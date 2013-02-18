@@ -1,0 +1,58 @@
+<?xml version="1.0"?> 
+<!-- Revolute-Revolute Manipulator -->
+<robot name="rr_manipulator">
+  <gazebo>
+    <plugin
+      name="ros_control" 
+      filename="libros_control_gazebo_plugin.so"/>
+  </gazebo>
+
+  <link name="link1">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <collision name="collision">
+      <geometry> <box size="10 1 1"/> </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry> <box size="10 1 1"/> </geometry>
+      <material> <color rgba="1 0 0 1"/> </material>
+    </visual>
+  </link>
+
+  <link name="link2">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <collision name="collision">
+      <geometry> <box size="10 1 1"/> </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry> <box size="10 1 1"/> </geometry>
+      <material> <color rgba="0.5 0 0.5 1"/> </material>
+    </visual>
+  </link>
+
+  <link name="link3">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <collision name="collision">
+      <geometry> <box size="10 1 1"/> </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry> <box size="10 1 1"/> </geometry>
+      <material> <color rgba="0 0 1 1"/> </material>
+    </visual>
+  </link>
+
+  <joint name="joint1" type="revolute">
+    <parent link="link1"/>
+    <child link="link2"/>
+    <origin xyz="5 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.4" upper="0.4"/>
+  </joint>
+
+  <joint name="joint2" type="revolute">
+    <parent link="link2"/>
+    <child link="link3"/>
+    <origin xyz="5 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.4" upper="0.4"/>
+  </joint>
+</robot>
