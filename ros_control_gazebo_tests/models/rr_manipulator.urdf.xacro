@@ -4,7 +4,7 @@
   <gazebo>
     <plugin
       name="ros_control" 
-      filename="libros_control_gazebo_plugin.so"/>
+      filename="$(find ros_control_gazebo_plugin)/lib/libros_control_gazebo_plugin.so"/>
   </gazebo>
 
   <link name="link1">
@@ -14,7 +14,7 @@
     </collision>
     <visual name="visual">
       <geometry> <box size="10 1 1"/> </geometry>
-      <material> <color rgba="1 0 0 1"/> </material>
+      <material name="red"> <color rgba="1 0 0 1"/> </material>
     </visual>
   </link>
 
@@ -25,7 +25,7 @@
     </collision>
     <visual name="visual">
       <geometry> <box size="10 1 1"/> </geometry>
-      <material> <color rgba="0.5 0 0.5 1"/> </material>
+      <material name="purple"> <color rgba="1.0 0 1.0 1"/> </material>
     </visual>
   </link>
 
@@ -36,23 +36,21 @@
     </collision>
     <visual name="visual">
       <geometry> <box size="10 1 1"/> </geometry>
-      <material> <color rgba="0 0 1 1"/> </material>
+      <material name="blue"> <color rgba="0 0 1 1"/> </material>
     </visual>
   </link>
 
-  <joint name="joint1" type="revolute">
+  <joint name="joint1" type="continuous">
     <parent link="link1"/>
     <child link="link2"/>
     <origin xyz="5 0 0" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-0.4" upper="0.4"/>
   </joint>
 
-  <joint name="joint2" type="revolute">
+  <joint name="joint2" type="continuous">
     <parent link="link2"/>
     <child link="link3"/>
     <origin xyz="5 0 0" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-0.4" upper="0.4"/>
   </joint>
 </robot>

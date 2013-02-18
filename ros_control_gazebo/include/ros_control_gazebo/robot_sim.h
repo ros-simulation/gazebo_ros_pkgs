@@ -11,9 +11,10 @@ namespace ros_control_gazebo {
 
   class RobotSim : public hardware_interface::RobotHW {
   public:
-    virtual void init(const gazebo::physics::ModelPtr model) = 0;
-    virtual void read(const gazebo::physics::ModelPtr model) = 0;
-    virtual void write(gazebo::physics::ModelPtr model) = 0;
+    virtual void init_sim(const gazebo::physics::ModelPtr model) { };
+    virtual void read_sim(const gazebo::physics::ModelPtr model) = 0;
+    virtual void write_sim(gazebo::physics::ModelPtr model) = 0;
+
   };
 
 }

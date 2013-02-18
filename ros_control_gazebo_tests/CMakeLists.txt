@@ -28,3 +28,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+rosbuild_find_ros_package(xacro)
+include(${xacro_PACKAGE_PATH}/cmake/xacro.cmake)
+
+xacro_add_xacro_file(${PROJECT_SOURCE_DIR}/models/rr_manipulator.urdf.xacro ${PROJECT_SOURCE_DIR}/urdf/rr_manipulator.urdf)
+add_custom_target(urdf ALL DEPENDS urdf/rr_manipulator.urdf)
+
+rosbuild_add_library(RobotSimRR src/robot_sim_rr.cpp)

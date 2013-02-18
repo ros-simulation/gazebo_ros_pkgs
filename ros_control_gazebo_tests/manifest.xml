@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/ros_control_gazebo_tests</url>
 
+  <depend package="ros_control_gazebo_plugin"/>
 </package>
 
 
