@@ -1,10 +1,16 @@
 
 #include <boost/bind.hpp>
 
+#include <ros/ros.h>
+
+#include <pluginlib/class_loader.h>
+
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
+#include <gazebo/common/common.hh>
 
+#include <controller_manager/controller_manager.h>
 #include <ros_control_gazebo/robot_sim.h>
 
 namespace ros_control_gazebo_plugin
@@ -13,51 +19,51 @@ namespace ros_control_gazebo_plugin
   {
     public: 
       
-      void Load(gazebo::physics::ModelPtr parent, gazebo::sdf::ElementPtr /*sdf*/) 
+      void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf) 
       {
         // Store the pointer to the model
         model_ = parent;
+
+        // Initialize ROS interface, if necessary
+        if(!ros::isInitialized()) {
+          // Note: If we don't disable the SIGINT handler, gazebo will not exit
+          int node_argc = 0;
+          char **node_argv = NULL;
+          ros::init(node_argc, node_argv, "gazebo",
+                    ros::init_options::NoSigintHandler);
+        }
+
+        // Start a spinner thread for handling callbacks
+        spinner_.reset(new ros::AsyncSpinner(1));
+        spinner_->start();
+
+        // Get namespace for nodehandle
+        std::string ns = std::string("ros_control/")+model_->GetName();
+        if (sdf->HasElement("ns")) {
+          ns = sdf->GetElement("ns")->GetValueString();
+        }
         
         // Get the ROS paarameters
-        model_nh_ = ros::NodeHandle("ros_control/"+model_->getName());
+        model_nh_ = ros::NodeHandle(ns);
+        this->get_params();
 
-        // Get the full class type for the robot sim interface
-        if(!model_nh_.getParam("robot_sim_type", robot_sim_type_str_)) {
-          ROS_FATAL_STREAM("RobotSim type ROS parameter not found at
-                           "<<model_nh_.getNamespace()<<"/robot_sim_type");
-          return;
-        }
-
-        // Get the simulation period
-        ros::Duration sim_period(model_->GetWorld()->GetPhysicsEngine()->GetUpdatePeriod());
-
-        if(!model_nh_.getParam("control_period", control_period_)) {
-          ROS_FATAL_STREAM("Controller update period ROS parameter not found at
-                           "<<model_nh_.getNamespace()<<"/control_period");
-          return;
-        } else if( control_period_ < sim_period ) {
-          ROS_ERROR_STREAM("Desired controller update period ("<<control_period_
-                           <<" s) is faster than the gazebo simulation period ("
-                           <<sim_period<<" s).");
-        } else if( control_period > sim_period ) {
-          ROS_WARN_STREAM("Desired controller update period ("<<control_period_
-                           <<" s) is slower than the gazebo simulation period ("
-                           <<sim_period<<" s).");
-        }
-
-        // Load the RobotSim abstraction to interface the controllers with the gazebo model
+        // Load the RobotSim abstraction to interface the controllers with the
+        // gazebo model
         robot_sim_loader_.reset
           (new pluginlib::ClassLoader<ros_control_gazebo::RobotSim>
            ("ros_control_gazebo",
             "ros_control_gazebo::RobotSim"));
-        robot_sim_.reset(robot_sim_loader_->createInstance(robot_sim_type_str_));
+        robot_sim_ = robot_sim_loader_->createInstance(robot_sim_type_str_);
+        robot_sim_->init(model_);
 
         // Create the controller manager
-        controller_manager_.reset(new ros_control::ControllerManager(robot_sim_, model_nh_));
+        controller_manager_.reset
+          (new controller_manager::ControllerManager(robot_sim_.get(), model_nh_));
 
         // Listen to the update event. This event is broadcast every
         // simulation iteration.
-        update_connection_ = event::Events::ConnectWorldUpdateStart
+        update_connection_ = 
+          gazebo::event::Events::ConnectWorldUpdateStart
           (boost::bind(&RosControlGazeboPlugin::update, this));
       }
 
@@ -65,7 +71,7 @@ namespace ros_control_gazebo_plugin
       void update()
       {
         // Get the simulation time and period
-        gazebo::common::Time sim_time_gz = model_->GetWorld()->GetSimTime();
+        gazebo::common::Time gz_time_now = model_->GetWorld()->GetSimTime();
         ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
         ros::Duration sim_period = sim_time_ros - last_sim_time_ros_;
 
@@ -75,25 +81,61 @@ namespace ros_control_gazebo_plugin
           last_sim_time_ros_ = sim_time_ros;
 
           // Update the robot simulation with the state of the gazebo model
-          robot_sim_->read_state(model_);
+          robot_sim_->read(model_);
 
           // Compute the controller commands
-          controller_manager_.update(sim_time_ros, sim_period);
+          controller_manager_->update(sim_time_ros, sim_period);
 
-          // Update the gazebo model with the result of the controller computation
-          robot_hw_sim_->write_state(model_);
+          // Update the gazebo model with the result of the controller
+          // computation
+          robot_sim_->write(model_);
+        }
+      }
+    private:
+      void get_params() {
+        // Get the full class type for the robot sim interface
+        if(!model_nh_.getParam("robot_sim_type", robot_sim_type_str_)) {
+          ROS_FATAL_STREAM("RobotSim type ROS parameter not found at"
+                           <<model_nh_.getNamespace()<<"/robot_sim_type");
+          return;
+        }
+
+        // Get the simulation period
+        ros::Duration sim_period
+          (model_->GetWorld()->GetPhysicsEngine()->GetUpdatePeriod());
+        double control_period = sim_period.toSec();
+        bool control_period_found = model_nh_.getParam("control_period", control_period);
+        control_period_ = ros::Duration(control_period);
+
+        if(!control_period_found) {
+          ROS_FATAL_STREAM("Controller update period ROS parameter not found at"
+                           <<model_nh_.getNamespace()<<"/control_period");
+          return;
+        } else if( control_period_ < sim_period ) {
+          ROS_ERROR_STREAM("Desired controller update period ("<<control_period_
+                           <<" s) is faster than the gazebo simulation period ("
+                           <<sim_period<<" s).");
+        } else if( control_period_ > sim_period ) {
+          ROS_WARN_STREAM("Desired controller update period ("<<control_period_
+                           <<" s) is slower than the gazebo simulation period ("
+                           <<sim_period<<" s).");
         }
       }
 
     private:
+      // Namespace
+      ros::NodeHandle model_nh_;
+      boost::shared_ptr<ros::AsyncSpinner> spinner_;
+
       // Pointer to the model
-      physics::ModelPtr model_;
+      gazebo::physics::ModelPtr model_;
 
       // Pointer to the update event connection
-      event::ConnectionPtr update_connection_;
+      gazebo::event::ConnectionPtr update_connection_;
 
       // Interface loader
-      boost::shared_ptr<pluginlib::ClassLoader<ros_control_gazebo::RobotSim> > robot_sim_loader_;
+      boost::shared_ptr<pluginlib::ClassLoader<ros_control_gazebo::RobotSim> >
+        robot_sim_loader_;
       void load_robot_sim_srv();
       
       // Robot simulator interface
@@ -101,7 +143,8 @@ namespace ros_control_gazebo_plugin
       boost::shared_ptr<ros_control_gazebo::RobotSim> robot_sim_;
 
       // Controller manager
-      boost::shared_ptr<ros_control::ControllerManager> controller_manager_;
+      boost::shared_ptr<controller_manager::ControllerManager>
+        controller_manager_;
 
       // Timing
       ros::Duration control_period_;

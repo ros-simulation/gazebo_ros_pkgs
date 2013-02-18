@@ -9,6 +9,15 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/ros_control_gazebo</url>
 
+  <depend package="roscpp"/>
+  <depend package="gazebo"/>
+  <depend package="hardware_interface"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export>
+
+
 </package>
 
 

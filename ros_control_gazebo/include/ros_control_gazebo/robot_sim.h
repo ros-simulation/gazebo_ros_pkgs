@@ -5,12 +5,15 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 
+#include <hardware_interface/robot_hw.h>
+
 namespace ros_control_gazebo {
 
-  class RobotSim {
+  class RobotSim : public hardware_interface::RobotHW {
   public:
-    virtual void read_state(gazebo::physics::Model const *model) = 0;
-    virtual void write_state(gazebo::physics::Model *model) = 0;
+    virtual void init(const gazebo::physics::ModelPtr model) = 0;
+    virtual void read(const gazebo::physics::ModelPtr model) = 0;
+    virtual void write(gazebo::physics::ModelPtr model) = 0;
   };
 
 }

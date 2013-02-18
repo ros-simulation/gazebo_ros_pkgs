@@ -9,6 +9,11 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/ros_control_gazebo_plugin</url>
 
+  <depend package="roscpp"/>
+  <depend package="gazebo"/>
+  <depend package="controller_manager"/>
+  <depend package="ros_control_gazebo"/>
+  <depend package="pluginlib"/>
 </package>
 
 
