@@ -79,7 +79,6 @@ namespace ros_control_gazebo_tests {
     virtual void write_sim(gazebo::physics::ModelPtr model) {
       for(unsigned int j=0; j < n_dof_; j++) {
         // Gazebo has an interesting API...
-        sim_joints_[j]->SetVelocity(0,joint_velocity_command_[j]);
         sim_joints_[j]->SetForce(0,joint_effort_command_[j]);
       }
     }

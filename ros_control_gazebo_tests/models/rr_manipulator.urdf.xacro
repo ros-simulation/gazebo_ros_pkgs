@@ -10,6 +10,7 @@
     <controller:ros_control_gazebo_plugin
       name="ros_control" 
       plugin="$(find ros_control_gazebo_plugin)/lib/libros_control_gazebo_plugin.so">
+      <ns>rr/ros_control</ns>
       <robotSimType>ros_control_gazebo_tests/RobotSimRR</robotSimType>
       <controlPeriod>0.001</controlPeriod>
     </controller:ros_control_gazebo_plugin>
@@ -24,7 +25,7 @@
   <link name="link1">
     <collision name="collision">
       <origin xyz="0.5 0 0" rpy="0 0 0"/>
-      <geometry> <box size="1 0.1 0.1"/> </geometry>
+      <geometry> <box size="0.9 0.1 0.1"/> </geometry>
     </collision>
     <visual name="visual">
       <origin xyz="0.5 0 0" rpy="0 0 0"/>
@@ -44,7 +45,7 @@
   <link name="link2">
     <collision name="collision">
       <origin xyz="0.5 0 0" rpy="0 0 0"/>
-      <geometry> <box size="1 0.1 0.1"/> </geometry>
+      <geometry> <box size="0.9 0.1 0.1"/> </geometry>
     </collision>
     <visual name="visual">
       <origin xyz="0.5 0 0" rpy="0 0 0"/>
@@ -64,7 +65,7 @@
   <link name="link3">
     <collision name="collision">
       <origin xyz="0.5 0 0" rpy="0 0 0"/>
-      <geometry> <box size="1 0.1 0.1"/> </geometry>
+      <geometry> <box size="0.9 0.1 0.1"/> </geometry>
     </collision>
     <visual name="visual">
       <origin xyz="0.5 0 0" rpy="0 0 0"/>

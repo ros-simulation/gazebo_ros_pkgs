@@ -1,3 +1,20 @@
 <launch>
   <include file="$(find gazebo_worlds)/launch/empty_world.launch"/>
+
+  <param name="robot_description"
+    command="$(find xacro)/xacro.py '$(find ros_control_gazebo_tests)/models/rr_manipulator.urdf.xacro'" />
+
+  <rosparam ns="rr/ros_control">
+    joint1_position_controller:
+      type: effort_controllers/JointPositionController
+      joint: joint1
+      pid: {p: 10.0, i: 0.01, d: 1.0}
+    joint2_position_controller:
+      type: effort_controllers/JointPositionController
+      joint: joint2
+      pid: {p: 10.0, i: 0.01, d: 1.0}
+  </rosparam>
+
+  <node name="urdf_spawner" pkg="gazebo" type="spawn_model" args="-urdf -model rr -param robot_description"/>
+
 </launch>

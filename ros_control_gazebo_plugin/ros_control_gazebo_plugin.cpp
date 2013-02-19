@@ -16,11 +16,13 @@
 namespace ros_control_gazebo_plugin
 {   
   
-
   class RosControlGazeboPlugin : public gazebo::ModelPlugin
   {
     public: 
-      
+      ~RosControlGazeboPlugin() {
+        ros::shutdown();
+      }
+
       void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf) 
       {
         // Store the pointer to the model
