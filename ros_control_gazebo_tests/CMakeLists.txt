@@ -29,10 +29,18 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+# Build URDF
 rosbuild_find_ros_package(xacro)
 include(${xacro_PACKAGE_PATH}/cmake/xacro.cmake)
 
-xacro_add_xacro_file(${PROJECT_SOURCE_DIR}/models/rr_manipulator.urdf.xacro ${PROJECT_SOURCE_DIR}/urdf/rr_manipulator.urdf)
+set(XACRO_SOURCE_PATH ${PROJECT_SOURCE_DIR}/models)
+set(URDF_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/urdf)
+file(MAKE_DIRECTORY ${URDF_OUTPUT_PATH})
+
+xacro_add_xacro_file(
+  ${XACRO_SOURCE_PATH}/rr_manipulator.urdf.xacro 
+  ${URDF_OUTPUT_PATH}/rr_manipulator.urdf)
 add_custom_target(urdf ALL DEPENDS urdf/rr_manipulator.urdf)
 
+# Build RobotSim Interface
 rosbuild_add_library(ros_control_gazebo_tests src/robot_sim_rr.cpp)
