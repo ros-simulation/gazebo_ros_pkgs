@@ -10,7 +10,7 @@ Tests
 
 ### Effort-Controlled R-R Manipulator
 
-To bring up the simulator with a simple R-R manopulator and effort
+To bring up the simulator with a simple R-R manipulator and effort
 controllers, run:
 
 ```bash
