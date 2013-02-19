@@ -1,14 +1,18 @@
 <?xml version="1.0"?> 
 <!-- Revolute-Revolute Manipulator -->
 <robot name="rr_manipulator"
-  xmlns:xacro="http://www.ros.org/wiki/xacro">
+  xmlns:xacro="http://www.ros.org/wiki/xacro"
+  xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller">
 
   <xacro:property name="PI" value="3.1415926535897931"/>
 
   <gazebo>
-    <plugin
+    <controller:ros_control_gazebo_plugin
       name="ros_control" 
-      filename="$(find ros_control_gazebo_plugin)/lib/libros_control_gazebo_plugin.so"/>
+      plugin="$(find ros_control_gazebo_plugin)/lib/libros_control_gazebo_plugin.so">
+      <robotSimType>ros_control_gazebo_tests/RobotSimRR</robotSimType>
+      <controlPeriod>0.001</controlPeriod>
+    </controller:ros_control_gazebo_plugin>
   </gazebo>
 
   <material name="red"> <color rgba="1 0 0 1"/> </material>
