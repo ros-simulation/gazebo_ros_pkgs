@@ -1,7 +1,7 @@
 <launch>
   <include file="$(find gazebo_worlds)/launch/empty_world.launch"/>
-  <rosparam>
-    ros_control:
-      rr: {robot_sim_type: 'ros_control_gazebo_tests::RobotSimRR'}
+  <rosparam ns="ros_control/rr">
+    robot_sim_type: 'ros_control_gazebo_tests/RobotSimRR'
+    control_period: 0.001
   </rosparam>
 </launch>

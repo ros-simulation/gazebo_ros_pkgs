@@ -9,7 +9,13 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/ros_control_gazebo_tests</url>
 
+  <depend package="ros_control_gazebo"/>
   <depend package="ros_control_gazebo_plugin"/>
+
+  <export>
+    <ros_control_gazebo plugin="${prefix}/robot_sim_plugins.xml" />
+  </export>
+
 </package>
 
 

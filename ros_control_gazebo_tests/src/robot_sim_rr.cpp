@@ -18,17 +18,17 @@ namespace ros_control_gazebo_tests {
   {
   public:
     RobotSimRR() :
-      n_dof_(2) 
+      n_dof_(2),
+      joint_name_(n_dof_),
+      joint_position_(n_dof_),
+      joint_velocity_(n_dof_),
+      joint_effort_(n_dof_),
+      joint_effort_command_(n_dof_),
+      joint_velocity_command_(n_dof_)
     {
-      joint_position_.resize(n_dof_);
-      joint_velocity_.resize(n_dof_);
-      joint_effort_.resize(n_dof_);
-      joint_effort_command_.resize(n_dof_);
-      joint_velocity_command_.resize(n_dof_);
-      joint_name_.resize(n_dof_);
 
-      joint_name_.push_back(std::string("joint1"));
-      joint_name_.push_back(std::string("jointn_dof_"));
+      joint_name_[0] = "joint1";
+      joint_name_[1] = "joint2";
 
       for(unsigned int j=0; j < n_dof_; j++) {
         joint_position_[j] = 1.0;
@@ -48,16 +48,22 @@ namespace ros_control_gazebo_tests {
     }
 
 
-    virtual void init_sim(const gazebo::physics::ModelPtr model) {
+    virtual bool init_sim(const gazebo::physics::ModelPtr model) {
       // Get the gazebo joints that correspond to the robot joints
       for(unsigned int j=0; j < n_dof_; j++) {
+        ROS_INFO_STREAM("Getting pointer to gazebo joint: "<<joint_name_[j]);
         gazebo::physics::JointPtr joint = model->GetJoint(joint_name_[j]);
         if (joint) {
           sim_joints_.push_back(joint);
         } else {
-          sim_joints_.push_back(gazebo::physics::JointPtr()); 
+          ROS_ERROR_STREAM(
+              "This robot has a joint named \""<<joint_name_[j]
+              <<"\" which is not in the gazebo model.");
+          return false;
         }
       }
+
+      return true;
     }
 
     virtual void read_sim(const gazebo::physics::ModelPtr model) {
@@ -85,12 +91,12 @@ namespace ros_control_gazebo_tests {
     hardware_interface::EffortJointInterface   ej_interface_;
     hardware_interface::VelocityJointInterface vj_interface_;
 
-    std::vector<double> joint_effort_command_;
-    std::vector<double> joint_velocity_command_;
+    std::vector<std::string> joint_name_;
     std::vector<double> joint_position_;
     std::vector<double> joint_velocity_;
     std::vector<double> joint_effort_;
-    std::vector<std::string> joint_name_;
+    std::vector<double> joint_effort_command_;
+    std::vector<double> joint_velocity_command_;
 
     std::vector<gazebo::physics::JointPtr> sim_joints_;
   };
