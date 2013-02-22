@@ -88,7 +88,7 @@ namespace ros_control_gazebo_plugin
              ("ros_control_gazebo",
               "ros_control_gazebo::RobotSim"));
           robot_sim_ = robot_sim_loader_->createInstance(robot_sim_type_str_);
-          if(!robot_sim_->init_sim(model_)) {
+          if(!robot_sim_->init_sim(model_nh_, model_)) {
             ROS_FATAL("Could not initialize robot simulation interface");
             return;
           }
@@ -121,14 +121,14 @@ namespace ros_control_gazebo_plugin
           last_sim_time_ros_ = sim_time_ros;
 
           // Update the robot simulation with the state of the gazebo model
-          robot_sim_->read_sim(model_);
+          robot_sim_->read_sim(sim_time_ros, sim_period);
 
           // Compute the controller commands
           controller_manager_->update(sim_time_ros, sim_period);
 
           // Update the gazebo model with the result of the controller
           // computation
-          robot_sim_->write_sim(model_);
+          robot_sim_->write_sim(sim_time_ros, sim_period);
         }
       }
 

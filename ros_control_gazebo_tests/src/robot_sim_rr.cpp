@@ -48,7 +48,9 @@ namespace ros_control_gazebo_tests {
     }
 
 
-    virtual bool init_sim(const gazebo::physics::ModelPtr model) {
+    virtual bool init_sim(ros::NodeHandle nh,
+                          gazebo::physics::ModelPtr model)
+    {
       // Get the gazebo joints that correspond to the robot joints
       for(unsigned int j=0; j < n_dof_; j++) {
         ROS_INFO_STREAM("Getting pointer to gazebo joint: "<<joint_name_[j]);
@@ -66,7 +68,7 @@ namespace ros_control_gazebo_tests {
       return true;
     }
 
-    virtual void read_sim(const gazebo::physics::ModelPtr model) {
+    virtual void read_sim(ros::Time time, ros::Duration period) {
       for(unsigned int j=0; j < n_dof_; j++) {
         // Gazebo has an interesting API...
         joint_position_[j] += angles::shortest_angular_distance
@@ -76,7 +78,7 @@ namespace ros_control_gazebo_tests {
       }
     }
 
-    virtual void write_sim(gazebo::physics::ModelPtr model) {
+    virtual void write_sim(ros::Time time, ros::Duration period) {
       for(unsigned int j=0; j < n_dof_; j++) {
         // Gazebo has an interesting API...
         sim_joints_[j]->SetForce(0,joint_effort_command_[j]);
