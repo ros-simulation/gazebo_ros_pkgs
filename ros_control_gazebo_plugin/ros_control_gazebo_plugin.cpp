@@ -19,10 +19,11 @@ namespace ros_control_gazebo_plugin
   class RosControlGazeboPlugin : public gazebo::ModelPlugin
   {
     public: 
-      ~RosControlGazeboPlugin() {
+      virtual ~RosControlGazeboPlugin() {
         ros::shutdown();
       }
 
+      // Overloaded Gazebo entry point
       void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf) 
       {
         // Store the pointer to the model
@@ -88,7 +89,7 @@ namespace ros_control_gazebo_plugin
              ("ros_control_gazebo",
               "ros_control_gazebo::RobotSim"));
           robot_sim_ = robot_sim_loader_->createInstance(robot_sim_type_str_);
-          if(!robot_sim_->init_sim(model_nh_, model_)) {
+          if(!robot_sim_->initSim(model_nh_, model_)) {
             ROS_FATAL("Could not initialize robot simulation interface");
             return;
           }
@@ -101,14 +102,14 @@ namespace ros_control_gazebo_plugin
           // simulation iteration.
           update_connection_ = 
             gazebo::event::Events::ConnectWorldUpdateStart
-            (boost::bind(&RosControlGazeboPlugin::update, this));
+            (boost::bind(&RosControlGazeboPlugin::Update, this));
         } catch(pluginlib::LibraryLoadException &ex) {
           ROS_FATAL_STREAM("Failed to create robot simulation interface loader: "<<ex.what());
         }
       }
 
       // Called by the world update start event
-      void update()
+      void Update()
       {
         // Get the simulation time and period
         gazebo::common::Time gz_time_now = model_->GetWorld()->GetSimTime();
@@ -121,14 +122,14 @@ namespace ros_control_gazebo_plugin
           last_sim_time_ros_ = sim_time_ros;
 
           // Update the robot simulation with the state of the gazebo model
-          robot_sim_->read_sim(sim_time_ros, sim_period);
+          robot_sim_->readSim(sim_time_ros, sim_period);
 
           // Compute the controller commands
           controller_manager_->update(sim_time_ros, sim_period);
 
           // Update the gazebo model with the result of the controller
           // computation
-          robot_sim_->write_sim(sim_time_ros, sim_period);
+          robot_sim_->writeSim(sim_time_ros, sim_period);
         }
       }
 
