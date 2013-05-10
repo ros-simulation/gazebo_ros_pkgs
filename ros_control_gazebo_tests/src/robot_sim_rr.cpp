@@ -78,7 +78,7 @@ namespace ros_control_gazebo_tests {
         joint_position_[j] += angles::shortest_angular_distance
           (joint_position_[j], sim_joints_[j]->GetAngle(0).Radian());
         joint_velocity_[j] = sim_joints_[j]->GetVelocity(0);
-        joint_effort_[j] = sim_joints_[j]->GetForce(0);
+        joint_effort_[j] = sim_joints_[j]->GetForce(0u);
       }
     }
 
