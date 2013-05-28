@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package>
+  <name>gazebo_ros</name>
+  <version>0.1.0</version>
+  <description>
+    Provides ROS plugins that offer message and service publishers for interfacing with <a href="http://gazebosim.org">Gazebo</a> through ROS.
+    Formally simulator_gazebo/gazebo
+  </description>
+
+  <author email="natekoenig@gmail.com">Nate Koenig, Andrew Howard, with contributions from many others. See web page for a full credits list.</author>
+  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
+  <maintainer email="dave@osrfoundation.org">Dave Coleman</maintainer>
+
+  <license>Apache 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>gazebo_msgs</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>std_srvs</build_depend>
+  <build_depend>rosgraph_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <run_depend>gazebo_msgs</run_depend>
+  <run_depend>roslib</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>std_srvs</run_depend>
+  <run_depend>rosgraph_msgs</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>message_generation</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+</package>

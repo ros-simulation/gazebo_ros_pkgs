@@ -1,0 +1,10 @@
+#!/bin/sh
+final="$@"
+
+# add ros plugin if does not exist
+if [ `expr "$final" : '.*libgazebo_ros_paths_plugin\.so.*'` -eq 0 ]
+then
+    final="$final -g `catkin_find libgazebo_ros_paths_plugin.so`"
+fi
+
+. /usr/local/share/gazebo/setup.sh && gzclient $final

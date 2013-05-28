@@ -1,0 +1,9 @@
+# Set Gazebo Model pose and twist
+string model_name           # model to set state (pose and twist)
+string urdf_param_name      # parameter name that contains the urdf XML.
+
+string[] joint_names        # list of joints to set positions.  if joint is not listed here, preserve current position.
+float64[] joint_positions   # set to this position.
+---
+bool success                # return true if setting state successful
+string status_message       # comments if available
