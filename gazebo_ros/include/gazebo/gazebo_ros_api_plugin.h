@@ -111,7 +111,7 @@
 
 // For physics dynamics reconfigure
 #include <dynamic_reconfigure/server.h>
-#include <gazebo/PhysicsConfig.h>
+#include <gazebo_ros/PhysicsConfig.h>
 #include "gazebo_msgs/SetPhysicsProperties.h"
 #include "gazebo_msgs/GetPhysicsProperties.h"
 

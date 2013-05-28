@@ -1,7 +1,28 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gazebo_plugins)
 
-find_package(catkin REQUIRED COMPONENTS message_generation gazebo gazebo_msgs roscpp rospy nodelet angles std_srvs geometry_msgs sensor_msgs nav_msgs urdf tf dynamic_reconfigure driver_base rosgraph_msgs trajectory_msgs pcl_ros image_transport rosconsole)
+find_package(catkin REQUIRED COMPONENTS 
+  message_generation 
+  gazebo_ros
+  gazebo_msgs 
+  roscpp 
+  rospy 
+  nodelet 
+  angles 
+  std_srvs 
+  geometry_msgs 
+  sensor_msgs 
+  nav_msgs 
+  urdf 
+  tf 
+  dynamic_reconfigure 
+  driver_base 
+  rosgraph_msgs 
+  trajectory_msgs 
+  pcl_ros 
+  image_transport 
+  rosconsole
+)
 
 # include(FindPkgConfig)
 # if (PKG_CONFIG_FOUND)
@@ -66,7 +87,7 @@ message(status "\n\n${ld_flags}\n\n")
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES vision_reconfigure gazebo_ros_camera_utils gazebo_ros_camera gazebo_ros_depth_camera gazebo_ros_openni_kinect gazebo_ros_gpu_laser gazebo_ros_laser gazebo_ros_block_laser gazebo_ros_p3d gazebo_ros_imu gazebo_ros_f3d move_model_test pr2_pose_test gazebo_ros_bumper gazebo_ros_template gazebo_ros_projector gazebo_ros_force gazebo_ros_joint_trajectory 
-  CATKIN_DEPENDS message_generation gazebo gazebo_msgs roscpp rospy nodelet angles std_srvs geometry_msgs sensor_msgs nav_msgs urdf tf dynamic_reconfigure driver_base rosgraph_msgs trajectory_msgs pcl_ros image_transport rosconsole
+  CATKIN_DEPENDS message_generation gazebo_ros gazebo_msgs roscpp rospy nodelet angles std_srvs geometry_msgs sensor_msgs nav_msgs urdf tf dynamic_reconfigure driver_base rosgraph_msgs trajectory_msgs pcl_ros image_transport rosconsole
 #  DEPENDS gazebo
   )
 

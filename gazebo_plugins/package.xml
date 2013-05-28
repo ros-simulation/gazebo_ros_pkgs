@@ -1,18 +1,15 @@
 <package>
   <name>gazebo_plugins</name>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
   <description>
-	Robot-Independent Gazebo plugins.
+    Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
 
   <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
-
+  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
 
   <license>BSD</license>
-
-
   <author>John Hsu</author>
-
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -21,7 +18,7 @@
   <build_depend>trajectory_msgs</build_depend>
   <build_depend>std_srvs</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>gazebo</build_depend>
+  <build_depend>gazebo_ros</build_depend>
   <build_depend>gazebo_msgs</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>nodelet</build_depend>
@@ -42,7 +39,7 @@
   <run_depend>trajectory_msgs</run_depend>
   <run_depend>std_srvs</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>gazebo</run_depend>
+  <run_depend>gazebo_ros</run_depend>
   <run_depend>gazebo_msgs</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>nodelet</run_depend>

@@ -10,6 +10,8 @@
   <author>John Hsu</author>
   <license>BSD</license>
 
+  <buildtool_depend>catkin</buildtool_depend>
+
   <export>
     <deprecated>This package will be removed in ROS-I. All tests have been moved to the gazebo_plugins package.</deprecated>
   </export>
