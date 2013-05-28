@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>gazebo</name>
+  <version>0.1.0</version>
+  <description>Deprecated package that used to pull a version of Gazebo to build for ROS. Now Gazebo is installed through a stand alone debian.</description>
+
+  <author email="natekoenig@gmail.com">Nate Koenig, Andrew Howard, with contributions from many others. See web page for a full credits list.</author>
+  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
+  <license>Apache 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <deprecated>This package will be removed in ROS-I. Gazebo is now a stand alone package.</deprecated>
+  </export>
+</package>
