@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+
+<gazebo:world 
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:gazebo="http://playerstage.sourceforge.net/gazebo/xmlschema/#gz" 
+  xmlns:model="http://playerstage.sourceforge.net/gazebo/xmlschema/#model" 
+  xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor" 
+  xmlns:window="http://playerstage.sourceforge.net/gazebo/xmlschema/#window" 
+  xmlns:param="http://playerstage.sourceforge.net/gazebo/xmlschema/#param" 
+  xmlns:body="http://playerstage.sourceforge.net/gazebo/xmlschema/#body" 
+  xmlns:geo="http://willowgarage.com/xmlschema/#geo" 
+  xmlns:geom="http://playerstage.sourceforge.net/gazebo/xmlschema/#geom" 
+  xmlns:joint="http://playerstage.sourceforge.net/gazebo/xmlschema/#joint" 
+  xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface" 
+  xmlns:ui="http://playerstage.sourceforge.net/gazebo/xmlschema/#ui"
+  xmlns:rendering="http://playerstage.sourceforge.net/gazebo/xmlschema/#rendering" 
+  xmlns:renderable="http://playerstage.sourceforge.net/gazebo/xmlschema/#renderable" 
+  xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+  xmlns:physics="http://playerstage.sourceforge.net/gazebo/xmlschema/#physics" >
+
+  <verbosity>5</verbosity>
+
+<!-- cfm is 1e-5 for single precision -->
+<!-- erp is typically .1-.8 -->
+<!-- here's the global contact cfm/erp -->
+  <physics:ode>
+    <stepTime>0.001</stepTime>
+    <gravity>0 0 -9.8</gravity>
+    <cfm>0.00001</cfm>
+    <erp>0.2</erp>
+    <quickStep>true</quickStep>
+    <quickStepIters>10</quickStepIters>
+    <quickStepW>1.3</quickStepW>
+    <contactMaxCorrectingVel>100.0</contactMaxCorrectingVel>
+    <contactSurfaceLayer>0.001</contactSurfaceLayer>
+  </physics:ode>
+
+  <geo:origin>
+    <lat>37.4270909558</lat><lon>-122.077919338</lon>
+  </geo:origin>
+
+  <rendering:gui>
+    <type>fltk</type>
+    <size>480 320</size>
+    <pos>0 0</pos>
+    <frames>
+      <row height="100%">
+        <camera width="100%">
+          <xyz>0 0 20</xyz>
+          <rpy>0 90 90</rpy>
+        </camera>
+      </row>
+    </frames>
+  </rendering:gui>
+
+
+  <rendering:ogre>
+    <ambient>1.0 1.0 1.0 1.0</ambient>
+    <sky>
+      <material>Gazebo/CloudySky</material>
+    </sky>
+    <grid>false</grid>
+    <maxUpdateRate>10</maxUpdateRate>
+  </rendering:ogre>
+
+  <model:physical name="gplane">
+    <xyz>0 0 0</xyz>
+    <rpy>0 0 0</rpy>
+    <static>true</static>
+
+    <body:plane name="plane">
+      <geom:plane name="plane">
+        <laserRetro>2000.0</laserRetro>
+        <kp>1000000.0</kp>
+        <kd>1.0</kd>
+        <normal>0 0 1</normal>
+        <size>51.3 51.3</size>
+        <!-- map3.png -->
+        <material>Gazebo/White</material>
+      </geom:plane>
+    </body:plane>
+  </model:physical>
+
+  <!-- office walls -->
+  <model:physical name="wall_1_model">
+    <xyz>0 -5 1</xyz>
+    <rpy>0.0 0.0 0.0</rpy>
+    <static>true</static>
+    <body:box name="wall_1_body">
+      <geom:box name="wall_1_geom">
+        <mesh>default</mesh>
+        <size>10 .2 2</size>
+        <visual>
+          <size>10 .2 2</size>
+          <material>Gazebo/Green</material>
+          <mesh>unit_box</mesh>
+        </visual>
+      </geom:box>
+    </body:box>
+  </model:physical>
+
+  <model:physical name="wall_2_model">
+    <xyz>0 10 1</xyz>
+    <rpy>0.0 0.0 0.0</rpy>
+    <static>true</static>
+    <body:box name="wall_2_body">
+      <geom:box name="wall_2_geom">
+        <mesh>default</mesh>
+        <size>10 .2 2</size>
+        <visual>
+          <size>10 .2 2</size>
+          <material>Gazebo/Green</material>
+          <mesh>unit_box</mesh>
+        </visual>
+      </geom:box>
+    </body:box>
+  </model:physical>
+
+  <model:physical name="wall_3_model">
+    <xyz>-5 2.5 1</xyz>
+    <rpy>0.0 0.0 0.0</rpy>
+    <static>true</static>
+    <body:box name="wall_3_body">
+      <geom:box name="wall_3_geom">
+        <mesh>default</mesh>
+        <size>.2 15 2</size>
+        <visual>
+          <size>.2 15 2</size>
+          <material>Gazebo/Green</material>
+          <mesh>unit_box</mesh>
+        </visual>
+      </geom:box>
+    </body:box>
+  </model:physical>
+
+  <model:physical name="wall_4_model">
+    <xyz>5 2.5 1</xyz>
+    <rpy>0.0 0.0 0.0</rpy>
+    <static>true</static>
+    <body:box name="wall_4_body">
+      <geom:box name="wall_4_geom">
+        <mesh>default</mesh>
+        <size>.2 15 2</size>
+        <visual>
+          <size>.2 15 2</size>
+          <material>Gazebo/Green</material>
+          <mesh>unit_box</mesh>
+        </visual>
+      </geom:box>
+    </body:box>
+  </model:physical>
+
+  <!-- interior walls -->
+  <model:physical name="wall_5_model">
+    <xyz>-2.25 5 1</xyz>
+    <rpy>0.0 0.0 0.0</rpy>
+    <static>true</static>
+    <body:box name="wall_5_body">
+      <geom:box name="wall_5_geom">
+        <mesh>default</mesh>
+        <size>5.5 .2 2</size>
+        <visual>
+          <size>5.5 .2 2</size>
+          <material>Gazebo/Green</material>
+          <mesh>unit_box</mesh>
+        </visual>
+      </geom:box>
+    </body:box>
+  </model:physical>
+
+  <model:physical name="wall_6_model">
+    <xyz>3.5 5 1</xyz>
+    <rpy>0.0 0.0 0.0</rpy>
+    <static>true</static>
+    <body:box name="wall_6_body">
+      <geom:box name="wall_6_geom">
+        <mesh>default</mesh>
+        <size>3 .2 2</size>
+        <visual>
+          <size>3 .2 2</size>
+          <material>Gazebo/Green</material>
+          <mesh>unit_box</mesh>
+        </visual>
+      </geom:box>
+    </body:box>
+  </model:physical>
+
+  <!-- White Directional light -->
+  <model:renderable name="directional_white">
+    <light>
+      <type>directional</type>
+      <direction>0 -0.2 -0.8</direction>
+      <diffuseColor>0.4 0.4 0.4</diffuseColor>
+      <specularColor>0.0 0.0 0.0</specularColor>
+      <attenuation>1 0.0 1.0 0.4</attenuation>
+      <range>10</range>
+    </light>
+  </model:renderable>
+  <!--
+  -->
+
+
+
+  <!-- The "desk"-->
+  <!-- small desks -->
+  <model:physical name="desk4_model">
+    <xyz>2.28  -0.21  0</xyz>
+    <rpy>0.0 0.0 0.0 </rpy>
+    <include embedded="true">
+      <!--xi:include href="../objects/desk6.model" /--> <!-- block legs -->
+      <xi:include href="../objects/desk4.model" /> <!-- skinny pole legs -->
+    </include>
+  </model:physical>
+
+  <!-- The second "desk"-->
+  <model:physical name="desk5_model">
+    <xyz>2.25  -3.0   0</xyz>
+    <rpy>0.0 0.0 0.0 </rpy>
+    <include embedded="true">
+      <xi:include href="../objects/desk5.model" />
+    </include>
+  </model:physical>
+
+  <!-- The small cylinder "cup" -->
+  <model:physical name="cylinder1_model">
+    <xyz>   2.35   0.0    0.72</xyz>
+    <rpy>   0.0    0.0    0.0</rpy>
+    <body:cylinder name="cylinder1_body">
+      <geom:cylinder name="cylinder1_geom">
+        <kp>100000000.0</kp>
+        <kd>0.1</kd>
+        <mesh>default</mesh>
+        <size>0.025 0.075</size>
+        <mass> 0.05</mass>
+        <visual>
+          <size> 0.05 0.05 0.075</size>
+          <material>Gazebo/PioneerBody</material>
+          <mesh>unit_cylinder</mesh>
+        </visual>
+        <laserRetro>1.0</laserRetro>
+      </geom:cylinder>
+      <geom:box name="cylinder1_base_geom">
+        <kp>100000000.0</kp>
+        <kd>0.1</kd>
+        <mesh>default</mesh>
+        <xyz>0.0 0.0 -0.033</xyz>
+        <size>0.05 0.05 0.01</size>
+        <mass> 0.01</mass>
+        <visual>
+          <size> 0.05 0.05 0.01</size>
+          <material>Gazebo/Fish</material>
+          <mesh>unit_box</mesh>
+        </visual>
+        <laserRetro>1.0</laserRetro>
+      </geom:box>
+    </body:cylinder>
+  </model:physical>
+
+
+
+
+
+
+  <!-- White Directional light -->
+  <model:renderable name="point_white">
+    <xyz>0.0 0.0 3</xyz>
+    <enableGravity>false</enableGravity>
+    <light>
+      <type>point</type>
+      <diffuseColor>0.8 0.8 0.8</diffuseColor>
+      <specularColor>.1 .1 .1</specularColor>
+      <attenuation>0.2 0.1 0</attenuation>
+      <range>10</range>
+    </light>
+  </model:renderable>
+</gazebo:world>

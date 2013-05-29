@@ -1,0 +1,174 @@
+<?xml version="1.0" ?>
+<gazebo version="1.0">
+  <world name='default'>
+    <scene>
+      <ambient rgba='0.100000 0.100000 0.100000 1.000000'/>
+      <background rgba='0.700000 0.700000 0.700000 1.000000'/>
+      <shadows enabled='1'/>
+    </scene>
+    <physics type='ode' update_rate='0.000000'>
+      <gravity xyz='0.000000 0.000000 -9.800000'/>
+      <ode>
+        <solver type='quick' dt='0.001000' iters='50' precon_iters='0' sor='1.300000'/>
+        <constraints cfm='0.000000' erp='0.100000' contact_max_correcting_vel='100.000000' contact_surface_layer='0.001000'/>
+      </ode>
+    </physics>
+    <!-- Ground Plane -->
+    <model name="office_map" static="true">
+      <link name="link">
+        <origin pose="0.0 0.0 0.0 0.0 0.0 0.0"/>	
+        <collision name="collision">
+          <geometry>
+            <heightmap filename="simple_office.jpg" size="25.7 25.7 1" origin="0 0 0"/>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <heightmap filename="simple_office.jpg" size="25.7 25.7 1" origin="0 0 0">
+              <texture>
+                <diffuse>dirt_diffusespecular.png</diffuse>
+                <normal>dirt_normal.png</normal>
+                <size>50</size>
+              </texture>
+              <texture>
+                <diffuse>grass_diffusespecular.png</diffuse>
+                <normal>grass_normal.png</normal>
+                <size>20</size>
+              </texture>
+              <texture>
+                <diffuse>fungus_diffusespecular.png</diffuse>
+                <normal>fungus_normal.png</normal>
+                <size>80</size>
+              </texture>
+              <blend>
+                <min_height>2</min_height>
+                <fade_dist>5</fade_dist>
+              </blend>
+              <blend>
+                <min_height>4</min_height>
+                <fade_dist>5</fade_dist>
+              </blend>
+            </heightmap>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name='table1' static='1'>
+      <origin pose='2.000000 3.000000 -0.010000 0.000000 0.000000 -1.570800'/>
+      <link name='body' gravity='1' self_collide='0' kinematic='0'>
+        <origin pose='0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000'/>
+        <collision name='top' laser_retro='0.000000'>
+          <origin pose='0.000000 0.000000 0.620000 0.000000 -0.000000 0.000000'/>
+          <geometry>
+            <box size='1.400000 0.500000 0.050000'/>
+          </geometry>
+          <surface>
+            <friction>
+              <ode mu='-1.000000' mu2='-1.000000' fdir1='0.000000 0.000000 0.000000' slip1='0.000000' slip2='0.000000'/>
+            </friction>
+            <bounce restitution_coefficient='0.000000' threshold='100000.000000'/>
+            <contact>
+              <ode soft_cfm='0.000000' soft_erp='0.200000' kp='1000000000000.000000' kd='1.000000' max_vel='100.000000' min_depth='0.001000'/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='top_visual' cast_shadows='1' laser_retro='0.000000' transparency='0.000000'>
+          <origin pose='0.000000 0.000000 0.010000 0.000000 -0.000000 0.000000'/>
+          <geometry>
+            <mesh filename='table.dae' scale='1.000000 1.000000 1.000000'/>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name='table2' static='1'>
+      <origin pose='2.000000 9.000000 -0.010000 0.000000 0.000000 -1.570800'/>
+      <link name='body' gravity='1' self_collide='0' kinematic='0'>
+        <origin pose='0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000'/>
+        <collision name='top' laser_retro='0.000000'>
+          <origin pose='0.000000 0.000000 0.620000 0.000000 -0.000000 0.000000'/>
+          <geometry>
+            <box size='1.400000 0.500000 0.050000'/>
+          </geometry>
+          <surface>
+            <friction>
+              <ode mu='-1.000000' mu2='-1.000000' fdir1='0.000000 0.000000 0.000000' slip1='0.000000' slip2='0.000000'/>
+            </friction>
+            <bounce restitution_coefficient='0.000000' threshold='100000.000000'/>
+            <contact>
+              <ode soft_cfm='0.000000' soft_erp='0.200000' kp='1000000000000.000000' kd='1.000000' max_vel='100.000000' min_depth='0.001000'/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='top_visual' cast_shadows='1' laser_retro='0.000000' transparency='0.000000'>
+          <origin pose='0.000000 0.000000 0.010000 0.000000 -0.000000 0.000000'/>
+          <geometry>
+            <mesh filename='table.dae' scale='1.000000 1.000000 1.000000'/>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name='table3' static='1'>
+      <origin pose='8.000000 5.000000 -0.010000 0.000000 0.000000 -1.570800'/>
+      <link name='body' gravity='1' self_collide='0' kinematic='0'>
+        <origin pose='0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000'/>
+        <collision name='top' laser_retro='0.000000'>
+          <origin pose='0.000000 0.000000 0.620000 0.000000 -0.000000 0.000000'/>
+          <geometry>
+            <box size='1.400000 0.500000 0.050000'/>
+          </geometry>
+          <surface>
+            <friction>
+              <ode mu='-1.000000' mu2='-1.000000' fdir1='0.000000 0.000000 0.000000' slip1='0.000000' slip2='0.000000'/>
+            </friction>
+            <bounce restitution_coefficient='0.000000' threshold='100000.000000'/>
+            <contact>
+              <ode soft_cfm='0.000000' soft_erp='0.200000' kp='1000000000000.000000' kd='1.000000' max_vel='100.000000' min_depth='0.001000'/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='top_visual' cast_shadows='1' laser_retro='0.000000' transparency='0.000000'>
+          <origin pose='0.000000 0.000000 0.010000 0.000000 -0.000000 0.000000'/>
+          <geometry>
+            <mesh filename='table.dae' scale='1.000000 1.000000 1.000000'/>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name='table4' static='1'>
+      <origin pose='8.000000 7.000000 -0.010000 0.000000 0.000000 -1.570800'/>
+      <link name='body' gravity='1' self_collide='0' kinematic='0'>
+        <origin pose='0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000'/>
+        <collision name='top' laser_retro='0.000000'>
+          <origin pose='0.000000 0.000000 0.620000 0.000000 -0.000000 0.000000'/>
+          <geometry>
+            <box size='1.400000 0.500000 0.050000'/>
+          </geometry>
+          <surface>
+            <friction>
+              <ode mu='-1.000000' mu2='-1.000000' fdir1='0.000000 0.000000 0.000000' slip1='0.000000' slip2='0.000000'/>
+            </friction>
+            <bounce restitution_coefficient='0.000000' threshold='100000.000000'/>
+            <contact>
+              <ode soft_cfm='0.000000' soft_erp='0.200000' kp='1000000000000.000000' kd='1.000000' max_vel='100.000000' min_depth='0.001000'/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='top_visual' cast_shadows='1' laser_retro='0.000000' transparency='0.000000'>
+          <origin pose='0.000000 0.000000 0.010000 0.000000 -0.000000 0.000000'/>
+          <geometry>
+            <mesh filename='table.dae' scale='1.000000 1.000000 1.000000'/>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <light name='directional' type='directional' cast_shadows='0'>
+      <origin pose='0.000000 0.000000 100.000000 0.000000 -0.000000 0.000000'/>
+      <diffuse rgba='1.000000 1.000000 1.000000 1.000000'/>
+      <specular rgba='0.100000 0.100000 0.100000 1.000000'/>
+      <attenuation range='200.000000' linear='0.010000' constant='0.500000' quadratic='0.001000'/>
+      <direction xyz='0.010000 0.000000 -0.990000'/>
+    </light>
+  </world>
+</gazebo>
