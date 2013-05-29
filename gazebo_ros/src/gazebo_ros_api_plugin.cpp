@@ -97,6 +97,8 @@ namespace gazebo
 
       // below needs the world to be created first
       this->load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::LoadGazeboRosApiPlugin,this,_1));
+
+      ROS_INFO("Finished loading Gazebo ROS API Plugin.");
     }
 
     void GazeboRosApiPlugin::LoadGazeboRosApiPlugin(std::string _worldName)
