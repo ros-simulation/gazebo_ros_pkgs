@@ -7,4 +7,5 @@ then
     final="$final -g `catkin_find libgazebo_ros_paths_plugin.so`"
 fi
 
+# Combine the commands
 . /usr/local/share/gazebo/setup.sh && gzclient $final
