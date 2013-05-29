@@ -128,33 +128,19 @@ namespace gazebo
     void LoadPaths()
     {
 
-      /* This is commented out because we are now using system installed OGRE,
-         and sourcing gazebo installed setup.sh in ${CMAKE_INSTALL_PREFIX}/share/gazebo/setup.sh
+      // We are now using system installed OGRE,
+      // and sourcing gazebo installed setup.sh in ${CMAKE_INSTALL_PREFIX}/share/gazebo/setup.sh
       // setting Gazebo Path/Resources Configurations
       //   GAZEBO_RESOURCE_PATH, GAZEBO_PLUGIN_PATH and OGRE_RESOURCE_PATH for
       //   GazeboConfig::gazeboPaths, GazeboConfig::pluginPaths and GazeboConfig::ogrePaths
       // by adding paths to GazeboConfig based on ros::package
       // optional: setting environment variables according to ROS
       //           e.g. setenv("OGRE_RESOURCE_PATH",ogre_package_path.c_str(),1);
-      // set ogre library paths by searching for package named ogre
-      gazebo::common::SystemPaths::Instance()->ClearOgrePaths();
-      gazebo::common::SystemPaths::Instance()->ogrePathsFromEnv = false;
-      std::string ogre_package_name("ogre"); // @todo: un hardcode this???
-      std::string ogre_package_path = ros::package::getPath(ogre_package_name)+std::string("/ogre/lib/OGRE");
-      if (ogre_package_path.empty())
-        ROS_DEBUG("Package[%s] does not exist, assuming user must have set OGRE_RESOURCE_PATH already.",ogre_package_name.c_str());
-      else
-      {
-        ROS_DEBUG("ogre path %s",ogre_package_path.c_str());
-        gazebo::common::SystemPaths::Instance()->AddOgrePaths(ogre_package_path);
-      }
-      */
 
       // set gazebo media paths by adding all packages that exports "gazebo_media_path" for gazebo
-      //gazebo::common::SystemPaths::Instance()->ClearGazeboPaths();
       gazebo::common::SystemPaths::Instance()->gazeboPathsFromEnv = false;
       std::vector<std::string> gazebo_media_paths;
-      rosPackageGetPluginsDebug("gazebo","gazebo_media_path",gazebo_media_paths);
+      rosPackageGetPluginsDebug("gazebo_ros","gazebo_media_path",gazebo_media_paths);
       for (std::vector<std::string>::iterator iter=gazebo_media_paths.begin(); iter != gazebo_media_paths.end(); iter++)
       {
         ROS_DEBUG("med path %s",iter->c_str());
@@ -162,10 +148,9 @@ namespace gazebo
       }
 
       // set gazebo plugins paths by adding all packages that exports "plugin_path" for gazebo
-      //gazebo::common::SystemPaths::Instance()->ClearPluginPaths();
       gazebo::common::SystemPaths::Instance()->pluginPathsFromEnv = false;
       std::vector<std::string> plugin_paths;
-      rosPackageGetPluginsDebug("gazebo","plugin_path",plugin_paths);
+      rosPackageGetPluginsDebug("gazebo_ros","plugin_path",plugin_paths);
       for (std::vector<std::string>::iterator iter=plugin_paths.begin(); iter != plugin_paths.end(); iter++)
       {
         ROS_DEBUG("plugin path %s",(*iter).c_str());
@@ -173,10 +158,9 @@ namespace gazebo
       }
 
       // set model paths by adding all packages that exports "gazebo_model_path" for gazebo
-      //gazebo::common::SystemPaths::Instance()->ClearModelPaths();
       gazebo::common::SystemPaths::Instance()->modelPathsFromEnv = false;
       std::vector<std::string> model_paths;
-      rosPackageGetPluginsDebug("gazebo","gazebo_model_path",model_paths);
+      rosPackageGetPluginsDebug("gazebo_ros","gazebo_model_path",model_paths);
       for (std::vector<std::string>::iterator iter=model_paths.begin(); iter != model_paths.end(); iter++)
       {
         ROS_DEBUG("model path %s",(*iter).c_str());
@@ -184,7 +168,7 @@ namespace gazebo
       }
 
       // set .gazeborc path to something else, so we don't pick up default ~/.gazeborc
-      std::string gazeborc = ros::package::getPath("gazebo")+"/.do_not_use_gazeborc";
+      std::string gazeborc = ros::package::getPath("gazebo_ros")+"/.do_not_use_gazeborc";
       setenv("GAZEBORC",gazeborc.c_str(),1);
 
     }
