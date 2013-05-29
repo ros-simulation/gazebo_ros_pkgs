@@ -141,9 +141,9 @@ namespace gazebo
       this->AdvertiseServices();
 
       // hooks for applying forces, publishing simtime on /clock
-      this->wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateStart(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
-      this->force_update_event_  = gazebo::event::Events::ConnectWorldUpdateStart(boost::bind(&GazeboRosApiPlugin::forceJointSchedulerSlot,this));
-      this->time_update_event_   = gazebo::event::Events::ConnectWorldUpdateStart(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
+      this->wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
+      this->force_update_event_  = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::forceJointSchedulerSlot,this));
+      this->time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
 
       // spin ros, is this needed?
       this->ros_spin_thread_ = new boost::thread(boost::bind(&GazeboRosApiPlugin::spin, this));
