@@ -8,4 +8,5 @@ then
 fi
 
 # Combine the commands
-. /usr/local/share/gazebo/setup.sh && gzclient $final
+setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
+. $setup_path/setup.sh && gzclient $final
