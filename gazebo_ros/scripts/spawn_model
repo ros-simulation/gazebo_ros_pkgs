@@ -98,6 +98,9 @@ class SpawnModel():
     def parseUserInputs(self):
         # get goal from commandline
         for i in range(0,len(sys.argv)):
+          if sys.argv[i] == '-h' or sys.argv[i] == '--help' or sys.argv[i] == '-help':
+            usage()
+            sys.exit(1)
           if sys.argv[i] == '-unpause':
             self.unpause_physics = True
           if sys.argv[i] == '-urdf':
