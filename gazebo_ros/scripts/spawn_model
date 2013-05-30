@@ -57,7 +57,6 @@ def usage():
                                      If left empty or specified as "world", gazebo world frame is used.
     -gazebo_namespace <gazebo ros_namespace> - optional: ROS namespace of gazebo offered ROS interfaces.  Defaults to /gazebo/ (e.g. /gazebo/spawn_model).
     -robot_namespace <robot ros_namespace> - optional: change ROS namespace of gazebo-plugins.
-    -namespace <robot ros_namespace> - DEPRECATED:  use -robot_namespace instead.
     -unpause - optional: !!!Experimental!!! unpause physics after spawning model
     -wait - optional: !!!Experimental!!! wait for model to exist
     -trimesh_mass <mass in kg> - required if -trimesh is used: linear mass
