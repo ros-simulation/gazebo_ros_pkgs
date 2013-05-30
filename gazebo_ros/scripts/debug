@@ -12,4 +12,5 @@ then
     final="$final -s `catkin_find libgazebo_ros_api_plugin.so`"
 fi
 
-. /usr/local/share/gazebo/setup.sh && `rospack find gazebo_ros`/scripts/gdbrun gzserver $final
+setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
+. $setup_path/setup.sh && `rospack find gazebo_ros`/scripts/gdbrun gzserver $final
