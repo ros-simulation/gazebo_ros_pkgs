@@ -182,7 +182,6 @@ class SpawnModel():
 
     def checkForModel(self,model):
         for n in model.name:
-          #print "list of models: ",n
           if n == self.wait_for_model:
             self.wait_for_model_exists = True
 
@@ -194,34 +193,32 @@ class SpawnModel():
         if not self.wait_for_model == "":
           rospy.Subscriber("%s/model_states"%(self.gazebo_namespace), ModelStates, self.checkForModel)
           while not rospy.is_shutdown() and not self.wait_for_model_exists:
-            #print "waiting for model ",self.wait_for_model
             time.sleep(0.1)
-
 
         if rospy.is_shutdown():
           sys.exit(0)
 
         if self.file_name != "":
-          print "loading model xml from file"
+          rospy.loginfo("Loading model xml from file")
           if os.path.exists(self.file_name):
             if os.path.isdir(self.file_name):
-              print "Error: file name is a path?"
+              print "Error: file name is a path?", self.file_name
               sys.exit(0)
             if not os.path.isfile(self.file_name):
-              print "Error: unable to open file"
+              print "Error: unable to open file", self.file_name
               sys.exit(0)
           else:
-            print "Error: file does not exist"
+            print "Error: file does not exist", self.file_name
             sys.exit(0)
           # load file
           f = open(self.file_name,'r')
           model_xml = f.read()
           if model_xml == "":
-            print "Error: file is empty"
+            print "Error: file is empty", self.file_name
             sys.exit(0)
 
         elif self.param_name != "":
-          print "loading model xml from ros parameter"
+          rospy.loginfo( "Loading model xml from ros parameter")
           model_xml = rospy.get_param(self.param_name)
           if model_xml == "":
             print "Error: param does not exist or is empty"
@@ -271,6 +268,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print usage()
     else:
+        rospy.loginfo("spawn_model script started")
         sm = SpawnModel()
         sm.parseUserInputs()
         sm.callSpawnService()

@@ -376,13 +376,13 @@ namespace gazebo
     {
       this->pub_link_states_connection_count_++;
       if (this->pub_link_states_connection_count_ == 1) // connect on first subscriber
-        this->pub_link_states_event_   = gazebo::event::Events::ConnectWorldUpdateStart(boost::bind(&GazeboRosApiPlugin::publishLinkStates,this));
+        this->pub_link_states_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishLinkStates,this));
     }
     void GazeboRosApiPlugin::onModelStatesConnect()
     {
       this->pub_model_states_connection_count_++;
       if (this->pub_model_states_connection_count_ == 1) // connect on first subscriber
-        this->pub_model_states_event_   = gazebo::event::Events::ConnectWorldUpdateStart(boost::bind(&GazeboRosApiPlugin::publishModelStates,this));
+        this->pub_model_states_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishModelStates,this));
     }
     void GazeboRosApiPlugin::onLinkStatesDisconnect()
     {
@@ -2106,7 +2106,7 @@ namespace gazebo
 
       // set result
       res.success = true;
-      res.status_message = std::string("SpawnModel: successfully spawned model");
+      res.status_message = std::string("SpawnModel: Successfully spawned model");
       return true;
     }
 

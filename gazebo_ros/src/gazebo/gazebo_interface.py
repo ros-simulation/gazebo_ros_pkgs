@@ -16,7 +16,7 @@ def spawn_gazebo_model_client(model_name, model_xml, robot_namespace, initial_po
     try:
       spawn_gazebo_model = rospy.ServiceProxy(gazebo_namespace+'/spawn_gazebo_model', SpawnModel)
       resp = spawn_gazebo_model(model_name, model_xml, robot_namespace, initial_pose, reference_frame)
-      print "spawn status: ", resp.status_message
+      rospy.loginfo("Spawn status: %s"%resp.status_message)
       return resp.success
     except rospy.ServiceException, e:
       print "Service call failed: %s"%e
@@ -27,7 +27,7 @@ def spawn_urdf_model_client(model_name, model_xml, robot_namespace, initial_pose
     try:
       spawn_urdf_model = rospy.ServiceProxy(gazebo_namespace+'/spawn_urdf_model', SpawnModel)
       resp = spawn_urdf_model(model_name, model_xml, robot_namespace, initial_pose, reference_frame)
-      print "spawn status: ", resp.status_message
+      rospy.loginfo("Spawn status: %s"%resp.status_message)
       return resp.success
     except rospy.ServiceException, e:
       print "Service call failed: %s"%e
@@ -38,7 +38,8 @@ def set_model_configuration_client(model_name, model_param_name, joint_names, jo
     try:
       set_model_configuration = rospy.ServiceProxy(gazebo_namespace+'/set_model_configuration', SetModelConfiguration)
       resp = set_model_configuration(model_name, model_param_name, joint_names, joint_positions)
-      print "set model configuration status: ", resp.status_message
+      rospy.loginfo("Set model configuration status: %s"%resp.status_message)
+
       return resp.success
     except rospy.ServiceException, e:
       print "Service call failed: %s"%e
