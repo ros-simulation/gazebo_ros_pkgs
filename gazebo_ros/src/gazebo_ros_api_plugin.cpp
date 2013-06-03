@@ -53,7 +53,6 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
 
   // shutdown ros
   this->rosnode_->shutdown();
-  delete this->rosnode_;
 
   ROS_INFO_STREAM_NAMED("api_plugin","here4");
   // shutdown ros queue
@@ -92,6 +91,9 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   ROS_INFO_STREAM_NAMED("api_plugin","here10");
   this->lock_.unlock();
   ROS_INFO_STREAM_NAMED("api_plugin","here11");
+
+  delete this->rosnode_;
+
 }
 
 void GazeboRosApiPlugin::Load(int argc, char** argv)
@@ -173,11 +175,13 @@ void GazeboRosApiPlugin::OnResponse(ConstResponsePtr &_response)
 
 /// \brief ros queue thread for this node
 void GazeboRosApiPlugin::gazeboQueueThread()
-{ 
+{
   ROS_DEBUG_STREAM("Callback thread id=" << boost::this_thread::get_id());
   static const double timeout = 0.001;
   while (this->rosnode_->ok())
+  {
     this->gazebo_queue_.callAvailable(ros::WallDuration(timeout));
+  }
 }
 
 /// \brief advertise services
@@ -973,7 +977,7 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   // supported updates
   gazebo::physics::PhysicsEnginePtr ode_pe = (this->world->GetPhysicsEngine());
   //ode_pe->SetStepTime(req.time_step); DEPRECATED
-  ode_pe->SetMaxStepSize(req.time_step); 
+  ode_pe->SetMaxStepSize(req.time_step);
   //ode_pe->SetUpdateRate(req.max_update_rate); DEPRECATED
   ode_pe->SetRealTimeUpdateRate(req.max_update_rate);
   ode_pe->SetGravity(gazebo::math::Vector3(req.gravity.x,req.gravity.y,req.gravity.z));
@@ -1820,27 +1824,37 @@ void GazeboRosApiPlugin::PhysicsReconfigureCallback(gazebo::PhysicsConfig &confi
 
 void GazeboRosApiPlugin::PhysicsReconfigureNode()
 {
-  ros::NodeHandle node_handle;
-  this->physics_reconfigure_set_client_ = node_handle.serviceClient<gazebo_msgs::SetPhysicsProperties>("/gazebo/set_physics_properties");
-  this->physics_reconfigure_get_client_ = node_handle.serviceClient<gazebo_msgs::GetPhysicsProperties>("/gazebo/get_physics_properties");
+  ROS_DEBUG_STREAM_NAMED("temp","here");
+
+  //ros::NodeHandle node_handle;
+  this->physics_reconfigure_set_client_ = this->rosnode_->serviceClient<gazebo_msgs::SetPhysicsProperties>("/gazebo/set_physics_properties");
+  this->physics_reconfigure_get_client_ = this->rosnode_->serviceClient<gazebo_msgs::GetPhysicsProperties>("/gazebo/get_physics_properties");
+  ROS_DEBUG_STREAM_NAMED("temp","here2"); // never passes this point! TODO
   this->physics_reconfigure_set_client_.waitForExistence();
+  ROS_DEBUG_STREAM_NAMED("temp","here3");
   this->physics_reconfigure_get_client_.waitForExistence();
+  ROS_DEBUG_STREAM_NAMED("temp","here4");
 
   // for dynamic reconfigure physics
   // for dynamic_reconfigure
   dynamic_reconfigure::Server<gazebo::PhysicsConfig> physics_reconfigure_srv;
   dynamic_reconfigure::Server<gazebo::PhysicsConfig>::CallbackType physics_reconfigure_f;
-
+  ROS_DEBUG_STREAM_NAMED("temp","here5");
   physics_reconfigure_f = boost::bind(&GazeboRosApiPlugin::PhysicsReconfigureCallback, this, _1, _2);
   physics_reconfigure_srv.setCallback(physics_reconfigure_f);
 
   ROS_INFO("Starting to spin physics dynamic reconfigure node...");
+    std::cout << "Start Phsyics Reconfigure Node";
   ros::Rate r(10);
-  while(ros::ok())
+  //  while(ros::ok())   
+  while (this->rosnode_->ok())
   {
+    std::cout << ".";
     ros::spinOnce();
+    std::cout << "sleeping...";
     r.sleep();
   }
+    std::cout << "DONE Phyics Reconfigure Node";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
