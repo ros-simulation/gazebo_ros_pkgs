@@ -65,6 +65,6 @@ install(DIRECTORY include/
    PATTERN ".svn" EXCLUDE
 )
 
-install(PROGRAMS scripts/gazebo scripts/debug scripts/gui scripts/perf scripts/spawn_model
+install(PROGRAMS scripts/gazebo scripts/debug scripts/gzclient scripts/gzserver scripts/gdbrun scripts/perf scripts/spawn_model
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
