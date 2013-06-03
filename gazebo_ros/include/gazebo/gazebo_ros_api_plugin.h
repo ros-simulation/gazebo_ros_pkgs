@@ -255,11 +255,11 @@ private:
   gazebo::transport::PublisherPtr request_pub_;
   gazebo::transport::SubscriberPtr response_sub_;
 
-  ros::NodeHandle* rosnode_;
+  ros::NodeHandle* nh_;
   ros::CallbackQueue gazebo_queue_;
   boost::thread* gazebo_callback_queue_thread_;
 
-  gazebo::physics::WorldPtr world;
+  gazebo::physics::WorldPtr world_;
   gazebo::event::ConnectionPtr wrench_update_event_;
   gazebo::event::ConnectionPtr force_update_event_;
   gazebo::event::ConnectionPtr time_update_event_;
@@ -344,8 +344,8 @@ private: boost::mutex lock_;
     ros::Duration duration;
   };
 
-  std::vector<GazeboRosApiPlugin::WrenchBodyJob*> wrench_body_jobs;
-  std::vector<GazeboRosApiPlugin::ForceJointJob*> force_joint_jobs;
+  std::vector<GazeboRosApiPlugin::WrenchBodyJob*> wrench_body_jobs_;
+  std::vector<GazeboRosApiPlugin::ForceJointJob*> force_joint_jobs_;
 
   ////////////////////////////////////////////////////////////////////////////////
   /// \brief
