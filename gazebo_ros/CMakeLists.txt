@@ -68,3 +68,8 @@ install(DIRECTORY include/
 install(PROGRAMS scripts/gazebo scripts/debug scripts/gzclient scripts/gzserver scripts/gdbrun scripts/perf scripts/spawn_model
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
+
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  )
+
