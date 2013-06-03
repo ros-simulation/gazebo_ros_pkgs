@@ -173,7 +173,7 @@ void GazeboRosApiPlugin::OnResponse(ConstResponsePtr &_response)
 
 /// \brief ros queue thread for this node
 void GazeboRosApiPlugin::gazeboQueueThread()
-{ 
+{
   ROS_DEBUG_STREAM("Callback thread id=" << boost::this_thread::get_id());
   static const double timeout = 0.001;
   while (this->rosnode_->ok())
@@ -973,7 +973,7 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   // supported updates
   gazebo::physics::PhysicsEnginePtr ode_pe = (this->world->GetPhysicsEngine());
   //ode_pe->SetStepTime(req.time_step); DEPRECATED
-  ode_pe->SetMaxStepSize(req.time_step); 
+  ode_pe->SetMaxStepSize(req.time_step);
   //ode_pe->SetUpdateRate(req.max_update_rate); DEPRECATED
   ode_pe->SetRealTimeUpdateRate(req.max_update_rate);
   ode_pe->SetGravity(gazebo::math::Vector3(req.gravity.x,req.gravity.y,req.gravity.z));
