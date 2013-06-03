@@ -7,13 +7,11 @@
   <xacro:property name="PI" value="3.1415926535897931"/>
 
   <gazebo>
-    <controller:ros_control_gazebo_plugin
-      name="ros_control" 
-      plugin="$(find ros_control_gazebo_plugin)/lib/libros_control_gazebo_plugin.so">
+    <plugin name="ros_control" filename="libros_control_gazebo_plugin.so">
       <ns>rr/ros_control</ns>
       <robotSimType>ros_control_gazebo_tests/RobotSimRR</robotSimType>
       <controlPeriod>0.001</controlPeriod>
-    </controller:ros_control_gazebo_plugin>
+    </plugin>
   </gazebo>
 
   <material name="red"> <color rgba="1 0 0 1"/> </material>

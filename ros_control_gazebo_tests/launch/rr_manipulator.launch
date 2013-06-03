@@ -1,5 +1,5 @@
 <launch>
-  <include file="$(find gazebo_worlds)/launch/empty_world.launch"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
 
   <param name="robot_description"
     command="$(find xacro)/xacro.py '$(find ros_control_gazebo_tests)/models/rr_manipulator.urdf.xacro'" />
@@ -15,6 +15,6 @@
       pid: {p: 10.0, i: 0.01, d: 1.0}
   </rosparam>
 
-  <node name="urdf_spawner" pkg="gazebo" type="spawn_model" args="-urdf -model rr -param robot_description"/>
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model rr -param robot_description"/>
 
 </launch>

@@ -16,11 +16,8 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
 
 add_library(ros_control_gazebo_plugin ros_control_gazebo_plugin.cpp)
+target_link_libraries(ros_control_gazebo_plugin ${catkin_LIBRARIES})
 
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  #TODO DEPENDENCIES geometry_msgs std_msgs
-)
 # TODO: fill in what other packages will need to use this package
 ## DEPENDS: system dependencies of this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
