@@ -30,17 +30,18 @@ namespace ros_control_gazebo_plugin
         model_ = parent;
 
         // Initialize ROS interface, if necessary
-        if(!ros::isInitialized()) {
+        if(!ros::isInitialized()) 
+        {
           // Note: If we don't disable the SIGINT handler, gazebo will not exit
           int node_argc = 0;
           char **node_argv = NULL;
           ros::init(node_argc, node_argv, "gazebo",
                     ros::init_options::NoSigintHandler);
-        }
 
-        // Start a spinner thread for handling callbacks
-        spinner_.reset(new ros::AsyncSpinner(1));
-        spinner_->start();
+          // Start a spinner thread for handling callbacks
+          spinner_.reset(new ros::AsyncSpinner(1));
+          spinner_->start();
+        }
 
         // Get namespace for nodehandle
         std::string ns = std::string("ros_control/")+model_->GetName();
