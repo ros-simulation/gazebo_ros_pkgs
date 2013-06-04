@@ -6,6 +6,7 @@
 
   <xacro:property name="PI" value="3.1415926535897931"/>
 
+  <!-- ros_control_gazebo plugin -->
   <gazebo>
     <plugin name="ros_control" filename="libros_control_gazebo_plugin.so">
       <ns>rr/ros_control</ns>
@@ -20,11 +21,10 @@
   <link name="world"/>
 
   <link name="link1">
-
     <collision>
       <origin xyz="0 0 0.5" rpy="0 0 0"/>
       <geometry>
-	<box size="0.1 0.1 1"/>
+        <box size="0.1 0.1 1"/>
       </geometry>
       <material name="red"/>
     </collision>
@@ -32,7 +32,7 @@
     <visual>
       <origin xyz="0 0 0.5" rpy="0 0 0"/>
       <geometry>
-	<box size="0.1 0.1 1"/>
+        <box size="0.1 0.1 1"/>
       </geometry>
       <material name="red"/>
 
@@ -49,11 +49,10 @@
   </link>
 
   <link name="link2">
-
     <collision>
       <origin xyz="0 0 0.45" rpy="0 0 0"/>
       <geometry> 
-	<box size="0.1 0.1 1"/>
+        <box size="0.1 0.1 1"/>
       </geometry>
       <material name="blue"/>
     </collision>
@@ -61,7 +60,7 @@
     <visual>
       <origin xyz="0 0 0.45" rpy="0 0 0"/>
       <geometry> 
-	<box size="0.1 0.1 1"/>
+        <box size="0.1 0.1 1"/>
       </geometry>
       <material name="blue"/>
     </visual>
@@ -77,11 +76,10 @@
   </link>
 
   <link name="link3">
-
     <collision>
       <origin xyz="0 0 0.45" rpy="0 0 0"/>
       <geometry> 
-	<box size="0.1 0.1 1"/>
+        <box size="0.1 0.1 1"/>
       </geometry>
       <material name="blue"/>
     </collision>
@@ -89,7 +87,7 @@
     <visual>
       <origin xyz="0 0 0.45" rpy="0 0 0"/>
       <geometry> 
-	<box size="0.1 0.1 1"/>
+        <box size="0.1 0.1 1"/>
       </geometry>
       <material name="blue"/>
     </visual>

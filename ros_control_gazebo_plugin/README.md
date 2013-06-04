@@ -16,13 +16,12 @@ The `<plugin>` tag has the following required elements:
 It also has the following optional elements:
  * `<ns>`: The ROS namespace to be used for this instance of the plugin
 
-The controller plugin can be specified like the following:
+The controller plugin can be specified by adding the following to your URDF or SDF:
 
 ```xml
 <gazebo>
-  <plugin
-    name="ros_control" 
-    plugin="$(find ros_control_gazebo_plugin)/lib/libros_control_gazebo_plugin.so">
+  <plugin name="ros_control" filename="libros_control_gazebo_plugin.so">
+    <ns>rr/ros_control</ns>
     <robotSimType>ros_control_gazebo_tests/RobotSimRR</robotSimType>
     <controlPeriod>0.001</controlPeriod>
   </plugin>
