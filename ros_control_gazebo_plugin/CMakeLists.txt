@@ -15,7 +15,7 @@ endif()
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
 
-add_library(ros_control_gazebo_plugin ros_control_gazebo_plugin.cpp)
+add_library(ros_control_gazebo_plugin src/ros_control_gazebo_plugin.cpp)
 target_link_libraries(ros_control_gazebo_plugin ${catkin_LIBRARIES})
 
 # TODO: fill in what other packages will need to use this package

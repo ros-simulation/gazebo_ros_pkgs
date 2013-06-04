@@ -7,7 +7,8 @@
 
 namespace ros_control_gazebo {
 
-  class RobotSim : public hardware_interface::RobotHW {
+  class RobotSim : public hardware_interface::RobotHW 
+  {
   public:
 
     virtual ~RobotSim() { }

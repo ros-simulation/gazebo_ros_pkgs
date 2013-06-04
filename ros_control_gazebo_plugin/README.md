@@ -9,7 +9,7 @@ Plugins
 
 ### ros_control_gazebo_plugin
 
-The `<controller:ros_control_gazebo_plugin>` tag has the following required elements:
+The `<plugin>` tag has the following required elements:
  * `<robotSimType>`: The pluginlib name of the robot sim interface to be used
  * `<controlPeriod>`: The period of the controller update (in seconds)
 
@@ -20,11 +20,11 @@ The controller plugin can be specified like the following:
 
 ```xml
 <gazebo>
-  <controller:ros_control_gazebo_plugin
+  <plugin
     name="ros_control" 
     plugin="$(find ros_control_gazebo_plugin)/lib/libros_control_gazebo_plugin.so">
     <robotSimType>ros_control_gazebo_tests/RobotSimRR</robotSimType>
     <controlPeriod>0.001</controlPeriod>
-  </controller:ros_control_gazebo_plugin>
+  </plugin>
 </gazebo>
 ```

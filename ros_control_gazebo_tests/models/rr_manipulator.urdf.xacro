@@ -21,12 +21,21 @@
 
   <link name="link1">
 
+    <collision>
+      <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      <geometry>
+	<box size="0.1 0.1 1"/>
+      </geometry>
+      <material name="red"/>
+    </collision>
+
     <visual>
       <origin xyz="0 0 0.5" rpy="0 0 0"/>
       <geometry>
 	<box size="0.1 0.1 1"/>
       </geometry>
       <material name="red"/>
+
     </visual>
 
     <inertial>
@@ -40,6 +49,14 @@
   </link>
 
   <link name="link2">
+
+    <collision>
+      <origin xyz="0 0 0.45" rpy="0 0 0"/>
+      <geometry> 
+	<box size="0.1 0.1 1"/>
+      </geometry>
+      <material name="blue"/>
+    </collision>
 
     <visual>
       <origin xyz="0 0 0.45" rpy="0 0 0"/>
@@ -61,6 +78,14 @@
 
   <link name="link3">
 
+    <collision>
+      <origin xyz="0 0 0.45" rpy="0 0 0"/>
+      <geometry> 
+	<box size="0.1 0.1 1"/>
+      </geometry>
+      <material name="blue"/>
+    </collision>
+
     <visual>
       <origin xyz="0 0 0.45" rpy="0 0 0"/>
       <geometry> 
@@ -78,6 +103,11 @@
         izz="1.0"/>
     </inertial>
   </link>
+
+  <gazebo reference="link3">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
 
   <joint name="fixed" type="fixed">
     <parent link="world"/>
