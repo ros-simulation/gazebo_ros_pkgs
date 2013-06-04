@@ -143,8 +143,14 @@ public:
 
   /// \brief
   void onLinkStatesConnect();
+
+  /// \brief
   void onModelStatesConnect();
+
+  /// \brief
   void onLinkStatesDisconnect();
+
+  /// \brief
   void onModelStatesDisconnect();
 
   /// \brief Function for inserting a URDF into Gazebo from ROS Service Call
@@ -229,77 +235,65 @@ public:
 
 private:
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void wrenchBodySchedulerSlot();
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void forceJointSchedulerSlot();
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
   void publishSimTime();
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void publishLinkStates();
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void publishModelStates();
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void stripXmlDeclaration(std::string &model_xml);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void updateSDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void updateSDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void walkChildAddRobotNamespace(TiXmlNode* robot_xml);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, gazebo_msgs::SpawnModel::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // \brief helper function for applyBodyWrench
+  /// \brief helper function for applyBodyWrench
+  ///        shift wrench from reference frame to target frame
   void transformWrench(gazebo::math::Vector3 &target_force, gazebo::math::Vector3 &target_torque,
                        gazebo::math::Vector3 reference_force, gazebo::math::Vector3 reference_torque,
                        gazebo::math::Pose target_to_reference );
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief Used for the dynamnic reconfigure callback function template
   void physicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief waits for the rest of Gazebo to be ready before initializing the dynamic reconfigure services
   void physicsReconfigureThread();
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief Unusd
   void onResponse(ConstResponsePtr &response);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief utilites for checking incoming string URDF/SDF/Param
   bool isURDF(std::string model_xml);
+
+  /// \brief utilites for checking incoming string URDF/SDF/Param
   bool isSDF(std::string model_xml);
+
+  /// \brief utilites for checking incoming string URDF/SDF/Param
   void loadGazeboRosApiPlugin(std::string world_name);
 
   std::string robot_namespace_;
