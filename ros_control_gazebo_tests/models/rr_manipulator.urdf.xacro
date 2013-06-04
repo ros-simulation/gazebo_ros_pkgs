@@ -6,40 +6,32 @@
 
   <xacro:property name="PI" value="3.1415926535897931"/>
 
-  <!-- ros_control_gazebo plugin -->
   <gazebo>
     <plugin name="ros_control" filename="libros_control_gazebo_plugin.so">
       <ns>rr/ros_control</ns>
       <robotSimType>ros_control_gazebo_tests/RobotSimRR</robotSimType>
       <controlPeriod>0.001</controlPeriod>
     </plugin>
-
-    <material name="red">Gazebo/Red</material>
-    <material name="blue">Gazebo/Blue</material>
   </gazebo>
+
+  <material name="red"> <color rgba="1 0 0 1"/> </material>
+  <material name="purple"> <color rgba="1.0 0 1.0 1"/> </material>
+  <material name="blue"> <color rgba="0 0 1 1"/> </material>
 
   <link name="world"/>
 
   <link name="link1">
-    <collision>
-      <origin xyz="0 0 0.5" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.1 0.1 1"/>
-      </geometry>
-      <material name="red"/>
+    <collision name="collision">
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <geometry> <box size="0.9 0.1 0.1"/> </geometry>
     </collision>
-
-    <visual>
-      <origin xyz="0 0 0.5" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.1 0.1 1"/>
-      </geometry>
+    <visual name="visual">
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <geometry> <box size="1 0.1 0.1"/> </geometry>
       <material name="red"/>
-
     </visual>
-
     <inertial>
-      <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
       <mass value="1"/>
       <inertia 
         ixx="1.0" ixy="0.0" ixz="0.0" 
@@ -49,24 +41,17 @@
   </link>
 
   <link name="link2">
-    <collision>
-      <origin xyz="0 0 0.45" rpy="0 0 0"/>
-      <geometry> 
-        <box size="0.1 0.1 1"/>
-      </geometry>
-      <material name="blue"/>
+    <collision name="collision">
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <geometry> <box size="0.9 0.1 0.1"/> </geometry>
     </collision>
-
-    <visual>
-      <origin xyz="0 0 0.45" rpy="0 0 0"/>
-      <geometry> 
-        <box size="0.1 0.1 1"/>
-      </geometry>
-      <material name="blue"/>
+    <visual name="visual">
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <geometry> <box size="1 0.1 0.1"/> </geometry>
+      <material name="purple"/>
     </visual>
-
     <inertial>
-      <origin xyz="0 0 1.5" rpy="0 0 0"/>
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
       <mass value="1"/>
       <inertia 
         ixx="1.0" ixy="0.0" ixz="0.0" 
@@ -76,24 +61,17 @@
   </link>
 
   <link name="link3">
-    <collision>
-      <origin xyz="0 0 0.45" rpy="0 0 0"/>
-      <geometry> 
-        <box size="0.1 0.1 1"/>
-      </geometry>
-      <material name="blue"/>
+    <collision name="collision">
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <geometry> <box size="0.9 0.1 0.1"/> </geometry>
     </collision>
-
-    <visual>
-      <origin xyz="0 0 0.45" rpy="0 0 0"/>
-      <geometry> 
-        <box size="0.1 0.1 1"/>
-      </geometry>
+    <visual name="visual">
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <geometry> <box size="1 0.1 0.1"/> </geometry>
       <material name="blue"/>
     </visual>
-
     <inertial>
-      <origin xyz="0 0 1.5" rpy="0 0 0"/>
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
       <mass value="1"/>
       <inertia 
         ixx="1.0" ixy="0.0" ixz="0.0" 
@@ -102,29 +80,23 @@
     </inertial>
   </link>
 
-  <gazebo reference="link3">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
-  </gazebo>
-
   <joint name="fixed" type="fixed">
     <parent link="world"/>
     <child link="link1"/>
-    <!--origin xyz="0 0 1" rpy="${PI} 0 0"/-->
+    <origin xyz="0 0 1" rpy="${PI} 0 0"/>
   </joint>
 
   <joint name="joint1" type="continuous">
     <parent link="link1"/>
     <child link="link2"/>
-    <origin xyz="0 0.1 0.9" rpy="0 0 0"/>
-    <axis xyz="0 1 0"/>
+    <origin xyz="1 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
 
   <joint name="joint2" type="continuous">
     <parent link="link2"/>
     <child link="link3"/>
-    <origin xyz="0 0.1 0.9" rpy="0 0 0"/>
+    <origin xyz="1 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
   </joint>
-
 </robot>
