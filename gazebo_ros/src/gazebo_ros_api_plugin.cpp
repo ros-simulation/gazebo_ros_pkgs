@@ -2061,8 +2061,8 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
       if (world_->GetModel(model_name)) break;
     }
-    ROS_DEBUG("Waiting for spawning model (%s)",model_name.c_str());
-    usleep(1000);
+    ROS_DEBUG_ONCE("Waiting for spawning model (%s)",model_name.c_str());
+    usleep(2000);
   }
 
   // set result
