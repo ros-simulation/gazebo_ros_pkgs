@@ -102,7 +102,7 @@ namespace ros_control_gazebo_plugin
           // Listen to the update event. This event is broadcast every
           // simulation iteration.
           update_connection_ = 
-            gazebo::event::Events::ConnectWorldUpdateStart
+            gazebo::event::Events::ConnectWorldUpdateBegin
             (boost::bind(&RosControlGazeboPlugin::Update, this));
         } catch(pluginlib::LibraryLoadException &ex) {
           ROS_FATAL_STREAM("Failed to create robot simulation interface loader: "<<ex.what());
