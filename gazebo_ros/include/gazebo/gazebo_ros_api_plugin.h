@@ -320,9 +320,9 @@ private:
   gazebo::transport::PublisherPtr request_pub_;
   gazebo::transport::SubscriberPtr response_sub_;
 
-  ros::NodeHandle* nh_;
+  boost::shared_ptr<ros::NodeHandle> nh_;
   ros::CallbackQueue gazebo_queue_;
-  boost::thread* gazebo_callback_queue_thread_;
+  boost::shared_ptr<boost::thread> gazebo_callback_queue_thread_;
 
   gazebo::physics::WorldPtr world_;
   gazebo::event::ConnectionPtr wrench_update_event_;
@@ -368,14 +368,14 @@ private:
   std::string xmlSuffix_;
 
   // ROS comm
-  ros::AsyncSpinner* async_ros_spin_;
+  boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;
 
   // physics dynamic reconfigure
-  boost::thread* physics_reconfigure_thread_;
+  boost::shared_ptr<boost::thread> physics_reconfigure_thread_;
   bool physics_reconfigure_initialized_;
   ros::ServiceClient physics_reconfigure_set_client_;
   ros::ServiceClient physics_reconfigure_get_client_;
-  dynamic_reconfigure::Server<gazebo::PhysicsConfig>* physics_reconfigure_srv_;
+  boost::shared_ptr< dynamic_reconfigure::Server<gazebo::PhysicsConfig> > physics_reconfigure_srv_;
   dynamic_reconfigure::Server<gazebo::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
 
   ros::Publisher     pub_clock_;

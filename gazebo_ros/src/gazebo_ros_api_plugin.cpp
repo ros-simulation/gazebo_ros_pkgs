@@ -58,12 +58,9 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
 
   // Shutdown ROS queue
   gazebo_callback_queue_thread_->join();
-  delete gazebo_callback_queue_thread_;
 
   // Physics Dynamix Reconfigure
   physics_reconfigure_thread_->join();
-  delete physics_reconfigure_thread_;
-  delete physics_reconfigure_srv_;
 
   // Delete Force and Wrench Jobs
   lock_.lock();
@@ -79,8 +76,6 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   }
   lock_.unlock();
 
-  // Remove the node handle
-  delete nh_;
 }
 
 void GazeboRosApiPlugin::Load(int argc, char** argv)
@@ -91,17 +86,17 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   else
     ROS_ERROR("Something other than this gazebo_ros_api plugin started ros::init(...), command line arguments may not be parsed properly.");
 
-  nh_ = new ros::NodeHandle("~"); // advertise topics and services in this node's namespace
+  nh_.reset(new ros::NodeHandle("~")); // advertise topics and services in this node's namespace
 
   // Built-in multi-threaded ROS spinning
-  async_ros_spin_ = new ros::AsyncSpinner(0); // will use a thread for each CPU core
+  async_ros_spin_.reset(new ros::AsyncSpinner(0)); // will use a thread for each CPU core
   async_ros_spin_->start();
 
   /// \brief setup custom callback queue
-  gazebo_callback_queue_thread_ = new boost::thread( &GazeboRosApiPlugin::gazeboQueueThread,this );
+  gazebo_callback_queue_thread_.reset(new boost::thread( &GazeboRosApiPlugin::gazeboQueueThread, this) );
 
   /// \brief start a thread for the physics dynamic reconfigure node
-  physics_reconfigure_thread_ = new boost::thread(boost::bind(&GazeboRosApiPlugin::PhysicsReconfigureThread, this));
+  physics_reconfigure_thread_.reset(new boost::thread(boost::bind(&GazeboRosApiPlugin::PhysicsReconfigureThread, this)));
 
   // below needs the world to be created first
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::LoadGazeboRosApiPlugin,this,_1));
@@ -1839,7 +1834,7 @@ void GazeboRosApiPlugin::PhysicsReconfigureThread()
   physics_reconfigure_set_client_.waitForExistence();
   physics_reconfigure_get_client_.waitForExistence();
 
-  physics_reconfigure_srv_ = new dynamic_reconfigure::Server<gazebo::PhysicsConfig>();
+  physics_reconfigure_srv_.reset(new dynamic_reconfigure::Server<gazebo::PhysicsConfig>());
 
   physics_reconfigure_callback_ = boost::bind(&GazeboRosApiPlugin::PhysicsReconfigureCallback, this, _1, _2);
   physics_reconfigure_srv_->setCallback(physics_reconfigure_callback_);
