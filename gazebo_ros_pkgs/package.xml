@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>gazebo_pkgs</name>
+  <name>gazebo_ros_pkgs</name> <!-- This is a meta package! -->
   <version>1.0.0</version>
   <description>Wrappers, tools and additional API's for using ROS with the <a href="http://ros.org/wiki/gazebo">Gazebo</a> simulator.</description>
 
