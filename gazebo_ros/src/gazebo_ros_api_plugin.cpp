@@ -31,69 +31,56 @@
 namespace gazebo
 {
 
-GazeboRosApiPlugin::GazeboRosApiPlugin()
+GazeboRosApiPlugin::GazeboRosApiPlugin() :
+  physics_reconfigure_initialized_(false),
+  world_created_(false)
 {
   robot_namespace_.clear();
-  world_created_ = false;
 }
 
 GazeboRosApiPlugin::~GazeboRosApiPlugin()
 {
-  ROS_INFO_STREAM_NAMED("api_plugin","here1");
-  // disconnect slots
+  // Disconnect slots
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
-  ROS_INFO_STREAM_NAMED("api_plugin","here2");
+
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
     gazebo::event::Events::DisconnectWorldUpdateBegin(pub_link_states_event_);
   if (pub_model_states_connection_count_ > 0) // disconnect if there are subscribers on exit
     gazebo::event::Events::DisconnectWorldUpdateBegin(pub_model_states_event_);
-  ROS_INFO_STREAM_NAMED("api_plugin","here3");
 
-  // shutdown ros
+  // Stop the multi threaded ROS spinner
+  async_ros_spin_->stop();
+
+  // Shutdown the ROS node
   nh_->shutdown();
 
-  ROS_INFO_STREAM_NAMED("api_plugin","here4");
-  // shutdown ros queue
+  // Shutdown ROS queue
   gazebo_callback_queue_thread_->join();
-
-  ROS_INFO_STREAM_NAMED("api_plugin","here4.5");
-
   delete gazebo_callback_queue_thread_;
-  ROS_INFO_STREAM_NAMED("api_plugin","here5");
 
+  // Physics Dynamix Reconfigure
   physics_reconfigure_thread_->join();
-  ROS_INFO_STREAM_NAMED("api_plugin","here5.5");
-
   delete physics_reconfigure_thread_;
-  ROS_INFO_STREAM_NAMED("api_plugin","here6");
+  delete physics_reconfigure_srv_;
 
-  ros_spin_thread_->join();
-  ROS_INFO_STREAM_NAMED("api_plugin","here6.5");
-
-  delete ros_spin_thread_;
-  ROS_INFO_STREAM_NAMED("api_plugin","here7");
-  /* Delete Force and Wrench Jobs */
+  // Delete Force and Wrench Jobs
   lock_.lock();
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
   {
     delete (*iter);
     force_joint_jobs_.erase(iter);
-    ROS_INFO_STREAM_NAMED("api_plugin","here8");
   }
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
   {
     delete (*iter);
     wrench_body_jobs_.erase(iter);
-    ROS_INFO_STREAM_NAMED("api_plugin","here9");
   }
-  ROS_INFO_STREAM_NAMED("api_plugin","here10");
   lock_.unlock();
-  ROS_INFO_STREAM_NAMED("api_plugin","here11");
 
-  //delete nh_;
-  ROS_INFO_STREAM_NAMED("api_plugin","here12");
+  // Remove the node handle
+  delete nh_;
 }
 
 void GazeboRosApiPlugin::Load(int argc, char** argv)
@@ -106,12 +93,15 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
 
   nh_ = new ros::NodeHandle("~"); // advertise topics and services in this node's namespace
 
+  // Built-in multi-threaded ROS spinning
+  async_ros_spin_ = new ros::AsyncSpinner(0); // will use a thread for each CPU core
+  async_ros_spin_->start();
+
   /// \brief setup custom callback queue
   gazebo_callback_queue_thread_ = new boost::thread( &GazeboRosApiPlugin::gazeboQueueThread,this );
 
   /// \brief start a thread for the physics dynamic reconfigure node
-  physics_reconfigure_thread_ = new boost::thread(boost::bind(&GazeboRosApiPlugin::PhysicsReconfigureNode, this));
-  physics_reconfigure_initialized_ = false;
+  physics_reconfigure_thread_ = new boost::thread(boost::bind(&GazeboRosApiPlugin::PhysicsReconfigureThread, this));
 
   // below needs the world to be created first
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::LoadGazeboRosApiPlugin,this,_1));
@@ -162,8 +152,6 @@ void GazeboRosApiPlugin::LoadGazeboRosApiPlugin(std::string _worldName)
   force_update_event_  = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::forceJointSchedulerSlot,this));
   time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
 
-  // spin ros, is this needed?
-  ros_spin_thread_ = new boost::thread(boost::bind(&GazeboRosApiPlugin::spin, this));
 }
 
 void GazeboRosApiPlugin::OnResponse(ConstResponsePtr &_response)
@@ -1585,18 +1573,6 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   return true;
 }
 
-
-void GazeboRosApiPlugin::spin()
-{
-  // todo: make a wait loop that does not provide extra ros::spin()
-  ros::WallRate rate(10);
-  while (nh_->ok())
-  {
-    ros::spinOnce();
-    rate.sleep();
-  }
-}
-
 /// \brief utilites for checking incoming string URDF/XML/Param
 bool GazeboRosApiPlugin::IsURDF(std::string model_xml)
 {
@@ -1875,43 +1851,23 @@ void GazeboRosApiPlugin::PhysicsReconfigureCallback(gazebo::PhysicsConfig &confi
   }
 }
 
-void GazeboRosApiPlugin::PhysicsReconfigureNode()
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Wrap the get/set physics properties services into a dynamics reconfigure node
+void GazeboRosApiPlugin::PhysicsReconfigureThread()
 {
-  ROS_DEBUG_STREAM_NAMED("temp","Inside Physics Reconfigure Node");
-
-  //ros::NodeHandle node_handle;
   physics_reconfigure_set_client_ = nh_->serviceClient<gazebo_msgs::SetPhysicsProperties>("/gazebo/set_physics_properties");
   physics_reconfigure_get_client_ = nh_->serviceClient<gazebo_msgs::GetPhysicsProperties>("/gazebo/get_physics_properties");
 
-  ROS_WARN_STREAM_NAMED("temp","here2");
+  // Wait until the rest of this plugin is loaded and the services are being offered 
   physics_reconfigure_set_client_.waitForExistence();
-  ROS_WARN_STREAM_NAMED("temp","here3");
   physics_reconfigure_get_client_.waitForExistence();
-  ROS_WARN_STREAM_NAMED("temp","here4");
 
-  // for dynamic reconfigure physics
-  // for dynamic_reconfigure
-  dynamic_reconfigure::Server<gazebo::PhysicsConfig> physics_reconfigure_srv;
-  dynamic_reconfigure::Server<gazebo::PhysicsConfig>::CallbackType physics_reconfigure_f;
-  ROS_WARN_STREAM_NAMED("temp","here5");
-  physics_reconfigure_f = boost::bind(&GazeboRosApiPlugin::PhysicsReconfigureCallback, this, _1, _2);
-  physics_reconfigure_srv.setCallback(physics_reconfigure_f);
+  physics_reconfigure_srv_ = new dynamic_reconfigure::Server<gazebo::PhysicsConfig>();
 
-  ROS_INFO("Starting to spin physics dynamic reconfigure node...");
+  physics_reconfigure_callback_ = boost::bind(&GazeboRosApiPlugin::PhysicsReconfigureCallback, this, _1, _2);
+  physics_reconfigure_srv_->setCallback(physics_reconfigure_callback_);
 
-  ros::WallRate rate(10);
-  while (nh_->ok())
-  {
-    //ROS_WARN_STREAM_NAMED("temp","IN WHILE LOOP");
-    //ros::spinOnce();
-    //ROS_WARN_STREAM_NAMED("temp","Spin onced");
-    rate.sleep();
-    //usleep(1/10*1000*1000);
-    //ROS_WARN_STREAM_NAMED("temp","Awake");
-  }
-
-  //  ros::spin();
-  std::cout << "DONE Phyics Reconfigure Node";
+  ROS_INFO("Physics dynamic reconfigure ready.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

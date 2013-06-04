@@ -242,8 +242,6 @@ public:
   /// \brief
   bool applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &req,gazebo_msgs::ApplyBodyWrench::Response &res);
 
-  void spin();
-
 private:
   // helper function for applyBodyWrench
   void transformWrench(gazebo::math::Vector3 &target_force, gazebo::math::Vector3 &target_torque,
@@ -302,14 +300,18 @@ private:
   std::string xmlPrefix_;
   std::string xmlSuffix_;
 
+  // ROS comm
+  ros::AsyncSpinner* async_ros_spin_;
+
   // physics dynamic reconfigure
-  boost::thread* ros_spin_thread_;
   boost::thread* physics_reconfigure_thread_;
   bool physics_reconfigure_initialized_;
   ros::ServiceClient physics_reconfigure_set_client_;
   ros::ServiceClient physics_reconfigure_get_client_;
+  dynamic_reconfigure::Server<gazebo::PhysicsConfig>* physics_reconfigure_srv_;
+  dynamic_reconfigure::Server<gazebo::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
   void PhysicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
-  void PhysicsReconfigureNode();
+  void PhysicsReconfigureThread();
 
   void OnResponse(ConstResponsePtr &_response);
 
