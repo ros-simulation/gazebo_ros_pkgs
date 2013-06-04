@@ -122,128 +122,116 @@
 namespace gazebo
 {
 
+/// \brief A plugin loaded within the gzserver on startup.
 class GazeboRosApiPlugin : public SystemPlugin
 {
 public:
+  /// \brief Constructor
   GazeboRosApiPlugin();
+
+  /// \brief Desctructor
   ~GazeboRosApiPlugin();
 
+  /// \brief Gazebo-inherited load function
+  /// 
+  /// Called before Gazebo is loaded. Must not block. 
+  /// Capitalized per Gazebo cpp style guidelines
+  /// \param _argc Number of command line arguments.
+  /// \param _argv Array of command line arguments.
   void Load(int argc, char** argv);
 
   /// \brief ros queue thread for this node
   void gazeboQueueThread();
 
   /// \brief advertise services
-  void AdvertiseServices();
+  void advertiseServices();
 
+  /// \brief
   void onLinkStatesConnect();
   void onModelStatesConnect();
   void onLinkStatesDisconnect();
   void onModelStatesDisconnect();
 
+  /// \brief
   bool spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
   bool spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief delete model given name
   bool deleteModel(gazebo_msgs::DeleteModel::Request &req,gazebo_msgs::DeleteModel::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool getModelState(gazebo_msgs::GetModelState::Request &req,gazebo_msgs::GetModelState::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool getModelProperties(gazebo_msgs::GetModelProperties::Request &req,gazebo_msgs::GetModelProperties::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool getWorldProperties(gazebo_msgs::GetWorldProperties::Request &req,gazebo_msgs::GetWorldProperties::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool getJointProperties(gazebo_msgs::GetJointProperties::Request &req,gazebo_msgs::GetJointProperties::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool getLinkProperties(gazebo_msgs::GetLinkProperties::Request &req,gazebo_msgs::GetLinkProperties::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool getLinkState(gazebo_msgs::GetLinkState::Request &req,gazebo_msgs::GetLinkState::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool setLinkProperties(gazebo_msgs::SetLinkProperties::Request &req,gazebo_msgs::SetLinkProperties::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool setPhysicsProperties(gazebo_msgs::SetPhysicsProperties::Request &req,gazebo_msgs::SetPhysicsProperties::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,gazebo_msgs::GetPhysicsProperties::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool setJointProperties(gazebo_msgs::SetJointProperties::Request &req,gazebo_msgs::SetJointProperties::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool setModelState(gazebo_msgs::SetModelState::Request &req,gazebo_msgs::SetModelState::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void updateModelState(const gazebo_msgs::ModelState::ConstPtr& model_state);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool applyJointEffort(gazebo_msgs::ApplyJointEffort::Request &req,gazebo_msgs::ApplyJointEffort::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool resetSimulation(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool resetWorld(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool pausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool unpausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool clearJointForces(gazebo_msgs::JointRequest::Request &req,gazebo_msgs::JointRequest::Response &res);
   bool clearJointForces(std::string joint_name);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool clearBodyWrenches(gazebo_msgs::BodyRequest::Request &req,gazebo_msgs::BodyRequest::Response &res);
   bool clearBodyWrenches(std::string body_name);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool setModelConfiguration(gazebo_msgs::SetModelConfiguration::Request &req,gazebo_msgs::SetModelConfiguration::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool setLinkState(gazebo_msgs::SetLinkState::Request &req,gazebo_msgs::SetLinkState::Response &res);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   void updateLinkState(const gazebo_msgs::LinkState::ConstPtr& link_state);
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// \brief
   bool applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &req,gazebo_msgs::ApplyBodyWrench::Response &res);
 
 private:
-  // helper function for applyBodyWrench
+  /// \brief helper function for applyBodyWrench
   void transformWrench(gazebo::math::Vector3 &target_force, gazebo::math::Vector3 &target_torque,
                        gazebo::math::Vector3 reference_force, gazebo::math::Vector3 reference_torque,
                        gazebo::math::Pose target_to_reference );
@@ -296,10 +284,6 @@ private:
   int                pub_link_states_connection_count_;
   int                pub_model_states_connection_count_;
 
-  // for internal gazebo xml use
-  std::string xmlPrefix_;
-  std::string xmlSuffix_;
-
   // ROS comm
   ros::AsyncSpinner* async_ros_spin_;
 
@@ -310,10 +294,10 @@ private:
   ros::ServiceClient physics_reconfigure_get_client_;
   dynamic_reconfigure::Server<gazebo::PhysicsConfig>* physics_reconfigure_srv_;
   dynamic_reconfigure::Server<gazebo::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
-  void PhysicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
-  void PhysicsReconfigureThread();
+  void physicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
+  void physicsReconfigureThread();
 
-  void OnResponse(ConstResponsePtr &_response);
+  void onResponse(ConstResponsePtr &response);
 
   ros::Publisher     pub_clock_;
 
@@ -321,10 +305,10 @@ private:
 private: boost::mutex lock_;
 
   /// \brief utilites for checking incoming string URDF/XML/Param
-  bool IsURDF(std::string model_xml);
-  bool IsGazeboModelXML(std::string model_xml);
-  bool IsSDF(std::string model_xml);
-  void LoadGazeboRosApiPlugin(std::string _worldName);
+  bool isURDF(std::string model_xml);
+  bool isGazeboModelXML(std::string model_xml);
+  bool isSDF(std::string model_xml);
+  void loadGazeboRosApiPlugin(std::string world_name);
   bool world_created_;
 
   class WrenchBodyJob
