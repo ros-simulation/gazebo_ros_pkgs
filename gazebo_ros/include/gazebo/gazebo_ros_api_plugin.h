@@ -23,7 +23,7 @@
  */
 
 /* Desc: External interfaces for Gazebo
- * Author: John Hsu adapted original gazebo main.cc by Nate Koenig
+ * Author: John Hsu adapted original gazebo main.cc by Nate Koenig, Dave Coleman
  * Date: 25 Apr 2010
  * SVN: $Id: main.cc 8598 2010-03-22 21:59:24Z hsujohnhsu $
  */
@@ -52,7 +52,6 @@
 #include <gazebo/common/SystemPaths.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/transport/Node.hh>
-//#include "msgs/MessageTypes.hh" // implicitly included from CommonTypes.hh
 
 // ros
 #include <ros/ros.h>
@@ -104,8 +103,6 @@
 
 // For model pose transform to set custom joint angles
 #include <ros/ros.h>
-// #include "LinearMath/btTransform.h"
-// #include "LinearMath/btVector3.h"
 #include <gazebo_msgs/SetModelConfiguration.h>
 #include <boost/shared_ptr.hpp>
 
@@ -116,8 +113,6 @@
 #include "gazebo_msgs/GetPhysicsProperties.h"
 
 #include <boost/algorithm/string.hpp>
-
-//#include <tf/transform_broadcaster.h>
 
 namespace gazebo
 {
@@ -243,10 +238,82 @@ public:
   bool applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &req,gazebo_msgs::ApplyBodyWrench::Response &res);
 
 private:
-  // helper function for applyBodyWrench
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void wrenchBodySchedulerSlot();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void forceJointSchedulerSlot();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
+  void publishSimTime();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void publishLinkStates();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void publishModelStates();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void stripXmlDeclaration(std::string &model_xml);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void updateSDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void updateSDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  void walkChildAddRobotNamespace(TiXmlNode* robot_xml);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief
+  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, gazebo_msgs::SpawnModel::Response &res);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // \brief helper function for applyBodyWrench
   void transformWrench(gazebo::math::Vector3 &target_force, gazebo::math::Vector3 &target_torque,
                        gazebo::math::Vector3 reference_force, gazebo::math::Vector3 reference_torque,
                        gazebo::math::Pose target_to_reference );
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief Used for the dynamnic reconfigure callback function template
+  void PhysicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief waits for the rest of Gazebo to be ready before initializing the dynamic reconfigure services
+  void PhysicsReconfigureThread();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief Unusd
+  void OnResponse(ConstResponsePtr &_response);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief utilites for checking incoming string URDF/SDF/Param
+  bool IsURDF(std::string model_xml);
+  bool IsSDF(std::string model_xml);
+  void LoadGazeboRosApiPlugin(std::string _worldName);
+
+  std::string robot_namespace_;
+
   gazebo::transport::NodePtr gazebonode_;
   gazebo::transport::SubscriberPtr stat_sub_;
   gazebo::transport::PublisherPtr factory_pub_;
@@ -310,21 +377,12 @@ private:
   ros::ServiceClient physics_reconfigure_get_client_;
   dynamic_reconfigure::Server<gazebo::PhysicsConfig>* physics_reconfigure_srv_;
   dynamic_reconfigure::Server<gazebo::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
-  void PhysicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
-  void PhysicsReconfigureThread();
-
-  void OnResponse(ConstResponsePtr &_response);
 
   ros::Publisher     pub_clock_;
 
   /// \brief A mutex to lock access to fields that are used in ROS message callbacks
-private: boost::mutex lock_;
+  boost::mutex lock_;
 
-  /// \brief utilites for checking incoming string URDF/XML/Param
-  bool IsURDF(std::string model_xml);
-  bool IsGazeboModelXML(std::string model_xml);
-  bool IsSDF(std::string model_xml);
-  void LoadGazeboRosApiPlugin(std::string _worldName);
   bool world_created_;
 
   class WrenchBodyJob
@@ -349,64 +407,6 @@ private: boost::mutex lock_;
   std::vector<GazeboRosApiPlugin::WrenchBodyJob*> wrench_body_jobs_;
   std::vector<GazeboRosApiPlugin::ForceJointJob*> force_joint_jobs_;
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void wrenchBodySchedulerSlot();
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void forceJointSchedulerSlot();
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
-  void publishSimTime();
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void publishLinkStates();
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void publishModelStates();
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void stripXmlDeclaration(std::string &model_xml);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void updateGazeboXmlModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void updateGazeboXmlName(TiXmlDocument &gazebo_model_xml, std::string model_name);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void updateGazeboSDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void updateGazeboSDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  void walkChildAddRobotNamespace(TiXmlNode* robot_xml);
-
-  std::string robot_namespace_;
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// \brief
-  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, gazebo_msgs::SpawnModel::Response &res);
 };
 }
 #endif
