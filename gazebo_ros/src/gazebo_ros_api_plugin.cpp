@@ -104,12 +104,12 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   physics_reconfigure_thread_ = new boost::thread(boost::bind(&GazeboRosApiPlugin::physicsReconfigureThread, this));
 
   // below needs the world to be created first
-  load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::LoadGazeboRosApiPlugin,this,_1));
+  load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::loadGazeboRosApiPlugin,this,_1));
 
   ROS_INFO("Finished loading Gazebo ROS API Plugin.");
 }
 
-void GazeboRosApiPlugin::LoadGazeboRosApiPlugin(std::string _worldName)
+void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
 {
   // make sure things are only called once
   gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
@@ -124,7 +124,7 @@ void GazeboRosApiPlugin::LoadGazeboRosApiPlugin(std::string _worldName)
   world_created_ = true;
   lock_.unlock();
 
-  world_ = gazebo::physics::get_world(_worldName);
+  world_ = gazebo::physics::get_world(world_name);
   if (!world_)
   {
     //ROS_ERROR("world name: [%s]",world->GetName().c_str());
@@ -134,7 +134,7 @@ void GazeboRosApiPlugin::LoadGazeboRosApiPlugin(std::string _worldName)
   }
 
   gazebonode_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
-  gazebonode_->Init(_worldName);
+  gazebonode_->Init(world_name);
   //stat_sub_ = gazebonode_->Subscribe("~/world_stats", &GazeboRosApiPlugin::publishSimTime, this); // TODO: does not work in server plugin?
   factory_pub_ = gazebonode_->Advertise<gazebo::msgs::Factory>("~/factory");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
@@ -154,7 +154,7 @@ void GazeboRosApiPlugin::LoadGazeboRosApiPlugin(std::string _worldName)
 
 }
 
-void GazeboRosApiPlugin::onResponse(ConstResponsePtr &_response)
+void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
 {
 
 }
