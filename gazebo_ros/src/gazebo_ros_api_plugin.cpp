@@ -20,7 +20,7 @@
  */
 
 /* Desc: External interfaces for Gazebo
- * Author: John Hsu adapted original gazebo main.cc by Nate Koenig, Dave Coleman
+ * Author: Nate Koenig, John Hsu, Dave Coleman
  * Date: 25 Apr 2010
  * SVN: $Id: main.cc 8598 2010-03-22 21:59:24Z hsujohnhsu $
  */
@@ -153,7 +153,6 @@ void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
 
 }
 
-/// \brief ros queue thread for this node
 void GazeboRosApiPlugin::gazeboQueueThread()
 {
   static const double timeout = 0.001;
@@ -163,7 +162,6 @@ void GazeboRosApiPlugin::gazeboQueueThread()
   }
 }
 
-/// \brief advertise services
 void GazeboRosApiPlugin::advertiseServices()
 {
   // publish clock for simulated ros time
@@ -603,8 +601,6 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
   return spawnAndConform(gazebo_model_xml, model_name, res);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief delete model given name
 bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,gazebo_msgs::DeleteModel::Response &res)
 {
   // clear forces, etc for the body in question
@@ -667,8 +663,6 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,gaze
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,gazebo_msgs::GetModelState::Response &res)
 {
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
@@ -741,8 +735,6 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Request &req,gazebo_msgs::GetModelProperties::Response &res)
 {
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
@@ -804,8 +796,6 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Request &req,gazebo_msgs::GetWorldProperties::Response &res)
 {
   res.sim_time = world_->GetSimTime().Double();
@@ -819,8 +809,6 @@ bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Req
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Request &req,gazebo_msgs::GetJointProperties::Response &res)
 {
   gazebo::physics::JointPtr joint;
@@ -856,8 +844,6 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::getLinkProperties(gazebo_msgs::GetLinkProperties::Request &req,gazebo_msgs::GetLinkProperties::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
@@ -897,8 +883,6 @@ bool GazeboRosApiPlugin::getLinkProperties(gazebo_msgs::GetLinkProperties::Reque
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,gazebo_msgs::GetLinkState::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
@@ -964,8 +948,6 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,ga
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::setLinkProperties(gazebo_msgs::SetLinkProperties::Request &req,gazebo_msgs::SetLinkProperties::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
@@ -991,8 +973,6 @@ bool GazeboRosApiPlugin::setLinkProperties(gazebo_msgs::SetLinkProperties::Reque
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties::Request &req,gazebo_msgs::SetPhysicsProperties::Response &res)
 {
   // pause simulation if requested
@@ -1025,8 +1005,6 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,gazebo_msgs::GetPhysicsProperties::Response &res)
 {
   // supported updates
@@ -1056,8 +1034,6 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Request &req,gazebo_msgs::SetJointProperties::Response &res)
 {
   /// @todo: current settings only allows for setting of 1DOF joints (e.g. HingeJoint and SliderJoint) correctly.
@@ -1103,8 +1079,6 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,gazebo_msgs::SetModelState::Response &res)
 {
   gazebo::math::Vector3 target_pos(req.model_state.pose.position.x,req.model_state.pose.position.y,req.model_state.pose.position.z);
@@ -1168,8 +1142,6 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::updateModelState(const gazebo_msgs::ModelState::ConstPtr& model_state)
 {
   gazebo_msgs::SetModelState::Response res;
@@ -1178,8 +1150,6 @@ void GazeboRosApiPlugin::updateModelState(const gazebo_msgs::ModelState::ConstPt
   /*bool success =*/ setModelState(req,res);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request &req,gazebo_msgs::ApplyJointEffort::Response &res)
 {
   gazebo::physics::JointPtr joint;
@@ -1210,40 +1180,30 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
   return false;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::resetSimulation(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
 {
   world_->Reset();
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::resetWorld(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
 {
   world_->ResetEntities(gazebo::physics::Base::MODEL);
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::pausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
 {
   world_->SetPaused(true);
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::unpausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
 {
   world_->SetPaused(false);
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::clearJointForces(gazebo_msgs::JointRequest::Request &req,gazebo_msgs::JointRequest::Response &res)
 {
   return clearJointForces(req.joint_name);
@@ -1271,8 +1231,6 @@ bool GazeboRosApiPlugin::clearJointForces(std::string joint_name)
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::clearBodyWrenches(gazebo_msgs::BodyRequest::Request &req,gazebo_msgs::BodyRequest::Response &res)
 {
   return clearBodyWrenches(req.body_name);
@@ -1301,8 +1259,6 @@ bool GazeboRosApiPlugin::clearBodyWrenches(std::string body_name)
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguration::Request &req,gazebo_msgs::SetModelConfiguration::Response &res)
 {
   std::string gazebo_model_name = req.model_name;
@@ -1346,8 +1302,6 @@ bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguratio
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,gazebo_msgs::SetLinkState::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.link_name));
@@ -1414,8 +1368,6 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,ga
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::updateLinkState(const gazebo_msgs::LinkState::ConstPtr& link_state)
 {
   gazebo_msgs::SetLinkState::Request req;
@@ -1424,10 +1376,6 @@ void GazeboRosApiPlugin::updateLinkState(const gazebo_msgs::LinkState::ConstPtr&
   /*bool success = */ setLinkState(req,res);
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief shift wrench from reference frame to target frame
-///        assume wrench is defined in
 void GazeboRosApiPlugin::transformWrench( gazebo::math::Vector3 &target_force, gazebo::math::Vector3 &target_torque,
                                           gazebo::math::Vector3 reference_force, gazebo::math::Vector3 reference_torque,
                                           gazebo::math::Pose target_to_reference )
@@ -1442,8 +1390,6 @@ void GazeboRosApiPlugin::transformWrench( gazebo::math::Vector3 &target_force, g
   target_torque = target_torque + target_to_reference.pos.Cross(target_force);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &req,gazebo_msgs::ApplyBodyWrench::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.body_name));
@@ -1555,7 +1501,6 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   return true;
 }
 
-/// \brief utilites for checking incoming string URDF/XML/Param
 bool GazeboRosApiPlugin::isURDF(std::string model_xml)
 {
   TiXmlDocument doc_in;
@@ -1578,8 +1523,6 @@ bool GazeboRosApiPlugin::isSDF(std::string model_xml)
     return false;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
 {
   // MDMutex locks in case model is getting deleted, don't have to do this if we delete jobs first
@@ -1614,8 +1557,6 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
   lock_.unlock();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::forceJointSchedulerSlot()
 {
   // MDMutex locks in case model is getting deleted, don't have to do this if we delete jobs first
@@ -1646,8 +1587,6 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
   lock_.unlock();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
 {
   ROS_ERROR("CLOCK2");
@@ -1666,9 +1605,6 @@ void GazeboRosApiPlugin::publishSimTime()
   pub_clock_.publish(ros_time_);
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::publishLinkStates()
 {
   gazebo_msgs::LinkStates link_states;
@@ -1714,8 +1650,6 @@ void GazeboRosApiPlugin::publishLinkStates()
   pub_link_states_.publish(link_states);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::publishModelStates()
 {
   gazebo_msgs::ModelStates model_states;
@@ -1824,8 +1758,6 @@ void GazeboRosApiPlugin::physicsReconfigureCallback(gazebo::PhysicsConfig &confi
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Wrap the get/set physics properties services into a dynamics reconfigure node
 void GazeboRosApiPlugin::physicsReconfigureThread()
 {
   physics_reconfigure_set_client_ = nh_->serviceClient<gazebo_msgs::SetPhysicsProperties>("/gazebo/set_physics_properties");
@@ -1843,8 +1775,6 @@ void GazeboRosApiPlugin::physicsReconfigureThread()
   ROS_INFO("Physics dynamic reconfigure ready.");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
 {
   // incoming robot model string is a string containing a Gazebo Model XML
@@ -1859,8 +1789,6 @@ void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
     model_xml.replace(pos1,pos2-pos1+2,std::string(""));
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::updateSDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
 {
   TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("gazebo");
@@ -1893,8 +1821,6 @@ void GazeboRosApiPlugin::updateSDFModelPose(TiXmlDocument &gazebo_model_xml, gaz
     ROS_ERROR("could not find <gazebo> element in sdf, so new name not applied");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::updateSDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
 {
   TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("gazebo");
@@ -1918,8 +1844,6 @@ void GazeboRosApiPlugin::updateSDFName(TiXmlDocument &gazebo_model_xml, std::str
     ROS_ERROR("could not find <gazebo> element in sdf, so new name not applied");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
 {
   TiXmlElement* model_tixml = (gazebo_model_xml.FirstChildElement("robot"));
@@ -1954,8 +1878,6 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ga
     ROS_ERROR("could not find <model> element in sdf, so name and initial position is not applied");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
 {
   TiXmlElement* model_tixml = gazebo_model_xml.FirstChildElement("robot");
@@ -1974,8 +1896,6 @@ void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::st
     ROS_ERROR("could not find <robot> element in URDF, name not replaced");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
 {
   TiXmlNode* child = 0;
@@ -2010,8 +1930,6 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief
 bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, gazebo_msgs::SpawnModel::Response &res)
 {
   // push to factory iface

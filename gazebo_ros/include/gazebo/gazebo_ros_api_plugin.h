@@ -23,7 +23,7 @@
  */
 
 /* Desc: External interfaces for Gazebo
- * Author: John Hsu adapted original gazebo main.cc by Nate Koenig, Dave Coleman
+ * Author: Nate Koenig, John Hsu, Dave Coleman
  * Date: 25 Apr 2010
  * SVN: $Id: main.cc 8598 2010-03-22 21:59:24Z hsujohnhsu $
  */
