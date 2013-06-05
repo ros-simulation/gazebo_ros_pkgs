@@ -127,6 +127,10 @@ namespace gazebo
 
     private: double point_cloud_cutoff_;
 
+    /// \brief A noise array used in both the depth image and point cloud.
+    private: float* noise_;
+    private: float gaussian_noise_sigma_;
+
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;
 
