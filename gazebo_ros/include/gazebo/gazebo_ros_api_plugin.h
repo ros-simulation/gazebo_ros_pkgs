@@ -278,22 +278,22 @@ private:
                        gazebo::math::Vector3 reference_force, gazebo::math::Vector3 reference_torque,
                        gazebo::math::Pose target_to_reference );
 
-  /// \brief Used for the dynamnic reconfigure callback function template
+  /// \brief Used for the dynamic reconfigure callback function template
   void physicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
 
   /// \brief waits for the rest of Gazebo to be ready before initializing the dynamic reconfigure services
   void physicsReconfigureThread();
 
-  /// \brief Unusd
+  /// \brief Unused
   void onResponse(ConstResponsePtr &response);
 
-  /// \brief utilites for checking incoming string URDF/SDF/Param
+  /// \brief utility for checking if string is in URDF format
   bool isURDF(std::string model_xml);
 
-  /// \brief utilites for checking incoming string URDF/SDF/Param
+  /// \brief utility for checking if string is in SDF format
   bool isSDF(std::string model_xml);
 
-  /// \brief utilites for checking incoming string URDF/SDF/Param
+  /// \brief Connect to Gazebo via its plugin interface, get a pointer to the world, start events
   void loadGazeboRosApiPlugin(std::string world_name);
 
   std::string robot_namespace_;

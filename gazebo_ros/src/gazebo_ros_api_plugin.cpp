@@ -59,7 +59,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   // Shutdown ROS queue
   gazebo_callback_queue_thread_->join();
 
-  // Physics Dynamix Reconfigure
+  // Physics Dynamic Reconfigure
   physics_reconfigure_thread_->join();
 
   // Delete Force and Wrench Jobs
