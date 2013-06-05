@@ -235,9 +235,9 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
 
   this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
 
-  // resolve tf prefix
+  // resolve tf prefix (the tf_prefix is in the robot namespace not the camera namespace)
   std::string prefix;
-  this->rosnode_->getParam(std::string("tf_prefix"), prefix);
+  this->rosnode_->getParam(std::string("/"+this->robot_namespace_+"/"+"tf_prefix"), prefix);
   this->frame_name_ = tf::resolve(prefix, this->frame_name_);
 
   if (!this->camera_name_.empty())
