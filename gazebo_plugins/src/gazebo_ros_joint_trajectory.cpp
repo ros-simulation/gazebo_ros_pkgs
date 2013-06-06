@@ -46,7 +46,7 @@ GazeboRosJointTrajectory::GazeboRosJointTrajectory()
 // Destructor
 GazeboRosJointTrajectory::~GazeboRosJointTrajectory()
 {
-  event::Events::DisconnectWorldUpdateStart(this->update_connection_);
+  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
   // Finalize the controller
   this->rosnode_->shutdown();
   this->queue_.clear();
@@ -132,7 +132,7 @@ void GazeboRosJointTrajectory::Load( physics::WorldPtr _world, sdf::ElementPtr _
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->update_connection_ = event::Events::ConnectWorldUpdateStart(
+  this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboRosJointTrajectory::UpdateStates, this));
 }
 
@@ -222,8 +222,7 @@ void GazeboRosJointTrajectory::FixLink(physics::LinkPtr link)
     this->joint_ = this->world_->GetPhysicsEngine()->CreateJoint("revolute",this->model_);
     this->joint_->SetModel(this->model_);
     math::Pose pose = link->GetWorldPose();
-    //math::Pose  pose(math::Vector3(0, 0, 0.2), math::Quaternion(1, 0, 0, 0));
-    this->joint_->Load(physics::LinkPtr(), link, pose.pos);
+    this->joint_->Load(physics::LinkPtr(), link, pose);
     this->joint_->SetAxis(0, math::Vector3(0, 0, 0));
     this->joint_->SetHighStop(0, 0);
     this->joint_->SetLowStop(0, 0);
