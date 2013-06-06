@@ -1,3 +1,4 @@
+
 /*
  *  Gazebo - Outdoor Multi-Robot Simulator
  *  Copyright (C) 2003
@@ -52,7 +53,7 @@ GazeboRosForce::GazeboRosForce()
 // Destructor
 GazeboRosForce::~GazeboRosForce()
 {
-  event::Events::DisconnectWorldUpdateStart(this->update_connection_);
+  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
 
   // Custom Callback Queue
   this->queue_.clear();
