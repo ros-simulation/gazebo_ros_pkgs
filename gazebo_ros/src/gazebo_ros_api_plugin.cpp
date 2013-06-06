@@ -604,6 +604,7 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
   {
     updateURDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
     updateURDFName(gazebo_model_xml, model_name);
+    this->walkChildAddRobotNamespace(&gazebo_model_xml);
   }
   else
   {
