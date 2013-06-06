@@ -157,7 +157,7 @@ void GazeboRosIMU::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->update_connection_ = event::Events::ConnectWorldUpdateStart(
+  this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboRosIMU::UpdateChild, this));
 }
 

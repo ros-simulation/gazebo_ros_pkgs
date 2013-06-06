@@ -132,7 +132,7 @@ void GazeboRosJointTrajectory::Load( physics::WorldPtr _world, sdf::ElementPtr _
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->update_connection_ = event::Events::ConnectWorldUpdateStart(
+  this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboRosJointTrajectory::UpdateStates, this));
 }
 
