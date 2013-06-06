@@ -60,6 +60,10 @@ GazeboRosDepthCamera::GazeboRosDepthCamera()
 // Destructor
 GazeboRosDepthCamera::~GazeboRosDepthCamera()
 {
+  if(this->noise_ != NULL){
+    delete[] this->noise_;
+    this->noise_ = NULL;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,6 +109,15 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
     this->point_cloud_cutoff_ = 0.4;
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->GetValueDouble();
+
+  // gaussian noise
+  if (!_sdf->GetElement("gaussianNoise")){
+    this->gaussian_noise_sigma_ = 0.0;
+    this->noise_ = NULL;
+  } else {
+    this->gaussian_noise_sigma_ = _sdf->GetElement("gaussianNoise")->GetValueDouble();
+    this->noise_ = new float[this->width * this->height];
+  }
 
   ros::AdvertiseOptions point_cloud_ao =
     ros::AdvertiseOptions::create<sensor_msgs::PointCloud2 >(
@@ -193,6 +206,18 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
     }
     else
     {
+      for(unsigned int i = 0; i < this->width * this->height && this->noise_ != NULL; ++i){
+        // using Box-Muller transform to generate two independent standard normally disbributed normal variables
+        // see wikipedia
+        float U = (float)rand()/(float)RAND_MAX; // normalized uniform random variable
+        float V = (float)rand()/(float)RAND_MAX; // normalized uniform random variable
+        this->noise_[i] = sqrt(-2.0 * ::log(U)) * cos( 2.0*M_PI * V);
+        //double Y = sqrt(-2.0 * ::log(U)) * sin( 2.0*M_PI * V); // the other indep. normal variable
+        // we'll just use X
+        // scale to our sigma
+        this->noise_[i] = this->gaussian_noise_sigma_ * this->noise_[i];
+      }
+
       if (this->point_cloud_connect_count_ > 0)
         this->FillPointdCloud(_image);
 
@@ -368,7 +393,7 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
       if (cols_arg>1) yAngle = atan2( (double)i - 0.5*(double)(cols_arg-1), fl);
       else            yAngle = 0.0;
 
-      double depth = toCopyFrom[index++];
+      double depth = this->noise_[index] + toCopyFrom[index++];
 
       // in optical frame
       // hardcoded rotation rpy(-M_PI/2, 0, -M_PI/2) is built-in
@@ -444,7 +469,7 @@ bool GazeboRosDepthCamera::FillDepthImageHelper(
   {
     for (uint32_t i = 0; i < cols_arg; i++)
     {
-      float depth = toCopyFrom[index++];
+      float depth = this->noise_[index] + toCopyFrom[index++];
 
       if (depth > this->point_cloud_cutoff_)
       {

@@ -46,7 +46,7 @@ GazeboRosF3D::GazeboRosF3D()
 // Destructor
 GazeboRosF3D::~GazeboRosF3D()
 {
-  event::Events::DisconnectWorldUpdateStart(this->update_connection_);
+  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
   // Custom Callback Queue
   this->queue_.clear();
   this->queue_.disable();
@@ -129,7 +129,7 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->update_connection_ = event::Events::ConnectWorldUpdateStart(
+  this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboRosF3D::UpdateChild, this));
 }
 
