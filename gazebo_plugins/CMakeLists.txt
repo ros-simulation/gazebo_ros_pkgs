@@ -86,7 +86,7 @@ message(status "\n\n${ld_flags}\n\n")
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES vision_reconfigure gazebo_ros_camera_utils gazebo_ros_camera gazebo_ros_depth_camera gazebo_ros_openni_kinect gazebo_ros_gpu_laser gazebo_ros_laser gazebo_ros_block_laser gazebo_ros_p3d gazebo_ros_imu gazebo_ros_f3d move_model_test pr2_pose_test gazebo_ros_bumper gazebo_ros_template gazebo_ros_projector gazebo_ros_force gazebo_ros_joint_trajectory 
+  LIBRARIES vision_reconfigure gazebo_ros_camera_utils gazebo_ros_camera gazebo_ros_depth_camera gazebo_ros_openni_kinect gazebo_ros_gpu_laser gazebo_ros_laser gazebo_ros_block_laser gazebo_ros_p3d gazebo_ros_imu gazebo_ros_f3d gazebo_ros_bumper gazebo_ros_template gazebo_ros_projector gazebo_ros_force gazebo_ros_joint_trajectory 
   CATKIN_DEPENDS message_generation gazebo_ros gazebo_msgs roscpp rospy nodelet angles std_srvs geometry_msgs sensor_msgs nav_msgs urdf tf dynamic_reconfigure driver_base rosgraph_msgs trajectory_msgs pcl_ros image_transport rosconsole
 #  DEPENDS gazebo
   )
@@ -160,14 +160,6 @@ set_target_properties(gazebo_ros_f3d PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_f3d PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_f3d ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
-add_library(move_model_test src/move_model_test.cpp)
-set_target_properties(move_model_test PROPERTIES LINK_FLAGS "${ld_flags}")
-set_target_properties(move_model_test PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-
-add_library(pr2_pose_test src/pr2_pose_test.cpp)
-set_target_properties(pr2_pose_test PROPERTIES LINK_FLAGS "${ld_flags}")
-set_target_properties(pr2_pose_test PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-
 add_library(gazebo_ros_bumper src/gazebo_ros_bumper.cpp)
 add_dependencies(gazebo_ros_bumper gazebo_msgs_gencpp)
 set_target_properties(gazebo_ros_bumper PROPERTIES LINK_FLAGS "${ld_flags}")
@@ -232,8 +224,6 @@ install(TARGETS
   gazebo_ros_p3d
   gazebo_ros_imu
   gazebo_ros_f3d
-  move_model_test
-  pr2_pose_test
   gazebo_ros_bumper
   gazebo_ros_template
   gazebo_ros_projector
