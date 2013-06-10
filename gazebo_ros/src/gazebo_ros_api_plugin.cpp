@@ -35,27 +35,34 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
 
 GazeboRosApiPlugin::~GazeboRosApiPlugin()
 {
+  ROS_DEBUG_STREAM_NAMED("api_plugin","GazeboRosApiPlugin Deconstructor start");
   // Disconnect slots
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
 
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
     gazebo::event::Events::DisconnectWorldUpdateBegin(pub_link_states_event_);
   if (pub_model_states_connection_count_ > 0) // disconnect if there are subscribers on exit
     gazebo::event::Events::DisconnectWorldUpdateBegin(pub_model_states_event_);
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Disconnected World Updates");
 
   // Stop the multi threaded ROS spinner
   async_ros_spin_->stop();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Async ROS Spin Stopped");
 
   // Shutdown the ROS node
   nh_->shutdown();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Node Handle Shutdown");
 
   // Shutdown ROS queue
   gazebo_callback_queue_thread_->join();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Callback Queue Joined");
 
   // Physics Dynamic Reconfigure
   physics_reconfigure_thread_->join();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Physics reconfigure joined");
 
   // Delete Force and Wrench Jobs
   lock_.lock();
@@ -64,13 +71,16 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
     delete (*iter);
     force_joint_jobs_.erase(iter);
   }
+  ROS_DEBUG_STREAM_NAMED("api_plugin","ForceJointJobs deleted");
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
   {
     delete (*iter);
     wrench_body_jobs_.erase(iter);
   }
   lock_.unlock();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
 
+  ROS_DEBUG_STREAM_NAMED("api_plugin","DONE");
 }
 
 void GazeboRosApiPlugin::Load(int argc, char** argv)
