@@ -15,27 +15,26 @@
  *
 */
 
-
-// *************************************************************
-// DEPRECATED
-// This class has been renamed to gazebo_ros_joint_pose_trajectory
-// *************************************************************
+/*
+ * Desc: 3D position interface for ground truth.
+ * Author: Sachin Chitta and John Hsu
+ * Date: 1 June 2008
+ */
 
 #include <string>
 #include <stdlib.h>
 #include <tf/tf.h>
 
-#include <gazebo_plugins/gazebo_ros_joint_trajectory.h>
+#include <gazebo_plugins/gazebo_ros_joint_pose_trajectory.h>
 
 namespace gazebo
 {
-GZ_REGISTER_MODEL_PLUGIN(GazeboRosJointTrajectory);
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosJointPoseTrajectory);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor
-ROS_DEPRECATED GazeboRosJointTrajectory::GazeboRosJointTrajectory()  // replaced with GazeboROSJointPoseTrajectory
+ROS_DEPRECATED GazeboRosJointPoseTrajectory::GazeboRosJointPoseTrajectory()  // replaced with GazeboROSJointPoseTrajectory
 {
-  ROS_WARN_NAMED("gazebo_ros_joint_trajectory","DEPRECATED: gazebo_ros_joint_trajectory has been renamed to gazebo_ros_joint_pose_trajectory");
 
   this->has_trajectory_ = false;
   this->trajectory_index = 0;
@@ -46,7 +45,7 @@ ROS_DEPRECATED GazeboRosJointTrajectory::GazeboRosJointTrajectory()  // replaced
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
-GazeboRosJointTrajectory::~GazeboRosJointTrajectory()
+GazeboRosJointPoseTrajectory::~GazeboRosJointPoseTrajectory()
 {
   event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
   // Finalize the controller
@@ -59,7 +58,7 @@ GazeboRosJointTrajectory::~GazeboRosJointTrajectory()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
-void GazeboRosJointTrajectory::Load(physics::ModelPtr _model,
+void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
   sdf::ElementPtr _sdf)
 {
   // save pointers
@@ -103,7 +102,7 @@ void GazeboRosJointTrajectory::Load(physics::ModelPtr _model,
   if (ros::isInitialized())
   {
     this->deferred_load_thread_ = boost::thread(
-      boost::bind(&GazeboRosJointTrajectory::LoadThread, this));
+      boost::bind(&GazeboRosJointPoseTrajectory::LoadThread, this));
   }
   else
   {
@@ -115,7 +114,7 @@ void GazeboRosJointTrajectory::Load(physics::ModelPtr _model,
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
-void GazeboRosJointTrajectory::LoadThread()
+void GazeboRosJointPoseTrajectory::LoadThread()
 {
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 
@@ -128,7 +127,7 @@ void GazeboRosJointTrajectory::LoadThread()
     ros::SubscribeOptions trajectory_so =
       ros::SubscribeOptions::create<trajectory_msgs::JointTrajectory>(
       this->topic_name_, 100, boost::bind(
-      &GazeboRosJointTrajectory::SetTrajectory, this, _1),
+      &GazeboRosJointPoseTrajectory::SetTrajectory, this, _1),
       ros::VoidPtr(), &this->queue_);
     this->sub_ = this->rosnode_->subscribe(trajectory_so);
   }
@@ -139,7 +138,7 @@ void GazeboRosJointTrajectory::LoadThread()
     ros::AdvertiseServiceOptions srv_aso =
       ros::AdvertiseServiceOptions::create<gazebo_msgs::SetJointTrajectory>(
       this->service_name_,
-      boost::bind(&GazeboRosJointTrajectory::SetTrajectory, this, _1, _2),
+      boost::bind(&GazeboRosJointPoseTrajectory::SetTrajectory, this, _1, _2),
       ros::VoidPtr(), &this->queue_);
     this->srv_ = this->rosnode_->advertiseService(srv_aso);
   }
@@ -149,18 +148,18 @@ void GazeboRosJointTrajectory::LoadThread()
 
   // start custom queue for joint trajectory plugin ros topics
   this->callback_queue_thread_ =
-    boost::thread(boost::bind(&GazeboRosJointTrajectory::QueueThread, this));
+    boost::thread(boost::bind(&GazeboRosJointPoseTrajectory::QueueThread, this));
 
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
-      boost::bind(&GazeboRosJointTrajectory::UpdateStates, this));
+      boost::bind(&GazeboRosJointPoseTrajectory::UpdateStates, this));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // set joint trajectory
-void GazeboRosJointTrajectory::SetTrajectory(
+void GazeboRosJointPoseTrajectory::SetTrajectory(
   const trajectory_msgs::JointTrajectory::ConstPtr& trajectory)
 {
   boost::mutex::scoped_lock lock(this->update_mutex);
@@ -229,7 +228,7 @@ void GazeboRosJointTrajectory::SetTrajectory(
 }
 
 #ifdef ENABLE_SERVICE
-bool GazeboRosJointTrajectory::SetTrajectory(
+bool GazeboRosJointPoseTrajectory::SetTrajectory(
   const gazebo_msgs::SetJointTrajectory::Request& req,
   const gazebo_msgs::SetJointTrajectory::Response& res)
 {
@@ -306,7 +305,7 @@ bool GazeboRosJointTrajectory::SetTrajectory(
 
 ////////////////////////////////////////////////////////////////////////////////
 // Play the trajectory, update states
-void GazeboRosJointTrajectory::UpdateStates()
+void GazeboRosJointPoseTrajectory::UpdateStates()
 {
   boost::mutex::scoped_lock lock(this->update_mutex);
   if (this->has_trajectory_)
@@ -387,7 +386,7 @@ void GazeboRosJointTrajectory::UpdateStates()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Put laser data to the interface
-void GazeboRosJointTrajectory::QueueThread()
+void GazeboRosJointPoseTrajectory::QueueThread()
 {
   static const double timeout = 0.01;
   while (this->rosnode_->ok())

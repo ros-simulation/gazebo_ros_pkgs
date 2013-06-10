@@ -1,28 +1,23 @@
 /*
- *  Gazebo - Outdoor Multi-Robot Simulator
- *  Copyright (C) 2003
- *     Nate Koenig & Andrew Howard
+ * Copyright 2012 Open Source Robotics Foundation
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- */
+*/
 
 /* Desc: External interfaces for Gazebo
  * Author: Nate Koenig, John Hsu, Dave Coleman
- * Date: 25 Apr 2010
- * SVN: $Id: main.cc 8598 2010-03-22 21:59:24Z hsujohnhsu $
+ * Date: Jun 10 2013
  */
 
 #include <gazebo/common/Events.hh>
@@ -40,27 +35,34 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
 
 GazeboRosApiPlugin::~GazeboRosApiPlugin()
 {
+  ROS_DEBUG_STREAM_NAMED("api_plugin","GazeboRosApiPlugin Deconstructor start");
   // Disconnect slots
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
 
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
     gazebo::event::Events::DisconnectWorldUpdateBegin(pub_link_states_event_);
   if (pub_model_states_connection_count_ > 0) // disconnect if there are subscribers on exit
     gazebo::event::Events::DisconnectWorldUpdateBegin(pub_model_states_event_);
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Disconnected World Updates");
 
   // Stop the multi threaded ROS spinner
   async_ros_spin_->stop();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Async ROS Spin Stopped");
 
   // Shutdown the ROS node
   nh_->shutdown();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Node Handle Shutdown");
 
   // Shutdown ROS queue
   gazebo_callback_queue_thread_->join();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Callback Queue Joined");
 
   // Physics Dynamic Reconfigure
   physics_reconfigure_thread_->join();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Physics reconfigure joined");
 
   // Delete Force and Wrench Jobs
   lock_.lock();
@@ -69,13 +71,16 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
     delete (*iter);
     force_joint_jobs_.erase(iter);
   }
+  ROS_DEBUG_STREAM_NAMED("api_plugin","ForceJointJobs deleted");
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
   {
     delete (*iter);
     wrench_body_jobs_.erase(iter);
   }
   lock_.unlock();
+  ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
 
+  ROS_DEBUG_STREAM_NAMED("api_plugin","DONE");
 }
 
 void GazeboRosApiPlugin::Load(int argc, char** argv)
