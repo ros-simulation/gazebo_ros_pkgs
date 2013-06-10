@@ -328,19 +328,29 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         // no noise if at max range
         geometry_msgs::Point32 point;
         point.x = (r+minRange) * cos(pAngle)*cos(yAngle);
-        point.y = (r+minRange) *             sin(yAngle);
+        point.y = -(r+minRange) * sin(yAngle);
         point.z = (r+minRange) * sin(pAngle)*cos(yAngle);
-        this->cloud_msg_.points.push_back(point);
-      }
-      else
-      {
+
+        //pAngle is rotated by yAngle:
+        point.x = (r+minRange) * cos(pAngle) * cos(yAngle);
+        point.y = -(r+minRange) * cos(pAngle) * sin(yAngle);
+        point.z = (r+minRange) * sin(pAngle);
+
+        this->cloud_msg_.points.push_back(point); 
+      } 
+      else 
+      { 
         geometry_msgs::Point32 point;
-        point.x      = (r+minRange) * cos(pAngle)*cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
-        point.y      = (r+minRange) *             sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
-        point.z      = (r+minRange) * sin(pAngle)*cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
-        this->cloud_msg_.points.push_back(point);
-      }
-      // only 1 channel
+        point.x = (r+minRange) * cos(pAngle)*cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
+        point.y = -(r+minRange) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
+        point.z = (r+minRange) * sin(pAngle)*cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
+        //pAngle is rotated by yAngle:
+        point.x = (r+minRange) * cos(pAngle) * cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.y = -(r+minRange) * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.z = (r+minRange) * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        this->cloud_msg_.points.push_back(point); 
+      } // only 1 channel 
+
       this->cloud_msg_.channels[0].values.push_back(intensity + this->GaussianKernel(0,this->gaussian_noise_)) ;
     }
   }
