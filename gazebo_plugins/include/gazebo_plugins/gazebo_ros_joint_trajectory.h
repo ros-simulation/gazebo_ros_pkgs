@@ -1,130 +1,133 @@
 /*
- *  Gazebo - Outdoor Multi-Robot Simulator
- *  Copyright (C) 2003  
- *     Nate Koenig & Andrew Howard
+ * Copyright 2012 Open Source Robotics Foundation
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- */
-/*
- * Desc: 3D position interface.
- * Author: Sachin Chitta and John Hsu
- * Date: 10 June 2008
- * SVN: $Id$
- */
+*/
+
+// *************************************************************
+// DEPRECATED
+// This class has been renamed to gazebo_ros_joint_pose_trajectory
+// *************************************************************
+
 #ifndef GAZEBO_ROS_JOINT_TRAJECTORY_PLUGIN_HH
 #define GAZEBO_ROS_JOINT_TRAJECTORY_PLUGIN_HH
+
+#include <string>
+#include <vector>
+
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <ros/advertise_options.h>
 #include <ros/subscribe_options.h>
+
 #include <trajectory_msgs/JointTrajectory.h>
 #include <geometry_msgs/Pose.h>
 
+#undef ENABLE_SERVICE
+#ifdef ENABLE_SERVICE
 #include <gazebo_msgs/SetJointTrajectory.h>
+#endif
 
-#include "physics/physics.hh"
-#include "transport/TransportTypes.hh"
-#include "common/Time.hh"
-#include "common/Plugin.hh"
-#include "common/Events.hh"
-
-#include <boost/thread.hpp>
-#include "boost/thread/mutex.hpp"
+#include <gazebo/physics/physics.hh>
+#include <gazebo/transport/TransportTypes.hh>
+#include <gazebo/common/Time.hh>
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/common/Events.hh>
 
 namespace gazebo
 {
+  class GazeboRosJointTrajectory : public ModelPlugin // replaced with GazeboROSJointPoseTrajectory
+  {
+    /// \brief Constructor
+    public: GazeboRosJointTrajectory();
 
-   class GazeboRosJointTrajectory : public WorldPlugin
-   {
-      /// \brief Constructor
-      public: GazeboRosJointTrajectory();
+    /// \brief Destructor
+    public: virtual ~GazeboRosJointTrajectory();
 
-      /// \brief Destructor
-      public: virtual ~GazeboRosJointTrajectory();
+    /// \brief Load the controller
+    public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
-      /// \brief Load the controller
-      public: void Load( physics::WorldPtr _world, sdf::ElementPtr _sdf );
+    /// \brief Update the controller
+    private: void SetTrajectory(
+      const trajectory_msgs::JointTrajectory::ConstPtr& trajectory);
+#ifdef ENABLE_SERVICE
+    private: bool SetTrajectory(
+      const gazebo_msgs::SetJointTrajectory::Request& req,
+      const gazebo_msgs::SetJointTrajectory::Response& res);
+#endif
+    private: void UpdateStates();
 
-      /// \brief Update the controller
-      private: void SetTrajectory(const trajectory_msgs::JointTrajectory::ConstPtr& trajectory);
-      private: bool SetTrajectory(const gazebo_msgs::SetJointTrajectory::Request& req,
-                                  const gazebo_msgs::SetJointTrajectory::Response& res);
-      private: void UpdateStates();
+    private: physics::WorldPtr world_;
+    private: physics::ModelPtr model_;
 
-      private: physics::WorldPtr world_;
-      private: physics::ModelPtr model_;
+    /// \brief pose should be set relative to this link (default to "world")
+    private: physics::LinkPtr reference_link_;
+    private: std::string reference_link_name_;
 
-      /// \brief pose should be set relative to this link (default to "world")
-      private: physics::LinkPtr reference_link_;
-      private: std::string reference_link_name_;
-      /// \brief frame transform name, should match link name
-      //private: std::string tf_frame_name_;
+    /// \brief pointer to ros node
+    private: ros::NodeHandle* rosnode_;
+    private: ros::Subscriber sub_;
+    private: ros::ServiceServer srv_;
+    private: bool has_trajectory_;
 
-      /// \brief pointer to ros node
-      private: ros::NodeHandle* rosnode_;
-      private: ros::Subscriber sub_;
-      private: ros::ServiceServer srv_;
-      private: bool has_trajectory_;
+    /// \brief ros message
+    private: trajectory_msgs::JointTrajectory trajectory_msg_;
+    private: bool set_model_pose_;
+    private: geometry_msgs::Pose model_pose_;
 
-      /// \brief ros message
-      private: trajectory_msgs::JointTrajectory trajectory_msg_;
-      private: bool set_model_pose_;
-      private: geometry_msgs::Pose model_pose_;
+    /// \brief topic name
+    private: std::string topic_name_;
+    private: std::string service_name_;
 
-      /// \brief topic name
-      private: std::string topic_name_;
-      private: std::string service_name_;
+    /// \brief A mutex to lock access to fields that are
+    /// used in message callbacks
+    private: boost::mutex update_mutex;
 
-      /// \brief A mutex to lock access to fields that are used in message callbacks
-      private: boost::mutex update_mutex;
+    /// \brief save last_time
+    private: common::Time last_time_;
 
-      /// \brief save last_time
-      private: common::Time last_time_;
+    // trajectory time control
+    private: common::Time trajectory_start;
+    private: unsigned int trajectory_index;
 
-      // trajectory time control
-      private: common::Time trajectory_start;
-      private: unsigned int trajectory_index;
+    // rate control
+    private: double update_rate_;
+    private: bool disable_physics_updates_;
+    private: bool physics_engine_enabled_;
 
-      // rate control
-      private: double update_rate_;
-      private: bool disable_physics_updates_;
-      private: bool physics_engine_enabled_;
+    /// \brief for setting ROS name space
+    private: std::string robot_namespace_;
 
-      /// \brief for setting ROS name space
-      private: std::string robot_namespace_;
+    private: ros::CallbackQueue queue_;
+    private: void QueueThread();
+    private: boost::thread callback_queue_thread_;
 
-      private: ros::CallbackQueue queue_;
-      private: void QueueThread();
-      private: boost::thread callback_queue_thread_;
-      
-      // Pointer to the update event connection
-      private: event::ConnectionPtr update_connection_;
+    private: std::vector<gazebo::physics::JointPtr> joints_;
+    private: std::vector<trajectory_msgs::JointTrajectoryPoint> points_;
 
-      private: trajectory_msgs::JointTrajectory joint_trajectory_;
+    // Pointer to the update event connection
+    private: event::ConnectionPtr update_connection_;
 
-      void FixLink(physics::LinkPtr link);
-      void UnfixLink();
-      private: physics::JointPtr joint_;
-   };
+    private: trajectory_msgs::JointTrajectory joint_trajectory_;
 
-/** \} */
-/// @}
-
-
+    // deferred load in case ros is blocking
+    private: sdf::ElementPtr sdf;
+    private: void LoadThread();
+    private: boost::thread deferred_load_thread_;
+  };
 }
-
 #endif

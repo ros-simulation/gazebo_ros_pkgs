@@ -18,11 +18,11 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
 /*
  * Desc: Controller for diffdrive robots in gazebo.
  * Author: Tony Pratkanis
  * Date: 17 April 2009
- * SVN info: $Id$
  */
 
 #include <gazebo/GazeboError.hh>
@@ -35,7 +35,9 @@
 
 #include <boost/bind.hpp>
 
-class DiffDrive {
+class DiffDrive 
+{
+
 public:
   libgazebo::PositionIface *posIface;
   ros::NodeHandle* rnh_;

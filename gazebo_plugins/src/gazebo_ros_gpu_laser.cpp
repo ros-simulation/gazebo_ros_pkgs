@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Open Source Robotics Foundation
+ * Copyright 2013 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,12 @@
  *
 */
 
+/*
+   Desc: GazeboRosGpuLaser plugin for simulating ray sensors in Gazebo
+   Author: Mihai Emanuel Dolha
+   Date: 29 March 2012
+ */
+
 #include <algorithm>
 #include <string>
 #include <assert.h>
@@ -28,7 +34,7 @@
 #include "gazebo/sensors/GpuRaySensor.hh"
 #include "gazebo/sensors/SensorTypes.hh"
 
-#include "tf/tf.h"
+#include <tf/tf.h>
 
 #include <gazebo_plugins/gazebo_ros_gpu_laser.h>
 

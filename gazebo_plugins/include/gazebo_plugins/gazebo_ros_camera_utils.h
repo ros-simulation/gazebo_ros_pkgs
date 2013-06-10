@@ -1,31 +1,27 @@
 /*
- *  Gazebo - Outdoor Multi-Robot Simulator
- *  Copyright (C) 2003  
- *     Nate Koenig & Andrew Howard
+ * Copyright 2012 Open Source Robotics Foundation
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- */
-/*
- * Desc: A dynamic controller plugin that publishes ROS image_raw camera_info topic for generic camera sensor.
- * Author: John Hsu
- * Date: 24 Sept 2008
- * SVN: $Id$
- */
+*/
+
 #ifndef GAZEBO_ROS_CAMERA_UTILS_HH
 #define GAZEBO_ROS_CAMERA_UTILS_HH
+
+#include <string>
+// boost stuff
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 // ros stuff
 #include <ros/ros.h>
@@ -37,31 +33,30 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <std_msgs/Float64.h>
-#include "image_transport/image_transport.h"
+#include <image_transport/image_transport.h>
 
-// gazebo stuff
-#include "sdf/interface/Param.hh"
-#include "physics/physics.hh"
-#include "transport/TransportTypes.hh"
-#include "msgs/MessageTypes.hh"
-#include "common/Time.hh"
-#include "sensors/SensorTypes.hh"
-#include "plugins/CameraPlugin.hh"
-
-
+// no dynamic reconfigure for now, since we don't want
+// to depend on gazebo_plugins directly
+#undef DYNAMIC_RECONFIGURE
+#ifdef DYNAMIC_RECONFIGURE
 // dynamic reconfigure stuff
 #include <gazebo_plugins/GazeboRosCameraConfig.h>
 #include <dynamic_reconfigure/server.h>
+#endif
 
-// boost stuff
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
-
+// gazebo stuff
+#include "gazebo/sdf/interface/Param.hh"
+#include "gazebo/physics/physics.hh"
+#include "gazebo/transport/TransportTypes.hh"
+#include "gazebo/msgs/MessageTypes.hh"
+#include "gazebo/common/Time.hh"
+#include "gazebo/sensors/SensorTypes.hh"
+#include "gazebo/plugins/CameraPlugin.hh"
 
 namespace gazebo
 {
-
-  class GazeboRosCameraUtils //: public CameraPlugin
+  class GazeboRosMultiCamera;
+  class GazeboRosCameraUtils
   {
     /// \brief Constructor
     /// \param parent The parent entity, must be a Model or a Sensor
@@ -70,26 +65,43 @@ namespace gazebo
     /// \brief Destructor
     public: ~GazeboRosCameraUtils();
 
-    /// \brief Load the plugin
-    /// \param take in SDF root element
-    public: virtual void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
+    /// \brief Load the plugin.
+    /// \param[in] _parent Take in SDF root element.
+    /// \param[in] _sdf SDF values.
+    public: void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
+
+    /// \brief Load the plugin.
+    /// \param[in] _parent Take in SDF root element.
+    /// \param[in] _sdf SDF values.
+    /// \param[in] _camera_name_suffix Suffix of the camera name.
+    /// \param[in] _hack_baseline Multiple camera baseline.
+    public: void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf,
+                      const std::string &_camera_name_suffix,
+                      double _hack_baseline);
 
     private: void Init();
 
     /// \brief Put camera data to the ROS topic
     protected: void PutCameraData(const unsigned char *_src);
-    protected: void PutCameraData(const unsigned char *_src, common::Time &last_update_time);
+    protected: void PutCameraData(const unsigned char *_src,
+      common::Time &last_update_time);
 
     /// \brief Keep track of number of connctions
     protected: int image_connect_count_;
     protected: void ImageConnect();
     protected: void ImageDisconnect();
 
+    /// \brief Keep track when we activate this camera through ros
+    /// subscription, was it already active?  resume state when
+    /// unsubscribed.
+    protected: bool was_active_;
+
     /// \brief: Camera modification functions
     private: void SetHFOV(const std_msgs::Float64::ConstPtr& hfov);
     private: void SetUpdateRate(const std_msgs::Float64::ConstPtr& update_rate);
 
-    /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
+    /// \brief A pointer to the ROS node.
+    ///  A node will be instantiated if it does not exist.
     protected: ros::NodeHandle* rosnode_;
     protected: image_transport::Publisher image_pub_;
     private: image_transport::ImageTransport* itnode_;
@@ -107,11 +119,10 @@ namespace gazebo
     protected: std::string image_topic_name_;
 
     /// \brief Publish CameraInfo to the ROS topic
-    protected: virtual void PublishCameraInfo(ros::Publisher &camera_info_publisher);
-    protected: virtual void PublishCameraInfo(common::Time &last_update_time);
-    protected: virtual void PublishCameraInfo();
+    protected: void PublishCameraInfo(ros::Publisher camera_info_publisher);
+    protected: void PublishCameraInfo(common::Time &last_update_time);
+    protected: void PublishCameraInfo();
     /// \brief Keep track of number of connctions for CameraInfo
-    protected: int info_connect_count_;
     private: void InfoConnect();
     private: void InfoDisconnect();
     /// \brief camera info
@@ -138,7 +149,8 @@ namespace gazebo
     protected: double distortion_t1_;
     protected: double distortion_t2_;
 
-    /// \brief A mutex to lock access to fields that are used in ROS message callbacks
+    /// \brief A mutex to lock access to fields
+    /// that are used in ROS message callbacks
     protected: boost::mutex lock_;
 
     /// \brief size of image buffer
@@ -148,11 +160,15 @@ namespace gazebo
     private: ros::Subscriber cameraHFOVSubscriber_;
     private: ros::Subscriber cameraUpdateRateSubscriber_;
 
-    // Time last published, refrain from publish unless new image has been rendered
+#ifdef DYNAMIC_RECONFIGURE
+    // Time last published, refrain from publish unless
+    //   new image has been rendered
     // Allow dynamic reconfiguration of camera params
-    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig> *dyn_srv_;
-
-    void configCallback(gazebo_plugins::GazeboRosCameraConfig &config, uint32_t level);
+    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
+      *dyn_srv_;
+    void configCallback(gazebo_plugins::GazeboRosCameraConfig &config,
+      uint32_t level);
+#endif
 
     protected: ros::CallbackQueue camera_queue_;
     protected: void CameraQueueThread();
@@ -173,12 +189,16 @@ namespace gazebo
 
     protected: common::Time sensor_update_time_;
 
-    // maintain for one more release for backwards compatibility with pr2_gazebo_plugins
-    protected: int imageConnectCount;
-    protected: int infoConnectCount;
+    // maintain for one more release for backwards compatibility
     protected: physics::WorldPtr world;
-  };
 
+    // deferred load in case ros is blocking
+    private: sdf::ElementPtr sdf;
+    private: void LoadThread();
+    private: boost::thread deferred_load_thread_;
+
+    friend class GazeboRosMultiCamera;
+  };
 }
 #endif
 
