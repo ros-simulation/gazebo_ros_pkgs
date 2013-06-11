@@ -54,8 +54,10 @@ GazeboRosLaser::GazeboRosLaser()
 // Destructor
 GazeboRosLaser::~GazeboRosLaser()
 {
+  ROS_DEBUG_STREAM_NAMED("gpu_laser","Shutting down GPU Laser");
   this->rosnode_->shutdown();
   delete this->rosnode_;
+  ROS_DEBUG_STREAM_NAMED("gpu_laser","Unloaded");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -144,6 +146,8 @@ void GazeboRosLaser::LoadThread()
 
   // sensor generation off by default
   this->parent_ray_sensor_->SetActive(false);
+
+  ROS_INFO_STREAM_NAMED("gpu_laser","LoadThread function completed");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
