@@ -25,14 +25,14 @@
 #include <string>
 #include <assert.h>
 
-#include "gazebo/physics/World.hh"
-#include "gazebo/physics/HingeJoint.hh"
-#include "gazebo/sensors/Sensor.hh"
-#include "gazebo/sdf/interface/SDF.hh"
-#include "gazebo/sdf/interface/Param.hh"
-#include "gazebo/common/Exception.hh"
-#include "gazebo/sensors/GpuRaySensor.hh"
-#include "gazebo/sensors/SensorTypes.hh"
+#include <gazebo/physics/World.hh>
+#include <gazebo/physics/HingeJoint.hh>
+#include <gazebo/sensors/Sensor.hh>
+#include <gazebo/sdf/interface/SDF.hh>
+#include <gazebo/sdf/interface/Param.hh>
+#include <gazebo/common/Exception.hh>
+#include <gazebo/sensors/GpuRaySensor.hh>
+#include <gazebo/sensors/SensorTypes.hh>
 
 #include <tf/tf.h>
 

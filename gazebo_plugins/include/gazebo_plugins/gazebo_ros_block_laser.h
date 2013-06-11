@@ -33,14 +33,14 @@
 #include <ros/callback_queue.h>
 #include <ros/advertise_options.h>
 
-#include "sdf/interface/Param.hh"
-#include "physics/physics.hh"
-#include "transport/TransportTypes.hh"
-#include "msgs/MessageTypes.hh"
-#include "common/Time.hh"
-#include "common/Plugin.hh"
-#include "sensors/SensorTypes.hh"
-#include "plugins/RayPlugin.hh"
+#include <gazebo/sdf/interface/Param.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/transport/TransportTypes.hh>
+#include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/common/Time.hh>
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/plugins/RayPlugin.hh>
 
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
