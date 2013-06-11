@@ -254,6 +254,33 @@ void GazeboRosApiPlugin::advertiseServices()
   get_link_state_service_ = nh_->advertiseService(get_link_state_aso);
 
   // Advertise more services on the custom queue
+  std::string get_physics_properties_service_name("get_physics_properties");
+  ros::AdvertiseServiceOptions get_physics_properties_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::GetPhysicsProperties>(
+                                                                            get_physics_properties_service_name,
+                                                                            boost::bind(&GazeboRosApiPlugin::getPhysicsProperties,this,_1,_2),
+                                                                            ros::VoidPtr(), &gazebo_queue_);
+  get_physics_properties_service_ = nh_->advertiseService(get_physics_properties_aso);
+
+  // publish complete link states in world frame
+  ros::AdvertiseOptions pub_link_states_ao =
+    ros::AdvertiseOptions::create<gazebo_msgs::LinkStates>(
+                                                           "link_states",10,
+                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesConnect,this),
+                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesDisconnect,this),
+                                                           ros::VoidPtr(), &gazebo_queue_);
+  pub_link_states_ = nh_->advertise(pub_link_states_ao);
+
+  // publish complete model states in world frame
+  ros::AdvertiseOptions pub_model_states_ao =
+    ros::AdvertiseOptions::create<gazebo_msgs::ModelStates>(
+                                                            "model_states",10,
+                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesConnect,this),
+                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesDisconnect,this),
+                                                            ros::VoidPtr(), &gazebo_queue_);
+  pub_model_states_ = nh_->advertise(pub_model_states_ao);
+
+  // Advertise more services on the custom queue
   std::string set_link_properties_service_name("set_link_properties");
   ros::AdvertiseServiceOptions set_link_properties_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetLinkProperties>(
@@ -272,24 +299,6 @@ void GazeboRosApiPlugin::advertiseServices()
   set_physics_properties_service_ = nh_->advertiseService(set_physics_properties_aso);
 
   // Advertise more services on the custom queue
-  std::string get_physics_properties_service_name("get_physics_properties");
-  ros::AdvertiseServiceOptions get_physics_properties_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::GetPhysicsProperties>(
-                                                                            get_physics_properties_service_name,
-                                                                            boost::bind(&GazeboRosApiPlugin::getPhysicsProperties,this,_1,_2),
-                                                                            ros::VoidPtr(), &gazebo_queue_);
-  get_physics_properties_service_ = nh_->advertiseService(get_physics_properties_aso);
-
-  // Advertise more services on the custom queue
-  std::string apply_body_wrench_service_name("apply_body_wrench");
-  ros::AdvertiseServiceOptions apply_body_wrench_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyBodyWrench>(
-                                                                       apply_body_wrench_service_name,
-                                                                       boost::bind(&GazeboRosApiPlugin::applyBodyWrench,this,_1,_2),
-                                                                       ros::VoidPtr(), &gazebo_queue_);
-  apply_body_wrench_service_ = nh_->advertiseService(apply_body_wrench_aso);
-
-  // Advertise more services on the custom queue
   std::string set_model_state_service_name("set_model_state");
   ros::AdvertiseServiceOptions set_model_state_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetModelState>(
@@ -297,24 +306,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                      boost::bind(&GazeboRosApiPlugin::setModelState,this,_1,_2),
                                                                      ros::VoidPtr(), &gazebo_queue_);
   set_model_state_service_ = nh_->advertiseService(set_model_state_aso);
-
-  // Advertise more services on the custom queue
-  std::string apply_joint_effort_service_name("apply_joint_effort");
-  ros::AdvertiseServiceOptions apply_joint_effort_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyJointEffort>(
-                                                                        apply_joint_effort_service_name,
-                                                                        boost::bind(&GazeboRosApiPlugin::applyJointEffort,this,_1,_2),
-                                                                        ros::VoidPtr(), &gazebo_queue_);
-  apply_joint_effort_service_ = nh_->advertiseService(apply_joint_effort_aso);
-
-  // Advertise more services on the custom queue
-  std::string set_joint_properties_service_name("set_joint_properties");
-  ros::AdvertiseServiceOptions set_joint_properties_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetJointProperties>(
-                                                                          set_joint_properties_service_name,
-                                                                          boost::bind(&GazeboRosApiPlugin::setJointProperties,this,_1,_2),
-                                                                          ros::VoidPtr(), &gazebo_queue_);
-  set_joint_properties_service_ = nh_->advertiseService(set_joint_properties_aso);
 
   // Advertise more services on the custom queue
   std::string set_model_configuration_service_name("set_model_configuration");
@@ -326,6 +317,15 @@ void GazeboRosApiPlugin::advertiseServices()
   set_model_configuration_service_ = nh_->advertiseService(set_model_configuration_aso);
 
   // Advertise more services on the custom queue
+  std::string set_joint_properties_service_name("set_joint_properties");
+  ros::AdvertiseServiceOptions set_joint_properties_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetJointProperties>(
+                                                                          set_joint_properties_service_name,
+                                                                          boost::bind(&GazeboRosApiPlugin::setJointProperties,this,_1,_2),
+                                                                          ros::VoidPtr(), &gazebo_queue_);
+  set_joint_properties_service_ = nh_->advertiseService(set_joint_properties_aso);
+
+  // Advertise more services on the custom queue
   std::string set_link_state_service_name("set_link_state");
   ros::AdvertiseServiceOptions set_link_state_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetLinkState>(
@@ -334,23 +334,22 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                     ros::VoidPtr(), &gazebo_queue_);
   set_link_state_service_ = nh_->advertiseService(set_link_state_aso);
 
-  // Advertise more services on the custom queue
-  std::string reset_simulation_service_name("reset_simulation");
-  ros::AdvertiseServiceOptions reset_simulation_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          reset_simulation_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::resetSimulation,this,_1,_2),
+  // Advertise topic on custom queue
+  // topic callback version for set_link_state
+  ros::SubscribeOptions link_state_so =
+    ros::SubscribeOptions::create<gazebo_msgs::LinkState>(
+                                                          "set_link_state",10,
+                                                          boost::bind( &GazeboRosApiPlugin::updateLinkState,this,_1),
                                                           ros::VoidPtr(), &gazebo_queue_);
-  reset_simulation_service_ = nh_->advertiseService(reset_simulation_aso);
+  set_link_state_topic_ = nh_->subscribe(link_state_so);
 
-  // Advertise more services on the custom queue
-  std::string reset_world_service_name("reset_world");
-  ros::AdvertiseServiceOptions reset_world_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          reset_world_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::resetWorld,this,_1,_2),
-                                                          ros::VoidPtr(), &gazebo_queue_);
-  reset_world_service_ = nh_->advertiseService(reset_world_aso);
+  // topic callback version for set_model_state
+  ros::SubscribeOptions model_state_so =
+    ros::SubscribeOptions::create<gazebo_msgs::ModelState>(
+                                                           "set_model_state",10,
+                                                           boost::bind( &GazeboRosApiPlugin::updateModelState,this,_1),
+                                                           ros::VoidPtr(), &gazebo_queue_);
+  set_model_state_topic_ = nh_->subscribe(model_state_so);
 
   // Advertise more services on the custom queue
   std::string pause_physics_service_name("pause_physics");
@@ -371,6 +370,24 @@ void GazeboRosApiPlugin::advertiseServices()
   unpause_physics_service_ = nh_->advertiseService(unpause_physics_aso);
 
   // Advertise more services on the custom queue
+  std::string apply_body_wrench_service_name("apply_body_wrench");
+  ros::AdvertiseServiceOptions apply_body_wrench_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyBodyWrench>(
+                                                                       apply_body_wrench_service_name,
+                                                                       boost::bind(&GazeboRosApiPlugin::applyBodyWrench,this,_1,_2),
+                                                                       ros::VoidPtr(), &gazebo_queue_);
+  apply_body_wrench_service_ = nh_->advertiseService(apply_body_wrench_aso);
+
+  // Advertise more services on the custom queue
+  std::string apply_joint_effort_service_name("apply_joint_effort");
+  ros::AdvertiseServiceOptions apply_joint_effort_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyJointEffort>(
+                                                                        apply_joint_effort_service_name,
+                                                                        boost::bind(&GazeboRosApiPlugin::applyJointEffort,this,_1,_2),
+                                                                        ros::VoidPtr(), &gazebo_queue_);
+  apply_joint_effort_service_ = nh_->advertiseService(apply_joint_effort_aso);
+
+  // Advertise more services on the custom queue
   std::string clear_joint_forces_service_name("clear_joint_forces");
   ros::AdvertiseServiceOptions clear_joint_forces_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::JointRequest>(
@@ -388,42 +405,26 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                    ros::VoidPtr(), &gazebo_queue_);
   clear_body_wrenches_service_ = nh_->advertiseService(clear_body_wrenches_aso);
 
-  // Advertise topic on custom queue
-  // topic callback version for set_link_state
-  ros::SubscribeOptions link_state_so =
-    ros::SubscribeOptions::create<gazebo_msgs::LinkState>(
-                                                          "set_link_state",10,
-                                                          boost::bind( &GazeboRosApiPlugin::updateLinkState,this,_1),
+  // Advertise more services on the custom queue
+  std::string reset_simulation_service_name("reset_simulation");
+  ros::AdvertiseServiceOptions reset_simulation_aso =
+    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
+                                                          reset_simulation_service_name,
+                                                          boost::bind(&GazeboRosApiPlugin::resetSimulation,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
-  set_link_state_topic_ = nh_->subscribe(link_state_so);
+  reset_simulation_service_ = nh_->advertiseService(reset_simulation_aso);
 
-  // topic callback version for set_model_state
-  ros::SubscribeOptions model_state_so =
-    ros::SubscribeOptions::create<gazebo_msgs::ModelState>(
-                                                           "set_model_state",10,
-                                                           boost::bind( &GazeboRosApiPlugin::updateModelState,this,_1),
-                                                           ros::VoidPtr(), &gazebo_queue_);
-  set_model_state_topic_ = nh_->subscribe(model_state_so);
+  // Advertise more services on the custom queue
+  std::string reset_world_service_name("reset_world");
+  ros::AdvertiseServiceOptions reset_world_aso =
+    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
+                                                          reset_world_service_name,
+                                                          boost::bind(&GazeboRosApiPlugin::resetWorld,this,_1,_2),
+                                                          ros::VoidPtr(), &gazebo_queue_);
+  reset_world_service_ = nh_->advertiseService(reset_world_aso);
 
-  // publish complete link states in world frame
-  ros::AdvertiseOptions pub_link_states_ao =
-    ros::AdvertiseOptions::create<gazebo_msgs::LinkStates>(
-                                                           "link_states",10,
-                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesConnect,this),
-                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesDisconnect,this),
-                                                           ros::VoidPtr(), &gazebo_queue_);
-  pub_link_states_ = nh_->advertise(pub_link_states_ao);
 
-  // publish complete model states in world frame
-  ros::AdvertiseOptions pub_model_states_ao =
-    ros::AdvertiseOptions::create<gazebo_msgs::ModelStates>(
-                                                            "model_states",10,
-                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesConnect,this),
-                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesDisconnect,this),
-                                                            ros::VoidPtr(), &gazebo_queue_);
-  pub_model_states_ = nh_->advertise(pub_model_states_ao);
-
-  // set param for use_sim_time if not set by user alread
+  // set param for use_sim_time if not set by user already
   nh_->setParam("/use_sim_time", true);
 
   // todo: contemplate setting environment variable ROBOT=sim here???
