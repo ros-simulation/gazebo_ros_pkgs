@@ -824,7 +824,7 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
     if (joint) break;
   }
 
-  if (joint)
+  if (!joint)
   {
     res.success = false;
     res.status_message = "GetJointProperties: joint not found";
@@ -853,7 +853,7 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
 bool GazeboRosApiPlugin::getLinkProperties(gazebo_msgs::GetLinkProperties::Request &req,gazebo_msgs::GetLinkProperties::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
-  if (body)
+  if (!body)
   {
     res.success = false;
     res.status_message = "GetLinkProperties: link not found, did you forget to scope the link by model name?";
@@ -894,7 +894,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,ga
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
 
-  if (body)
+  if (!body)
   {
     res.success = false;
     res.status_message = "GetLinkState: link not found, did you forget to scope the link by model name?";
@@ -957,7 +957,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,ga
 bool GazeboRosApiPlugin::setLinkProperties(gazebo_msgs::SetLinkProperties::Request &req,gazebo_msgs::SetLinkProperties::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
-  if (body)
+  if (!body)
   {
     res.success = false;
     res.status_message = "SetLinkProperties: link not found, did you forget to scope the link by model name?";
@@ -1050,7 +1050,7 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
     if (joint) break;
   }
 
-  if (joint)
+  if (!joint)
   {
     res.success = false;
     res.status_message = "SetJointProperties: joint not found";
