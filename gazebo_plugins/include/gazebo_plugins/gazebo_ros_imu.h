@@ -1,136 +1,124 @@
 /*
- *  Gazebo - Outdoor Multi-Robot Simulator
- *  Copyright (C) 2003  
- *     Nate Koenig & Andrew Howard
+ * Copyright 2012 Open Source Robotics Foundation
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- */
-/*
- * Desc: 3D position interface.
- * Author: Sachin Chitta and John Hsu
- * Date: 10 June 2008
- * SVN: $Id$
- */
+*/
 #ifndef GAZEBO_ROS_IMU_HH
 #define GAZEBO_ROS_IMU_HH
 
-#include <ros/callback_queue.h>
-#include <ros/advertise_options.h>
-
-#include "physics/physics.hh"
-#include "transport/TransportTypes.hh"
-#include "msgs/MessageTypes.hh"
-#include "common/Time.hh"
-#include "common/Plugin.hh"
-#include "common/Events.hh"
-
-#include <ros/ros.h>
+#include <string>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
+
+#include <ros/ros.h>
+#include <ros/callback_queue.h>
+#include <ros/advertise_options.h>
 #include <sensor_msgs/Imu.h>
 #include <std_srvs/Empty.h>
 
+#include "gazebo/physics/physics.hh"
+#include "gazebo/transport/transport.hh"
+#include "gazebo/common/common.hh"
+
+#include "PubQueue.h"
 
 namespace gazebo
 {
-   class GazeboRosIMU : public ModelPlugin
-   {
-      /// \brief Constructor
-      public: GazeboRosIMU();
+  class GazeboRosIMU : public ModelPlugin
+  {
+    /// \brief Constructor
+    public: GazeboRosIMU();
 
-      /// \brief Destructor
-      public: virtual ~GazeboRosIMU();
+    /// \brief Destructor
+    public: virtual ~GazeboRosIMU();
 
-      /// \brief Load the controller
-      /// \param node XML config node
-      public: void Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf );
+    /// \brief Load the controller
+    /// \param node XML config node
+    public: void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
-      /// \brief Update the controller
-      protected: virtual void UpdateChild();
+    /// \brief Update the controller
+    protected: virtual void UpdateChild();
 
-      /// \brief The parent World
-      private: physics::WorldPtr world_;
+    /// \brief The parent World
+    private: physics::WorldPtr world_;
 
-      /// \brief The link referred to by this plugin
-      private: physics::LinkPtr link;
+    /// \brief The link referred to by this plugin
+    private: physics::LinkPtr link;
 
-      /// \brief pointer to ros node
-      private: ros::NodeHandle* rosnode_;
-      private: ros::Publisher pub_;
-      private: ros::Publisher deprecated_pub_;
+    /// \brief pointer to ros node
+    private: ros::NodeHandle* rosnode_;
+    private: ros::Publisher pub_;
+    private: PubQueue<sensor_msgs::Imu>::Ptr pub_Queue;
 
-      /// \brief ros message
-      private: sensor_msgs::Imu imu_msg_;
+    /// \brief ros message
+    private: sensor_msgs::Imu imu_msg_;
 
-      /// \brief store link name
-      private: std::string link_name_;
+    /// \brief store link name
+    private: std::string link_name_;
 
-      /// \brief topic name
-      private: std::string topic_name_;
+    /// \brief topic name
+    private: std::string topic_name_;
 
-      /// \brief allow specifying constant xyz and rpy offsets
-      private: math::Pose offset_;
+    /// \brief allow specifying constant xyz and rpy offsets
+    private: math::Pose offset_;
 
-      /// \brief A mutex to lock access to fields that are used in message callbacks
-      private: boost::mutex lock_;
+    /// \brief A mutex to lock access to fields
+    /// that are used in message callbacks
+    private: boost::mutex lock_;
 
-      /// \brief save last_time
-      private: common::Time last_time_;
-      private: math::Vector3 last_vpos_;
-      private: math::Vector3 last_veul_;
-      private: math::Vector3 apos_;
-      private: math::Vector3 aeul_;
+    /// \brief save last_time
+    private: common::Time last_time_;
+    private: math::Vector3 last_vpos_;
+    private: math::Vector3 last_veul_;
+    private: math::Vector3 apos_;
+    private: math::Vector3 aeul_;
 
-      /// \brief: keep initial pose to offset orientation in imu message
-      private: math::Pose initial_pose_;
+    /// \brief: keep initial pose to offset orientation in imu message
+    private: math::Pose initial_pose_;
 
-      /// \brief Gaussian noise
-      private: double gaussian_noise_;
+    /// \brief Gaussian noise
+    private: double gaussian_noise_;
 
-      /// \brief Gaussian noise generator
-      private: double GaussianKernel(double mu,double sigma);
+    /// \brief Gaussian noise generator
+    private: double GaussianKernel(double mu, double sigma);
 
-      /// \brief for setting ROS name space
-      private: std::string robot_namespace_;
+    /// \brief for setting ROS name space
+    private: std::string robot_namespace_;
 
-      /// \brief Keep track of number of connctions
-      private: int imu_connect_count_;
-      private: void IMUConnect();
-      private: void IMUDisconnect();
+    /// \brief call back when using service
+    private: bool ServiceCallback(std_srvs::Empty::Request &req,
+                                  std_srvs::Empty::Response &res);
 
-      /// \brief call back when using service
-      private: bool ServiceCallback(std_srvs::Empty::Request &req,
-                                    std_srvs::Empty::Response &res);
-      private: ros::ServiceServer srv_;
-      private: std::string service_name_;
+    private: ros::ServiceServer srv_;
+    private: std::string service_name_;
 
-      private: ros::CallbackQueue imu_queue_;
-      private: void IMUQueueThread();
-      private: boost::thread callback_queue_thread_;
+    private: ros::CallbackQueue imu_queue_;
+    private: void IMUQueueThread();
+    private: boost::thread callback_queue_thread_;
 
-      // Pointer to the update event connection
-      private: event::ConnectionPtr update_connection_;
-   };
+    // Pointer to the update event connection
+    private: event::ConnectionPtr update_connection_;
 
-/** \} */
-/// @}
+    // deferred load in case ros is blocking
+    private: sdf::ElementPtr sdf;
+    private: void LoadThread();
+    private: boost::thread deferred_load_thread_;
+    private: unsigned int seed;
 
-
+    // ros publish multi queue, prevents publish() blocking
+    private: PubMultiQueue pmq;
+  };
 }
-
 #endif
-

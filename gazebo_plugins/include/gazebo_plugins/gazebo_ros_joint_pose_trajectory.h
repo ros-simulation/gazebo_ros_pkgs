@@ -50,13 +50,13 @@
 
 namespace gazebo
 {
-  class GazeboRosJointTrajectory : public ModelPlugin // replaced with GazeboROSJointPoseTrajectory
+  class GazeboRosJointPoseTrajectory : public ModelPlugin // replaced with GazeboROSJointPoseTrajectory
   {
     /// \brief Constructor
-    public: GazeboRosJointTrajectory();
+    public: GazeboRosJointPoseTrajectory();
 
     /// \brief Destructor
-    public: virtual ~GazeboRosJointTrajectory();
+    public: virtual ~GazeboRosJointPoseTrajectory();
 
     /// \brief Load the controller
     public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);

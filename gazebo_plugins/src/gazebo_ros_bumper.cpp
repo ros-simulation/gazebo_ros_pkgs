@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Open Source Robotics Foundation
+ * Copyright 2013 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,12 @@
  * limitations under the License.
  *
 */
+
+/*
+ * Desc: Bumper controller
+ * Author: Nate Koenig
+ * Date: 09 Sept. 2008
+ */
 
 #include <map>
 #include <string>
@@ -32,7 +38,7 @@
 
 #include <tf/tf.h>
 
-#include "gazebo_plugins/gazebo_ros_bumper.h"
+#include <gazebo_plugins/gazebo_ros_bumper.h>
 
 namespace gazebo
 {
