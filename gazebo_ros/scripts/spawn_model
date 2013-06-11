@@ -50,7 +50,7 @@ model_template = """<robot name="MODEL_NAME">
 
 def usage():
     print '''Commands:
-    -[urdf|gazebo|trimesh] - specify incoming xml is urdf or gazebo format
+    -[urdf|sdf|trimesh|gazebo] - specify incoming xml is urdf, sdf or trimesh format. gazebo arg is deprecated in ROS Hydro
     -[file|param] [<file_name>|<param_name>] - source of the model xml or the trimesh file
     -model <model_name> - name of the model to be spawned.
     -reference_frame <entity_name> - optinal: name of the model/body where initial pose is defined.
@@ -91,7 +91,7 @@ class SpawnModel():
         self.wait_for_model          = ""
         self.wait_for_model_exists   = False
         self.urdf_format             = False
-        self.gazebo_format           = False
+        self.sdf_format              = False
         self.joint_names             = []
         self.joint_positions         = []
 
@@ -104,17 +104,19 @@ class SpawnModel():
           if sys.argv[i] == '-unpause':
             self.unpause_physics = True
           if sys.argv[i] == '-urdf':
-            if self.gazebo_format == True:
-                print "Error: you cannot specify both urdf and gazebo format xml, must pick one"
+            if self.sdf_format == True:
+                print "Error: you cannot specify both urdf and sdf format xml, must pick one"
                 sys.exit(0)
             else:
               self.urdf_format = True;
-          if sys.argv[i] == '-gazebo':
+          if sys.argv[i] == '-sdf' or sys.argv[i] == '-gazebo':
             if self.urdf_format == True:
-                print "Error: you cannot specify both urdf and gazebo format xml, must pick one"
+                print "Error: you cannot specify both urdf and sdf format xml, must pick one"
                 sys.exit(0)
             else:
-              self.gazebo_format = True;
+                if sys.argv[i] == '-gazebo':
+                    print "Deprecated: the -gazebo tag is now -sdf"
+                self.sdf_format = True;
           if sys.argv[i] == '-J':
             if len(sys.argv) > i+2:
               self.joint_names.append(sys.argv[i+1])
@@ -173,8 +175,8 @@ class SpawnModel():
             if len(sys.argv) > i+1:
               self.initial_rpy[2] = float(sys.argv[i+1])
 
-        if not self.gazebo_format and not self.urdf_format:
-          print "Error: you must specify incoming format as either urdf or gazebo format xml"
+        if not self.sdf_format and not self.urdf_format:
+          print "Error: you must specify incoming format as either urdf or sdf format xml"
           sys.exit(0)
         if self.model_name == "":
           print "Error: you must specify robot name"
@@ -240,7 +242,7 @@ class SpawnModel():
         # spawn model
         if self.urdf_format:
           success = gazebo_interface.spawn_urdf_model_client(self.model_name, model_xml, self.robot_namespace, initial_pose, self.reference_frame, self.gazebo_namespace)
-        elif self.gazebo_format:
+        elif self.sdf_format:
           success = gazebo_interface.spawn_gazebo_model_client(self.model_name, model_xml, self.robot_namespace, initial_pose, self.reference_frame, self.gazebo_namespace)
         else:
           print "Error: should not be here in spawner helper script, there is a bug"
