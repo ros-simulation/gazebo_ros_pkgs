@@ -1,5 +1,6 @@
+
 /*
- * Copyright 2012 Open Source Robotics Foundation
+ * Copyright 2013 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +81,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   lock_.unlock();
   ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
 
-  ROS_DEBUG_STREAM_NAMED("api_plugin","DONE");
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Unloaded");
 }
 
 void GazeboRosApiPlugin::Load(int argc, char** argv)
@@ -172,14 +173,23 @@ void GazeboRosApiPlugin::advertiseServices()
   // publish clock for simulated ros time
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
 
-  // Advertise spawn services on the custom queue
+  // Advertise spawn services on the custom queue - DEPRECATED IN HYDRO
   std::string spawn_gazebo_model_service_name("spawn_gazebo_model");
   ros::AdvertiseServiceOptions spawn_gazebo_model_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
                                                                   spawn_gazebo_model_service_name,
                                                                   boost::bind(&GazeboRosApiPlugin::spawnGazeboModel,this,_1,_2),
                                                                   ros::VoidPtr(), &gazebo_queue_);
-  spawn_urdf_gazebo_service_ = nh_->advertiseService(spawn_gazebo_model_aso);
+  spawn_gazebo_model_service_ = nh_->advertiseService(spawn_gazebo_model_aso);
+
+  // Advertise spawn services on the custom queue
+  std::string spawn_sdf_model_service_name("spawn_sdf_model");
+  ros::AdvertiseServiceOptions spawn_sdf_model_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
+                                                                  spawn_sdf_model_service_name,
+                                                                  boost::bind(&GazeboRosApiPlugin::spawnSDFModel,this,_1,_2),
+                                                                  ros::VoidPtr(), &gazebo_queue_);
+  spawn_sdf_model_service_ = nh_->advertiseService(spawn_sdf_model_aso);
 
   // Advertise spawn services on the custom queue
   std::string spawn_urdf_model_service_name("spawn_urdf_model");
@@ -532,10 +542,17 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,ga
 
   req.model_xml = model_xml;
 
-  return spawnGazeboModel(req,res);
+  return spawnSDFModel(req,res);
 }
 
+// DEPRECATED IN HYDRO
 bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res)
+{
+  ROS_WARN_STREAM_NAMED("api_plugin","/gazebo/spawn_gazebo_model is deprecated, use /gazebo/spawn_sdf_model instead");
+  spawnSDFModel(req, res);
+}
+
+bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res)
 {
   // incoming robot name
   std::string model_name = req.model_name;
@@ -568,7 +585,7 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
   {
     res.success = false;
     res.status_message = "SpawnModel: reference reference_frame not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
 
   // incoming robot model string
@@ -577,7 +594,7 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
   // store resulting Gazebo Model XML to be sent to spawn queue
   // get incoming string containg either an URDF or a Gazebo Model XML
   // grab from parameter server if necessary
-  // convert to SDF if necessary
+  // convert to SDF ifp necessary
   stripXmlDeclaration(model_xml);
 
   // put string in TiXmlDocument for manipulation
@@ -600,7 +617,7 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
     ROS_ERROR("GazeboRosApiPlugin SpawnModel Failure: input xml format not recognized");
     res.success = false;
     res.status_message = std::string("GazeboRosApiPlugin SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.");
-    return false;
+    return true;
   }
 
   // do spawning check if spawn worked, return response
@@ -616,7 +633,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,gaze
     ROS_ERROR("DeleteModel: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "DeleteModel: model does not exist";
-    return false;
+    return true;
   }
 
   // delete wrench jobs on bodies
@@ -653,7 +670,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,gaze
     {
       res.success = false;
       res.status_message = std::string("DeleteModel: Model pushed to delete queue, but delete service timed out waiting for model to disappear from simulation");
-      return false;
+      return true;
     }
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
@@ -678,7 +695,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
     ROS_ERROR("GetModelState: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "GetModelState: model does not exist";
-    return false;
+    return true;
   }
   else
   {
@@ -715,7 +732,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
     {
       res.success = false;
       res.status_message = "GetModelState: reference relative_entity_name not found, did you forget to scope the body by model name?";
-      return false;
+      return true;
     }
 
     // fill in response
@@ -749,7 +766,7 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
     ROS_ERROR("GetModelProperties: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "GetModelProperties: model does not exist";
-    return false;
+    return true;
   }
   else
   {
@@ -828,7 +845,7 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
   {
     res.success = false;
     res.status_message = "GetJointProperties: joint not found";
-    return false;
+    return true;
   }
   else
   {
@@ -857,7 +874,7 @@ bool GazeboRosApiPlugin::getLinkProperties(gazebo_msgs::GetLinkProperties::Reque
   {
     res.success = false;
     res.status_message = "GetLinkProperties: link not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
   else
   {
@@ -898,7 +915,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,ga
   {
     res.success = false;
     res.status_message = "GetLinkState: link not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
 
   // get body pose
@@ -930,7 +947,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,ga
   {
     res.success = false;
     res.status_message = "GetLinkState: reference reference_frame not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
 
   res.link_state.link_name = req.link_name;
@@ -961,7 +978,7 @@ bool GazeboRosApiPlugin::setLinkProperties(gazebo_msgs::SetLinkProperties::Reque
   {
     res.success = false;
     res.status_message = "SetLinkProperties: link not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
   else
   {
@@ -987,9 +1004,7 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
 
   // supported updates
   gazebo::physics::PhysicsEnginePtr ode_pe = (world_->GetPhysicsEngine());
-  //ode_pe->SetStepTime(req.time_step); DEPRECATED
   ode_pe->SetMaxStepSize(req.time_step);
-  //ode_pe->SetUpdateRate(req.max_update_rate); DEPRECATED
   ode_pe->SetRealTimeUpdateRate(req.max_update_rate);
   ode_pe->SetGravity(gazebo::math::Vector3(req.gravity.x,req.gravity.y,req.gravity.z));
 
@@ -1014,10 +1029,8 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
 bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,gazebo_msgs::GetPhysicsProperties::Response &res)
 {
   // supported updates
-  //res.time_step = world_->GetPhysicsEngine()->GetStepTime(); DEPRECATED
   res.time_step = world_->GetPhysicsEngine()->GetMaxStepSize();
   res.pause = world_->IsPaused();
-  //res.max_update_rate = world_->GetPhysicsEngine()->GetUpdateRate(); DEPRECATED
   res.max_update_rate = world_->GetPhysicsEngine()->GetRealTimeUpdateRate();
   gazebo::math::Vector3 gravity = world_->GetPhysicsEngine()->GetGravity();
   res.gravity.x = gravity.x;
@@ -1054,7 +1067,7 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
   {
     res.success = false;
     res.status_message = "SetJointProperties: joint not found";
-    return false;
+    return true;
   }
   else
   {
@@ -1100,7 +1113,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     ROS_ERROR("Updating ModelState: model [%s] does not exist",req.model_state.model_name.c_str());
     res.success = false;
     res.status_message = "SetModelState: model does not exist";
-    return false;
+    return true;
   }
   else
   {
@@ -1127,7 +1140,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
                 req.model_state.model_name.c_str(),req.model_state.reference_frame.c_str());
       res.success = false;
       res.status_message = "SetModelState: specified reference frame entity does not exist";
-      return false;
+      return true;
     }
 
     //ROS_ERROR("target state: %f %f %f",target_pose.pos.x,target_pose.pos.y,target_pose.pos.z);
@@ -1183,7 +1196,7 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
 
   res.success = false;
   res.status_message = "ApplyJointEffort: joint not found";
-  return false;
+  return true;
 }
 
 bool GazeboRosApiPlugin::resetSimulation(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
@@ -1276,7 +1289,7 @@ bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguratio
     ROS_ERROR("SetModelConfiguration: model [%s] does not exist",gazebo_model_name.c_str());
     res.success = false;
     res.status_message = "SetModelConfiguration: model does not exist";
-    return false;
+    return true;
   }
 
   if (req.joint_names.size() == req.joint_positions.size())
@@ -1304,7 +1317,7 @@ bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguratio
   {
     res.success = false;
     res.status_message = "SetModelConfiguration: joint name and position list have different lengths";
-    return false;
+    return true;
   }
 }
 
@@ -1317,7 +1330,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,ga
     ROS_ERROR("Updating LinkState: link [%s] does not exist",req.link_state.link_name.c_str());
     res.success = false;
     res.status_message = "SetLinkState: link does not exist";
-    return false;
+    return true;
   }
 
   /// @todo: FIXME map is really wrong, unless using tf here somehow
@@ -1354,7 +1367,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,ga
     ROS_ERROR("Updating LinkState: reference_frame is not a valid link name");
     res.success = false;
     res.status_message = "SetLinkState: failed";
-    return false;
+    return true;
   }
 
   //std::cout << " debug : " << target_pose << std::endl;
@@ -1405,7 +1418,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
     ROS_ERROR("ApplyBodyWrench: body [%s] does not exist",req.body_name.c_str());
     res.success = false;
     res.status_message = "ApplyBodyWrench: body does not exist";
-    return false;
+    return true;
   }
 
   // target wrench
@@ -1483,7 +1496,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
     ROS_ERROR("ApplyBodyWrench: reference_frame is not a valid link name");
     res.success = false;
     res.status_message = "ApplyBodyWrench: reference_frame not found";
-    return false;
+    return true;
   }
 
   // apply wrench
@@ -1821,10 +1834,10 @@ void GazeboRosApiPlugin::updateSDFModelPose(TiXmlDocument &gazebo_model_xml, gaz
       origin_key->SetAttribute("pose",origin_stream.str());
     }
     else
-      ROS_ERROR("could not find <model> element in sdf, so name and initial position is not applied");
+      ROS_WARN("could not find <model> element in sdf, so name and initial position is not applied");
   }
   else
-    ROS_ERROR("could not find <gazebo> element in sdf, so new name not applied");
+    ROS_WARN("could not find <gazebo> element in sdf, so model pose not applied");
 }
 
 void GazeboRosApiPlugin::updateSDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
@@ -1844,10 +1857,10 @@ void GazeboRosApiPlugin::updateSDFName(TiXmlDocument &gazebo_model_xml, std::str
       model_tixml->SetAttribute("name",model_name);
     }
     else
-      ROS_ERROR("could not find <model> element in sdf, so name and initial position is not applied");
+      ROS_WARN("could not find <model> element in sdf, so name and initial position is not applied");
   }
   else
-    ROS_ERROR("could not find <gazebo> element in sdf, so new name not applied");
+    ROS_WARN("could not find <gazebo> element in sdf, so new name not applied");
 }
 
 void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
@@ -1881,7 +1894,7 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ga
     origin_key->SetAttribute("rpy",rpy_stream.str());
   }
   else
-    ROS_ERROR("could not find <model> element in sdf, so name and initial position is not applied");
+    ROS_WARN("could not find <model> element in sdf, so name and initial position is not applied");
 }
 
 void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
@@ -1899,7 +1912,7 @@ void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::st
     model_tixml->SetAttribute("name",model_name);
   }
   else
-    ROS_ERROR("could not find <robot> element in URDF, name not replaced");
+    ROS_WARN("could not find <robot> element in URDF, name not replaced");
 }
 
 void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
@@ -1963,7 +1976,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
     ROS_ERROR("SpawnModel: Failure - model name %s already exist.",model_name.c_str());
     res.success = false;
     res.status_message = "SpawnModel: Failure - model already exists.";
-    return false;
+    return true;
   }
 
   // Publish the factory message
@@ -1971,20 +1984,25 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   /// FIXME: should change publish to direct invocation World::LoadModel() and/or
   ///        change the poll for Model existence to common::Events based check.
 
-  /// \brief poll and wait, verify that the model is spawned within Hardcoded 60 seconds
-  ros::Duration model_spawn_timeout(60.0);
+  /// \brief poll and wait, verify that the model is spawned within Hardcoded 10 seconds
+  ros::Duration model_spawn_timeout(10.0);
   ros::Time timeout = ros::Time::now() + model_spawn_timeout;
-  while (true)
+
+  while (ros::ok())
   {
     if (ros::Time::now() > timeout)
     {
       res.success = false;
-      res.status_message = std::string("SpawnModel: Model pushed to spawn queue, but spawn service timed out waiting for model to appear in simulation");
-      return false;
+      res.status_message = std::string("SpawnModel: Model pushed to spawn queue, but spawn service")
+        + std::string(" timed out waiting for model to appear in simulation under the name ")
+        + model_name;
+
+      return true;
     }
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if (world_->GetModel(model_name)) break;
+      if (world_->GetModel(model_name)) 
+        break;
     }
     ROS_DEBUG_ONCE("Waiting for spawning model (%s)",model_name.c_str());
     usleep(2000);

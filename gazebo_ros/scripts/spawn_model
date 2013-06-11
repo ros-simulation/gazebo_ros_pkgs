@@ -1,11 +1,26 @@
 #!/usr/bin/env python
-# 
-#  helper script for spawning models in gazebo
-# 
-# Provides quick access to the services exposed by gazebo
+#
+# Copyright 2013 Open Source Robotics Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Desc: helper script for spawning models in gazebo
+# Author: John Hsu, Dave Coleman
+#
 
 import rospy, sys, os
 import string
+import warnings
 
 from gazebo import gazebo_interface
 
@@ -15,43 +30,18 @@ from std_srvs.srv import Empty
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Wrench
 import tf.transformations as tft
 
-world_joint_template = """<link name="world"/>
-  <joint name="JOINT_NAME" type="floating" >
-    <axis xyz="0 0 1" />
-    <parent link="world" />
-    <child link="LINK_NAME" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
-  </joint>"""
-model_template = """<robot name="MODEL_NAME">
-  <link name="LINK_NAME">
-    <inertial>
-      <mass value="MASS" />
-      <origin xyz="0 0 0" /> 
-      <inertia  ixx="IXX" ixy="0.0"  ixz="0.0"  iyy="IYY"  iyz="0.0"  izz="IZZ" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        VISUAL_GEOMETRY
-      </geometry>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0 " />
-      <geometry>
-        COLLISION_GEOMETRY
-      </geometry>
-    </collision>
-  </link>
-  <gazebo reference="LINK_NAME">
-    <material>MATERIAL</material>
-    <turnGravityOff>GRAVITY</turnGravityOff>
-  </gazebo>
-</robot>"""
+model_database_template = """<sdf version="1.4">
+  <world name="default">
+    <include>
+      <uri>model://MODEL_NAME</uri>
+    </include>
+  </world>
+</sdf>"""        
 
 def usage():
     print '''Commands:
     -[urdf|sdf|trimesh|gazebo] - specify incoming xml is urdf, sdf or trimesh format. gazebo arg is deprecated in ROS Hydro
-    -[file|param] [<file_name>|<param_name>] - source of the model xml or the trimesh file
+    -[file|param|database] [<file_name>|<param_name>|<model_name>] - source of the model xml or the trimesh file
     -model <model_name> - name of the model to be spawned.
     -reference_frame <entity_name> - optinal: name of the model/body where initial pose is defined.
                                      If left empty or specified as "world", gazebo world frame is used.
@@ -83,6 +73,7 @@ class SpawnModel():
         self.initial_q               = [0,0,0,1]
         self.file_name               = ""
         self.param_name              = ""
+        self.database_name           = ""
         self.model_name              = ""
         self.robot_namespace         = rospy.get_namespace()
         self.gazebo_namespace        = "/gazebo"
@@ -116,6 +107,7 @@ class SpawnModel():
             else:
                 if sys.argv[i] == '-gazebo':
                     print "Deprecated: the -gazebo tag is now -sdf"
+                    warnings.warn("Deprecated: the -gazebo tag is now -sdf", DeprecationWarning)
                 self.sdf_format = True;
           if sys.argv[i] == '-J':
             if len(sys.argv) > i+2:
@@ -126,18 +118,25 @@ class SpawnModel():
               sys.exit(0)
           if sys.argv[i] == '-param':
             if len(sys.argv) > i+1:
-              if self.file_name != "":
-                print "Error: you cannot specify file name if parameter name is given, must pick one source of model xml"
+              if self.file_name != "" or self.database_name != "":
+                print "Error: you cannot specify file name if parameter or database name is given, must pick one source of model xml"
                 sys.exit(0)
               else:
                 self.param_name = sys.argv[i+1]
           if sys.argv[i] == '-file':
             if len(sys.argv) > i+1:
-              if self.param_name != "":
-                print "Error: you cannot specify parameter if file name is given, must pick one source of model xml"
+              if self.param_name != "" or self.database_name != "":
+                print "Error: you cannot specify parameter if file or database name is given, must pick one source of model xml"
                 sys.exit(0)
               else:
                 self.file_name = sys.argv[i+1]
+          if sys.argv[i] == '-database':
+            if len(sys.argv) > i+1:
+              if self.param_name != "" or self.file_name != "":
+                print "Error: you cannot specify parameter if file or parameter name is given, must pick one source of model xml"
+                sys.exit(0)
+              else:
+                self.database_name = sys.argv[i+1]
           if sys.argv[i] == '-model':
             if len(sys.argv) > i+1:
               self.model_name = sys.argv[i+1]
@@ -188,6 +187,10 @@ class SpawnModel():
             self.wait_for_model_exists = True
 
 
+    # Generate a blank SDF file with an include for the model from the model database
+    def createDatabaseCode(self, database_name):
+        return model_database_template.replace("MODEL_NAME", database_name);
+    
     def callSpawnService(self):
 
         # wait for model to exist
@@ -219,11 +222,20 @@ class SpawnModel():
             print "Error: file is empty", self.file_name
             sys.exit(0)
 
+        # ROS Parameter
         elif self.param_name != "":
           rospy.loginfo( "Loading model xml from ros parameter")
           model_xml = rospy.get_param(self.param_name)
           if model_xml == "":
             print "Error: param does not exist or is empty"
+            sys.exit(0)
+
+        # Gazebo Model Database
+        elif self.database_name != "":
+          rospy.loginfo( "Loading model xml from Gazebo Model Database")
+          model_xml = self.createDatabaseCode(self.database_name)
+          if model_xml == "":
+            print "Error: an error occured generating the SDF file"
             sys.exit(0)
         else:
           print "Error: user specified param or filename is an empty string"
@@ -243,7 +255,7 @@ class SpawnModel():
         if self.urdf_format:
           success = gazebo_interface.spawn_urdf_model_client(self.model_name, model_xml, self.robot_namespace, initial_pose, self.reference_frame, self.gazebo_namespace)
         elif self.sdf_format:
-          success = gazebo_interface.spawn_gazebo_model_client(self.model_name, model_xml, self.robot_namespace, initial_pose, self.reference_frame, self.gazebo_namespace)
+          success = gazebo_interface.spawn_sdf_model_client(self.model_name, model_xml, self.robot_namespace, initial_pose, self.reference_frame, self.gazebo_namespace)
         else:
           print "Error: should not be here in spawner helper script, there is a bug"
           sys.exit(0)
