@@ -39,25 +39,25 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
-#include "sensor_msgs/fill_image.h"
+#include <sensor_msgs/fill_image.h>
 #include <std_msgs/Float64.h>
-#include "image_transport/image_transport.h"
+#include <image_transport/image_transport.h>
 
 // gazebo stuff
-#include "sdf/interface/Param.hh"
-#include "physics/physics.hh"
-#include "transport/TransportTypes.hh"
-#include "msgs/MessageTypes.hh"
-#include "common/Time.hh"
-#include "sensors/SensorTypes.hh"
-#include "plugins/DepthCameraPlugin.hh"
+#include <gazebo/sdf/interface/Param.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/transport/TransportTypes.hh>
+#include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/common/Time.hh>
+#include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/plugins/DepthCameraPlugin.hh>
 
 // dynamic reconfigure stuff
 #include <gazebo_plugins/GazeboRosCameraConfig.h>
 #include <dynamic_reconfigure/server.h>
 
 // boost stuff
-#include "boost/thread/mutex.hpp"
+#include <boost/thread/mutex.hpp>
 
 // camera stuff
 #include <gazebo_plugins/gazebo_ros_camera_utils.h>

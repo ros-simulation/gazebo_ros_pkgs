@@ -25,14 +25,14 @@
 #include <string>
 #include <assert.h>
 
-#include "gazebo/physics/World.hh"
-#include "gazebo/physics/HingeJoint.hh"
-#include "gazebo/sensors/Sensor.hh"
-#include "gazebo/sdf/interface/SDF.hh"
-#include "gazebo/sdf/interface/Param.hh"
-#include "gazebo/common/Exception.hh"
-#include "gazebo/sensors/GpuRaySensor.hh"
-#include "gazebo/sensors/SensorTypes.hh"
+#include <gazebo/physics/World.hh>
+#include <gazebo/physics/HingeJoint.hh>
+#include <gazebo/sensors/Sensor.hh>
+#include <gazebo/sdf/interface/SDF.hh>
+#include <gazebo/sdf/interface/Param.hh>
+#include <gazebo/common/Exception.hh>
+#include <gazebo/sensors/GpuRaySensor.hh>
+#include <gazebo/sensors/SensorTypes.hh>
 
 #include <tf/tf.h>
 
@@ -54,8 +54,10 @@ GazeboRosLaser::GazeboRosLaser()
 // Destructor
 GazeboRosLaser::~GazeboRosLaser()
 {
+  ROS_DEBUG_STREAM_NAMED("gpu_laser","Shutting down GPU Laser");
   this->rosnode_->shutdown();
   delete this->rosnode_;
+  ROS_DEBUG_STREAM_NAMED("gpu_laser","Unloaded");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -144,6 +146,8 @@ void GazeboRosLaser::LoadThread()
 
   // sensor generation off by default
   this->parent_ray_sensor_->SetActive(false);
+
+  ROS_INFO_STREAM_NAMED("gpu_laser","LoadThread function completed");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

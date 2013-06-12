@@ -1,5 +1,6 @@
+
 /*
- * Copyright 2012 Open Source Robotics Foundation
+ * Copyright 2013 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +81,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   lock_.unlock();
   ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
 
-  ROS_DEBUG_STREAM_NAMED("api_plugin","DONE");
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Unloaded");
 }
 
 void GazeboRosApiPlugin::Load(int argc, char** argv)
@@ -172,14 +173,23 @@ void GazeboRosApiPlugin::advertiseServices()
   // publish clock for simulated ros time
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
 
-  // Advertise spawn services on the custom queue
+  // Advertise spawn services on the custom queue - DEPRECATED IN HYDRO
   std::string spawn_gazebo_model_service_name("spawn_gazebo_model");
   ros::AdvertiseServiceOptions spawn_gazebo_model_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
                                                                   spawn_gazebo_model_service_name,
                                                                   boost::bind(&GazeboRosApiPlugin::spawnGazeboModel,this,_1,_2),
                                                                   ros::VoidPtr(), &gazebo_queue_);
-  spawn_urdf_gazebo_service_ = nh_->advertiseService(spawn_gazebo_model_aso);
+  spawn_gazebo_model_service_ = nh_->advertiseService(spawn_gazebo_model_aso);
+
+  // Advertise spawn services on the custom queue
+  std::string spawn_sdf_model_service_name("spawn_sdf_model");
+  ros::AdvertiseServiceOptions spawn_sdf_model_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
+                                                                  spawn_sdf_model_service_name,
+                                                                  boost::bind(&GazeboRosApiPlugin::spawnSDFModel,this,_1,_2),
+                                                                  ros::VoidPtr(), &gazebo_queue_);
+  spawn_sdf_model_service_ = nh_->advertiseService(spawn_sdf_model_aso);
 
   // Advertise spawn services on the custom queue
   std::string spawn_urdf_model_service_name("spawn_urdf_model");
@@ -254,6 +264,33 @@ void GazeboRosApiPlugin::advertiseServices()
   get_link_state_service_ = nh_->advertiseService(get_link_state_aso);
 
   // Advertise more services on the custom queue
+  std::string get_physics_properties_service_name("get_physics_properties");
+  ros::AdvertiseServiceOptions get_physics_properties_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::GetPhysicsProperties>(
+                                                                            get_physics_properties_service_name,
+                                                                            boost::bind(&GazeboRosApiPlugin::getPhysicsProperties,this,_1,_2),
+                                                                            ros::VoidPtr(), &gazebo_queue_);
+  get_physics_properties_service_ = nh_->advertiseService(get_physics_properties_aso);
+
+  // publish complete link states in world frame
+  ros::AdvertiseOptions pub_link_states_ao =
+    ros::AdvertiseOptions::create<gazebo_msgs::LinkStates>(
+                                                           "link_states",10,
+                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesConnect,this),
+                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesDisconnect,this),
+                                                           ros::VoidPtr(), &gazebo_queue_);
+  pub_link_states_ = nh_->advertise(pub_link_states_ao);
+
+  // publish complete model states in world frame
+  ros::AdvertiseOptions pub_model_states_ao =
+    ros::AdvertiseOptions::create<gazebo_msgs::ModelStates>(
+                                                            "model_states",10,
+                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesConnect,this),
+                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesDisconnect,this),
+                                                            ros::VoidPtr(), &gazebo_queue_);
+  pub_model_states_ = nh_->advertise(pub_model_states_ao);
+
+  // Advertise more services on the custom queue
   std::string set_link_properties_service_name("set_link_properties");
   ros::AdvertiseServiceOptions set_link_properties_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetLinkProperties>(
@@ -272,24 +309,6 @@ void GazeboRosApiPlugin::advertiseServices()
   set_physics_properties_service_ = nh_->advertiseService(set_physics_properties_aso);
 
   // Advertise more services on the custom queue
-  std::string get_physics_properties_service_name("get_physics_properties");
-  ros::AdvertiseServiceOptions get_physics_properties_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::GetPhysicsProperties>(
-                                                                            get_physics_properties_service_name,
-                                                                            boost::bind(&GazeboRosApiPlugin::getPhysicsProperties,this,_1,_2),
-                                                                            ros::VoidPtr(), &gazebo_queue_);
-  get_physics_properties_service_ = nh_->advertiseService(get_physics_properties_aso);
-
-  // Advertise more services on the custom queue
-  std::string apply_body_wrench_service_name("apply_body_wrench");
-  ros::AdvertiseServiceOptions apply_body_wrench_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyBodyWrench>(
-                                                                       apply_body_wrench_service_name,
-                                                                       boost::bind(&GazeboRosApiPlugin::applyBodyWrench,this,_1,_2),
-                                                                       ros::VoidPtr(), &gazebo_queue_);
-  apply_body_wrench_service_ = nh_->advertiseService(apply_body_wrench_aso);
-
-  // Advertise more services on the custom queue
   std::string set_model_state_service_name("set_model_state");
   ros::AdvertiseServiceOptions set_model_state_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetModelState>(
@@ -297,24 +316,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                      boost::bind(&GazeboRosApiPlugin::setModelState,this,_1,_2),
                                                                      ros::VoidPtr(), &gazebo_queue_);
   set_model_state_service_ = nh_->advertiseService(set_model_state_aso);
-
-  // Advertise more services on the custom queue
-  std::string apply_joint_effort_service_name("apply_joint_effort");
-  ros::AdvertiseServiceOptions apply_joint_effort_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyJointEffort>(
-                                                                        apply_joint_effort_service_name,
-                                                                        boost::bind(&GazeboRosApiPlugin::applyJointEffort,this,_1,_2),
-                                                                        ros::VoidPtr(), &gazebo_queue_);
-  apply_joint_effort_service_ = nh_->advertiseService(apply_joint_effort_aso);
-
-  // Advertise more services on the custom queue
-  std::string set_joint_properties_service_name("set_joint_properties");
-  ros::AdvertiseServiceOptions set_joint_properties_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetJointProperties>(
-                                                                          set_joint_properties_service_name,
-                                                                          boost::bind(&GazeboRosApiPlugin::setJointProperties,this,_1,_2),
-                                                                          ros::VoidPtr(), &gazebo_queue_);
-  set_joint_properties_service_ = nh_->advertiseService(set_joint_properties_aso);
 
   // Advertise more services on the custom queue
   std::string set_model_configuration_service_name("set_model_configuration");
@@ -326,6 +327,15 @@ void GazeboRosApiPlugin::advertiseServices()
   set_model_configuration_service_ = nh_->advertiseService(set_model_configuration_aso);
 
   // Advertise more services on the custom queue
+  std::string set_joint_properties_service_name("set_joint_properties");
+  ros::AdvertiseServiceOptions set_joint_properties_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetJointProperties>(
+                                                                          set_joint_properties_service_name,
+                                                                          boost::bind(&GazeboRosApiPlugin::setJointProperties,this,_1,_2),
+                                                                          ros::VoidPtr(), &gazebo_queue_);
+  set_joint_properties_service_ = nh_->advertiseService(set_joint_properties_aso);
+
+  // Advertise more services on the custom queue
   std::string set_link_state_service_name("set_link_state");
   ros::AdvertiseServiceOptions set_link_state_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetLinkState>(
@@ -334,23 +344,22 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                     ros::VoidPtr(), &gazebo_queue_);
   set_link_state_service_ = nh_->advertiseService(set_link_state_aso);
 
-  // Advertise more services on the custom queue
-  std::string reset_simulation_service_name("reset_simulation");
-  ros::AdvertiseServiceOptions reset_simulation_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          reset_simulation_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::resetSimulation,this,_1,_2),
+  // Advertise topic on custom queue
+  // topic callback version for set_link_state
+  ros::SubscribeOptions link_state_so =
+    ros::SubscribeOptions::create<gazebo_msgs::LinkState>(
+                                                          "set_link_state",10,
+                                                          boost::bind( &GazeboRosApiPlugin::updateLinkState,this,_1),
                                                           ros::VoidPtr(), &gazebo_queue_);
-  reset_simulation_service_ = nh_->advertiseService(reset_simulation_aso);
+  set_link_state_topic_ = nh_->subscribe(link_state_so);
 
-  // Advertise more services on the custom queue
-  std::string reset_world_service_name("reset_world");
-  ros::AdvertiseServiceOptions reset_world_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          reset_world_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::resetWorld,this,_1,_2),
-                                                          ros::VoidPtr(), &gazebo_queue_);
-  reset_world_service_ = nh_->advertiseService(reset_world_aso);
+  // topic callback version for set_model_state
+  ros::SubscribeOptions model_state_so =
+    ros::SubscribeOptions::create<gazebo_msgs::ModelState>(
+                                                           "set_model_state",10,
+                                                           boost::bind( &GazeboRosApiPlugin::updateModelState,this,_1),
+                                                           ros::VoidPtr(), &gazebo_queue_);
+  set_model_state_topic_ = nh_->subscribe(model_state_so);
 
   // Advertise more services on the custom queue
   std::string pause_physics_service_name("pause_physics");
@@ -371,6 +380,24 @@ void GazeboRosApiPlugin::advertiseServices()
   unpause_physics_service_ = nh_->advertiseService(unpause_physics_aso);
 
   // Advertise more services on the custom queue
+  std::string apply_body_wrench_service_name("apply_body_wrench");
+  ros::AdvertiseServiceOptions apply_body_wrench_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyBodyWrench>(
+                                                                       apply_body_wrench_service_name,
+                                                                       boost::bind(&GazeboRosApiPlugin::applyBodyWrench,this,_1,_2),
+                                                                       ros::VoidPtr(), &gazebo_queue_);
+  apply_body_wrench_service_ = nh_->advertiseService(apply_body_wrench_aso);
+
+  // Advertise more services on the custom queue
+  std::string apply_joint_effort_service_name("apply_joint_effort");
+  ros::AdvertiseServiceOptions apply_joint_effort_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyJointEffort>(
+                                                                        apply_joint_effort_service_name,
+                                                                        boost::bind(&GazeboRosApiPlugin::applyJointEffort,this,_1,_2),
+                                                                        ros::VoidPtr(), &gazebo_queue_);
+  apply_joint_effort_service_ = nh_->advertiseService(apply_joint_effort_aso);
+
+  // Advertise more services on the custom queue
   std::string clear_joint_forces_service_name("clear_joint_forces");
   ros::AdvertiseServiceOptions clear_joint_forces_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::JointRequest>(
@@ -388,42 +415,26 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                    ros::VoidPtr(), &gazebo_queue_);
   clear_body_wrenches_service_ = nh_->advertiseService(clear_body_wrenches_aso);
 
-  // Advertise topic on custom queue
-  // topic callback version for set_link_state
-  ros::SubscribeOptions link_state_so =
-    ros::SubscribeOptions::create<gazebo_msgs::LinkState>(
-                                                          "set_link_state",10,
-                                                          boost::bind( &GazeboRosApiPlugin::updateLinkState,this,_1),
+  // Advertise more services on the custom queue
+  std::string reset_simulation_service_name("reset_simulation");
+  ros::AdvertiseServiceOptions reset_simulation_aso =
+    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
+                                                          reset_simulation_service_name,
+                                                          boost::bind(&GazeboRosApiPlugin::resetSimulation,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
-  set_link_state_topic_ = nh_->subscribe(link_state_so);
+  reset_simulation_service_ = nh_->advertiseService(reset_simulation_aso);
 
-  // topic callback version for set_model_state
-  ros::SubscribeOptions model_state_so =
-    ros::SubscribeOptions::create<gazebo_msgs::ModelState>(
-                                                           "set_model_state",10,
-                                                           boost::bind( &GazeboRosApiPlugin::updateModelState,this,_1),
-                                                           ros::VoidPtr(), &gazebo_queue_);
-  set_model_state_topic_ = nh_->subscribe(model_state_so);
+  // Advertise more services on the custom queue
+  std::string reset_world_service_name("reset_world");
+  ros::AdvertiseServiceOptions reset_world_aso =
+    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
+                                                          reset_world_service_name,
+                                                          boost::bind(&GazeboRosApiPlugin::resetWorld,this,_1,_2),
+                                                          ros::VoidPtr(), &gazebo_queue_);
+  reset_world_service_ = nh_->advertiseService(reset_world_aso);
 
-  // publish complete link states in world frame
-  ros::AdvertiseOptions pub_link_states_ao =
-    ros::AdvertiseOptions::create<gazebo_msgs::LinkStates>(
-                                                           "link_states",10,
-                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesConnect,this),
-                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesDisconnect,this),
-                                                           ros::VoidPtr(), &gazebo_queue_);
-  pub_link_states_ = nh_->advertise(pub_link_states_ao);
 
-  // publish complete model states in world frame
-  ros::AdvertiseOptions pub_model_states_ao =
-    ros::AdvertiseOptions::create<gazebo_msgs::ModelStates>(
-                                                            "model_states",10,
-                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesConnect,this),
-                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesDisconnect,this),
-                                                            ros::VoidPtr(), &gazebo_queue_);
-  pub_model_states_ = nh_->advertise(pub_model_states_ao);
-
-  // set param for use_sim_time if not set by user alread
+  // set param for use_sim_time if not set by user already
   nh_->setParam("/use_sim_time", true);
 
   // todo: contemplate setting environment variable ROBOT=sim here???
@@ -531,10 +542,18 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,ga
 
   req.model_xml = model_xml;
 
-  return spawnGazeboModel(req,res);
+  // Model is now considered convert to SDF
+  return spawnSDFModel(req,res);
 }
 
+// DEPRECATED IN HYDRO
 bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res)
+{
+  ROS_WARN_STREAM_NAMED("api_plugin","/gazebo/spawn_gazebo_model is deprecated, use /gazebo/spawn_sdf_model instead");
+  spawnSDFModel(req, res);
+}
+
+bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res)
 {
   // incoming robot name
   std::string model_name = req.model_name;
@@ -567,7 +586,7 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
   {
     res.success = false;
     res.status_message = "SpawnModel: reference reference_frame not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
 
   // incoming robot model string
@@ -575,8 +594,7 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
 
   // store resulting Gazebo Model XML to be sent to spawn queue
   // get incoming string containg either an URDF or a Gazebo Model XML
-  // grab from parameter server if necessary
-  // convert to SDF if necessary
+  // grab from parameter server if necessary convert to SDF if necessary
   stripXmlDeclaration(model_xml);
 
   // put string in TiXmlDocument for manipulation
@@ -586,8 +604,7 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
   // optional model manipulations: update initial pose && replace model name
   if (isSDF(model_xml))
   {
-    updateSDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
-    updateSDFName(gazebo_model_xml, model_name);
+    updateSDFAttributes(gazebo_model_xml, model_name, initial_xyz, initial_q);
   }
   else if (isURDF(model_xml))
   {
@@ -599,7 +616,7 @@ bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
     ROS_ERROR("GazeboRosApiPlugin SpawnModel Failure: input xml format not recognized");
     res.success = false;
     res.status_message = std::string("GazeboRosApiPlugin SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.");
-    return false;
+    return true;
   }
 
   // do spawning check if spawn worked, return response
@@ -615,7 +632,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,gaze
     ROS_ERROR("DeleteModel: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "DeleteModel: model does not exist";
-    return false;
+    return true;
   }
 
   // delete wrench jobs on bodies
@@ -652,7 +669,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,gaze
     {
       res.success = false;
       res.status_message = std::string("DeleteModel: Model pushed to delete queue, but delete service timed out waiting for model to disappear from simulation");
-      return false;
+      return true;
     }
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
@@ -677,7 +694,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
     ROS_ERROR("GetModelState: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "GetModelState: model does not exist";
-    return false;
+    return true;
   }
   else
   {
@@ -714,7 +731,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
     {
       res.success = false;
       res.status_message = "GetModelState: reference relative_entity_name not found, did you forget to scope the body by model name?";
-      return false;
+      return true;
     }
 
     // fill in response
@@ -748,7 +765,7 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
     ROS_ERROR("GetModelProperties: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "GetModelProperties: model does not exist";
-    return false;
+    return true;
   }
   else
   {
@@ -823,11 +840,11 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
     if (joint) break;
   }
 
-  if (joint)
+  if (!joint)
   {
     res.success = false;
     res.status_message = "GetJointProperties: joint not found";
-    return false;
+    return true;
   }
   else
   {
@@ -852,11 +869,11 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
 bool GazeboRosApiPlugin::getLinkProperties(gazebo_msgs::GetLinkProperties::Request &req,gazebo_msgs::GetLinkProperties::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
-  if (body)
+  if (!body)
   {
     res.success = false;
     res.status_message = "GetLinkProperties: link not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
   else
   {
@@ -893,11 +910,11 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,ga
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
 
-  if (body)
+  if (!body)
   {
     res.success = false;
     res.status_message = "GetLinkState: link not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
 
   // get body pose
@@ -929,7 +946,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,ga
   {
     res.success = false;
     res.status_message = "GetLinkState: reference reference_frame not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
 
   res.link_state.link_name = req.link_name;
@@ -956,11 +973,11 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,ga
 bool GazeboRosApiPlugin::setLinkProperties(gazebo_msgs::SetLinkProperties::Request &req,gazebo_msgs::SetLinkProperties::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
-  if (body)
+  if (!body)
   {
     res.success = false;
     res.status_message = "SetLinkProperties: link not found, did you forget to scope the link by model name?";
-    return false;
+    return true;
   }
   else
   {
@@ -986,9 +1003,7 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
 
   // supported updates
   gazebo::physics::PhysicsEnginePtr ode_pe = (world_->GetPhysicsEngine());
-  //ode_pe->SetStepTime(req.time_step); DEPRECATED
   ode_pe->SetMaxStepSize(req.time_step);
-  //ode_pe->SetUpdateRate(req.max_update_rate); DEPRECATED
   ode_pe->SetRealTimeUpdateRate(req.max_update_rate);
   ode_pe->SetGravity(gazebo::math::Vector3(req.gravity.x,req.gravity.y,req.gravity.z));
 
@@ -1013,10 +1028,8 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
 bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,gazebo_msgs::GetPhysicsProperties::Response &res)
 {
   // supported updates
-  //res.time_step = world_->GetPhysicsEngine()->GetStepTime(); DEPRECATED
   res.time_step = world_->GetPhysicsEngine()->GetMaxStepSize();
   res.pause = world_->IsPaused();
-  //res.max_update_rate = world_->GetPhysicsEngine()->GetUpdateRate(); DEPRECATED
   res.max_update_rate = world_->GetPhysicsEngine()->GetRealTimeUpdateRate();
   gazebo::math::Vector3 gravity = world_->GetPhysicsEngine()->GetGravity();
   res.gravity.x = gravity.x;
@@ -1049,11 +1062,11 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
     if (joint) break;
   }
 
-  if (joint)
+  if (!joint)
   {
     res.success = false;
     res.status_message = "SetJointProperties: joint not found";
-    return false;
+    return true;
   }
   else
   {
@@ -1099,7 +1112,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     ROS_ERROR("Updating ModelState: model [%s] does not exist",req.model_state.model_name.c_str());
     res.success = false;
     res.status_message = "SetModelState: model does not exist";
-    return false;
+    return true;
   }
   else
   {
@@ -1126,7 +1139,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
                 req.model_state.model_name.c_str(),req.model_state.reference_frame.c_str());
       res.success = false;
       res.status_message = "SetModelState: specified reference frame entity does not exist";
-      return false;
+      return true;
     }
 
     //ROS_ERROR("target state: %f %f %f",target_pose.pos.x,target_pose.pos.y,target_pose.pos.z);
@@ -1182,7 +1195,7 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
 
   res.success = false;
   res.status_message = "ApplyJointEffort: joint not found";
-  return false;
+  return true;
 }
 
 bool GazeboRosApiPlugin::resetSimulation(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
@@ -1275,7 +1288,7 @@ bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguratio
     ROS_ERROR("SetModelConfiguration: model [%s] does not exist",gazebo_model_name.c_str());
     res.success = false;
     res.status_message = "SetModelConfiguration: model does not exist";
-    return false;
+    return true;
   }
 
   if (req.joint_names.size() == req.joint_positions.size())
@@ -1303,7 +1316,7 @@ bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguratio
   {
     res.success = false;
     res.status_message = "SetModelConfiguration: joint name and position list have different lengths";
-    return false;
+    return true;
   }
 }
 
@@ -1316,7 +1329,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,ga
     ROS_ERROR("Updating LinkState: link [%s] does not exist",req.link_state.link_name.c_str());
     res.success = false;
     res.status_message = "SetLinkState: link does not exist";
-    return false;
+    return true;
   }
 
   /// @todo: FIXME map is really wrong, unless using tf here somehow
@@ -1353,7 +1366,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,ga
     ROS_ERROR("Updating LinkState: reference_frame is not a valid link name");
     res.success = false;
     res.status_message = "SetLinkState: failed";
-    return false;
+    return true;
   }
 
   //std::cout << " debug : " << target_pose << std::endl;
@@ -1404,7 +1417,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
     ROS_ERROR("ApplyBodyWrench: body [%s] does not exist",req.body_name.c_str());
     res.success = false;
     res.status_message = "ApplyBodyWrench: body does not exist";
-    return false;
+    return true;
   }
 
   // target wrench
@@ -1482,7 +1495,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
     ROS_ERROR("ApplyBodyWrench: reference_frame is not a valid link name");
     res.success = false;
     res.status_message = "ApplyBodyWrench: reference_frame not found";
-    return false;
+    return true;
   }
 
   // apply wrench
@@ -1794,59 +1807,103 @@ void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
     model_xml.replace(pos1,pos2-pos1+2,std::string(""));
 }
 
-void GazeboRosApiPlugin::updateSDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
+void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
+                                             gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
 {
-  TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("gazebo");
-  if (gazebo_tixml)
+  // This function can handle both regular SDF files and <include> SDFs that are used with the 
+  // Gazebo Model Database
+
+  TiXmlElement* pose_element; // This is used by both reguar and database SDFs
+
+  // Check SDF for requires SDF element
+  TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("sdf");
+  if (!gazebo_tixml)
   {
-    TiXmlElement* model_tixml = gazebo_tixml->FirstChildElement("model");
-    if (model_tixml)
+    ROS_WARN("Could not find <sdf> element in sdf, so name and initial position cannot be applied");
+    return;
+  }
+
+  // Check SDF for optional model element. May not have one
+  TiXmlElement* model_tixml = gazebo_tixml->FirstChildElement("model");
+  if (model_tixml)
+  {
+    // Update model name
+    if (model_tixml->Attribute("name") != NULL)
     {
-      // replace initial pose of robot
-      // find first instance of xyz and rpy, replace with initial pose
-      TiXmlElement* origin_key = model_tixml->FirstChildElement("origin");
-
-      if (!origin_key)
-      {
-        origin_key = new TiXmlElement("origin");
-        model_tixml->LinkEndChild(origin_key);
-      }
-
-      std::ostringstream origin_stream;
-      gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
-      origin_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z << " "
-                    << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
-
-      origin_key->SetAttribute("pose",origin_stream.str());
+      // removing old model name
+      model_tixml->RemoveAttribute("name");
     }
-    else
-      ROS_ERROR("could not find <model> element in sdf, so name and initial position is not applied");
+    // replace with user specified name
+    model_tixml->SetAttribute("name",model_name);
+
+    // Check for the pose element
+    pose_element = model_tixml->FirstChildElement("pose");
+
+    // Create the pose element if it doesn't exist
+    if (!pose_element)
+    {
+      pose_element = new TiXmlElement("pose");
+      model_tixml->LinkEndChild(pose_element);
+    }
+
+    // Pose is set at bottom of function
   }
   else
-    ROS_ERROR("could not find <gazebo> element in sdf, so new name not applied");
-}
-
-void GazeboRosApiPlugin::updateSDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
-{
-  TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("gazebo");
-  if (gazebo_tixml)
   {
-    TiXmlElement* model_tixml = gazebo_tixml->FirstChildElement("model");
-    if (model_tixml)
-    {
-      if (model_tixml->Attribute("name") != NULL)
-      {
-        // removing old model name
-        model_tixml->RemoveAttribute("name");
-      }
-      // replace with user specified name
-      model_tixml->SetAttribute("name",model_name);
+    // Check SDF for world element
+    TiXmlElement* world_tixml = gazebo_tixml->FirstChildElement("world");
+    if (!world_tixml)
+    {      
+      ROS_WARN("Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
+      return;
     }
-    else
-      ROS_ERROR("could not find <model> element in sdf, so name and initial position is not applied");
+    // Check SDF for required include element
+    TiXmlElement* include_tixml = world_tixml->FirstChildElement("include");    
+    if (!include_tixml)
+    {      
+      ROS_WARN("Could not find <include> element in sdf, so name and initial position cannot be applied");
+      return;
+    }
+
+    // Check for name element
+    TiXmlElement* name_tixml = include_tixml->FirstChildElement("name");    
+    if (!name_tixml)
+    {      
+      // Create the name element
+      name_tixml = new TiXmlElement("name");
+      include_tixml->LinkEndChild(name_tixml);
+    }      
+
+    // Set the text within the name element
+    TiXmlText* text = new TiXmlText(model_name);
+    name_tixml->LinkEndChild( text );    
+
+    // Check for the pose element
+    pose_element = include_tixml->FirstChildElement("pose");
+
+    // Create the pose element if it doesn't exist
+    if (!pose_element)
+    {
+      pose_element = new TiXmlElement("pose");
+      include_tixml->LinkEndChild(pose_element);
+    }
+    // Pose is set at bottom of function
   }
-  else
-    ROS_ERROR("could not find <gazebo> element in sdf, so new name not applied");
+
+  // Set the pose value for both SDFs types here
+  if (pose_element)
+  {
+    // Create the string of 6 numbers
+    std::ostringstream pose_stream;
+    gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
+    pose_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z << " "
+                << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
+
+    // Add value to pose element
+    TiXmlText* text = new TiXmlText(pose_stream.str());      
+    pose_element->LinkEndChild( text );
+  }
+
 }
 
 void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
@@ -1880,7 +1937,7 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ga
     origin_key->SetAttribute("rpy",rpy_stream.str());
   }
   else
-    ROS_ERROR("could not find <model> element in sdf, so name and initial position is not applied");
+    ROS_WARN("could not find <model> element in sdf, so name and initial position is not applied");
 }
 
 void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
@@ -1898,7 +1955,7 @@ void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::st
     model_tixml->SetAttribute("name",model_name);
   }
   else
-    ROS_ERROR("could not find <robot> element in URDF, name not replaced");
+    ROS_WARN("could not find <robot> element in URDF, name not replaced");
 }
 
 void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
@@ -1935,7 +1992,8 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
   }
 }
 
-bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, gazebo_msgs::SpawnModel::Response &res)
+bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+                                         gazebo_msgs::SpawnModel::Response &res)
 {
   // push to factory iface
   std::ostringstream stream;
@@ -1947,7 +2005,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   gazebo::msgs::Factory msg;
   gazebo::msgs::Init(msg, "spawn_model");
   msg.set_sdf( gazebo_model_xml_string );
-
+  
   //ROS_ERROR("attempting to spawn model name [%s] [%s]", model_name.c_str(),gazebo_model_xml_string.c_str());
 
   // FIXME: should use entity_info or add lock to World::receiveMutex
@@ -1962,7 +2020,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
     ROS_ERROR("SpawnModel: Failure - model name %s already exist.",model_name.c_str());
     res.success = false;
     res.status_message = "SpawnModel: Failure - model already exists.";
-    return false;
+    return true;
   }
 
   // Publish the factory message
@@ -1970,20 +2028,25 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   /// FIXME: should change publish to direct invocation World::LoadModel() and/or
   ///        change the poll for Model existence to common::Events based check.
 
-  /// \brief poll and wait, verify that the model is spawned within Hardcoded 60 seconds
-  ros::Duration model_spawn_timeout(60.0);
+  /// \brief poll and wait, verify that the model is spawned within Hardcoded 10 seconds
+  ros::Duration model_spawn_timeout(10.0);
   ros::Time timeout = ros::Time::now() + model_spawn_timeout;
-  while (true)
+
+  while (ros::ok())
   {
     if (ros::Time::now() > timeout)
     {
       res.success = false;
-      res.status_message = std::string("SpawnModel: Model pushed to spawn queue, but spawn service timed out waiting for model to appear in simulation");
-      return false;
+      res.status_message = std::string("SpawnModel: Model pushed to spawn queue, but spawn service")
+        + std::string(" timed out waiting for model to appear in simulation under the name ")
+        + model_name;
+
+      return true;
     }
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if (world_->GetModel(model_name)) break;
+      if (world_->GetModel(model_name)) 
+        break;
     }
     ROS_DEBUG_ONCE("Waiting for spawning model (%s)",model_name.c_str());
     usleep(2000);

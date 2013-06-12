@@ -32,8 +32,8 @@
 #include <rendering/RTShaderSystem.hh>
 #include <gazebo_plugins/gazebo_ros_projector.h>
 
-#include "std_msgs/String.h"
-#include "std_msgs/Int32.h"
+#include <std_msgs/String.h>
+#include <std_msgs/Int32.h>
 
 #include <Ogre.h>
 #include <OgreMath.h>
