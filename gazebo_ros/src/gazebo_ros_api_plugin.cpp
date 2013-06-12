@@ -542,6 +542,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,ga
 
   req.model_xml = model_xml;
 
+  // Model is now considered convert to SDF
   return spawnSDFModel(req,res);
 }
 
@@ -593,8 +594,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,gaz
 
   // store resulting Gazebo Model XML to be sent to spawn queue
   // get incoming string containg either an URDF or a Gazebo Model XML
-  // grab from parameter server if necessary
-  // convert to SDF ifp necessary
+  // grab from parameter server if necessary convert to SDF if necessary
   stripXmlDeclaration(model_xml);
 
   // put string in TiXmlDocument for manipulation
@@ -604,8 +604,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,gaz
   // optional model manipulations: update initial pose && replace model name
   if (isSDF(model_xml))
   {
-    updateSDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
-    updateSDFName(gazebo_model_xml, model_name);
+    updateSDFAttributes(gazebo_model_xml, model_name, initial_xyz, initial_q);
   }
   else if (isURDF(model_xml))
   {
@@ -1808,59 +1807,103 @@ void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
     model_xml.replace(pos1,pos2-pos1+2,std::string(""));
 }
 
-void GazeboRosApiPlugin::updateSDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
+void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
+                                             gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
 {
-  TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("gazebo");
-  if (gazebo_tixml)
+  // This function can handle both regular SDF files and <include> SDFs that are used with the 
+  // Gazebo Model Database
+
+  TiXmlElement* pose_element; // This is used by both reguar and database SDFs
+
+  // Check SDF for requires SDF element
+  TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("sdf");
+  if (!gazebo_tixml)
   {
-    TiXmlElement* model_tixml = gazebo_tixml->FirstChildElement("model");
-    if (model_tixml)
+    ROS_WARN("Could not find <sdf> element in sdf, so name and initial position cannot be applied");
+    return;
+  }
+
+  // Check SDF for optional model element. May not have one
+  TiXmlElement* model_tixml = gazebo_tixml->FirstChildElement("model");
+  if (model_tixml)
+  {
+    // Update model name
+    if (model_tixml->Attribute("name") != NULL)
     {
-      // replace initial pose of robot
-      // find first instance of xyz and rpy, replace with initial pose
-      TiXmlElement* origin_key = model_tixml->FirstChildElement("origin");
-
-      if (!origin_key)
-      {
-        origin_key = new TiXmlElement("origin");
-        model_tixml->LinkEndChild(origin_key);
-      }
-
-      std::ostringstream origin_stream;
-      gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
-      origin_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z << " "
-                    << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
-
-      origin_key->SetAttribute("pose",origin_stream.str());
+      // removing old model name
+      model_tixml->RemoveAttribute("name");
     }
-    else
-      ROS_WARN("could not find <model> element in sdf, so name and initial position is not applied");
+    // replace with user specified name
+    model_tixml->SetAttribute("name",model_name);
+
+    // Check for the pose element
+    pose_element = model_tixml->FirstChildElement("pose");
+
+    // Create the pose element if it doesn't exist
+    if (!pose_element)
+    {
+      pose_element = new TiXmlElement("pose");
+      model_tixml->LinkEndChild(pose_element);
+    }
+
+    // Pose is set at bottom of function
   }
   else
-    ROS_WARN("could not find <gazebo> element in sdf, so model pose not applied");
-}
-
-void GazeboRosApiPlugin::updateSDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
-{
-  TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("gazebo");
-  if (gazebo_tixml)
   {
-    TiXmlElement* model_tixml = gazebo_tixml->FirstChildElement("model");
-    if (model_tixml)
-    {
-      if (model_tixml->Attribute("name") != NULL)
-      {
-        // removing old model name
-        model_tixml->RemoveAttribute("name");
-      }
-      // replace with user specified name
-      model_tixml->SetAttribute("name",model_name);
+    // Check SDF for world element
+    TiXmlElement* world_tixml = gazebo_tixml->FirstChildElement("world");
+    if (!world_tixml)
+    {      
+      ROS_WARN("Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
+      return;
     }
-    else
-      ROS_WARN("could not find <model> element in sdf, so name and initial position is not applied");
+    // Check SDF for required include element
+    TiXmlElement* include_tixml = world_tixml->FirstChildElement("include");    
+    if (!include_tixml)
+    {      
+      ROS_WARN("Could not find <include> element in sdf, so name and initial position cannot be applied");
+      return;
+    }
+
+    // Check for name element
+    TiXmlElement* name_tixml = include_tixml->FirstChildElement("name");    
+    if (!name_tixml)
+    {      
+      // Create the name element
+      name_tixml = new TiXmlElement("name");
+      include_tixml->LinkEndChild(name_tixml);
+    }      
+
+    // Set the text within the name element
+    TiXmlText* text = new TiXmlText(model_name);
+    name_tixml->LinkEndChild( text );    
+
+    // Check for the pose element
+    pose_element = include_tixml->FirstChildElement("pose");
+
+    // Create the pose element if it doesn't exist
+    if (!pose_element)
+    {
+      pose_element = new TiXmlElement("pose");
+      include_tixml->LinkEndChild(pose_element);
+    }
+    // Pose is set at bottom of function
   }
-  else
-    ROS_WARN("could not find <gazebo> element in sdf, so new name not applied");
+
+  // Set the pose value for both SDFs types here
+  if (pose_element)
+  {
+    // Create the string of 6 numbers
+    std::ostringstream pose_stream;
+    gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
+    pose_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z << " "
+                << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
+
+    // Add value to pose element
+    TiXmlText* text = new TiXmlText(pose_stream.str());      
+    pose_element->LinkEndChild( text );
+  }
+
 }
 
 void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
@@ -1949,7 +1992,8 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
   }
 }
 
-bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, gazebo_msgs::SpawnModel::Response &res)
+bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+                                         gazebo_msgs::SpawnModel::Response &res)
 {
   // push to factory iface
   std::ostringstream stream;
@@ -1961,7 +2005,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   gazebo::msgs::Factory msg;
   gazebo::msgs::Init(msg, "spawn_model");
   msg.set_sdf( gazebo_model_xml_string );
-
+  
   //ROS_ERROR("attempting to spawn model name [%s] [%s]", model_name.c_str(),gazebo_model_xml_string.c_str());
 
   // FIXME: should use entity_info or add lock to World::receiveMutex
