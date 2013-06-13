@@ -12,15 +12,15 @@
 #include <ros/subscribe_options.h>
 
 #include <ros/ros.h>
-#include "boost/thread/mutex.hpp"
+#include <boost/thread/mutex.hpp>
 
-#include "physics/physics.hh"
-#include "transport/TransportTypes.hh"
-#include "transport/Node.hh"
-#include "common/Time.hh"
-#include "common/Plugin.hh"
-#include "common/Events.hh"
-#include "rendering/RenderTypes.hh"
+#include <gazebo/physics/physics.hh>
+#include <gazebo/transport/TransportTypes.hh>
+#include <gazebo/transport/Node.hh>
+#include <gazebo/common/Time.hh>
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/common/Events.hh>
+#include <gazebo/rendering/RenderTypes.hh>
 
 #include <std_msgs/String.h>
 #include <std_msgs/Int32.h>

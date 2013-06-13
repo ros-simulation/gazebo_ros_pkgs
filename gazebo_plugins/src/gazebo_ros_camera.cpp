@@ -43,6 +43,7 @@ GazeboRosCamera::GazeboRosCamera()
 // Destructor
 GazeboRosCamera::~GazeboRosCamera()
 {
+  ROS_DEBUG_STREAM_NAMED("camera","Unloaded");
 }
 
 void GazeboRosCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)

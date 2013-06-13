@@ -27,9 +27,9 @@
 
 #include <gazebo_plugins/gazebo_ros_depth_camera.h>
 
-#include "sensors/Sensor.hh"
-#include "sdf/interface/SDF.hh"
-#include "sensors/SensorTypes.hh"
+#include <gazebo/sensors/Sensor.hh>
+#include <gazebo/sdf/interface/SDF.hh>
+#include <gazebo/sensors/SensorTypes.hh>
 
 // for creating PointCloud2 from pcl point cloud
 #include "pcl/ros/conversions.h"

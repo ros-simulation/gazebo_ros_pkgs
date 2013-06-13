@@ -156,8 +156,11 @@ public:
   /// \brief Function for inserting a URDF into Gazebo from ROS Service Call
   bool spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
 
-  /// \brief Function for inserting a URDF into Gazebo from ROS Service Call
-  bool spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
+  /// \brief Function for inserting a URDF into Gazebo from ROS Service Call. Deprecated in ROS Hydro - replace with spawnURDFModel()
+  ROS_DEPRECATED bool spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
+
+  /// \brief Both SDFs and converted URDFs get sent to this function for further manipulation from a ROS Service call
+  bool spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
 
   /// \brief delete model given name
   bool deleteModel(gazebo_msgs::DeleteModel::Request &req,gazebo_msgs::DeleteModel::Response &res);
@@ -254,14 +257,13 @@ private:
   /// \brief
   void stripXmlDeclaration(std::string &model_xml);
 
-  /// \brief
-  void updateSDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
+  /// \brief Update the model name and pose of the SDF file before sending to Gazebo
+  void updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+                           gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
-  /// \brief
-  void updateSDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
-
-  /// \brief
-  void updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
+  /// \brief Update the model name and pose of the URDF file before sending to Gazebo
+  void updateURDFModelPose(TiXmlDocument &gazebo_model_xml, 
+                           gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
   /// \brief
   void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
@@ -270,7 +272,8 @@ private:
   void walkChildAddRobotNamespace(TiXmlNode* robot_xml);
 
   /// \brief
-  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, gazebo_msgs::SpawnModel::Response &res);
+  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+                       gazebo_msgs::SpawnModel::Response &res);
 
   /// \brief helper function for applyBodyWrench
   ///        shift wrench from reference frame to target frame
@@ -316,7 +319,8 @@ private:
   gazebo::event::ConnectionPtr pub_model_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
-  ros::ServiceServer spawn_urdf_gazebo_service_;
+  ros::ServiceServer spawn_gazebo_model_service_; // DEPRECATED IN HYDRO
+  ros::ServiceServer spawn_sdf_model_service_;
   ros::ServiceServer spawn_urdf_model_service_;
   ros::ServiceServer delete_model_service_;
   ros::ServiceServer get_model_state_service_;
