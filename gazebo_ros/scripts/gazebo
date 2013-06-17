@@ -17,7 +17,9 @@ client_final="-g `catkin_find libgazebo_ros_paths_plugin.so`"
 
 # Combine the commands
 setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
-. $setup_path/setup.sh && gzserver $final & gzclient $client_final
+. $setup_path/setup.sh 
+gzserver $final & 
+gzclient $client_final
 
 # Kill the server... ?
-#killall gzserver -9
+killall gzserver -9
