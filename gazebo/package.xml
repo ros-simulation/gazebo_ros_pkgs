@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>gazebo</name>
-  <version>0.1.0</version>
+  <version>2.0.0</version>
   <description>Deprecated package that used to pull a version of Gazebo to build for ROS. Now Gazebo is installed through a stand alone debian.</description>
 
   <author email="natekoenig@gmail.com">Nate Koenig, Andrew Howard, with contributions from many others. See web page for a full credits list.</author>
