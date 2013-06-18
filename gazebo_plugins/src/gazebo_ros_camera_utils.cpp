@@ -49,6 +49,11 @@ GazeboRosCameraUtils::GazeboRosCameraUtils()
   this->image_connect_count_ = 0;
   this->last_update_time_ = common::Time(0);
   this->last_info_update_time_ = common::Time(0);
+  this->height_ = 0;
+  this->width_ = 0;
+  this->skip_ = 0;
+  this->format_ = "";
+  this->initialized_ = false;
 }
 
 #ifdef DYNAMIC_RECONFIGURE
@@ -457,6 +462,8 @@ void GazeboRosCameraUtils::Init()
   // start custom queue for camera_
   this->callback_queue_thread_ = boost::thread(
     boost::bind(&GazeboRosCameraUtils::CameraQueueThread, this));
+
+  this->initialized_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -470,6 +477,9 @@ void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src,
 
 void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
 {
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
   /// don't bother if there are no subscribers
   if (this->image_pub_.getNumSubscribers() > 0)
   {
@@ -499,6 +509,9 @@ void GazeboRosCameraUtils::PublishCameraInfo(common::Time &last_update_time)
 
 void GazeboRosCameraUtils::PublishCameraInfo()
 {
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
   if (this->camera_info_pub_.getNumSubscribers() > 0)
   {
     this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
