@@ -23,8 +23,22 @@ generate_dynamic_reconfigure_options(cfg/Physics.cfg)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES gazebo_ros_api_plugin gazebo_ros_paths_plugin
-  CATKIN_DEPENDS roslib roscpp geometry_msgs std_srvs tf rosgraph_msgs dynamic_reconfigure message_generation std_msgs gazebo_msgs
+  LIBRARIES 
+  gazebo_ros_api_plugin 
+  gazebo_ros_paths_plugin
+   
+  CATKIN_DEPENDS 
+  roslib 
+  roscpp 
+  geometry_msgs 
+  std_srvs 
+  tf 
+  rosgraph_msgs 
+  dynamic_reconfigure 
+  message_generation 
+  std_msgs 
+  gazebo_msgs
+  gazebo_plugins
   )
 
 include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_SYSTEM_INCLUDE_DIRS})
