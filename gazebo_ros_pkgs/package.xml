@@ -2,15 +2,25 @@
 <package>
   <name>gazebo_ros_pkgs</name> <!-- This is a meta package! -->
   <version>1.0.0</version>
-  <description>Wrappers, tools and additional API's for using ROS with the <a href="http://ros.org/wiki/gazebo">Gazebo</a> simulator.</description>
+  <description>Interface for using ROS with the <a href="http://gazebosim.org/">Gazebo</a> simulator.</description>
 
   <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
   <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+
   <license>BSD,LGPL,Apache 2.0</license>
+
+  <url type="website">http://gazebosim.org/wiki/Tutorials#ROS_Integration</url>
+  <url type="bugtracker">https://github.com/osrf/gazebo_ros_pkgs/issues</url>
+  <url type="repository">https://github.com/osrf/gazebo_ros_pkgs</url>
+
+  <author>John Hsu, Nate Koenig</author>>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>gazebo</run_depend>
+  <run_depend>gazebo_plugins</run_depend>
+  <run_depend>gazebo_ros</run_depend>
+  <run_depend>gazebo_msgs</run_depend>
+
   <export>
     <metapackage/>
   </export>

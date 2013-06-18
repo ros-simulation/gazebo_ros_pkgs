@@ -3,11 +3,16 @@
   <name>gazebo_msgs</name>
   <version>0.1.0</version>
   <description>
-	Msg and Srv data structures for interacting with Gazebo from ROS.  
+    Message and service data structures for interacting with Gazebo from ROS.
   </description>
 
   <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
+
   <license>BSD</license>
+
+  <url type="website">http://gazebosim.org/wiki/Tutorials#ROS_Integration</url>
+  <url type="bugtracker">https://github.com/osrf/gazebo_ros_pkgs/issues</url>
+  <url type="repository">https://github.com/osrf/gazebo_ros_pkgs</url>
 
   <author>John Hsu</author>
 
