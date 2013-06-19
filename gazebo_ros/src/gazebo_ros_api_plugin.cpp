@@ -29,7 +29,9 @@ namespace gazebo
 
 GazeboRosApiPlugin::GazeboRosApiPlugin() :
   physics_reconfigure_initialized_(false),
-  world_created_(false)
+  world_created_(false),
+  stop_(false),
+  plugin_loaded_(false)
 {
   robot_namespace_.clear();
 }
@@ -37,6 +39,18 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
 GazeboRosApiPlugin::~GazeboRosApiPlugin()
 {
   ROS_DEBUG_STREAM_NAMED("api_plugin","GazeboRosApiPlugin Deconstructor start");
+
+  // Unload the sigint event
+  gazebo::event::Events::DisconnectSigInt(sigint_event_);
+  ROS_DEBUG_STREAM_NAMED("api_plugin","After sigint_event unload");
+
+  // Don't attempt to unload this plugin if it was never loaded in the Load() function
+  if(!plugin_loaded_)
+  {
+    ROS_DEBUG_STREAM_NAMED("api_plugin","Deconstructor skipped because never loaded");
+    return;
+  }
+
   // Disconnect slots
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
@@ -84,13 +98,38 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   ROS_DEBUG_STREAM_NAMED("api_plugin","Unloaded");
 }
 
+void GazeboRosApiPlugin::shutdownSignal()
+{
+  ROS_DEBUG_STREAM_NAMED("api_plugin","shutdownSignal() recieved");
+  stop_ = true;
+}
+
 void GazeboRosApiPlugin::Load(int argc, char** argv)
 {
+  ROS_DEBUG_STREAM_NAMED("api_plugin","Load");
+
+  // connect to sigint event
+  sigint_event_ = gazebo::event::Events::ConnectSigInt(boost::bind(&GazeboRosApiPlugin::shutdownSignal,this));
+
   // setup ros related
   if (!ros::isInitialized())
     ros::init(argc,argv,"gazebo",ros::init_options::NoSigintHandler);
   else
     ROS_ERROR("Something other than this gazebo_ros_api plugin started ros::init(...), command line arguments may not be parsed properly.");
+
+  // check if the ros master is available - required
+  while(!ros::master::check()) 
+  {
+    ROS_WARN_STREAM_NAMED("api_plugin","No ROS master - start roscore to continue...");    
+    // wait 0.5 second
+    usleep(500*1000); // can't use ROS Time here b/c node handle is not yet initialized
+
+    if(stop_)
+    {
+      ROS_WARN_STREAM_NAMED("api_plugin","Canceled loading Gazebo ROS API plugin by sigint event");
+      return;
+    }
+  }
 
   nh_.reset(new ros::NodeHandle("~")); // advertise topics and services in this node's namespace
 

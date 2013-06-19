@@ -1,6 +1,3 @@
-#ifndef __GAZEBO_ROS_API_PLUGIN_HH__
-#define __GAZEBO_ROS_API_PLUGIN_HH__
-
 /*
  *  Gazebo - Outdoor Multi-Robot Simulator
  *  Copyright (C) 2003
@@ -28,6 +25,9 @@
  * SVN: $Id: main.cc 8598 2010-03-22 21:59:24Z hsujohnhsu $
  */
 
+#ifndef __GAZEBO_ROS_API_PLUGIN_HH__
+#define __GAZEBO_ROS_API_PLUGIN_HH__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -53,7 +53,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/transport/Node.hh>
 
-// ros
+// ROS
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <ros/subscribe_options.h>
@@ -126,6 +126,9 @@ public:
 
   /// \brief Destructor
   ~GazeboRosApiPlugin();
+  
+  /// \bried Detect if sig-int shutdown signal is recieved
+  void shutdownSignal();
 
   /// \brief Gazebo-inherited load function
   /// 
@@ -298,6 +301,13 @@ private:
 
   /// \brief Connect to Gazebo via its plugin interface, get a pointer to the world, start events
   void loadGazeboRosApiPlugin(std::string world_name);
+
+  // track if the desconstructor event needs to occur
+  bool plugin_loaded_;
+
+  // detect if sigint event occurs
+  bool stop_; 
+  gazebo::event::ConnectionPtr sigint_event_;
 
   std::string robot_namespace_;
 
