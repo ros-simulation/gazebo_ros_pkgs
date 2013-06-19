@@ -21,5 +21,5 @@ setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
 gzserver $final & 
 gzclient $client_final
 
-# Kill the server... ?
-killall gzserver -9
+# Kill the server
+kill -s SIGINT $!
