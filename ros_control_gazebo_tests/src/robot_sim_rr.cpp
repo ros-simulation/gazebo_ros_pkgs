@@ -1,3 +1,6 @@
+
+#include <ros/ros.h>
+
 #include <pluginlib/class_list_macros.h>
 
 #include <hardware_interface/joint_command_interface.h>
@@ -12,6 +15,8 @@
 #include <gazebo/common/common.hh>
 
 namespace ros_control_gazebo_tests {
+
+  using namespace hardware_interface;
 
   class RobotSimRR : public ros_control_gazebo::RobotSim
   {
@@ -38,12 +43,16 @@ namespace ros_control_gazebo_tests {
         joint_velocity_command_[j] = 0.0;
 
         // Register joints
-        js_interface_.registerHandle(hardware_interface::JointStateHandle(joint_name_[j], &joint_position_[j], 
-                                                                          &joint_velocity_[j], &joint_effort_[j]));
-        ej_interface_.registerHandle(hardware_interface::JointHandle(js_interface_.getHandle(joint_name_[j]), 
-                                                                     &joint_effort_command_[j]));
-        vj_interface_.registerHandle(hardware_interface::JointHandle(js_interface_.getHandle(joint_name_[j]), 
-                                                                     &joint_velocity_command_[j]));
+        js_interface_.registerHandle(JointStateHandle(joint_name_[j],
+                                                      &joint_position_[j],
+                                                      &joint_velocity_[j],
+                                                      &joint_effort_[j]));
+
+        ej_interface_.registerHandle(JointHandle(js_interface_.getHandle(joint_name_[j]),
+                                                 &joint_effort_command_[j]));
+
+        vj_interface_.registerHandle(JointHandle(js_interface_.getHandle(joint_name_[j]),
+                                                 &joint_velocity_command_[j]));
       }
 
       // Register interfaces
@@ -97,9 +106,9 @@ namespace ros_control_gazebo_tests {
   private:
     unsigned int n_dof_;
 
-    hardware_interface::JointStateInterface    js_interface_;
-    hardware_interface::EffortJointInterface   ej_interface_;
-    hardware_interface::VelocityJointInterface vj_interface_;
+    JointStateInterface    js_interface_;
+    EffortJointInterface   ej_interface_;
+    VelocityJointInterface vj_interface_;
 
     std::vector<std::string> joint_name_;
     std::vector<double> joint_position_;
