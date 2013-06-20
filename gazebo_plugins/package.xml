@@ -18,12 +18,14 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+
+  <build_depend>gazebo</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>trajectory_msgs</build_depend>
   <build_depend>std_srvs</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>gazebo_msgs</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>nodelet</build_depend>
   <build_depend>angles</build_depend>
@@ -38,12 +40,13 @@
   <build_depend>rosconsole</build_depend>
   <build_depend>message_generation</build_depend>
 
+  <run_depend>gazebo</run_depend>
+  <run_depend>gazebo_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>trajectory_msgs</run_depend>
   <run_depend>std_srvs</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>gazebo_msgs</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>nodelet</run_depend>
   <run_depend>angles</run_depend>
