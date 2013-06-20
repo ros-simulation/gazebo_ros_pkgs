@@ -38,9 +38,12 @@ namespace ros_control_gazebo_tests {
         joint_velocity_command_[j] = 0.0;
 
         // Register joints
-        js_interface_.registerJoint(joint_name_[j], &joint_position_[j], &joint_velocity_[j], &joint_effort_[j]);
-        ej_interface_.registerJoint(js_interface_.getJointStateHandle(joint_name_[j]), &joint_effort_command_[j]);
-        vj_interface_.registerJoint(js_interface_.getJointStateHandle(joint_name_[j]), &joint_velocity_command_[j]);
+        js_interface_.registerHandle(hardware_interface::JointStateHandle(joint_name_[j], &joint_position_[j], 
+                                                                          &joint_velocity_[j], &joint_effort_[j]));
+        ej_interface_.registerHandle(hardware_interface::JointHandle(js_interface_.getHandle(joint_name_[j]), 
+                                                                     &joint_effort_command_[j]));
+        vj_interface_.registerHandle(hardware_interface::JointHandle(js_interface_.getHandle(joint_name_[j]), 
+                                                                     &joint_velocity_command_[j]));
       }
 
       // Register interfaces
