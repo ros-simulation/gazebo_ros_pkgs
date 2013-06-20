@@ -2,7 +2,7 @@
 #define __ROS_CONTROL_GAZEBO_ROBOT_SIM_H
 
 #include <gazebo/physics/physics.hh>
-
+#include <ros/ros.h>
 #include <hardware_interface/robot_hw.h>
 
 namespace ros_control_gazebo {
