@@ -607,6 +607,9 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   if (isSDF(model_xml))
   {
     updateSDFAttributes(gazebo_model_xml, model_name, initial_xyz, initial_q);
+    
+    // Walk recursively through the entire SDF, locate plugin tags and
+    // add robotNamespace as a child with the correct namespace
     if (!this->robot_namespace_.empty()) 
     {
       // Get root element for SDF
@@ -615,8 +618,6 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
           gazebo_model_xml.FirstChild("gazebo") : model_tixml;
       if (model_tixml) 
       {
-        // Walk recursively through the entire SDF, locate plugin tags and
-        // add robotNamespace as a child with the correct namespace
         walkChildAddRobotNamespace(model_tixml);
       } 
       else 
@@ -629,14 +630,15 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   {
     updateURDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
     updateURDFName(gazebo_model_xml, model_name);
+    
+    // Walk recursively through the entire URDF, locate plugin tags and
+    // add robotNamespace as a child with the correct namespace
     if (!this->robot_namespace_.empty()) 
     {
       // Get root element for URDF
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("robot");
       if (model_tixml) 
       {
-        // Walk recursively through the entire URDF, locate plugin tags and
-        // add robotNamespace as a child with the correct namespace
         walkChildAddRobotNamespace(model_tixml);
       } 
       else 
