@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2013 Open Source Robotics Foundation
  *
@@ -608,11 +607,45 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   if (isSDF(model_xml))
   {
     updateSDFAttributes(gazebo_model_xml, model_name, initial_xyz, initial_q);
+    
+    // Walk recursively through the entire SDF, locate plugin tags and
+    // add robotNamespace as a child with the correct namespace
+    if (!this->robot_namespace_.empty()) 
+    {
+      // Get root element for SDF
+      TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("sdf");
+      model_tixml = (!model_tixml) ? 
+          gazebo_model_xml.FirstChild("gazebo") : model_tixml;
+      if (model_tixml) 
+      {
+        walkChildAddRobotNamespace(model_tixml);
+      } 
+      else 
+      {
+        ROS_WARN("Unable to add robot namespace to xml");
+      }
+    }
   }
   else if (isURDF(model_xml))
   {
     updateURDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
     updateURDFName(gazebo_model_xml, model_name);
+    
+    // Walk recursively through the entire URDF, locate plugin tags and
+    // add robotNamespace as a child with the correct namespace
+    if (!this->robot_namespace_.empty()) 
+    {
+      // Get root element for URDF
+      TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("robot");
+      if (model_tixml) 
+      {
+        walkChildAddRobotNamespace(model_tixml);
+      } 
+      else 
+      {
+        ROS_WARN("Unable to add robot namespace to xml");
+      }
+    }
   }
   else
   {
@@ -1985,7 +2018,7 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
   child = robot_xml->IterateChildren(child);
   while (child != NULL)
   {
-    if (child->ValueStr().find(std::string("plugin")) == 0 && child->ValueStr().find(std::string("plugin")) != std::string::npos)
+    if (child->ValueStr().find(std::string("plugin")) == 0)
     {
       ROS_DEBUG("recursively walking gazebo extension for %s --> %d",child->ValueStr().c_str(),(int)child->ValueStr().find(std::string("plugin")));
       if (child->FirstChildElement("robotNamespace") == NULL)
