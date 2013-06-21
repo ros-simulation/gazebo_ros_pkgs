@@ -109,10 +109,12 @@ public:
     }
 
     // Debug output
+    /*
     ROS_DEBUG_STREAM_NAMED("ros_control","Plugin XML:");
     std::string temp;
     sdf_->PrintValues(temp);
     std::cout << temp;
+    */
 
     // Get namespace for nodehandle
     if(sdf_->HasElement("robotNamespace"))
@@ -157,24 +159,27 @@ public:
       return;
     }
 
-    std::vector<std::string> joints;
-
     // Get the joints this plugin is suppose to control
     if(sdf_->HasElement("joint"))
     {
-      ROS_INFO_STREAM_NAMED("test","here " << sdf_->GetElement("joint")->GetValueString() );
-      ROS_INFO_STREAM_NAMED("test","here2 " << sdf_->GetElement("joint")->GetValueString() );
-      joints.push_back( sdf_->GetElement("joint")->GetValueString() );
+      // get all available joints
+      sdf::ElementPtr element_it = sdf_->GetElement("joint");
+
+      while(element_it != sdf::ElementPtr() ) // do while not null
+      {
+        ROS_DEBUG_STREAM_NAMED("load","Parsed from plugin SDF joint w/name '" 
+          << element_it->GetValueString() << "'");
+
+        // Add joint to vector
+        joint_names_.push_back( element_it->GetValueString() ); 
+
+        element_it = element_it->GetNextElement("joint");
+      }     
     }
-
-
-
-
-
 
     // Get parameters/settings for controllers from ROS param server
     nh_ = ros::NodeHandle(robot_namespace_);
-    ROS_INFO("starting gazebo_ros_control plugin in namespace: %s", robot_namespace_.c_str());
+    ROS_INFO("Starting gazebo_ros_control plugin in namespace: %s", robot_namespace_.c_str());
 
     // Read urdf from ros parameter server then
     // setup actuators and mechanism control node.
@@ -186,7 +191,8 @@ public:
       }*/
 
     // Load a new instance of our fake hardware interface for Gazebo
-    sim_robot_hw_.reset(new GazeboRobotHW());
+    ROS_DEBUG_STREAM_NAMED("load","Loading GazeboRobotHW");
+    sim_robot_hw_.reset(new GazeboRobotHW(joint_names_));
 
     if(!sim_robot_hw_->initSim(parent_model_))
     {
@@ -195,6 +201,7 @@ public:
     }
 
     // Create the controller manager
+    ROS_DEBUG_STREAM_NAMED("load","Loading controller_manager");
     controller_manager_.reset
       (new controller_manager::ControllerManager(sim_robot_hw_.get(), nh_ ));
 
@@ -202,7 +209,31 @@ public:
     // simulation iteration.
     update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin
       (boost::bind(&GazeboRosControl::Update, this));
+  }
 
+  // Called by the world update start event
+  void Update()
+  {
+    // Get the simulation time and period
+    gazebo::common::Time gz_time_now = parent_model_->GetWorld()->GetSimTime();
+    ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
+    ros::Duration sim_period = sim_time_ros - last_sim_time_ros_;
+
+    // Check if we should update the controllers
+    if(sim_period >= control_period_) {
+      // Store this simulation time
+      last_sim_time_ros_ = sim_time_ros;
+
+      // Update the robot simulation with the state of the gazebo model
+      sim_robot_hw_->readSim(sim_time_ros, sim_period);
+
+      // Compute the controller commands
+      controller_manager_->update(sim_time_ros, sim_period);
+
+      // Update the gazebo model with the result of the controller
+      // computation
+      sim_robot_hw_->writeSim(sim_time_ros, sim_period);
+    }
   }
 
   // Get the URDF XML from the parameter server
@@ -338,31 +369,6 @@ public:
     return true;
   }
 
-  // Called by the world update start event
-  void Update()
-  {
-    // Get the simulation time and period
-    gazebo::common::Time gz_time_now = parent_model_->GetWorld()->GetSimTime();
-    ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
-    ros::Duration sim_period = sim_time_ros - last_sim_time_ros_;
-
-    // Check if we should update the controllers
-    if(sim_period >= control_period_) {
-      // Store this simulation time
-      last_sim_time_ros_ = sim_time_ros;
-
-      // Update the robot simulation with the state of the gazebo model
-      sim_robot_hw_->readSim(sim_time_ros, sim_period);
-
-      // Compute the controller commands
-      controller_manager_->update(sim_time_ros, sim_period);
-
-      // Update the gazebo model with the result of the controller
-      // computation
-      sim_robot_hw_->writeSim(sim_time_ros, sim_period);
-    }
-  }
-
 private:
 
   // Namespace
@@ -381,6 +387,9 @@ private:
   // Strings
   std::string robot_namespace_;
   std::string robot_description_;
+
+  // Joints in this plugin's scope
+  std::vector<std::string> joint_names_;
 
   // Simulated Hardware
   GazeboRobotHWPtr sim_robot_hw_;
