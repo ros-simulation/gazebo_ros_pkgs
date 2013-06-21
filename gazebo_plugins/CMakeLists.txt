@@ -241,6 +241,11 @@ set_target_properties(gazebo_ros_joint_pose_trajectory PROPERTIES COMPILE_FLAGS 
 add_dependencies(gazebo_ros_joint_pose_trajectory gazebo_msgs_gencpp)
 target_link_libraries(gazebo_ros_joint_pose_trajectory ${Boost_LIBRARIES})
 
+add_library(gazebo_ros_diff_drive src/gazebo_ros_diff_drive.cpp)
+set_target_properties(gazebo_ros_diff_drive PROPERTIES LINK_FLAGS "${ld_flags}")
+set_target_properties(gazebo_ros_diff_drive PROPERTIES COMPILE_FLAGS "${cxx_flags}")
+target_link_libraries(gazebo_ros_diff_drive ${GAZEBO_SYSTEM_LIBRARIES} ${catkin_LIBRARIES})
+
 add_executable(pub_joint_trajectory_test test/pub_joint_trajectory_test.cpp)
 set_target_properties(pub_joint_trajectory_test PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(pub_joint_trajectory_test PROPERTIES COMPILE_FLAGS "${cxx_flags}")
