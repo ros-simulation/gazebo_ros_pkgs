@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2013 Open Source Robotics Foundation
  *
@@ -616,6 +615,8 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
           gazebo_model_xml.FirstChild("gazebo") : model_tixml;
       if (model_tixml) 
       {
+        // Walk recursively through the entire SDF, locate plugin tags and
+        // add robotNamespace as a child with the correct namespace
         walkChildAddRobotNamespace(model_tixml);
       } 
       else 
@@ -634,6 +635,8 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("robot");
       if (model_tixml) 
       {
+        // Walk recursively through the entire URDF, locate plugin tags and
+        // add robotNamespace as a child with the correct namespace
         walkChildAddRobotNamespace(model_tixml);
       } 
       else 
