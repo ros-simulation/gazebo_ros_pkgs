@@ -48,6 +48,7 @@ GazeboRosDepthCamera::GazeboRosDepthCamera()
   this->point_cloud_connect_count_ = 0;
   this->depth_info_connect_count_ = 0;
   this->last_depth_image_camera_info_update_time_ = common::Time(0);
+  this->advertised_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,8 +70,6 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
   this->depth_ = this->depth;
   this->format_ = this->format;
   this->camera_ = this->depthCamera;
-
-  GazeboRosCameraUtils::Load(_parent, _sdf);
 
   // using a different default
   if (!_sdf->GetElement("imageTopicName"))
@@ -100,6 +99,11 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->GetValueDouble();
 
+  GazeboRosCameraUtils::Load(_parent, _sdf);
+}
+
+void GazeboRosDepthCamera::Advertise()
+{
   ros::AdvertiseOptions point_cloud_ao =
     ros::AdvertiseOptions::create<sensor_msgs::PointCloud2 >(
       this->point_cloud_topic_name_,1,
@@ -123,7 +127,10 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
         boost::bind( &GazeboRosDepthCamera::DepthInfoDisconnect,this),
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
+
+  this->advertised_ = true;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Increment count
@@ -176,6 +183,12 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
+  if (!this->advertised_)
+    Advertise();
+
   this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
   if (this->parentSensor->IsActive())
   {
@@ -209,6 +222,12 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
+  if (!this->advertised_)
+    Advertise();
+
   this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
   if (!this->parentSensor->IsActive())
   {
@@ -268,6 +287,12 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
+  if (!this->advertised_)
+    Advertise();
+
   //ROS_ERROR("camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
   this->sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
 

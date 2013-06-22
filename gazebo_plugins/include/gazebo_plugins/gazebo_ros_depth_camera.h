@@ -77,6 +77,9 @@ namespace gazebo
     /// \param take in SDF root element
     public: virtual void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
 
+    /// \brief Advertise point cloud and depth image
+    public: virtual void Advertise();
+
     /// \brief Update the controller
     protected: virtual void OnNewDepthFrame(const float *_image,
                    unsigned int _width, unsigned int _height,
@@ -146,6 +149,8 @@ namespace gazebo
     // overload with our own
     private: common::Time depth_sensor_update_time_;
     protected: ros::Publisher depth_image_camera_info_pub_;
+
+    private: bool advertised_;
   };
 
 }

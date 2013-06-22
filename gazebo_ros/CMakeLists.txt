@@ -74,7 +74,7 @@ install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
   )
 
 install(DIRECTORY include/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
    FILES_MATCHING PATTERN "*.h"
    PATTERN ".svn" EXCLUDE
 )
