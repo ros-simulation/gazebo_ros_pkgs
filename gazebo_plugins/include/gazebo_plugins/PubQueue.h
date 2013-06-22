@@ -102,6 +102,8 @@ class PubMultiQueue
     boost::mutex service_funcs_lock_;
     /// \brief If started, the thread that will call the service functions
     boost::thread service_thread_;
+    /// \brief Boolean flag to shutdown the service thread if PubMultiQueue is destructed
+    bool service_thread_running_;
     /// \brief Condition variable used to block and resume service_thread_
     boost::condition_variable service_cond_var_;
     /// \brief Mutex to accompany service_cond_var_
@@ -128,6 +130,7 @@ class PubMultiQueue
     {
       if(service_thread_.joinable())
       {
+        service_thread_running_ = false;
         notifyServiceThread();
         service_thread_.join();
       }
@@ -166,7 +169,7 @@ class PubMultiQueue
     /// in between cycles.
     void spin()
     {
-      while(ros::ok())
+      while(ros::ok() && service_thread_running_)
       {
         boost::unique_lock<boost::mutex> lock(service_cond_var_lock_);
         service_cond_var_.wait(lock);
@@ -177,6 +180,7 @@ class PubMultiQueue
     /// \brief Start a thread to call spin().
     void startServiceThread()
     {
+      service_thread_running_ = true;
       service_thread_ = boost::thread(boost::bind(&PubMultiQueue::spin, this));
     }
 
