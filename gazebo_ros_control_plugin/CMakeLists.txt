@@ -5,7 +5,7 @@ project(gazebo_ros_control_plugin)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
 find_package(catkin REQUIRED COMPONENTS roscpp gazebo_ros controller_manager
-  ros_control_gazebo hardware_interface pluginlib)
+  gazebo_ros_control_sim_interface hardware_interface pluginlib)
 
 # Find gazebo
 include (FindPkgConfig)
@@ -28,7 +28,7 @@ target_link_libraries(default_robot_sim ${catkin_LIBRARIES})
 ## INCLUDE_DIRS: 
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 catkin_package(
-    DEPENDS roscpp gazebo_ros controller_manager ros_control_gazebo pluginlib
+    DEPENDS roscpp gazebo_ros controller_manager gazebo_ros_control_sim_interface pluginlib
     CATKIN_DEPENDS # TODO
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO

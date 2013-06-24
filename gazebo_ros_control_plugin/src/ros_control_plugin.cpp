@@ -196,9 +196,9 @@ namespace gazebo_ros_control_plugin
       // gazebo model
       try {
         robot_sim_loader_.reset
-          (new pluginlib::ClassLoader<ros_control_gazebo::RobotSim>
-           ("ros_control_gazebo",
-            "ros_control_gazebo::RobotSim"));
+          (new pluginlib::ClassLoader<gazebo_ros_control_sim_interface::RobotSim>
+           ("gazebo_ros_control_sim_interface",
+            "gazebo_ros_control_sim_interface::RobotSim"));
 
         robot_sim_ = robot_sim_loader_->createInstance(robot_sim_type_str_);
 
@@ -398,7 +398,7 @@ namespace gazebo_ros_control_plugin
     gazebo::event::ConnectionPtr update_connection_;
 
     // Interface loader
-    boost::shared_ptr<pluginlib::ClassLoader<ros_control_gazebo::RobotSim> >
+    boost::shared_ptr<pluginlib::ClassLoader<gazebo_ros_control_sim_interface::RobotSim> >
       robot_sim_loader_;
     void load_robot_sim_srv();
 
@@ -411,7 +411,7 @@ namespace gazebo_ros_control_plugin
 
     // Robot simulator interface
     std::string robot_sim_type_str_;
-    boost::shared_ptr<ros_control_gazebo::RobotSim> robot_sim_;
+    boost::shared_ptr<gazebo_ros_control_sim_interface::RobotSim> robot_sim_;
 
     // Controller manager
     boost::shared_ptr<controller_manager::ControllerManager>
