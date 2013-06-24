@@ -125,8 +125,8 @@ namespace gazebo_ros_control_plugin
       ROS_DEBUG_STREAM_NAMED("loadThread","Using rosparam parameter \""<<robot_description_<<"\" for robot model description.");
 
       // Get the robot simulation interface type
-      if(sdf->HasElement("robotSimType")) {
-        robot_sim_type_str_ = sdf->GetValueString("robotSimType");
+      if(sdf_->HasElement("robotSimType")) {
+        robot_sim_type_str_ = sdf_->GetValueString("robotSimType");
       } else {
         robot_sim_type_str_ = "gazebo_ros_control/DefaultRobotSim";
         ROS_DEBUG_STREAM_NAMED("loadThread","RobotSim sub-class type not specified URDF/SDF, using default plugin.\""<<robot_sim_type_str_<<"\"");
@@ -257,20 +257,20 @@ namespace gazebo_ros_control_plugin
       while (urdf_string.empty())
       {
         std::string search_param_name;
-        if (nh_.searchParam(param_name, search_param_name))
+        if (model_nh_.searchParam(param_name, search_param_name))
         {
           ROS_INFO_ONCE("gazebo_ros_control plugin is waiting for model"
                         " URDF in parameter [%s] on the ROS param server.", search_param_name.c_str());
 
 
-          nh_.getParam(search_param_name, urdf_string);
+          model_nh_.getParam(search_param_name, urdf_string);
         }
         else
         {
           ROS_INFO("gazebo_ros_control plugin is waiting for model"
                    " URDF in parameter [%s] on the ROS param server.", robot_description_.c_str());
 
-          nh_.getParam(param_name, urdf_string);
+          model_nh_.getParam(param_name, urdf_string);
         }
 
         usleep(100000);

@@ -52,11 +52,12 @@
 // ROS
 #include <ros/ros.h>
 #include <angles/angles.h>
+#include <pluginlib/class_list_macros.h>
 
 // ros_control + gazebo
 #include <gazebo_ros_control_sim_interface/robot_sim.h>
 
-namespace gazebo_ros_control
+namespace gazebo_ros_control_plugin
 {
 
   class DefaultRobotSim : public gazebo_ros_control_sim_interface::RobotSim
@@ -105,7 +106,7 @@ namespace gazebo_ros_control
       for(unsigned int j=0; j < n_dof_; j++)
       {
         ROS_DEBUG_STREAM("Getting pointer to gazebo joint: "<<joint_names_[j]);
-        gazebo::physics::JointPtr joint = model->GetJoint(joint_names_[j]);
+        gazebo::physics::JointPtr joint = parent_model->GetJoint(joint_names_[j]);
         if (joint)
         {
           sim_joints_.push_back(joint);
