@@ -19,6 +19,9 @@ include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO
 add_library(${PROJECT_NAME} src/ros_control_plugin.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
+add_library(default_robot_sim src/default_robot_sim.cpp)
+target_link_libraries(default_robot_sim ${catkin_LIBRARIES})
+
 # TODO: fill in what other packages will need to use this package
 ## DEPENDS: system dependencies of this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
