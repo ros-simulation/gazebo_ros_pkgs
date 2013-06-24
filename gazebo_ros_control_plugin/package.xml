@@ -29,6 +29,6 @@
   <run_depend>pluginlib</run_depend> 
 
   <export>
-
+    <gazebo_ros_control_sim_interface plugin="${prefix}/robot_sim_plugins.xml"/>
   </export>
 </package>

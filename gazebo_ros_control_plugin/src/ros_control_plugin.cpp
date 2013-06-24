@@ -70,6 +70,8 @@ namespace gazebo_ros_control_plugin
     // Overloaded Gazebo entry point
     void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf) 
     {
+      ROS_INFO_STREAM("Loading ros_control_gazebo_plugin...");
+
       // Save pointers to the model
       parent_model_ = parent;
       sdf_ = sdf;
@@ -83,8 +85,10 @@ namespace gazebo_ros_control_plugin
     void loadThread()
     {
       // Error message if the model couldn't be found
-      if (!parent_model_)
+      if (!parent_model_) {
         ROS_ERROR_STREAM_NAMED("loadThread","parent model is NULL");
+        return;
+      }
 
       // Initialize ROS interface, if necessary (if we aren't using gazebo_ros_api_plugin)
       if(!ros::isInitialized())
@@ -128,9 +132,8 @@ namespace gazebo_ros_control_plugin
       if(sdf_->HasElement("robotSimType")) {
         robot_sim_type_str_ = sdf_->GetValueString("robotSimType");
       } else {
-        robot_sim_type_str_ = "gazebo_ros_control/DefaultRobotSim";
+        robot_sim_type_str_ = "gazebo_ros_control_plugin/DefaultRobotSim";
         ROS_DEBUG_STREAM_NAMED("loadThread","RobotSim sub-class type not specified URDF/SDF, using default plugin.\""<<robot_sim_type_str_<<"\"");
-        return;
       }
 
       // Get the controller period
@@ -221,6 +224,8 @@ namespace gazebo_ros_control_plugin
       } catch(pluginlib::LibraryLoadException &ex) {
         ROS_FATAL_STREAM("Failed to create robot simulation interface loader: "<<ex.what());
       }
+
+      ROS_INFO("Loaded gazebo_ros_control_plugin.");
     }
 
     // Called by the world update start event

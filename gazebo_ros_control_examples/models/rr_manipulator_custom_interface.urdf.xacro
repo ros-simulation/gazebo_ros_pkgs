@@ -8,13 +8,11 @@
 
   <gazebo>
     <plugin name="ros_control" filename="libgazebo_ros_control_plugin.so">
-      <robotNamespace>rr/ros_control</robotNamespace>
+      <ns>rr/ros_control</ns>
+      <robotSimType>gazebo_ros_control_examples/RobotSimRR</robotSimType>
       <controlPeriod>0.001</controlPeriod>
-      <joint>joint1</joint>
-      <joint>joint2</joint>
     </plugin>
   </gazebo>
 
   <xacro:include filename="$(find gazebo_ros_control_examples)/models/rr_manipulator_description.urdf.xacro"/>
-
 </robot>
