@@ -128,6 +128,7 @@ class PubMultiQueue
     {
       if(service_thread_.joinable())
       {
+        ros::shutdown();
         notifyServiceThread();
         service_thread_.join();
       }
