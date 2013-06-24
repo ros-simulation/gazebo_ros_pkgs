@@ -6,7 +6,7 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
 
-#include <ros_control_gazebo/robot_sim.h>
+#include <gazebo_ros_control_sim_interface/robot_sim.h>
 
 #include <angles/angles.h>
 
@@ -14,11 +14,11 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 
-namespace ros_control_gazebo_tests {
+namespace gazebo_ros_control_examples {
 
   using namespace hardware_interface;
 
-  class RobotSimRR : public ros_control_gazebo::RobotSim
+  class RobotSimRR : public gazebo_ros_control_sim_interface::RobotSim
   {
   public:
     RobotSimRR() :
@@ -122,4 +122,4 @@ namespace ros_control_gazebo_tests {
 
 }
 
-PLUGINLIB_DECLARE_CLASS(ros_control_gazebo_tests, RobotSimRR, ros_control_gazebo_tests::RobotSimRR, ros_control_gazebo::RobotSim)
+PLUGINLIB_DECLARE_CLASS(gazebo_ros_control_examples, RobotSimRR, gazebo_ros_control_examples::RobotSimRR, gazebo_ros_control_sim_interface::RobotSim)

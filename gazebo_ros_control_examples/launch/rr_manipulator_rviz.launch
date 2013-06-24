@@ -1,6 +1,6 @@
 <launch>
   <param name="robot_description"
-    command="$(find xacro)/xacro.py '$(find ros_control_gazebo_tests)/models/rr_manipulator.urdf.xacro'" />
+    command="$(find xacro)/xacro.py '$(find gazebo_ros_control_examples)/models/rr_manipulator.urdf.xacro'" />
 
   <!-- send fake joint values -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">

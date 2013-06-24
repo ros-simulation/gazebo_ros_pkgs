@@ -1,4 +1,4 @@
-ros_control_gazebo_tests
+gazebo_ros_control_examples
 ========================
 
 This package provides test and examples using `ros_control`-based
@@ -14,7 +14,7 @@ To bring up the simulator with a simple R-R manipulator and effort
 controllers, run:
 
 ```bash
-roslaunch ros_control_gazebo_tests rr_manipulator.launch
+roslaunch gazebo_ros_control_examples rr_manipulator.launch
 rosservice call /rr/ros_control/controller_manager/load_controller "name: 'joint1_position_controller'"
 rosservice call /rr/ros_control/controller_manager/load_controller "name: 'joint2_position_controller'"
 rosservice call /rr/ros_control/controller_manager/switch_controller "{start_controllers: ['joint1_position_controller','joint2_position_controller'], stop_controllers: [], strictness: 0}" 

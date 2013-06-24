@@ -20,7 +20,7 @@ The controller plugin can be specified by adding the following to your URDF or S
 <gazebo>
   <plugin name="ros_control" filename="libgazebo_ros_control_plugin.so">
     <robotNamespace>rr/ros_control</robotNamespace>
-    <robotSimType>ros_control_gazebo_tests/RobotSimRR</robotSimType>
+    <robotSimType>gazebo_ros_control_examples/RobotSimRR</robotSimType>
     <controlPeriod>0.001</controlPeriod>
   </plugin>
 </gazebo>

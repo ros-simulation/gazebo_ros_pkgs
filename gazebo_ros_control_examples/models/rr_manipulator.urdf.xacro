@@ -7,9 +7,9 @@
   <xacro:property name="PI" value="3.1415926535897931"/>
 
   <gazebo>
-    <plugin name="ros_control" filename="libros_control_gazebo_plugin.so">
+    <plugin name="ros_control" filename="libgazebo_ros_control_plugin.so">
       <ns>rr/ros_control</ns>
-      <robotSimType>ros_control_gazebo_tests/RobotSimRR</robotSimType>
+      <robotSimType>gazebo_ros_control_examples/RobotSimRR</robotSimType>
       <controlPeriod>0.001</controlPeriod>
     </plugin>
   </gazebo>

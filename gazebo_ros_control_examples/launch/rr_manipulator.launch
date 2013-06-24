@@ -2,7 +2,7 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
 
   <param name="robot_description"
-    command="$(find xacro)/xacro.py '$(find ros_control_gazebo_tests)/models/rr_manipulator.urdf.xacro'" />
+    command="$(find xacro)/xacro.py '$(find gazebo_ros_control_examples)/models/rr_manipulator.urdf.xacro'" />
 
   <rosparam ns="rr/ros_control">
     joint1_position_controller:
