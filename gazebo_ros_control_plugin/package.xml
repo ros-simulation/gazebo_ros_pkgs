@@ -2,6 +2,8 @@
   <name>gazebo_ros_control_plugin</name>
   <version>0.1.0</version>
   <description>gazebo_ros_control_plugin</description>
+
+  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
   <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
 
   <license>BSD</license>
@@ -9,6 +11,7 @@
   <url type="website">http://ros.org/wiki/gazebo_ros_control_plugin</url>
   <!-- <url type="bugtracker"></url> -->
 
+  <author>Dave Coleman</author>
   <author>Jonathan Bohren</author>
 
   <buildtool_depend>catkin</buildtool_depend>
