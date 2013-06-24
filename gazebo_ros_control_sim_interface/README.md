@@ -1,4 +1,4 @@
-ros_control_gazebo
+gazebo_ros_control_sim_interface
 ==================
 
 This package provides tools for using `ros_control`-based controllers in the
@@ -7,11 +7,11 @@ Gazebo simulator along with the `ros_control` controller manager.
 Interfaces
 ----------
 
-### ros_control_gazebo::RobotSim : public hardware_interface::RobotHW
+### gazebo_ros_control_sim_interface::RobotSim : public hardware_interface::RobotHW
 
-This class is a subclass of `hardware_interface::RobotHW` which provides an 
-API for the `ros_control_gazebo_plugin` to read and command joint properties 
-in the [Gazebo simulator](gazebosim.org).
+This class is a subclass of `hardware_interface::RobotHW` which provides an API
+for the `gazebo_ros_control_sim_interface_plugin` to read and command joint
+properties in the [Gazebo simulator](gazebosim.org).
 
 Sub-classes of `RobotSim` are built into dynamically-loaded
 [pluginlib](http://www.ros.org/wiki/pluginlib) plugins. The
