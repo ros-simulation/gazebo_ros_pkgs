@@ -198,7 +198,7 @@ namespace gazebo
     private: boost::thread deferred_load_thread_;
 
     /// \brief True if camera util is initialized
-    private: bool initialized_;
+    protected: bool initialized_;
 
     friend class GazeboRosMultiCamera;
   };
