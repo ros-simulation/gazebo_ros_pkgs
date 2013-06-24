@@ -5,7 +5,7 @@
 #include <ros/ros.h>
 #include <hardware_interface/robot_hw.h>
 
-namespace ros_control_gazebo {
+namespace gazebo_ros_control_sim_interface {
 
   class RobotSim : public hardware_interface::RobotHW 
   {
@@ -14,8 +14,9 @@ namespace ros_control_gazebo {
     virtual ~RobotSim() { }
 
     virtual bool initSim(
-        ros::NodeHandle nh, 
-        gazebo::physics::ModelPtr model) 
+        ros::NodeHandle model_nh, 
+        gazebo::physics::ModelPtr parent_model,
+        std::vector<std::string> joint_names) 
     {
       return true; 
     };

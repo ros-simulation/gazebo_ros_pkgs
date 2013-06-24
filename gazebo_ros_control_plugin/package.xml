@@ -1,12 +1,12 @@
 <package>
-  <name>ros_control_gazebo_plugin</name>
+  <name>gazebo_ros_control_plugin</name>
   <version>0.1.0</version>
-  <description>ros_control_gazebo_plugin</description>
+  <description>gazebo_ros_control_plugin</description>
   <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
 
   <license>BSD</license>
 
-  <url type="website">http://ros.org/wiki/ros_control_gazebo_plugin</url>
+  <url type="website">http://ros.org/wiki/gazebo_ros_control_plugin</url>
   <!-- <url type="bugtracker"></url> -->
 
   <author>Jonathan Bohren</author>
@@ -16,13 +16,13 @@
   <build_depend>roscpp</build_depend> 
   <build_depend>gazebo_ros</build_depend> 
   <build_depend>controller_manager</build_depend> 
-  <build_depend>ros_control_gazebo</build_depend> 
+  <build_depend>gazebo_ros_control_sim_interface</build_depend> 
   <build_depend>pluginlib</build_depend> 
 
   <run_depend>roscpp</run_depend> 
   <run_depend>gazebo_ros</run_depend> 
   <run_depend>controller_manager</run_depend> 
-  <run_depend>ros_control_gazebo</run_depend> 
+  <run_depend>gazebo_ros_control_sim_interface</run_depend> 
   <run_depend>pluginlib</run_depend> 
 
   <export>

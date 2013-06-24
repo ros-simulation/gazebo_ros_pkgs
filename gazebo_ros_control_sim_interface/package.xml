@@ -1,12 +1,12 @@
 <package>
-  <name>ros_control_gazebo</name>
+  <name>gazebo_ros_control_sim_interface</name>
   <version>0.1.0</version>
-  <description>ros_control_gazebo</description>
+  <description>gazebo_ros_control_sim_interface</description>
   <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer> -->
 
   <license>BSD</license>
 
-  <url type="website">http://ros.org/wiki/ros_control_gazebo</url>
+  <url type="website">http://ros.org/wiki/gazebo_ros_control_sim_interface</url>
   <!-- <url type="bugtracker"></url> -->
 
   <author>Jonathan Bohren</author>
