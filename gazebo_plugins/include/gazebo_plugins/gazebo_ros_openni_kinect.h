@@ -77,6 +77,9 @@ namespace gazebo
     /// \param take in SDF root element
     public: virtual void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
 
+    /// \brief Advertise point cloud and depth image
+    public: virtual void Advertise();
+
     /// \brief Update the controller
     protected: virtual void OnNewDepthFrame(const float *_image, 
                    unsigned int _width, unsigned int _height, 
@@ -139,6 +142,8 @@ namespace gazebo
 
     using GazeboRosCameraUtils::PublishCameraInfo;
     protected: virtual void PublishCameraInfo();
+
+    private: bool advertised_;
   };
 
 }
