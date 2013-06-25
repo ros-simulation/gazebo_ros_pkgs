@@ -52,12 +52,12 @@ The gazebo_ros_control Gazebo plugin also provides a
 custom interfaces between Gazebo and ros_control for simulating more complex
 mechanisms (nonlinear springs, linkages, etc).
 
-These plugins must inherit `gazebo_ros_control::RobotSim` which implements a
-simulated ros_control `hardware_interface::RobotHW`. `RobotSim` provides
+These plugins must inherit `gazebo_ros_control::RobotHWSim` which implements a
+simulated ros_control `hardware_interface::RobotHW`. `RobotHWSim` provides
 API-level access to read and command joint properties in the [Gazebo
 simulator](gazebosim.org).
 
-The respective `RobotSim` sub-class is specified in an URDF/SDF model and is
+The respective `RobotHWSim` sub-class is specified in an URDF/SDF model and is
 loaded when the robot model is loaded. For example, the following XML will load
 the default plugin (same behavior as when using no `<robotSimType>` tag:
 
@@ -66,7 +66,7 @@ the default plugin (same behavior as when using no `<robotSimType>` tag:
   <plugin name="ros_control" filename="libgazebo_ros_control.so">
     <robotNamespace>rr/ros_control</robotNamespace>
     <controlPeriod>0.001</controlPeriod>
-    <robotSimType>gazebo_ros_control/DefaultRobotSim</robotSimType>
+    <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
     <joint>shoulder_joint</joint>
     <joint>elbow_joint</joint>
   </plugin>

@@ -37,8 +37,8 @@
    Desc:   Hardware Interface for any simulated robot in Gazebo
 */
 
-#ifndef __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_SIM_H_
-#define __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_SIM_H_
+#ifndef __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_HW_SIM_H_
+#define __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_HW_SIM_H_
 
 // ros_control
 #include <hardware_interface/joint_command_interface.h>
@@ -55,12 +55,12 @@
 #include <pluginlib/class_list_macros.h>
 
 // ros_control + gazebo
-#include <gazebo_ros_control/robot_sim.h>
+#include <gazebo_ros_control/robot_hw_sim.h>
 
 namespace gazebo_ros_control
 {
 
-  class DefaultRobotSim : public gazebo_ros_control::RobotSim
+  class DefaultRobotHWSim : public gazebo_ros_control::RobotHWSim
   {
   public:
 
@@ -159,13 +159,13 @@ namespace gazebo_ros_control
     std::vector<gazebo::physics::JointPtr> sim_joints_;
   };
 
-  typedef boost::shared_ptr<DefaultRobotSim> DefaultRobotSimPtr;
+  typedef boost::shared_ptr<DefaultRobotHWSim> DefaultRobotHWSimPtr;
 
 }
 
 PLUGINLIB_DECLARE_CLASS(gazebo_ros_control,
-                        DefaultRobotSim,
-                        gazebo_ros_control::DefaultRobotSim,
-                        gazebo_ros_control::RobotSim)
+                        DefaultRobotHWSim,
+                        gazebo_ros_control::DefaultRobotHWSim,
+                        gazebo_ros_control::RobotHWSim)
 
-#endif // #ifndef __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_SIM_H_
+#endif // #ifndef __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_HW_SIM_H_
