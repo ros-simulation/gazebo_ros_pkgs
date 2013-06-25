@@ -1,0 +1,20 @@
+<?xml version="1.0"?> 
+<!-- Revolute-Revolute Manipulator -->
+<robot name="rr_manipulator"
+  xmlns:xacro="http://www.ros.org/wiki/xacro"
+  xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller">
+
+  <xacro:property name="PI" value="3.1415926535897931"/>
+
+  <gazebo>
+    <plugin name="ros_control" filename="libgazebo_ros_control_plugin.so">
+      <robotNamespace>rr/ros_control</robotNamespace>
+      <controlPeriod>0.001</controlPeriod>
+      <joint>joint1</joint>
+      <joint>joint2</joint>
+    </plugin>
+  </gazebo>
+
+  <xacro:include filename="$(find gazebo_ros_control_examples)/models/rr_manipulator_description.urdf.xacro"/>
+
+</robot>

@@ -1,0 +1,26 @@
+<package>
+  <name>gazebo_ros_control</name>
+  <version>0.2.0</version>
+  <description>gazebo_ros_control</description>
+
+  <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
+  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://gazebosim.org/wiki/Tutorials#ROS_Integration</url>
+  <url type="bugtracker">https://github.com/osrf/gazebo_ros_control/issues</url>
+  <url type="repository">https://github.com/osrf/gazebo_ros_control</url>
+
+  <author email="jbo@jhu.edu">Jonathan Bohren</author>
+  <author email="davetcoleman@gmail.com">Dave Coleman</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>gazebo_ros_control_plugin</run_depend> 
+  <run_depend>gazebo_ros_control_sim_interface</run_depend> 
+
+  <export>
+   <metapackage/>
+  </export>
+</package>
