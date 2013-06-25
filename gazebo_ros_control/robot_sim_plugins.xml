@@ -1,9 +1,9 @@
 <library path="lib/libdefault_robot_sim">
 
   <class
-    name="gazebo_ros_control_plugin/DefaultRobotSim"
-    type="gazebo_ros_control_plugin::DefaultRobotSim"
-    base_class_type="gazebo_ros_control_sim_interface::RobotSim">
+    name="gazebo_ros_control/DefaultRobotSim"
+    type="gazebo_ros_control::DefaultRobotSim"
+    base_class_type="gazebo_ros_control::RobotSim">
     <description>
       A default robot simulation interface which constructs joint handles from an SDF/URDF.
     </description>

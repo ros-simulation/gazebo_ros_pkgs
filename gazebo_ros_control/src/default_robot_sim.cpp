@@ -55,12 +55,12 @@
 #include <pluginlib/class_list_macros.h>
 
 // ros_control + gazebo
-#include <gazebo_ros_control_sim_interface/robot_sim.h>
+#include <gazebo_ros_control/robot_sim.h>
 
-namespace gazebo_ros_control_plugin
+namespace gazebo_ros_control
 {
 
-  class DefaultRobotSim : public gazebo_ros_control_sim_interface::RobotSim
+  class DefaultRobotSim : public gazebo_ros_control::RobotSim
   {
   public:
 
@@ -163,9 +163,9 @@ namespace gazebo_ros_control_plugin
 
 }
 
-PLUGINLIB_DECLARE_CLASS(gazebo_ros_control_plugin,
+PLUGINLIB_DECLARE_CLASS(gazebo_ros_control,
                         DefaultRobotSim,
-                        gazebo_ros_control_plugin::DefaultRobotSim,
-                        gazebo_ros_control_sim_interface::RobotSim)
+                        gazebo_ros_control::DefaultRobotSim,
+                        gazebo_ros_control::RobotSim)
 
 #endif // #ifndef __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_SIM_H_

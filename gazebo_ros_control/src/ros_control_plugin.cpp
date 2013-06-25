@@ -54,9 +54,9 @@
 
 // ros_control
 #include <controller_manager/controller_manager.h>
-#include <gazebo_ros_control_sim_interface/robot_sim.h>
+#include <gazebo_ros_control/robot_sim.h>
 
-namespace gazebo_ros_control_plugin
+namespace gazebo_ros_control
 {   
 
   class RosControlPlugin : public gazebo::ModelPlugin
@@ -132,7 +132,7 @@ namespace gazebo_ros_control_plugin
       if(sdf_->HasElement("robotSimType")) {
         robot_sim_type_str_ = sdf_->GetValueString("robotSimType");
       } else {
-        robot_sim_type_str_ = "gazebo_ros_control_plugin/DefaultRobotSim";
+        robot_sim_type_str_ = "gazebo_ros_control/DefaultRobotSim";
         ROS_DEBUG_STREAM_NAMED("loadThread","RobotSim sub-class type not specified URDF/SDF, using default plugin.\""<<robot_sim_type_str_<<"\"");
       }
 
@@ -199,9 +199,9 @@ namespace gazebo_ros_control_plugin
       // gazebo model
       try {
         robot_sim_loader_.reset
-          (new pluginlib::ClassLoader<gazebo_ros_control_sim_interface::RobotSim>
-           ("gazebo_ros_control_sim_interface",
-            "gazebo_ros_control_sim_interface::RobotSim"));
+          (new pluginlib::ClassLoader<gazebo_ros_control::RobotSim>
+           ("gazebo_ros_control",
+            "gazebo_ros_control::RobotSim"));
 
         robot_sim_ = robot_sim_loader_->createInstance(robot_sim_type_str_);
 
@@ -225,7 +225,7 @@ namespace gazebo_ros_control_plugin
         ROS_FATAL_STREAM("Failed to create robot simulation interface loader: "<<ex.what());
       }
 
-      ROS_INFO("Loaded gazebo_ros_control_plugin.");
+      ROS_INFO("Loaded gazebo_ros_control.");
     }
 
     // Called by the world update start event
@@ -403,7 +403,7 @@ namespace gazebo_ros_control_plugin
     gazebo::event::ConnectionPtr update_connection_;
 
     // Interface loader
-    boost::shared_ptr<pluginlib::ClassLoader<gazebo_ros_control_sim_interface::RobotSim> >
+    boost::shared_ptr<pluginlib::ClassLoader<gazebo_ros_control::RobotSim> >
       robot_sim_loader_;
     void load_robot_sim_srv();
 
@@ -416,7 +416,7 @@ namespace gazebo_ros_control_plugin
 
     // Robot simulator interface
     std::string robot_sim_type_str_;
-    boost::shared_ptr<gazebo_ros_control_sim_interface::RobotSim> robot_sim_;
+    boost::shared_ptr<gazebo_ros_control::RobotSim> robot_sim_;
 
     // Controller manager
     boost::shared_ptr<controller_manager::ControllerManager>

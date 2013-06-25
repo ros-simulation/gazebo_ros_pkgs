@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-project(gazebo_ros_control_plugin)
+project(gazebo_ros_control)
 
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
 find_package(catkin REQUIRED COMPONENTS roscpp gazebo_ros controller_manager
-  gazebo_ros_control_sim_interface hardware_interface pluginlib)
+   hardware_interface pluginlib)
 
 # Find gazebo
 include (FindPkgConfig)
@@ -28,8 +28,8 @@ target_link_libraries(default_robot_sim ${catkin_LIBRARIES})
 ## INCLUDE_DIRS: 
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 catkin_package(
-    DEPENDS roscpp gazebo_ros controller_manager gazebo_ros_control_sim_interface pluginlib
+    DEPENDS roscpp gazebo_ros controller_manager pluginlib
     CATKIN_DEPENDS # TODO
-    INCLUDE_DIRS # TODO include
+    INCLUDE_DIRS include
     LIBRARIES # TODO
 )

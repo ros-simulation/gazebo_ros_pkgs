@@ -5,7 +5,7 @@
 #include <ros/ros.h>
 #include <hardware_interface/robot_hw.h>
 
-namespace gazebo_ros_control_sim_interface {
+namespace gazebo_ros_control {
 
   class RobotSim : public hardware_interface::RobotHW 
   {

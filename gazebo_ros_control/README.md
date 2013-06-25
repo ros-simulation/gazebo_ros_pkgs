@@ -22,7 +22,7 @@ The plugin can be specified by adding the following to your URDF or SDF:
 
 ```xml
 <gazebo>
-  <plugin name="ros_control" filename="libgazebo_ros_control_plugin.so">
+  <plugin name="ros_control" filename="libgazebo_ros_control.so">
     <robotNamespace>rr/ros_control</robotNamespace>
     <controlPeriod>0.001</controlPeriod>
     <joint>shoulder_joint</joint>
@@ -63,7 +63,7 @@ the default plugin (same behavior as when using no `<robotSimType>` tag:
 
 ```xml
 <gazebo>
-  <plugin name="ros_control" filename="libgazebo_ros_control_plugin.so">
+  <plugin name="ros_control" filename="libgazebo_ros_control.so">
     <robotNamespace>rr/ros_control</robotNamespace>
     <controlPeriod>0.001</controlPeriod>
     <robotSimType>gazebo_ros_control/DefaultRobotSim</robotSimType>
