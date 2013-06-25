@@ -13,13 +13,13 @@
   <url type="bugtracker">https://github.com/osrf/gazebo_ros_pkgs/issues</url>
   <url type="repository">https://github.com/osrf/gazebo_ros_pkgs</url>
 
-  <author>John Hsu, Nate Koenig</author>>
+  <author>John Hsu, Nate Koenig, Dave Coleman</author>>
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>gazebo_msgs</run_depend>
   <run_depend>gazebo_plugins</run_depend>
   <run_depend>gazebo_ros</run_depend>
-  <run_depend>gazebo_msgs</run_depend>
 
   <export>
     <metapackage/>
