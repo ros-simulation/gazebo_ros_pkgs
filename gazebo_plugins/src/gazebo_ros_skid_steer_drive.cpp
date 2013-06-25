@@ -320,11 +320,11 @@ namespace gazebo {
     double vr = x_;
     double va = rot_;
 
-    wheel_speed_[LEFT_FRONT] = vr + va * wheel_separation_ / 2.0;
-    wheel_speed_[LEFT_REAR] = vr + va * wheel_separation_ / 2.0;
+    wheel_speed_[RIGHT_FRONT] = vr + va * wheel_separation_ / 2.0;
+    wheel_speed_[RIGHT_REAR] = vr + va * wheel_separation_ / 2.0;
 
-    wheel_speed_[RIGHT_FRONT] = vr - va * wheel_separation_ / 2.0;
-    wheel_speed_[RIGHT_REAR] = vr - va * wheel_separation_ / 2.0;
+    wheel_speed_[LEFT_FRONT] = vr - va * wheel_separation_ / 2.0;
+    wheel_speed_[LEFT_REAR] = vr - va * wheel_separation_ / 2.0;
 
   }
 
