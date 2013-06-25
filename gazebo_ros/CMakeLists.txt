@@ -22,7 +22,7 @@ catkin_python_setup()
 generate_dynamic_reconfigure_options(cfg/Physics.cfg)
 
 catkin_package(
-  INCLUDE_DIRS include
+  #INCLUDE_DIRS include
   LIBRARIES 
   gazebo_ros_api_plugin 
   gazebo_ros_paths_plugin
@@ -41,7 +41,7 @@ catkin_package(
   gazebo_plugins
   )
 
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_SYSTEM_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_SYSTEM_INCLUDE_DIRS})
 
 set(cxx_flags)
 foreach (item ${GAZEBO_SYSTEM_CFLAGS})
@@ -73,11 +73,12 @@ install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
 #  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
 
-install(DIRECTORY include/
-   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
-   PATTERN ".svn" EXCLUDE
-)
+# removed all include files
+#install( DIRECTORY include/
+#   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+#   FILES_MATCHING PATTERN "*.h"
+#   PATTERN ".svn" EXCLUDE
+#)
 
 install(PROGRAMS scripts/gazebo scripts/debug scripts/gzclient scripts/gzserver scripts/gdbrun scripts/perf scripts/spawn_model
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
