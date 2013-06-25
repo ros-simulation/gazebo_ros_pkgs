@@ -17,9 +17,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>gazebo_msgs</run_depend>
   <run_depend>gazebo_plugins</run_depend>
   <run_depend>gazebo_ros</run_depend>
-  <run_depend>gazebo_msgs</run_depend>
 
   <export>
     <metapackage/>
