@@ -1,0 +1,32 @@
+<package>
+  <name>gazebo_ros_control</name>
+  <version>0.1.0</version>
+  <description>gazebo_ros_control</description>
+
+  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+  <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/gazebo_ros_control</url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <author>Dave Coleman</author>
+  <author>Jonathan Bohren</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend> 
+  <build_depend>gazebo_ros</build_depend> 
+  <build_depend>controller_manager</build_depend> 
+  <build_depend>pluginlib</build_depend> 
+
+  <run_depend>roscpp</run_depend> 
+  <run_depend>gazebo_ros</run_depend> 
+  <run_depend>controller_manager</run_depend> 
+  <run_depend>pluginlib</run_depend> 
+
+  <export>
+    <gazebo_ros_control plugin="${prefix}/robot_sim_plugins.xml"/>
+  </export>
+</package>
