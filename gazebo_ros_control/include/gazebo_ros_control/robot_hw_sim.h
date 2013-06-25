@@ -1,5 +1,5 @@
-#ifndef __ROS_CONTROL_GAZEBO_ROBOT_SIM_H
-#define __ROS_CONTROL_GAZEBO_ROBOT_SIM_H
+#ifndef __ROS_CONTROL_GAZEBO_ROBOT_HW_SIM_H
+#define __ROS_CONTROL_GAZEBO_ROBOT_HW_SIM_H
 
 #include <gazebo/physics/physics.hh>
 #include <ros/ros.h>
@@ -7,11 +7,11 @@
 
 namespace gazebo_ros_control {
 
-  class RobotSim : public hardware_interface::RobotHW 
+  class RobotHWSim : public hardware_interface::RobotHW 
   {
   public:
 
-    virtual ~RobotSim() { }
+    virtual ~RobotHWSim() { }
 
     virtual bool initSim(
         ros::NodeHandle model_nh, 
@@ -29,4 +29,4 @@ namespace gazebo_ros_control {
 
 }
 
-#endif // ifndef __ROS_CONTROL_GAZEBO_ROBOT_SIM_H
+#endif // ifndef __ROS_CONTROL_GAZEBO_ROBOT_HW_SIM_H
