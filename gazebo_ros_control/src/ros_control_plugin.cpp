@@ -36,7 +36,7 @@
 
 /* Author: Dave Coleman, Jonathan Bohren
    Desc:   Gazebo plugin for ros_control that allows 'hardware_interfaces' to be plugged in
-           using pluginlib
+   using pluginlib
 */
 
 // Boost
@@ -64,10 +64,10 @@ class RosControlPlugin : public gazebo::ModelPlugin
 {
 public:
 
-  virtual ~RosControlPlugin() 
+  virtual ~RosControlPlugin()
   {
     // Disconnect from gazebo events
-    gazebo::event::Events::DisconnectWorldUpdateBegin(update_connection_);    
+    gazebo::event::Events::DisconnectWorldUpdateBegin(update_connection_);
   }
 
   // Overloaded Gazebo entry point
@@ -88,7 +88,7 @@ public:
   void loadThread()
   {
     // Error message if the model couldn't be found
-    if (!parent_model_) 
+    if (!parent_model_)
     {
       ROS_ERROR_STREAM_NAMED("loadThread","parent model is NULL");
       return;
@@ -144,47 +144,47 @@ public:
     if(sdf_->HasElement("controlPeriod"))
     {
       control_period_ = ros::Duration(sdf_->GetValueDouble("controlPeriod"));
-      // Get the simulation period
-      ros::Duration sim_period
-        (parent_model_->GetWorld()->GetPhysicsEngine()->GetUpdatePeriod());
-
-      // Check the period against the simulation period
-      if( control_period_ < sim_period )
-      {
-        ROS_ERROR_STREAM("Desired controller update period ("<<control_period_
-          <<" s) is faster than the gazebo simulation period ("
-          <<sim_period<<" s).");
-      }
-      else if( control_period_ > sim_period )
-      {
-        ROS_WARN_STREAM("Desired controller update period ("<<control_period_
-          <<" s) is slower than the gazebo simulation period ("
-          <<sim_period<<" s).");
-      }
     }
     else
     {
-      ROS_FATAL_STREAM("Control period not found in URDF/SDF");
-      return;
+      control_period_ = 0.001; // default amount
+      ROS_INFO_STREAM("Control period not found in URDF/SDF, used default value of 0.001");
+    }
+
+    // Get the simulation period
+    ros::Duration sim_period(parent_model_->GetWorld()->GetPhysicsEngine()->GetUpdatePeriod());
+      
+    // Check the period against the simulation period
+    if( control_period_ < sim_period )
+    {
+      ROS_ERROR_STREAM("Desired controller update period ("<<control_period_
+        <<" s) is faster than the gazebo simulation period ("
+        <<sim_period<<" s).");
+    }
+    else if( control_period_ > sim_period )
+    {
+      ROS_WARN_STREAM("Desired controller update period ("<<control_period_
+        <<" s) is slower than the gazebo simulation period ("
+        <<sim_period<<" s).");
     }
 
     /*
     // Get the joints this plugin is supposed to control
     if(sdf_->HasElement("joint"))
     {
-      // get all available joints
-      sdf::ElementPtr element_it = sdf_->GetElement("joint");
+    // get all available joints
+    sdf::ElementPtr element_it = sdf_->GetElement("joint");
 
-      while(element_it != sdf::ElementPtr() ) // do while not null
-      {
-        ROS_DEBUG_STREAM_NAMED("load","Parsed from plugin SDF joint w/name '"
-          << element_it->GetValueString() << "'");
+    while(element_it != sdf::ElementPtr() ) // do while not null
+    {
+    ROS_DEBUG_STREAM_NAMED("load","Parsed from plugin SDF joint w/name '"
+    << element_it->GetValueString() << "'");
 
-        // Add joint to vector
-        joints_.push_back( element_it->GetValueString() );
+    // Add joint to vector
+    joints_.push_back( element_it->GetValueString() );
 
-        element_it = element_it->GetNextElement("joint");
-      }
+    element_it = element_it->GetNextElement("joint");
+    }
     }
     */
 
@@ -424,7 +424,7 @@ public:
       }
       else
       {
-        ROS_WARN_STREAM_NAMED("ros_control_plugin","No type attribute for actuator " 
+        ROS_WARN_STREAM_NAMED("ros_control_plugin","No type attribute for actuator "
           << actuator_name);
         continue;
       }
@@ -436,7 +436,7 @@ public:
       // Copy data into joint struct
       JointData joint_data(joint_name, actuator_type);
       joints_.push_back(joint_data);
-      
+
     } // end for transmission elements
 
     return true;
@@ -459,7 +459,7 @@ private:
   gazebo::event::ConnectionPtr update_connection_;
 
   // Interface loader
-  boost::shared_ptr<pluginlib::ClassLoader<gazebo_ros_control::RobotHWSim> > robot_hw_sim_loader_;  
+  boost::shared_ptr<pluginlib::ClassLoader<gazebo_ros_control::RobotHWSim> > robot_hw_sim_loader_;
   void load_robot_hw_sim_srv();
 
   // Strings

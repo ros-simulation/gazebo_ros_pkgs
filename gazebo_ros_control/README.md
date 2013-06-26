@@ -8,10 +8,8 @@ with the [Gazebo](http://gazebosim.org/) simulator.
 This package provides a Gazebo plugin which instantiates a ros_control
 controller manager and connects it to a Gazebo model.
 
-The `<plugin>` tag has the following required elements:
- * `<controlPeriod>`: The period of the controller update (in seconds)
-
 It also has the following optional elements:
+ * `<controlPeriod>`: The period of the controller update (in seconds), defaults to 0.001
  * `<robotNamespace>`: The ROS namespace to be used for this instance of the plugin, defaults to robot name in URDF/SDF
  * `<robotParam>`: The location of the robot_descrption (URDF XML) on the parameter server, defaults to '/robot_description'
  * `<robotSimType>`: The pluginlib name of a custom robot sim interface to be used (see below for more details), defaults to 'DefaultRobotHWSim'
