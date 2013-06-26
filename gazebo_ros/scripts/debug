@@ -14,4 +14,4 @@ then
 fi
 
 setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
-. $setup_path/setup.sh && `rospack find gazebo_ros`/scripts/gdbrun gzserver $final
+. $setup_path/setup.sh && rosrun gazebo_ros gdbrun gzserver $final
