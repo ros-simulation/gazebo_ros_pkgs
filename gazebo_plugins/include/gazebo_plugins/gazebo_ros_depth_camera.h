@@ -150,7 +150,7 @@ namespace gazebo
     private: common::Time depth_sensor_update_time_;
     protected: ros::Publisher depth_image_camera_info_pub_;
 
-    private: bool advertised_;
+    private: event::ConnectionPtr load_connection_;
   };
 
 }

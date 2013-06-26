@@ -239,6 +239,11 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     boost::bind(&GazeboRosCameraUtils::LoadThread, this));
 }
 
+event::ConnectionPtr GazeboRosCameraUtils::OnLoad(const boost::function<void()>& load_function)
+{
+  return load_event_.Connect(load_function);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
 void GazeboRosCameraUtils::LoadThread()
@@ -463,6 +468,7 @@ void GazeboRosCameraUtils::Init()
   this->callback_queue_thread_ = boost::thread(
     boost::bind(&GazeboRosCameraUtils::CameraQueueThread, this));
 
+  load_event_();
   this->initialized_ = true;
 }
 

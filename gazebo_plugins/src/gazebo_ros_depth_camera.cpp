@@ -48,7 +48,6 @@ GazeboRosDepthCamera::GazeboRosDepthCamera()
   this->point_cloud_connect_count_ = 0;
   this->depth_info_connect_count_ = 0;
   this->last_depth_image_camera_info_update_time_ = common::Time(0);
-  this->advertised_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +98,7 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->GetValueDouble();
 
+  load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosDepthCamera::Advertise, this));
   GazeboRosCameraUtils::Load(_parent, _sdf);
 }
 
@@ -127,8 +127,6 @@ void GazeboRosDepthCamera::Advertise()
         boost::bind( &GazeboRosDepthCamera::DepthInfoDisconnect,this),
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
-
-  this->advertised_ = true;
 }
 
 
@@ -186,9 +184,6 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-  if (!this->advertised_)
-    Advertise();
-
   this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
   if (this->parentSensor->IsActive())
   {
@@ -224,9 +219,6 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
-
-  if (!this->advertised_)
-    Advertise();
 
   this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
   if (!this->parentSensor->IsActive())
@@ -289,9 +281,6 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
-
-  if (!this->advertised_)
-    Advertise();
 
   //ROS_ERROR("camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
   this->sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
