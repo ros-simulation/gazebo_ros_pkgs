@@ -22,9 +22,9 @@
 
 #include <string>
 
-#include <sensors/Sensor.hh>
-#include <sensors/MultiCameraSensor.hh>
-#include <sensors/SensorTypes.hh>
+#include <gazebo/sensors/Sensor.hh>
+#include <gazebo/sensors/MultiCameraSensor.hh>
+#include <gazebo/sensors/SensorTypes.hh>
 
 #include <gazebo_plugins/gazebo_ros_multicamera.h>
 
