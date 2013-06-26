@@ -79,6 +79,8 @@ namespace gazebo
                       const std::string &_camera_name_suffix,
                       double _hack_baseline);
 
+    public: event::ConnectionPtr OnLoad(const boost::function<void()>&);
+
     private: void Init();
 
     /// \brief Put camera data to the ROS topic
@@ -196,6 +198,7 @@ namespace gazebo
     private: sdf::ElementPtr sdf;
     private: void LoadThread();
     private: boost::thread deferred_load_thread_;
+    private: event::EventT<void()> load_event_;
 
     /// \brief True if camera util is initialized
     protected: bool initialized_;

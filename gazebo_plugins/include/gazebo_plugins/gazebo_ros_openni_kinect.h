@@ -143,7 +143,7 @@ namespace gazebo
     using GazeboRosCameraUtils::PublishCameraInfo;
     protected: virtual void PublishCameraInfo();
 
-    private: bool advertised_;
+    private: event::ConnectionPtr load_connection_;
   };
 
 }
