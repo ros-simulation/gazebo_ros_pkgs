@@ -554,7 +554,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
     while (pos1 != std::string::npos)
     {
       size_t pos2 = model_xml.find("/", pos1+10);
-      ROS_DEBUG(" pos %d %d",(int)pos1, (int)pos2);
+      //ROS_DEBUG(" pos %d %d",(int)pos1, (int)pos2);
       if (pos2 == std::string::npos || pos1 >= pos2)
       {
         ROS_ERROR("malformed package name?");
@@ -562,7 +562,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
       }
 
       std::string package_name = model_xml.substr(pos1+10,pos2-pos1-10);
-      ROS_DEBUG("package name [%s]", package_name.c_str());
+      //ROS_DEBUG("package name [%s]", package_name.c_str());
       std::string package_path = ros::package::getPath(package_name);
       if (package_path.empty())
       {
@@ -571,7 +571,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
         res.status_message = std::string("urdf reference package name does not exist: ")+package_name;
         return false;
       }
-      ROS_DEBUG("package name [%s] has path [%s]", package_name.c_str(), package_path.c_str());
+      ROS_DEBUG_ONCE("Package name [%s] has path [%s]", package_name.c_str(), package_path.c_str());
 
       model_xml.replace(pos1,(pos2-pos1),package_path);
       pos1 = model_xml.find(package_prefix,0);
