@@ -2092,7 +2092,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   std::ostringstream stream;
   stream << gazebo_model_xml;
   std::string gazebo_model_xml_string = stream.str();
-  ROS_DEBUG("Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
+  //ROS_DEBUG("Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
 
   // publish to factory topic
   gazebo::msgs::Factory msg;
