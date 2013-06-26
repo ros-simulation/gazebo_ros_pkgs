@@ -140,33 +140,33 @@ public:
       ROS_DEBUG_STREAM_NAMED("loadThread","RobotHWSim sub-class type not specified URDF/SDF, using default plugin.\""<<robot_hw_sim_type_str_<<"\"");
     }
 
-    // Get the controller period
+    // Get the Gazebo simulation period
+    ros::Duration sim_period(parent_model_->GetWorld()->GetPhysicsEngine()->GetUpdatePeriod());
+
+    // Decide the plugin control period
     if(sdf_->HasElement("controlPeriod"))
     {
       control_period_ = ros::Duration(sdf_->GetValueDouble("controlPeriod"));
+
+      // Check the period against the simulation period
+      if( control_period_ < sim_period )
+      {
+        ROS_ERROR_STREAM("Desired controller update period ("<<control_period_
+          <<" s) is faster than the gazebo simulation period ("<<sim_period<<" s).");
+      }
+      else if( control_period_ > sim_period )
+      {
+        ROS_WARN_STREAM("Desired controller update period ("<<control_period_
+          <<" s) is slower than the gazebo simulation period ("<<sim_period<<" s).");
+      }
     }
     else
     {
-      control_period_ = 0.001; // default amount
-      ROS_INFO_STREAM("Control period not found in URDF/SDF, used default value of 0.001");
+      control_period_ = sim_period;
+      ROS_DEBUG_STREAM("Control period not found in URDF/SDF, defaulting to Gazebo period of " 
+        << control_period_);
     }
 
-    // Get the simulation period
-    ros::Duration sim_period(parent_model_->GetWorld()->GetPhysicsEngine()->GetUpdatePeriod());
-      
-    // Check the period against the simulation period
-    if( control_period_ < sim_period )
-    {
-      ROS_ERROR_STREAM("Desired controller update period ("<<control_period_
-        <<" s) is faster than the gazebo simulation period ("
-        <<sim_period<<" s).");
-    }
-    else if( control_period_ > sim_period )
-    {
-      ROS_WARN_STREAM("Desired controller update period ("<<control_period_
-        <<" s) is slower than the gazebo simulation period ("
-        <<sim_period<<" s).");
-    }
 
     /*
     // Get the joints this plugin is supposed to control
