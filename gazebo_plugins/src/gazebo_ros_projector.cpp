@@ -26,10 +26,10 @@
 #include <utility>
 #include <sstream>
 
-#include <rendering/Rendering.hh>
-#include <rendering/Scene.hh>
-#include <rendering/Visual.hh>
-#include <rendering/RTShaderSystem.hh>
+#include <gazebo/rendering/Rendering.hh>
+#include <gazebo/rendering/Scene.hh>
+#include <gazebo/rendering/Visual.hh>
+#include <gazebo/rendering/RTShaderSystem.hh>
 #include <gazebo_plugins/gazebo_ros_projector.h>
 
 #include <std_msgs/String.h>
