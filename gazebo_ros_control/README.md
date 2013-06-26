@@ -1,9 +1,9 @@
 # Gazebo ros_control Interfaces
 
 This is a ROS package for integrating the `ros_control` controller architecture
-with the [Gazebo](gazebosim.org) simulator. 
+with the [Gazebo](http://gazebosim.org/) simulator. 
 
-### Gazebo Plugin
+## Gazebo Plugin
 
 This package provides a Gazebo plugin which instantiates a ros_control
 controller manager and connects it to a Gazebo model.
@@ -43,7 +43,7 @@ For the purposes of gazeb_ros_control in its current implementation, the only im
 
 The rest of the names and elements are ignored for the time being.
 
-### Default gazebo_ros_control Behavior
+## Default gazebo_ros_control Behavior
 
 By default, without a `<robotSimType>` tag, `gazebo_ros_control` will attempt
 to get all of the information it needs to interface with ros_control-based
@@ -55,7 +55,7 @@ The default behavior provides the following ros_control interfaces:
  * `hardware_interface::EffortJointInterface`
  * `hardware_interface::VelocityJointInterface`
 
-### Custom ros_control Simulation Plugins
+## Custom ros_control Simulation Plugins
 
 The gazebo_ros_control Gazebo plugin also provides a
 [pluginlib](http://www.ros.org/wiki/pluginlib)-based interface to implement
@@ -81,7 +81,7 @@ the default plugin (same behavior as when using no `<robotSimType>` tag:
 </gazebo>
 ```
 
-### Future Direction
+## Future Direction
 
 A todo list:
  - Implement tranmissions
