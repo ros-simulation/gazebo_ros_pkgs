@@ -54,7 +54,7 @@
 
 // ros_control
 #include <controller_manager/controller_manager.h>
-#include <gazebo_ros_control/robot_sim.h>
+#include <gazebo_ros_control/robot_hw_sim.h>
 
 namespace gazebo_ros_control
 {   
@@ -130,10 +130,10 @@ namespace gazebo_ros_control
 
       // Get the robot simulation interface type
       if(sdf_->HasElement("robotSimType")) {
-        robot_sim_type_str_ = sdf_->GetValueString("robotSimType");
+        robot_hw_sim_type_str_ = sdf_->GetValueString("robotSimType");
       } else {
-        robot_sim_type_str_ = "gazebo_ros_control/DefaultRobotSim";
-        ROS_DEBUG_STREAM_NAMED("loadThread","RobotSim sub-class type not specified URDF/SDF, using default plugin.\""<<robot_sim_type_str_<<"\"");
+        robot_hw_sim_type_str_ = "gazebo_ros_control/DefaultRobotHWSim";
+        ROS_DEBUG_STREAM_NAMED("loadThread","RobotHWSim sub-class type not specified URDF/SDF, using default plugin.\""<<robot_hw_sim_type_str_<<"\"");
       }
 
       // Get the controller period
@@ -195,17 +195,17 @@ namespace gazebo_ros_control
         return;
         }*/
 
-      // Load the RobotSim abstraction to interface the controllers with the
+      // Load the RobotHWSim abstraction to interface the controllers with the
       // gazebo model
       try {
-        robot_sim_loader_.reset
-          (new pluginlib::ClassLoader<gazebo_ros_control::RobotSim>
+        robot_hw_sim_loader_.reset
+          (new pluginlib::ClassLoader<gazebo_ros_control::RobotHWSim>
            ("gazebo_ros_control",
-            "gazebo_ros_control::RobotSim"));
+            "gazebo_ros_control::RobotHWSim"));
 
-        robot_sim_ = robot_sim_loader_->createInstance(robot_sim_type_str_);
+        robot_hw_sim_ = robot_hw_sim_loader_->createInstance(robot_hw_sim_type_str_);
 
-        if(!robot_sim_->initSim(model_nh_, parent_model_, joint_names_)) {
+        if(!robot_hw_sim_->initSim(model_nh_, parent_model_, joint_names_)) {
           ROS_FATAL("Could not initialize robot simulation interface");
           return;
         }
@@ -213,7 +213,7 @@ namespace gazebo_ros_control
         // Create the controller manager
         ROS_DEBUG_STREAM_NAMED("load","Loading controller_manager");
         controller_manager_.reset
-          (new controller_manager::ControllerManager(robot_sim_.get(), model_nh_));
+          (new controller_manager::ControllerManager(robot_hw_sim_.get(), model_nh_));
 
         // Listen to the update event. This event is broadcast every
         // simulation iteration.
@@ -242,14 +242,14 @@ namespace gazebo_ros_control
         last_sim_time_ros_ = sim_time_ros;
 
         // Update the robot simulation with the state of the gazebo model
-        robot_sim_->readSim(sim_time_ros, sim_period);
+        robot_hw_sim_->readSim(sim_time_ros, sim_period);
 
         // Compute the controller commands
         controller_manager_->update(sim_time_ros, sim_period);
 
         // Update the gazebo model with the result of the controller
         // computation
-        robot_sim_->writeSim(sim_time_ros, sim_period);
+        robot_hw_sim_->writeSim(sim_time_ros, sim_period);
       }
     }
 
@@ -403,9 +403,9 @@ namespace gazebo_ros_control
     gazebo::event::ConnectionPtr update_connection_;
 
     // Interface loader
-    boost::shared_ptr<pluginlib::ClassLoader<gazebo_ros_control::RobotSim> >
-      robot_sim_loader_;
-    void load_robot_sim_srv();
+    boost::shared_ptr<pluginlib::ClassLoader<gazebo_ros_control::RobotHWSim> >
+      robot_hw_sim_loader_;
+    void load_robot_hw_sim_srv();
 
     // Strings
     std::string robot_namespace_;
@@ -415,8 +415,8 @@ namespace gazebo_ros_control
     std::vector<std::string> joint_names_;
 
     // Robot simulator interface
-    std::string robot_sim_type_str_;
-    boost::shared_ptr<gazebo_ros_control::RobotSim> robot_sim_;
+    std::string robot_hw_sim_type_str_;
+    boost::shared_ptr<gazebo_ros_control::RobotHWSim> robot_hw_sim_;
 
     // Controller manager
     boost::shared_ptr<controller_manager::ControllerManager>
