@@ -85,6 +85,15 @@ namespace gazebo {
       this->robot_namespace_ =
         _sdf->GetElement("robotNamespace")->GetValueString() + "/";
     }
+    
+    this->broadcast_tf_ = false;
+    if (!_sdf->HasElement("broadcastTF")) {
+      if (!this->broadcast_tf_) ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to false.",this->robot_namespace_.c_str());
+      else ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to true.",this->robot_namespace_.c_str());
+          
+    } else {
+      this->broadcast_tf_ = _sdf->GetElement("broadcastTF")->GetValueBool();
+    }
 
     // TODO write error if joint doesn't exist!
     this->left_front_joint_name_ = "left_front_joint";
@@ -359,7 +368,7 @@ namespace gazebo {
     tf::Vector3 vt(pose.pos.x, pose.pos.y, pose.pos.z);
 
     tf::Transform base_footprint_to_odom(qt, vt);
-    transform_broadcaster_->sendTransform(
+    if (this->broadcast_tf_) transform_broadcaster_->sendTransform(
         tf::StampedTransform(base_footprint_to_odom, current_time,
             odom_frame, base_footprint_frame));
 
