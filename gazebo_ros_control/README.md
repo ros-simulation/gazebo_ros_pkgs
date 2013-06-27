@@ -8,24 +8,21 @@ with the [Gazebo](http://gazebosim.org/) simulator.
 This package provides a Gazebo plugin which instantiates a ros_control
 controller manager and connects it to a Gazebo model.
 
-It also has the following optional elements:
- * `<controlPeriod>`: The period of the controller update (in seconds), defaults to 0.001
- * `<robotNamespace>`: The ROS namespace to be used for this instance of the plugin, defaults to robot name in URDF/SDF
- * `<robotParam>`: The location of the robot_descrption (URDF XML) on the parameter server, defaults to '/robot_description'
- * `<robotSimType>`: The pluginlib name of a custom robot sim interface to be used (see below for more details), defaults to 'DefaultRobotHWSim'
-
 The plugin is used by adding the following to your URDF or SDF:
 
 ```xml
 <gazebo>
-  <plugin name="ros_control" filename="libgazebo_ros_control.so">
-    <robotNamespace>/MYROBOT</robotNamespace>
-    <controlPeriod>0.001</controlPeriod>
-  </plugin>
+  <plugin name="ros_control" filename="libgazebo_ros_control.so"/>
 </gazebo>
 ```
 
-To specify which joints are to be actuated by ros_control, you must add transmission tags to your URDF for every joint:
+The ros_control `<plugin>` tag also has the following optional child elements:
+ * `<robotNamespace>`: The ROS namespace to be used for this instance of the plugin, defaults to robot name in URDF/SDF
+ * `<controlPeriod>`: The period of the controller update (in seconds), defaults to 0.001
+ * `<robotParam>`: The location of the robot_descrption (URDF XML) on the parameter server, defaults to '/robot_description'
+ * `<robotSimType>`: The pluginlib name of a custom robot sim interface to be used (see below for more details), defaults to 'DefaultRobotHWSim'
+
+To specify which joints should be actuated by ros_control, you must add transmission tags to your URDF for every joint:
 
 ```xml
   <transmission name="tran1" type="transmission_interface/SimpleTransmission">

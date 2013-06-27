@@ -28,9 +28,9 @@
 
 #include <gazebo_plugins/gazebo_ros_openni_kinect.h>
 
-#include <sensors/Sensor.hh>
-#include <sdf/interface/SDF.hh>
-#include <sensors/SensorTypes.hh>
+#include <gazebo/sensors/Sensor.hh>
+#include <gazebo/sdf/interface/SDF.hh>
+#include <gazebo/sensors/SensorTypes.hh>
 
 // for creating PointCloud2 from pcl point cloud
 #include "pcl/ros/conversions.h"
@@ -49,7 +49,6 @@ GazeboRosOpenniKinect::GazeboRosOpenniKinect()
   this->point_cloud_connect_count_ = 0;
   this->depth_info_connect_count_ = 0;
   this->last_depth_image_camera_info_update_time_ = common::Time(0);
-  this->advertised_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,6 +99,7 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->GetValueDouble();
 
+  load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosOpenniKinect::Advertise, this));
   GazeboRosCameraUtils::Load(_parent, _sdf);
 }
 
@@ -128,8 +128,6 @@ void GazeboRosOpenniKinect::Advertise()
         boost::bind( &GazeboRosOpenniKinect::DepthInfoDisconnect,this), 
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
-
-  this->advertised_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -186,9 +184,6 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-  if (!this->advertised_)
-    Advertise();
-
   this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
   if (this->parentSensor->IsActive())
   {
@@ -224,9 +219,6 @@ void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
-
-  if (!this->advertised_)
-    Advertise();
 
   //ROS_ERROR("camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
   this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
