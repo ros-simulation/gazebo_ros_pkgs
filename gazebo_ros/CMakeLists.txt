@@ -8,8 +8,6 @@ find_package(catkin REQUIRED COMPONENTS roslib roscpp geometry_msgs std_srvs tf 
 include (FindPkgConfig)
 if (PKG_CONFIG_FOUND)
   pkg_check_modules(GAZEBO_SYSTEM REQUIRED gazebo)
-  # pkg_check_modules(GAZEBO_ODE REQUIRED gazebo_ode)
-  # pkg_check_modules(GAZEBO_TRANSPORT REQUIRED gazebo_transport)
   pkg_check_modules(XML libxml-2.0)
 else()
   message(FATAL_ERROR "pkg-config is required; please install it")
