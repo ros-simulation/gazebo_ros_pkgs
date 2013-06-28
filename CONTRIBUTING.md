@@ -11,7 +11,7 @@ can more easily recognize contributions which require their attention.
 
 ## Style 
 
-We follow the [http://ros.org/wiki/CppStyleGuide | C++ ROS style guidelines] and 
+We follow the [C++ ROS style guidelines](http://ros.org/wiki/CppStyleGuide) and 
 conventions as closely as possible. However, because the plugins inherit from Gazebo 
 classes and Gazebo follows a very different formatting standard, there are a few 
 exceptions where Gazebo's function names do not comply to the ROS guidelines.
