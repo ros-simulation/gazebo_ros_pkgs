@@ -10,9 +10,6 @@ Wrappers, tools and additional API's for using ROS with the Gazebo simulator. Fo
 
 ### Develop and Contribute
 
-The Gazebo plugins in this repository follow the C++ [ROS style guidelines](http://ros.org/doc/groovy/api/roscpp/html) and conventions as closely as possible. However, because the plugins inherit from Gazebo classes and Gazebo follows a very different formatting standard, there are a few exceptions where Gazebo's function names do not comply to the ROS guidelines. This is fine, but code contributions should follow ROS's style as close as possible.
-
-We welcome any contributions to this repo and encourage you to fork the project then send pull requests back to this parent repo. Thanks for your help!
-
+See [Contribute](https://github.com/ros-simulation/gazebo_ros_pkgs/blob/hydro-devel/CONTRIBUTING.md) page.
 
 
