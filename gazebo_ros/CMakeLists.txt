@@ -1,9 +1,20 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gazebo_ros)
 
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
-find_package(catkin REQUIRED COMPONENTS roslib roscpp geometry_msgs std_srvs tf rosgraph_msgs dynamic_reconfigure message_generation std_msgs gazebo_msgs)
+find_package(catkin REQUIRED COMPONENTS 
+  roslib
+  roscpp
+  geometry_msgs
+  std_srvs
+  tf
+  rosgraph_msgs
+  dynamic_reconfigure
+  message_generation
+  std_msgs
+  gazebo_msgs
+)
 
 include (FindPkgConfig)
 if (PKG_CONFIG_FOUND)
@@ -20,7 +31,6 @@ catkin_python_setup()
 generate_dynamic_reconfigure_options(cfg/Physics.cfg)
 
 catkin_package(
-  #INCLUDE_DIRS include
   LIBRARIES 
   gazebo_ros_api_plugin 
   gazebo_ros_paths_plugin
@@ -37,7 +47,7 @@ catkin_package(
   std_msgs 
   gazebo_msgs
   gazebo_plugins
-  )
+)
 
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_SYSTEM_INCLUDE_DIRS})
 
@@ -66,23 +76,14 @@ set_target_properties(gazebo_ros_paths_plugin PROPERTIES LINK_FLAGS "${ld_flags}
 target_link_libraries(gazebo_ros_paths_plugin ${GAZEBO_SYSTEM_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
-#  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
-
-# removed all include files
-#install( DIRECTORY include/
-#   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-#)
 
 install(PROGRAMS scripts/gazebo scripts/debug scripts/gzclient scripts/gzserver scripts/gdbrun scripts/perf scripts/spawn_model
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+)
 
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-  )
+)
 
