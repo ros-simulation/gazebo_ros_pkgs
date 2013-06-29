@@ -22,7 +22,7 @@ import rospy, sys, os
 import string
 import warnings
 
-from gazebo import gazebo_interface
+from gazebo_ros import gazebo_interface
 
 from gazebo_msgs.msg import *
 from gazebo_msgs.srv import *

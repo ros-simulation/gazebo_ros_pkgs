@@ -1,5 +1,6 @@
 # Python stuff
 *.pyc
+__init__.py
 
 # Data files
 *.dat

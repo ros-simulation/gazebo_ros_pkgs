@@ -2133,15 +2133,18 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
       res.status_message = std::string("SpawnModel: Model pushed to spawn queue, but spawn service")
         + std::string(" timed out waiting for model to appear in simulation under the name ")
         + model_name;
-
       return true;
     }
+
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
       if (world_->GetModel(model_name)) 
         break;
     }
-    ROS_DEBUG_ONCE("Waiting for spawning model (%s)",model_name.c_str());
+
+    ROS_DEBUG_STREAM_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now() 
+      << " for model " << model_name << " to spawn");
+
     usleep(2000);
   }
 
