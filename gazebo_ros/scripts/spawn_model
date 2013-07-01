@@ -195,6 +195,7 @@ class SpawnModel():
 
         # wait for model to exist
         rospy.init_node('spawn_model')
+
         if not self.wait_for_model == "":
           rospy.Subscriber("%s/model_states"%(self.gazebo_namespace), ModelStates, self.checkForModel)
           while not rospy.is_shutdown() and not self.wait_for_model_exists:
@@ -253,9 +254,11 @@ class SpawnModel():
 
         # spawn model
         if self.urdf_format:
-          success = gazebo_interface.spawn_urdf_model_client(self.model_name, model_xml, self.robot_namespace, initial_pose, self.reference_frame, self.gazebo_namespace)
+          success = gazebo_interface.spawn_urdf_model_client(self.model_name, model_xml, self.robot_namespace, 
+                                                             initial_pose, self.reference_frame, self.gazebo_namespace)
         elif self.sdf_format:
-          success = gazebo_interface.spawn_sdf_model_client(self.model_name, model_xml, self.robot_namespace, initial_pose, self.reference_frame, self.gazebo_namespace)
+          success = gazebo_interface.spawn_sdf_model_client(self.model_name, model_xml, self.robot_namespace, 
+                                                            initial_pose, self.reference_frame, self.gazebo_namespace)
         else:
           print "Error: should not be here in spawner helper script, there is a bug"
           sys.exit(0)
@@ -263,7 +266,8 @@ class SpawnModel():
         # set model configuration before unpause if user requested
         if len(self.joint_names) != 0:
           try:
-            success = gazebo_interface.set_model_configuration_client(self.model_name, self.param_name, self.joint_names, self.joint_positions, self.gazebo_namespace)
+            success = gazebo_interface.set_model_configuration_client(self.model_name, self.param_name, 
+                                                                      self.joint_names, self.joint_positions, self.gazebo_namespace)
           except rospy.ServiceException, e:
             print "set model configuration service call failed: %s"%e
 
@@ -282,7 +286,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print usage()
     else:
-        rospy.loginfo("spawn_model script started")
+        print("spawn_model script started") # make this a print incase roscore has not been started
         sm = SpawnModel()
         sm.parseUserInputs()
         sm.callSpawnService()
