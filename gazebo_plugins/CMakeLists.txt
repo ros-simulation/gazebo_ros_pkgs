@@ -23,30 +23,9 @@ find_package(catkin REQUIRED COMPONENTS
   rosconsole
 )
 
-# include(FindPkgConfig)
-# if (PKG_CONFIG_FOUND)
-#   pkg_check_modules(GAZEBO gazebo)
-# else()
-#   message(FATAL_ERROR "FindPkgConfig")
-# endif()
-
-# include (FindPkgConfig)
-# if (PKG_CONFIG_FOUND)
-#   # pkg_check_modules(GAZEBO gazebo)
-#   # set(ENV{PKG_CONFIG_PATH} "${PROJECT_SOURCE_DIR}/gazebo/lib/pkgconfig")
-#   pkg_check_modules(GAZEBO_SERVER REQUIRED gazebo)
-#   pkg_check_modules(GAZEBO_ODE REQUIRED gazebo_ode)
-#   pkg_check_modules(GAZEBO_TRANSPORT REQUIRED gazebo_transport)
-#   pkg_check_modules(XML libxml-2.0)
-# else()
-#   message(FATAL_ERROR "pkg-config is required; please install it")
-# endif()
-
 include (FindPkgConfig)
 if (PKG_CONFIG_FOUND)
   pkg_check_modules(GAZEBO_SYSTEM REQUIRED gazebo)
-  # pkg_check_modules(GAZEBO_ODE REQUIRED gazebo_ode)
-  # pkg_check_modules(GAZEBO_TRANSPORT REQUIRED gazebo_transport)
   pkg_check_modules(XML libxml-2.0)
 else()
   message(FATAL_ERROR "pkg-config is required; please install it")
@@ -257,6 +236,7 @@ add_executable(pub_joint_trajectory_test test/pub_joint_trajectory_test.cpp)
 set_target_properties(pub_joint_trajectory_test PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(pub_joint_trajectory_test PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(pub_joint_trajectory_test ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GAZEBO_SYSTEM_LIBRARIES})
+add_dependencies(pub_joint_trajectory_test ${catkin_EXPORTED_TARGETS}) # don't build until gazebo_msgs is done
 
 # exec_program("glxinfo" OUTPUT_VARIABLE glx_out RETURN_VALUE glx_val)
 # if(${glx_val} EQUAL 0)
