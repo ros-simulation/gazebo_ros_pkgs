@@ -103,6 +103,7 @@ namespace gazebo {
       tf::TransformBroadcaster *transform_broadcaster_;
       nav_msgs::Odometry odom_;
       std::string tf_prefix_;
+      bool broadcast_tf_;
 
       boost::mutex lock;
 
