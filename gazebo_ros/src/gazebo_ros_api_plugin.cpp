@@ -145,6 +145,7 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   // below needs the world to be created first
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::loadGazeboRosApiPlugin,this,_1));
 
+  plugin_loaded_ = true;
   ROS_INFO("Finished loading Gazebo ROS API Plugin.");
 }
 
