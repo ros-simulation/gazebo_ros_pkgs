@@ -137,7 +137,7 @@ public:
       robot_hw_sim_type_str_ = sdf_->GetValueString("robotSimType");
     } else {
       robot_hw_sim_type_str_ = "gazebo_ros_control/DefaultRobotHWSim";
-      ROS_DEBUG_STREAM_NAMED("loadThread","RobotHWSim sub-class type not specified URDF/SDF, using default plugin.\""<<robot_hw_sim_type_str_<<"\"");
+      ROS_DEBUG_STREAM_NAMED("loadThread","Using default plugin for RobotHWSim (none specified in URDF/SDF)\""<<robot_hw_sim_type_str_<<"\"");
     }
 
     // Get the Gazebo simulation period
@@ -289,7 +289,7 @@ public:
 
       usleep(100000);
     }
-    ROS_INFO("gazebo_ros_control got urdf from param server, parsing...");
+    ROS_DEBUG_STREAM_NAMED("gazebo_ros_control", "Recieved urdf from param server, parsing...");
 
     return urdf_string;
   }
