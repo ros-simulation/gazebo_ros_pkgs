@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_ros 
   controller_manager
   hardware_interface 
+  transmission_interface
   pluginlib)
 
 # Find gazebo
@@ -22,6 +23,7 @@ catkin_package(
   gazebo_ros 
   controller_manager 
   pluginlib
+  transmission_interface
   INCLUDE_DIRS include
   )
 

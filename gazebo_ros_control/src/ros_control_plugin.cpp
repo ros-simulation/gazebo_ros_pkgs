@@ -44,7 +44,6 @@
 
 // ROS
 #include <ros/ros.h>
-
 #include <pluginlib/class_loader.h>
 
 // Gazebo
@@ -56,6 +55,7 @@
 // ros_control
 #include <controller_manager/controller_manager.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
+#include <transmission_interface/transmission_parser.h>
 
 namespace gazebo_ros_control
 {
@@ -163,30 +163,10 @@ public:
     else
     {
       control_period_ = sim_period;
-      ROS_DEBUG_STREAM("Control period not found in URDF/SDF, defaulting to Gazebo period of " 
+      ROS_DEBUG_STREAM("Control period not found in URDF/SDF, defaulting to Gazebo period of "
         << control_period_);
     }
 
-
-    /*
-    // Get the joints this plugin is supposed to control
-    if(sdf_->HasElement("joint"))
-    {
-    // get all available joints
-    sdf::ElementPtr element_it = sdf_->GetElement("joint");
-
-    while(element_it != sdf::ElementPtr() ) // do while not null
-    {
-    ROS_DEBUG_STREAM_NAMED("load","Parsed from plugin SDF joint w/name '"
-    << element_it->GetValueString() << "'");
-
-    // Add joint to vector
-    joints_.push_back( element_it->GetValueString() );
-
-    element_it = element_it->GetNextElement("joint");
-    }
-    }
-    */
 
     // Get parameters/settings for controllers from ROS param server
     model_nh_ = ros::NodeHandle(robot_namespace_);
@@ -196,7 +176,7 @@ public:
     // Read urdf from ros parameter server then
     // setup actuators and mechanism control node.
     // This call will block if ROS is not properly initialized.
-    if (!loadControllerManagerFromURDF())
+    if (!parseTransmissionsFromURDF())
     {
       ROS_ERROR("Error parsing URDF in gazebo_ros_control plugin, plugin not active.\n");
       return;
@@ -213,7 +193,7 @@ public:
 
       robot_hw_sim_ = robot_hw_sim_loader_->createInstance(robot_hw_sim_type_str_);
 
-      if(!robot_hw_sim_->initSim(model_nh_, parent_model_, joints_))
+      if(!robot_hw_sim_->initSim(model_nh_, parent_model_, transmissions_))
       {
         ROS_FATAL("Could not initialize robot simulation interface");
         return;
@@ -295,149 +275,11 @@ public:
   }
 
   // Get Transmissions from the URDF
-  bool loadControllerManagerFromURDF()
+  bool parseTransmissionsFromURDF()
   {
     std::string urdf_string = getURDF(robot_description_);
 
-    // initialize TiXmlDocument doc with a string
-    TiXmlDocument doc;
-    if (!doc.Parse(urdf_string.c_str()) && doc.Error())
-    {
-      ROS_ERROR("Could not load the gazebo_ros_control plugin's"
-        " configuration file: %s\n", urdf_string.c_str());
-      return false;
-    }
-
-    // debug
-    //doc.Print();
-    //std::cout << *(doc.RootElement()) << std::endl;
-
-    /*
-    // Pulls out the list of actuators used in the robot configuration.
-    struct GetActuators : public TiXmlVisitor
-    {
-    std::set<std::string> actuators;
-    virtual bool VisitEnter(const TiXmlElement &elt, const TiXmlAttribute *)
-    {
-    if (elt.ValueStr() == "actuator" && elt.Attribute("name"))
-    actuators.insert(elt.Attribute("name"));
-    return true;
-    }
-    } get_actuators;
-    doc.RootElement()->Accept(&get_actuators);
-
-    // Places that found actuators into the hardware interface.
-    std::set<std::string>::iterator it;
-    for (it = get_actuators.actuators.begin();
-    it != get_actuators.actuators.end(); ++it)
-    {
-    std::cout << " adding actuator " << (*it) << std::endl;
-    //pr2_hardware_interface::Actuator* pr2_actuator =
-    //  new pr2_hardware_interface::Actuator(*it);
-    //pr2_actuator->state_.is_enabled_ = true;
-    //hardware_interface_.addActuator(pr2_actuator);
-    }
-    */
-
-    // Find joints in transmission tags
-    TiXmlElement *root = doc.RootElement();
-
-    // Constructs the transmissions by parsing custom xml.
-    TiXmlElement *tran_it = NULL;
-    for (tran_it = root->FirstChildElement("transmission"); tran_it;
-         tran_it = tran_it->NextSiblingElement("transmission"))
-    {
-      // Load transmission attributes
-      std::string tran_type;
-      if(tran_it->Attribute("type"))
-      {
-        tran_type = tran_it->Attribute("type");
-        // ROS_DEBUG_STREAM_NAMED("ros_control_plugin","Found tranmission of type '" << tran_type << "'");
-      }
-      else
-      {
-        ROS_WARN_STREAM_NAMED("ros_control_plugin","No type attribute for tranmission tag!");
-        continue;
-      }
-
-      std::string tran_name;
-      if(tran_it->Attribute("name"))
-      {
-        tran_name = tran_it->Attribute("name");
-        // ROS_DEBUG_STREAM_NAMED("ros_control_plugin","Found tranmission of name '" << tran_name << "'");
-      }
-      else
-      {
-        ROS_WARN_STREAM_NAMED("ros_control_plugin","No name attribute for tranmission tag!");
-        continue;
-      }
-
-      // Load joint attributes
-      TiXmlElement *joint_child = tran_it->FirstChildElement("joint");
-      if(!joint_child)
-      {
-        ROS_WARN_STREAM_NAMED("ros_control_plugin","No joint element found for tranmission "
-          << tran_name);
-        continue;
-      }
-
-      std::string joint_name;
-      if(joint_child->Attribute("name"))
-      {
-        joint_name = joint_child->Attribute("name");
-        // ROS_DEBUG_STREAM_NAMED("ros_control_plugin","Found joint of name '" << joint_name << "'");
-      }
-      else
-      {
-        ROS_WARN_STREAM_NAMED("ros_control_plugin","No name attribute for joint in tranmission "
-          << tran_name);
-        continue;
-      }
-
-      // Load actuator attributes
-      TiXmlElement *actuator_child = tran_it->FirstChildElement("actuator");
-      if(!actuator_child)
-      {
-        ROS_WARN_STREAM_NAMED("ros_control_plugin","No actuator element found for tranmission "
-          << tran_name);
-        continue;
-      }
-
-      std::string actuator_name;
-      if(actuator_child->Attribute("name"))
-      {
-        actuator_name = actuator_child->Attribute("name");
-        // ROS_DEBUG_STREAM_NAMED("ros_control_plugin","Found actuator of name '" << actuator_name << "'");
-      }
-      else
-      {
-        ROS_WARN_STREAM_NAMED("ros_control_plugin","No name attribute for actuator in tranmission "
-          << tran_name);
-        continue;
-      }
-
-      std::string actuator_type;
-      if(actuator_child->Attribute("type"))
-      {
-        actuator_type = actuator_child->Attribute("type");
-        // ROS_DEBUG_STREAM_NAMED("ros_control_plugin","Found actuator of type '" << actuator_type << "'");
-      }
-      else
-      {
-        ROS_WARN_STREAM_NAMED("ros_control_plugin","No type attribute for actuator "
-          << actuator_name);
-        continue;
-      }
-
-      // \todo read mechanical reduction tag
-
-      // \todo load transmission
-
-      // Copy data into joint struct
-      JointData joint_data(joint_name, actuator_type);
-      joints_.push_back(joint_data);
-
-    } // end for transmission elements
+    transmission_interface::TransmissionParser::parse(urdf_string, transmissions_);
 
     return true;
   }
@@ -466,8 +308,8 @@ private:
   std::string robot_namespace_;
   std::string robot_description_;
 
-  // Joints in this plugin's scope
-  std::vector<JointData> joints_;
+  // Transmissions in this plugin's scope
+  std::vector<transmission_interface::TransmissionInfo> transmissions_;
 
   // Robot simulator interface
   std::string robot_hw_sim_type_str_;
