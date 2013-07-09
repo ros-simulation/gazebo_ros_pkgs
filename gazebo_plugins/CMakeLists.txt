@@ -82,7 +82,9 @@ catkin_package(
   gazebo_ros_projector 
   gazebo_ros_force 
   gazebo_ros_joint_trajectory 
-  gazebo_ros_joint_pose_trajectory 
+  gazebo_ros_joint_pose_trajectory
+  gazebo_ros_diff_drive
+  gazebo_ros_skid_steer_drive
   
   CATKIN_DEPENDS 
   message_generation 
@@ -272,6 +274,8 @@ install(TARGETS
   gazebo_ros_force
   gazebo_ros_joint_trajectory
   gazebo_ros_joint_pose_trajectory
+  gazebo_ros_diff_drive
+  gazebo_ros_skid_steer_drive
   pub_joint_trajectory_test  
   gazebo_ros_gpu_laser
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

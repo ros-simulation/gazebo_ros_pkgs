@@ -70,10 +70,7 @@ namespace gazebo_ros_control {
     virtual bool initSim(
         ros::NodeHandle model_nh, 
         gazebo::physics::ModelPtr parent_model,
-        std::vector<JointData> joints) 
-    {
-      return true; 
-    };
+        std::vector<JointData> joints) = 0;
 
     virtual void readSim(ros::Time time, ros::Duration period) = 0;
 

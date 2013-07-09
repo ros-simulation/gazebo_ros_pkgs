@@ -16,6 +16,15 @@ if (PKG_CONFIG_FOUND)
   pkg_check_modules(GAZEBO gazebo)
 endif()
 
+catkin_package(
+  CATKIN_DEPENDS 
+  roscpp 
+  gazebo_ros 
+  controller_manager 
+  pluginlib
+  INCLUDE_DIRS include
+  )
+
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
 
@@ -25,13 +34,16 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_library(default_robot_hw_sim src/default_robot_hw_sim.cpp)
 target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES})
 
-catkin_package(
-    DEPENDS 
-      roscpp 
-      gazebo_ros 
-      controller_manager 
-      pluginlib
-    CATKIN_DEPENDS # TODO
-    INCLUDE_DIRS include
-    LIBRARIES # TODO
-)
+# Install
+install(TARGETS ${PROJECT_NAME} default_robot_hw_sim
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  )
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  )
+
+install(FILES robot_hw_sim_plugins.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  )
+
