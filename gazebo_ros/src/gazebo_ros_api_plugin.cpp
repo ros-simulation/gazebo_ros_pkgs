@@ -2143,7 +2143,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
         break;
     }
 
-    ROS_DEBUG_STREAM_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now() 
+    ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now() 
       << " for model " << model_name << " to spawn");
 
     usleep(2000);
