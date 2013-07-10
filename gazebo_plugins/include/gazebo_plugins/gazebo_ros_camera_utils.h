@@ -45,7 +45,7 @@
 #endif
 
 // gazebo stuff
-#include "gazebo/sdf/interface/Param.hh"
+#include "sdf/Param.hh"
 #include "gazebo/physics/physics.hh"
 #include "gazebo/transport/TransportTypes.hh"
 #include "gazebo/msgs/MessageTypes.hh"

@@ -72,7 +72,7 @@ void GazeboRosJointTrajectory::Load(physics::ModelPtr _model,
   // load parameters
   this->robot_namespace_ = "";
   if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->GetValueString("robotNamespace") + "/";
+    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
 
   if (!this->sdf->HasElement("serviceName"))
   {
@@ -80,7 +80,7 @@ void GazeboRosJointTrajectory::Load(physics::ModelPtr _model,
     this->service_name_ = "set_joint_trajectory";
   }
   else
-    this->service_name_ = this->sdf->GetValueString("serviceName");
+    this->service_name_ = this->sdf->Get<std::string>("serviceName");
 
   if (!this->sdf->HasElement("topicName"))
   {
@@ -88,7 +88,7 @@ void GazeboRosJointTrajectory::Load(physics::ModelPtr _model,
     this->topic_name_ = "set_joint_trajectory";
   }
   else
-    this->topic_name_ = this->sdf->GetValueString("topicName");
+    this->topic_name_ = this->sdf->Get<std::string>("topicName");
 
   if (!this->sdf->HasElement("updateRate"))
   {
@@ -97,7 +97,7 @@ void GazeboRosJointTrajectory::Load(physics::ModelPtr _model,
     this->update_rate_ = 0;
   }
   else
-    this->update_rate_ = this->sdf->GetValueDouble("updateRate");
+    this->update_rate_ = this->sdf->Get<double>("updateRate");
 
   // ros callback queue for processing subscription
   if (ros::isInitialized())

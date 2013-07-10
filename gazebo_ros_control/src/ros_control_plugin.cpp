@@ -115,7 +115,7 @@ public:
     // Get namespace for nodehandle
     // TODO: "topicNamespace" or "rosNamespace"
     if(sdf_->HasElement("robotNamespace")) {
-      robot_namespace_ = sdf_->GetElement("robotNamespace")->GetValueString();
+      robot_namespace_ = sdf_->GetElement("robotNamespace")->Get<std::string>();
     } else {
       // TODO: Why not make this default?
       robot_namespace_ = parent_model_->GetName(); // default
@@ -123,7 +123,7 @@ public:
 
     // Get robot_description ROS param name
     if (sdf_->HasElement("robotParam")) {
-      robot_description_ = sdf_->GetElement("robotParam")->GetValueString();
+      robot_description_ = sdf_->GetElement("robotParam")->Get<std::string>();
     } else {
       robot_description_ = "robot_description"; // default
     }
@@ -134,7 +134,7 @@ public:
 
     // Get the robot simulation interface type
     if(sdf_->HasElement("robotSimType")) {
-      robot_hw_sim_type_str_ = sdf_->GetValueString("robotSimType");
+      robot_hw_sim_type_str_ = sdf_->Get<std::string>("robotSimType");
     } else {
       robot_hw_sim_type_str_ = "gazebo_ros_control/DefaultRobotHWSim";
       ROS_DEBUG_STREAM_NAMED("loadThread","Using default plugin for RobotHWSim (none specified in URDF/SDF)\""<<robot_hw_sim_type_str_<<"\"");
@@ -146,7 +146,7 @@ public:
     // Decide the plugin control period
     if(sdf_->HasElement("controlPeriod"))
     {
-      control_period_ = ros::Duration(sdf_->GetValueDouble("controlPeriod"));
+      control_period_ = ros::Duration(sdf_->Get<double>("controlPeriod"));
 
       // Check the period against the simulation period
       if( control_period_ < sim_period )
@@ -178,10 +178,10 @@ public:
     while(element_it != sdf::ElementPtr() ) // do while not null
     {
     ROS_DEBUG_STREAM_NAMED("load","Parsed from plugin SDF joint w/name '"
-    << element_it->GetValueString() << "'");
+    << element_it->Get<std::string>() << "'");
 
     // Add joint to vector
-    joints_.push_back( element_it->GetValueString() );
+    joints_.push_back( element_it->Get<std::string>() );
 
     element_it = element_it->GetNextElement("joint");
     }
