@@ -285,7 +285,7 @@ private:
                        gazebo::math::Pose target_to_reference );
 
   /// \brief Used for the dynamic reconfigure callback function template
-  void physicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
+  void physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level);
 
   /// \brief waits for the rest of Gazebo to be ready before initializing the dynamic reconfigure services
   void physicsReconfigureThread();
@@ -369,8 +369,8 @@ private:
   bool physics_reconfigure_initialized_;
   ros::ServiceClient physics_reconfigure_set_client_;
   ros::ServiceClient physics_reconfigure_get_client_;
-  boost::shared_ptr< dynamic_reconfigure::Server<gazebo::PhysicsConfig> > physics_reconfigure_srv_;
-  dynamic_reconfigure::Server<gazebo::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
+  boost::shared_ptr< dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig> > physics_reconfigure_srv_;
+  dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
 
   ros::Publisher     pub_clock_;
 

@@ -1797,7 +1797,7 @@ void GazeboRosApiPlugin::publishModelStates()
   pub_model_states_.publish(model_states);
 }
 
-void GazeboRosApiPlugin::physicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level)
+void GazeboRosApiPlugin::physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level)
 {
   if (!physics_reconfigure_initialized_)
   {
@@ -1879,7 +1879,7 @@ void GazeboRosApiPlugin::physicsReconfigureThread()
   physics_reconfigure_set_client_.waitForExistence();
   physics_reconfigure_get_client_.waitForExistence();
 
-  physics_reconfigure_srv_.reset(new dynamic_reconfigure::Server<gazebo::PhysicsConfig>());
+  physics_reconfigure_srv_.reset(new dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>());
 
   physics_reconfigure_callback_ = boost::bind(&GazeboRosApiPlugin::physicsReconfigureCallback, this, _1, _2);
   physics_reconfigure_srv_->setCallback(physics_reconfigure_callback_);
@@ -2143,7 +2143,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
         break;
     }
 
-    ROS_DEBUG_STREAM_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now() 
+    ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now() 
       << " for model " << model_name << " to spawn");
 
     usleep(2000);
