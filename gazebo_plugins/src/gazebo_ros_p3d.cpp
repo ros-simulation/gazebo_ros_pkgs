@@ -63,7 +63,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace"))
     this->robot_namespace_ =
-      _sdf->GetElement("robotNamespace")->GetValueString() + "/";
+      _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
   if (!_sdf->HasElement("bodyName"))
   {
@@ -71,7 +71,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     return;
   }
   else
-    this->link_name_ = _sdf->GetElement("bodyName")->GetValueString();
+    this->link_name_ = _sdf->GetElement("bodyName")->Get<std::string>();
 
   this->link_ = _parent->GetLink(this->link_name_);
   if (!this->link_)
@@ -87,7 +87,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     return;
   }
   else
-    this->topic_name_ = _sdf->GetElement("topicName")->GetValueString();
+    this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>();
 
   if (!_sdf->HasElement("frameName"))
   {
@@ -95,7 +95,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->frame_name_ = "world";
   }
   else
-    this->frame_name_ = _sdf->GetElement("frameName")->GetValueString();
+    this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
 
   if (!_sdf->HasElement("xyzOffset"))
   {
@@ -103,7 +103,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->offset_.pos = math::Vector3(0, 0, 0);
   }
   else
-    this->offset_.pos = _sdf->GetElement("xyzOffset")->GetValueVector3();
+    this->offset_.pos = _sdf->GetElement("xyzOffset")->Get<math::Vector3>();
 
   if (!_sdf->HasElement("rpyOffset"))
   {
@@ -111,7 +111,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->offset_.rot = math::Vector3(0, 0, 0);
   }
   else
-    this->offset_.rot = _sdf->GetElement("rpyOffset")->GetValueVector3();
+    this->offset_.rot = _sdf->GetElement("rpyOffset")->Get<math::Vector3>();
 
   if (!_sdf->HasElement("gaussianNoise"))
   {
@@ -119,7 +119,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->gaussian_noise_ = 0;
   }
   else
-    this->gaussian_noise_ = _sdf->GetElement("gaussianNoise")->GetValueDouble();
+    this->gaussian_noise_ = _sdf->GetElement("gaussianNoise")->Get<double>();
 
   if (!_sdf->HasElement("updateRate"))
   {
@@ -128,7 +128,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->update_rate_ = 0;
   }
   else
-    this->update_rate_ = _sdf->GetElement("updateRate")->GetValueDouble();
+    this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
 
   if (!ros::isInitialized())
   {

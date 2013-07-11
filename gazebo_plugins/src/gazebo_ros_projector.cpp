@@ -85,7 +85,7 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   this->node_->Init(this->world_->GetName());
   // Setting projector topic
   std::string name = std::string("~/") + _parent->GetName() + "/" +
-                      _sdf->GetValueString("projector");
+                      _sdf->Get<std::string>("projector");
   // Create a publisher on the ~/physics topic
   this->projector_pub_ = node_->Advertise<msgs::Projector>(name);
 
@@ -94,15 +94,15 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   // load parameters
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = _sdf->GetElement("robotNamespace")->GetValueString() + "/";
+    this->robot_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
   this->texture_topic_name_ = "";
   if (_sdf->HasElement("textureTopicName"))
-    this->texture_topic_name_ = _sdf->GetElement("textureTopicName")->GetValueString();
+    this->texture_topic_name_ = _sdf->GetElement("textureTopicName")->Get<std::string>();
 
   this->projector_topic_name_ = "";
   if (_sdf->HasElement("projectorTopicName"))
-    this->projector_topic_name_ = _sdf->GetElement("projectorTopicName")->GetValueString();
+    this->projector_topic_name_ = _sdf->GetElement("projectorTopicName")->Get<std::string>();
 
   // initialize ros
   if (!ros::isInitialized())
