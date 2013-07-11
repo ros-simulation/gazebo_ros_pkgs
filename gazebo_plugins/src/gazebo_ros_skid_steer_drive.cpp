@@ -93,7 +93,7 @@ namespace gazebo {
       else ROS_INFO("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to true.",this->robot_namespace_.c_str());
           
     } else {
-      this->broadcast_tf_ = _sdf->GetElement("broadcastTF")->GetValueBool();
+      this->broadcast_tf_ = _sdf->GetElement("broadcastTF")->Get<bool>();
     }
 
     // TODO write error if joint doesn't exist!
