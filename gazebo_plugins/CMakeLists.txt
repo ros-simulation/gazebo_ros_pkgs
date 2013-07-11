@@ -273,7 +273,6 @@ install(TARGETS
 install(DIRECTORY include/
    DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
    FILES_MATCHING PATTERN "*.h"
-   PATTERN ".svn" EXCLUDE
 )
 
 install(PROGRAMS scripts/set_wrench.py scripts/set_pose.py scripts/gazebo_model
@@ -282,10 +281,8 @@ install(PROGRAMS scripts/set_wrench.py scripts/set_pose.py scripts/gazebo_model
 
 install(DIRECTORY Media
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".svn" EXCLUDE
   )
 
 install(DIRECTORY test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".svn" EXCLUDE
   )
