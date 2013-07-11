@@ -31,8 +31,8 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/HingeJoint.hh>
 #include <gazebo/sensors/Sensor.hh>
-#include <gazebo/sdf/interface/SDF.hh>
-#include <gazebo/sdf/interface/Param.hh>
+#include <sdf/SDF.hh>
+#include <sdf/Param.hh>
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/CameraSensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
@@ -117,26 +117,26 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
 
   this->robot_namespace_ = "";
   if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->GetValueString("robotNamespace") + "/";
+    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
 
   this->image_topic_name_ = "image_raw";
   if (this->sdf->HasElement("imageTopicName"))
-    this->image_topic_name_ = this->sdf->GetValueString("imageTopicName");
+    this->image_topic_name_ = this->sdf->Get<std::string>("imageTopicName");
 
   this->camera_info_topic_name_ = "camera_info";
   if (this->sdf->HasElement("cameraInfoTopicName"))
     this->camera_info_topic_name_ =
-      this->sdf->GetValueString("cameraInfoTopicName");
+      this->sdf->Get<std::string>("cameraInfoTopicName");
 
   if (!this->sdf->HasElement("cameraName"))
     ROS_DEBUG("Camera plugin missing <cameraName>, default to empty");
   else
-    this->camera_name_ = this->sdf->GetValueString("cameraName");
+    this->camera_name_ = this->sdf->Get<std::string>("cameraName");
 
   if (!this->sdf->HasElement("frameName"))
     ROS_DEBUG("Camera plugin missing <frameName>, defaults to /world");
   else
-    this->frame_name_ = this->sdf->GetValueString("frameName");
+    this->frame_name_ = this->sdf->Get<std::string>("frameName");
 
   if (!this->sdf->HasElement("updateRate"))
   {
@@ -144,7 +144,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->update_rate_ = 0;
   }
   else
-    this->update_rate_ = this->sdf->GetValueDouble("updateRate");
+    this->update_rate_ = this->sdf->Get<double>("updateRate");
 
   if (!this->sdf->HasElement("CxPrime"))
   {
@@ -152,7 +152,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->cx_prime_ = 0;
   }
   else
-    this->cx_prime_ = this->sdf->GetValueDouble("CxPrime");
+    this->cx_prime_ = this->sdf->Get<double>("CxPrime");
 
   if (!this->sdf->HasElement("Cx"))
   {
@@ -160,7 +160,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->cx_= 0;
   }
   else
-    this->cx_ = this->sdf->GetValueDouble("Cx");
+    this->cx_ = this->sdf->Get<double>("Cx");
 
   if (!this->sdf->HasElement("Cy"))
   {
@@ -168,7 +168,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->cy_= 0;
   }
   else
-    this->cy_ = this->sdf->GetValueDouble("Cy");
+    this->cy_ = this->sdf->Get<double>("Cy");
 
   if (!this->sdf->HasElement("focalLength"))
   {
@@ -176,7 +176,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->focal_length_= 0;
   }
   else
-    this->focal_length_ = this->sdf->GetValueDouble("focalLength");
+    this->focal_length_ = this->sdf->Get<double>("focalLength");
 
   if (!this->sdf->HasElement("hackBaseline"))
   {
@@ -184,7 +184,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->hack_baseline_= 0;
   }
   else
-    this->hack_baseline_ = this->sdf->GetValueDouble("hackBaseline");
+    this->hack_baseline_ = this->sdf->Get<double>("hackBaseline");
 
   if (!this->sdf->HasElement("distortionK1"))
   {
@@ -192,7 +192,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_k1_= 0;
   }
   else
-    this->distortion_k1_ = this->sdf->GetValueDouble("distortionK1");
+    this->distortion_k1_ = this->sdf->Get<double>("distortionK1");
 
   if (!this->sdf->HasElement("distortionK2"))
   {
@@ -200,7 +200,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_k2_= 0;
   }
   else
-    this->distortion_k2_ = this->sdf->GetValueDouble("distortionK2");
+    this->distortion_k2_ = this->sdf->Get<double>("distortionK2");
 
   if (!this->sdf->HasElement("distortionK3"))
   {
@@ -208,7 +208,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_k3_= 0;
   }
   else
-    this->distortion_k3_ = this->sdf->GetValueDouble("distortionK3");
+    this->distortion_k3_ = this->sdf->Get<double>("distortionK3");
 
   if (!this->sdf->HasElement("distortionT1"))
   {
@@ -216,7 +216,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_t1_= 0;
   }
   else
-    this->distortion_t1_ = this->sdf->GetValueDouble("distortionT1");
+    this->distortion_t1_ = this->sdf->Get<double>("distortionT1");
 
   if (!this->sdf->HasElement("distortionT2"))
   {
@@ -224,7 +224,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_t2_= 0;
   }
   else
-    this->distortion_t2_ = this->sdf->GetValueDouble("distortionT2");
+    this->distortion_t2_ = this->sdf->Get<double>("distortionT2");
 
   if ((this->distortion_k1_ != 0.0) || (this->distortion_k2_ != 0.0) ||
       (this->distortion_k3_ != 0.0) || (this->distortion_t1_ != 0.0) ||

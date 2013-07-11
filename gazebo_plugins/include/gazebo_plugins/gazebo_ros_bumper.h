@@ -37,7 +37,7 @@
 #include <gazebo/sensors/sensors.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo/sdf/interface/SDF.hh>
+#include <sdf/SDF.hh>
 #include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
 #include <gazebo/common/Time.hh>
