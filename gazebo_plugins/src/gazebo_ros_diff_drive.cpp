@@ -82,7 +82,7 @@ namespace gazebo {
           this->robot_namespace_.c_str());
     } else {
       this->robot_namespace_ = 
-        _sdf->GetElement("robotNamespace")->GetValueString() + "/";
+        _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
     }
 
     this->left_joint_name_ = "left_joint";
@@ -90,7 +90,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <leftJoint>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->left_joint_name_.c_str());
     } else {
-      this->left_joint_name_ = _sdf->GetElement("leftJoint")->GetValueString();
+      this->left_joint_name_ = _sdf->GetElement("leftJoint")->Get<std::string>();
     }
 
     this->right_joint_name_ = "right_joint";
@@ -98,7 +98,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <rightJoint>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->right_joint_name_.c_str());
     } else {
-      this->right_joint_name_ = _sdf->GetElement("rightJoint")->GetValueString();
+      this->right_joint_name_ = _sdf->GetElement("rightJoint")->Get<std::string>();
     }
 
     this->wheel_separation_ = 0.34;
@@ -107,7 +107,7 @@ namespace gazebo {
           this->robot_namespace_.c_str(), this->wheel_separation_);
     } else {
       this->wheel_separation_ = 
-        _sdf->GetElement("wheelSeparation")->GetValueDouble();
+        _sdf->GetElement("wheelSeparation")->Get<double>();
     }
 
     this->wheel_diameter_ = 0.15;
@@ -115,7 +115,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <wheelDiameter>, defaults to %f",
           this->robot_namespace_.c_str(), this->wheel_diameter_);
     } else {
-      this->wheel_diameter_ = _sdf->GetElement("wheelDiameter")->GetValueDouble();
+      this->wheel_diameter_ = _sdf->GetElement("wheelDiameter")->Get<double>();
     }
 
     this->torque = 5.0;
@@ -123,7 +123,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <torque>, defaults to %f",
           this->robot_namespace_.c_str(), this->torque);
     } else {
-      this->torque = _sdf->GetElement("torque")->GetValueDouble();
+      this->torque = _sdf->GetElement("torque")->Get<double>();
     }
 
     this->command_topic_ = "cmd_vel";
@@ -131,7 +131,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <commandTopic>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->command_topic_.c_str());
     } else {
-      this->command_topic_ = _sdf->GetElement("commandTopic")->GetValueString();
+      this->command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
     }
 
     this->odometry_topic_ = "odom";
@@ -139,7 +139,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <odometryTopic>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->odometry_topic_.c_str());
     } else {
-      this->odometry_topic_ = _sdf->GetElement("odometryTopic")->GetValueString();
+      this->odometry_topic_ = _sdf->GetElement("odometryTopic")->Get<std::string>();
     }
 
     this->odometry_frame_ = "odom";
@@ -147,7 +147,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <odometryFrame>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->odometry_frame_.c_str());
     } else {
-      this->odometry_frame_ = _sdf->GetElement("odometryFrame")->GetValueString();
+      this->odometry_frame_ = _sdf->GetElement("odometryFrame")->Get<std::string>();
     }
 
     this->robot_base_frame_ = "base_footprint";
@@ -155,7 +155,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <robotBaseFrame>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->robot_base_frame_.c_str());
     } else {
-      this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->GetValueString();
+      this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->Get<std::string>();
     }
 
     this->update_rate_ = 100.0;
@@ -163,7 +163,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <updateRate>, defaults to %f",
           this->robot_namespace_.c_str(), this->update_rate_);
     } else {
-      this->update_rate_ = _sdf->GetElement("updateRate")->GetValueDouble();
+      this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
     }
 
     // Initialize update rate stuff

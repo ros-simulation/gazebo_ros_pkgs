@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>gazebo_ros</name>
-  <version>2.1.0</version>
+  <version>2.1.1</version>
   <description>
     Provides ROS plugins that offer message and service publishers for interfacing with <a href="http://gazebosim.org">Gazebo</a> through ROS.
     Formally simulator_gazebo/gazebo
@@ -16,7 +16,8 @@
   <url type="bugtracker">https://github.com/osrf/gazebo_ros_pkgs/issues</url>
   <url type="repository">https://github.com/osrf/gazebo_ros_pkgs</url>
 
-  <author>John Hsu, Nate Koenig</author>>
+  <author>John Hsu</author>
+  <author>Nate Koenig</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 

@@ -25,13 +25,15 @@ find_package(catkin REQUIRED COMPONENTS
 
 include (FindPkgConfig)
 if (PKG_CONFIG_FOUND)
-  pkg_check_modules(GAZEBO_SYSTEM REQUIRED gazebo)
   pkg_check_modules(XML libxml-2.0)
+  pkg_check_modules(OGRE OGRE)
 else()
   message(FATAL_ERROR "pkg-config is required; please install it")
 endif()
 
-pkg_check_modules(OGRE OGRE)
+# Depend on system install of Gazebo and SDFormat
+find_package(gazebo REQUIRED)
+find_package(SDF REQUIRED)
 
 execute_process(COMMAND
 pkg-config --variable=plugindir OGRE
@@ -45,18 +47,16 @@ catkin_python_setup()
 
 generate_dynamic_reconfigure_options(cfg/CameraSynchronizer.cfg cfg/GazeboRosCamera.cfg cfg/GazeboRosOpenniKinect.cfg cfg/Hokuyo.cfg)
 
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_SYSTEM_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS})
-#link_directories(${OGRE_LIBRARY_DIRS} ${GAZEBO_SYSTEM_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-#link_directories(/usr/local/lib/gazebo-1.5/plugins)
+include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS} ${SDFORMAT_INCLUDE_DIRS})
 
 set(cxx_flags)
-foreach (item ${GAZEBO_SYSTEM_CFLAGS})
+foreach (item ${GAZEBO_CFLAGS})
   set(cxx_flags "${cxx_flags} ${item}")
 endforeach ()
 message(status "\n\n${cxx_flags}\n\n")
 
 set(ld_flags)
-foreach (item ${GAZEBO_SYSTEM_LDFLAGS})
+foreach (item ${GAZEBO_LDFLAGS})
   set(ld_flags "${ld_flags} ${item}")
 endforeach ()
 message(status "\n\n${ld_flags}\n\n")
@@ -106,7 +106,9 @@ catkin_package(
   pcl_ros 
   image_transport 
   rosconsole
-#  DEPENDS gazebo
+  DEPENDS 
+    gazebo 
+    SDF
   )
 
 
@@ -131,47 +133,47 @@ find_package(Boost REQUIRED COMPONENTS thread)
 add_library(gazebo_ros_camera_utils src/gazebo_ros_camera_utils.cpp)
 set_target_properties(gazebo_ros_camera_utils PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_camera_utils PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_camera_utils ${GAZEBO_SYSTEM_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${SDFORMAT_LIBRARIES})
 
 add_library(MultiCameraPlugin src/MultiCameraPlugin.cpp)
 set_target_properties(MultiCameraPlugin PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(MultiCameraPlugin PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(MultiCameraPlugin ${GAZEBO_SYSTEM_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(MultiCameraPlugin ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_camera src/gazebo_ros_camera.cpp)
 set_target_properties(gazebo_ros_camera PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_camera PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_camera gazebo_ros_camera_utils ${GAZEBO_SYSTEM_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_camera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_multicamera src/gazebo_ros_multicamera.cpp)
 set_target_properties(gazebo_ros_multicamera PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_multicamera PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_multicamera gazebo_ros_camera_utils ${GAZEBO_SYSTEM_LIBRARIES} MultiCameraPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_multicamera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} MultiCameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_depth_camera src/gazebo_ros_depth_camera.cpp)
 set_target_properties(gazebo_ros_depth_camera PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_depth_camera PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_depth_camera gazebo_ros_camera_utils ${GAZEBO_SYSTEM_LIBRARIES} DepthCameraPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_depth_camera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} DepthCameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_openni_kinect src/gazebo_ros_openni_kinect.cpp)
 set_target_properties(gazebo_ros_openni_kinect PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_openni_kinect PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_camera_utils ${GAZEBO_SYSTEM_LIBRARIES} DepthCameraPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} DepthCameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_gpu_laser src/gazebo_ros_gpu_laser.cpp)
 set_target_properties(gazebo_ros_gpu_laser PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_gpu_laser PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_gpu_laser ${catkin_LIBRARIES} ${GAZEBO_SYSTEM_LIBRARIES} GpuRayPlugin)
+target_link_libraries(gazebo_ros_gpu_laser ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} GpuRayPlugin)
 
 add_library(gazebo_ros_laser src/gazebo_ros_laser.cpp)
 set_target_properties(gazebo_ros_laser PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_laser PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_laser ${GAZEBO_SYSTEM_LIBRARIES} RayPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_laser ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} RayPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_block_laser src/gazebo_ros_block_laser.cpp)
 set_target_properties(gazebo_ros_block_laser PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_block_laser PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_block_laser ${GAZEBO_SYSTEM_LIBRARIES} RayPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_block_laser ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} RayPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_p3d src/gazebo_ros_p3d.cpp)
 set_target_properties(gazebo_ros_p3d PROPERTIES LINK_FLAGS "${ld_flags}")
@@ -192,7 +194,7 @@ add_library(gazebo_ros_bumper src/gazebo_ros_bumper.cpp)
 add_dependencies(gazebo_ros_bumper gazebo_msgs_gencpp)
 set_target_properties(gazebo_ros_bumper PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_bumper PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_bumper ${GAZEBO_SYSTEM_LIBRARIES} ${Boost_LIBRARIES} ContactPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_bumper ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} ${Boost_LIBRARIES} ContactPlugin ${catkin_LIBRARIES})
 
 
 add_library(gazebo_ros_template src/gazebo_ros_template.cpp)
@@ -225,32 +227,18 @@ target_link_libraries(gazebo_ros_joint_pose_trajectory ${Boost_LIBRARIES})
 add_library(gazebo_ros_diff_drive src/gazebo_ros_diff_drive.cpp)
 set_target_properties(gazebo_ros_diff_drive PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_diff_drive PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_diff_drive ${GAZEBO_SYSTEM_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_diff_drive ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_skid_steer_drive src/gazebo_ros_skid_steer_drive.cpp)
 set_target_properties(gazebo_ros_skid_steer_drive PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_skid_steer_drive PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_skid_steer_drive ${GAZEBO_SYSTEM_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_skid_steer_drive ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES} ${catkin_LIBRARIES})
 
 add_executable(pub_joint_trajectory_test test/pub_joint_trajectory_test.cpp)
 set_target_properties(pub_joint_trajectory_test PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(pub_joint_trajectory_test PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(pub_joint_trajectory_test ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GAZEBO_SYSTEM_LIBRARIES})
+target_link_libraries(pub_joint_trajectory_test ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDFORMAT_LIBRARIES})
 add_dependencies(pub_joint_trajectory_test ${catkin_EXPORTED_TARGETS}) # don't build until gazebo_msgs is done
-
-# exec_program("glxinfo" OUTPUT_VARIABLE glx_out RETURN_VALUE glx_val)
-# if(${glx_val} EQUAL 0)
-#   if(${glx_out} MATCHES "direct rendering: Yes")
-#     message(STATUS "run test here")
-#     rosbuild_add_rostest_labeled(gazebo test/p3d_test/test_3_single_pendulums.launch)
-#     rosbuild_add_rostest_labeled(gazebo test/p3d_test/test_single_pendulum.launch)
-#     rosbuild_add_rostest_labeled(gazebo test/p3d_test/test_3_double_pendulums.launch)
-#     rosbuild_add_rostest_labeled(gazebo test/p3d_test/test_double_pendulum.launch)
-#     rosbuild_add_rostest_labeled(gazebo test/bumper_test/test_bumper.launch)
-#   endif(${glx_out} MATCHES "direct rendering: Yes")
-# else(${glx_val} EQUAL 0)
-#   message(STATUS "no test here")
-# endif(${glx_val} EQUAL 0)
 
 install(TARGETS 
   hokuyo_node 
@@ -285,7 +273,6 @@ install(TARGETS
 install(DIRECTORY include/
    DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
    FILES_MATCHING PATTERN "*.h"
-   PATTERN ".svn" EXCLUDE
 )
 
 install(PROGRAMS scripts/set_wrench.py scripts/set_pose.py scripts/gazebo_model
@@ -294,10 +281,8 @@ install(PROGRAMS scripts/set_wrench.py scripts/set_pose.py scripts/gazebo_model
 
 install(DIRECTORY Media
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".svn" EXCLUDE
   )
 
 install(DIRECTORY test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".svn" EXCLUDE
   )
