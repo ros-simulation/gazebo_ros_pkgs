@@ -20,10 +20,10 @@
 #include <string>
 #include <vector>
 
-#include "gazebo/common/Plugin.hh"
-#include "gazebo/sensors/MultiCameraSensor.hh"
-#include "gazebo/rendering/Camera.hh"
-#include "gazebo/gazebo.hh"
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/sensors/MultiCameraSensor.hh>
+#include <gazebo/rendering/Camera.hh>
+#include <gazebo/gazebo.hh>
 
 namespace gazebo
 {
