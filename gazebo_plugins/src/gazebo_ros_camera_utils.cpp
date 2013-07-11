@@ -56,7 +56,6 @@ GazeboRosCameraUtils::GazeboRosCameraUtils()
   this->initialized_ = false;
 }
 
-#ifdef DYNAMIC_RECONFIGURE
 void GazeboRosCameraUtils::configCallback(
   gazebo_plugins::GazeboRosCameraConfig &config, uint32_t level)
 {
@@ -64,7 +63,6 @@ void GazeboRosCameraUtils::configCallback(
     this->camera_name_.c_str(), config.imager_rate);
   this->parentSensor_->SetUpdateRate(config.imager_rate);
 }
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
@@ -271,7 +269,6 @@ void GazeboRosCameraUtils::LoadThread()
   this->rosnode_->getParam(std::string("tf_prefix"), prefix);
   this->frame_name_ = tf::resolve(prefix, this->frame_name_);
 
-#ifdef DYNAMIC_RECONFIGURE
   if (!this->camera_name_.empty())
   {
     dyn_srv_ =
@@ -288,7 +285,6 @@ void GazeboRosCameraUtils::LoadThread()
              " becuase <cameraName> is not specified",
              this->image_topic_name_.c_str());
   }
-#endif
 
   this->image_pub_ = this->itnode_->advertise(
     this->image_topic_name_, 2,
