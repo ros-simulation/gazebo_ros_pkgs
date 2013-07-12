@@ -33,7 +33,7 @@
 #include <gazebo/sensors/SensorTypes.hh>
 
 // for creating PointCloud2 from pcl point cloud
-#include "pcl/ros/conversions.h"
+#include <pcl/conversions.h>
 
 #include <tf/tf.h>
 
@@ -370,7 +370,9 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
     }
   }
 
-  point_cloud.header = point_cloud_msg.header;
+  // Convert the sensor_msgs's header to a PCL header and assign to our new point cloud
+  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
+  
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }
