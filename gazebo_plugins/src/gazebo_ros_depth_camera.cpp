@@ -32,7 +32,7 @@
 #include <gazebo/sensors/SensorTypes.hh>
 
 // for creating PointCloud2 from pcl point cloud
-#include "pcl/ros/conversions.h"
+#include <pcl/conversions.h>
 
 #include <tf/tf.h>
 
@@ -264,7 +264,10 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
           }
         }
       }
-      point_cloud.header = this->point_cloud_msg_.header;
+
+      // Convert the sensor_msgs's header to a PCL header and assign to our new point cloud
+      point_cloud.header = pcl_conversions::toPCL(point_cloud_msg_.header);
+
       pcl::toROSMsg(point_cloud, this->point_cloud_msg_);
 
       this->point_cloud_pub_.publish(this->point_cloud_msg_);
@@ -422,8 +425,9 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
       point_cloud.points.push_back(point);
     }
   }
+  // Convert the sensor_msgs's header to a PCL header and assign to our new point cloud
+  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
 
-  point_cloud.header = point_cloud_msg.header;
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }
