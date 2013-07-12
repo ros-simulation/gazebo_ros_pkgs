@@ -197,7 +197,7 @@ public:
       sim_joints_[j]->SetForce(0,joint_effort_command_[j]);
       
       // Output debug every nth msg
-      if( !(j % 10) )
+      if( !(j % 10) && false)
       {
         ROS_DEBUG_STREAM_NAMED("robot_hw_sim","SetForce " << joint_effort_command_[j]);
       }
