@@ -18,6 +18,7 @@
 
   <author>John Hsu</author>
   <author>Nate Koenig</author>
+  <author>Dave Coleman</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
