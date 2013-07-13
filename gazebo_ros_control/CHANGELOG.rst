@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2013-07-13)
+------------------
+
 2.1.2 (2013-07-12)
 ------------------
 * Cleaned up CMakeLists.txt for all gazebo_ros_pkgs
