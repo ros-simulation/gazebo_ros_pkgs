@@ -2,6 +2,10 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2013-07-13)
+------------------
+* temporarily add tbb as a work around for `#74 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/74>`_
+
 2.1.2 (2013-07-12)
 ------------------
 * Fixed compatibility with new PCL 1.7.0
