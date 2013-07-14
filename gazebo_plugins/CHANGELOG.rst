@@ -2,6 +2,9 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2013-07-14)
+------------------
+
 2.1.3 (2013-07-13)
 ------------------
 * temporarily add tbb as a work around for `#74 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/74>`_

@@ -2,6 +2,10 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2013-07-14)
+------------------
+* Fixed for Jenkins broken dependency on SDF in ros_control
+
 2.1.3 (2013-07-13)
 ------------------
 
