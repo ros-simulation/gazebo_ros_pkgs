@@ -35,23 +35,18 @@
 #include <std_msgs/Float64.h>
 #include <image_transport/image_transport.h>
 
-// no dynamic reconfigure for now, since we don't want
-// to depend on gazebo_plugins directly
-#undef DYNAMIC_RECONFIGURE
-#ifdef DYNAMIC_RECONFIGURE
 // dynamic reconfigure stuff
 #include <gazebo_plugins/GazeboRosCameraConfig.h>
 #include <dynamic_reconfigure/server.h>
-#endif
 
-// gazebo stuff
-#include "sdf/Param.hh"
-#include "gazebo/physics/physics.hh"
-#include "gazebo/transport/TransportTypes.hh"
-#include "gazebo/msgs/MessageTypes.hh"
-#include "gazebo/common/Time.hh"
-#include "gazebo/sensors/SensorTypes.hh"
-#include "gazebo/plugins/CameraPlugin.hh"
+// Gazebo
+#include <sdf/Param.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/transport/TransportTypes.hh>
+#include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/common/Time.hh>
+#include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/plugins/CameraPlugin.hh>
 
 namespace gazebo
 {
@@ -162,15 +157,10 @@ namespace gazebo
     private: ros::Subscriber cameraHFOVSubscriber_;
     private: ros::Subscriber cameraUpdateRateSubscriber_;
 
-#ifdef DYNAMIC_RECONFIGURE
-    // Time last published, refrain from publish unless
-    //   new image has been rendered
+    // Time last published, refrain from publish unless new image has been rendered
     // Allow dynamic reconfiguration of camera params
-    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
-      *dyn_srv_;
-    void configCallback(gazebo_plugins::GazeboRosCameraConfig &config,
-      uint32_t level);
-#endif
+    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig> *dyn_srv_;
+    void configCallback(gazebo_plugins::GazeboRosCameraConfig &config, uint32_t level);
 
     protected: ros::CallbackQueue camera_queue_;
     protected: void CameraQueueThread();
