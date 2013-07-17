@@ -25,14 +25,19 @@ catkin_package(
   )
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+include_directories(include
+  ${Boost_INCLUDE_DIR}
+  ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+  ${SDFormat_INCLUDE_DIRS}
+  )
 
 ## Libraries
 add_library(${PROJECT_NAME} src/ros_control_plugin.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${SDFormat_LIBRARIES})
 
 add_library(default_robot_hw_sim src/default_robot_hw_sim.cpp)
-target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES})
+target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES} ${SDFormat_LIBRARIES})
 
 ## Install
 install(TARGETS ${PROJECT_NAME} default_robot_hw_sim
