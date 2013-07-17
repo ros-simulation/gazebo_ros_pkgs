@@ -31,8 +31,19 @@
 #include <sdf/SDF.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
-// for creating PointCloud2 from pcl point cloud
+// Support PCL conversion for both Groovy (PCL 1.6) and Hydro (PCL 1.7)
+// This is a temporary fix until the groovy-devel and hydro-devel branches are split
+// **Groovy**
+#if PCL_MINOR_VERSION == 6  
 #include "pcl/ros/conversions.h"
+// **Hydro**
+#elif PCL_MINOR_VERSION > 6 
+#include "pcl_conversions_compatibility.h" // a temporary copy of the version in pcl_conversions pkg
+// \todo: this is the correct include once we depend on the correct conversion header located
+// in the Hydro-only package pcl_conversions. It should be switched to here after the branches
+// are split:
+//#include <pcl/conversions.h>
+#endif
 
 #include <tf/tf.h>
 
@@ -264,7 +275,20 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
           }
         }
       }
-      point_cloud.header = this->point_cloud_msg_.header;
+
+      
+  // Convert the sensor_msgs's header to a PCL header and assign to our new point cloud
+
+  // Assume PCL is still verion 1.x.x... compare minor versions
+#if PCL_MINOR_VERSION == 6 
+  // Support for ROS Groovy:
+  point_cloud.header = point_cloud_msg_.header;
+#elif PCL_MINOR_VERSION > 6
+  // Support for ROS Hydro and greater
+  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg_.header);
+#endif
+
+
       pcl::toROSMsg(point_cloud, this->point_cloud_msg_);
 
       this->point_cloud_pub_.publish(this->point_cloud_msg_);
@@ -423,7 +447,17 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
     }
   }
 
+  // Convert the sensor_msgs's header to a PCL header and assign to our new point cloud
+
+  // Assume PCL is still verion 1.x.x... compare minor versions
+#if PCL_MINOR_VERSION == 6 
+  // Support for ROS Groovy:
   point_cloud.header = point_cloud_msg.header;
+#elif PCL_MINOR_VERSION > 6
+  // Support for ROS Hydro and greater
+  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
+#endif
+
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }
