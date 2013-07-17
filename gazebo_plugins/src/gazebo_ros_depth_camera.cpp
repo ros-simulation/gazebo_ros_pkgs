@@ -444,10 +444,7 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
       point_cloud.points.push_back(point);
     }
   }
-  // Convert the sensor_msgs's header to a PCL header and assign to our new point cloud
-  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
 
-<<<<<<< HEAD
   // Convert the sensor_msgs's header to a PCL header and assign to our new point cloud
 
   // Assume PCL is still verion 1.x.x... compare minor versions
@@ -459,8 +456,6 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
   point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
 #endif
 
-=======
->>>>>>> hydro-devel
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }

@@ -112,8 +112,6 @@ catkin_package(
     SDF
   )
 
-message(STATUS " !!!!!!!!!!!!!!1 PCL Version is " ${PCL_VERSION})
-
 ## Executables
 add_executable(hokuyo_node src/hokuyo_node.cpp)
 add_dependencies(hokuyo_node ${PROJECT_NAME}_gencfg)
