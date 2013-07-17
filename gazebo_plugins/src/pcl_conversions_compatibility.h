@@ -33,6 +33,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Note: this file has been temporarily copied from the new Hydro package pcl_conversions.
+   It had to be included here because we are using this repo branch for Groovy development too,
+   and pcl_conversions is not available in Groovy. In the near future we will split the branches
+   into two versions and no longer need this file (it should be removed).
+   \todo remove this file and instead use https://github.com/ros-perception/pcl_conversions/
+ */
+
 #ifndef PCL_CONVERSIONS_H__
 #define PCL_CONVERSIONS_H__
 
