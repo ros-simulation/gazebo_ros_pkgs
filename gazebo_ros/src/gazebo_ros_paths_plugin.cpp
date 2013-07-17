@@ -91,7 +91,7 @@ public:
     // set gazebo plugins paths by adding all packages that exports "plugin_path" for gazebo
     gazebo::common::SystemPaths::Instance()->pluginPathsFromEnv = false;
     std::vector<std::string> plugin_paths;
-    ros::package::getPlugins("gazebo_ros","plugin_path",gazebo_media_paths);
+    ros::package::getPlugins("gazebo_ros","plugin_path",plugin_paths);
     for (std::vector<std::string>::iterator iter=plugin_paths.begin(); iter != plugin_paths.end(); iter++)
     {
       ROS_DEBUG("plugin path %s",(*iter).c_str());
@@ -101,7 +101,7 @@ public:
     // set model paths by adding all packages that exports "gazebo_model_path" for gazebo
     gazebo::common::SystemPaths::Instance()->modelPathsFromEnv = false;
     std::vector<std::string> model_paths;
-    ros::package::getPlugins("gazebo_ros","gazebo_model_path",gazebo_media_paths);
+    ros::package::getPlugins("gazebo_ros","gazebo_model_path",model_paths);
     for (std::vector<std::string>::iterator iter=model_paths.begin(); iter != model_paths.end(); iter++)
     {
       ROS_DEBUG("model path %s",(*iter).c_str());
