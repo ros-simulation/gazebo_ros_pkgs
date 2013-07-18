@@ -29,7 +29,7 @@
 #include <gazebo_plugins/gazebo_ros_openni_kinect.h>
 
 #include <gazebo/sensors/Sensor.hh>
-#include <sdf/SDF.hh>
+#include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
 // Support PCL conversion for both Groovy (PCL 1.6) and Hydro (PCL 1.7)
