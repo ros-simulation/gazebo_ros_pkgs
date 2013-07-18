@@ -2,6 +2,14 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.5 (2013-07-18)
+------------------
+* Include <sdf/sdf.hh> instead of <sdf/SDF.hh>
+  The sdformat package recently changed the name of an sdf header
+  file from SDF.hh to SDFImpl.hh; this change will use the lower-case
+  header file which should work with old and new versions of sdformat
+  or gazebo.
+
 2.1.4 (2013-07-14)
 ------------------
 
