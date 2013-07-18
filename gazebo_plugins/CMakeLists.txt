@@ -34,6 +34,7 @@ endif()
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
 find_package(SDF REQUIRED)
+find_package(PCL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 
 execute_process(COMMAND
@@ -110,7 +111,6 @@ catkin_package(
     gazebo 
     SDF
   )
-
 
 ## Executables
 add_executable(hokuyo_node src/hokuyo_node.cpp)
