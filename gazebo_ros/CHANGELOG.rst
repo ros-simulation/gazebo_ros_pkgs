@@ -2,6 +2,10 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.5 (2013-07-18)
+------------------
+* gazebo_ros: fixed variable names in gazebo_ros_paths_plugin
+
 2.1.4 (2013-07-14)
 ------------------
 

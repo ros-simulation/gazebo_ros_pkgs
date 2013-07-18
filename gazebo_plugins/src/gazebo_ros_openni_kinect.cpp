@@ -29,7 +29,7 @@
 #include <gazebo_plugins/gazebo_ros_openni_kinect.h>
 
 #include <gazebo/sensors/Sensor.hh>
-#include <sdf/SDF.hh>
+#include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
 // for creating PointCloud2 from pcl point cloud

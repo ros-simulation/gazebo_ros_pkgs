@@ -28,7 +28,7 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/HingeJoint.hh>
 #include <gazebo/sensors/Sensor.hh>
-#include <sdf/SDF.hh>
+#include <sdf/sdf.hh>
 #include <sdf/Param.hh>
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/GpuRaySensor.hh>
