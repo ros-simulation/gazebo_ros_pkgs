@@ -1,3 +1,6 @@
+# vi stuff
+.*.sw?
+
 # Python stuff
 *.pyc
 
