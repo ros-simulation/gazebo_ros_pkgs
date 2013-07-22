@@ -210,7 +210,7 @@ target_link_libraries(gazebo_ros_projector ${Boost_LIBRARIES})
 add_library(gazebo_ros_prosilica src/gazebo_ros_prosilica.cpp)
 set_target_properties(gazebo_ros_prosilica PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_prosilica PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_prosilica gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} DepthCameraPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_prosilica gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_force src/gazebo_ros_force.cpp)
 set_target_properties(gazebo_ros_force PROPERTIES LINK_FLAGS "${ld_flags}")

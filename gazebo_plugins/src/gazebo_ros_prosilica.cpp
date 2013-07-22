@@ -1,32 +1,26 @@
 /*
- *  Gazebo - Outdoor Multi-Robot Simulator
- *  Copyright (C) 2003
- *     Nate Koenig & Andrew Howard
+ * Copyright 2013 Open Source Robotics Foundation
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- */
+*/
+
 /*
  @mainpage
-   Desc: GazeboRosProsilica plugin for simulating cameras in Gazebo
+   Desc: GazeboRosProsilica plugin for simulating Prosilica cameras in Gazebo
    Author: John Hsu
    Date: 24 Sept 2008
-   SVN info: $Id$
- @htmlinclude manifest.html
- @b GazeboRosProsilica plugin mimics after prosilica_camera package
- */
+*/
 
 #include <algorithm>
 #include <assert.h>
@@ -84,13 +78,13 @@ GazeboRosProsilica::~GazeboRosProsilica()
 void GazeboRosProsilica::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
 
-  DepthCameraPlugin::Load(_parent, _sdf);
+  CameraPlugin::Load(_parent, _sdf);
   this->parentSensor_ = this->parentSensor;
   this->width_ = this->width;
   this->height_ = this->height;
   this->depth_ = this->depth;
   this->format_ = this->format;
-  this->camera_ = this->depthCamera;
+  this->camera_ = this->camera;
   GazeboRosCameraUtils::Load(_parent, _sdf);
 
   // camera mode for prosilica:
@@ -210,7 +204,7 @@ void GazeboRosProsilica::pollCallback(polled_camera::GetPolledImage::Request& re
   {
     {
       // Get a pointer to image data
-      src = this->parentSensor->GetDepthCamera()->GetImageData(0);
+      src = this->parentSensor->GetCamera()->GetImageData(0);
 
       if (src)
       {
