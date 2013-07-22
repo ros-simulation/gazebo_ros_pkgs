@@ -35,7 +35,7 @@
 // prosilica components
 // Stuff in image_common
 #include <image_transport/image_transport.h>
-#include <polled_camera/publication_server.h>
+#include <polled_camera/publication_server.h>  // do: sudo apt-get install ros-hydro-polled-camera
 #include <polled_camera/GetPolledImage.h>
 
 namespace gazebo
