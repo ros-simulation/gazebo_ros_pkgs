@@ -55,7 +55,7 @@
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
 
-// ros_control + gazebo
+// gazebo_ros_control
 #include <gazebo_ros_control/robot_hw_sim.h>
 
 namespace gazebo_ros_control
@@ -68,10 +68,10 @@ public:
   bool initSim(
     ros::NodeHandle model_nh,
     gazebo::physics::ModelPtr parent_model,
-    const std::vector<JointData> joints)
+    std::vector<transmission_interface::TransmissionInfo> transmissions)
   {
     // Resize vectors to our DOF
-    n_dof_ = joints.size();
+    n_dof_ = transmissions.size();
     joint_names_.resize(n_dof_);
     joint_position_.resize(n_dof_);
     joint_velocity_.resize(n_dof_);
@@ -82,29 +82,62 @@ public:
     // Initialize values
     for(unsigned int j=0; j < n_dof_; j++)
     {
-      joint_names_[j] = joints[j].name_;
+      // Check that this transmission has one joint
+      if(transmissions[j].joints_.size() == 0)
+      {
+        ROS_WARN_STREAM_NAMED("default_robot_hw_sim","Transmission " << transmissions[j].name_
+          << " has no associated joints.");
+        continue;
+      }
+      else if(transmissions[j].joints_.size() > 1)
+      {
+        ROS_WARN_STREAM_NAMED("default_robot_hw_sim","Transmission " << transmissions[j].name_
+          << " has more than one joint. Currently the default robot hardware simulation "
+          << " interface only supports one.");
+        continue;
+      }
+
+      // Check that this transmission has one actuator
+      if(transmissions[j].actuators_.size() == 0)
+      {
+        ROS_WARN_STREAM_NAMED("default_robot_hw_sim","Transmission " << transmissions[j].name_
+          << " has no associated actuators.");
+        continue;
+      }
+      else if(transmissions[j].actuators_.size() > 1)
+      {
+        ROS_WARN_STREAM_NAMED("default_robot_hw_sim","Transmission " << transmissions[j].name_
+          << " has more than one actuator. Currently the default robot hardware simulation "
+          << " interface only supports one.");
+        continue;
+      }
+
+      // Add data from transmission
+      joint_names_[j] = transmissions[j].joints_[0].name_;
       joint_position_[j] = 1.0;
       joint_velocity_[j] = 0.0;
       joint_effort_[j] = 1.0;  // N/m for continuous joints
       joint_effort_command_[j] = 0.0;
       joint_velocity_command_[j] = 0.0;
 
+      const std::string& hardware_interface = transmissions[j].actuators_[0].hardware_interface_;
+
+      // Debug
+      ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joint_names_[j]
+        << "' of type '" << hardware_interface << "'");
+
       // Create joint state interface
       js_interface_.registerHandle(hardware_interface::JointStateHandle(
           joint_names_[j], &joint_position_[j],&joint_velocity_[j], &joint_effort_[j]));
 
-      // Debug
-      ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joints[j].name_
-        << "' of type '" << joints[j].hardware_interface_ << "'");
-
       // Decide what kind of command interface this actuator/joint has
-      if(joints[j].hardware_interface_ == "EffortJointInterface")
+      if(hardware_interface == "EffortJointInterface")
       {
         // Create effort joint interface
         ej_interface_.registerHandle(hardware_interface::JointHandle(
             js_interface_.getHandle(joint_names_[j]),&joint_effort_command_[j]));
       }
-      else if(joints[j].hardware_interface_ == "VelocityJointInterface")
+      else if(hardware_interface == "VelocityJointInterface")
       {
         // Create velocity joint interface
         vj_interface_.registerHandle(hardware_interface::JointHandle(
@@ -112,8 +145,9 @@ public:
       }
       else
       {
-        ROS_ERROR_STREAM_NAMED("default_robot_hw_sim","No matching hardware interface found for '"
-          << joints[j].hardware_interface_ );
+        ROS_FATAL_STREAM_NAMED("default_robot_hw_sim","No matching hardware interface found for '"
+          << hardware_interface );
+        return false;
       }
     }
 
@@ -125,8 +159,8 @@ public:
     // Get the gazebo joints that correspond to the robot joints
     for(unsigned int j=0; j < n_dof_; j++)
     {
-      ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim", "Getting pointer to gazebo joint: "
-        << joint_names_[j]);
+      //ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim", "Getting pointer to gazebo joint: "
+      //  << joint_names_[j]);
       gazebo::physics::JointPtr joint = parent_model->GetJoint(joint_names_[j]);
       if (joint)
       {
@@ -163,7 +197,7 @@ public:
       sim_joints_[j]->SetForce(0,joint_effort_command_[j]);
       
       // Output debug every nth msg
-      if( !(j % 10) )
+      if( !(j % 10) && false)
       {
         ROS_DEBUG_STREAM_NAMED("robot_hw_sim","SetForce " << joint_effort_command_[j]);
       }

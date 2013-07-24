@@ -80,6 +80,7 @@ catkin_package(
   gazebo_ros_bumper 
   gazebo_ros_template 
   gazebo_ros_projector 
+  gazebo_ros_prosilica 
   gazebo_ros_force 
   gazebo_ros_joint_trajectory 
   gazebo_ros_joint_pose_trajectory
@@ -204,6 +205,11 @@ add_library(gazebo_ros_projector src/gazebo_ros_projector.cpp)
 set_target_properties(gazebo_ros_projector PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_projector PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_projector ${Boost_LIBRARIES})
+
+add_library(gazebo_ros_prosilica src/gazebo_ros_prosilica.cpp)
+set_target_properties(gazebo_ros_prosilica PROPERTIES LINK_FLAGS "${ld_flags}")
+set_target_properties(gazebo_ros_prosilica PROPERTIES COMPILE_FLAGS "${cxx_flags}")
+target_link_libraries(gazebo_ros_prosilica gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_force src/gazebo_ros_force.cpp)
 set_target_properties(gazebo_ros_force PROPERTIES LINK_FLAGS "${ld_flags}")
