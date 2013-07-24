@@ -83,6 +83,9 @@ class GazeboRosProsilica : public CameraPlugin, GazeboRosCameraUtils
   /// \brief ROS image topic name
   private: std::string pollServiceName;
 
+  private: void Advertise();
+  private: event::ConnectionPtr load_connection_;
+
   // subscribe to world stats
   //private: transport::NodePtr node;
   //private: transport::SubscriberPtr statsSub;
