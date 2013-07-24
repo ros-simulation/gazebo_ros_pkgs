@@ -87,6 +87,11 @@ void GazeboRosProsilica::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->camera_ = this->camera;
   GazeboRosCameraUtils::Load(_parent, _sdf);
 
+  this->load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosProsilica::Advertise, this));
+}
+
+void GazeboRosProsilica::Advertise()
+{
   // camera mode for prosilica:
   // prosilica::AcquisitionMode mode_; /// @todo Make this property of Camera
 
