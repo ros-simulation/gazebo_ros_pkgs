@@ -265,7 +265,7 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
         }
       }
 
-      point_cloud.header = this->point_cloud_msg_.header;
+      point_cloud.header = pcl_conversions::toPCL(point_cloud_msg_.header);
 
       pcl::toROSMsg(point_cloud, this->point_cloud_msg_);
 
@@ -425,7 +425,8 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
     }
   }
 
-  point_cloud.header = point_cloud_msg.header;
+  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
+
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }

@@ -370,7 +370,8 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
     }
   }
 
-  point_cloud.header = point_cloud_msg.header;
+  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
+
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }
