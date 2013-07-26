@@ -36,6 +36,7 @@
   <build_depend>driver_base</build_depend>
   <build_depend>rosgraph_msgs</build_depend>
   <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>rosconsole</build_depend>
   <build_depend>message_generation</build_depend>
@@ -59,6 +60,7 @@
   <run_depend>driver_base</run_depend>
   <run_depend>rosgraph_msgs</run_depend>
   <run_depend>pcl_ros</run_depend>
+  <run_depend>pcl</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>rosconsole</run_depend>
   <run_depend>message_generation</run_depend>
