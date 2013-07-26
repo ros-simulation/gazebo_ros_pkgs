@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros 
   image_transport 
   rosconsole
+  polled_camera
 )
 
 include (FindPkgConfig)
