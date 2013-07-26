@@ -104,13 +104,14 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   if (_sdf->HasElement("projectorTopicName"))
     this->projector_topic_name_ = _sdf->GetElement("projectorTopicName")->Get<std::string>();
 
-  // initialize ros
+  // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    int argc = 0;
-    char** argv = NULL;
-    ros::init(argc,argv,"gazebo",ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
   }
+
   
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 

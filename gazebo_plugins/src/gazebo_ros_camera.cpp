@@ -48,6 +48,14 @@ GazeboRosCamera::~GazeboRosCamera()
 
 void GazeboRosCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
+  // Make sure the ROS node for Gazebo has already been initialized
+  if (!ros::isInitialized())
+  {
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
+  }
+
   CameraPlugin::Load(_parent, _sdf);
   // copying from CameraPlugin into GazeboRosCameraUtils
   this->parentSensor_ = this->parentSensor;
