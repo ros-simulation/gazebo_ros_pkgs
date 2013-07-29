@@ -126,7 +126,7 @@ public:
       ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joint_names_[j]
         << "' of type '" << hardware_interface << "'");
 
-      // Create joint state interface
+      // Create joint state interface for all joints
       js_interface_.registerHandle(hardware_interface::JointStateHandle(
           joint_names_[j], &joint_position_[j],&joint_velocity_[j], &joint_effort_[j]));
 
@@ -191,6 +191,8 @@ public:
 
   void writeSim(ros::Time time, ros::Duration period)
   {
+    // \todo check if this joint is using a position, velocity, or effort hardware interface
+    // and set gazebo accordingly 
     for(unsigned int j=0; j < n_dof_; j++)
     {
       // Gazebo has an interesting API...
@@ -219,6 +221,8 @@ private:
   std::vector<double> joint_velocity_command_;
 
   std::vector<gazebo::physics::JointPtr> sim_joints_;
+
+  
 };
 
 typedef boost::shared_ptr<DefaultRobotHWSim> DefaultRobotHWSimPtr;

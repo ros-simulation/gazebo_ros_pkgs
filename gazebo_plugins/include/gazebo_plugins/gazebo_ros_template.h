@@ -27,8 +27,7 @@
 #ifndef GAZEBO_ROS_TEMPLATE_HH
 #define GAZEBO_ROS_TEMPLATE_HH
 
-#include <ros/callback_queue.h>
-#include <ros/advertise_options.h>
+#include <ros/ros.h>
 
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/TransportTypes.hh>

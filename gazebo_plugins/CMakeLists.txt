@@ -43,7 +43,6 @@ execute_process(COMMAND
   OUTPUT_VARIABLE OGRE_PLUGIN_PATH
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-message(STATUS OGRE_PLUGIN_PATH=${OGRE_PLUGIN_PATH})
 
 catkin_python_setup()
 
@@ -55,13 +54,11 @@ set(cxx_flags)
 foreach (item ${GAZEBO_CFLAGS})
   set(cxx_flags "${cxx_flags} ${item}")
 endforeach ()
-message(status "\n\n${cxx_flags}\n\n")
 
 set(ld_flags)
 foreach (item ${GAZEBO_LDFLAGS})
   set(ld_flags "${ld_flags} ${item}")
 endforeach ()
-message(status "\n\n${ld_flags}\n\n")
 
 
 catkin_package(

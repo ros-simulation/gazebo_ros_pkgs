@@ -52,8 +52,6 @@ void GazeboRosTemplate::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
