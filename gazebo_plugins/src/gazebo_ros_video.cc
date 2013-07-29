@@ -107,7 +107,14 @@ namespace gazebo {
   }
 
   // Constructor
-  GazeboRosVideo::GazeboRosVideo() {}
+  GazeboRosVideo::GazeboRosVideo() {
+    if (!ros::isInitialized()) {
+      ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, "
+        << "unable to load plugin. Load the Gazebo system plugin "
+        << "'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+      return;
+    }
+  }
 
   // Destructor
   GazeboRosVideo::~GazeboRosVideo() {}
@@ -158,8 +165,6 @@ namespace gazebo {
     // Initialize the ROS node and subscribe to cmd_vel
     int argc = 0;
     char** argv = NULL;
-    ros::init(argc, argv, "gazebo_ros_video_plugin", 
-        ros::init_options::NoSigintHandler | ros::init_options::AnonymousName);
     rosnode_.reset(new ros::NodeHandle(robot_namespace_));
 
     ros::SubscribeOptions so =
