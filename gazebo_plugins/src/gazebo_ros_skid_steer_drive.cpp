@@ -259,13 +259,16 @@ namespace gazebo {
     joints[LEFT_FRONT]->SetMaxForce(0, torque);
     joints[RIGHT_FRONT]->SetMaxForce(0, torque);
     joints[LEFT_REAR]->SetMaxForce(0, torque);
-	joints[RIGHT_REAR]->SetMaxForce(0, torque);
+    joints[RIGHT_REAR]->SetMaxForce(0, torque);
 
-    // Initialize the ROS node and subscribe to cmd_vel
-    int argc = 0;
-    char** argv = NULL;
-    ros::init(argc, argv, "skid_steer_drive_plugin",
-        ros::init_options::NoSigintHandler | ros::init_options::AnonymousName);
+    // Make sure the ROS node for Gazebo has already been initialized
+    if (!ros::isInitialized())
+    {
+      ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+        << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+      return;
+    }
+
     rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 
     ROS_INFO("Starting GazeboRosSkidSteerDrive Plugin (ns = %s)!", this->robot_namespace_.c_str());

@@ -98,18 +98,17 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
   else
     this->update_rate_ = this->sdf->Get<double>("updateRate");
 
-  // ros callback queue for processing subscription
-  if (ros::isInitialized())
+  // Make sure the ROS node for Gazebo has already been initialized
+  if (!ros::isInitialized())
   {
-    this->deferred_load_thread_ = boost::thread(
-      boost::bind(&GazeboRosJointPoseTrajectory::LoadThread, this));
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
   }
-  else
-  {
-    gzerr << "Not loading plugin since ROS hasn't been "
-          << "properly initialized.  Try starting gazebo with ros plugin:\n"
-          << "  gazebo -s libgazebo_ros_api_plugin.so\n";
-  }
+
+  this->deferred_load_thread_ = boost::thread(
+    boost::bind(&GazeboRosJointPoseTrajectory::LoadThread, this));
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
