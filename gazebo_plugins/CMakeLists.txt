@@ -21,6 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros 
   image_transport 
   rosconsole
+  cv_bridge
+  polled_camera
 )
 
 include (FindPkgConfig)
@@ -86,6 +88,7 @@ catkin_package(
   gazebo_ros_joint_pose_trajectory
   gazebo_ros_diff_drive
   gazebo_ros_skid_steer_drive
+  gazebo_ros_video
   
   CATKIN_DEPENDS 
   message_generation 
@@ -238,6 +241,11 @@ set_target_properties(gazebo_ros_skid_steer_drive PROPERTIES LINK_FLAGS "${ld_fl
 set_target_properties(gazebo_ros_skid_steer_drive PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_skid_steer_drive ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_library(gazebo_ros_video src/gazebo_ros_video.cpp)
+set_target_properties(gazebo_ros_video PROPERTIES LINK_FLAGS "${ld_flags}")
+set_target_properties(gazebo_ros_video PROPERTIES COMPILE_FLAGS "${cxx_flags}")
+target_link_libraries(gazebo_ros_video ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 ##
 ## Add your new plugin here
 ##
@@ -272,6 +280,7 @@ install(TARGETS
   gazebo_ros_joint_pose_trajectory
   gazebo_ros_diff_drive
   gazebo_ros_skid_steer_drive
+  gazebo_ros_video
   pub_joint_trajectory_test  
   gazebo_ros_gpu_laser
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
