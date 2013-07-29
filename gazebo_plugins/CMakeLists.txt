@@ -241,7 +241,7 @@ set_target_properties(gazebo_ros_skid_steer_drive PROPERTIES LINK_FLAGS "${ld_fl
 set_target_properties(gazebo_ros_skid_steer_drive PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_skid_steer_drive ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_library(gazebo_ros_video src/gazebo_ros_video.cc)
+add_library(gazebo_ros_video src/gazebo_ros_video.cpp)
 set_target_properties(gazebo_ros_video PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_video PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_video ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})

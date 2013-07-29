@@ -39,9 +39,11 @@
 #include <gazebo/rendering/rendering.hh>
 #include <gazebo/transport/TransportTypes.hh>
 
-namespace gazebo {
+namespace gazebo 
+{
 
-  class VideoVisual : public rendering::Visual {
+  class VideoVisual : public rendering::Visual 
+  {
     public: 
       VideoVisual(
           const std::string &name, rendering::VisualPtr parent, 
@@ -54,7 +56,8 @@ namespace gazebo {
       int width_;
   }; 
 
-  class GazeboRosVideo : public VisualPlugin {
+  class GazeboRosVideo : public VisualPlugin 
+  {
     public: 
     
       GazeboRosVideo();
