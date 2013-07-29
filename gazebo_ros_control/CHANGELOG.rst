@@ -2,6 +2,20 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2013-07-29)
+------------------
+* Standardized the way ROS nodes are initialized in gazebo plugins
+* Remove find_package(SDF) from CMakeLists.txt
+  It is sufficient to find gazebo, which will export the information
+  about the SDFormat package.
+* Merge branch 'hydro-devel' into tranmission_parsing
+* Doc and debug update
+* Merged hydro-devel
+* Hid debug info
+* Merged from Hydro-devel
+* Merge branch 'hydro-devel' into tranmission_parsing
+* Moved trasmission parsing to ros_control
+
 2.1.5 (2013-07-18)
 ------------------
 

@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2013-07-29)
+------------------
+* Switched to pcl_conversions
+* Remove find_package(SDF) from CMakeLists.txt
+  It is sufficient to find gazebo, which will export the information
+  about the SDFormat package.
+
 2.1.5 (2013-07-18)
 ------------------
 * gazebo_ros: fixed variable names in gazebo_ros_paths_plugin

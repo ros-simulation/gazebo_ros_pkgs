@@ -2,6 +2,24 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2013-07-29)
+------------------
+* Switched to pcl_conversions instead of using compiler flags for Hydro/Groovy PCL support
+* fixed node intialization conflict between gzserver and gzclient. better adherance to gazebo style guidelines
+* Fixed template
+* removed ros initialization from plugins
+* Standardized the way ROS nodes are initialized in gazebo plugins
+* Remove find_package(SDF) from CMakeLists.txt
+  It is sufficient to find gazebo, which will export the information about the SDFormat package.
+* ROS Video Plugin for Gazebo - allows displaying an image stream in an OGRE texture inside gazebo. Also provides a fix for `#85 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/85>`_.
+* patch a fix for prosilica plugin (startup race condition where rosnode_ might still be NULL).
+* Added explanation of new dependency in gazebo_ros_pkgs
+* switch Prosilica camera from type depth to regular camera (as depth data were not used).
+* migrating prosilica plugin from pr2_gazebo_plugins
+* Removed tbb because it was a temporary dependency for a Gazebo bug
+* SDF.hh --> sdf.hh
+* Added PCL to package.xml
+
 2.1.5 (2013-07-18)
 ------------------
 * Include <sdf/sdf.hh> instead of <sdf/SDF.hh>
