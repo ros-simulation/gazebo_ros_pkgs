@@ -99,8 +99,20 @@ namespace gazebo
     {
       robot_base_frame_ = sdf->GetElement("robotBaseFrame")->Get<std::string>();
     } 
+
+    odometry_rate_ = 20.0;
+    if (!sdf->HasElement("odometryRate")) 
+    {
+      ROS_WARN("ModelControllerPlugin (ns = %s) missing <odometryRate>, "
+          "defaults to %f",
+          robot_namespace_.c_str(), odometry_rate_);
+    } 
+    else 
+    {
+      odometry_rate_ = sdf->GetElement("odometryRate")->Get<double>();
+    } 
  
-    last_update_time_ = parent_->GetWorld()->GetSimTime();
+    last_odom_publish_time_ = parent_->GetWorld()->GetSimTime();
     last_odom_pose_ = parent_->GetWorldPose();
     x_ = 0;
     y_ = 0;
@@ -147,9 +159,6 @@ namespace gazebo
   // Update the controller
   void GazeboRosModelController::UpdateChild() 
   {
-    common::Time current_time = parent_->GetWorld()->GetSimTime();
-    double seconds_since_last_update = 
-      (current_time - last_update_time_).Double();
     boost::mutex::scoped_lock scoped_lock(lock);
     math::Pose pose = parent_->GetWorldPose();
     float yaw = pose.rot.GetYaw();
@@ -158,6 +167,15 @@ namespace gazebo
           y_ * cosf(yaw) + x_ * sinf(yaw), 
           0));
     parent_->SetAngularVel(math::Vector3(0, 0, rot_));
+    if (odometry_rate_ > 0.0) {
+      common::Time current_time = parent_->GetWorld()->GetSimTime();
+      double seconds_since_last_update = 
+        (current_time - last_odom_publish_time_).Double();
+      if (seconds_since_last_update > (1.0 / odometry_rate_)) {
+        publishOdometry(seconds_since_last_update);
+        last_odom_publish_time_ = current_time;
+      }
+    }
   }
 
   // Finalize the controller
@@ -189,6 +207,7 @@ namespace gazebo
 
   void GazeboRosModelController::publishOdometry(double step_time) 
   {
+
     ros::Time current_time = ros::Time::now();
     std::string odom_frame = tf::resolve(tf_prefix_, odometry_frame_);
     std::string base_footprint_frame = 
@@ -222,11 +241,8 @@ namespace gazebo
 
     // get velocity in /odom frame
     math::Vector3 linear;
-    // Getting values from the worlds model in gazebo instead of supplied
-    // velocites as a simple means of error correction
     linear.x = (pose.pos.x - last_odom_pose_.pos.x) / step_time;
     linear.y = (pose.pos.y - last_odom_pose_.pos.y) / step_time;
-    boost::mutex::scoped_lock scoped_lock(lock);
     if (rot_ > M_PI / step_time) 
     { 
       // we cannot calculate the angular velocity correctly
