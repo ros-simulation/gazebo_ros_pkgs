@@ -31,8 +31,7 @@
 #include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
-// for creating PointCloud2 from pcl point cloud
-#include "pcl/ros/conversions.h"
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <tf/tf.h>
 

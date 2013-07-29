@@ -54,13 +54,11 @@ set(cxx_flags)
 foreach (item ${GAZEBO_CFLAGS})
   set(cxx_flags "${cxx_flags} ${item}")
 endforeach ()
-message(status "\n\n${cxx_flags}\n\n")
 
 set(ld_flags)
 foreach (item ${GAZEBO_LDFLAGS})
   set(ld_flags "${ld_flags} ${item}")
 endforeach ()
-message(status "\n\n${ld_flags}\n\n")
 
 ## Plugins
 add_library(gazebo_ros_api_plugin src/gazebo_ros_api_plugin.cpp)

@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   rosgraph_msgs 
   trajectory_msgs 
   pcl_ros 
+  pcl_conversions
   image_transport 
   rosconsole
   cv_bridge
@@ -105,6 +106,7 @@ catkin_package(
   rosgraph_msgs 
   trajectory_msgs 
   pcl_ros 
+  pcl_conversions
   image_transport 
   rosconsole
   DEPENDS 
