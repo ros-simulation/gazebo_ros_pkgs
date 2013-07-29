@@ -14,7 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
-find_package(SDF REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS
