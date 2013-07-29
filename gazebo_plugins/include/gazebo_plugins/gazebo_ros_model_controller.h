@@ -22,8 +22,8 @@
  * Date: 29 July 2013
  */
 
-#ifndef GAZEBO_ROS_MODEL_CONTROLLER_5DRC9ADD
-#define GAZEBO_ROS_MODEL_CONTROLLER_5DRC9ADD
+#ifndef GAZEBO_ROS_MODEL_CONTROLLER_HH
+#define GAZEBO_ROS_MODEL_CONTROLLER_HH
 
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -96,4 +96,4 @@ namespace gazebo {
 
 }
 
-#endif /* end of include guard: GAZEBO_ROS_MODEL_CONTROLLER_5DRC9ADD */
+#endif /* end of include guard: GAZEBO_ROS_MODEL_CONTROLLER_HH */
