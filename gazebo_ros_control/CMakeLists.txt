@@ -34,7 +34,7 @@ include_directories(include
   )
 
 ## Libraries
-add_library(${PROJECT_NAME} src/ros_control_plugin.cpp)
+add_library(${PROJECT_NAME} src/gazebo_ros_control_plugin.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${SDFormat_LIBRARIES})
 
 add_library(default_robot_hw_sim src/default_robot_hw_sim.cpp)
