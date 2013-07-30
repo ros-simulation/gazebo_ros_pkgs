@@ -274,6 +274,7 @@ install(TARGETS
   gazebo_ros_bumper
   gazebo_ros_template
   gazebo_ros_projector
+  gazebo_ros_prosilica
   gazebo_ros_force
   gazebo_ros_joint_trajectory
   gazebo_ros_joint_pose_trajectory
