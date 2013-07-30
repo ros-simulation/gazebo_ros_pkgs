@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2013-07-29)
+------------------
+
 2.2.0 (2013-07-29)
 ------------------
 * Standardized the way ROS nodes are initialized in gazebo plugins

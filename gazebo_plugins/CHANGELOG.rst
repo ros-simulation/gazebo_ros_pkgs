@@ -2,6 +2,10 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2013-07-29)
+------------------
+* Added prosilica plugin to install TARGETS
+
 2.2.0 (2013-07-29)
 ------------------
 * Switched to pcl_conversions instead of using compiler flags for Hydro/Groovy PCL support
