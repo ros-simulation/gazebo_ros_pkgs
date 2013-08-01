@@ -22,8 +22,8 @@
  * Date: 29 July 2013
  */
 
-#ifndef GAZEBO_ROS_MODEL_CONTROLLER_HH
-#define GAZEBO_ROS_MODEL_CONTROLLER_HH
+#ifndef GAZEBO_ROS_PLANAR_MOVE_HH
+#define GAZEBO_ROS_PLANAR_MOVE_HH
 
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -44,11 +44,11 @@
 
 namespace gazebo {
 
-  class GazeboRosModelController : public ModelPlugin {
+  class GazeboRosPlanarMove : public ModelPlugin {
 
     public: 
-      GazeboRosModelController();
-      ~GazeboRosModelController();
+      GazeboRosPlanarMove();
+      ~GazeboRosPlanarMove();
       void Load(physics::ModelPtr parent, sdf::ElementPtr sdf);
 
     protected: 
@@ -96,4 +96,4 @@ namespace gazebo {
 
 }
 
-#endif /* end of include guard: GAZEBO_ROS_MODEL_CONTROLLER_HH */
+#endif /* end of include guard: GAZEBO_ROS_PLANAR_MOVE_HH */

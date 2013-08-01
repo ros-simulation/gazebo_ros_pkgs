@@ -89,7 +89,7 @@ catkin_package(
   gazebo_ros_diff_drive
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
-  gazebo_ros_model_controller
+  gazebo_ros_planar_move
   
   CATKIN_DEPENDS 
   message_generation 
@@ -247,10 +247,10 @@ set_target_properties(gazebo_ros_video PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_video PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_video ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_library(gazebo_ros_model_controller src/gazebo_ros_model_controller.cpp)
-set_target_properties(gazebo_ros_model_controller PROPERTIES LINK_FLAGS "${ld_flags}")
-set_target_properties(gazebo_ros_model_controller PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_model_controller ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_library(gazebo_ros_planar_move src/gazebo_ros_planar_move.cpp)
+set_target_properties(gazebo_ros_planar_move PROPERTIES LINK_FLAGS "${ld_flags}")
+set_target_properties(gazebo_ros_planar_move PROPERTIES COMPILE_FLAGS "${cxx_flags}")
+target_link_libraries(gazebo_ros_planar_move ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 ##
 ## Add your new plugin here
@@ -287,7 +287,7 @@ install(TARGETS
   gazebo_ros_diff_drive
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
-  gazebo_ros_model_controller
+  gazebo_ros_planar_move
   pub_joint_trajectory_test  
   gazebo_ros_gpu_laser
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

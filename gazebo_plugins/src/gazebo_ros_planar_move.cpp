@@ -22,17 +22,17 @@
  * Date: 29 July 2013
  */
 
-#include <gazebo_plugins/gazebo_ros_model_controller.h>
+#include <gazebo_plugins/gazebo_ros_planar_move.h>
 
 namespace gazebo 
 {
 
-  GazeboRosModelController::GazeboRosModelController() {}
+  GazeboRosPlanarMove::GazeboRosPlanarMove() {}
 
-  GazeboRosModelController::~GazeboRosModelController() {}
+  GazeboRosPlanarMove::~GazeboRosPlanarMove() {}
 
   // Load the controller
-  void GazeboRosModelController::Load(physics::ModelPtr parent, 
+  void GazeboRosPlanarMove::Load(physics::ModelPtr parent, 
       sdf::ElementPtr sdf) 
   {
 
@@ -43,7 +43,7 @@ namespace gazebo
     robot_namespace_ = "";
     if (!sdf->HasElement("robotNamespace")) 
     {
-      ROS_INFO("ModelControllerPlugin missing <robotNamespace>, "
+      ROS_INFO("PlanarMovePlugin missing <robotNamespace>, "
           "defaults to \"%s\"", robot_namespace_.c_str());
     }
     else 
@@ -55,7 +55,7 @@ namespace gazebo
     command_topic_ = "cmd_vel";
     if (!sdf->HasElement("commandTopic")) 
     {
-      ROS_WARN("ModelControllerPlugin (ns = %s) missing <commandTopic>, "
+      ROS_WARN("PlanarMovePlugin (ns = %s) missing <commandTopic>, "
           "defaults to \"%s\"", 
           robot_namespace_.c_str(), command_topic_.c_str());
     } 
@@ -67,7 +67,7 @@ namespace gazebo
     odometry_topic_ = "odom";
     if (!sdf->HasElement("odometryTopic")) 
     {
-      ROS_WARN("ModelControllerPlugin (ns = %s) missing <odometryTopic>, "
+      ROS_WARN("PlanarMovePlugin (ns = %s) missing <odometryTopic>, "
           "defaults to \"%s\"", 
           robot_namespace_.c_str(), odometry_topic_.c_str());
     } 
@@ -79,7 +79,7 @@ namespace gazebo
     odometry_frame_ = "odom";
     if (!sdf->HasElement("odometryFrame")) 
     {
-      ROS_WARN("ModelControllerPlugin (ns = %s) missing <odometryFrame>, "
+      ROS_WARN("PlanarMovePlugin (ns = %s) missing <odometryFrame>, "
           "defaults to \"%s\"",
           robot_namespace_.c_str(), odometry_frame_.c_str());
     }
@@ -91,7 +91,7 @@ namespace gazebo
     robot_base_frame_ = "base_footprint";
     if (!sdf->HasElement("robotBaseFrame")) 
     {
-      ROS_WARN("ModelControllerPlugin (ns = %s) missing <robotBaseFrame>, "
+      ROS_WARN("PlanarMovePlugin (ns = %s) missing <robotBaseFrame>, "
           "defaults to \"%s\"",
           robot_namespace_.c_str(), robot_base_frame_.c_str());
     } 
@@ -103,7 +103,7 @@ namespace gazebo
     odometry_rate_ = 20.0;
     if (!sdf->HasElement("odometryRate")) 
     {
-      ROS_WARN("ModelControllerPlugin (ns = %s) missing <odometryRate>, "
+      ROS_WARN("PlanarMovePlugin (ns = %s) missing <odometryRate>, "
           "defaults to %f",
           robot_namespace_.c_str(), odometry_rate_);
     } 
@@ -122,7 +122,7 @@ namespace gazebo
     // Ensure that ROS has been initialized and subscribe to cmd_vel
     if (!ros::isInitialized()) 
     {
-      ROS_FATAL_STREAM("GazeboRosVideo Plugin (ns = " << robot_namespace_
+      ROS_FATAL_STREAM("PlanarMovePlugin (ns = " << robot_namespace_
         << "). A ROS node for Gazebo has not been initialized, "
         << "unable to load plugin. Load the Gazebo system plugin "
         << "'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
@@ -139,7 +139,7 @@ namespace gazebo
     // subscribe to the odometry topic
     ros::SubscribeOptions so =
       ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
-          boost::bind(&GazeboRosModelController::cmdVelCallback, this, _1),
+          boost::bind(&GazeboRosPlanarMove::cmdVelCallback, this, _1),
           ros::VoidPtr(), &queue_);
 
     vel_sub_ = rosnode_->subscribe(so);
@@ -147,17 +147,17 @@ namespace gazebo
 
     // start custom queue for diff drive
     callback_queue_thread_ = 
-      boost::thread(boost::bind(&GazeboRosModelController::QueueThread, this));
+      boost::thread(boost::bind(&GazeboRosPlanarMove::QueueThread, this));
 
     // listen to the update event (broadcast every simulation iteration)
     update_connection_ = 
       event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&GazeboRosModelController::UpdateChild, this));
+          boost::bind(&GazeboRosPlanarMove::UpdateChild, this));
 
   }
 
   // Update the controller
-  void GazeboRosModelController::UpdateChild() 
+  void GazeboRosPlanarMove::UpdateChild() 
   {
     boost::mutex::scoped_lock scoped_lock(lock);
     math::Pose pose = parent_->GetWorldPose();
@@ -179,7 +179,7 @@ namespace gazebo
   }
 
   // Finalize the controller
-  void GazeboRosModelController::FiniChild() {
+  void GazeboRosPlanarMove::FiniChild() {
     alive_ = false;
     queue_.clear();
     queue_.disable();
@@ -187,7 +187,7 @@ namespace gazebo
     callback_queue_thread_.join();
   }
 
-  void GazeboRosModelController::cmdVelCallback(
+  void GazeboRosPlanarMove::cmdVelCallback(
       const geometry_msgs::Twist::ConstPtr& cmd_msg) 
   {
     boost::mutex::scoped_lock scoped_lock(lock);
@@ -196,7 +196,7 @@ namespace gazebo
     rot_ = cmd_msg->angular.z;
   }
 
-  void GazeboRosModelController::QueueThread() 
+  void GazeboRosPlanarMove::QueueThread() 
   {
     static const double timeout = 0.01;
     while (alive_ && rosnode_->ok()) 
@@ -205,7 +205,7 @@ namespace gazebo
     }
   }
 
-  void GazeboRosModelController::publishOdometry(double step_time) 
+  void GazeboRosPlanarMove::publishOdometry(double step_time) 
   {
 
     ros::Time current_time = ros::Time::now();
@@ -271,6 +271,6 @@ namespace gazebo
     odometry_pub_.publish(odom_);
   }
 
-  GZ_REGISTER_MODEL_PLUGIN(GazeboRosModelController)
+  GZ_REGISTER_MODEL_PLUGIN(GazeboRosPlanarMove)
 }
 
