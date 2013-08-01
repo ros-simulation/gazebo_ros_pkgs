@@ -59,9 +59,12 @@ GazeboRosCameraUtils::GazeboRosCameraUtils()
 void GazeboRosCameraUtils::configCallback(
   gazebo_plugins::GazeboRosCameraConfig &config, uint32_t level)
 {
-  ROS_INFO("Reconfigure request for the gazebo ros camera_: %s. New rate: %.2f",
-    this->camera_name_.c_str(), config.imager_rate);
-  this->parentSensor_->SetUpdateRate(config.imager_rate);
+  if (this->initialized_)
+  {
+    ROS_INFO("Reconfigure request for the gazebo ros camera_: %s. New rate: %.2f",
+             this->camera_name_.c_str(), config.imager_rate);
+    this->parentSensor_->SetUpdateRate(config.imager_rate);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
