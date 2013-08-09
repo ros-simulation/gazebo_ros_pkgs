@@ -209,6 +209,7 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
+  PublishCameraInfo();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
