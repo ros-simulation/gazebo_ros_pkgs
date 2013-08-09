@@ -84,7 +84,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->node_ = transport::NodePtr(new transport::Node());
   this->node_->Init(worldName);
 
-  this->parent_ray_sensor_ = boost::shared_dynamic_cast<sensors::RaySensor>(this->parent_sensor_);
+  this->parent_ray_sensor_ = boost::dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
 
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosBlockLaser controller requires a Ray Sensor as its parent");
