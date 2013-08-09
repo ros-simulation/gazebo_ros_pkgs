@@ -486,7 +486,7 @@ void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
     return;
 
   /// don't bother if there are no subscribers
-  if (this->image_pub_.getNumSubscribers() > 0)
+  if (this->image_connect_count_ > 0)
   {
     boost::mutex::scoped_lock lock(this->lock_);
 
