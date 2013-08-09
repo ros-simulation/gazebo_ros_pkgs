@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(gazebo_ros)
 
 find_package(catkin REQUIRED COMPONENTS
+  cmake_modules
   roslib
   roscpp
   geometry_msgs
@@ -25,6 +26,8 @@ endif()
 find_package(gazebo REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 
+find_package(TinyXML REQUIRED)
+
 catkin_python_setup()
 
 generate_dynamic_reconfigure_options(cfg/Physics.cfg)
@@ -46,9 +49,12 @@ catkin_package(
   std_msgs
   gazebo_msgs
   gazebo_plugins
+
+  DEPENDS
+    TinyXML
   )
 
-include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
 
 set(cxx_flags)
 foreach (item ${GAZEBO_CFLAGS})
@@ -65,7 +71,7 @@ add_library(gazebo_ros_api_plugin src/gazebo_ros_api_plugin.cpp)
 add_dependencies(gazebo_ros_api_plugin gazebo_msgs_gencpp ${PROJECT_NAME}_gencfg) # wait for gazebo_msgs to be built
 set_target_properties(gazebo_ros_api_plugin PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_api_plugin PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_api_plugin ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(gazebo_ros_api_plugin ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML_LIBRARIES})
 
 add_library(gazebo_ros_paths_plugin src/gazebo_ros_paths_plugin.cpp)
 add_dependencies(gazebo_ros_paths_plugin gazebo_msgs_gencpp ${PROJECT_NAME}_gencfg) # wait for gazebo_msgs to be built

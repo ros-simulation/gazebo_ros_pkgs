@@ -130,7 +130,7 @@ void GazeboRosIMU::LoadThread()
   this->pmq.startServiceThread();
 
   // assert that the body by link_name_ exists
-  this->link = boost::shared_dynamic_cast<physics::Link>(
+  this->link = boost::dynamic_pointer_cast<physics::Link>(
     this->world_->GetEntity(this->link_name_));
   if (!this->link)
   {

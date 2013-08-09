@@ -175,7 +175,7 @@ void GazeboRosJointTrajectory::SetTrajectory(
     physics::EntityPtr ent =
       this->world_->GetEntity(this->reference_link_name_);
     if (ent)
-      this->reference_link_ = boost::shared_dynamic_cast<physics::Link>(ent);
+      this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
     {
       ROS_ERROR("ros_joint_trajectory plugin needs a reference link [%s] as"
