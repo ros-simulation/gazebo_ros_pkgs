@@ -2,6 +2,10 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2013-08-12)
+------------------
+* Renamed ros_control_plugin, updated documentation
+
 2.2.1 (2013-07-29)
 ------------------
 

@@ -2,6 +2,25 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2013-08-12)
+------------------
+* enable image generation when pointcloud is requested, as the generated image is used by the pointcloud
+* gazebo_plugins: replace deprecated boost function
+  This is related to this gazebo issue:
+  https://bitbucket.org/osrf/gazebo/issue/581/boost-shared_-_cast-are-deprecated-removed
+* gazebo_plugins: fix linkedit issues
+  Note: other linkedit errors were fixed upstream
+  in gazebo
+* gazebo_ros_openni_kinect plugin: adds publishing of the camera info
+  again (fixes `#95 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/95>`_)
+* Merge pull request `#90 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/90>`_ from piyushk/add_model_controller
+  added a simple model controller plugin that uses a twist message
+* renamed plugin from model controller to planar move
+* prevents dynamic_reconfigure from overwritting update rate param on start-up
+* removed anonymizer from include guard
+* fixed odometry publication for model controller plugin
+* added a simple model controller plugin that uses a twist message to control models
+
 2.2.1 (2013-07-29)
 ------------------
 * Added prosilica plugin to install TARGETS

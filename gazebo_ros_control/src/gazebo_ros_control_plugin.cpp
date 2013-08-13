@@ -73,7 +73,7 @@ public:
   // Overloaded Gazebo entry point
   void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf)
   {
-    ROS_INFO_STREAM("Loading ros_control_gazebo_plugin...");
+    ROS_INFO_STREAM("Loading gazebo_ros_control plugin...");
 
     // Save pointers to the model
     parent_model_ = parent;
@@ -94,7 +94,7 @@ public:
       return;
     }
 
-    // Initialize ROS interface, if necessary (if we aren't using gazebo_ros_api_plugin)
+    // Check that ROS has been initialized
     if(!ros::isInitialized())
     {
       ROS_ERROR_STREAM("Not loading plugin since ROS hasn't been "
@@ -261,7 +261,7 @@ public:
       }
       else
       {
-        ROS_INFO("gazebo_ros_control plugin is waiting for model"
+        ROS_INFO_ONCE("gazebo_ros_control plugin is waiting for model"
           " URDF in parameter [%s] on the ROS param server.", robot_description_.c_str());
 
         nh_.getParam(param_name, urdf_string);

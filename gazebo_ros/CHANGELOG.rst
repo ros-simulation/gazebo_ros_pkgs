@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2013-08-12)
+------------------
+* gazebo_ros: fixed missing dependency on TinyXML
+* gazebo_plugins: replace deprecated boost function
+  This is related to this gazebo issue:
+  https://bitbucket.org/osrf/gazebo/issue/581/boost-shared_-_cast-are-deprecated-removed
+
 2.2.1 (2013-07-29)
 ------------------
 

@@ -38,8 +38,8 @@
    Desc:   Hardware Interface for any simulated robot in Gazebo
 */
 
-#ifndef __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_HW_SIM_H_
-#define __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_HW_SIM_H_
+#ifndef _GAZEBO_ROS_CONTROL___DEFAULT_ROBOT_HW_SIM_H_
+#define _GAZEBO_ROS_CONTROL___DEFAULT_ROBOT_HW_SIM_H_
 
 // ros_control
 #include <hardware_interface/joint_command_interface.h>
@@ -128,7 +128,7 @@ public:
 
       // Create joint state interface for all joints
       js_interface_.registerHandle(hardware_interface::JointStateHandle(
-          joint_names_[j], &joint_position_[j],&joint_velocity_[j], &joint_effort_[j]));
+          joint_names_[j], &joint_position_[j], &joint_velocity_[j], &joint_effort_[j]));
 
       // Decide what kind of command interface this actuator/joint has
       if(hardware_interface == "EffortJointInterface")
