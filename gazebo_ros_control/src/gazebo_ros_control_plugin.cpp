@@ -47,14 +47,14 @@
 namespace gazebo_ros_control
 {
 
-RosControlPlugin::~RosControlPlugin()
+GazeboRosControlPlugin::~GazeboRosControlPlugin()
 {
   // Disconnect from gazebo events
   gazebo::event::Events::DisconnectWorldUpdateBegin(update_connection_);
 }
 
 // Overloaded Gazebo entry point
-void RosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf)
+void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf)
 {
   ROS_INFO_STREAM_NAMED("gazebo_ros_control","Loading gazebo_ros_control plugin...");
 
@@ -64,11 +64,11 @@ void RosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sd
 
   // ros callback queue for processing subscription
   deferred_load_thread_ = boost::thread(
-    boost::bind(&RosControlPlugin::loadThread, this));
+    boost::bind(&GazeboRosControlPlugin::loadThread, this));
 }
 
 // Load in seperate thread from Gazebo in case ROS is blocking
-void RosControlPlugin::loadThread()
+void GazeboRosControlPlugin::loadThread()
 {
   // Error message if the model couldn't be found
   if (!parent_model_)
@@ -190,7 +190,7 @@ void RosControlPlugin::loadThread()
     // Listen to the update event. This event is broadcast every simulation iteration.
     update_connection_ =
       gazebo::event::Events::ConnectWorldUpdateBegin
-      (boost::bind(&RosControlPlugin::Update, this));
+      (boost::bind(&GazeboRosControlPlugin::Update, this));
 
   }
   catch(pluginlib::LibraryLoadException &ex)
@@ -202,7 +202,7 @@ void RosControlPlugin::loadThread()
 }
 
 // Called by the world update start event
-void RosControlPlugin::Update()
+void GazeboRosControlPlugin::Update()
 {
   // Get the simulation time and period
   gazebo::common::Time gz_time_now = parent_model_->GetWorld()->GetSimTime();
@@ -227,7 +227,7 @@ void RosControlPlugin::Update()
 }
 
 // Get the URDF XML from the parameter server
-std::string RosControlPlugin::getURDF(std::string param_name) const
+std::string GazeboRosControlPlugin::getURDF(std::string param_name) const
 {
   std::string urdf_string;
 
@@ -258,7 +258,7 @@ std::string RosControlPlugin::getURDF(std::string param_name) const
 }
 
 // Get Transmissions from the URDF
-bool RosControlPlugin::parseTransmissionsFromURDF()
+bool GazeboRosControlPlugin::parseTransmissionsFromURDF()
 {
   std::string urdf_string = getURDF(robot_description_);
 

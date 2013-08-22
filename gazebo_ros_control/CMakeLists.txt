@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8.3)
-
 project(gazebo_ros_control)
 
 # Load catkin and all dependencies required for this package
@@ -10,20 +9,21 @@ find_package(catkin REQUIRED COMPONENTS
   hardware_interface 
   transmission_interface
   pluginlib
-  )
+)
 
-# Depend on system install of Gazebo and SDFormat
+# Depend on system install of Gazebo 
 find_package(gazebo REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS
-  roscpp
-  gazebo_ros
-  controller_manager
-  pluginlib
-  transmission_interface
+    roscpp
+    gazebo_ros
+    controller_manager
+    pluginlib
+    transmission_interface
   INCLUDE_DIRS include
-  )
+  DEPENDS gazebo
+)
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(include
@@ -31,14 +31,14 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${GAZEBO_INCLUDE_DIRS}
   ${SDFormat_INCLUDE_DIRS}
-  )
+)
 
 ## Libraries
 add_library(${PROJECT_NAME} src/gazebo_ros_control_plugin.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${SDFormat_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${gazebo_LIBRARIES})
 
 add_library(default_robot_hw_sim src/default_robot_hw_sim.cpp)
-target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES} ${SDFormat_LIBRARIES})
+target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES} ${gazebo_LIBRARIES})
 
 ## Install
 install(TARGETS ${PROJECT_NAME} default_robot_hw_sim

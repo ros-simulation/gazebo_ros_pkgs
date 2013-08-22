@@ -60,11 +60,11 @@
 namespace gazebo_ros_control
 {
 
-class RosControlPlugin : public gazebo::ModelPlugin
+class GazeboRosControlPlugin : public gazebo::ModelPlugin
 {
 public:
 
-  virtual ~RosControlPlugin();
+  virtual ~GazeboRosControlPlugin();
 
   // Overloaded Gazebo entry point
   void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf);
@@ -81,7 +81,7 @@ public:
   // Get Transmissions from the URDF
   bool parseTransmissionsFromURDF();
 
-private:
+protected:
 
   // Node Handles
   ros::NodeHandle nh_; // no namespace
@@ -122,5 +122,5 @@ private:
 };
 
 // Register this plugin with the simulator
-GZ_REGISTER_MODEL_PLUGIN(RosControlPlugin);
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosControlPlugin);
 }
