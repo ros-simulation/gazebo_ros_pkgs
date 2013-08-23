@@ -50,6 +50,13 @@ namespace gazebo
     protected: virtual void OnNewFrameRight(const unsigned char *_image,
                    unsigned int _width, unsigned int _height,
                    unsigned int _depth, const std::string &_format);
+
+    /// Bookkeeping flags that will be passed into the underlying
+    /// GazeboRosCameraUtils objects to let them share state about the parent
+    /// sensor.
+    private: int imageConnectCount;
+    private: boost::mutex imageConnectCountLock;
+    private: bool wasActive;
   };
 }
 #endif

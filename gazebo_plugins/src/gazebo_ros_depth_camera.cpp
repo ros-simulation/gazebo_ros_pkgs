@@ -142,7 +142,7 @@ void GazeboRosDepthCamera::Advertise()
 void GazeboRosDepthCamera::PointCloudConnect()
 {
   this->point_cloud_connect_count_++;
-  this->image_connect_count_++;
+  (*this->image_connect_count_)++;
   this->parentSensor->SetActive(true);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +150,7 @@ void GazeboRosDepthCamera::PointCloudConnect()
 void GazeboRosDepthCamera::PointCloudDisconnect()
 {
   this->point_cloud_connect_count_--;
-  this->image_connect_count_--;
+  (*this->image_connect_count_)--;
   if (this->point_cloud_connect_count_ <= 0)
     this->parentSensor->SetActive(false);
 }
@@ -196,7 +196,7 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
   {
     if (this->point_cloud_connect_count_ <= 0 &&
         this->depth_image_connect_count_ <= 0 &&
-        this->image_connect_count_ <= 0)
+        (*this->image_connect_count_) <= 0)
     {
       this->parentSensor->SetActive(false);
     }
@@ -296,13 +296,13 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
 
   if (!this->parentSensor->IsActive())
   {
-    if (this->image_connect_count_ > 0)
+    if ((*this->image_connect_count_) > 0)
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
   else
   {
-    if (this->image_connect_count_ > 0)
+    if ((*this->image_connect_count_) > 0)
       this->PutCameraData(_image);
   }
 }
