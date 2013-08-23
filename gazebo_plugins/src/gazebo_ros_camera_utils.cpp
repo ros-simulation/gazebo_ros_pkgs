@@ -119,9 +119,6 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   this->robot_namespace_ = "";
   if (this->sdf->HasElement("robotNamespace"))
     this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
-  else{
-    ROS_INFO("No robot namespace found.");
-  }
 
   this->image_topic_name_ = "image_raw";
   if (this->sdf->HasElement("imageTopicName"))
