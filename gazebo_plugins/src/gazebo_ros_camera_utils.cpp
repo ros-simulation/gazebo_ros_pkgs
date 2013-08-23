@@ -272,6 +272,7 @@ void GazeboRosCameraUtils::LoadThread()
   std::string prefix;
   robotnode->getParam(std::string("tf_prefix"), prefix);
   this->frame_name_ = tf::resolve(prefix, this->frame_name_);
+  delete robotnode;
 
   if (!this->camera_name_.empty())
   {
