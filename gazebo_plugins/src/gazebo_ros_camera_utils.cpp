@@ -119,6 +119,9 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   this->robot_namespace_ = "";
   if (this->sdf->HasElement("robotNamespace"))
     this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
+  else{
+    ROS_INFO("No robot namespace found.");
+  }
 
   this->image_topic_name_ = "image_raw";
   if (this->sdf->HasElement("imageTopicName"))
@@ -267,9 +270,10 @@ void GazeboRosCameraUtils::LoadThread()
 
   this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
 
-  // resolve tf prefix
+  // resolve tf prefix that is in the robot node!
+  ros::NodeHandle* robotnode = new ros::NodeHandle(this->robot_namespace_);
   std::string prefix;
-  this->rosnode_->getParam(std::string("tf_prefix"), prefix);
+  robotnode->getParam(std::string("tf_prefix"), prefix);
   this->frame_name_ = tf::resolve(prefix, this->frame_name_);
 
   if (!this->camera_name_.empty())
