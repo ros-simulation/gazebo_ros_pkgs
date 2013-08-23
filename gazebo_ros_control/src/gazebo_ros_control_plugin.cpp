@@ -56,20 +56,13 @@ GazeboRosControlPlugin::~GazeboRosControlPlugin()
 // Overloaded Gazebo entry point
 void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf)
 {
-  ROS_INFO_STREAM_NAMED("gazebo_ros_control","Loading gazebo_ros_control plugin...");
+  ROS_INFO_STREAM_NAMED("gazebo_ros_control","Loading gazebo_ros_control plugin");
+
 
   // Save pointers to the model
   parent_model_ = parent;
   sdf_ = sdf;
 
-  // ros callback queue for processing subscription
-  deferred_load_thread_ = boost::thread(
-    boost::bind(&GazeboRosControlPlugin::loadThread, this));
-}
-
-// Load in seperate thread from Gazebo in case ROS is blocking
-void GazeboRosControlPlugin::loadThread()
-{
   // Error message if the model couldn't be found
   if (!parent_model_)
   {
@@ -84,14 +77,6 @@ void GazeboRosControlPlugin::loadThread()
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
-
-  // Debug output
-  /*
-    ROS_DEBUG_STREAM_NAMED("ros_control","Plugin XML:");
-    std::string temp;
-    sdf_->PrintValues(temp);
-    std::cout << temp;
-  */
 
   // Get namespace for nodehandle
   if(sdf_->HasElement("robotNamespace"))
@@ -268,4 +253,6 @@ bool GazeboRosControlPlugin::parseTransmissionsFromURDF()
 }
 
 
-}
+// Register this plugin with the simulator
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosControlPlugin);
+} // namespace

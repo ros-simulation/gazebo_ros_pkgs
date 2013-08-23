@@ -67,10 +67,7 @@ public:
   virtual ~GazeboRosControlPlugin();
 
   // Overloaded Gazebo entry point
-  void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf);
-
-  // Load in seperate thread from Gazebo in case ROS is blocking
-  void loadThread();
+  virtual void Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf);
 
   // Called by the world update start event
   void Update();
@@ -121,6 +118,5 @@ protected:
 
 };
 
-// Register this plugin with the simulator
-GZ_REGISTER_MODEL_PLUGIN(GazeboRosControlPlugin);
+
 }
