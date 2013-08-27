@@ -2,6 +2,10 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.1 (2013-08-27)
+------------------
+* Cleaned up template, fixes for header files
+
 2.3.0 (2013-08-12)
 ------------------
 * gazebo_ros: fixed missing dependency on TinyXML

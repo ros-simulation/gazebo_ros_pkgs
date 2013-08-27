@@ -2,6 +2,12 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.1 (2013-08-27)
+------------------
+* Cleaned up template, fixes for header files
+* Renamed plugin to match file name, tweaked CMakeLists
+* Created a header file for the ros_control gazebo plugin
+
 2.3.0 (2013-08-12)
 ------------------
 * Renamed ros_control_plugin, updated documentation
