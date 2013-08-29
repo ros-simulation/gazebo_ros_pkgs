@@ -14,6 +14,10 @@
  * limitations under the License.
  *
 */
+/*
+ * Desc: A dynamic controller plugin that publishes ROS image_raw
+ *    camera_info topic for generic camera sensor.
+*/
 
 #ifndef GAZEBO_ROS_CAMERA_HH
 #define GAZEBO_ROS_CAMERA_HH
