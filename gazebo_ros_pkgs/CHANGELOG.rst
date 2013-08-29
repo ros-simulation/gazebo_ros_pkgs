@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.1 (2013-08-27)
+------------------
+
 2.3.0 (2013-08-12)
 ------------------
 * Renamed ros_control_plugin, updated documentation

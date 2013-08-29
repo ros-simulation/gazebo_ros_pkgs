@@ -51,6 +51,7 @@ generate_dynamic_reconfigure_options(cfg/CameraSynchronizer.cfg cfg/GazeboRosCam
 
 include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS})
 
+# \todo: remove these?
 set(cxx_flags)
 foreach (item ${GAZEBO_CFLAGS})
   set(cxx_flags "${cxx_flags} ${item}")

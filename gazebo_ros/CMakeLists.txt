@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   std_msgs
   gazebo_msgs
-  )
+)
 
 include (FindPkgConfig)
 if (PKG_CONFIG_FOUND)
@@ -22,8 +22,9 @@ else()
   message(FATAL_ERROR "pkg-config is required; please install it")
 endif()
 
-# Depend on system install of Gazebo and SDFormat
+# Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
+
 find_package(Boost REQUIRED COMPONENTS thread)
 
 find_package(TinyXML REQUIRED)
@@ -52,7 +53,7 @@ catkin_package(
 
   DEPENDS
     TinyXML
-  )
+)
 
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
 

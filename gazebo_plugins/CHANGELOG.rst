@@ -2,6 +2,11 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.1 (2013-08-27)
+------------------
+* Remove direct dependency on pcl, rely on the transitive dependency from pcl_ros
+* Cleaned up template, fixes for header files
+
 2.3.0 (2013-08-12)
 ------------------
 * enable image generation when pointcloud is requested, as the generated image is used by the pointcloud
