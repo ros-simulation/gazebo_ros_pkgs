@@ -22,8 +22,8 @@
 #include <vector>
 
 // library for processing camera data for gazebo / ros conversions
-#include "gazebo_ros_camera_utils.h"
-#include "MultiCameraPlugin.h"
+#include <gazebo_plugins/gazebo_ros_camera_utils.h>
+#include <gazebo_plugins/MultiCameraPlugin.h>
 
 namespace gazebo
 {

@@ -27,7 +27,7 @@
 // library for processing camera data for gazebo / ros conversions
 #include <gazebo/plugins/CameraPlugin.hh>
 
-#include "gazebo_plugins/gazebo_ros_camera_utils.h"
+#include <gazebo_plugins/gazebo_ros_camera_utils.h>
 
 namespace gazebo
 {

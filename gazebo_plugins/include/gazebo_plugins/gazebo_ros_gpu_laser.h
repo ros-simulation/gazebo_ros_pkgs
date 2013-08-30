@@ -38,7 +38,7 @@
 
 #include <sdf/sdf.hh>
 
-#include "PubQueue.h"
+#include <gazebo_plugins/PubQueue.h>
 
 namespace gazebo
 {

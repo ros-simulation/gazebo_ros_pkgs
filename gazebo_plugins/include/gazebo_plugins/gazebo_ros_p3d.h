@@ -41,7 +41,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Events.hh>
 
-#include "PubQueue.h"
+#include <gazebo_plugins/PubQueue.h>
 
 namespace gazebo
 {

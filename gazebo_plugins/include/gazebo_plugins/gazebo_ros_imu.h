@@ -32,7 +32,7 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/common/common.hh>
 
-#include "PubQueue.h"
+#include <gazebo_plugins/PubQueue.h>
 
 namespace gazebo
 {
