@@ -178,7 +178,7 @@ class SpawnModel():
           print "Error: you must specify incoming format as either urdf or sdf format xml"
           sys.exit(0)
         if self.model_name == "":
-          print "Error: you must specify robot name"
+          print "Error: you must specify model name"
           sys.exit(0)
 
     def checkForModel(self,model):
