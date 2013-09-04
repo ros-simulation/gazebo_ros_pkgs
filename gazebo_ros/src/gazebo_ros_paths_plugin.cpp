@@ -38,8 +38,8 @@
  * Desc: External interfaces for Gazebo
  */
 
-#include <common/SystemPaths.hh>
-#include <common/Plugin.hh>
+#include <gazebo/common/SystemPaths.hh>
+#include <gazebo/common/Plugin.hh>
 
 #include <ros/ros.h>
 #include <ros/package.h>
