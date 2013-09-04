@@ -28,17 +28,17 @@
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/ChannelFloat32.h>
 
+#include <sdf/sdf.hh>
+
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/HingeJoint.hh>
 #include <gazebo/sensors/Sensor.hh>
-#include <sdf/sdf.hh>
-#include <sdf/Param.hh>
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/CameraSensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/rendering/Camera.hh>
 
-#include <gazebo_plugins/gazebo_ros_camera_utils.h>
+#include "gazebo_plugins/gazebo_ros_camera_utils.h"
 
 namespace gazebo
 {
@@ -46,7 +46,6 @@ namespace gazebo
 // Constructor
 GazeboRosCameraUtils::GazeboRosCameraUtils()
 {
-  this->image_connect_count_ = 0;
   this->last_update_time_ = common::Time(0);
   this->last_info_update_time_ = common::Time(0);
   this->height_ = 0;
@@ -351,11 +350,13 @@ void GazeboRosCameraUtils::SetUpdateRate(
 // Increment count
 void GazeboRosCameraUtils::ImageConnect()
 {
-  // upon first connection, remember if camera was active.
-  if (this->image_connect_count_ == 0)
-    this->was_active_ = this->parentSensor_->IsActive();
+  boost::mutex::scoped_lock lock(*this->image_connect_count_lock_);
 
-  this->image_connect_count_++;
+  // upon first connection, remember if camera was active.
+  if ((*this->image_connect_count_) == 0)
+    *this->was_active_ = this->parentSensor_->IsActive();
+
+  (*this->image_connect_count_)++;
 
   this->parentSensor_->SetActive(true);
 }
@@ -363,12 +364,14 @@ void GazeboRosCameraUtils::ImageConnect()
 // Decrement count
 void GazeboRosCameraUtils::ImageDisconnect()
 {
-  this->image_connect_count_--;
+  boost::mutex::scoped_lock lock(*this->image_connect_count_lock_);
+
+  (*this->image_connect_count_)--;
 
   // if there are no more subscribers, but camera was active to begin with,
   // leave it active.  Use case:  this could be a multicamera, where
   // each camera shares the same parentSensor_.
-  if (this->image_connect_count_ <= 0 && !this->was_active_)
+  if ((*this->image_connect_count_) <= 0 && !*this->was_active_)
     this->parentSensor_->SetActive(false);
 }
 
@@ -489,7 +492,7 @@ void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
     return;
 
   /// don't bother if there are no subscribers
-  if (this->image_connect_count_ > 0)
+  if ((*this->image_connect_count_) > 0)
   {
     boost::mutex::scoped_lock lock(this->lock_);
 
@@ -511,6 +514,9 @@ void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
 // Put camera_ data to the interface
 void GazeboRosCameraUtils::PublishCameraInfo(common::Time &last_update_time)
 {
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
   this->sensor_update_time_ = last_update_time;
   this->PublishCameraInfo();
 }

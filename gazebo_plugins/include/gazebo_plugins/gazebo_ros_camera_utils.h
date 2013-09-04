@@ -40,7 +40,6 @@
 #include <dynamic_reconfigure/server.h>
 
 // Gazebo
-#include <sdf/Param.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
@@ -83,15 +82,17 @@ namespace gazebo
     protected: void PutCameraData(const unsigned char *_src,
       common::Time &last_update_time);
 
-    /// \brief Keep track of number of connctions
-    protected: int image_connect_count_;
+    /// \brief Keep track of number of image connections
+    protected: boost::shared_ptr<int> image_connect_count_;
+    /// \brief A mutex to lock access to image_connect_count_
+    protected: boost::shared_ptr<boost::mutex> image_connect_count_lock_;
     protected: void ImageConnect();
     protected: void ImageDisconnect();
 
     /// \brief Keep track when we activate this camera through ros
     /// subscription, was it already active?  resume state when
     /// unsubscribed.
-    protected: bool was_active_;
+    protected: boost::shared_ptr<bool> was_active_;
 
     /// \brief: Camera modification functions
     private: void SetHFOV(const std_msgs::Float64::ConstPtr& hfov);
@@ -157,10 +158,13 @@ namespace gazebo
     private: ros::Subscriber cameraHFOVSubscriber_;
     private: ros::Subscriber cameraUpdateRateSubscriber_;
 
-    // Time last published, refrain from publish unless new image has been rendered
+    // Time last published, refrain from publish unless new image has
+    // been rendered
     // Allow dynamic reconfiguration of camera params
-    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig> *dyn_srv_;
-    void configCallback(gazebo_plugins::GazeboRosCameraConfig &config, uint32_t level);
+    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
+      *dyn_srv_;
+    void configCallback(gazebo_plugins::GazeboRosCameraConfig &config,
+      uint32_t level);
 
     protected: ros::CallbackQueue camera_queue_;
     protected: void CameraQueueThread();

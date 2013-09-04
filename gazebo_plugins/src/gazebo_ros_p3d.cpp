@@ -15,17 +15,11 @@
  *
 */
 
-/*
- * Desc: 3D position interface for ground truth.
- * Author: Sachin Chitta and John Hsu
- * Date: 1 June 2008
- */
-
 #include <string>
 #include <tf/tf.h>
 #include <stdlib.h>
 
-#include <gazebo_plugins/gazebo_ros_p3d.h>
+#include "gazebo_plugins/gazebo_ros_p3d.h"
 
 namespace gazebo
 {

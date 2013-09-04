@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <tf/tf.h>
 
-#include <gazebo_plugins/gazebo_ros_joint_trajectory.h>
+#include "gazebo_plugins/gazebo_ros_joint_trajectory.h"
 
 namespace gazebo
 {
