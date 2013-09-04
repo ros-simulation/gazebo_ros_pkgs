@@ -25,18 +25,18 @@
 #include <string>
 #include <assert.h>
 
+#include <sdf/sdf.hh>
+
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/HingeJoint.hh>
 #include <gazebo/sensors/Sensor.hh>
-#include <sdf/sdf.hh>
-#include <sdf/Param.hh>
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/GpuRaySensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
 #include <tf/tf.h>
 
-#include <gazebo_plugins/gazebo_ros_gpu_laser.h>
+#include "gazebo_plugins/gazebo_ros_gpu_laser.h"
 
 namespace gazebo
 {
@@ -156,8 +156,8 @@ void GazeboRosLaser::LaserConnect()
 {
   this->laser_connect_count_++;
   if (this->laser_connect_count_ == 1)
-    this->laser_scan_sub_ = 
-      this->gazebo_node_->Subscribe(this->parent_ray_sensor_->GetTopic(), 
+    this->laser_scan_sub_ =
+      this->gazebo_node_->Subscribe(this->parent_ray_sensor_->GetTopic(),
                                     &GazeboRosLaser::OnScan, this);
 }
 
@@ -187,12 +187,12 @@ void GazeboRosLaser::OnScan(ConstLaserScanStampedPtr &_msg)
   laser_msg.range_min = _msg->scan().range_min();
   laser_msg.range_max = _msg->scan().range_max();
   laser_msg.ranges.resize(_msg->scan().ranges_size());
-  std::copy(_msg->scan().ranges().begin(), 
-            _msg->scan().ranges().end(), 
+  std::copy(_msg->scan().ranges().begin(),
+            _msg->scan().ranges().end(),
             laser_msg.ranges.begin());
   laser_msg.intensities.resize(_msg->scan().intensities_size());
-  std::copy(_msg->scan().intensities().begin(), 
-            _msg->scan().intensities().end(), 
+  std::copy(_msg->scan().intensities().begin(),
+            _msg->scan().intensities().end(),
             laser_msg.intensities.begin());
   this->pub_queue_->push(laser_msg, this->pub_);
 }

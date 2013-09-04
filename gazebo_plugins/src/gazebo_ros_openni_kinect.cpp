@@ -135,7 +135,7 @@ void GazeboRosOpenniKinect::Advertise()
 void GazeboRosOpenniKinect::PointCloudConnect()
 {
   this->point_cloud_connect_count_++;
-  this->image_connect_count_++;
+  (*this->image_connect_count_)++;
   this->parentSensor->SetActive(true);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ void GazeboRosOpenniKinect::PointCloudConnect()
 void GazeboRosOpenniKinect::PointCloudDisconnect()
 {
   this->point_cloud_connect_count_--;
-  this->image_connect_count_--;
+  (*this->image_connect_count_)--;
   if (this->point_cloud_connect_count_ <= 0)
     this->parentSensor->SetActive(false);
 }
@@ -189,7 +189,7 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
   {
     if (this->point_cloud_connect_count_ <= 0 &&
         this->depth_image_connect_count_ <= 0 &&
-        this->image_connect_count_ <= 0)
+        (*this->image_connect_count_) <= 0)
     {
       this->parentSensor->SetActive(false);
     }
@@ -228,19 +228,19 @@ void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
   {
     if (this->point_cloud_connect_count_ <= 0 &&
         this->depth_image_connect_count_ <= 0 &&
-        this->image_connect_count_ <= 0)
+        (*this->image_connect_count_) <= 0)
     {
       this->parentSensor->SetActive(false);
     }
     else
     {
-      if (this->image_connect_count_ > 0)
+      if ((*this->image_connect_count_) > 0)
         this->PutCameraData(_image);
     }
   }
   else
   {
-    if (this->image_connect_count_ > 0)
+    if ((*this->image_connect_count_) > 0)
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
