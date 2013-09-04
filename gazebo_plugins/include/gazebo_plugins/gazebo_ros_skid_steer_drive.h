@@ -41,8 +41,8 @@
 
 #include <map>
 
-#include <common/common.hh>
-#include <physics/physics.hh>
+#include <gazebo/common/common.hh>
+#include <gazebo/physics/physics.hh>
 
 // ROS
 #include <ros/ros.h>
