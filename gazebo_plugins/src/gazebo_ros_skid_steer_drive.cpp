@@ -42,7 +42,7 @@
 
 #include <gazebo_plugins/gazebo_ros_skid_steer_drive.h>
 
-#include <math/gzmath.hh>
+#include <gazebo/math/gzmath.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
