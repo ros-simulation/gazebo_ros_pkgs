@@ -24,6 +24,7 @@ find_package(catkin REQUIRED COMPONENTS
   rosconsole
   cv_bridge
   polled_camera
+  diagnostic_updater
 )
 
 include (FindPkgConfig)
