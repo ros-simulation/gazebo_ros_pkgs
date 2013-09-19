@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.2 (2013-09-19)
+------------------
+
 2.3.1 (2013-08-27)
 ------------------
 * Cleaned up template, fixes for header files

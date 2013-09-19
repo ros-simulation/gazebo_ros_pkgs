@@ -2,6 +2,22 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.2 (2013-09-19)
+------------------
+* Make gazebo includes use full path
+  In the next release of gazebo, it will be required to use the
+  full path for include files. For example,
+  `include <physics/physics.hh>` will not be valid
+  `include <gazebo/physics/physics.hh>` must be done instead.
+* Merge branch 'hydro-devel' of `gazebo_ros_pkgs <github.com:ros-simulation/gazebo_ros_pkgs>`_ into synchronize_with_drcsim_plugins
+* change includes to use brackets in headers for export
+* per pull request comments
+* Changed resolution for searchParam.
+* Don't forget to delete the node!
+* Removed info message on robot namespace.
+* Retreive the tf prefix from the robot node.
+* synchronize with drcsim plugins
+
 2.3.1 (2013-08-27)
 ------------------
 * Remove direct dependency on pcl, rely on the transitive dependency from pcl_ros
@@ -11,8 +27,7 @@ Changelog for package gazebo_plugins
 ------------------
 * enable image generation when pointcloud is requested, as the generated image is used by the pointcloud
 * gazebo_plugins: replace deprecated boost function
-  This is related to this gazebo issue:
-  https://bitbucket.org/osrf/gazebo/issue/581/boost-shared_-_cast-are-deprecated-removed
+  This is related to this `gazebo issue #581 <https://bitbucket.org/osrf/gazebo/issue/581/boost-shared_-_cast-are-deprecated-removed>`_
 * gazebo_plugins: fix linkedit issues
   Note: other linkedit errors were fixed upstream
   in gazebo
@@ -40,7 +55,7 @@ Changelog for package gazebo_plugins
 * Remove find_package(SDF) from CMakeLists.txt
   It is sufficient to find gazebo, which will export the information about the SDFormat package.
 * ROS Video Plugin for Gazebo - allows displaying an image stream in an OGRE texture inside gazebo. Also provides a fix for `#85 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/85>`_.
-* patch a fix for prosilica plugin (startup race condition where rosnode_ might still be NULL).
+* patch a fix for prosilica plugin (startup race condition where `rosnode_` might still be NULL).
 * Added explanation of new dependency in gazebo_ros_pkgs
 * switch Prosilica camera from type depth to regular camera (as depth data were not used).
 * migrating prosilica plugin from pr2_gazebo_plugins
@@ -96,11 +111,11 @@ Changelog for package gazebo_plugins
   Header files of packages gazebo_ros and gazebo_plugins are installed to the wrong location
 * Rotation fixed.
 * Skid steering drive plugin.
-* gazebo_plugins: added missing initialization of GazeboRosDepthCamera::advertised_
+* gazebo_plugins: added missing initialization of `GazeboRosDepthCamera::advertised_`
 * gazebo_plugins: fixed depth and openni kinect camera plugin segfaults
 * gazebo_plugins: terminate the service thread properly on destruction of a PubMutliQueue object without shuting down ros
 * gazebo_plugins/gazebo_ros: fixed install directories for include files and gazebo scripts
-* fix for terminating the service_thread_ in PubQueue.h
+* fix for terminating the `service_thread_` in PubQueue.h
 * added differential drive plugin to gazebo plugins
 
 2.0.2 (2013-06-20)
