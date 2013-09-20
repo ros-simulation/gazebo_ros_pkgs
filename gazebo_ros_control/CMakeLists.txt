@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   hardware_interface 
   transmission_interface
   pluginlib
+  joint_limits_interface
+  urdf
 )
 
 # Depend on system install of Gazebo 
