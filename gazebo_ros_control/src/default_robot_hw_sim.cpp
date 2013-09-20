@@ -44,6 +44,10 @@
 // ros_control
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <joint_limits_interface/joint_limits.h>
+#include <joint_limits_interface/joint_limits_interface.h>
+#include <joint_limits_interface/joint_limits_rosparam.h>
+#include <joint_limits_interface/joint_limits_urdf.h>
 
 // Gazebo
 #include <gazebo/common/common.hh>
@@ -58,6 +62,9 @@
 // gazebo_ros_control
 #include <gazebo_ros_control/robot_hw_sim.h>
 
+// URDF
+#include <urdf/model.h>
+
 namespace gazebo_ros_control
 {
 
@@ -66,10 +73,16 @@ class DefaultRobotHWSim : public gazebo_ros_control::RobotHWSim
 public:
 
   bool initSim(
+    const std::string& robot_namespace,
     ros::NodeHandle model_nh,
     gazebo::physics::ModelPtr parent_model,
+    const urdf::Model *const urdf_model,
     std::vector<transmission_interface::TransmissionInfo> transmissions)
   {
+    // getJointLimits() searches joint_limit_nh for joint limit parameters. The format of each parameter's name is
+    // "joint_limits/<joint name>". An example is "joint_limits/axle_joint".
+    const ros::NodeHandle joint_limit_nh(model_nh, robot_namespace);
+
     // Resize vectors to our DOF
     n_dof_ = transmissions.size();
     joint_names_.resize(n_dof_);
@@ -134,8 +147,11 @@ public:
       if(hardware_interface == "EffortJointInterface")
       {
         // Create effort joint interface
-        ej_interface_.registerHandle(hardware_interface::JointHandle(
-            js_interface_.getHandle(joint_names_[j]),&joint_effort_command_[j]));
+        const std::string& joint_name = joint_names_[j];
+        hardware_interface::JointHandle joint_handle(js_interface_.getHandle(joint_name),
+                                                     &joint_effort_command_[j]);
+        ej_interface_.registerHandle(joint_handle);
+        registerEffortJointLimits(joint_name, joint_handle, joint_limit_nh, urdf_model);
       }
       else if(hardware_interface == "VelocityJointInterface")
       {
@@ -182,6 +198,7 @@ public:
     for(unsigned int j=0; j < n_dof_; j++)
     {
       // Gazebo has an interesting API...
+      // \todo If the joint is a slider joint, do not call shortest_angular_distance().
       joint_position_[j] += angles::shortest_angular_distance(joint_position_[j],
                             sim_joints_[j]->GetAngle(0).Radian());
       joint_velocity_[j] = sim_joints_[j]->GetVelocity(0);
@@ -191,6 +208,9 @@ public:
 
   void writeSim(ros::Time time, ros::Duration period)
   {
+    ej_sat_interface_.enforceLimits(period);
+    ej_limits_interface_.enforceLimits(period);
+
     // \todo check if this joint is using a position, velocity, or effort hardware interface
     // and set gazebo accordingly 
     for(unsigned int j=0; j < n_dof_; j++)
@@ -207,11 +227,55 @@ public:
   }
 
 private:
+  // Register the limits of the joint specified by joint_name and joint_handle. The limits are retrieved from
+  // joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
+  void registerEffortJointLimits(const std::string& joint_name, const hardware_interface::JointHandle& joint_handle,
+                                 const ros::NodeHandle& joint_limit_nh, const urdf::Model *const urdf_model)
+  {
+    joint_limits_interface::JointLimits limits;
+    bool has_limits = false;
+    joint_limits_interface::SoftJointLimits soft_limits;
+    bool has_soft_limits = false;
+
+    if (urdf_model != NULL)
+    {
+      const boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model->getJoint(joint_name);
+      if (urdf_joint != NULL)
+      {
+        // Get limits from the URDF file.
+        if (joint_limits_interface::getJointLimits(urdf_joint, limits))
+          has_limits = true;
+        if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits))
+          has_soft_limits = true;
+      }
+    }
+    // Get limits from the parameter server.
+    if (joint_limits_interface::getJointLimits(joint_name, joint_limit_nh, limits))
+      has_limits = true;
+
+    if (has_limits)
+    {
+      if (has_soft_limits)
+      {
+        const joint_limits_interface::EffortJointSoftLimitsHandle limits_handle(joint_handle, limits, soft_limits);
+        ej_limits_interface_.registerHandle(limits_handle);
+      }
+      else
+      {
+        const joint_limits_interface::EffortJointSaturationHandle sat_handle(joint_handle, limits);
+        ej_sat_interface_.registerHandle(sat_handle);
+      }
+    }
+  }
+
   unsigned int n_dof_;
 
   hardware_interface::JointStateInterface    js_interface_;
   hardware_interface::EffortJointInterface   ej_interface_;
   hardware_interface::VelocityJointInterface vj_interface_;
+
+  joint_limits_interface::EffortJointSaturationInterface ej_sat_interface_;
+  joint_limits_interface::EffortJointSoftLimitsInterface ej_limits_interface_;
 
   std::vector<std::string> joint_names_;
   std::vector<double> joint_position_;
@@ -221,14 +285,13 @@ private:
   std::vector<double> joint_velocity_command_;
 
   std::vector<gazebo::physics::JointPtr> sim_joints_;
-
-  
 };
 
 typedef boost::shared_ptr<DefaultRobotHWSim> DefaultRobotHWSimPtr;
 
 }
 
+// \todo PLUGINLIB_DECLARE_CLASS has been deprecated. Replace it with PLUGINLIB_EXPORT_CLASS.
 PLUGINLIB_DECLARE_CLASS(gazebo_ros_control,
   DefaultRobotHWSim,
   gazebo_ros_control::DefaultRobotHWSim,
