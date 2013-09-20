@@ -26,7 +26,7 @@
 #include <utility>
 #include <sstream>
 
-#include <gazebo/rendering/Rendering.hh>
+#include <gazebo/rendering/RenderingIface.hh>
 #include <gazebo/rendering/Scene.hh>
 #include <gazebo/rendering/Visual.hh>
 #include <gazebo/rendering/RTShaderSystem.hh>
@@ -112,7 +112,7 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     return;
   }
 
-  
+
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 
 
@@ -137,7 +137,7 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Load a texture into the projector 
+// Load a texture into the projector
 void GazeboRosProjector::LoadImage(const std_msgs::String::ConstPtr& imageMsg)
 {
   msgs::Projector msg;
