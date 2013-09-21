@@ -2060,11 +2060,8 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
   {
     if (child->ValueStr().find(std::string("plugin")) == 0)
     {
-      ROS_DEBUG("recursively walking gazebo extension for %s --> %d",child->ValueStr().c_str(),(int)child->ValueStr().find(std::string("plugin")));
       if (child->FirstChildElement("robotNamespace") == NULL)
       {
-        ROS_DEBUG("    adding robotNamespace for %s",child->ValueStr().c_str());
-        //addKeyValue(child->ToElement(), "robotNamespace", robot_namespace_);
         TiXmlElement* child_elem = child->ToElement()->FirstChildElement("robotNamespace");
         while (child_elem)
         {
@@ -2075,10 +2072,6 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
         TiXmlText* val = new TiXmlText(robot_namespace_);
         key->LinkEndChild(val);
         child->ToElement()->LinkEndChild(key);
-      }
-      else
-      {
-        ROS_DEBUG("    robotNamespace already exists for %s",child->ValueStr().c_str());
       }
     }
     walkChildAddRobotNamespace(child);
