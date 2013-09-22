@@ -79,8 +79,8 @@ public:
     const urdf::Model *const urdf_model,
     std::vector<transmission_interface::TransmissionInfo> transmissions)
   {
-    // getJointLimits() searches joint_limit_nh for joint limit parameters. The format of each parameter's name is
-    // "joint_limits/<joint name>". An example is "joint_limits/axle_joint".
+    // getJointLimits() searches joint_limit_nh for joint limit parameters. The format of each
+    // parameter's name is "joint_limits/<joint name>". An example is "joint_limits/axle_joint".
     const ros::NodeHandle joint_limit_nh(model_nh, robot_namespace);
 
     // Resize vectors to our DOF
@@ -147,11 +147,10 @@ public:
       if(hardware_interface == "EffortJointInterface")
       {
         // Create effort joint interface
-        const std::string& joint_name = joint_names_[j];
-        hardware_interface::JointHandle joint_handle(js_interface_.getHandle(joint_name),
+        hardware_interface::JointHandle joint_handle(js_interface_.getHandle(joint_names_[j]),
                                                      &joint_effort_command_[j]);
         ej_interface_.registerHandle(joint_handle);
-        registerEffortJointLimits(joint_name, joint_handle, joint_limit_nh, urdf_model);
+        registerEffortJointLimits(joint_names_[j], joint_handle, joint_limit_nh, urdf_model);
       }
       else if(hardware_interface == "VelocityJointInterface")
       {
@@ -227,10 +226,12 @@ public:
   }
 
 private:
-  // Register the limits of the joint specified by joint_name and joint_handle. The limits are retrieved from
-  // joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
-  void registerEffortJointLimits(const std::string& joint_name, const hardware_interface::JointHandle& joint_handle,
-                                 const ros::NodeHandle& joint_limit_nh, const urdf::Model *const urdf_model)
+  // Register the limits of the joint specified by joint_name and joint_handle. The limits are
+  // retrieved from joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
+  void registerEffortJointLimits(const std::string& joint_name,
+                                 const hardware_interface::JointHandle& joint_handle,
+                                 const ros::NodeHandle& joint_limit_nh,
+                                 const urdf::Model *const urdf_model)
   {
     joint_limits_interface::JointLimits limits;
     bool has_limits = false;
@@ -257,7 +258,8 @@ private:
     {
       if (has_soft_limits)
       {
-        const joint_limits_interface::EffortJointSoftLimitsHandle limits_handle(joint_handle, limits, soft_limits);
+        const joint_limits_interface::EffortJointSoftLimitsHandle
+          limits_handle(joint_handle, limits, soft_limits);
         ej_limits_interface_.registerHandle(limits_handle);
       }
       else
