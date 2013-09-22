@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.2 (2013-09-19)
+------------------
+* Make gazebo includes use full path
+  In the next release of gazebo, it will be required to use the
+  full path for include files. For example,
+  `include <physics/physics.hh>` will not be valid
+  `include <gazebo/physics/physics.hh>` must be done instead.
+* update gazebo includes
+* Fixed a minor typo in spawn_model error message when `-model` not specified
+
 2.3.1 (2013-08-27)
 ------------------
 * Cleaned up template, fixes for header files
@@ -10,8 +20,7 @@ Changelog for package gazebo_ros
 ------------------
 * gazebo_ros: fixed missing dependency on TinyXML
 * gazebo_plugins: replace deprecated boost function
-  This is related to this gazebo issue:
-  https://bitbucket.org/osrf/gazebo/issue/581/boost-shared_-_cast-are-deprecated-removed
+  This is related to `this gazebo issue <https://bitbucket.org/osrf/gazebo/issue/581/boost-shared_-_cast-are-deprecated-removed>`_
 
 2.2.1 (2013-07-29)
 ------------------
@@ -46,9 +55,9 @@ Changelog for package gazebo_ros
 * Merge branch 'hydro-devel' of github.com:ros-simulation/gazebo_ros_pkgs into hydro-devel
 * Reduced number of debug msgs
 * Fixed physics dynamic reconfigure namespace
-* gazebo_ros_api_plugin: set plugin_loaded_ flag to true in
+* gazebo_ros_api_plugin: set `plugin_loaded_` flag to true in
   GazeboRosApiPlugin::Load() function
-* Actually we need __init__.py
+* Actually we need `__init__.py`
 * Cleaning up code
 * Moved gazebo_interface.py from gazebo/ folder to gazebo_ros/ folder
 * Removed searching for plugins under 'gazebo' pkg because of rospack warnings
@@ -106,7 +115,7 @@ Changelog for package gazebo_ros
 * Converted all non-Gazebo pointers to boost shared_ptrs
 * Removed old Gazebo XML handling functions - has been replaced by SDF, various code cleanup
 * Removed the physics reconfigure node handle, switched to async ROS spinner, reduced required while loops
-* Fixed shutdown segfault, renamed rosnode_ to nh_, made all member variables have _ at end, formatted functions
+* Fixed shutdown segfault, renamed `rosnode_` to `nh_`, made all member variables have `_` at end, formatted functions
 * Added small comment
 * adding install for gazebo_ros launchfiles
 * Formatted files to be double space indent per ROS standards

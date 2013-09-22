@@ -24,12 +24,14 @@ find_package(catkin REQUIRED COMPONENTS
   rosconsole
   cv_bridge
   polled_camera
+  diagnostic_updater
 )
 
 include (FindPkgConfig)
 if (PKG_CONFIG_FOUND)
   pkg_check_modules(XML libxml-2.0)
   pkg_check_modules(OGRE OGRE)
+  pkg_check_modules(OGRE-Terrain OGRE-Terrain)
 else()
   message(FATAL_ERROR "pkg-config is required; please install it")
 endif()
@@ -49,7 +51,7 @@ catkin_python_setup()
 
 generate_dynamic_reconfigure_options(cfg/CameraSynchronizer.cfg cfg/GazeboRosCamera.cfg cfg/GazeboRosOpenniKinect.cfg cfg/Hokuyo.cfg)
 
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS})
+include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS} ${OGRE-Terrain_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS})
 
 # \todo: remove these?
 set(cxx_flags)
