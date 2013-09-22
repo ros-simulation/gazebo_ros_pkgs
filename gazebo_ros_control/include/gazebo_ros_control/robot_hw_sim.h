@@ -46,6 +46,7 @@
 #include <ros/ros.h>
 #include <hardware_interface/robot_hw.h>
 #include <transmission_interface/transmission_info.h>
+#include <urdf/model.h>
 
 namespace gazebo_ros_control {
 
@@ -69,8 +70,10 @@ namespace gazebo_ros_control {
     virtual ~RobotHWSim() { }
 
     virtual bool initSim(
+        const std::string& robot_namespace,
         ros::NodeHandle model_nh, 
         gazebo::physics::ModelPtr parent_model,
+        const urdf::Model *const urdf_model,
         std::vector<transmission_interface::TransmissionInfo> transmissions) = 0;
 
     virtual void readSim(ros::Time time, ros::Duration period) = 0;

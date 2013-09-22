@@ -76,7 +76,7 @@ public:
   std::string getURDF(std::string param_name) const;
 
   // Get Transmissions from the URDF
-  bool parseTransmissionsFromURDF();
+  bool parseTransmissionsFromURDF(const std::string& urdf_string);
 
 protected:
 
