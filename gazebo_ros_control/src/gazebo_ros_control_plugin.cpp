@@ -43,6 +43,7 @@
 #include <boost/bind.hpp>
 
 #include <gazebo_ros_control/gazebo_ros_control_plugin.h>
+#include <urdf/model.h>
 
 namespace gazebo_ros_control
 {
@@ -145,7 +146,8 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
   // Read urdf from ros parameter server then
   // setup actuators and mechanism control node.
   // This call will block if ROS is not properly initialized.
-  if (!parseTransmissionsFromURDF())
+  const std::string urdf_string = getURDF(robot_description_);
+  if (!parseTransmissionsFromURDF(urdf_string))
   {
     ROS_ERROR("gazebo_ros_control", "Error parsing URDF in gazebo_ros_control plugin, plugin not active.\n");
     return;
@@ -160,8 +162,10 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
           "gazebo_ros_control::RobotHWSim"));
 
     robot_hw_sim_ = robot_hw_sim_loader_->createInstance(robot_hw_sim_type_str_);
+    urdf::Model urdf_model;
+    const urdf::Model *const urdf_model_ptr = urdf_model.initString(urdf_string) ? &urdf_model : NULL;
 
-    if(!robot_hw_sim_->initSim(model_nh_, parent_model_, transmissions_))
+    if(!robot_hw_sim_->initSim(robot_namespace_, model_nh_, parent_model_, urdf_model_ptr, transmissions_))
     {
       ROS_FATAL_NAMED("gazebo_ros_control","Could not initialize robot simulation interface");
       return;
@@ -243,12 +247,9 @@ std::string GazeboRosControlPlugin::getURDF(std::string param_name) const
 }
 
 // Get Transmissions from the URDF
-bool GazeboRosControlPlugin::parseTransmissionsFromURDF()
+bool GazeboRosControlPlugin::parseTransmissionsFromURDF(const std::string& urdf_string)
 {
-  std::string urdf_string = getURDF(robot_description_);
-
   transmission_interface::TransmissionParser::parse(urdf_string, transmissions_);
-
   return true;
 }
 
