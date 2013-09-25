@@ -58,6 +58,11 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     return;
   }
 
+  // initialize shared_ptr members
+  this->image_connect_count_ = boost::shared_ptr<int>(new int(0));
+  this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
+  this->was_active_ = boost::shared_ptr<bool>(new bool(false));
+
   // copying from CameraPlugin into GazeboRosCameraUtils
   for (unsigned i = 0; i < this->camera.size(); ++i)
   {
@@ -69,13 +74,9 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     util->format_  = this->format[i];
     util->camera_  = this->camera[i];
     // Set up a shared connection counter
-    this->imageConnectCount = 0;
-    util->image_connect_count_ = boost::shared_ptr<int>(&this->imageConnectCount);
-    util->image_connect_count_lock_ =
-      boost::shared_ptr<boost::mutex>(&this->imageConnectCountLock);
-    this->wasActive = false;
-    util->was_active_ =
-      boost::shared_ptr<bool>(&this->wasActive);
+    util->image_connect_count_ = this->image_connect_count_;
+    util->image_connect_count_lock_ = this->image_connect_count_lock_;
+    util->was_active_ = this->was_active_;
     if (this->camera[i]->GetName().find("left") != std::string::npos)
     {
       // FIXME: hardcoded, left hack_baseline_ 0
