@@ -234,6 +234,11 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
              " distortion parameters right now, your simulation maybe wrong.");
   }
 
+  // initialize shared_ptr members
+  if (!this->image_connect_count_) this->image_connect_count_ = boost::shared_ptr<int>(new int(0));
+  if (!this->image_connect_count_lock_) this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
+  if (!this->was_active_) this->was_active_ = boost::shared_ptr<bool>(new bool(false));
+
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
     boost::bind(&GazeboRosCameraUtils::LoadThread, this));
