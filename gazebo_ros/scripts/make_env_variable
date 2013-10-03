@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+import os
+import sys
+import rospkg
+
+# which environment variable we are doing: GAZEBO_RESOURCE_PATH,
+# GAZEBO_MODEL_PATH, or GAZEBO_PLUGIN_PATH
+variable_name = sys.argv[1]
+
+# the tag name used in the package.xml export section is the same as
+# the environment variable name, but lowercase
+tag_name = variable_name.lower()
+
+# get the current paths in the variable
+try:
+    directories = os.environ[variable_name].split(':')
+except KeyError:
+    directories = []
+
+# look for exported model/resource/plugin directories in all packages 
+# which depend on gazebo_ros
+r = rospkg.RosPack()
+for pkg_name in r.get_depends_on('gazebo_ros'):
+    m = r.get_manifest(pkg_name)
+    for e in m.exports:
+        if tag_name in e.attrs:
+            new_directory = e.attrs[tag_name]
+
+            # relative paths are expanded relative to package directory
+            if not os.path.isabs(new_directory):
+                new_directory = os.path.join(
+                    r.get_path(pkg_name), new_directory)
+
+            # only prepend this directory if it is not already in the list
+            if not new_directory in directories:
+                directories.insert(0, new_directory)
+
+# print the value for the environment variable
+print ':'.join(directories)
+
+
