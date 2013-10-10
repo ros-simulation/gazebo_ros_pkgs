@@ -49,9 +49,21 @@ execute_process(COMMAND
 
 catkin_python_setup()
 
-generate_dynamic_reconfigure_options(cfg/CameraSynchronizer.cfg cfg/GazeboRosCamera.cfg cfg/GazeboRosOpenniKinect.cfg cfg/Hokuyo.cfg)
+generate_dynamic_reconfigure_options(
+  cfg/CameraSynchronizer.cfg
+  cfg/GazeboRosCamera.cfg
+  cfg/GazeboRosOpenniKinect.cfg
+  cfg/Hokuyo.cfg
+)
 
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS} ${OGRE-Terrain_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS})
+include_directories(include
+  ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+  ${OGRE_INCLUDE_DIRS}
+  ${OGRE-Terrain_INCLUDE_DIRS}
+  ${SDFormat_INCLUDE_DIRS}
+)
 
 # \todo: remove these?
 set(cxx_flags)
