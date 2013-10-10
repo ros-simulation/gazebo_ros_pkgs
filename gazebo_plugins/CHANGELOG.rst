@@ -2,6 +2,18 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.3 (2013-10-10)
+------------------
+* gazebo_plugins: use shared pointers for variables shared among cameras
+  It is not allowed to construct a shared_ptr from a pointer to a member
+  variable.
+* gazebo_plugins: moved initialization of shared_ptr members of
+  GazeboRosCameraUtils to `GazeboRosCameraUtils::Load()`
+  This fixes segfaults in gazebo_ros_depth_camera and
+  gazebo_ros_openni_kinect as the pointers have not been initialized
+  there.
+* Use `RenderingIFace.hh`
+
 2.3.2 (2013-09-19)
 ------------------
 * Make gazebo includes use full path

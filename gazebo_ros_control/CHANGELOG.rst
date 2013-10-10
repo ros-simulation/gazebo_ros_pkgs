@@ -2,6 +2,21 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.3 (2013-10-10)
+------------------
+* Eliminated a joint_name variable and replaced it with `joint_names_[j]`.
+  Modified some lines so that they fit in 100 columns. These changes were made
+  in order to be consistent with the rest of the file.
+* Merge remote-tracking branch 'upstream/hydro-devel' into hydro-devel
+* joint_limits_interface is now used to enforce limits on effort-controlled
+  joints.
+* Added "joint_limits_interface" and "urdf" to the component list.
+* Additional parameters are passed to `robot_hw_sim->initSim()`. These parameters
+  are used by the joint limits interface.
+* Added "joint_limits_interface" and "urdf" to the build dependency list.
+* Added the robot_namespace and urdf_model parameters to `initSim()`.
+* Added the urdf_string parameter to `parseTransmissionsFromURDF()`.
+
 2.3.2 (2013-09-19)
 ------------------
 

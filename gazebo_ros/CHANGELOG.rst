@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.3 (2013-10-10)
+------------------
+* Cleaned up unnecessary debug output that was recently added
+* Fixed issue where catkin_find returns more than one library if it is installed from both source and debian
+
 2.3.2 (2013-09-19)
 ------------------
 * Make gazebo includes use full path
