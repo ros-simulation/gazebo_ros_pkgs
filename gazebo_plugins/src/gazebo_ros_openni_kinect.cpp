@@ -70,7 +70,6 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
   this->depth_ = this->depth;
   this->format_ = this->format;
   this->camera_ = this->depthCamera;
-  this->image_connect_count_ = boost::shared_ptr<int>(new int);
 
   // using a different default
   if (!_sdf->GetElement("imageTopicName"))

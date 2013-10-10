@@ -66,11 +66,7 @@ void GazeboRosCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->depth_ = this->depth;
   this->format_ = this->format;
   this->camera_ = this->camera;
-  this->image_connect_count_ = boost::shared_ptr<int>(new int);
-  *this->image_connect_count_ = 0;
-  this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
-  this->was_active_ = boost::shared_ptr<bool>(new bool);
-  *this->was_active_ = false;
+
   GazeboRosCameraUtils::Load(_parent, _sdf);
 }
 
