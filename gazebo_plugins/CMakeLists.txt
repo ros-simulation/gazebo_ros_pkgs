@@ -126,10 +126,11 @@ target_link_libraries(hokuyo_node
 )
 
 add_library(vision_reconfigure src/vision_reconfigure.cpp)
-add_dependencies(vision_reconfigure gazebo_plugins_gencfg)
+add_dependencies(vision_reconfigure ${PROJECT_NAME}_gencfg)
 target_link_libraries(vision_reconfigure ${catkin_LIBRARIES})
 
 add_executable(camera_synchronizer src/camera_synchronizer.cpp)
+add_dependencies(camera_synchronizer ${PROJECT_NAME}_gencfg)
 target_link_libraries(camera_synchronizer vision_reconfigure ${catkin_LIBRARIES})
 
 add_executable(pub_joint_trajectory_test test/pub_joint_trajectory_test.cpp)
@@ -142,6 +143,7 @@ add_definitions(-fPIC) # what is this for?
 
 ## Plugins
 add_library(gazebo_ros_camera_utils src/gazebo_ros_camera_utils.cpp)
+add_dependencies(gazebo_ros_camera_utils ${PROJECT_NAME}_gencfg)
 set_target_properties(gazebo_ros_camera_utils PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_camera_utils PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -152,21 +154,25 @@ set_target_properties(MultiCameraPlugin PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(MultiCameraPlugin ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_camera src/gazebo_ros_camera.cpp)
+add_dependencies(gazebo_ros_camera ${PROJECT_NAME}_gencfg)
 set_target_properties(gazebo_ros_camera PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_camera PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_camera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_multicamera src/gazebo_ros_multicamera.cpp)
+add_dependencies(gazebo_ros_multicamera ${PROJECT_NAME}_gencfg)
 set_target_properties(gazebo_ros_multicamera PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_multicamera PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_multicamera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} MultiCameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_depth_camera src/gazebo_ros_depth_camera.cpp)
+add_dependencies(gazebo_ros_depth_camera ${PROJECT_NAME}_gencfg)
 set_target_properties(gazebo_ros_depth_camera PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_depth_camera PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_depth_camera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} DepthCameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_openni_kinect src/gazebo_ros_openni_kinect.cpp)
+add_dependencies(gazebo_ros_openni_kinect ${PROJECT_NAME}_gencfg)
 set_target_properties(gazebo_ros_openni_kinect PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_openni_kinect PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} DepthCameraPlugin ${catkin_LIBRARIES})
@@ -213,6 +219,7 @@ set_target_properties(gazebo_ros_projector PROPERTIES COMPILE_FLAGS "${cxx_flags
 target_link_libraries(gazebo_ros_projector ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_prosilica src/gazebo_ros_prosilica.cpp)
+add_dependencies(gazebo_ros_prosilica ${PROJECT_NAME}_gencfg)
 set_target_properties(gazebo_ros_prosilica PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_prosilica PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 target_link_libraries(gazebo_ros_prosilica gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
