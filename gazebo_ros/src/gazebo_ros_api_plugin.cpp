@@ -1984,6 +1984,8 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     // Pose is set at bottom of function
   }
 
+	
+
   // Set the pose value for both SDFs types here
   if (pose_element)
   {
@@ -1992,9 +1994,78 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
     pose_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z << " "
                 << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
+    
+    // Add argument pose relatively to sdf pose
+    std::string sdf_pose=pose_element->GetText();
+    std::string arg_pose=pose_stream.str();
+    std::string temp_str;
+    float p_x,p_y,p_z,p_R,p_P,p_Y;
+    int runner_prev=0,runner_next=0;
+    
+    runner_next=sdf_pose.find(' ',runner_prev);
+    temp_str=sdf_pose.substr(runner_prev,runner_next);
+    p_x=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    runner_next=sdf_pose.find(' ',runner_prev);
+    temp_str=sdf_pose.substr(runner_prev,runner_next);
+    p_y=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    runner_next=sdf_pose.find(' ',runner_prev);
+    temp_str=sdf_pose.substr(runner_prev,runner_next);
+    p_z=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    runner_next=sdf_pose.find(' ',runner_prev);
+    temp_str=sdf_pose.substr(runner_prev,runner_next);
+    p_R=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    runner_next=sdf_pose.find(' ',runner_prev);
+    temp_str=sdf_pose.substr(runner_prev,runner_next);
+    p_P=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    temp_str=sdf_pose.substr(runner_prev,sdf_pose.size()-1);
+    p_Y=atof(temp_str.c_str());
+	
+	runner_prev=runner_next=0;
+	
+	runner_next=arg_pose.find(' ',runner_prev);
+    temp_str=arg_pose.substr(runner_prev,runner_next);
+    p_x+=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    runner_next=arg_pose.find(' ',runner_prev);
+    temp_str=arg_pose.substr(runner_prev,runner_next);
+    p_y+=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    runner_next=arg_pose.find(' ',runner_prev);
+    temp_str=arg_pose.substr(runner_prev,runner_next);
+    p_z+=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    runner_next=arg_pose.find(' ',runner_prev);
+    temp_str=arg_pose.substr(runner_prev,runner_next);
+    p_R+=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    runner_next=arg_pose.find(' ',runner_prev);
+    temp_str=arg_pose.substr(runner_prev,runner_next);
+    p_P+=atof(temp_str.c_str());
+    runner_prev=runner_next+1;
+    
+    temp_str=arg_pose.substr(runner_prev,arg_pose.size()-1);
+    p_Y+=atof(temp_str.c_str());
+
+	std::ostringstream final_pose_stream;
+	final_pose_stream<<p_x<<" "<<p_y<<" "<<p_z<<" "<<p_R<<" "<<p_P<<" "<<p_Y;
 
     // Add value to pose element
-    TiXmlText* text = new TiXmlText(pose_stream.str());      
+    pose_element = new TiXmlElement("pose");
+    TiXmlText* text = new TiXmlText(final_pose_stream.str());      
     pose_element->LinkEndChild( text );
   }
 
