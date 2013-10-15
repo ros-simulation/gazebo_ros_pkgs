@@ -2,6 +2,9 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.3.3 (2013-10-10)
 ------------------
 * gazebo_plugins: use shared pointers for variables shared among cameras
