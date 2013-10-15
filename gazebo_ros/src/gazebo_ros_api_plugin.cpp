@@ -81,16 +81,12 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   // Delete Force and Wrench Jobs
   lock_.lock();
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
-  {
     delete (*iter);
-    force_joint_jobs_.erase(iter);
-  }
+  force_joint_jobs_.clear();
   ROS_DEBUG_STREAM_NAMED("api_plugin","ForceJointJobs deleted");
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
-  {
     delete (*iter);
-    wrench_body_jobs_.erase(iter);
-  }
+  wrench_body_jobs_.clear();
   lock_.unlock();
   ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
 
@@ -1661,7 +1657,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
     {
       // remove from queue once expires
       delete (*iter);
-      wrench_body_jobs_.erase(iter);
+      iter = wrench_body_jobs_.erase(iter);
     }
     else
       iter++;
@@ -1691,7 +1687,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
-      force_joint_jobs_.erase(iter);
+      iter = force_joint_jobs_.erase(iter);
     }
     else
       iter++;
