@@ -1319,7 +1319,7 @@ bool GazeboRosApiPlugin::clearJointForces(std::string joint_name)
   while(search)
   {
     search = false;
-    for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();iter++)
+    for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();++iter)
     {
       if ((*iter)->joint->GetName() == joint_name)
       {
@@ -1347,7 +1347,7 @@ bool GazeboRosApiPlugin::clearBodyWrenches(std::string body_name)
   while(search)
   {
     search = false;
-    for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();iter++)
+    for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();++iter)
     {
       //ROS_ERROR("search %s %s",(*iter)->body->GetScopedName().c_str(), body_name.c_str());
       if ((*iter)->body->GetScopedName() == body_name)
