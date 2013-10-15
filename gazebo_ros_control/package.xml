@@ -29,7 +29,6 @@
   <run_depend>gazebo_ros</run_depend> 
   <run_depend>controller_manager</run_depend> 
   <run_depend>pluginlib</run_depend> 
-  <run_depend>ros_controllers</run_depend> 
   <run_depend>transmission_interface</run_depend> 
 
   <export>
