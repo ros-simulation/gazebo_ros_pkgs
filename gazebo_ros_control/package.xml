@@ -30,6 +30,7 @@
   <run_depend>controller_manager</run_depend> 
   <run_depend>pluginlib</run_depend> 
   <run_depend>transmission_interface</run_depend> 
+  <run_depend>urdf</run_depend>
 
   <export>
     <gazebo_ros_control plugin="${prefix}/robot_hw_sim_plugins.xml"/>
