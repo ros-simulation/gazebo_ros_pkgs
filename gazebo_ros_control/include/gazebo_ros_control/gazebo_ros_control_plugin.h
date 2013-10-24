@@ -81,7 +81,6 @@ public:
 protected:
 
   // Node Handles
-  ros::NodeHandle nh_; // no namespace
   ros::NodeHandle model_nh_; // namespaces to robot name
 
   // Pointer to the model
