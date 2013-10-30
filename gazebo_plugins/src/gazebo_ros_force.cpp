@@ -71,7 +71,7 @@ void GazeboRosForce::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("bodyName"))
   {
-    ROS_FATAL("f3d plugin missing <bodyName>, cannot proceed");
+    ROS_FATAL("force plugin missing <bodyName>, cannot proceed");
     return;
   }
   else
@@ -80,13 +80,13 @@ void GazeboRosForce::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->link_ = _model->GetLink(this->link_name_);
   if (!this->link_)
   {
-    ROS_FATAL("gazebo_ros_f3d plugin error: link named: %s does not exist\n",this->link_name_.c_str());
+    ROS_FATAL("gazebo_ros_force plugin error: link named: %s does not exist\n",this->link_name_.c_str());
     return;
   }
 
   if (!_sdf->HasElement("topicName"))
   {
-    ROS_FATAL("f3d plugin missing <topicName>, cannot proceed");
+    ROS_FATAL("force plugin missing <topicName>, cannot proceed");
     return;
   }
   else
