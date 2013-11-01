@@ -70,7 +70,9 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
   this->depth_ = this->depth;
   this->format_ = this->format;
   this->camera_ = this->depthCamera;
-  this->image_connect_count_ = boost::shared_ptr<int>(new int);
+  this->image_connect_count_ = boost::shared_ptr<int>(new int(0));
+  this->depth_image_connect_count_ = 0;
+  this->was_active_ = boost::shared_ptr<bool>(new bool);
   this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
 
   // using a different default
@@ -103,6 +105,8 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
 
   load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosOpenniKinect::Advertise, this));
   GazeboRosCameraUtils::Load(_parent, _sdf);
+
+  ROS_INFO("Loaded openni plugin");
 }
 
 void GazeboRosOpenniKinect::Advertise()
@@ -130,6 +134,8 @@ void GazeboRosOpenniKinect::Advertise()
         boost::bind( &GazeboRosOpenniKinect::DepthInfoDisconnect,this), 
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
+
+  ROS_INFO("Advertised openni topics");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
