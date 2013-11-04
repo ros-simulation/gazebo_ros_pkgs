@@ -86,6 +86,7 @@ catkin_package(
   gazebo_ros_prosilica 
   gazebo_ros_force 
   gazebo_ros_joint_trajectory 
+  gazebo_ros_joint_state_publisher 
   gazebo_ros_joint_pose_trajectory
   gazebo_ros_diff_drive
   gazebo_ros_skid_steer_drive
@@ -228,6 +229,13 @@ set_target_properties(gazebo_ros_joint_trajectory PROPERTIES COMPILE_FLAGS "${cx
 add_dependencies(gazebo_ros_joint_trajectory gazebo_msgs_gencpp)
 target_link_libraries(gazebo_ros_joint_trajectory ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+
+add_library(gazebo_ros_joint_state_publisher src/gazebo_ros_joint_state_publisher.cpp)
+set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES LINK_FLAGS "${ld_flags}")
+set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES COMPILE_FLAGS "${cxx_flags}")
+add_dependencies(gazebo_ros_joint_state_publisher gazebo_msgs_gencpp)
+target_link_libraries(gazebo_ros_joint_state_publisher ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 add_library(gazebo_ros_joint_pose_trajectory src/gazebo_ros_joint_pose_trajectory.cpp)
 set_target_properties(gazebo_ros_joint_pose_trajectory PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_joint_pose_trajectory PROPERTIES COMPILE_FLAGS "${cxx_flags}")
@@ -286,6 +294,7 @@ install(TARGETS
   gazebo_ros_prosilica
   gazebo_ros_force
   gazebo_ros_joint_trajectory
+  gazebo_ros_joint_state_publisher
   gazebo_ros_joint_pose_trajectory
   gazebo_ros_diff_drive
   gazebo_ros_skid_steer_drive
