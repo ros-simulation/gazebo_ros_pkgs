@@ -196,23 +196,24 @@ void GazeboRosControlPlugin::Update()
   // Get the simulation time and period
   gazebo::common::Time gz_time_now = parent_model_->GetWorld()->GetSimTime();
   ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
-  ros::Duration sim_period = sim_time_ros - last_sim_time_ros_;
+  ros::Duration sim_period = sim_time_ros - last_update_sim_time_ros_;
 
   // Check if we should update the controllers
   if(sim_period >= control_period_) {
     // Store this simulation time
-    last_sim_time_ros_ = sim_time_ros;
+    last_update_sim_time_ros_ = sim_time_ros;
 
     // Update the robot simulation with the state of the gazebo model
     robot_hw_sim_->readSim(sim_time_ros, sim_period);
 
     // Compute the controller commands
     controller_manager_->update(sim_time_ros, sim_period);
-
-    // Update the gazebo model with the result of the controller
-    // computation
-    robot_hw_sim_->writeSim(sim_time_ros, sim_period);
   }
+
+  // Update the gazebo model with the result of the controller
+  // computation
+  robot_hw_sim_->writeSim(sim_time_ros, sim_time_ros - last_write_sim_time_ros_);
+  last_write_sim_time_ros_ = sim_time_ros;
 }
 
 // Get the URDF XML from the parameter server
