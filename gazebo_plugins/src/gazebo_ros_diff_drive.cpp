@@ -66,8 +66,6 @@ namespace gazebo {
 
   // Destructor
   GazeboRosDiffDrive::~GazeboRosDiffDrive() {
-    delete rosnode_;
-    delete transform_broadcaster_;
   }
 
   // Load the controller
@@ -75,6 +73,7 @@ namespace gazebo {
 
     this->parent = _parent;
     this->world = _parent->GetWorld();
+    
 
     this->robot_namespace_ = "";
     if (!_sdf->HasElement("robotNamespace")) {
@@ -166,6 +165,21 @@ namespace gazebo {
       this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
     }
 
+    
+    this->publishWheelTF_ = false;
+    if (_sdf->HasElement("publishWheelTF")) {
+      this->publishWheelTF_ = _sdf->GetElement("publishWheelTF")->Get<bool>();
+    }
+    ROS_INFO("GazeboRosDiffDrive Plugin (ns = %s) <publishWheelTF>, set to %i=%s",
+          this->robot_namespace_.c_str(), this->publishWheelTF_, (this->publishWheelTF_?"ture":"false"));
+    
+    this->publishWheelJointState_ = false;
+    if (_sdf->HasElement("publishWheelJointState")) {
+      this->publishWheelJointState_ = _sdf->GetElement("publishWheelJointState")->Get<bool>();
+    }
+    ROS_INFO("GazeboRosDiffDrive Plugin (ns = %s) <publishWheelJointState>, set to %i=%s",
+          this->robot_namespace_.c_str(), this->publishWheelJointState_, (this->publishWheelJointState_?"ture":"false"));
+    
     // Initialize update rate stuff
     if (this->update_rate_ > 0.0) {
       this->update_period_ = 1.0 / this->update_rate_;
@@ -182,17 +196,18 @@ namespace gazebo {
     rot_ = 0;
     alive_ = true;
 
-    joints[LEFT] = this->parent->GetJoint(left_joint_name_);
-    joints[RIGHT] = this->parent->GetJoint(right_joint_name_);
+    joints_.resize(2);
+    joints_[LEFT] = this->parent->GetJoint(left_joint_name_);
+    joints_[RIGHT] = this->parent->GetJoint(right_joint_name_);
 
-    if (!joints[LEFT]) { 
+    if (!joints_[LEFT]) { 
       char error[200];
       snprintf(error, 200, 
           "GazeboRosDiffDrive Plugin (ns = %s) couldn't get left hinge joint named \"%s\"", 
           this->robot_namespace_.c_str(), this->left_joint_name_.c_str());
       gzthrow(error);
     }
-    if (!joints[RIGHT]) { 
+    if (!joints_[RIGHT]) { 
       char error[200];
       snprintf(error, 200, 
           "GazeboRosDiffDrive Plugin (ns = %s) couldn't get right hinge joint named \"%s\"", 
@@ -200,8 +215,8 @@ namespace gazebo {
       gzthrow(error);
     }
 
-    joints[LEFT]->SetMaxForce(0, torque);
-    joints[RIGHT]->SetMaxForce(0, torque);
+    joints_[LEFT]->SetMaxForce(0, torque);
+    joints_[RIGHT]->SetMaxForce(0, torque);
 
     // Make sure the ROS node for Gazebo has already been initialized
     if (!ros::isInitialized())
@@ -211,12 +226,14 @@ namespace gazebo {
       return;
     }
 
-    rosnode_ = new ros::NodeHandle(this->robot_namespace_);
-
+    rosnode_ = boost::shared_ptr<ros::NodeHandle> ( new ros::NodeHandle ( this->robot_namespace_ ) );
     ROS_INFO("Starting GazeboRosDiffDrive Plugin (ns = %s)!", this->robot_namespace_.c_str());
-
+    
+    if(this->publishWheelJointState_){
+      joint_state_publisher_ = rosnode_->advertise<sensor_msgs::JointState> ( "joint_states",1000 );
+    }
     tf_prefix_ = tf::getPrefixParam(*rosnode_);
-    transform_broadcaster_ = new tf::TransformBroadcaster();
+    transform_broadcaster_ = boost::shared_ptr<tf::TransformBroadcaster> ( new tf::TransformBroadcaster() );
 
     // ROS: Subscribe to the velocity command topic (usually "cmd_vel")
     ros::SubscribeOptions so =
@@ -238,6 +255,42 @@ namespace gazebo {
           boost::bind(&GazeboRosDiffDrive::UpdateChild, this));
 
   }
+  
+void GazeboRosDiffDrive::publishWheelJointState() {
+    ros::Time current_time = ros::Time::now();
+
+    joint_state_.header.stamp = current_time;
+    joint_state_.name.resize ( joints_.size() );
+    joint_state_.position.resize ( joints_.size() );
+
+    for ( int i = 0; i < 2; i++ ) {
+        physics::JointPtr joint = joints_[i];
+        math::Angle angle = joint->GetAngle ( 0 );
+        joint_state_.name[i] = joint->GetName();
+        joint_state_.position[i] = angle.Radian () ;
+    }
+    joint_state_publisher_.publish ( joint_state_ );
+}
+
+void GazeboRosDiffDrive::publishWheelTF() {
+    ros::Time current_time = ros::Time::now();
+    for(int i = 0; i < 2; i++){
+    std::string wheel_frame = 
+      tf::resolve(tf_prefix_, joints_[i]->GetChild()->GetName ());
+    std::string wheel_parent_frame = 
+      tf::resolve(tf_prefix_, joints_[i]->GetParent()->GetName ());
+
+    math::Pose poseWheel = joints_[i]->GetChild()->GetRelativePose();
+
+    tf::Quaternion qt(poseWheel.rot.x, poseWheel.rot.y, poseWheel.rot.z, poseWheel.rot.w);
+    tf::Vector3 vt(poseWheel.pos.x, poseWheel.pos.y, poseWheel.pos.z);
+
+    tf::Transform tfWheel(qt, vt);
+    transform_broadcaster_->sendTransform(
+        tf::StampedTransform(tfWheel, current_time,
+            wheel_parent_frame, wheel_frame));
+    }
+  }
 
   // Update the controller
   void GazeboRosDiffDrive::UpdateChild() {
@@ -247,11 +300,13 @@ namespace gazebo {
     if (seconds_since_last_update > update_period_) {
 
       publishOdometry(seconds_since_last_update);
+      if(publishWheelTF_) publishWheelTF();
+      if(publishWheelJointState_) publishWheelJointState();
 
       // Update robot in case new velocities have been requested
       getWheelVelocities();
-      joints[LEFT]->SetVelocity(0, wheel_speed_[LEFT] / wheel_diameter_);
-      joints[RIGHT]->SetVelocity(0, wheel_speed_[RIGHT] / wheel_diameter_);
+      joints_[LEFT]->SetVelocity(0, wheel_speed_[LEFT] / wheel_diameter_);
+      joints_[RIGHT]->SetVelocity(0, wheel_speed_[RIGHT] / wheel_diameter_);
 
       last_update_time_+= common::Time(update_period_);
 

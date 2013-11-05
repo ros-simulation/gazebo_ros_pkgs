@@ -60,8 +60,7 @@ public:
     ~GazeboRosJointStatePublisher();
     void Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf );
     void OnUpdate ( const common::UpdateInfo & _info );
-    void publishTF();
-
+    void publishJointStates();
     // Pointer to the model
 private:
     event::ConnectionPtr updateConnection;
@@ -71,7 +70,7 @@ private:
 
     // ROS STUFF
     boost::shared_ptr<ros::NodeHandle> rosnode_;
-    sensor_msgs::JointState joint_state;
+    sensor_msgs::JointState joint_state_;
     ros::Publisher joint_state_publisher_;
     std::string tf_prefix_;
     std::string robot_namespace_;
@@ -81,6 +80,7 @@ private:
     double update_rate_;
     double update_period_;
     common::Time last_update_time_;
+    
 };
 
 // Register this plugin with the simulator

@@ -54,6 +54,7 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <sensor_msgs/JointState.h>
 
 // Custom Callback Queue
 #include <ros/callback_queue.h>
@@ -82,6 +83,9 @@ namespace gazebo {
     private:
       void publishOdometry(double step_time);
       void getWheelVelocities();
+      void publishWheelTF(); /// publishes the wheel tf's
+      void publishWheelJointState();
+
 
       physics::WorldPtr world;
       physics::ModelPtr parent;
@@ -95,13 +99,15 @@ namespace gazebo {
       double torque;
       double wheel_speed_[2];
 
-      physics::JointPtr joints[2];
+      std::vector<physics::JointPtr> joints_;
 
       // ROS STUFF
-      ros::NodeHandle* rosnode_;
+      boost::shared_ptr<ros::NodeHandle> rosnode_;
       ros::Publisher odometry_publisher_;
       ros::Subscriber cmd_vel_subscriber_;
-      tf::TransformBroadcaster *transform_broadcaster_;
+      boost::shared_ptr<tf::TransformBroadcaster> transform_broadcaster_;
+      sensor_msgs::JointState joint_state_;
+      ros::Publisher joint_state_publisher_;      
       nav_msgs::Odometry odom_;
       std::string tf_prefix_;
 
@@ -129,6 +135,10 @@ namespace gazebo {
       double update_rate_;
       double update_period_;
       common::Time last_update_time_;
+      
+    // Flags
+    bool publishWheelTF_;
+    bool publishWheelJointState_;
 
   };
 

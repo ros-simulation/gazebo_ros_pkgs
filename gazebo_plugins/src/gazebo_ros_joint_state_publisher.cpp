@@ -102,7 +102,7 @@ void GazeboRosJointStatePublisher::OnUpdate ( const common::UpdateInfo & _info )
     double seconds_since_last_update = ( current_time - last_update_time_ ).Double();
     if ( seconds_since_last_update > update_period_ ) {
 
-        publishTF();
+        publishJointStates();
 
         last_update_time_+= common::Time ( update_period_ );
 
@@ -110,19 +110,19 @@ void GazeboRosJointStatePublisher::OnUpdate ( const common::UpdateInfo & _info )
 
 }
 
-void GazeboRosJointStatePublisher::publishTF() {
+void GazeboRosJointStatePublisher::publishJointStates() {
     ros::Time current_time = ros::Time::now();
 
-    joint_state.header.stamp = current_time;
-    joint_state.name.resize ( joints_.size() );
-    joint_state.position.resize ( joints_.size() );
+    joint_state_.header.stamp = current_time;
+    joint_state_.name.resize ( joints_.size() );
+    joint_state_.position.resize ( joints_.size() );
 
     for ( int i = 0; i < joints_.size(); i++ ) {
         physics::JointPtr joint = joints_[i];
         math::Angle angle = joint->GetAngle ( 0 );
-        joint_state.name[i] = joint->GetName();
-        joint_state.position[i] = angle.Radian () ;
+        joint_state_.name[i] = joint->GetName();
+        joint_state_.position[i] = angle.Radian () ;
     }
-    joint_state_publisher_.publish ( joint_state );
+    joint_state_publisher_.publish ( joint_state_ );
 }
 
