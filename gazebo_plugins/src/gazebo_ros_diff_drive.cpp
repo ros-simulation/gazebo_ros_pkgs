@@ -232,6 +232,7 @@ namespace gazebo {
     if(this->publishWheelJointState_){
       joint_state_publisher_ = rosnode_->advertise<sensor_msgs::JointState> ( "joint_states",1000 );
     }
+    
     tf_prefix_ = tf::getPrefixParam(*rosnode_);
     transform_broadcaster_ = boost::shared_ptr<tf::TransformBroadcaster> ( new tf::TransformBroadcaster() );
 
