@@ -216,6 +216,14 @@ void GazeboRosControlPlugin::Update()
   last_write_sim_time_ros_ = sim_time_ros;
 }
 
+// Called on world reset
+void GazeboRosControlPlugin::Reset()
+{
+  // Reset timing variables to not pass negative update periods to controllers on world reset
+  last_update_sim_time_ros_ = ros::Time();
+  last_write_sim_time_ros_ = ros::Time();
+}
+
 // Get the URDF XML from the parameter server
 std::string GazeboRosControlPlugin::getURDF(std::string param_name) const
 {

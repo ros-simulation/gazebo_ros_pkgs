@@ -72,6 +72,9 @@ public:
   // Called by the world update start event
   void Update();
 
+  // Called on world reset
+  virtual void Reset();
+
   // Get the URDF XML from the parameter server
   std::string getURDF(std::string param_name) const;
 
