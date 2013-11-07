@@ -104,8 +104,9 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
-  }
-
+  }   
+  
+  ROS_INFO ( "Starting GazeboRosLaser Plugin (ns = %s)!", this->robot_namespace_.c_str() );
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
     boost::bind(&GazeboRosLaser::LoadThread, this));

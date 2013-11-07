@@ -84,7 +84,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!this->sdf->HasElement("frameName"))
   {
-    ROS_INFO("Laser plugin missing <frameName>, defaults to /world");
+    ROS_INFO("GazeboRosLaser plugin missing <frameName>, defaults to /world");
     this->frame_name_ = "/world";
   }
   else
@@ -92,7 +92,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!this->sdf->HasElement("topicName"))
   {
-    ROS_INFO("Laser plugin missing <topicName>, defaults to /world");
+    ROS_INFO("GazeboRosLaser plugin missing <topicName>, defaults to /world");
     this->topic_name_ = "/world";
   }
   else
@@ -109,6 +109,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     return;
   }
 
+  ROS_INFO ( "Starting GazeboRosLaser Plugin (ns = %s)!", this->robot_namespace_.c_str() );
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
     boost::bind(&GazeboRosLaser::LoadThread, this));

@@ -81,7 +81,7 @@ void GazeboRosJointStatePublisher::Load ( physics::ModelPtr _parent, sdf::Elemen
 
     for ( unsigned int i = 0; i< joint_names_.size(); i++ ) {
         joints_.push_back ( this->parent_->GetJoint ( joint_names_[i] ) );
-        ROS_INFO ( "joint_name: %s", joint_names_[i].c_str() );
+        ROS_INFO ( "GazeboRosJointStatePublisher is going to publish joint: %s", joint_names_[i].c_str() );
     }
 
     ROS_INFO ( "Starting GazeboRosJointStatePublisher Plugin (ns = %s)!, parent name: %s", this->robot_namespace_.c_str(), parent_->GetName ().c_str() );
