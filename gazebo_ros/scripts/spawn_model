@@ -198,7 +198,7 @@ class SpawnModel():
 
         if not self.wait_for_model == "":
           rospy.Subscriber("%s/model_states"%(self.gazebo_namespace), ModelStates, self.checkForModel)
-		      r= rospy.Rate(10)
+          r= rospy.Rate(10)
           while not rospy.is_shutdown() and not self.wait_for_model_exists:
             r.sleep()
 

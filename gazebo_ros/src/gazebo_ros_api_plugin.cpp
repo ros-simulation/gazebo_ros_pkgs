@@ -1929,12 +1929,7 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
 
     // Create the pose element if it doesn't exist
     if (!pose_element)
-    {
       pose_element = new TiXmlElement("pose");
-      model_tixml->LinkEndChild(pose_element);
-    }
-
-    // Pose is set at bottom of function
   }
   else
   {
@@ -1945,21 +1940,21 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
       ROS_WARN("Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
       return;
     }
-    // Check SDF for required include element
-    TiXmlElement* include_tixml = world_tixml->FirstChildElement("include");    
-    if (!include_tixml)
+    // If not <model> element, check SDF for required include element
+    model_tixml = world_tixml->FirstChildElement("include");    
+    if (!model_tixml)
     {      
       ROS_WARN("Could not find <include> element in sdf, so name and initial position cannot be applied");
       return;
     }
 
     // Check for name element
-    TiXmlElement* name_tixml = include_tixml->FirstChildElement("name");    
+    TiXmlElement* name_tixml = model_tixml->FirstChildElement("name");    
     if (!name_tixml)
     {      
       // Create the name element
       name_tixml = new TiXmlElement("name");
-      include_tixml->LinkEndChild(name_tixml);
+      model_tixml->LinkEndChild(name_tixml);
     }      
 
     // Set the text within the name element
@@ -1967,18 +1962,14 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     name_tixml->LinkEndChild( text );    
 
     // Check for the pose element
-    pose_element = include_tixml->FirstChildElement("pose");
+    pose_element = model_tixml->FirstChildElement("pose");
 
     // Create the pose element if it doesn't exist
     if (!pose_element)
-    {
       pose_element = new TiXmlElement("pose");
-      include_tixml->LinkEndChild(pose_element);
-    }
-    // Pose is set at bottom of function
   }
 
-  // Set the pose value for both SDFs types here
+  // Set and link the pose element after adding initial pose
   if (pose_element)
   {
     // convert pose_element to math::Pose
@@ -1993,10 +1984,15 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     pose_stream << model_pose.pos.x << " " << model_pose.pos.y << " " << model_pose.pos.z << " "
                 << model_rpy.x << " " << model_rpy.y << " " << model_rpy.z;
 
+    ROS_ERROR("debug: %s", pose_stream.str().c_str());
+
     // Add value to pose element
     TiXmlText* text = new TiXmlText(pose_stream.str());      
-    pose_element->LinkEndChild( text );
+    TiXmlElement* new_pose_element = new TiXmlElement("pose");
+    new_pose_element->LinkEndChild(text);
+    model_tixml->LinkEndChild(new_pose_element);
   }
+
 
 }
 
