@@ -1980,8 +1980,6 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     pose_stream << new_model_pose.pos.x << " " << new_model_pose.pos.y << " " << new_model_pose.pos.z << " "
                 << model_rpy.x << " " << model_rpy.y << " " << model_rpy.z;
 
-    ROS_ERROR("debug: %s", pose_stream.str().c_str());
-
     // Add value to pose element
     TiXmlText* text = new TiXmlText(pose_stream.str());      
     TiXmlElement* new_pose_element = new TiXmlElement("pose");
@@ -2153,7 +2151,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   std::ostringstream stream;
   stream << gazebo_model_xml;
   std::string gazebo_model_xml_string = stream.str();
-  ROS_ERROR("Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
+  ROS_DEBUG("Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
 
   // publish to factory topic
   gazebo::msgs::Factory msg;
