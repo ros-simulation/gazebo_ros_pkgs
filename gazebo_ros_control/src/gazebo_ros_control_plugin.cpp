@@ -140,7 +140,6 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
 
   // Get parameters/settings for controllers from ROS param server
   model_nh_ = ros::NodeHandle(robot_namespace_);
-  nh_ = ros::NodeHandle();
   ROS_INFO_NAMED("gazebo_ros_control", "Starting gazebo_ros_control plugin in namespace: %s", robot_namespace_.c_str());
 
   // Read urdf from ros parameter server then
@@ -224,19 +223,19 @@ std::string GazeboRosControlPlugin::getURDF(std::string param_name) const
   while (urdf_string.empty())
   {
     std::string search_param_name;
-    if (nh_.searchParam(param_name, search_param_name))
+    if (model_nh_.searchParam(param_name, search_param_name))
     {
       ROS_INFO_ONCE_NAMED("gazebo_ros_control", "gazebo_ros_control plugin is waiting for model"
         " URDF in parameter [%s] on the ROS param server.", search_param_name.c_str());
 
-      nh_.getParam(search_param_name, urdf_string);
+      model_nh_.getParam(search_param_name, urdf_string);
     }
     else
     {
       ROS_INFO_ONCE_NAMED("gazebo_ros_control", "gazebo_ros_control plugin is waiting for model"
         " URDF in parameter [%s] on the ROS param server.", robot_description_.c_str());
 
-      nh_.getParam(param_name, urdf_string);
+      model_nh_.getParam(param_name, urdf_string);
     }
 
     usleep(100000);
