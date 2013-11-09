@@ -1987,17 +1987,89 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
   // Set the pose value for both SDFs types here
   if (pose_element)
   {
+    // convert pose_element to math::Pose
+    gazebo::math::Pose pose = this->parsePose(pose_element->GetText());
+
+    // add pose_element Pose to initial pose
+    gazebo::math::Pose model_pose = pose + gazebo::math::Pose(initial_xyz, initial_q);
+
     // Create the string of 6 numbers
     std::ostringstream pose_stream;
-    gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
-    pose_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z << " "
-                << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
+    gazebo::math::Vector3 model_rpy = model_pose.rot.GetAsEuler(); // convert to Euler angles for Gazebo XML
+    pose_stream << model_pose.pos.x << " " << model_pose.pos.y << " " << model_pose.pos.z << " "
+                << model_rpy.x << " " << model_rpy.y << " " << model_rpy.z;
 
     // Add value to pose element
     TiXmlText* text = new TiXmlText(pose_stream.str());      
     pose_element->LinkEndChild( text );
   }
 
+}
+
+gazebo::math::Pose GazeboRosApiPlugin::parsePose(const std::string &str)
+{
+  std::vector<std::string> pieces;
+  std::vector<double> vals;
+
+  boost::split(pieces, str, boost::is_any_of(" "));
+  for (unsigned int i = 0; i < pieces.size(); ++i)
+  {
+    if (pieces[i] != "")
+    {
+      try
+      {
+        vals.push_back(boost::lexical_cast<double>(pieces[i].c_str()));
+      }
+      catch(boost::bad_lexical_cast &e)
+      {
+        sdferr << "xml key [" << str
+          << "][" << i << "] value [" << pieces[i]
+          << "] is not a valid double from a 3-tuple\n";
+        return gazebo::math::Pose();
+      }
+    }
+  }
+
+  if (vals.size() == 6)
+    return gazebo::math::Pose(vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]);
+  else
+  {
+    ROS_ERROR("Beware: failed to parse string [%s] as gazebo::math::Pose, returning zeros.", str.c_str());
+    return gazebo::math::Pose();
+  }
+}
+
+gazebo::math::Vector3 GazeboRosApiPlugin::parseVector3(const std::string &str)
+{
+  std::vector<std::string> pieces;
+  std::vector<double> vals;
+
+  boost::split(pieces, str, boost::is_any_of(" "));
+  for (unsigned int i = 0; i < pieces.size(); ++i)
+  {
+    if (pieces[i] != "")
+    {
+      try
+      {
+        vals.push_back(boost::lexical_cast<double>(pieces[i].c_str()));
+      }
+      catch(boost::bad_lexical_cast &e)
+      {
+        sdferr << "xml key [" << str
+          << "][" << i << "] value [" << pieces[i]
+          << "] is not a valid double from a 3-tuple\n";
+        return gazebo::math::Vector3();
+      }
+    }
+  }
+
+  if (vals.size() == 3)
+    return gazebo::math::Vector3(vals[0], vals[1], vals[2]);
+  else
+  {
+    ROS_ERROR("Beware: failed to parse string [%s] as gazebo::math::Vector3, returning zeros.", str.c_str());
+    return gazebo::math::Vector3();
+  }
 }
 
 void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
@@ -2015,17 +2087,28 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ga
       model_tixml->LinkEndChild(origin_key);
     }
 
+    gazebo::math::Vector3 xyz;
+    gazebo::math::Vector3 rpy;
     if (origin_key->Attribute("xyz"))
+    {
+      xyz = this->parseVector3(origin_key->Attribute("xyz"));
       origin_key->RemoveAttribute("xyz");
+    }
     if (origin_key->Attribute("rpy"))
+    {
+      rpy = this->parseVector3(origin_key->Attribute("rpy"));
       origin_key->RemoveAttribute("rpy");
+    }
+
+    // add xyz, rpy to initial pose
+    gazebo::math::Pose model_pose = gazebo::math::Pose(xyz, rpy) + gazebo::math::Pose(initial_xyz, initial_q);
 
     std::ostringstream xyz_stream;
-    xyz_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z;
+    xyz_stream << model_pose.pos.x << " " << model_pose.pos.y << " " << model_pose.pos.z;
 
     std::ostringstream rpy_stream;
-    gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
-    rpy_stream << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
+    gazebo::math::Vector3 model_rpy = model_pose.rot.GetAsEuler(); // convert to Euler angles for Gazebo XML
+    rpy_stream << model_rpy.x << " " << model_rpy.y << " " << model_rpy.z;
 
     origin_key->SetAttribute("xyz",xyz_stream.str());
     origin_key->SetAttribute("rpy",rpy_stream.str());
