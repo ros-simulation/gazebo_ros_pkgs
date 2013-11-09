@@ -727,8 +727,6 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
     clearJointForces(joints[i]->GetName());
   }
 
-  // clear entity from selection @todo: need to clear links if selected individually
-  gazebo::event::Events::setSelectedEntity(req.model_name, "normal");
   // send delete model request
   gazebo::msgs::Request *msg = gazebo::msgs::CreateRequest("entity_delete",req.model_name);
   request_pub_->Publish(*msg,true);
