@@ -1876,8 +1876,10 @@ void GazeboRosApiPlugin::physicsReconfigureThread()
   physics_reconfigure_get_client_ = nh_->serviceClient<gazebo_msgs::GetPhysicsProperties>("/gazebo/get_physics_properties");
 
   // Wait until the rest of this plugin is loaded and the services are being offered 
-  physics_reconfigure_set_client_.waitForExistence();
-  physics_reconfigure_get_client_.waitForExistence();
+  while (ros::ok() && !physics_reconfigure_set_client_.exists())
+    usleep(1000);
+  while (ros::ok() && !physics_reconfigure_get_client_.exists())
+    usleep(1000);
 
   physics_reconfigure_srv_.reset(new dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>());
 
