@@ -18,7 +18,7 @@
 # Author: John Hsu, Dave Coleman
 #
 
-import rospy, sys, os
+import rospy, sys, os, time
 import string
 import warnings
 
@@ -198,8 +198,9 @@ class SpawnModel():
 
         if not self.wait_for_model == "":
           rospy.Subscriber("%s/model_states"%(self.gazebo_namespace), ModelStates, self.checkForModel)
+		      r= rospy.Rate(10)
           while not rospy.is_shutdown() and not self.wait_for_model_exists:
-            time.sleep(0.1)
+            r.sleep()
 
         if rospy.is_shutdown():
           sys.exit(0)

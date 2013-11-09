@@ -81,16 +81,12 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   // Delete Force and Wrench Jobs
   lock_.lock();
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
-  {
     delete (*iter);
-    force_joint_jobs_.erase(iter);
-  }
+  force_joint_jobs_.clear();
   ROS_DEBUG_STREAM_NAMED("api_plugin","ForceJointJobs deleted");
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
-  {
     delete (*iter);
-    wrench_body_jobs_.erase(iter);
-  }
+  wrench_body_jobs_.clear();
   lock_.unlock();
   ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
 
@@ -731,8 +727,6 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
     clearJointForces(joints[i]->GetName());
   }
 
-  // clear entity from selection @todo: need to clear links if selected individually
-  gazebo::event::Events::setSelectedEntity(req.model_name, "normal");
   // send delete model request
   gazebo::msgs::Request *msg = gazebo::msgs::CreateRequest("entity_delete",req.model_name);
   request_pub_->Publish(*msg,true);
@@ -1323,7 +1317,7 @@ bool GazeboRosApiPlugin::clearJointForces(std::string joint_name)
   while(search)
   {
     search = false;
-    for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();iter++)
+    for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();++iter)
     {
       if ((*iter)->joint->GetName() == joint_name)
       {
@@ -1351,7 +1345,7 @@ bool GazeboRosApiPlugin::clearBodyWrenches(std::string body_name)
   while(search)
   {
     search = false;
-    for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();iter++)
+    for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();++iter)
     {
       //ROS_ERROR("search %s %s",(*iter)->body->GetScopedName().c_str(), body_name.c_str());
       if ((*iter)->body->GetScopedName() == body_name)
@@ -1661,7 +1655,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
     {
       // remove from queue once expires
       delete (*iter);
-      wrench_body_jobs_.erase(iter);
+      iter = wrench_body_jobs_.erase(iter);
     }
     else
       iter++;
@@ -1691,7 +1685,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
-      force_joint_jobs_.erase(iter);
+      iter = force_joint_jobs_.erase(iter);
     }
     else
       iter++;
