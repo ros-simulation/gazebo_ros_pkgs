@@ -111,7 +111,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
   }
 
   // Get the Gazebo simulation period
-  ros::Duration gazebo_period(parent_model_->GetWorld()->GetPhysicsEngine()->GetUpdatePeriod());
+  ros::Duration gazebo_period(parent_model_->GetWorld()->GetPhysicsEngine()->GetMaxStepSize());
 
   // Decide the plugin control period
   if(sdf_->HasElement("controlPeriod"))
@@ -140,7 +140,6 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
 
   // Get parameters/settings for controllers from ROS param server
   model_nh_ = ros::NodeHandle(robot_namespace_);
-  nh_ = ros::NodeHandle();
   ROS_INFO_NAMED("gazebo_ros_control", "Starting gazebo_ros_control plugin in namespace: %s", robot_namespace_.c_str());
 
   // Read urdf from ros parameter server then
@@ -196,23 +195,32 @@ void GazeboRosControlPlugin::Update()
   // Get the simulation time and period
   gazebo::common::Time gz_time_now = parent_model_->GetWorld()->GetSimTime();
   ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
-  ros::Duration sim_period = sim_time_ros - last_sim_time_ros_;
+  ros::Duration sim_period = sim_time_ros - last_update_sim_time_ros_;
 
   // Check if we should update the controllers
   if(sim_period >= control_period_) {
     // Store this simulation time
-    last_sim_time_ros_ = sim_time_ros;
+    last_update_sim_time_ros_ = sim_time_ros;
 
     // Update the robot simulation with the state of the gazebo model
     robot_hw_sim_->readSim(sim_time_ros, sim_period);
 
     // Compute the controller commands
     controller_manager_->update(sim_time_ros, sim_period);
-
-    // Update the gazebo model with the result of the controller
-    // computation
-    robot_hw_sim_->writeSim(sim_time_ros, sim_period);
   }
+
+  // Update the gazebo model with the result of the controller
+  // computation
+  robot_hw_sim_->writeSim(sim_time_ros, sim_time_ros - last_write_sim_time_ros_);
+  last_write_sim_time_ros_ = sim_time_ros;
+}
+
+// Called on world reset
+void GazeboRosControlPlugin::Reset()
+{
+  // Reset timing variables to not pass negative update periods to controllers on world reset
+  last_update_sim_time_ros_ = ros::Time();
+  last_write_sim_time_ros_ = ros::Time();
 }
 
 // Get the URDF XML from the parameter server
@@ -224,19 +232,19 @@ std::string GazeboRosControlPlugin::getURDF(std::string param_name) const
   while (urdf_string.empty())
   {
     std::string search_param_name;
-    if (nh_.searchParam(param_name, search_param_name))
+    if (model_nh_.searchParam(param_name, search_param_name))
     {
       ROS_INFO_ONCE_NAMED("gazebo_ros_control", "gazebo_ros_control plugin is waiting for model"
         " URDF in parameter [%s] on the ROS param server.", search_param_name.c_str());
 
-      nh_.getParam(search_param_name, urdf_string);
+      model_nh_.getParam(search_param_name, urdf_string);
     }
     else
     {
       ROS_INFO_ONCE_NAMED("gazebo_ros_control", "gazebo_ros_control plugin is waiting for model"
         " URDF in parameter [%s] on the ROS param server.", robot_description_.c_str());
 
-      nh_.getParam(param_name, urdf_string);
+      model_nh_.getParam(param_name, urdf_string);
     }
 
     usleep(100000);
