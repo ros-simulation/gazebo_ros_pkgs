@@ -2,6 +2,20 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0-2 (2013-11-13)
+------------------
+* rerelease because sdformat became libsdformat, but we also based change on 2.3.4 in hydro-devel.
+* Merge pull request `#144 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/144>`_ from meyerj/fix-125
+  Fixed `#125 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/125>`_: ``gazebo_ros_control``: controlPeriod greater than the simulation period causes unexpected results
+* Merge pull request `#134 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/134>`_ from meyerj/gazebo-ros-control-use-model-nh
+  ``gazebo_ros_control``: Use the model NodeHandle to get the ``robot_description`` parameter
+* ``gazebo_ros_control``: added GazeboRosControlPlugin::Reset() method that resets the timestamps on world reset
+* ``gazebo_ros_control``: call writeSim() for each Gazebo world update independent of the control period
+* ``gazebo_ros_pkgs``: use GetMaxStepSize() for the Gazebo simulation period
+* ``gazebo_ros_control``: use the model NodeHandle to get the ``robot_description`` parameter
+* Add missing ``run_depend`` to urdf in ``gazebo_ros_control``
+* Remove dependency to meta-package ``ros_controllers``
+
 2.4.0 (2013-10-14)
 ------------------
 
