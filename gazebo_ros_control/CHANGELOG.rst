@@ -2,7 +2,7 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.4.0-2 (2013-11-13)
+2.4.1 (2013-11-13)
 ------------------
 * rerelease because sdformat became libsdformat, but we also based change on 2.3.4 in hydro-devel.
 * Merge pull request `#144 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/144>`_ from meyerj/fix-125

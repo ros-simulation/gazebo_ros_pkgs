@@ -2,7 +2,7 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.4.0-2 (2013-11-13)
+2.4.1 (2013-11-13)
 ------------------
 * rerelease because sdformat became libsdformat, but we also based change on 2.3.4 in hydro-devel.
 
