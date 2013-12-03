@@ -251,11 +251,11 @@ private:
   void updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name, 
                            gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
-  /// \brief Update the model name and pose of the URDF file before sending to Gazebo
+  /// \brief Update the model pose of the URDF file before sending to Gazebo
   void updateURDFModelPose(TiXmlDocument &gazebo_model_xml, 
                            gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
-  /// \brief
+  /// \brief Update the model name of the URDF file before sending to Gazebo
   void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
 
   /// \brief
@@ -288,6 +288,12 @@ private:
 
   /// \brief Connect to Gazebo via its plugin interface, get a pointer to the world, start events
   void loadGazeboRosApiPlugin(std::string world_name);
+
+  /// \brief convert xml to Pose
+  gazebo::math::Pose parsePose(const std::string &str);
+
+  /// \brief convert xml to Pose
+  gazebo::math::Vector3 parseVector3(const std::string &str);
 
   // track if the desconstructor event needs to occur
   bool plugin_loaded_;
