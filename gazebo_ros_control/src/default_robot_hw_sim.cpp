@@ -42,6 +42,7 @@
 #define _GAZEBO_ROS_CONTROL___DEFAULT_ROBOT_HW_SIM_H_
 
 // ros_control
+#include <control_toolbox/pid.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <joint_limits_interface/joint_limits.h>
@@ -65,6 +66,16 @@
 // URDF
 #include <urdf/model.h>
 
+namespace
+{
+
+double clamp(const double val, const double min_val, const double max_val)
+{
+  return std::min(std::max(val, min_val), max_val);
+}
+
+}
+
 namespace gazebo_ros_control
 {
 
@@ -86,7 +97,12 @@ public:
     // Resize vectors to our DOF
     n_dof_ = transmissions.size();
     joint_names_.resize(n_dof_);
+    joint_types_.resize(n_dof_);
+    joint_lower_limits_.resize(n_dof_);
+    joint_upper_limits_.resize(n_dof_);
+    joint_effort_limits_.resize(n_dof_);
     joint_hw_interface_types_.resize(n_dof_);
+    pid_controllers_.resize(n_dof_);
     joint_position_.resize(n_dof_);
     joint_velocity_.resize(n_dof_);
     joint_effort_.resize(n_dof_);
@@ -191,14 +207,23 @@ public:
       }
       sim_joints_.push_back(joint);
 
-      const double max_effort = registerJointLimits(joint_names_[j], joint_handle,
-                                                    joint_hw_interface_types_[j], joint_limit_nh,
-                                                    urdf_model);
-      // joint->SetMaxForce() must be called if joint->SetAngle() or joint->SetVelocity() are
-      // going to be called. joint->SetMaxForce() must *not* be called if joint->SetForce() is
-      // going to be called.
+      registerJointLimits(joint_names_[j], joint_handle, joint_hw_interface_types_[j],
+                          joint_limit_nh, urdf_model,
+                          &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
+                          &joint_effort_limits_[j]);
       if (joint_hw_interface_types_[j] != EFFORT)
-        joint->SetMaxForce(0, max_effort);
+      {
+        // Initialize the PID controller.
+
+        const ros::NodeHandle nh(model_nh, robot_namespace + "/gazebo_ros_control/pid_gains/" +
+                                 joint_names_[j]);
+        if (!pid_controllers_[j].init(nh))
+        {
+          ROS_ERROR_STREAM("No PID controller gain values were found for joint \"" <<
+                           joint_names_[j] << "\".");
+          return false;
+        }
+      }
     }
 
     // Register interfaces
@@ -215,9 +240,15 @@ public:
     for(unsigned int j=0; j < n_dof_; j++)
     {
       // Gazebo has an interesting API...
-      // \todo If the joint is a slider joint, do not call shortest_angular_distance().
-      joint_position_[j] += angles::shortest_angular_distance(joint_position_[j],
-                            sim_joints_[j]->GetAngle(0).Radian());
+      if (joint_types_[j] == urdf::Joint::PRISMATIC)
+      {
+        joint_position_[j] = sim_joints_[j]->GetAngle(0).Radian();
+      }
+      else
+      {
+        joint_position_[j] += angles::shortest_angular_distance(joint_position_[j],
+                              sim_joints_[j]->GetAngle(0).Radian());
+      }
       joint_velocity_[j] = sim_joints_[j]->GetVelocity(0);
       joint_effort_[j] = sim_joints_[j]->GetForce((unsigned int)(0));
     }
@@ -234,24 +265,53 @@ public:
 
     for(unsigned int j=0; j < n_dof_; j++)
     {
+      double effort;
+
       switch (joint_hw_interface_types_[j])
       {
         case EFFORT:
-          // Gazebo has an interesting API...
-          sim_joints_[j]->SetForce(0,joint_effort_command_[j]);
-      
-          // Output debug every nth msg
-          if( !(j % 10) && false)
+          effort = joint_effort_command_[j];
+          break;
+
+        case POSITION:
           {
-            ROS_DEBUG_STREAM_NAMED("robot_hw_sim","SetForce " << joint_effort_command_[j]);
+            double error;
+            switch (joint_types_[j])
+            {
+              case urdf::Joint::REVOLUTE:
+                angles::shortest_angular_distance_with_limits(joint_position_[j],
+                                                              joint_position_command_[j],
+                                                              joint_lower_limits_[j],
+                                                              joint_upper_limits_[j],
+                                                              error);
+                break;
+              case urdf::Joint::CONTINUOUS:
+                error = angles::shortest_angular_distance(joint_position_[j],
+                                                          joint_position_command_[j]);
+                break;
+              default:
+                error = joint_position_command_[j] - joint_position_[j];
+            }
+
+            const double effort_limit = joint_effort_limits_[j];
+            effort = clamp(pid_controllers_[j].computeCommand(error, period),
+                           -effort_limit, effort_limit);
           }
           break;
-        case POSITION:
-          sim_joints_[j]->SetAngle(0,joint_position_command_[j]);
-          break;
+
         case VELOCITY:
-          sim_joints_[j]->SetVelocity(0,joint_velocity_command_[j]);
+          const double error = joint_velocity_command_[j] - joint_velocity_[j];
+          const double effort_limit = joint_effort_limits_[j];
+          effort = clamp(pid_controllers_[j].computeCommand(error, period),
+                         -effort_limit, effort_limit);
           break;
+      }
+
+      sim_joints_[j]->SetForce(0, effort);
+      // Output debug every nth msg
+      if( !(j % 10) && false)
+      {
+        ROS_DEBUG_STREAM_NAMED("robot_hw_sim","SetForce " << effort);
       }
     }
   }
@@ -261,13 +321,20 @@ private:
 
   // Register the limits of the joint specified by joint_name and joint_handle. The limits are
   // retrieved from joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
-  // Return the maximum effort that can be applied to the joint.
-  double registerJointLimits(const std::string& joint_name,
+  // Return the joint's type, lower position limit, upper position limit, and effort limit.
+  void registerJointLimits(const std::string& joint_name,
                            const hardware_interface::JointHandle& joint_handle,
                            const HWInterfaceType hw_iface_type,
                            const ros::NodeHandle& joint_limit_nh,
-                           const urdf::Model *const urdf_model)
+                           const urdf::Model *const urdf_model,
+                           int *const joint_type, double *const lower_limit,
+                           double *const upper_limit, double *const effort_limit)
   {
+    *joint_type = urdf::Joint::UNKNOWN;
+    *lower_limit = -std::numeric_limits<double>::max();
+    *upper_limit = std::numeric_limits<double>::max();
+    *effort_limit = std::numeric_limits<double>::max();
+
     joint_limits_interface::JointLimits limits;
     bool has_limits = false;
     joint_limits_interface::SoftJointLimits soft_limits;
@@ -278,6 +345,7 @@ private:
       const boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model->getJoint(joint_name);
       if (urdf_joint != NULL)
       {
+        *joint_type = urdf_joint->type;
         // Get limits from the URDF file.
         if (joint_limits_interface::getJointLimits(urdf_joint, limits))
           has_limits = true;
@@ -290,7 +358,32 @@ private:
       has_limits = true;
 
     if (!has_limits)
-      return 0;
+      return;
+
+    if (*joint_type == urdf::Joint::UNKNOWN)
+    {
+      // Infer the joint type.
+
+      if (limits.has_position_limits)
+      {
+        *joint_type = urdf::Joint::REVOLUTE;
+      }
+      else
+      {
+        if (limits.angle_wraparound)
+          *joint_type = urdf::Joint::CONTINUOUS;
+        else
+          *joint_type = urdf::Joint::PRISMATIC;
+      }
+    }
+
+    if (limits.has_position_limits)
+    {
+      *lower_limit = limits.min_position;
+      *upper_limit = limits.max_position;
+    }
+    if (limits.has_effort_limits)
+      *effort_limit = limits.max_effort;
 
     if (has_soft_limits)
     {
@@ -346,10 +439,6 @@ private:
           break;
       }
     }
-
-    if (limits.has_effort_limits)
-      return limits.max_effort;
-    return 0;
   }
 
   unsigned int n_dof_;
@@ -367,7 +456,12 @@ private:
   joint_limits_interface::VelocityJointSoftLimitsInterface vj_limits_interface_;
 
   std::vector<std::string> joint_names_;
+  std::vector<int> joint_types_;
+  std::vector<double> joint_lower_limits_;
+  std::vector<double> joint_upper_limits_;
+  std::vector<double> joint_effort_limits_;
   std::vector<HWInterfaceType> joint_hw_interface_types_;
+  std::vector<control_toolbox::Pid> pid_controllers_;
   std::vector<double> joint_position_;
   std::vector<double> joint_velocity_;
   std::vector<double> joint_effort_;
@@ -382,10 +476,6 @@ typedef boost::shared_ptr<DefaultRobotHWSim> DefaultRobotHWSimPtr;
 
 }
 
-// \todo PLUGINLIB_DECLARE_CLASS has been deprecated. Replace it with PLUGINLIB_EXPORT_CLASS.
-PLUGINLIB_DECLARE_CLASS(gazebo_ros_control,
-  DefaultRobotHWSim,
-  gazebo_ros_control::DefaultRobotHWSim,
-  gazebo_ros_control::RobotHWSim)
+PLUGINLIB_EXPORT_CLASS(gazebo_ros_control::DefaultRobotHWSim, gazebo_ros_control::RobotHWSim)
 
 #endif // #ifndef __GAZEBO_ROS_CONTROL_PLUGIN_DEFAULT_ROBOT_HW_SIM_H_
