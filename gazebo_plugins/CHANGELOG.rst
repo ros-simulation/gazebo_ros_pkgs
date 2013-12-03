@@ -2,6 +2,19 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.4 (2013-11-13)
+------------------
+* Simplify ``gazebo_plugins/CMakeLists.txt``
+  Replace ``cxx_flags`` and ``ld_flags`` variables with simpler cmake macros
+  and eliminate unnecessary references to ``SDFormat_LIBRARIES``, since
+  they are already part of ``GAZEBO_LIBRARIES``.
+* Put some cmake lists on multiple lines to improve readability.
+* Add dependencies on dynamic reconfigure files
+  Occasionally the build can fail due to some targets having an
+  undeclared dependency on automatically generated dynamic
+  reconfigure files (GazeboRosCameraConfig.h for example). This
+  commit declares several of those dependencies.
+
 2.3.3 (2013-10-10)
 ------------------
 * gazebo_plugins: use shared pointers for variables shared among cameras

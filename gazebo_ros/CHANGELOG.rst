@@ -2,10 +2,31 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.4 (2013-11-13)
+------------------
+* remove debug statement
+* fix sdf spawn with initial pose
+* fix sdf spawn with initial pose
+* Merge branch 'hydro-devel' into ``spawn_model_pose_fix``
+* fix indentation
+* Merge pull request `#142 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/142>`_ from hsu/hydro-devel
+  fix issue `#38 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/38>`_, gui segfault on model deletion
+* Merge pull request `#140 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/140>`_ from ``v4hn/spawn_model_sleep``
+  replace time.sleep by rospy.Rate.sleep
+* fix spawn initial pose.  When model has a non-zero initial pose and user specified initial model spawn pose, add the two.
+* fix issue `#38 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/38>`_, gui segfault on model deletion by removing an obsolete call to set selected object state to "normal".
+* replace time.sleep by rospy.Rate.sleep
+  time was not even imported, so I don't know
+  why this could ever have worked...
+* Add time import
+  When using the -wait option the script fails because is missing the time import
+* Use pre-increment for iterators
+* Fix iterator erase() problems
+
 2.3.3 (2013-10-10)
 ------------------
 * Cleaned up unnecessary debug output that was recently added
-* Fixed issue where catkin_find returns more than one library if it is installed from both source and debian
+* Fixed issue where ``catkin_find`` returns more than one library if it is installed from both source and debian
 
 2.3.2 (2013-09-19)
 ------------------
