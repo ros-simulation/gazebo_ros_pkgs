@@ -1,6 +1,6 @@
 <package>
   <name>gazebo_plugins</name>
-  <version>2.1.0</version>
+  <version>2.3.4</version>
   <description>
     Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
@@ -17,7 +17,6 @@
   <author>John Hsu</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-
 
   <build_depend>gazebo</build_depend>
   <build_depend>gazebo_msgs</build_depend>
@@ -36,9 +35,13 @@
   <build_depend>driver_base</build_depend>
   <build_depend>rosgraph_msgs</build_depend>
   <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl_conversions</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>rosconsole</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>polled_camera</build_depend>
+  <build_depend>diagnostic_updater</build_depend>
 
   <run_depend>gazebo</run_depend>
   <run_depend>gazebo_msgs</run_depend>
@@ -57,7 +60,11 @@
   <run_depend>driver_base</run_depend>
   <run_depend>rosgraph_msgs</run_depend>
   <run_depend>pcl_ros</run_depend>
+  <run_depend>pcl_conversions</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>rosconsole</run_depend>
   <run_depend>message_generation</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>polled_camera</run_depend>
+
 </package>

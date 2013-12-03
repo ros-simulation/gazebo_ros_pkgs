@@ -36,22 +36,9 @@
 
 #include <tinyxml.h>
 
-#include <gazebo/Server.hh>
-#include <gazebo/physics/Physics.hh>
-#include <gazebo/physics/PhysicsEngine.hh>
-#include <gazebo/physics/PhysicsTypes.hh>
-#include <gazebo/physics/Entity.hh>
-#include <gazebo/physics/Collision.hh>
-#include <gazebo/physics/Inertial.hh>
-#include <gazebo/physics/Base.hh>
-#include <gazebo/physics/Link.hh>
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/Joint.hh>
-#include <gazebo/common/CommonTypes.hh>
-#include <gazebo/common/Exception.hh>
-#include <gazebo/common/SystemPaths.hh>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/transport/Node.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/common/common.hh>
+#include <gazebo/transport/transport.hh>
 
 // ROS
 #include <ros/ros.h>
@@ -264,11 +251,11 @@ private:
   void updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name, 
                            gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
-  /// \brief Update the model name and pose of the URDF file before sending to Gazebo
+  /// \brief Update the model pose of the URDF file before sending to Gazebo
   void updateURDFModelPose(TiXmlDocument &gazebo_model_xml, 
                            gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
-  /// \brief
+  /// \brief Update the model name of the URDF file before sending to Gazebo
   void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
 
   /// \brief
@@ -285,7 +272,7 @@ private:
                        gazebo::math::Pose target_to_reference );
 
   /// \brief Used for the dynamic reconfigure callback function template
-  void physicsReconfigureCallback(gazebo::PhysicsConfig &config, uint32_t level);
+  void physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level);
 
   /// \brief waits for the rest of Gazebo to be ready before initializing the dynamic reconfigure services
   void physicsReconfigureThread();
@@ -301,6 +288,12 @@ private:
 
   /// \brief Connect to Gazebo via its plugin interface, get a pointer to the world, start events
   void loadGazeboRosApiPlugin(std::string world_name);
+
+  /// \brief convert xml to Pose
+  gazebo::math::Pose parsePose(const std::string &str);
+
+  /// \brief convert xml to Pose
+  gazebo::math::Vector3 parseVector3(const std::string &str);
 
   // track if the desconstructor event needs to occur
   bool plugin_loaded_;
@@ -369,8 +362,8 @@ private:
   bool physics_reconfigure_initialized_;
   ros::ServiceClient physics_reconfigure_set_client_;
   ros::ServiceClient physics_reconfigure_get_client_;
-  boost::shared_ptr< dynamic_reconfigure::Server<gazebo::PhysicsConfig> > physics_reconfigure_srv_;
-  dynamic_reconfigure::Server<gazebo::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
+  boost::shared_ptr< dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig> > physics_reconfigure_srv_;
+  dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
 
   ros::Publisher     pub_clock_;
 

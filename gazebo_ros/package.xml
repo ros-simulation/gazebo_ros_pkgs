@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>gazebo_ros</name>
-  <version>2.1.0</version>
+  <version>2.3.4</version>
   <description>
     Provides ROS plugins that offer message and service publishers for interfacing with <a href="http://gazebosim.org">Gazebo</a> through ROS.
     Formally simulator_gazebo/gazebo
@@ -16,10 +16,13 @@
   <url type="bugtracker">https://github.com/osrf/gazebo_ros_pkgs/issues</url>
   <url type="repository">https://github.com/osrf/gazebo_ros_pkgs</url>
 
-  <author>John Hsu, Nate Koenig</author>>
+  <author>John Hsu</author>
+  <author>Nate Koenig</author>
+  <author>Dave Coleman</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>cmake_modules</build_depend>
   <build_depend>gazebo</build_depend>
   <build_depend>gazebo_msgs</build_depend>
   <build_depend>gazebo_plugins</build_depend>
@@ -33,6 +36,7 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>tinyxml</build_depend>
 
   <run_depend>gazebo</run_depend>
   <run_depend>gazebo_msgs</run_depend>
@@ -46,5 +50,6 @@
   <run_depend>geometry_msgs</run_depend>
   <run_depend>message_generation</run_depend>
   <run_depend>std_msgs</run_depend>
+  <run_depend>tinyxml</run_depend>
 
 </package>

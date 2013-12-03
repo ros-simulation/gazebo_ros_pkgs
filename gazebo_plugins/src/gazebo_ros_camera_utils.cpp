@@ -28,17 +28,17 @@
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/ChannelFloat32.h>
 
+#include <sdf/sdf.hh>
+
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/HingeJoint.hh>
 #include <gazebo/sensors/Sensor.hh>
-#include <gazebo/sdf/interface/SDF.hh>
-#include <gazebo/sdf/interface/Param.hh>
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/CameraSensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/rendering/Camera.hh>
 
-#include <gazebo_plugins/gazebo_ros_camera_utils.h>
+#include "gazebo_plugins/gazebo_ros_camera_utils.h"
 
 namespace gazebo
 {
@@ -46,7 +46,6 @@ namespace gazebo
 // Constructor
 GazeboRosCameraUtils::GazeboRosCameraUtils()
 {
-  this->image_connect_count_ = 0;
   this->last_update_time_ = common::Time(0);
   this->last_info_update_time_ = common::Time(0);
   this->height_ = 0;
@@ -56,15 +55,16 @@ GazeboRosCameraUtils::GazeboRosCameraUtils()
   this->initialized_ = false;
 }
 
-#ifdef DYNAMIC_RECONFIGURE
 void GazeboRosCameraUtils::configCallback(
   gazebo_plugins::GazeboRosCameraConfig &config, uint32_t level)
 {
-  ROS_INFO("Reconfigure request for the gazebo ros camera_: %s. New rate: %.2f",
-    this->camera_name_.c_str(), config.imager_rate);
-  this->parentSensor_->SetUpdateRate(config.imager_rate);
+  if (this->initialized_)
+  {
+    ROS_INFO("Reconfigure request for the gazebo ros camera_: %s. New rate: %.2f",
+             this->camera_name_.c_str(), config.imager_rate);
+    this->parentSensor_->SetUpdateRate(config.imager_rate);
+  }
 }
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
@@ -117,26 +117,26 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
 
   this->robot_namespace_ = "";
   if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->GetValueString("robotNamespace") + "/";
+    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
 
   this->image_topic_name_ = "image_raw";
   if (this->sdf->HasElement("imageTopicName"))
-    this->image_topic_name_ = this->sdf->GetValueString("imageTopicName");
+    this->image_topic_name_ = this->sdf->Get<std::string>("imageTopicName");
 
   this->camera_info_topic_name_ = "camera_info";
   if (this->sdf->HasElement("cameraInfoTopicName"))
     this->camera_info_topic_name_ =
-      this->sdf->GetValueString("cameraInfoTopicName");
+      this->sdf->Get<std::string>("cameraInfoTopicName");
 
   if (!this->sdf->HasElement("cameraName"))
     ROS_DEBUG("Camera plugin missing <cameraName>, default to empty");
   else
-    this->camera_name_ = this->sdf->GetValueString("cameraName");
+    this->camera_name_ = this->sdf->Get<std::string>("cameraName");
 
   if (!this->sdf->HasElement("frameName"))
     ROS_DEBUG("Camera plugin missing <frameName>, defaults to /world");
   else
-    this->frame_name_ = this->sdf->GetValueString("frameName");
+    this->frame_name_ = this->sdf->Get<std::string>("frameName");
 
   if (!this->sdf->HasElement("updateRate"))
   {
@@ -144,7 +144,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->update_rate_ = 0;
   }
   else
-    this->update_rate_ = this->sdf->GetValueDouble("updateRate");
+    this->update_rate_ = this->sdf->Get<double>("updateRate");
 
   if (!this->sdf->HasElement("CxPrime"))
   {
@@ -152,7 +152,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->cx_prime_ = 0;
   }
   else
-    this->cx_prime_ = this->sdf->GetValueDouble("CxPrime");
+    this->cx_prime_ = this->sdf->Get<double>("CxPrime");
 
   if (!this->sdf->HasElement("Cx"))
   {
@@ -160,7 +160,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->cx_= 0;
   }
   else
-    this->cx_ = this->sdf->GetValueDouble("Cx");
+    this->cx_ = this->sdf->Get<double>("Cx");
 
   if (!this->sdf->HasElement("Cy"))
   {
@@ -168,7 +168,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->cy_= 0;
   }
   else
-    this->cy_ = this->sdf->GetValueDouble("Cy");
+    this->cy_ = this->sdf->Get<double>("Cy");
 
   if (!this->sdf->HasElement("focalLength"))
   {
@@ -176,7 +176,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->focal_length_= 0;
   }
   else
-    this->focal_length_ = this->sdf->GetValueDouble("focalLength");
+    this->focal_length_ = this->sdf->Get<double>("focalLength");
 
   if (!this->sdf->HasElement("hackBaseline"))
   {
@@ -184,7 +184,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->hack_baseline_= 0;
   }
   else
-    this->hack_baseline_ = this->sdf->GetValueDouble("hackBaseline");
+    this->hack_baseline_ = this->sdf->Get<double>("hackBaseline");
 
   if (!this->sdf->HasElement("distortionK1"))
   {
@@ -192,7 +192,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_k1_= 0;
   }
   else
-    this->distortion_k1_ = this->sdf->GetValueDouble("distortionK1");
+    this->distortion_k1_ = this->sdf->Get<double>("distortionK1");
 
   if (!this->sdf->HasElement("distortionK2"))
   {
@@ -200,7 +200,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_k2_= 0;
   }
   else
-    this->distortion_k2_ = this->sdf->GetValueDouble("distortionK2");
+    this->distortion_k2_ = this->sdf->Get<double>("distortionK2");
 
   if (!this->sdf->HasElement("distortionK3"))
   {
@@ -208,7 +208,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_k3_= 0;
   }
   else
-    this->distortion_k3_ = this->sdf->GetValueDouble("distortionK3");
+    this->distortion_k3_ = this->sdf->Get<double>("distortionK3");
 
   if (!this->sdf->HasElement("distortionT1"))
   {
@@ -216,7 +216,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_t1_= 0;
   }
   else
-    this->distortion_t1_ = this->sdf->GetValueDouble("distortionT1");
+    this->distortion_t1_ = this->sdf->Get<double>("distortionT1");
 
   if (!this->sdf->HasElement("distortionT2"))
   {
@@ -224,7 +224,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     this->distortion_t2_= 0;
   }
   else
-    this->distortion_t2_ = this->sdf->GetValueDouble("distortionT2");
+    this->distortion_t2_ = this->sdf->Get<double>("distortionT2");
 
   if ((this->distortion_k1_ != 0.0) || (this->distortion_k2_ != 0.0) ||
       (this->distortion_k3_ != 0.0) || (this->distortion_t1_ != 0.0) ||
@@ -233,6 +233,11 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     ROS_WARN("gazebo_ros_camera_ simulation does not support non-zero"
              " distortion parameters right now, your simulation maybe wrong.");
   }
+
+  // initialize shared_ptr members
+  if (!this->image_connect_count_) this->image_connect_count_ = boost::shared_ptr<int>(new int(0));
+  if (!this->image_connect_count_lock_) this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
+  if (!this->was_active_) this->was_active_ = boost::shared_ptr<bool>(new bool(false));
 
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
@@ -267,11 +272,13 @@ void GazeboRosCameraUtils::LoadThread()
   this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
 
   // resolve tf prefix
-  std::string prefix;
-  this->rosnode_->getParam(std::string("tf_prefix"), prefix);
-  this->frame_name_ = tf::resolve(prefix, this->frame_name_);
+  std::string key;
+  if(this->rosnode_->searchParam("tf_prefix", key)){
+    std::string prefix;
+    this->rosnode_->getParam(key, prefix);
+    this->frame_name_ = tf::resolve(prefix, this->frame_name_);
+  }
 
-#ifdef DYNAMIC_RECONFIGURE
   if (!this->camera_name_.empty())
   {
     dyn_srv_ =
@@ -288,7 +295,6 @@ void GazeboRosCameraUtils::LoadThread()
              " becuase <cameraName> is not specified",
              this->image_topic_name_.c_str());
   }
-#endif
 
   this->image_pub_ = this->itnode_->advertise(
     this->image_topic_name_, 2,
@@ -349,11 +355,13 @@ void GazeboRosCameraUtils::SetUpdateRate(
 // Increment count
 void GazeboRosCameraUtils::ImageConnect()
 {
-  // upon first connection, remember if camera was active.
-  if (this->image_connect_count_ == 0)
-    this->was_active_ = this->parentSensor_->IsActive();
+  boost::mutex::scoped_lock lock(*this->image_connect_count_lock_);
 
-  this->image_connect_count_++;
+  // upon first connection, remember if camera was active.
+  if ((*this->image_connect_count_) == 0)
+    *this->was_active_ = this->parentSensor_->IsActive();
+
+  (*this->image_connect_count_)++;
 
   this->parentSensor_->SetActive(true);
 }
@@ -361,12 +369,14 @@ void GazeboRosCameraUtils::ImageConnect()
 // Decrement count
 void GazeboRosCameraUtils::ImageDisconnect()
 {
-  this->image_connect_count_--;
+  boost::mutex::scoped_lock lock(*this->image_connect_count_lock_);
+
+  (*this->image_connect_count_)--;
 
   // if there are no more subscribers, but camera was active to begin with,
   // leave it active.  Use case:  this could be a multicamera, where
   // each camera shares the same parentSensor_.
-  if (this->image_connect_count_ <= 0 && !this->was_active_)
+  if ((*this->image_connect_count_) <= 0 && !*this->was_active_)
     this->parentSensor_->SetActive(false);
 }
 
@@ -487,7 +497,7 @@ void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
     return;
 
   /// don't bother if there are no subscribers
-  if (this->image_pub_.getNumSubscribers() > 0)
+  if ((*this->image_connect_count_) > 0)
   {
     boost::mutex::scoped_lock lock(this->lock_);
 
@@ -509,6 +519,9 @@ void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
 // Put camera_ data to the interface
 void GazeboRosCameraUtils::PublishCameraInfo(common::Time &last_update_time)
 {
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
   this->sensor_update_time_ = last_update_time;
   this->PublishCameraInfo();
 }

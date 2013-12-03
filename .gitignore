@@ -1,3 +1,6 @@
+# vi stuff
+.*.sw?
+
 # Python stuff
 *.pyc
 
@@ -11,3 +14,4 @@
 # OSX Files
 .DS_Store
 
+CATKIN_IGNORE

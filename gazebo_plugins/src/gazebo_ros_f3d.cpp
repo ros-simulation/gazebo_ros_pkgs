@@ -58,7 +58,7 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   // load parameters
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = _sdf->GetElement("robotNamespace")->GetValueString() + "/";
+    this->robot_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
   if (!_sdf->HasElement("bodyName"))
   {
@@ -66,7 +66,7 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     return;
   }
   else
-    this->link_name_ = _sdf->GetElement("bodyName")->GetValueString();
+    this->link_name_ = _sdf->GetElement("bodyName")->Get<std::string>();
 
   this->link_ = _parent->GetLink(this->link_name_);
   if (!this->link_)
@@ -81,7 +81,7 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     return;
   }
   else
-    this->topic_name_ = _sdf->GetElement("topicName")->GetValueString();
+    this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>();
 
   if (!_sdf->HasElement("frameName"))
   {
@@ -90,16 +90,18 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   }
   else
   {
-    this->frame_name_ = _sdf->GetElement("frameName")->GetValueString();
+    this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
     // todo: frameName not used
     ROS_INFO("f3d plugin specifies <frameName> [%s], not used, default to world",this->frame_name_.c_str());
   }
   
+
+  // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    int argc = 0;
-    char** argv = NULL;
-    ros::init(argc,argv,"gazebo",ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
   }
 
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);

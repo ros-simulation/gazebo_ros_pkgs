@@ -65,7 +65,7 @@ void GazeboRosIMU::LoadThread()
   // load parameters
   this->robot_namespace_ = "";
   if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->GetValueString("robotNamespace") + "/";
+    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
 
   if (!this->sdf->HasElement("serviceName"))
   {
@@ -73,7 +73,7 @@ void GazeboRosIMU::LoadThread()
     this->service_name_ = "/default_imu";
   }
   else
-    this->service_name_ = this->sdf->GetValueString("serviceName");
+    this->service_name_ = this->sdf->Get<std::string>("serviceName");
 
   if (!this->sdf->HasElement("topicName"))
   {
@@ -81,7 +81,7 @@ void GazeboRosIMU::LoadThread()
     this->topic_name_ = "/default_imu";
   }
   else
-    this->topic_name_ = this->sdf->GetValueString("topicName");
+    this->topic_name_ = this->sdf->Get<std::string>("topicName");
 
   if (!this->sdf->HasElement("gaussianNoise"))
   {
@@ -89,7 +89,7 @@ void GazeboRosIMU::LoadThread()
     this->gaussian_noise_ = 0;
   }
   else
-    this->gaussian_noise_ = this->sdf->GetValueDouble("gaussianNoise");
+    this->gaussian_noise_ = this->sdf->Get<double>("gaussianNoise");
 
   if (!this->sdf->HasElement("bodyName"))
   {
@@ -97,7 +97,7 @@ void GazeboRosIMU::LoadThread()
     return;
   }
   else
-    this->link_name_ = this->sdf->GetValueString("bodyName");
+    this->link_name_ = this->sdf->Get<std::string>("bodyName");
 
   if (!this->sdf->HasElement("xyzOffset"))
   {
@@ -105,7 +105,7 @@ void GazeboRosIMU::LoadThread()
     this->offset_.pos = math::Vector3(0, 0, 0);
   }
   else
-    this->offset_.pos = this->sdf->GetValueVector3("xyzOffset");
+    this->offset_.pos = this->sdf->Get<math::Vector3>("xyzOffset");
 
   if (!this->sdf->HasElement("rpyOffset"))
   {
@@ -113,15 +113,14 @@ void GazeboRosIMU::LoadThread()
     this->offset_.rot = math::Vector3(0, 0, 0);
   }
   else
-    this->offset_.rot = this->sdf->GetValueVector3("rpyOffset");
+    this->offset_.rot = this->sdf->Get<math::Vector3>("rpyOffset");
 
 
-  // Exit if no ROS
+  // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    gzerr << "Not loading plugin since ROS hasn't been "
-          << "properly initialized.  Try starting gazebo with ros plugin:\n"
-          << "  gazebo -s libgazebo_ros_api_plugin.so\n";
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
 
@@ -131,7 +130,7 @@ void GazeboRosIMU::LoadThread()
   this->pmq.startServiceThread();
 
   // assert that the body by link_name_ exists
-  this->link = boost::shared_dynamic_cast<physics::Link>(
+  this->link = boost::dynamic_pointer_cast<physics::Link>(
     this->world_->GetEntity(this->link_name_));
   if (!this->link)
   {

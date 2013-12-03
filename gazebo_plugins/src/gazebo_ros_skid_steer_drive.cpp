@@ -42,7 +42,7 @@
 
 #include <gazebo_plugins/gazebo_ros_skid_steer_drive.h>
 
-#include <math/gzmath.hh>
+#include <gazebo/math/gzmath.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -83,7 +83,17 @@ namespace gazebo {
           this->robot_namespace_.c_str());
     } else {
       this->robot_namespace_ =
-        _sdf->GetElement("robotNamespace")->GetValueString() + "/";
+        _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
+    }
+    
+    this->broadcast_tf_ = false;
+    if (!_sdf->HasElement("broadcastTF")) {
+      if (!this->broadcast_tf_)
+    	  ROS_INFO("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to false.",this->robot_namespace_.c_str());
+      else ROS_INFO("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to true.",this->robot_namespace_.c_str());
+          
+    } else {
+      this->broadcast_tf_ = _sdf->GetElement("broadcastTF")->Get<bool>();
     }
 
     // TODO write error if joint doesn't exist!
@@ -92,7 +102,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <leftFrontJoint>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->left_front_joint_name_.c_str());
     } else {
-      this->left_front_joint_name_ = _sdf->GetElement("leftFrontJoint")->GetValueString();
+      this->left_front_joint_name_ = _sdf->GetElement("leftFrontJoint")->Get<std::string>();
     }
 
     this->right_front_joint_name_ = "right_front_joint";
@@ -100,7 +110,7 @@ namespace gazebo {
           ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <rightFrontJoint>, defaults to \"%s\"",
               this->robot_namespace_.c_str(), this->right_front_joint_name_.c_str());
         } else {
-          this->right_front_joint_name_ = _sdf->GetElement("rightFrontJoint")->GetValueString();
+          this->right_front_joint_name_ = _sdf->GetElement("rightFrontJoint")->Get<std::string>();
         }
 
 	this->left_rear_joint_name_ = "left_rear_joint";
@@ -108,7 +118,7 @@ namespace gazebo {
 	  ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <leftRearJoint>, defaults to \"%s\"",
 		  this->robot_namespace_.c_str(), this->left_rear_joint_name_.c_str());
 	} else {
-	  this->left_rear_joint_name_ = _sdf->GetElement("leftRearJoint")->GetValueString();
+	  this->left_rear_joint_name_ = _sdf->GetElement("leftRearJoint")->Get<std::string>();
 	}
 
     this->right_rear_joint_name_ = "right_rear_joint";
@@ -116,7 +126,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <rightRearJoint>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->right_rear_joint_name_.c_str());
     } else {
-      this->right_rear_joint_name_ = _sdf->GetElement("rightRearJoint")->GetValueString();
+      this->right_rear_joint_name_ = _sdf->GetElement("rightRearJoint")->Get<std::string>();
     }
 
 
@@ -131,7 +141,7 @@ namespace gazebo {
           this->robot_namespace_.c_str(), this->wheel_separation_);
     } else {
       this->wheel_separation_ =
-        _sdf->GetElement("wheelSeparation")->GetValueDouble();
+        _sdf->GetElement("wheelSeparation")->Get<double>();
     }
 
     // TODO get this from robot_description
@@ -140,7 +150,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <wheelDiameter>, defaults to %f",
           this->robot_namespace_.c_str(), this->wheel_diameter_);
     } else {
-      this->wheel_diameter_ = _sdf->GetElement("wheelDiameter")->GetValueDouble();
+      this->wheel_diameter_ = _sdf->GetElement("wheelDiameter")->Get<double>();
     }
 
     this->torque = 5.0;
@@ -148,7 +158,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <torque>, defaults to %f",
           this->robot_namespace_.c_str(), this->torque);
     } else {
-      this->torque = _sdf->GetElement("torque")->GetValueDouble();
+      this->torque = _sdf->GetElement("torque")->Get<double>();
     }
 
     this->command_topic_ = "cmd_vel";
@@ -156,7 +166,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <commandTopic>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->command_topic_.c_str());
     } else {
-      this->command_topic_ = _sdf->GetElement("commandTopic")->GetValueString();
+      this->command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
     }
 
     this->odometry_topic_ = "odom";
@@ -164,7 +174,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <odometryTopic>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->odometry_topic_.c_str());
     } else {
-      this->odometry_topic_ = _sdf->GetElement("odometryTopic")->GetValueString();
+      this->odometry_topic_ = _sdf->GetElement("odometryTopic")->Get<std::string>();
     }
 
     this->odometry_frame_ = "odom";
@@ -172,7 +182,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <odometryFrame>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->odometry_frame_.c_str());
     } else {
-      this->odometry_frame_ = _sdf->GetElement("odometryFrame")->GetValueString();
+      this->odometry_frame_ = _sdf->GetElement("odometryFrame")->Get<std::string>();
     }
 
     this->robot_base_frame_ = "base_footprint";
@@ -180,7 +190,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <robotBaseFrame>, defaults to \"%s\"",
           this->robot_namespace_.c_str(), this->robot_base_frame_.c_str());
     } else {
-      this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->GetValueString();
+      this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->Get<std::string>();
     }
 
     this->update_rate_ = 100.0;
@@ -188,7 +198,7 @@ namespace gazebo {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <updateRate>, defaults to %f",
           this->robot_namespace_.c_str(), this->update_rate_);
     } else {
-      this->update_rate_ = _sdf->GetElement("updateRate")->GetValueDouble();
+      this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
     }
 
     // Initialize update rate stuff
@@ -249,13 +259,16 @@ namespace gazebo {
     joints[LEFT_FRONT]->SetMaxForce(0, torque);
     joints[RIGHT_FRONT]->SetMaxForce(0, torque);
     joints[LEFT_REAR]->SetMaxForce(0, torque);
-	joints[RIGHT_REAR]->SetMaxForce(0, torque);
+    joints[RIGHT_REAR]->SetMaxForce(0, torque);
 
-    // Initialize the ROS node and subscribe to cmd_vel
-    int argc = 0;
-    char** argv = NULL;
-    ros::init(argc, argv, "skid_steer_drive_plugin",
-        ros::init_options::NoSigintHandler | ros::init_options::AnonymousName);
+    // Make sure the ROS node for Gazebo has already been initialized
+    if (!ros::isInitialized())
+    {
+      ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+        << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+      return;
+    }
+
     rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 
     ROS_INFO("Starting GazeboRosSkidSteerDrive Plugin (ns = %s)!", this->robot_namespace_.c_str());
@@ -359,9 +372,13 @@ namespace gazebo {
     tf::Vector3 vt(pose.pos.x, pose.pos.y, pose.pos.z);
 
     tf::Transform base_footprint_to_odom(qt, vt);
-    transform_broadcaster_->sendTransform(
+    if (this->broadcast_tf_) {
+
+    	transform_broadcaster_->sendTransform(
         tf::StampedTransform(base_footprint_to_odom, current_time,
             odom_frame, base_footprint_frame));
+
+    }
 
     // publish odom topic
     odom_.pose.pose.position.x = pose.pos.x;

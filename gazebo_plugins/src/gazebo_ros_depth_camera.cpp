@@ -28,11 +28,10 @@
 #include <gazebo_plugins/gazebo_ros_depth_camera.h>
 
 #include <gazebo/sensors/Sensor.hh>
-#include <gazebo/sdf/interface/SDF.hh>
+#include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
-// for creating PointCloud2 from pcl point cloud
-#include "pcl/ros/conversions.h"
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <tf/tf.h>
 
@@ -62,6 +61,14 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
 {
   DepthCameraPlugin::Load(_parent, _sdf);
 
+  // Make sure the ROS node for Gazebo has already been initialized
+  if (!ros::isInitialized())
+  {
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
+  }
+
   // copying from DepthCameraPlugin into GazeboRosCameraUtils
   this->parentSensor_ = this->parentSensor;
   this->width_ = this->width;
@@ -80,23 +87,23 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
   if (!_sdf->GetElement("pointCloudTopicName"))
     this->point_cloud_topic_name_ = "points";
   else
-    this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->GetValueString();
+    this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->Get<std::string>();
 
   // depth image stuff
   if (!_sdf->GetElement("depthImageTopicName"))
     this->depth_image_topic_name_ = "depth/image_raw";
   else
-    this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->GetValueString();
+    this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->Get<std::string>();
 
   if (!_sdf->GetElement("depthImageCameraInfoTopicName"))
     this->depth_image_camera_info_topic_name_ = "depth/camera_info";
   else
-    this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->GetValueString();
+    this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->Get<std::string>();
 
   if (!_sdf->GetElement("pointCloudCutoff"))
     this->point_cloud_cutoff_ = 0.4;
   else
-    this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->GetValueDouble();
+    this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->Get<double>();
 
   load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosDepthCamera::Advertise, this));
   GazeboRosCameraUtils::Load(_parent, _sdf);
@@ -135,7 +142,7 @@ void GazeboRosDepthCamera::Advertise()
 void GazeboRosDepthCamera::PointCloudConnect()
 {
   this->point_cloud_connect_count_++;
-  this->image_connect_count_++;
+  (*this->image_connect_count_)++;
   this->parentSensor->SetActive(true);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +150,7 @@ void GazeboRosDepthCamera::PointCloudConnect()
 void GazeboRosDepthCamera::PointCloudDisconnect()
 {
   this->point_cloud_connect_count_--;
-  this->image_connect_count_--;
+  (*this->image_connect_count_)--;
   if (this->point_cloud_connect_count_ <= 0)
     this->parentSensor->SetActive(false);
 }
@@ -189,7 +196,7 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
   {
     if (this->point_cloud_connect_count_ <= 0 &&
         this->depth_image_connect_count_ <= 0 &&
-        this->image_connect_count_ <= 0)
+        (*this->image_connect_count_) <= 0)
     {
       this->parentSensor->SetActive(false);
     }
@@ -264,7 +271,9 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
           }
         }
       }
-      point_cloud.header = this->point_cloud_msg_.header;
+
+      point_cloud.header = pcl_conversions::toPCL(point_cloud_msg_.header);
+
       pcl::toROSMsg(point_cloud, this->point_cloud_msg_);
 
       this->point_cloud_pub_.publish(this->point_cloud_msg_);
@@ -287,13 +296,13 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
 
   if (!this->parentSensor->IsActive())
   {
-    if (this->image_connect_count_ > 0)
+    if ((*this->image_connect_count_) > 0)
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
   else
   {
-    if (this->image_connect_count_ > 0)
+    if ((*this->image_connect_count_) > 0)
       this->PutCameraData(_image);
   }
 }
@@ -423,7 +432,8 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
     }
   }
 
-  point_cloud.header = point_cloud_msg.header;
+  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
+
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }

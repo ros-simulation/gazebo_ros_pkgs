@@ -1,40 +1,47 @@
 cmake_minimum_required(VERSION 2.8.3)
-
 project(gazebo_ros_control)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS 
-  roscpp 
-  gazebo_ros 
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  gazebo_ros
   controller_manager
   hardware_interface 
-  pluginlib)
+  transmission_interface
+  pluginlib
+  joint_limits_interface
+  urdf
+)
 
-# Find gazebo
-include (FindPkgConfig)
-if (PKG_CONFIG_FOUND)
-  pkg_check_modules(GAZEBO gazebo)
-endif()
+# Depend on system install of Gazebo 
+find_package(gazebo REQUIRED)
 
 catkin_package(
-  CATKIN_DEPENDS 
-  roscpp 
-  gazebo_ros 
-  controller_manager 
-  pluginlib
+  CATKIN_DEPENDS
+    roscpp
+    gazebo_ros
+    controller_manager
+    pluginlib
+    transmission_interface
   INCLUDE_DIRS include
-  )
+  DEPENDS gazebo
+)
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+include_directories(include
+  ${Boost_INCLUDE_DIR}
+  ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+)
 
-add_library(${PROJECT_NAME} src/ros_control_plugin.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+## Libraries
+add_library(${PROJECT_NAME} src/gazebo_ros_control_plugin.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 add_library(default_robot_hw_sim src/default_robot_hw_sim.cpp)
-target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES})
+target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
-# Install
+## Install
 install(TARGETS ${PROJECT_NAME} default_robot_hw_sim
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )

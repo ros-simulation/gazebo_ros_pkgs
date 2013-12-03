@@ -4,12 +4,12 @@ final="$@"
 # add ros plugin if does not exist
 if [ `expr "$final" : '.*libgazebo_ros_paths_plugin\.so.*'` -eq 0 ]
 then
-    final="$final -s `catkin_find libgazebo_ros_paths_plugin.so`"
+    final="$final -s `catkin_find --first-only libgazebo_ros_paths_plugin.so`"
 fi
 
 if [ `expr "$final" : '.*libgazebo\_ros\_api\_plugin\.so.*'` -eq 0 ]
 then
-    final="$final -s `catkin_find libgazebo_ros_api_plugin.so`"
+    final="$final -s `catkin_find --first-only libgazebo_ros_api_plugin.so`"
 fi
 
 setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/

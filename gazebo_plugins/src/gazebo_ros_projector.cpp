@@ -26,7 +26,7 @@
 #include <utility>
 #include <sstream>
 
-#include <gazebo/rendering/Rendering.hh>
+#include <gazebo/rendering/RenderingIface.hh>
 #include <gazebo/rendering/Scene.hh>
 #include <gazebo/rendering/Visual.hh>
 #include <gazebo/rendering/RTShaderSystem.hh>
@@ -85,7 +85,7 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   this->node_->Init(this->world_->GetName());
   // Setting projector topic
   std::string name = std::string("~/") + _parent->GetName() + "/" +
-                      _sdf->GetValueString("projector");
+                      _sdf->Get<std::string>("projector");
   // Create a publisher on the ~/physics topic
   this->projector_pub_ = node_->Advertise<msgs::Projector>(name);
 
@@ -94,24 +94,25 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   // load parameters
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = _sdf->GetElement("robotNamespace")->GetValueString() + "/";
+    this->robot_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
   this->texture_topic_name_ = "";
   if (_sdf->HasElement("textureTopicName"))
-    this->texture_topic_name_ = _sdf->GetElement("textureTopicName")->GetValueString();
+    this->texture_topic_name_ = _sdf->GetElement("textureTopicName")->Get<std::string>();
 
   this->projector_topic_name_ = "";
   if (_sdf->HasElement("projectorTopicName"))
-    this->projector_topic_name_ = _sdf->GetElement("projectorTopicName")->GetValueString();
+    this->projector_topic_name_ = _sdf->GetElement("projectorTopicName")->Get<std::string>();
 
-  // initialize ros
+  // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    int argc = 0;
-    char** argv = NULL;
-    ros::init(argc,argv,"gazebo",ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
   }
-  
+
+
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 
 
@@ -136,7 +137,7 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Load a texture into the projector 
+// Load a texture into the projector
 void GazeboRosProjector::LoadImage(const std_msgs::String::ConstPtr& imageMsg)
 {
   msgs::Projector msg;

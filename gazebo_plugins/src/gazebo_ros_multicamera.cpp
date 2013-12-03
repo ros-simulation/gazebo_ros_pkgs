@@ -26,7 +26,7 @@
 #include <gazebo/sensors/MultiCameraSensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
-#include <gazebo_plugins/gazebo_ros_multicamera.h>
+#include "gazebo_plugins/gazebo_ros_multicamera.h"
 
 namespace gazebo
 {
@@ -49,6 +49,20 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
   sdf::ElementPtr _sdf)
 {
   MultiCameraPlugin::Load(_parent, _sdf);
+
+  // Make sure the ROS node for Gazebo has already been initialized
+  if (!ros::isInitialized())
+  {
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
+  }
+
+  // initialize shared_ptr members
+  this->image_connect_count_ = boost::shared_ptr<int>(new int(0));
+  this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
+  this->was_active_ = boost::shared_ptr<bool>(new bool(false));
+
   // copying from CameraPlugin into GazeboRosCameraUtils
   for (unsigned i = 0; i < this->camera.size(); ++i)
   {
@@ -59,6 +73,10 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     util->depth_   = this->depth[i];
     util->format_  = this->format[i];
     util->camera_  = this->camera[i];
+    // Set up a shared connection counter
+    util->image_connect_count_ = this->image_connect_count_;
+    util->image_connect_count_lock_ = this->image_connect_count_lock_;
+    util->was_active_ = this->was_active_;
     if (this->camera[i]->GetName().find("left") != std::string::npos)
     {
       // FIXME: hardcoded, left hack_baseline_ 0
@@ -68,7 +86,7 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     {
       double hackBaseline = 0.0;
       if (_sdf->HasElement("hackBaseline"))
-        hackBaseline = _sdf->GetValueDouble("hackBaseline");
+        hackBaseline = _sdf->Get<double>("hackBaseline");
       util->Load(_parent, _sdf, "/right", hackBaseline);
     }
     this->utils.push_back(util);

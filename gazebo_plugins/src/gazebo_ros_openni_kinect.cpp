@@ -29,11 +29,11 @@
 #include <gazebo_plugins/gazebo_ros_openni_kinect.h>
 
 #include <gazebo/sensors/Sensor.hh>
-#include <gazebo/sdf/interface/SDF.hh>
+#include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
 // for creating PointCloud2 from pcl point cloud
-#include "pcl/ros/conversions.h"
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <tf/tf.h>
 
@@ -81,23 +81,23 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
   if (!_sdf->GetElement("pointCloudTopicName"))
     this->point_cloud_topic_name_ = "points";
   else
-    this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->GetValueString();
+    this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->Get<std::string>();
 
   // depth image stuff
   if (!_sdf->GetElement("depthImageTopicName"))
     this->depth_image_topic_name_ = "depth/image_raw";
   else
-    this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->GetValueString();
+    this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->Get<std::string>();
 
   if (!_sdf->GetElement("depthImageCameraInfoTopicName"))
     this->depth_image_camera_info_topic_name_ = "depth/camera_info";
   else
-    this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->GetValueString();
+    this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->Get<std::string>();
 
   if (!_sdf->GetElement("pointCloudCutoff"))
     this->point_cloud_cutoff_ = 0.4;
   else
-    this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->GetValueDouble();
+    this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->Get<double>();
 
   load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosOpenniKinect::Advertise, this));
   GazeboRosCameraUtils::Load(_parent, _sdf);
@@ -135,7 +135,7 @@ void GazeboRosOpenniKinect::Advertise()
 void GazeboRosOpenniKinect::PointCloudConnect()
 {
   this->point_cloud_connect_count_++;
-  this->image_connect_count_++;
+  (*this->image_connect_count_)++;
   this->parentSensor->SetActive(true);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ void GazeboRosOpenniKinect::PointCloudConnect()
 void GazeboRosOpenniKinect::PointCloudDisconnect()
 {
   this->point_cloud_connect_count_--;
-  this->image_connect_count_--;
+  (*this->image_connect_count_)--;
   if (this->point_cloud_connect_count_ <= 0)
     this->parentSensor->SetActive(false);
 }
@@ -189,7 +189,7 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
   {
     if (this->point_cloud_connect_count_ <= 0 &&
         this->depth_image_connect_count_ <= 0 &&
-        this->image_connect_count_ <= 0)
+        (*this->image_connect_count_) <= 0)
     {
       this->parentSensor->SetActive(false);
     }
@@ -209,6 +209,7 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
+  PublishCameraInfo();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -227,19 +228,19 @@ void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
   {
     if (this->point_cloud_connect_count_ <= 0 &&
         this->depth_image_connect_count_ <= 0 &&
-        this->image_connect_count_ <= 0)
+        (*this->image_connect_count_) <= 0)
     {
       this->parentSensor->SetActive(false);
     }
     else
     {
-      if (this->image_connect_count_ > 0)
+      if ((*this->image_connect_count_) > 0)
         this->PutCameraData(_image);
     }
   }
   else
   {
-    if (this->image_connect_count_ > 0)
+    if ((*this->image_connect_count_) > 0)
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
@@ -370,7 +371,8 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
     }
   }
 
-  point_cloud.header = point_cloud_msg.header;
+  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
+
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }

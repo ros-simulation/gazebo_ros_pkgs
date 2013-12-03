@@ -41,8 +41,8 @@
 
 #include <map>
 
-#include <common/common.hh>
-#include <physics/physics.hh>
+#include <gazebo/common/common.hh>
+#include <gazebo/physics/physics.hh>
 
 // ROS
 #include <ros/ros.h>
@@ -103,6 +103,7 @@ namespace gazebo {
       tf::TransformBroadcaster *transform_broadcaster_;
       nav_msgs::Odometry odom_;
       std::string tf_prefix_;
+      bool broadcast_tf_;
 
       boost::mutex lock;
 

@@ -22,14 +22,16 @@
  * Desc: A dynamic controller plugin that performs generic force interface.
  * Author: John Hsu
  * Date: 24 Sept 2008
- * SVN: $Id$
  */
 #ifndef GAZEBO_ROS_FORCE_HH
 #define GAZEBO_ROS_FORCE_HH
 
+#include <string>
+
 // Custom Callback Queue
 #include <ros/callback_queue.h>
 #include <ros/subscribe_options.h>
+#include <geometry_msgs/Wrench.h>
 
 #include <ros/ros.h>
 #include <boost/thread.hpp>
@@ -40,31 +42,25 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Events.hh>
 
-#include <geometry_msgs/Wrench.h>
 
 namespace gazebo
 {
-
 /// @addtogroup gazebo_dynamic_plugins Gazebo ROS Dynamic Plugins
 /// @{
 /** \defgroup GazeboRosForce Plugin XML Reference and Example
 
-  \brief Ros Force Controller.
+  \brief Ros Force Plugin.
   
-  This is a controller that collects data from a ROS topic and applies wrench to a body accordingly.
+  This is a Plugin that collects data from a ROS topic and applies wrench to a body accordingly.
 
   Example Usage:
   \verbatim
-  <model:physical name="box_model">
-    <body:empty name="box_body">
-     ...
-    </body:empty>
-    <controller:gazebo_ros_force name="box_force_controller" plugin="libgazebo_ros_force.so">
-        <alwaysOn>true</alwaysOn>
-        <topicName>box_force</topicName>
-        <bodyName>box_body</bodyName>
-    </controller:gazebo_ros_force>
-  </model:phyiscal>
+      <gazebo>
+        <plugin filename="libgazebo_ros_force.so" name="gazebo_ros_force">
+          <bodyName>box_body</bodyName>
+          <topicName>box_force</topicName>
+        </plugin>
+      </gazebo>
   \endverbatim
  
 \{
@@ -78,22 +74,25 @@ namespace gazebo
 class GazeboRosForce : public ModelPlugin
 {
   /// \brief Constructor
-  /// \param parent The parent entity, must be a Model or a Sensor
   public: GazeboRosForce();
 
   /// \brief Destructor
   public: virtual ~GazeboRosForce();
 
-  /// \brief Load the controller
-  /// \param node XML config node
+  // Documentation inherited
   protected: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
-  /// \brief Update the controller
+  // Documentation inherited
   protected: virtual void UpdateChild();
 
   /// \brief call back when a Wrench message is published
+  /// \param[in] _msg The Incoming ROS message representing the new force to exert.
   private: void UpdateObjectForce(const geometry_msgs::Wrench::ConstPtr& _msg);
 
+  /// \brief The custom callback queue thread function.
+  private: void QueueThread();
+
+  /// \brief A pointer to the gazebo world.
   private: physics::WorldPtr world_;
 
   /// \brief A pointer to the Link, where force is applied
@@ -106,9 +105,9 @@ class GazeboRosForce : public ModelPlugin
   /// \brief A mutex to lock access to fields that are used in ROS message callbacks
   private: boost::mutex lock_;
 
-  /// \brief ROS Wrench topic name
-  /// \brief inputs
+  /// \brief ROS Wrench topic name inputs
   private: std::string topic_name_;
+  /// \brief The Link this plugin is attached to, and will exert forces on.
   private: std::string link_name_;
 
   /// \brief for setting ROS name space
@@ -116,17 +115,15 @@ class GazeboRosForce : public ModelPlugin
 
   // Custom Callback Queue
   private: ros::CallbackQueue queue_;
-  private: void QueueThread();
+  /// \brief Thead object for the running callback Thread.
   private: boost::thread callback_queue_thread_;
+  /// \brief Container for the wrench force that this plugin exerts on the body.
   private: geometry_msgs::Wrench wrench_msg_;
 
   // Pointer to the update event connection
   private: event::ConnectionPtr update_connection_;
 };
-
 /** \} */
 /// @}
-
 }
 #endif
-

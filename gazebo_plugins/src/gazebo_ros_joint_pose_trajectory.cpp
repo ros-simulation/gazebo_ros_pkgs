@@ -71,7 +71,7 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
   // load parameters
   this->robot_namespace_ = "";
   if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->GetValueString("robotNamespace") + "/";
+    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
 
   if (!this->sdf->HasElement("serviceName"))
   {
@@ -79,7 +79,7 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
     this->service_name_ = "set_joint_trajectory";
   }
   else
-    this->service_name_ = this->sdf->GetValueString("serviceName");
+    this->service_name_ = this->sdf->Get<std::string>("serviceName");
 
   if (!this->sdf->HasElement("topicName"))
   {
@@ -87,7 +87,7 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
     this->topic_name_ = "set_joint_trajectory";
   }
   else
-    this->topic_name_ = this->sdf->GetValueString("topicName");
+    this->topic_name_ = this->sdf->Get<std::string>("topicName");
 
   if (!this->sdf->HasElement("updateRate"))
   {
@@ -96,20 +96,19 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
     this->update_rate_ = 0;
   }
   else
-    this->update_rate_ = this->sdf->GetValueDouble("updateRate");
+    this->update_rate_ = this->sdf->Get<double>("updateRate");
 
-  // ros callback queue for processing subscription
-  if (ros::isInitialized())
+  // Make sure the ROS node for Gazebo has already been initialized
+  if (!ros::isInitialized())
   {
-    this->deferred_load_thread_ = boost::thread(
-      boost::bind(&GazeboRosJointPoseTrajectory::LoadThread, this));
+    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
   }
-  else
-  {
-    gzerr << "Not loading plugin since ROS hasn't been "
-          << "properly initialized.  Try starting gazebo with ros plugin:\n"
-          << "  gazebo -s libgazebo_ros_api_plugin.so\n";
-  }
+
+  this->deferred_load_thread_ = boost::thread(
+    boost::bind(&GazeboRosJointPoseTrajectory::LoadThread, this));
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +173,7 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
     physics::EntityPtr ent =
       this->world_->GetEntity(this->reference_link_name_);
     if (ent)
-      this->reference_link_ = boost::shared_dynamic_cast<physics::Link>(ent);
+      this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
     {
       ROS_ERROR("ros_joint_trajectory plugin needs a reference link [%s] as"
@@ -247,7 +246,7 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
     physics::EntityPtr ent =
       this->world_->GetEntity(this->reference_link_name_);
     if (ent)
-      this->reference_link_ = boost::shared_dynamic_cast<physics::Link>(ent);
+      this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
     {
       ROS_ERROR("ros_joint_trajectory plugin specified a reference link [%s]"
