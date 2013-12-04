@@ -101,7 +101,7 @@ public:
     joint_lower_limits_.resize(n_dof_);
     joint_upper_limits_.resize(n_dof_);
     joint_effort_limits_.resize(n_dof_);
-    joint_hw_interface_types_.resize(n_dof_);
+    joint_control_methods_.resize(n_dof_);
     pid_controllers_.resize(n_dof_);
     joint_position_.resize(n_dof_);
     joint_velocity_.resize(n_dof_);
@@ -167,7 +167,7 @@ public:
       if(hardware_interface == "EffortJointInterface")
       {
         // Create effort joint interface
-        joint_hw_interface_types_[j] = EFFORT;
+        joint_control_methods_[j] = EFFORT;
         joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
                                                        &joint_effort_command_[j]);
         ej_interface_.registerHandle(joint_handle);
@@ -175,7 +175,7 @@ public:
       else if(hardware_interface == "PositionJointInterface")
       {
         // Create position joint interface
-        joint_hw_interface_types_[j] = POSITION;
+        joint_control_methods_[j] = POSITION;
         joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
                                                        &joint_position_command_[j]);
         pj_interface_.registerHandle(joint_handle);
@@ -183,7 +183,7 @@ public:
       else if(hardware_interface == "VelocityJointInterface")
       {
         // Create velocity joint interface
-        joint_hw_interface_types_[j] = VELOCITY;
+        joint_control_methods_[j] = VELOCITY;
         joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
                                                        &joint_velocity_command_[j]);
         vj_interface_.registerHandle(joint_handle);
@@ -207,21 +207,34 @@ public:
       }
       sim_joints_.push_back(joint);
 
-      registerJointLimits(joint_names_[j], joint_handle, joint_hw_interface_types_[j],
+      registerJointLimits(joint_names_[j], joint_handle, joint_control_methods_[j],
                           joint_limit_nh, urdf_model,
                           &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
                           &joint_effort_limits_[j]);
-      if (joint_hw_interface_types_[j] != EFFORT)
+      if (joint_control_methods_[j] != EFFORT)
       {
-        // Initialize the PID controller.
-
+        // Initialize the PID controller. If no PID gain values are found, use joint->SetAngle() or
+        // joint->SetVelocity() to control the joint.
         const ros::NodeHandle nh(model_nh, robot_namespace + "/gazebo_ros_control/pid_gains/" +
                                  joint_names_[j]);
-        if (!pid_controllers_[j].init(nh))
+        if (pid_controllers_[j].init(nh))
         {
-          ROS_ERROR_STREAM("No PID controller gain values were found for joint \"" <<
-                           joint_names_[j] << "\".");
-          return false;
+          switch (joint_control_methods_[j])
+          {
+            case POSITION:
+              joint_control_methods_[j] = POSITION_PID;
+              break;
+            case VELOCITY:
+              joint_control_methods_[j] = VELOCITY_PID;
+              break;
+          }
+        }
+        else
+        {
+          // joint->SetMaxForce() must be called if joint->SetAngle() or joint->SetVelocity() are
+          // going to be called. joint->SetMaxForce() must *not* be called if joint->SetForce() is
+          // going to be called.
+          joint->SetMaxForce(0, joint_effort_limits_[j]);
         }
       }
     }
@@ -265,15 +278,25 @@ public:
 
     for(unsigned int j=0; j < n_dof_; j++)
     {
-      double effort;
-
-      switch (joint_hw_interface_types_[j])
+      switch (joint_control_methods_[j])
       {
         case EFFORT:
-          effort = joint_effort_command_[j];
+          {
+            const double effort = joint_effort_command_[j];
+            sim_joints_[j]->SetForce(0, effort);
+            // Output debug every nth msg
+            if( !(j % 10) && false)
+            {
+              ROS_DEBUG_STREAM_NAMED("robot_hw_sim","SetForce " << effort);
+            }
+          }
           break;
 
         case POSITION:
+          sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
+          break;
+
+        case POSITION_PID:
           {
             double error;
             switch (joint_types_[j])
@@ -294,37 +317,37 @@ public:
             }
 
             const double effort_limit = joint_effort_limits_[j];
-            effort = clamp(pid_controllers_[j].computeCommand(error, period),
-                           -effort_limit, effort_limit);
+            const double effort = clamp(pid_controllers_[j].computeCommand(error, period),
+                                        -effort_limit, effort_limit);
+            sim_joints_[j]->SetForce(0, effort);
           }
           break;
 
         case VELOCITY:
+          sim_joints_[j]->SetVelocity(0, joint_velocity_command_[j]);
+          break;
+
+        case VELOCITY_PID:
           const double error = joint_velocity_command_[j] - joint_velocity_[j];
           const double effort_limit = joint_effort_limits_[j];
-          effort = clamp(pid_controllers_[j].computeCommand(error, period),
-                         -effort_limit, effort_limit);
+          const double effort = clamp(pid_controllers_[j].computeCommand(error, period),
+                                      -effort_limit, effort_limit);
+          sim_joints_[j]->SetForce(0, effort);
           break;
-      }
-
-      sim_joints_[j]->SetForce(0, effort);
-      // Output debug every nth msg
-      if( !(j % 10) && false)
-      {
-        ROS_DEBUG_STREAM_NAMED("robot_hw_sim","SetForce " << effort);
       }
     }
   }
 
 private:
-  enum HWInterfaceType {EFFORT, POSITION, VELOCITY};  // Hardware interface types
+  // Methods used to control a joint.
+  enum ControlMethod {EFFORT, POSITION, POSITION_PID, VELOCITY, VELOCITY_PID};
 
   // Register the limits of the joint specified by joint_name and joint_handle. The limits are
   // retrieved from joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
   // Return the joint's type, lower position limit, upper position limit, and effort limit.
   void registerJointLimits(const std::string& joint_name,
                            const hardware_interface::JointHandle& joint_handle,
-                           const HWInterfaceType hw_iface_type,
+                           const ControlMethod ctrl_method,
                            const ros::NodeHandle& joint_limit_nh,
                            const urdf::Model *const urdf_model,
                            int *const joint_type, double *const lower_limit,
@@ -387,7 +410,7 @@ private:
 
     if (has_soft_limits)
     {
-      switch (hw_iface_type)
+      switch (ctrl_method)
       {
         case EFFORT:
           {
@@ -414,7 +437,7 @@ private:
     }
     else
     {
-      switch (hw_iface_type)
+      switch (ctrl_method)
       {
         case EFFORT:
           {
@@ -460,7 +483,7 @@ private:
   std::vector<double> joint_lower_limits_;
   std::vector<double> joint_upper_limits_;
   std::vector<double> joint_effort_limits_;
-  std::vector<HWInterfaceType> joint_hw_interface_types_;
+  std::vector<ControlMethod> joint_control_methods_;
   std::vector<control_toolbox::Pid> pid_controllers_;
   std::vector<double> joint_position_;
   std::vector<double> joint_velocity_;
