@@ -208,7 +208,7 @@ void GazeboRosBumper::OnContact()
     // For each collision contact
     // Create a ContactState
     gazebo_msgs::ContactState state;
-    /// \TODO:
+    /// \TODO: 
     gazebo::msgs::Contact contact = contacts.contact(i);
 
     state.collision1_name = contact.collision1();
