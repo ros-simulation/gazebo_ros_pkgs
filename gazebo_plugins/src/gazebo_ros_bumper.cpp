@@ -121,6 +121,9 @@ void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // simulation iteration.
   this->update_connection_ = this->parentSensor->ConnectUpdated(
      boost::bind(&GazeboRosBumper::OnContact, this));
+
+  // Make sure the parent sensor is active.
+  this->parentSensor->SetActive(true);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +208,7 @@ void GazeboRosBumper::OnContact()
     // For each collision contact
     // Create a ContactState
     gazebo_msgs::ContactState state;
-    /// \TODO: 
+    /// \TODO:
     gazebo::msgs::Contact contact = contacts.contact(i);
 
     state.collision1_name = contact.collision1();
