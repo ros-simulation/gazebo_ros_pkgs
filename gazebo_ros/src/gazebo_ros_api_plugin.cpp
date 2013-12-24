@@ -113,9 +113,9 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
     ROS_ERROR("Something other than this gazebo_ros_api plugin started ros::init(...), command line arguments may not be parsed properly.");
 
   // check if the ros master is available - required
-  while(!ros::master::check()) 
+  while(!ros::master::check())
   {
-    ROS_WARN_STREAM_NAMED("api_plugin","No ROS master - start roscore to continue...");    
+    ROS_WARN_STREAM_NAMED("api_plugin","No ROS master - start roscore to continue...");
     // wait 0.5 second
     usleep(500*1000); // can't use ROS Time here b/c node handle is not yet initialized
 
@@ -643,20 +643,20 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   if (isSDF(model_xml))
   {
     updateSDFAttributes(gazebo_model_xml, model_name, initial_xyz, initial_q);
-    
+
     // Walk recursively through the entire SDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!this->robot_namespace_.empty()) 
+    if (!this->robot_namespace_.empty())
     {
       // Get root element for SDF
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("sdf");
-      model_tixml = (!model_tixml) ? 
+      model_tixml = (!model_tixml) ?
           gazebo_model_xml.FirstChild("gazebo") : model_tixml;
-      if (model_tixml) 
+      if (model_tixml)
       {
         walkChildAddRobotNamespace(model_tixml);
-      } 
-      else 
+      }
+      else
       {
         ROS_WARN("Unable to add robot namespace to xml");
       }
@@ -666,18 +666,18 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   {
     updateURDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
     updateURDFName(gazebo_model_xml, model_name);
-    
+
     // Walk recursively through the entire URDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!this->robot_namespace_.empty()) 
+    if (!this->robot_namespace_.empty())
     {
       // Get root element for URDF
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("robot");
-      if (model_tixml) 
+      if (model_tixml)
       {
         walkChildAddRobotNamespace(model_tixml);
-      } 
-      else 
+      }
+      else
       {
         ROS_WARN("Unable to add robot namespace to xml");
       }
@@ -1868,7 +1868,7 @@ void GazeboRosApiPlugin::physicsReconfigureThread()
   physics_reconfigure_set_client_ = nh_->serviceClient<gazebo_msgs::SetPhysicsProperties>("/gazebo/set_physics_properties");
   physics_reconfigure_get_client_ = nh_->serviceClient<gazebo_msgs::GetPhysicsProperties>("/gazebo/get_physics_properties");
 
-  // Wait until the rest of this plugin is loaded and the services are being offered 
+  // Wait until the rest of this plugin is loaded and the services are being offered
   physics_reconfigure_set_client_.waitForExistence();
   physics_reconfigure_get_client_.waitForExistence();
 
@@ -1897,7 +1897,7 @@ void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
 void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
                                              gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
 {
-  // This function can handle both regular SDF files and <include> SDFs that are used with the 
+  // This function can handle both regular SDF files and <include> SDFs that are used with the
   // Gazebo Model Database
 
   TiXmlElement* pose_element; // This is used by both reguar and database SDFs
@@ -1928,30 +1928,30 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     // Check SDF for world element
     TiXmlElement* world_tixml = gazebo_tixml->FirstChildElement("world");
     if (!world_tixml)
-    {      
+    {
       ROS_WARN("Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
       return;
     }
     // If not <model> element, check SDF for required include element
-    model_tixml = world_tixml->FirstChildElement("include");    
+    model_tixml = world_tixml->FirstChildElement("include");
     if (!model_tixml)
-    {      
+    {
       ROS_WARN("Could not find <include> element in sdf, so name and initial position cannot be applied");
       return;
     }
 
     // Check for name element
-    TiXmlElement* name_tixml = model_tixml->FirstChildElement("name");    
+    TiXmlElement* name_tixml = model_tixml->FirstChildElement("name");
     if (!name_tixml)
-    {      
+    {
       // Create the name element
       name_tixml = new TiXmlElement("name");
       model_tixml->LinkEndChild(name_tixml);
-    }      
+    }
 
     // Set the text within the name element
     TiXmlText* text = new TiXmlText(model_name);
-    name_tixml->LinkEndChild( text );    
+    name_tixml->LinkEndChild( text );
   }
 
 
@@ -1980,7 +1980,7 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
                 << model_rpy.x << " " << model_rpy.y << " " << model_rpy.z;
 
     // Add value to pose element
-    TiXmlText* text = new TiXmlText(pose_stream.str());      
+    TiXmlText* text = new TiXmlText(pose_stream.str());
     TiXmlElement* new_pose_element = new TiXmlElement("pose");
     new_pose_element->LinkEndChild(text);
     model_tixml->LinkEndChild(new_pose_element);
@@ -2143,7 +2143,7 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
   }
 }
 
-bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
                                          gazebo_msgs::SpawnModel::Response &res)
 {
   // push to factory iface
@@ -2156,7 +2156,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   gazebo::msgs::Factory msg;
   gazebo::msgs::Init(msg, "spawn_model");
   msg.set_sdf( gazebo_model_xml_string );
-  
+
   //ROS_ERROR("attempting to spawn model name [%s] [%s]", model_name.c_str(),gazebo_model_xml_string.c_str());
 
   // FIXME: should use entity_info or add lock to World::receiveMutex
@@ -2196,11 +2196,11 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
 
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if (world_->GetModel(model_name)) 
+      if (world_->GetModel(model_name))
         break;
     }
 
-    ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now() 
+    ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now()
       << " for model " << model_name << " to spawn");
 
     usleep(2000);
