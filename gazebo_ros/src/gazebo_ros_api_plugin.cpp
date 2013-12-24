@@ -1491,7 +1491,6 @@ void GazeboRosApiPlugin::transformWrench( gazebo::math::Vector3 &target_force, g
   target_torque = target_to_reference.rot.RotateVector(reference_torque);
 
   // target force is the refence force rotated by the target->reference transform
-  target_force = target_force;
   target_torque = target_torque + target_to_reference.pos.Cross(target_force);
 }
 
