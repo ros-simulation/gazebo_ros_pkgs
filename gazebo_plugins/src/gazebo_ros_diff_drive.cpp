@@ -306,8 +306,8 @@ void GazeboRosDiffDrive::publishWheelTF() {
 
       // Update robot in case new velocities have been requested
       getWheelVelocities();
-      joints_[LEFT]->SetVelocity(0, wheel_speed_[LEFT] / wheel_diameter_);
-      joints_[RIGHT]->SetVelocity(0, wheel_speed_[RIGHT] / wheel_diameter_);
+      joints_[LEFT]->SetVelocity(0, wheel_speed_[LEFT] / (wheel_diameter_ / 2.0));
+      joints_[RIGHT]->SetVelocity(0, wheel_speed_[RIGHT] / (wheel_diameter_ / 2.0));
 
       last_update_time_+= common::Time(update_period_);
 
