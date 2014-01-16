@@ -284,11 +284,6 @@ public:
           {
             const double effort = joint_effort_command_[j];
             sim_joints_[j]->SetForce(0, effort);
-            // Output debug every nth msg
-            if( !(j % 10) && false)
-            {
-              ROS_DEBUG_STREAM_NAMED("robot_hw_sim","SetForce " << effort);
-            }
           }
           break;
 
