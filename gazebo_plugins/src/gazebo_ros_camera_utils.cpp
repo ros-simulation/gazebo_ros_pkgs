@@ -85,22 +85,22 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   const std::string &_camera_name_suffix,
   double _hack_baseline)
 {
-  // default Load
-  this->Load(_parent, _sdf);
+  // default Load:
+  // provide _camera_name_suffix to prevent LoadThread() creating the ros::NodeHandle with
+  //an incomplete this->camera_name_ namespace. There was a race condition when the _camera_name_suffix
+  //was appended in this function.
+  this->Load(_parent, _sdf, _camera_name_suffix);
 
   // overwrite hack baseline if specified at load
   // example usage in gazebo_ros_multicamera
   this->hack_baseline_ = _hack_baseline;
-
-  // overwrite camera suffix
-  // example usage in gazebo_ros_multicamera
-  this->camera_name_ += _camera_name_suffix;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
 void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
-  sdf::ElementPtr _sdf)
+  sdf::ElementPtr _sdf,
+  const std::string &_camera_name_suffix)
 {
   // Get the world name.
   std::string world_name = _parent->GetWorldName();
@@ -132,6 +132,10 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     ROS_DEBUG("Camera plugin missing <cameraName>, default to empty");
   else
     this->camera_name_ = this->sdf->Get<std::string>("cameraName");
+
+  // overwrite camera suffix
+  // example usage in gazebo_ros_multicamera
+  this->camera_name_ += _camera_name_suffix;
 
   if (!this->sdf->HasElement("frameName"))
     ROS_DEBUG("Camera plugin missing <frameName>, defaults to /world");
