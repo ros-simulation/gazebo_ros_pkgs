@@ -317,7 +317,7 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz/LaserScan
-      Color: 85; 255; 0
+      Color: 255; 85; 255
       Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
@@ -346,7 +346,7 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz/LaserScan
-      Color: 170; 255; 0
+      Color: 255; 85; 255
       Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
@@ -390,7 +390,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 16.9585
+      Distance: 3.79949
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -402,10 +402,10 @@ Visualization Manager:
         Z: -0.109698
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.845398
+      Pitch: 0.585398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.555372
+      Yaw: 0.665372
     Saved: ~
 Window Geometry:
   Displays:
