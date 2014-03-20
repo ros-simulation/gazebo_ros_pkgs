@@ -4,9 +4,6 @@
   <xacro:include filename="$(find gazebo_plugins)/test/diff_drive/xacro/p3dx/pioneer3dx_body.xacro"/>
   <xacro:pioneer3dx_body />
   
-  <xacro:include filename="$(find gazebo_plugins)/test/diff_drive/xacro/p3dx/pioneer3dx_drive.xacro"/>
-  <xacro:pioneer3dx_drive />
-
   <xacro:include filename="$(find gazebo_plugins)/test/diff_drive/xacro/laser/hokuyo.xacro"/>
   <xacro:front_laser xyz="0.16 0 0.1" rpy="0 0 0"/>
   
