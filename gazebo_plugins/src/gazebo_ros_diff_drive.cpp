@@ -29,7 +29,7 @@
 /*
  * \file  gazebo_ros_diff_drive.cpp
  *
- * \brief A differential drive plugin for gazebo. Based on the diffdrive plugin 
+ * \brief A differential drive plugin for gazebo. Based on the diffdrive plugin
  * developed for the erratic robot (see copyright notice above). The original
  * plugin can be found in the ROS package gazebo_erratic_plugins.
  *
@@ -57,134 +57,162 @@
 
 namespace gazebo {
 
-  enum {
+enum {
     RIGHT,
     LEFT,
-  };
+};
 
-  GazeboRosDiffDrive::GazeboRosDiffDrive() {}
+GazeboRosDiffDrive::GazeboRosDiffDrive() {}
 
-  // Destructor
-  GazeboRosDiffDrive::~GazeboRosDiffDrive() {
-  }
+// Destructor
+GazeboRosDiffDrive::~GazeboRosDiffDrive() {
+}
 
-  // Load the controller
-  void GazeboRosDiffDrive::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
+// Load the controller
+void GazeboRosDiffDrive::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
 
     this->parent = _parent;
     this->world = _parent->GetWorld();
-    
 
-    this->robot_namespace_ = "";
-    if (!_sdf->HasElement("robotNamespace")) {
-      ROS_INFO("GazeboRosDiffDrive Plugin missing <robotNamespace>, defaults to \"%s\"", 
-          this->robot_namespace_.c_str());
+
+    this->robot_namespace_ = this->parent->GetName ();
+    if ( !_sdf->HasElement ( "robotNamespace" ) ) {
+        ROS_INFO ( "GazeboRosDiffDrive Plugin missing <robotNamespace>, defaults to \"%s\"",
+                   this->robot_namespace_.c_str() );
     } else {
-      this->robot_namespace_ = 
-        _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
+        this->robot_namespace_ = _sdf->GetElement ( "robotNamespace" )->Get<std::string>();
+        if ( this->robot_namespace_.empty() ) this->robot_namespace_ = this->parent->GetName ();
     }
+    if ( !robot_namespace_.empty() ) this->robot_namespace_ += "/";
+    rosnode_ = boost::shared_ptr<ros::NodeHandle> ( new ros::NodeHandle ( this->robot_namespace_ ) );
+
+    tf_prefix_ = tf::getPrefixParam(*rosnode_);
+    if(tf_prefix_.empty()) {
+        tf_prefix_ = robot_namespace_;
+        boost::trim_right_if(tf_prefix_,boost::is_any_of("/"));
+    }
+    ROS_INFO("GazeboRosDiffDrive Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
+             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
+
 
     this->left_joint_name_ = "left_joint";
     if (!_sdf->HasElement("leftJoint")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <leftJoint>, defaults to \"%s\"",
-          this->robot_namespace_.c_str(), this->left_joint_name_.c_str());
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <leftJoint>, defaults to \"%s\"",
+                 this->robot_namespace_.c_str(), this->left_joint_name_.c_str());
     } else {
-      this->left_joint_name_ = _sdf->GetElement("leftJoint")->Get<std::string>();
+        this->left_joint_name_ = _sdf->GetElement("leftJoint")->Get<std::string>();
     }
 
     this->right_joint_name_ = "right_joint";
     if (!_sdf->HasElement("rightJoint")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <rightJoint>, defaults to \"%s\"",
-          this->robot_namespace_.c_str(), this->right_joint_name_.c_str());
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <rightJoint>, defaults to \"%s\"",
+                 this->robot_namespace_.c_str(), this->right_joint_name_.c_str());
     } else {
-      this->right_joint_name_ = _sdf->GetElement("rightJoint")->Get<std::string>();
+        this->right_joint_name_ = _sdf->GetElement("rightJoint")->Get<std::string>();
     }
 
     this->wheel_separation_ = 0.34;
     if (!_sdf->HasElement("wheelSeparation")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <wheelSeparation>, defaults to %f",
-          this->robot_namespace_.c_str(), this->wheel_separation_);
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <wheelSeparation>, defaults to %f",
+                 this->robot_namespace_.c_str(), this->wheel_separation_);
     } else {
-      this->wheel_separation_ = 
-        _sdf->GetElement("wheelSeparation")->Get<double>();
+        this->wheel_separation_ =
+            _sdf->GetElement("wheelSeparation")->Get<double>();
     }
 
     this->wheel_diameter_ = 0.15;
     if (!_sdf->HasElement("wheelDiameter")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <wheelDiameter>, defaults to %f",
-          this->robot_namespace_.c_str(), this->wheel_diameter_);
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <wheelDiameter>, defaults to %f",
+                 this->robot_namespace_.c_str(), this->wheel_diameter_);
     } else {
-      this->wheel_diameter_ = _sdf->GetElement("wheelDiameter")->Get<double>();
+        this->wheel_diameter_ = _sdf->GetElement("wheelDiameter")->Get<double>();
     }
 
     this->torque = 5.0;
     if (!_sdf->HasElement("torque")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <torque>, defaults to %f",
-          this->robot_namespace_.c_str(), this->torque);
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <torque>, defaults to %f",
+                 this->robot_namespace_.c_str(), this->torque);
     } else {
-      this->torque = _sdf->GetElement("torque")->Get<double>();
+        this->torque = _sdf->GetElement("torque")->Get<double>();
     }
 
     this->command_topic_ = "cmd_vel";
     if (!_sdf->HasElement("commandTopic")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <commandTopic>, defaults to \"%s\"",
-          this->robot_namespace_.c_str(), this->command_topic_.c_str());
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <commandTopic>, defaults to \"%s\"",
+                 this->robot_namespace_.c_str(), this->command_topic_.c_str());
     } else {
-      this->command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
+        this->command_topic_ = _sdf->GetElement("commandTopic")->Get<std::string>();
     }
 
     this->odometry_topic_ = "odom";
     if (!_sdf->HasElement("odometryTopic")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <odometryTopic>, defaults to \"%s\"",
-          this->robot_namespace_.c_str(), this->odometry_topic_.c_str());
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <odometryTopic>, defaults to \"%s\"",
+                 this->robot_namespace_.c_str(), this->odometry_topic_.c_str());
     } else {
-      this->odometry_topic_ = _sdf->GetElement("odometryTopic")->Get<std::string>();
+        this->odometry_topic_ = _sdf->GetElement("odometryTopic")->Get<std::string>();
     }
 
     this->odometry_frame_ = "odom";
     if (!_sdf->HasElement("odometryFrame")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <odometryFrame>, defaults to \"%s\"",
-          this->robot_namespace_.c_str(), this->odometry_frame_.c_str());
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <odometryFrame>, defaults to \"%s\"",
+                 this->robot_namespace_.c_str(), this->odometry_frame_.c_str());
     } else {
-      this->odometry_frame_ = _sdf->GetElement("odometryFrame")->Get<std::string>();
+        this->odometry_frame_ = _sdf->GetElement("odometryFrame")->Get<std::string>();
     }
 
     this->robot_base_frame_ = "base_footprint";
     if (!_sdf->HasElement("robotBaseFrame")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <robotBaseFrame>, defaults to \"%s\"",
-          this->robot_namespace_.c_str(), this->robot_base_frame_.c_str());
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <robotBaseFrame>, defaults to \"%s\"",
+                 this->robot_namespace_.c_str(), this->robot_base_frame_.c_str());
     } else {
-      this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->Get<std::string>();
+        this->robot_base_frame_ = _sdf->GetElement("robotBaseFrame")->Get<std::string>();
     }
 
     this->update_rate_ = 100.0;
     if (!_sdf->HasElement("updateRate")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <updateRate>, defaults to %f",
-          this->robot_namespace_.c_str(), this->update_rate_);
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <updateRate>, defaults to %f",
+                 this->robot_namespace_.c_str(), this->update_rate_);
     } else {
-      this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
+        this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
     }
 
-    
+
     this->publishWheelTF_ = false;
     if (_sdf->HasElement("publishWheelTF")) {
-      this->publishWheelTF_ = _sdf->GetElement("publishWheelTF")->Get<bool>();
+
+        std::string value = _sdf->GetElement("publishWheelTF")->Get<std::string>();
+        if(boost::iequals(value, std::string("true"))) {
+            this->publishWheelTF_ = true;
+        } else if(boost::iequals(value, std::string("false"))) {
+            this->publishWheelTF_ = false;
+        } else {
+            ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s)  <publishWheelTF> was set to '%s', it must be set to 'true' or 'false'!",
+                     this->robot_namespace_.c_str(), value.c_str());
+        }
     }
-    ROS_INFO("GazeboRosDiffDrive Plugin (ns = %s) <publishWheelTF>, set to %i=%s",
-          this->robot_namespace_.c_str(), this->publishWheelTF_, (this->publishWheelTF_?"ture":"false"));
-    
+    ROS_INFO("GazeboRosDiffDrive Plugin (ns = %s) <publishWheelTF>, set to %s",
+             this->robot_namespace_.c_str(), (this->publishWheelTF_?"ture":"false"));
+
     this->publishWheelJointState_ = false;
     if (_sdf->HasElement("publishWheelJointState")) {
-      this->publishWheelJointState_ = _sdf->GetElement("publishWheelJointState")->Get<bool>();
+        std::string value = _sdf->GetElement("publishWheelJointState")->Get<std::string>();
+        if(boost::iequals(value, std::string("true"))) {
+            this->publishWheelJointState_ = true;
+        } else if(boost::iequals(value, std::string("false"))) {
+            this->publishWheelJointState_ = false;
+        } else {
+            ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s)  <publishWheelTF> was set to '%s', it must be set to 'true' or 'false'!",
+                     this->robot_namespace_.c_str(), value.c_str());
+        }
     }
-    ROS_INFO("GazeboRosDiffDrive Plugin (ns = %s) <publishWheelJointState>, set to %i=%s",
-          this->robot_namespace_.c_str(), this->publishWheelJointState_, (this->publishWheelJointState_?"ture":"false"));
-    
+    ROS_INFO("GazeboRosDiffDrive Plugin (ns = %s) <publishWheelJointState>, set to %s",
+             this->robot_namespace_.c_str(), (this->publishWheelJointState_?"ture":"false"));
+
     // Initialize update rate stuff
     if (this->update_rate_ > 0.0) {
-      this->update_period_ = 1.0 / this->update_rate_;
+        this->update_period_ = 1.0 / this->update_rate_;
     } else {
-      this->update_period_ = 0.0;
+        this->update_period_ = 0.0;
     }
     last_update_time_ = this->world->GetSimTime();
 
@@ -200,19 +228,19 @@ namespace gazebo {
     joints_[LEFT] = this->parent->GetJoint(left_joint_name_);
     joints_[RIGHT] = this->parent->GetJoint(right_joint_name_);
 
-    if (!joints_[LEFT]) { 
-      char error[200];
-      snprintf(error, 200, 
-          "GazeboRosDiffDrive Plugin (ns = %s) couldn't get left hinge joint named \"%s\"", 
-          this->robot_namespace_.c_str(), this->left_joint_name_.c_str());
-      gzthrow(error);
+    if (!joints_[LEFT]) {
+        char error[200];
+        snprintf(error, 200,
+                 "GazeboRosDiffDrive Plugin (ns = %s) couldn't get left hinge joint named \"%s\"",
+                 this->robot_namespace_.c_str(), this->left_joint_name_.c_str());
+        gzthrow(error);
     }
-    if (!joints_[RIGHT]) { 
-      char error[200];
-      snprintf(error, 200, 
-          "GazeboRosDiffDrive Plugin (ns = %s) couldn't get right hinge joint named \"%s\"", 
-          this->robot_namespace_.c_str(), this->right_joint_name_.c_str());
-      gzthrow(error);
+    if (!joints_[RIGHT]) {
+        char error[200];
+        snprintf(error, 200,
+                 "GazeboRosDiffDrive Plugin (ns = %s) couldn't get right hinge joint named \"%s\"",
+                 this->robot_namespace_.c_str(), this->right_joint_name_.c_str());
+        gzthrow(error);
     }
 
     joints_[LEFT]->SetMaxForce(0, torque);
@@ -221,42 +249,41 @@ namespace gazebo {
     // Make sure the ROS node for Gazebo has already been initialized
     if (!ros::isInitialized())
     {
-      ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
-        << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
-      return;
+        ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+                         << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+        return;
     }
 
     rosnode_ = boost::shared_ptr<ros::NodeHandle> ( new ros::NodeHandle ( this->robot_namespace_ ) );
     ROS_INFO("Starting GazeboRosDiffDrive Plugin (ns = %s)!", this->robot_namespace_.c_str());
-    
-    if(this->publishWheelJointState_){
-      joint_state_publisher_ = rosnode_->advertise<sensor_msgs::JointState> ( "joint_states",1000 );
+
+    if(this->publishWheelJointState_) {
+        joint_state_publisher_ = rosnode_->advertise<sensor_msgs::JointState> ( "joint_states",1000 );
     }
-    
-    tf_prefix_ = tf::getPrefixParam(*rosnode_);
+
     transform_broadcaster_ = boost::shared_ptr<tf::TransformBroadcaster> ( new tf::TransformBroadcaster() );
 
     // ROS: Subscribe to the velocity command topic (usually "cmd_vel")
     ros::SubscribeOptions so =
-      ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
-          boost::bind(&GazeboRosDiffDrive::cmdVelCallback, this, _1),
-          ros::VoidPtr(), &queue_);
+        ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
+                boost::bind(&GazeboRosDiffDrive::cmdVelCallback, this, _1),
+                ros::VoidPtr(), &queue_);
 
     cmd_vel_subscriber_ = rosnode_->subscribe(so);
 
     odometry_publisher_ = rosnode_->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
 
     // start custom queue for diff drive
-    this->callback_queue_thread_ = 
-      boost::thread(boost::bind(&GazeboRosDiffDrive::QueueThread, this));
+    this->callback_queue_thread_ =
+        boost::thread(boost::bind(&GazeboRosDiffDrive::QueueThread, this));
 
     // listen to the update event (broadcast every simulation iteration)
-    this->update_connection_ = 
-      event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&GazeboRosDiffDrive::UpdateChild, this));
+    this->update_connection_ =
+        event::Events::ConnectWorldUpdateBegin(
+            boost::bind(&GazeboRosDiffDrive::UpdateChild, this));
 
-  }
-  
+}
+
 void GazeboRosDiffDrive::publishWheelJointState() {
     ros::Time current_time = ros::Time::now();
 
@@ -275,55 +302,55 @@ void GazeboRosDiffDrive::publishWheelJointState() {
 
 void GazeboRosDiffDrive::publishWheelTF() {
     ros::Time current_time = ros::Time::now();
-    for(int i = 0; i < 2; i++){
-    std::string wheel_frame = 
-      tf::resolve(tf_prefix_, joints_[i]->GetChild()->GetName ());
-    std::string wheel_parent_frame = 
-      tf::resolve(tf_prefix_, joints_[i]->GetParent()->GetName ());
+    for(int i = 0; i < 2; i++) {
+        std::string wheel_frame =
+            tf::resolve(tf_prefix_, joints_[i]->GetChild()->GetName ());
+        std::string wheel_parent_frame =
+            tf::resolve(tf_prefix_, joints_[i]->GetParent()->GetName ());
 
-    math::Pose poseWheel = joints_[i]->GetChild()->GetRelativePose();
+        math::Pose poseWheel = joints_[i]->GetChild()->GetRelativePose();
 
-    tf::Quaternion qt(poseWheel.rot.x, poseWheel.rot.y, poseWheel.rot.z, poseWheel.rot.w);
-    tf::Vector3 vt(poseWheel.pos.x, poseWheel.pos.y, poseWheel.pos.z);
+        tf::Quaternion qt(poseWheel.rot.x, poseWheel.rot.y, poseWheel.rot.z, poseWheel.rot.w);
+        tf::Vector3 vt(poseWheel.pos.x, poseWheel.pos.y, poseWheel.pos.z);
 
-    tf::Transform tfWheel(qt, vt);
-    transform_broadcaster_->sendTransform(
-        tf::StampedTransform(tfWheel, current_time,
-            wheel_parent_frame, wheel_frame));
+        tf::Transform tfWheel(qt, vt);
+        transform_broadcaster_->sendTransform(
+            tf::StampedTransform(tfWheel, current_time,
+                                 wheel_parent_frame, wheel_frame));
     }
-  }
+}
 
-  // Update the controller
-  void GazeboRosDiffDrive::UpdateChild() {
+// Update the controller
+void GazeboRosDiffDrive::UpdateChild() {
     common::Time current_time = this->world->GetSimTime();
-    double seconds_since_last_update = 
-      (current_time - last_update_time_).Double();
+    double seconds_since_last_update =
+        (current_time - last_update_time_).Double();
     if (seconds_since_last_update > update_period_) {
 
-      publishOdometry(seconds_since_last_update);
-      if(publishWheelTF_) publishWheelTF();
-      if(publishWheelJointState_) publishWheelJointState();
+        publishOdometry(seconds_since_last_update);
+        if(publishWheelTF_) publishWheelTF();
+        if(publishWheelJointState_) publishWheelJointState();
 
-      // Update robot in case new velocities have been requested
-      getWheelVelocities();
-      joints_[LEFT]->SetVelocity(0, wheel_speed_[LEFT] / (wheel_diameter_ / 2.0));
-      joints_[RIGHT]->SetVelocity(0, wheel_speed_[RIGHT] / (wheel_diameter_ / 2.0));
+        // Update robot in case new velocities have been requested
+        getWheelVelocities();
+        joints_[LEFT]->SetVelocity(0, wheel_speed_[LEFT] / (wheel_diameter_ / 2.0));
+        joints_[RIGHT]->SetVelocity(0, wheel_speed_[RIGHT] / (wheel_diameter_ / 2.0));
 
-      last_update_time_+= common::Time(update_period_);
+        last_update_time_+= common::Time(update_period_);
 
     }
-  }
+}
 
-  // Finalize the controller
-  void GazeboRosDiffDrive::FiniChild() {
+// Finalize the controller
+void GazeboRosDiffDrive::FiniChild() {
     alive_ = false;
     queue_.clear();
     queue_.disable();
     rosnode_->shutdown();
     callback_queue_thread_.join();
-  }
+}
 
-  void GazeboRosDiffDrive::getWheelVelocities() {
+void GazeboRosDiffDrive::getWheelVelocities() {
     boost::mutex::scoped_lock scoped_lock(lock);
 
     double vr = x_;
@@ -331,30 +358,30 @@ void GazeboRosDiffDrive::publishWheelTF() {
 
     wheel_speed_[LEFT] = vr + va * wheel_separation_ / 2.0;
     wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;
-  }
+}
 
-  void GazeboRosDiffDrive::cmdVelCallback(
-      const geometry_msgs::Twist::ConstPtr& cmd_msg) {
+void GazeboRosDiffDrive::cmdVelCallback(
+    const geometry_msgs::Twist::ConstPtr& cmd_msg) {
 
     boost::mutex::scoped_lock scoped_lock(lock);
     x_ = cmd_msg->linear.x;
     rot_ = cmd_msg->angular.z;
-  }
+}
 
-  void GazeboRosDiffDrive::QueueThread() {
+void GazeboRosDiffDrive::QueueThread() {
     static const double timeout = 0.01;
 
     while (alive_ && rosnode_->ok()) {
-      queue_.callAvailable(ros::WallDuration(timeout));
+        queue_.callAvailable(ros::WallDuration(timeout));
     }
-  }
+}
 
-  void GazeboRosDiffDrive::publishOdometry(double step_time) {
+void GazeboRosDiffDrive::publishOdometry(double step_time) {
     ros::Time current_time = ros::Time::now();
-    std::string odom_frame = 
-      tf::resolve(tf_prefix_, odometry_frame_);
-    std::string base_footprint_frame = 
-      tf::resolve(tf_prefix_, robot_base_frame_);
+    std::string odom_frame =
+        tf::resolve(tf_prefix_, odometry_frame_);
+    std::string base_footprint_frame =
+        tf::resolve(tf_prefix_, robot_base_frame_);
 
     // getting data for base_footprint to odom transform
     math::Pose pose = this->parent->GetWorldPose();
@@ -364,8 +391,8 @@ void GazeboRosDiffDrive::publishWheelTF() {
 
     tf::Transform base_footprint_to_odom(qt, vt);
     transform_broadcaster_->sendTransform(
-        tf::StampedTransform(base_footprint_to_odom, current_time, 
-            odom_frame, base_footprint_frame));
+        tf::StampedTransform(base_footprint_to_odom, current_time,
+                             odom_frame, base_footprint_frame));
 
     // publish odom topic
     odom_.pose.pose.position.x = pose.pos.x;
@@ -397,7 +424,7 @@ void GazeboRosDiffDrive::publishWheelTF() {
     odom_.child_frame_id = base_footprint_frame;
 
     odometry_publisher_.publish(odom_);
-  }
+}
 
-  GZ_REGISTER_MODEL_PLUGIN(GazeboRosDiffDrive)
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosDiffDrive)
 }

@@ -35,6 +35,7 @@
 #include <gazebo/sensors/SensorTypes.hh>
 
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 
 #include <gazebo_plugins/gazebo_ros_laser.h>
 
@@ -70,16 +71,37 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // save pointers
   this->sdf = _sdf;
 
+  // accessing model name like suggested by nkoenig at http://answers.gazebosim.org/question/4878/multiple-robots-with-ros-plugins-sensor-plugin-vs/
+  std::vector<std::string> values;
+  std::string scopedName = _parent->GetScopedName();
+  boost::replace_all(scopedName, "::", ",");
+  boost::split(values, scopedName, boost::is_any_of(","));
+  std::string modelName;
+  if(values.size() < 2){
+    modelName = "";
+  } else {
+    modelName = values[1];
+  }
+  
+  
   this->parent_ray_sensor_ =
     boost::dynamic_pointer_cast<sensors::RaySensor>(_parent);
 
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosLaser controller requires a Ray Sensor as its parent");
 
-  this->robot_namespace_ = "";
-  if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
+  this->robot_namespace_ = modelName;
+  if (this->sdf->HasElement("robotNamespace")){
+    std::string tmp = this->sdf->Get<std::string>("robotNamespace");
+    if(!tmp.empty()){
+      this->robot_namespace_ = tmp;
+    }
+  }
+  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 
+  
+  ROS_INFO ( "Laser Plugin (robotNamespace = %s)" , this->robot_namespace_.c_str() );
+  
   if (!this->sdf->HasElement("frameName"))
   {
     ROS_INFO("Laser plugin missing <frameName>, defaults to /world");
@@ -87,7 +109,17 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   }
   else
     this->frame_name_ = this->sdf->Get<std::string>("frameName");
-
+   
+  
+  this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
+  if(this->tf_prefix_.empty()) {
+      this->tf_prefix_ = this->robot_namespace_;
+      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
+  }
+  ROS_INFO("Laser Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
+             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
+    
+  
   if (!this->sdf->HasElement("topicName"))
   {
     ROS_INFO("Laser plugin missing <topicName>, defaults to /world");
@@ -106,7 +138,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     return;
   }   
   
-  ROS_INFO ( "Starting GazeboRosLaser Plugin (ns = %s)!", this->robot_namespace_.c_str() );
+  ROS_INFO ( "Starting Laser Plugin (ns = %s)!", this->robot_namespace_.c_str() );
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
     boost::bind(&GazeboRosLaser::LoadThread, this));
@@ -117,16 +149,13 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 // Load the controller
 void GazeboRosLaser::LoadThread()
 {
-  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
   this->gazebo_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   this->gazebo_node_->Init(this->world_name_);
 
   this->pmq.startServiceThread();
 
   // resolve tf prefix
-  std::string prefix;
-  this->rosnode_->getParam(std::string("tf_prefix"), prefix);
-  this->frame_name_ = tf::resolve(prefix, this->frame_name_);
+  this->frame_name_ = tf::resolve(this->tf_prefix_, this->frame_name_);
 
   if (this->topic_name_ != "")
   {
