@@ -5,6 +5,7 @@ project(gazebo_ros_control)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   gazebo_ros
+  control_toolbox
   controller_manager
   hardware_interface 
   transmission_interface

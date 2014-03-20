@@ -74,7 +74,7 @@ namespace gazebo
     mo.convertToMesh(name + "__VideoMesh__");
 
     Ogre::MovableObject *obj = (Ogre::MovableObject*)
-      this->sceneNode->getCreator()->createEntity(
+      this->GetSceneNode()->getCreator()->createEntity(
           name + "__VideoEntity__",
           name + "__VideoMesh__");
     obj->setCastShadows(false);

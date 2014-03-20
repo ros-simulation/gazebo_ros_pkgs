@@ -81,16 +81,12 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   // Delete Force and Wrench Jobs
   lock_.lock();
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
-  {
     delete (*iter);
-    force_joint_jobs_.erase(iter);
-  }
+  force_joint_jobs_.clear();
   ROS_DEBUG_STREAM_NAMED("api_plugin","ForceJointJobs deleted");
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
-  {
     delete (*iter);
-    wrench_body_jobs_.erase(iter);
-  }
+  wrench_body_jobs_.clear();
   lock_.unlock();
   ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
 
@@ -117,9 +113,9 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
     ROS_ERROR("Something other than this gazebo_ros_api plugin started ros::init(...), command line arguments may not be parsed properly.");
 
   // check if the ros master is available - required
-  while(!ros::master::check()) 
+  while(!ros::master::check())
   {
-    ROS_WARN_STREAM_NAMED("api_plugin","No ROS master - start roscore to continue...");    
+    ROS_WARN_STREAM_NAMED("api_plugin","No ROS master - start roscore to continue...");
     // wait 0.5 second
     usleep(500*1000); // can't use ROS Time here b/c node handle is not yet initialized
 
@@ -647,20 +643,20 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   if (isSDF(model_xml))
   {
     updateSDFAttributes(gazebo_model_xml, model_name, initial_xyz, initial_q);
-    
+
     // Walk recursively through the entire SDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!this->robot_namespace_.empty()) 
+    if (!this->robot_namespace_.empty())
     {
       // Get root element for SDF
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("sdf");
-      model_tixml = (!model_tixml) ? 
+      model_tixml = (!model_tixml) ?
           gazebo_model_xml.FirstChild("gazebo") : model_tixml;
-      if (model_tixml) 
+      if (model_tixml)
       {
         walkChildAddRobotNamespace(model_tixml);
-      } 
-      else 
+      }
+      else
       {
         ROS_WARN("Unable to add robot namespace to xml");
       }
@@ -670,18 +666,18 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   {
     updateURDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
     updateURDFName(gazebo_model_xml, model_name);
-    
+
     // Walk recursively through the entire URDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!this->robot_namespace_.empty()) 
+    if (!this->robot_namespace_.empty())
     {
       // Get root element for URDF
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("robot");
-      if (model_tixml) 
+      if (model_tixml)
       {
         walkChildAddRobotNamespace(model_tixml);
-      } 
-      else 
+      }
+      else
       {
         ROS_WARN("Unable to add robot namespace to xml");
       }
@@ -731,8 +727,6 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
     clearJointForces(joints[i]->GetName());
   }
 
-  // clear entity from selection @todo: need to clear links if selected individually
-  gazebo::event::Events::setSelectedEntity(req.model_name, "normal");
   // send delete model request
   gazebo::msgs::Request *msg = gazebo::msgs::CreateRequest("entity_delete",req.model_name);
   request_pub_->Publish(*msg,true);
@@ -1323,7 +1317,7 @@ bool GazeboRosApiPlugin::clearJointForces(std::string joint_name)
   while(search)
   {
     search = false;
-    for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();iter++)
+    for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();++iter)
     {
       if ((*iter)->joint->GetName() == joint_name)
       {
@@ -1351,7 +1345,7 @@ bool GazeboRosApiPlugin::clearBodyWrenches(std::string body_name)
   while(search)
   {
     search = false;
-    for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();iter++)
+    for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();++iter)
     {
       //ROS_ERROR("search %s %s",(*iter)->body->GetScopedName().c_str(), body_name.c_str());
       if ((*iter)->body->GetScopedName() == body_name)
@@ -1497,7 +1491,6 @@ void GazeboRosApiPlugin::transformWrench( gazebo::math::Vector3 &target_force, g
   target_torque = target_to_reference.rot.RotateVector(reference_torque);
 
   // target force is the refence force rotated by the target->reference transform
-  target_force = target_force;
   target_torque = target_torque + target_to_reference.pos.Cross(target_force);
 }
 
@@ -1661,7 +1654,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
     {
       // remove from queue once expires
       delete (*iter);
-      wrench_body_jobs_.erase(iter);
+      iter = wrench_body_jobs_.erase(iter);
     }
     else
       iter++;
@@ -1691,7 +1684,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
-      force_joint_jobs_.erase(iter);
+      iter = force_joint_jobs_.erase(iter);
     }
     else
       iter++;
@@ -1875,7 +1868,7 @@ void GazeboRosApiPlugin::physicsReconfigureThread()
   physics_reconfigure_set_client_ = nh_->serviceClient<gazebo_msgs::SetPhysicsProperties>("/gazebo/set_physics_properties");
   physics_reconfigure_get_client_ = nh_->serviceClient<gazebo_msgs::GetPhysicsProperties>("/gazebo/get_physics_properties");
 
-  // Wait until the rest of this plugin is loaded and the services are being offered 
+  // Wait until the rest of this plugin is loaded and the services are being offered
   physics_reconfigure_set_client_.waitForExistence();
   physics_reconfigure_get_client_.waitForExistence();
 
@@ -1904,7 +1897,7 @@ void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
 void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
                                              gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
 {
-  // This function can handle both regular SDF files and <include> SDFs that are used with the 
+  // This function can handle both regular SDF files and <include> SDFs that are used with the
   // Gazebo Model Database
 
   TiXmlElement* pose_element; // This is used by both reguar and database SDFs
@@ -1929,75 +1922,135 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     }
     // replace with user specified name
     model_tixml->SetAttribute("name",model_name);
-
-    // Check for the pose element
-    pose_element = model_tixml->FirstChildElement("pose");
-
-    // Create the pose element if it doesn't exist
-    if (!pose_element)
-    {
-      pose_element = new TiXmlElement("pose");
-      model_tixml->LinkEndChild(pose_element);
-    }
-
-    // Pose is set at bottom of function
   }
   else
   {
     // Check SDF for world element
     TiXmlElement* world_tixml = gazebo_tixml->FirstChildElement("world");
     if (!world_tixml)
-    {      
+    {
       ROS_WARN("Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
       return;
     }
-    // Check SDF for required include element
-    TiXmlElement* include_tixml = world_tixml->FirstChildElement("include");    
-    if (!include_tixml)
-    {      
+    // If not <model> element, check SDF for required include element
+    model_tixml = world_tixml->FirstChildElement("include");
+    if (!model_tixml)
+    {
       ROS_WARN("Could not find <include> element in sdf, so name and initial position cannot be applied");
       return;
     }
 
     // Check for name element
-    TiXmlElement* name_tixml = include_tixml->FirstChildElement("name");    
+    TiXmlElement* name_tixml = model_tixml->FirstChildElement("name");
     if (!name_tixml)
-    {      
+    {
       // Create the name element
       name_tixml = new TiXmlElement("name");
-      include_tixml->LinkEndChild(name_tixml);
-    }      
+      model_tixml->LinkEndChild(name_tixml);
+    }
 
     // Set the text within the name element
     TiXmlText* text = new TiXmlText(model_name);
-    name_tixml->LinkEndChild( text );    
-
-    // Check for the pose element
-    pose_element = include_tixml->FirstChildElement("pose");
-
-    // Create the pose element if it doesn't exist
-    if (!pose_element)
-    {
-      pose_element = new TiXmlElement("pose");
-      include_tixml->LinkEndChild(pose_element);
-    }
-    // Pose is set at bottom of function
+    name_tixml->LinkEndChild( text );
   }
 
-  // Set the pose value for both SDFs types here
+
+  // Check for the pose element
+  pose_element = model_tixml->FirstChildElement("pose");
+  gazebo::math::Pose model_pose;
+
+  // Create the pose element if it doesn't exist
+  // Remove it if it exists, since we are inserting a new one
   if (pose_element)
   {
-    // Create the string of 6 numbers
-    std::ostringstream pose_stream;
-    gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
-    pose_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z << " "
-                << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
-
-    // Add value to pose element
-    TiXmlText* text = new TiXmlText(pose_stream.str());      
-    pose_element->LinkEndChild( text );
+    // save pose_element in math::Pose and remove child
+    model_pose = this->parsePose(pose_element->GetText());
+    model_tixml->RemoveChild(pose_element);
   }
 
+  // Set and link the pose element after adding initial pose
+  {
+    // add pose_element Pose to initial pose
+    gazebo::math::Pose new_model_pose = model_pose + gazebo::math::Pose(initial_xyz, initial_q);
+
+    // Create the string of 6 numbers
+    std::ostringstream pose_stream;
+    gazebo::math::Vector3 model_rpy = new_model_pose.rot.GetAsEuler(); // convert to Euler angles for Gazebo XML
+    pose_stream << new_model_pose.pos.x << " " << new_model_pose.pos.y << " " << new_model_pose.pos.z << " "
+                << model_rpy.x << " " << model_rpy.y << " " << model_rpy.z;
+
+    // Add value to pose element
+    TiXmlText* text = new TiXmlText(pose_stream.str());
+    TiXmlElement* new_pose_element = new TiXmlElement("pose");
+    new_pose_element->LinkEndChild(text);
+    model_tixml->LinkEndChild(new_pose_element);
+  }
+}
+
+gazebo::math::Pose GazeboRosApiPlugin::parsePose(const std::string &str)
+{
+  std::vector<std::string> pieces;
+  std::vector<double> vals;
+
+  boost::split(pieces, str, boost::is_any_of(" "));
+  for (unsigned int i = 0; i < pieces.size(); ++i)
+  {
+    if (pieces[i] != "")
+    {
+      try
+      {
+        vals.push_back(boost::lexical_cast<double>(pieces[i].c_str()));
+      }
+      catch(boost::bad_lexical_cast &e)
+      {
+        sdferr << "xml key [" << str
+          << "][" << i << "] value [" << pieces[i]
+          << "] is not a valid double from a 3-tuple\n";
+        return gazebo::math::Pose();
+      }
+    }
+  }
+
+  if (vals.size() == 6)
+    return gazebo::math::Pose(vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]);
+  else
+  {
+    ROS_ERROR("Beware: failed to parse string [%s] as gazebo::math::Pose, returning zeros.", str.c_str());
+    return gazebo::math::Pose();
+  }
+}
+
+gazebo::math::Vector3 GazeboRosApiPlugin::parseVector3(const std::string &str)
+{
+  std::vector<std::string> pieces;
+  std::vector<double> vals;
+
+  boost::split(pieces, str, boost::is_any_of(" "));
+  for (unsigned int i = 0; i < pieces.size(); ++i)
+  {
+    if (pieces[i] != "")
+    {
+      try
+      {
+        vals.push_back(boost::lexical_cast<double>(pieces[i].c_str()));
+      }
+      catch(boost::bad_lexical_cast &e)
+      {
+        sdferr << "xml key [" << str
+          << "][" << i << "] value [" << pieces[i]
+          << "] is not a valid double from a 3-tuple\n";
+        return gazebo::math::Vector3();
+      }
+    }
+  }
+
+  if (vals.size() == 3)
+    return gazebo::math::Vector3(vals[0], vals[1], vals[2]);
+  else
+  {
+    ROS_ERROR("Beware: failed to parse string [%s] as gazebo::math::Vector3, returning zeros.", str.c_str());
+    return gazebo::math::Vector3();
+  }
 }
 
 void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
@@ -2015,17 +2068,28 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ga
       model_tixml->LinkEndChild(origin_key);
     }
 
+    gazebo::math::Vector3 xyz;
+    gazebo::math::Vector3 rpy;
     if (origin_key->Attribute("xyz"))
+    {
+      xyz = this->parseVector3(origin_key->Attribute("xyz"));
       origin_key->RemoveAttribute("xyz");
+    }
     if (origin_key->Attribute("rpy"))
+    {
+      rpy = this->parseVector3(origin_key->Attribute("rpy"));
       origin_key->RemoveAttribute("rpy");
+    }
+
+    // add xyz, rpy to initial pose
+    gazebo::math::Pose model_pose = gazebo::math::Pose(xyz, rpy) + gazebo::math::Pose(initial_xyz, initial_q);
 
     std::ostringstream xyz_stream;
-    xyz_stream << initial_xyz.x << " " << initial_xyz.y << " " << initial_xyz.z;
+    xyz_stream << model_pose.pos.x << " " << model_pose.pos.y << " " << model_pose.pos.z;
 
     std::ostringstream rpy_stream;
-    gazebo::math::Vector3 initial_rpy = initial_q.GetAsEuler(); // convert to Euler angles for Gazebo XML
-    rpy_stream << initial_rpy.x << " " << initial_rpy.y << " " << initial_rpy.z;
+    gazebo::math::Vector3 model_rpy = model_pose.rot.GetAsEuler(); // convert to Euler angles for Gazebo XML
+    rpy_stream << model_rpy.x << " " << model_rpy.y << " " << model_rpy.z;
 
     origin_key->SetAttribute("xyz",xyz_stream.str());
     origin_key->SetAttribute("rpy",rpy_stream.str());
@@ -2079,20 +2143,20 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
   }
 }
 
-bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
                                          gazebo_msgs::SpawnModel::Response &res)
 {
   // push to factory iface
   std::ostringstream stream;
   stream << gazebo_model_xml;
   std::string gazebo_model_xml_string = stream.str();
-  //ROS_DEBUG("Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
+  ROS_DEBUG("Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
 
   // publish to factory topic
   gazebo::msgs::Factory msg;
   gazebo::msgs::Init(msg, "spawn_model");
   msg.set_sdf( gazebo_model_xml_string );
-  
+
   //ROS_ERROR("attempting to spawn model name [%s] [%s]", model_name.c_str(),gazebo_model_xml_string.c_str());
 
   // FIXME: should use entity_info or add lock to World::receiveMutex
@@ -2132,11 +2196,11 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
 
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if (world_->GetModel(model_name)) 
+      if (world_->GetModel(model_name))
         break;
     }
 
-    ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now() 
+    ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now()
       << " for model " << model_name << " to spawn");
 
     usleep(2000);
