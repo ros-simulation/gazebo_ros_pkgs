@@ -1,0 +1,373 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+    
+  <xacro:macro name="pioneer3dx_body" params="">
+	  
+	  
+  <!-- base_link -->
+  <link name="base_link"/>
+  <gazebo reference="base_link">
+    <material value="Gazebo/Red"/>
+  </gazebo>
+	  
+  <!-- Chassis -->
+  <joint name="base_chassis_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="chassis"/>
+  </joint>
+  <link name="chassis">
+    <visual name="chassis_visual">
+      <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/chassis.stl"/>
+      </geometry>
+      <material name="ChassisRed">
+        <color rgba="0.851 0.0 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/chassis.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
+      <inertia ixx="0.3338" ixy="0.0" ixz="0.0" iyy="0.4783" iyz="0.0" izz="0.3338"/>
+    </inertial>
+  </link>
+  <gazebo reference="chassis">
+    <material value="Gazebo/Red"/>
+  </gazebo>
+  
+  
+  <!-- Top -->
+  <joint name="chassis_top_joint" type="fixed">
+    <origin xyz="-0.045 0 0.234" rpy="0 0 0"/>
+    <parent link="chassis"/>
+    <child link="top_plate"/>
+  </joint>
+  <link name="top_plate">
+    <visual>
+      <inertial>
+        <mass value="0.01"/>
+        <origin xyz="0 0 0"/>
+        <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+      </inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="top_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/top.stl"/>
+      </geometry>
+      <material name="TopBlack">
+        <color rgba="0.038 0.038 0.038 1.0"/>
+      </material>
+    </visual>
+  </link>
+  <gazebo reference="top_plate">
+    <material value="Gazebo/Black"/>
+  </gazebo>
+  
+  <!-- Swivel -->
+  <joint name="chassis_swivel_joint" type="continuous">
+    <!-- <origin xyz="-0.185 0 0.055" rpy="0 0 0" /> orginal values -->
+    <origin xyz="-0.185 0 0.05" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <anchor xyz="0 0 0"/>
+    <limit effort="100" velocity="100" k_velocity="0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+    <parent link="chassis"/>
+    <child link="swivel"/>
+  </joint>
+  <link name="swivel">
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual name="base_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/swivel.stl"/>
+      </geometry>
+      <material name="swivel">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="swivel">
+    <material value="Gazebo/Grey"/>
+  </gazebo>
+  
+  <!-- Center Wheel -->
+  <joint name="swivel_wheel_joint" type="continuous">
+    <origin xyz="-0.026 0 -0.016" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <anchor xyz="0 0 0"/>
+    <limit effort="100" velocity="100" k_velocity="0"/>
+    <joint_properties damping="0.0" friction="0.0"/>
+    <parent link="swivel"/>
+    <child link="center_wheel"/>
+  </joint>
+  <link name="center_wheel">
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.012411765597" ixy="-0.000711733678" ixz="0.00050272983" iyy="0.015218160428" iyz="-0.000004273467" izz="0.011763977943"/>
+    </inertial>
+    <visual name="base_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/center_wheel.stl"/>
+      </geometry>
+      <material name="WheelBlack">
+        <color rgba="0.117 0.117 0.117 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${-3.1415927/2.0} 0 0"/>
+      <geometry>
+        <!--<mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/center_wheel.stl"/>-->
+        <cylinder radius="0.0375" length="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="center_wheel">
+	<material value="Gazebo/Black"/>
+  </gazebo>
+	
+  <!-- Center Hubcap -->
+  <joint name="wheel_hubcap_joint" type="fixed">
+    <origin xyz="-0.0035 0 -0.001" rpy="0 0 0"/>
+    <parent link="center_wheel"/>
+    <child link="center_hubcap"/>
+  </joint>
+  <link name="center_hubcap">
+    <inertial>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.012411765597" ixy="-0.000711733678" ixz="0.00050272983" iyy="0.015218160428" iyz="-0.000004273467" izz="0.011763977943"/>
+    </inertial>
+    <visual name="base_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/center_hubcap.stl"/>
+      </geometry>
+      <material name="swivel">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+    </collision>
+  </link>	
+  <gazebo reference="center_hubcap">
+	<material value="Gazebo/Grey"/>
+  </gazebo>
+  
+  <!-- Right Hubcap -->
+  <joint name="right_hub_joint" type="continuous">
+    <origin xyz="0 0.15 0.08" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="right_hub"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="right_hub">
+    <inertial>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.012411765597" ixy="0" ixz="0" iyy="0.015218160428" iyz="0" izz="0.011763977943"/>
+    </inertial>
+    <visual name="base_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/right_hubcap.stl"/>
+      </geometry>
+      <material name="HubcapYellow">
+        <color rgba="1.0 0.811 0.151 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="right_hub">
+	<material value="Gazebo/Yellow"/>
+  </gazebo>
+
+  <!-- Right Wheel -->
+  <joint name="right_wheel_joint" type="fixed">
+    <axis xyz="0 1 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="right_hub"/>
+    <child link="right_wheel"/>
+  </joint>
+  <link name="right_wheel">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.012411765597" ixy="0" ixz="0" iyy="0.015218160428" iyz="0" izz="0.011763977943"/>
+    </inertial>
+    <visual name="base_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/right_wheel.stl"/>
+      </geometry>
+      <material name="WheelBlack">
+        <color rgba="0.117 0.117 0.117 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${-3.1415927/2} 0 0"/>
+      <geometry>
+        <!--<mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/${suffix}_wheel.stl"/>-->
+        <cylinder radius="0.09" length="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="right_wheel">
+	<material value="Gazebo/Black"/>
+  </gazebo>
+
+  <!-- Left Hubcap -->
+  <joint name="left_hub_joint" type="continuous">
+    <origin xyz="0 -0.15 0.08" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="left_hub"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="left_hub">
+    <inertial>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.012411765597" ixy="0" ixz="0" iyy="0.015218160428" iyz="0" izz="0.011763977943"/>
+    </inertial>
+    <visual name="base_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/left_hubcap.stl"/>
+      </geometry>
+      <material name="HubcapYellow">
+        <color rgba="1.0 0.811 0.151 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="left_hub">
+	<material value="Gazebo/Yellow"/>
+  </gazebo>
+
+  <!-- Left Wheel -->
+  <joint name="left_wheel_joint" type="fixed">
+    <axis xyz="0 1 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="left_hub"/>
+    <child link="left_wheel"/>
+  </joint>
+  <link name="left_wheel">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.012411765597" ixy="0" ixz="0" iyy="0.015218160428" iyz="0" izz="0.011763977943"/>
+    </inertial>
+    <visual name="base_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/left_wheel.stl"/>
+      </geometry>
+      <material name="WheelBlack">
+        <color rgba="0.117 0.117 0.117 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${-3.1415927/2} 0 0"/>
+      <geometry>
+        <!--<mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/${suffix}_wheel.stl"/>-->
+        <cylinder radius="0.09" length="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="left_wheel">
+	<material value="Gazebo/Black"/>
+  </gazebo>
+  
+  <!-- Front Sonar -->
+  <joint name="base_front_joint" type="fixed">
+    <origin xyz="0.109 0 0.209" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="front_sonar"/>
+  </joint>
+  <link name="front_sonar">
+    <inertial>
+      <mass value="0.0001"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual name="front_sonar_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry name="pioneer_geom">
+        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/back_sonar.stl"/>
+      </geometry>
+      <material name="SonarYellow">
+        <color rgba="0.715 0.583 0.210 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0 0 0"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="front_sonar">
+	<material value="Gazebo/Yellow"/>
+  </gazebo>
+  
+  <gazebo>
+      <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+        <robotNamespace></robotNamespace>
+        <jointName>chassis_swivel_joint, swivel_wheel_joint, left_hub_joint, right_hub_joint</jointName>
+        <updateRate>10.0</updateRate>
+        <alwaysOn>true</alwaysOn>
+      </plugin>
+  </gazebo>
+      
+	<gazebo>
+		<plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+			<robotNamespace></robotNamespace>
+			<publishWheelTF>false</publishWheelTF>
+			<publishWheelJointState>true</publishWheelJointState>
+			<alwaysOn>true</alwaysOn>
+			<leftJoint>left_hub_joint</leftJoint>
+			<rightJoint>right_hub_joint</rightJoint>
+			<wheelSeparation>0.5380</wheelSeparation>
+			<wheelDiameter>0.18</wheelDiameter>
+			<torque>20</torque>
+			<commandTopic>cmd_vel</commandTopic>
+			<odometryTopic>odom</odometryTopic>
+			<odometryFrame>odom</odometryFrame>
+			<robotBaseFrame>base_link</robotBaseFrame>
+			<updateRate>100.0</updateRate>
+		</plugin>
+	</gazebo>
+  </xacro:macro>
+</robot>
