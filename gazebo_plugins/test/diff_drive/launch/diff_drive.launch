@@ -7,12 +7,12 @@
   <!-- Robot with diff drive -->
   <include file="$(find gazebo_plugins)/test/diff_drive/launch/pioneer3dx.gazebo.launch">
      <arg name="robot_name" value="r1" />
-     <arg name="robot_position" value="-x 0.0 -y -0.5 -z 0.01" />
+     <arg name="robot_position" value="-x 0.0 -y -0.5 -z 0.01 -R 0 -P 0 -Y +1.57" />
    </include>
 
   <include file="$(find gazebo_plugins)/test/diff_drive/launch/pioneer3dx.gazebo.launch">
      <arg name="robot_name" value="r2" />
-     <arg name="robot_position" value="-x 0.0 -y 0.5 -z 0.01" />
+     <arg name="robot_position" value="-x 0.0 -y 0.5 -z 0.01 -R 0 -P 0 -Y -1.57" />
    </include>
 
 
