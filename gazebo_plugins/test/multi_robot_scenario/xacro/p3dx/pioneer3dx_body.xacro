@@ -21,7 +21,7 @@
     <visual name="chassis_visual">
       <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/chassis.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/chassis.stl"/>
       </geometry>
       <material name="ChassisRed">
         <color rgba="0.851 0.0 0.0 1.0"/>
@@ -30,7 +30,7 @@
     <collision>
       <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/chassis.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/chassis.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -59,7 +59,7 @@
       </inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="top_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/top.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/top.stl"/>
       </geometry>
       <material name="TopBlack">
         <color rgba="0.038 0.038 0.038 1.0"/>
@@ -90,7 +90,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/swivel.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/swivel.stl"/>
       </geometry>
       <material name="swivel">
         <color rgba="0.5 0.5 0.5 1"/>
@@ -126,7 +126,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/center_wheel.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/center_wheel.stl"/>
       </geometry>
       <material name="WheelBlack">
         <color rgba="0.117 0.117 0.117 1"/>
@@ -135,7 +135,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="${-3.1415927/2.0} 0 0"/>
       <geometry>
-        <!--<mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/center_wheel.stl"/>-->
+        <!--<mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/center_wheel.stl"/>-->
         <cylinder radius="0.0375" length="0.01"/>
       </geometry>
     </collision>
@@ -159,7 +159,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/center_hubcap.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/center_hubcap.stl"/>
       </geometry>
       <material name="swivel">
         <color rgba="0.5 0.5 0.5 1"/>
@@ -192,7 +192,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/right_hubcap.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/right_hubcap.stl"/>
       </geometry>
       <material name="HubcapYellow">
         <color rgba="1.0 0.811 0.151 1.0"/>
@@ -225,7 +225,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/right_wheel.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/right_wheel.stl"/>
       </geometry>
       <material name="WheelBlack">
         <color rgba="0.117 0.117 0.117 1"/>
@@ -234,7 +234,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="${-3.1415927/2} 0 0"/>
       <geometry>
-        <!--<mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/${suffix}_wheel.stl"/>-->
+        <!--<mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/${suffix}_wheel.stl"/>-->
         <cylinder radius="0.09" length="0.01"/>
       </geometry>
     </collision>
@@ -259,7 +259,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/left_hubcap.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/left_hubcap.stl"/>
       </geometry>
       <material name="HubcapYellow">
         <color rgba="1.0 0.811 0.151 1.0"/>
@@ -292,7 +292,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/left_wheel.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/left_wheel.stl"/>
       </geometry>
       <material name="WheelBlack">
         <color rgba="0.117 0.117 0.117 1"/>
@@ -301,7 +301,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="${-3.1415927/2} 0 0"/>
       <geometry>
-        <!--<mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/${suffix}_wheel.stl"/>-->
+        <!--<mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/${suffix}_wheel.stl"/>-->
         <cylinder radius="0.09" length="0.01"/>
       </geometry>
     </collision>
@@ -325,7 +325,7 @@
     <visual name="front_sonar_vis">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://gazebo_plugins/test/diff_drive/meshes/p3dx/back_sonar.stl"/>
+        <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx/back_sonar.stl"/>
       </geometry>
       <material name="SonarYellow">
         <color rgba="0.715 0.583 0.210 1.0"/>
