@@ -113,6 +113,9 @@ namespace gazebo
     /// \brief ROS camera name
     private: std::string camera_name_;
 
+    /// \brief tf prefix
+    private: std::string tf_prefix_;
+    
     /// \brief ROS image topic name
     protected: std::string image_topic_name_;
 

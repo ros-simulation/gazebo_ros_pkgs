@@ -33,7 +33,7 @@
     </collision>
   </link>
   <gazebo reference="front_camera">
-    <material value="Gazebo/grey"/>
+    <material value="Gazebo/Grey"/>
   </gazebo>
     
   <gazebo reference="front_camera">
@@ -60,6 +60,7 @@
         </noise>
       </camera>
       <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <robotNamespace>rr</robotNamespace>
         <alwaysOn>true</alwaysOn>
         <updateRate>0.0</updateRate>
         <cameraName>camera</cameraName>

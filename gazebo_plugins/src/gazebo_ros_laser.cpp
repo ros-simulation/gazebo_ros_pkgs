@@ -38,6 +38,7 @@
 #include <tf/transform_listener.h>
 
 #include <gazebo_plugins/gazebo_ros_laser.h>
+#include <gazebo_plugins/gazebo_ros_sensor_util.h>
 
 namespace gazebo
 {
@@ -71,36 +72,13 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // save pointers
   this->sdf = _sdf;
 
-  // accessing model name like suggested by nkoenig at http://answers.gazebosim.org/question/4878/multiple-robots-with-ros-plugins-sensor-plugin-vs/
-  std::vector<std::string> values;
-  std::string scopedName = _parent->GetScopedName();
-  boost::replace_all(scopedName, "::", ",");
-  boost::split(values, scopedName, boost::is_any_of(","));
-  std::string modelName;
-  if(values.size() < 2){
-    modelName = "";
-  } else {
-    modelName = values[1];
-  }
-  
-  
   this->parent_ray_sensor_ =
     boost::dynamic_pointer_cast<sensors::RaySensor>(_parent);
 
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosLaser controller requires a Ray Sensor as its parent");
 
-  this->robot_namespace_ = modelName;
-  if (this->sdf->HasElement("robotNamespace")){
-    std::string tmp = this->sdf->Get<std::string>("robotNamespace");
-    if(!tmp.empty()){
-      this->robot_namespace_ = tmp;
-    }
-  }
-  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
-
-  
-  ROS_INFO ( "Laser Plugin (robotNamespace = %s)" , this->robot_namespace_.c_str() );
+  this->robot_namespace_ =  GetRobotNamespace(_parent, _sdf, "Laser");
   
   if (!this->sdf->HasElement("frameName"))
   {
@@ -109,16 +87,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   }
   else
     this->frame_name_ = this->sdf->Get<std::string>("frameName");
-   
   
-  this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
-  if(this->tf_prefix_.empty()) {
-      this->tf_prefix_ = this->robot_namespace_;
-      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
-  }
-  ROS_INFO("Laser Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
-             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
-    
   
   if (!this->sdf->HasElement("topicName"))
   {
@@ -154,6 +123,16 @@ void GazeboRosLaser::LoadThread()
 
   this->pmq.startServiceThread();
 
+  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
+  
+  this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
+  if(this->tf_prefix_.empty()) {
+      this->tf_prefix_ = this->robot_namespace_;
+      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
+  }
+  ROS_INFO("Laser Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
+             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
+  
   // resolve tf prefix
   this->frame_name_ = tf::resolve(this->tf_prefix_, this->frame_name_);
 
