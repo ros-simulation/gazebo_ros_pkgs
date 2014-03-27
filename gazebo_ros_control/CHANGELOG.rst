@@ -2,6 +2,22 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Removed some debugging code.
+* joint->SetAngle() and joint->SetVelocity() are now used to control
+  position-controlled joints and velocity-controlled joints that do not
+  have PID gain values stored on the Parameter Server.
+* Position-controlled and velocity-controlled joints now use PID controllers
+  instead of calling SetAngle() or SetVelocity(). readSim() now longer calls
+  angles::shortest_angular_distance() when a joint is prismatic.
+  PLUGINLIB_EXPORT_CLASS is now used to register the plugin.
+* gazebo_ros_control now depends on control_toolbox.
+* Added support for the position hardware interface. Completed support for the
+  velocity hardware interface.
+* Removed the "support more hardware interfaces" line.
+* Contributors: Jim Rothrock
+
 2.3.4 (2013-11-13)
 ------------------
 * Merge pull request `#144 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/144>`_ from meyerj/fix-125
