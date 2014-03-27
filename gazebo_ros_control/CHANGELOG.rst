@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* merging from hydro-devel
+* bump patch version for indigo-devel to 2.4.1
+* merging from indigo-devel after 2.3.4 release
+* Merge branch 'hydro-devel' of github.com:ros-simulation/gazebo_ros_pkgs into indigo-devel
+* "2.4.0"
+* catkin_generate_changelog
+* Contributors: John Hsu
+
 2.4.1 (2013-11-13)
 ------------------
 
