@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.2 (2014-03-27)
+------------------
 * merging from hydro-devel
 * bump patch version for indigo-devel to 2.4.1
 * merging from indigo-devel after 2.3.4 release
