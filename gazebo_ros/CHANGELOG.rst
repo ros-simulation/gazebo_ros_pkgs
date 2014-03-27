@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.5 (2014-03-26)
+------------------
 * gazebo_ros: [less-than-minor] fix newlines
 * gazebo_ros: remove assignment to self
   If this is needed for any twisted reason, it should be made clear

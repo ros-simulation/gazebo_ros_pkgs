@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.5 (2014-03-26)
+------------------
 * Removed some debugging code.
 * joint->SetAngle() and joint->SetVelocity() are now used to control
   position-controlled joints and velocity-controlled joints that do not

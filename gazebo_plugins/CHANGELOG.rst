@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.5 (2014-03-26)
+------------------
 * update test world for block laser
 * this corrects the right orientation of the laser scan and improves on comparison between 2 double numbers
 * Initialize ``depth_image_connect_count_`` in openni_kinect plugin
