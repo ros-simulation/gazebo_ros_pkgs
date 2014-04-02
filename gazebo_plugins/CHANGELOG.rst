@@ -2,6 +2,20 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.5 (2014-03-26)
+------------------
+* update test world for block laser
+* this corrects the right orientation of the laser scan and improves on comparison between 2 double numbers
+* Initialize ``depth_image_connect_count_`` in openni_kinect plugin
+* multicamera bad namespace. Fixes `#161 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/161>`_
+  There was a race condition between GazeboRosCameraUtils::LoadThread
+  creating the ros::NodeHandle and GazeboRosCameraUtils::Load
+  suffixing the camera name in the namespace
+* Use function for accessing scene node in gazebo_ros_video
+* readded the trailing whitespace for cleaner diff
+* the parent sensor in gazebo seems not to be active
+* Contributors: Dejan Pangercic, Ian Chen, John Hsu, Jordi Pages, Toni Oliver, Ugo Cupcic
+
 2.3.4 (2013-11-13)
 ------------------
 * Simplify ``gazebo_plugins/CMakeLists.txt``

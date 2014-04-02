@@ -36,7 +36,6 @@
                 <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
                 <inertial>
                     <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
-                    <damping linear="0.0" angular="0.0" />
                     <inertia>
                         <ixx>1.0</ixx>
                         <ixy>0.0</ixy>
@@ -54,10 +53,12 @@
                             <size>0.05 0.05 0.05</size>
                         </box>
                     </geometry>
+<!--
                     <material normal_map="normal_map.png">
                         <ambient>0.03 0.5 0.5 1.0</ambient>
                         <script>Gazebo/Red</script>
                     </material>
+-->
                     <cast_shadows>true</cast_shadows>
                     <laser_retro>100.0</laser_retro>
                 </visual>
@@ -143,7 +144,6 @@
                 <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
                 <inertial>
                     <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
-                    <damping linear="0.0" angular="0.0" />
                     <inertia>
                         <ixx>1.0</ixx>
                         <ixy>0.0</ixy>
@@ -161,10 +161,12 @@
                             <size>0.05 0.05 0.05</size>
                         </box>
                     </geometry>
+<!--
                     <material normal_map="normal_map.png">
                         <ambient>0.03 0.5 0.5 1.0</ambient>
                         <script>Gazebo/Red</script>
                     </material>
+-->
                     <cast_shadows>true</cast_shadows>
                     <laser_retro>100.0</laser_retro>
                 </visual>
@@ -245,7 +247,6 @@
                 <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
                 <inertial>
                     <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
-                    <damping linear="0.0" angular="0.0" />
                     <inertia>
                         <ixx>1.0</ixx>
                         <ixy>0.0</ixy>
@@ -260,14 +261,16 @@
                     <pose>0.0 0.1 0.0 0.0 0.0 0.0</pose>
                     <geometry>
                         <mesh>
-                            <filename>pr2/gripper_v0/l_finger_tip.stl</filename>
+                            <uri>pr2/gripper_v0/l_finger_tip.stl</uri>
                             <scale>3 3 3</scale>
                         </mesh>
                     </geometry>
+<!--
                     <material normal_map="normal_map.png">
                         <ambient>0.03 0.5 0.5 1.0</ambient>
                         <script>Gazebo/Red</script>
                     </material>
+-->
                     <cast_shadows>true</cast_shadows>
                     <laser_retro>100.0</laser_retro>
                 </visual>
@@ -276,7 +279,7 @@
                     <max_contacts>250</max_contacts>
                     <geometry>
                         <mesh>
-                            <filename>pr2/gripper_v0/l_finger_tip.stl</filename>
+                            <uri>pr2/gripper_v0/l_finger_tip.stl</uri>
                             <scale>3 3 3</scale>
                         </mesh>
                     </geometry>
@@ -311,7 +314,7 @@
                     <pose>0.0 -0.1 0.0 0.0 0.0 0.0</pose>
                     <geometry>
                         <mesh>
-                            <filename>pr2/gripper_v0/l_finger_tip.dae</filename>
+                            <uri>pr2/gripper_v0/l_finger_tip.dae</uri>
                             <scale>3 3 3</scale>
                         </mesh>
                     </geometry>
@@ -323,7 +326,7 @@
                     <max_contacts>250</max_contacts>
                     <geometry>
                         <mesh>
-                            <filename>pr2/gripper_v0/l_finger_tip.dae</filename>
+                            <uri>pr2/gripper_v0/l_finger_tip.dae</uri>
                             <scale>3 3 3</scale>
                         </mesh>
                     </geometry>
@@ -366,7 +369,6 @@
                 <pose>-0.1 -0.5 -0.5 0.0 0.0 0.0</pose>
                 <inertial>
                     <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
-                    <damping linear="0.0" angular="0.0" />
                     <inertia>
                         <ixx>1.0</ixx>
                         <ixy>0.0</ixy>
@@ -384,10 +386,12 @@
                             <size>0.1 0.25 0.5</size>
                         </box>
                     </geometry>
+<!--
                     <material normal_map="normal_map.png">
                         <ambient>0.03 0.5 0.5 1.0</ambient>
                         <script>Gazebo/Green</script>
                     </material>
+-->
                     <cast_shadows>true</cast_shadows>
                     <laser_retro>100.0</laser_retro>
                 </visual>
@@ -434,7 +438,6 @@
                 <pose>0.0 0.5 0.0 0.0 0.0 0.0</pose>
                 <inertial>
                     <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
-                    <damping linear="0.0" angular="0.0" />
                     <inertia>
                         <ixx>1.0</ixx>
                         <ixy>0.0</ixy>
@@ -452,10 +455,12 @@
                             <radius>0.05</radius>
                         </sphere>
                     </geometry>
+<!--
                     <material normal_map="normal_map.png">
                         <ambient>0.03 0.5 0.5 1.0</ambient>
                         <script>Gazebo/Green</script>
                     </material>
+-->
                     <cast_shadows>true</cast_shadows>
                     <laser_retro>100.0</laser_retro>
                 </visual>
@@ -502,7 +507,6 @@
                 <pose>0.5 0.0 0.0 0.0 0.0 0.0</pose>
                 <inertial>
                     <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
-                    <damping linear="0.0" angular="0.0" />
                     <inertia>
                         <ixx>1.0</ixx>
                         <ixy>0.0</ixy>
@@ -521,10 +525,12 @@
                             <length>0.5</length>
                         </cylinder>
                     </geometry>
+<!--
                     <material normal_map="normal_map.png">
                         <ambient>0.03 0.5 0.5 1.0</ambient>
                         <script>Gazebo/Green</script>
                     </material>
+-->
                     <cast_shadows>true</cast_shadows>
                     <laser_retro>100.0</laser_retro>
                 </visual>
@@ -588,7 +594,7 @@
                 <collision name="chair1_collision">
                     <geometry>
                         <mesh>
-                            <filename>chair/models/Chair.stl</filename>
+                            <uri>chair/models/Chair.stl</uri>
                             <scale>0.0254 0.0254 0.0254</scale>
                         </mesh>
                     </geometry>
@@ -621,7 +627,7 @@
                 <visual name="chair1_visual">
                     <geometry>
                         <mesh>
-                            <filename>chair/models/Chair.dae</filename>
+                            <uri>chair/models/Chair.dae</uri>
                             <scale>0.0254 0.0254 0.0254</scale>
                         </mesh>
                     </geometry>

@@ -40,6 +40,8 @@
 
 #include <tf/tf.h>
 
+#define EPSILON_DIFF 0.000001
+
 namespace gazebo
 {
 // Register this plugin with the simulator
@@ -321,31 +323,27 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
       /*  point scan from laser                                      */
       /*                                                             */
       /***************************************************************/
-      if (r == maxRange - minRange)
+      //compare 2 doubles
+      double diffRange = maxRange - minRange;
+      double diff  = diffRange - r;
+      if (fabs(diff) < EPSILON_DIFF)
       {
         // no noise if at max range
         geometry_msgs::Point32 point;
-        point.x = (r+minRange) * cos(pAngle)*cos(yAngle);
-        point.y = -(r+minRange) * sin(yAngle);
-        point.z = (r+minRange) * sin(pAngle)*cos(yAngle);
-
         //pAngle is rotated by yAngle:
-        point.x = (r+minRange) * cos(pAngle) * cos(yAngle);
-        point.y = -(r+minRange) * cos(pAngle) * sin(yAngle);
-        point.z = (r+minRange) * sin(pAngle);
+        point.x = r * cos(pAngle) * cos(yAngle);
+        point.y = r * cos(pAngle) * sin(yAngle);
+        point.z = -r * sin(pAngle);
 
         this->cloud_msg_.points.push_back(point); 
       } 
       else 
       { 
         geometry_msgs::Point32 point;
-        point.x = (r+minRange) * cos(pAngle)*cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
-        point.y = -(r+minRange) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
-        point.z = (r+minRange) * sin(pAngle)*cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_) ;
         //pAngle is rotated by yAngle:
-        point.x = (r+minRange) * cos(pAngle) * cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        point.y = -(r+minRange) * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        point.z = (r+minRange) * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.x = r * cos(pAngle) * cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.y = r * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.z = -r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         this->cloud_msg_.points.push_back(point); 
       } // only 1 channel 
 
