@@ -2,16 +2,16 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <!-- Front Laser --> 
-<xacro:macro name="front_laser" params="xyz rpy meshes" >
+<xacro:macro name="laser" params="name parent xyz rpy meshes" >
   
-  <joint name="front_laser_joint" type="fixed">
+  <joint name="${parent}_${name}_joint" type="fixed">
       <axis xyz="0 0 1" />
       <origin xyz="${xyz}" rpy="${rpy}"/>
-      <parent link="base_link"/>
-      <child link="front_laser"/>
+      <parent link="${parent}"/>
+      <child link="${name}"/>
     </joint>
     
-    <link name="front_laser">
+    <link name="${name}">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
@@ -21,7 +21,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://gazebo_plugins/test/multi_robot_scenario/meshes/laser/hokuyo.dae"/>
+          <mesh filename="${meshes}/hokuyo.dae"/>
         </geometry>
       </visual>
       <inertial>
@@ -31,7 +31,7 @@
       </inertial>
     </link>
     
-    <gazebo reference="front_laser">
+    <gazebo reference="${name}">
         <sensor name="laser" type="ray">
         <pose>0 0 0 0 0 0</pose>
           <ray>
@@ -53,8 +53,8 @@
           
           <plugin name="laser" filename="libgazebo_ros_laser.so" >
             <robotNamespace></robotNamespace>
-            <topicName>front_laser/scan</topicName>
-            <frameName>front_laser</frameName>
+            <topicName>${name}/scan</topicName>
+            <frameName>${name}</frameName>
           </plugin>
           <!--
           <plugin name="laser" filename="libRayPlugin.so" />

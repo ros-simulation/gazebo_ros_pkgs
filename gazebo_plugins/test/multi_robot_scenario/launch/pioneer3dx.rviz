@@ -67,6 +67,11 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        battery0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         center_hubcap:
           Alpha: 1
           Show Axes: false
@@ -92,7 +97,209 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        front_sonar:
+        left_hub:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_hub:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        sonar:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        swivel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        top:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: RobotModel
+      Robot Description: r1/robot_description
+      TF Prefix: r1
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        base_link:
+          Value: true
+        r1/base_link:
+          Value: true
+        r1/battery0:
+          Value: true
+        r1/center_hubcap:
+          Value: true
+        r1/center_wheel:
+          Value: true
+        r1/chassis:
+          Value: true
+        r1/front_camera:
+          Value: true
+        r1/front_laser:
+          Value: true
+        r1/left_hub:
+          Value: true
+        r1/left_wheel:
+          Value: true
+        r1/odom:
+          Value: true
+        r1/right_hub:
+          Value: true
+        r1/right_wheel:
+          Value: true
+        r1/sonar:
+          Value: true
+        r1/swivel:
+          Value: true
+        r1/top:
+          Value: true
+        r2/base_link:
+          Value: true
+        r2/battery0:
+          Value: true
+        r2/center_hubcap:
+          Value: true
+        r2/center_wheel:
+          Value: true
+        r2/chassis:
+          Value: true
+        r2/front_camera:
+          Value: true
+        r2/front_laser:
+          Value: true
+        r2/left_hub:
+          Value: true
+        r2/left_wheel:
+          Value: true
+        r2/odom:
+          Value: true
+        r2/right_hub:
+          Value: true
+        r2/right_wheel:
+          Value: true
+        r2/sonar:
+          Value: true
+        r2/swivel:
+          Value: true
+        r2/top:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        base_link:
+          r1/odom:
+            r1/base_link:
+              r1/chassis:
+                r1/battery0:
+                  {}
+                r1/front_camera:
+                  {}
+                r1/front_laser:
+                  {}
+                r1/left_hub:
+                  r1/left_wheel:
+                    {}
+                r1/right_hub:
+                  r1/right_wheel:
+                    {}
+                r1/sonar:
+                  {}
+                r1/swivel:
+                  r1/center_wheel:
+                    r1/center_hubcap:
+                      {}
+                r1/top:
+                  {}
+          r2/odom:
+            r2/base_link:
+              r2/chassis:
+                r2/battery0:
+                  {}
+                r2/front_camera:
+                  {}
+                r2/front_laser:
+                  {}
+                r2/left_hub:
+                  r2/left_wheel:
+                    {}
+                r2/right_hub:
+                  r2/right_wheel:
+                    {}
+                r2/sonar:
+                  {}
+                r2/swivel:
+                  r2/center_wheel:
+                    r2/center_hubcap:
+                      {}
+                r2/top:
+                  {}
+      Update Interval: 0
+      Value: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        battery0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        center_hubcap:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        center_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        chassis:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_camera:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_laser:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -117,101 +324,21 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        sonar:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         swivel:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        top_plate:
+        top:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-      Name: RobotModel
-      Robot Description: r1/robot_description
-      TF Prefix: r1
-      Update Interval: 0
-      Value: true
-      Visual Enabled: true
-    - Class: rviz/TF
-      Enabled: true
-      Frame Timeout: 15
-      Frames:
-        All Enabled: true
-        base_link:
-          Value: true
-        r1/base_link:
-          Value: true
-        r1/center_hubcap:
-          Value: true
-        r1/center_wheel:
-          Value: true
-        r1/chassis:
-          Value: true
-        r1/front_camera:
-          Value: true
-        r1/front_laser:
-          Value: true
-        r1/front_sonar:
-          Value: true
-        r1/left_hub:
-          Value: true
-        r1/left_wheel:
-          Value: true
-        r1/odom:
-          Value: true
-        r1/right_hub:
-          Value: true
-        r1/right_wheel:
-          Value: true
-        r1/swivel:
-          Value: true
-        r1/top_plate:
-          Value: true
-        r2/odom:
-          Value: true
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: false
-      Tree:
-        base_link:
-          r1/odom:
-            r1/base_link:
-              r1/chassis:
-                r1/swivel:
-                  r1/center_wheel:
-                    r1/center_hubcap:
-                      {}
-                r1/top_plate:
-                  {}
-              r1/front_camera:
-                {}
-              r1/front_laser:
-                {}
-              r1/front_sonar:
-                {}
-              r1/left_hub:
-                r1/left_wheel:
-                  {}
-              r1/right_hub:
-                r1/right_wheel:
-                  {}
-          r2/odom:
-            {}
-      Update Interval: 0
-      Value: true
-    - Alpha: 1
-      Class: rviz/RobotModel
-      Collision Enabled: false
-      Enabled: true
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        Link Tree Style: Links in Alphabetic Order
       Name: RobotModel
       Robot Description: r2/robot_description
       TF Prefix: r2
@@ -279,7 +406,7 @@ Visualization Manager:
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
-      Image Topic: /r1/camera/image_raw
+      Image Topic: /r1/front_camera/image_raw
       Name: Camera
       Overlay Alpha: 0.5
       Queue Size: 2

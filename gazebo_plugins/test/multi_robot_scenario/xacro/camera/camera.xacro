@@ -2,17 +2,17 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <!-- Camera --> 
-<xacro:macro name="cam_front" params="xyz rpy">
+<xacro:macro name="cam" params="name parent xyz rpy">
     
-  <joint name="base_front_camera_joint" type="fixed">
-          <axis xyz="0 0 1" />
-          <origin xyz="${xyz}" rpy="${rpy}"/>
-          <parent link="base_link"/>
-          <child link="front_camera"/>
+  <joint name="${parent}_${name}_joint" type="fixed">
+      <axis xyz="0 0 1" />
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <parent link="${parent}"/>
+      <child link="${name}"/>
   </joint>
       
   <!-- Camera -->
-  <link name="front_camera">
+  <link name="${name}">
     <inertial>
       <mass value="1e-5" />
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -32,11 +32,11 @@
       </geometry>
     </collision>
   </link>
-  <gazebo reference="front_camera">
+  <gazebo reference="${name}">
     <material value="Gazebo/Grey"/>
   </gazebo>
     
-  <gazebo reference="front_camera">
+  <gazebo reference="${name}">
     <sensor type="camera" name="camera1">
       <update_rate>30.0</update_rate>
       <camera name="head">
@@ -63,10 +63,10 @@
         <robotNamespace></robotNamespace>
         <alwaysOn>true</alwaysOn>
         <updateRate>0.0</updateRate>
-        <cameraName>camera</cameraName>
+        <cameraName>${name}</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-        <frameName>front_camera</frameName>
+        <frameName>${name}</frameName>
         <hackBaseline>0.07</hackBaseline>
         <distortionK1>0.0</distortionK1>
         <distortionK2>0.0</distortionK2>

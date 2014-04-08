@@ -6,12 +6,12 @@
   
   <!-- Import robot -->
   <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/p3dx/pioneer3dx_body.xacro"/>
-  <xacro:pioneer3dx_body meshes="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx"/>
+  <xacro:pioneer3dx_body name="chassis" parent="base_link" meshes="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx"/>
   
   <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/laser/hokuyo.xacro"/>
-  <xacro:front_laser xyz="0.16 0 0.1" rpy="0 0 0" meshes="package://gazebo_plugins/test/multi_robot_scenario/meshes/laser"/>
+  <xacro:laser name="front_laser" parent="chassis" xyz="0.16 0 0.1" rpy="0 0 0" meshes="package://gazebo_plugins/test/multi_robot_scenario/meshes/laser"/>
   
   <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/camera/camera.xacro"/>
-  <xacro:cam_front xyz="0 0 0.5" rpy="0 0 0" />
+  <xacro:cam name="front_camera" parent="chassis" xyz="0 0 0.5" rpy="0 0 0" />
   
 </robot>
