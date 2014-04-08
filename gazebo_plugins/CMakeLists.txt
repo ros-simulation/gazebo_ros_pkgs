@@ -18,7 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
   driver_base 
   rosgraph_msgs 
   trajectory_msgs 
-  pcl_ros 
   pcl_conversions
   image_transport 
   rosconsole
@@ -112,7 +111,6 @@ catkin_package(
   driver_base 
   rosgraph_msgs 
   trajectory_msgs 
-  pcl_ros 
   pcl_conversions
   image_transport 
   rosconsole
