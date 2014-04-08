@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <!-- Front Laser --> 
-<xacro:macro name="front_laser" params="xyz rpy">
+<xacro:macro name="front_laser" params="xyz rpy meshes" >
   
   <joint name="front_laser_joint" type="fixed">
       <axis xyz="0 0 1" />

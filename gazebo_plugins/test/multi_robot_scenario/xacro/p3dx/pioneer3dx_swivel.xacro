@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
-<robot  
-  xmlns:xacro="http://ros.org/wiki/xacro">
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
   <property name="M_PI" value="3.1415926535897931" />
 
-  <xacro:macro name="pioneer_swivel" params="parent xyz rpy">   
+  <xacro:macro name="pioneer_swivel" params="parent xyz rpy meshes">   
   
   <!-- Swivel -->
   <joint name="chassis_swivel_joint" type="continuous">
@@ -24,7 +23,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/swivel.stl"/>
+        <mesh filename="${meshes}/swivel.stl"/>
       </geometry>
       <material name="swivel">
         <color rgba="0.5 0.5 0.5 1"/>
@@ -60,7 +59,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/center_wheel.stl"/>
+        <mesh filename="${meshes}/center_wheel.stl"/>
       </geometry>
       <material name="WheelBlack">
         <color rgba="0.117 0.117 0.117 1"/>
@@ -69,7 +68,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="${-3.1415927/2.0} 0 0"/>
       <geometry>
-        <!--<mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/center_wheel.stl"/>-->
+        <!--<mesh filename="${meshes}/center_wheel.stl"/>-->
         <cylinder radius="0.0375" length="0.01"/>
       </geometry>
     </collision>
@@ -93,7 +92,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/center_hubcap.stl"/>
+        <mesh filename="${meshes}/center_hubcap.stl"/>
       </geometry>
       <material name="swivel">
         <color rgba="0.5 0.5 0.5 1"/>

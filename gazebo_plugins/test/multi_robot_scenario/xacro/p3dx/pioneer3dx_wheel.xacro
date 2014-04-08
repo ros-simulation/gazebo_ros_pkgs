@@ -3,7 +3,7 @@
   xmlns:xacro="http://ros.org/wiki/xacro">
   <property name="M_PI" value="3.1415926535897931" />
 
-  <xacro:macro name="pioneer_wheel" params="side parent xyz rpy radius">   
+  <xacro:macro name="pioneer_wheel" params="side parent xyz rpy radius meshes">   
 
   <!-- Hubcap -->
   <joint name="${side}_hub_joint" type="continuous">
@@ -21,7 +21,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/${side}_hubcap.stl"/>
+        <mesh filename="${meshes}/${side}_hubcap.stl"/>
       </geometry>
       <material name="HubcapYellow">
         <color rgba="1.0 0.811 0.151 1.0"/>
@@ -54,7 +54,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/${side}_wheel.stl"/>
+        <mesh filename="${meshes}/${side}_wheel.stl"/>
       </geometry>
       <material name="WheelBlack">
         <color rgba="0.117 0.117 0.117 1"/>
@@ -63,7 +63,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="${-3.1415927/2} 0 0"/>
       <geometry>
-        <!--<mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/${side}_wheel.stl"/>-->
+        <!--<mesh filename="${meshes}/${side}_wheel.stl"/>-->
         <cylinder radius="${radius}" length="0.01"/>
       </geometry>
     </collision>

@@ -1,146 +1,38 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  
+  <xacro:include filename="inertia_tensors.xacro"/>
+  <xacro:include filename="pioneer3dx_chassis.xacro"/>
+  <xacro:include filename="battery_block.xacro"/>
+  <xacro:include filename="pioneer3dx_wheel.xacro"/>
+  <xacro:include filename="pioneer3dx_swivel.xacro"/>
+  <xacro:include filename="pioneer3dx_sonar.xacro"/>
+  <xacro:include filename="pioneer3dx_plugins.xacro"/>
+  
+  <xacro:macro name="pioneer3dx_body" params="meshes">
+        
+    <!-- base_link -->
+    <link name="base_link"/>
     
-  <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/p3dx/inertia_tensors.xacro"/>
-  <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/p3dx/battery_block.xacro"/>
-  <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/p3dx/pioneer3dx_wheel.xacro"/>
-  <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/p3dx/pioneer3dx_swivel.xacro"/>
-  
-  <xacro:macro name="pioneer3dx_body" params="">
-	  
-	  
-      
-  <!-- base_link -->
-  <link name="base_link"/>
-  <gazebo reference="base_link">
-    <material value="Gazebo/Red"/>
-  </gazebo>
-      
-  <!-- Chassis -->
-  <joint name="base_chassis_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <parent link="base_link"/>
-    <child link="chassis"/>
-  </joint>
-  <link name="chassis">
-    <visual name="chassis_visual">
-      <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
-      <geometry name="pioneer_geom">
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/chassis.stl"/>
-      </geometry>
-      <material name="ChassisRed">
-        <color rgba="0.851 0.0 0.0 1.0"/>
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/chassis.stl"/>
-      </geometry>
-    </collision>
-    <xacro:box_inertial x="0.36" y="0.26"  z="0.18" mass="9.0" />
-  </link>
-  <gazebo reference="chassis">
-    <material value="Gazebo/Red"/>
-  </gazebo>
-  
-  
-  <!-- Akku0 -->
-  <xacro:battery_block name="accu0" parent="chassis" x="-0.14" y="0.00"  z="0.13" mass="2.5" />
+    <!-- Chassis -->
+    <xacro:pioneer_chassis name="chassis" parent="base_link" xyz="0 0 0" rpy="0 0 0"  meshes="${meshes}"/>
     
-  <!-- Top -->
-  <joint name="chassis_top_joint" type="fixed">
-    <origin xyz="-0.045 0 0.234" rpy="0 0 0"/>
-    <parent link="chassis"/>
-    <child link="top_plate"/>
-  </joint>
-  <link name="top_plate">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry name="top_geom">
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/top.stl"/>
-      </geometry>
-      <material name="TopBlack">
-        <color rgba="0.038 0.038 0.038 1.0"/>
-      </material>
-    </visual>
-    <collision>
-    <origin xyz="0.0 0 0.0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/top.stl"/>
-      </geometry>
-    </collision>
-    <xacro:box_inertial x="0.445" y="0.38"  z="0.01" mass="1.0" />
-  </link>
-  <gazebo reference="top_plate">
-    <material value="Gazebo/Black"/>
-  </gazebo>
-  
-  
-  <!-- Wheels -->
-  <xacro:pioneer_swivel parent="chassis"  xyz="-0.185 0 0.055" rpy="0 0 0" />
-  <xacro:pioneer_wheel side="right" parent="chassis"  xyz="0  0.15 0.09" rpy="0 0 0" radius="0.09"/>
-  <xacro:pioneer_wheel side="left"  parent="chassis"  xyz="0 -0.15 0.09" rpy="0 0 0" radius="0.09"/>
-  
-  <!-- Front Sonar -->
-  <joint name="base_front_joint" type="fixed">
-    <origin xyz="0.109 0 0.209" rpy="0 0 0"/>
-    <parent link="base_link"/>
-    <child link="front_sonar"/>
-  </joint>
-  <link name="front_sonar">
-    <inertial>
-      <mass value="0.0001"/>
-      <origin xyz="0 0 0"/>
-      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
-    </inertial>
-    <visual name="front_sonar_vis">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry name="pioneer_geom">
-        <mesh filename="package://v4r_gazebo/meshes/p3dx_meshes/back_sonar.stl"/>
-      </geometry>
-      <material name="SonarYellow">
-        <color rgba="0.715 0.583 0.210 1.0"/>
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0 0 0"/>
-      </geometry>
-    </collision>
-  </link>
-  <gazebo reference="front_sonar">
-    <material value="Gazebo/Yellow"/>
-  </gazebo>
-  
-  <gazebo>
-      <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
-        <robotNamespace></robotNamespace>
-        <jointName>chassis_swivel_joint, swivel_wheel_joint, left_hub_joint, right_hub_joint</jointName>
-        <updateRate>10.0</updateRate>
-        <alwaysOn>true</alwaysOn>
-      </plugin>
-  </gazebo>
-      
-    <gazebo>
-        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-            <robotNamespace></robotNamespace>
-            <publishWheelTF>false</publishWheelTF>
-            <publishWheelJointState>true</publishWheelJointState>
-            <alwaysOn>true</alwaysOn>
-            <leftJoint>left_hub_joint</leftJoint>
-            <rightJoint>right_hub_joint</rightJoint>
-            <wheelSeparation>0.5380</wheelSeparation>
-            <wheelDiameter>0.18</wheelDiameter>
-            <torque>20</torque>
-            <commandTopic>cmd_vel</commandTopic>
-            <odometryTopic>odom</odometryTopic>
-            <odometryFrame>odom</odometryFrame>
-            <robotBaseFrame>base_link</robotBaseFrame>
-            <updateRate>100.0</updateRate>
-        </plugin>
-    </gazebo>
+    <!-- Front Sonar -->
+    <xacro:pioneer_sonar name="sonar" parent="chassis" xyz="0.109 0 0.209" rpy="0 0 0"  meshes="${meshes}"/>      
+    
+    <!-- Akku0 -->
+    <xacro:battery_block name="battery0" parent="chassis" x="-0.14" y="0.00"  z="0.13" mass="2.5" />  
+    
+    <!-- Wheels -->
+    <xacro:pioneer_wheel side="right" parent="chassis"  xyz="0  0.15 0.09" rpy="0 0 0" radius="0.09" meshes="${meshes}"/>
+    <xacro:pioneer_wheel side="left"  parent="chassis"  xyz="0 -0.15 0.09" rpy="0 0 0" radius="0.09" meshes="${meshes}"/>
+    <xacro:pioneer_swivel parent="chassis"  xyz="-0.185 0 0.055" rpy="0 0 0" meshes="${meshes}"/>
+    
+    <!-- Motor plugin -->
+    <xacro:pioneer3dx_diff_drive />
+    
+    <!-- Joints plugin -->
+    <xacro:pioneer3dx_joints_state_publisher />
+    
   </xacro:macro>
 </robot>
