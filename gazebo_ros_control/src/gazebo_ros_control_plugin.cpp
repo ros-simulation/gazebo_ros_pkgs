@@ -148,7 +148,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
   const std::string urdf_string = getURDF(robot_description_);
   if (!parseTransmissionsFromURDF(urdf_string))
   {
-    ROS_ERROR("gazebo_ros_control", "Error parsing URDF in gazebo_ros_control plugin, plugin not active.\n");
+    ROS_ERROR_NAMED("gazebo_ros_control", "Error parsing URDF in gazebo_ros_control plugin, plugin not active.\n");
     return;
   }
 
