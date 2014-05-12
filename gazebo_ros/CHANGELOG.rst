@@ -4,8 +4,9 @@ Changelog for package gazebo_ros
 
 Forthcoming
 -----------
+* added osx support for gazebo start scripts
 * Remove gazebo_ros dependency on gazebo_plugins
-* Contributors: Steven Peters
+* Contributors: Markus Achtelik, Steven Peters
 
 2.4.2 (2014-03-27)
 ------------------
