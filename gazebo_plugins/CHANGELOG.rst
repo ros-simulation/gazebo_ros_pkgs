@@ -2,6 +2,15 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_plugins: add run-time dependency on gazebo_ros
+* Merge pull request `#176 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/176>`_ from ros-simulation/issue_175
+  Fix `#175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/175>`_: dynamic reconfigure dependency error
+* Remove unneeded dependency on pcl_ros
+* Fix `#175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/175>`_: dynamic reconfigure dependency error
+* Contributors: Steven Peters
+
 2.4.2 (2014-03-27)
 ------------------
 * merging from hydro-devel

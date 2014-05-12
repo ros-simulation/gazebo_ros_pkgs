@@ -2,6 +2,9 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.4.2 (2014-03-27)
 ------------------
 * merging from hydro-devel

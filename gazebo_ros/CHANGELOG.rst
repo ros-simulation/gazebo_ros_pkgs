@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove gazebo_ros dependency on gazebo_plugins
+* Contributors: Steven Peters
+
 2.4.2 (2014-03-27)
 ------------------
 * merging from hydro-devel
