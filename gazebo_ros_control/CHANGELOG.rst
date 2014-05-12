@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.3 (2014-05-12)
+------------------
 * Compatibility with Indigo's ros_control.
   Also fixes `#184 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/184>`_.
 * Remove build-time dependency on gazebo_ros.
