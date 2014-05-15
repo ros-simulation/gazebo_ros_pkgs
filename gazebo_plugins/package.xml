@@ -31,6 +31,7 @@
   <build_depend>nav_msgs</build_depend>
   <build_depend>urdf</build_depend>
   <build_depend>tf</build_depend>
+  <build_depend>tf2_ros</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>driver_base</build_depend>
   <build_depend>rosgraph_msgs</build_depend>
@@ -55,6 +56,7 @@
   <run_depend>nav_msgs</run_depend>
   <run_depend>urdf</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>tf2_ros</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>driver_base</run_depend>
   <run_depend>rosgraph_msgs</run_depend>
