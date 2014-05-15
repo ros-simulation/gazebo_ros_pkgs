@@ -6,6 +6,7 @@
   <arg name="gui" default="true"/>
   <arg name="headless" default="false"/>
   <arg name="debug" default="false"/>
+  <arg name="verbose" default="false"/>
   <arg name="world_name" default="worlds/empty.world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
 
   <!-- set use_sim_time flag -->
@@ -18,12 +19,14 @@
   <arg     if="$(arg paused)" name="command_arg1" value="-u"/>
   <arg unless="$(arg headless)" name="command_arg2" value=""/>
   <arg     if="$(arg headless)" name="command_arg2" value="-r"/>
+  <arg unless="$(arg verbose)" name="command_arg3" value=""/>
+  <arg     if="$(arg verbose)" name="command_arg3" value="--verbose"/>
   <arg unless="$(arg debug)" name="script_type" value="gzserver"/>
   <arg     if="$(arg debug)" name="script_type" value="debug"/>
 
   <!-- start gazebo server-->
   <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="false" output="screen"
-	args="$(arg command_arg1) $(arg command_arg2) $(arg world_name)" />
+	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) $(arg world_name)" />
 	
   <!-- start gazebo client -->
   <group if="$(arg gui)">
