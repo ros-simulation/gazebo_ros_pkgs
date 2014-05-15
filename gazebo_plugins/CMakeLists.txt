@@ -249,6 +249,7 @@ install(TARGETS
   gazebo_ros_imu
   gazebo_ros_f3d
   gazebo_ros_bumper
+  gazebo_ros_hand_of_god
   gazebo_ros_template
   gazebo_ros_projector
   gazebo_ros_prosilica
