@@ -35,8 +35,10 @@
 #include <gazebo/sensors/SensorTypes.hh>
 
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 
 #include "gazebo_plugins/gazebo_ros_gpu_laser.h"
+#include <gazebo_plugins/gazebo_ros_sensor_util.h>
 
 namespace gazebo
 {
@@ -78,9 +80,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosLaser controller requires a Ray Sensor as its parent");
 
-  this->robot_namespace_ = "";
-  if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
+  this->robot_namespace_ =  GetRobotNamespace(_parent, _sdf, "Laser");
 
   if (!this->sdf->HasElement("frameName"))
   {
@@ -120,16 +120,23 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 // Load the controller
 void GazeboRosLaser::LoadThread()
 {
-  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
   this->gazebo_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   this->gazebo_node_->Init(this->world_name_);
 
   this->pmq.startServiceThread();
-
+  
+  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
+  
+  this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
+  if(this->tf_prefix_.empty()) {
+      this->tf_prefix_ = this->robot_namespace_;
+      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
+  }
+  ROS_INFO("GPU Laser Plugin (ns = %s) <tf_prefix_>, set to \"%s\"",
+             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
+  
   // resolve tf prefix
-  std::string prefix;
-  this->rosnode_->getParam(std::string("tf_prefix"), prefix);
-  this->frame_name_ = tf::resolve(prefix, this->frame_name_);
+  this->frame_name_ = tf::resolve(this->tf_prefix_, this->frame_name_);
 
   if (this->topic_name_ != "")
   {

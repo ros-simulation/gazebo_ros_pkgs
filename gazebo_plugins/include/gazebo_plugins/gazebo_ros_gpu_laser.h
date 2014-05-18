@@ -75,6 +75,9 @@ namespace gazebo
 
     /// \brief frame transform name, should match link name
     private: std::string frame_name_;
+    
+    /// \brief tf prefix
+    private: std::string tf_prefix_;
 
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
