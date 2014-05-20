@@ -18,6 +18,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend> 
+  <build_depend>gazebo</build_depend>
   <build_depend>control_toolbox</build_depend> 
   <build_depend>controller_manager</build_depend> 
   <build_depend>pluginlib</build_depend> 
