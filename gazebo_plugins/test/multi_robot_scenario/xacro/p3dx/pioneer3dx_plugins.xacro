@@ -23,7 +23,7 @@
             <rightJoint>right_hub_joint</rightJoint>
             <wheelSeparation>0.5380</wheelSeparation>
             <wheelDiameter>0.18</wheelDiameter>
-            <torque>20</torque>
+            <torque>3</torque>
             <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
