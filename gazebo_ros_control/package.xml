@@ -25,6 +25,7 @@
   <build_depend>transmission_interface</build_depend> 
   <build_depend>joint_limits_interface</build_depend>
   <build_depend>urdf</build_depend>
+  <build_depend>angles</build_depend>
   
   <run_depend>roscpp</run_depend> 
   <run_depend>gazebo_ros</run_depend> 
@@ -33,6 +34,7 @@
   <run_depend>pluginlib</run_depend> 
   <run_depend>transmission_interface</run_depend> 
   <run_depend>urdf</run_depend>
+  <run_depend>angles</run_depend>
 
   <export>
     <gazebo_ros_control plugin="${prefix}/robot_hw_sim_plugins.xml"/>
