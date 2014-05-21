@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   joint_limits_interface
   urdf
+  angles
 )
 
 # Depend on system install of Gazebo 
