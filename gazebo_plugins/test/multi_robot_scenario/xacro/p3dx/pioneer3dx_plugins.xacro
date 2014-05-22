@@ -21,14 +21,15 @@
             <alwaysOn>true</alwaysOn>
             <leftJoint>left_hub_joint</leftJoint>
             <rightJoint>right_hub_joint</rightJoint>
-            <wheelSeparation>0.5380</wheelSeparation>
+            <wheelSeparation>0.3</wheelSeparation>
             <wheelDiameter>0.18</wheelDiameter>
-            <torque>3</torque>
+            <torque>20</torque>
             <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
             <robotBaseFrame>base_link</robotBaseFrame>
-            <updateRate>100.0</updateRate>
+            <updateRate>10.0</updateRate>
+            <max_accel>1.8</max_accel>
         </plugin>
     </gazebo>
     

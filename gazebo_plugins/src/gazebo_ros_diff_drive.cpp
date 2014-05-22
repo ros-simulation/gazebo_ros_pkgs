@@ -38,6 +38,15 @@
  * $ Id: 06/21/2013 11:23:40 AM piyushk $
  */
 
+
+/*
+ * 
+ * The support of acceleration limit was added by
+ * \author   George Todoran <todorangrg@gmail.com>
+ * \author   Markus Bader <markus.bader@tuwien.ac.at> 
+ * \date 22th of May 2014
+ */
+
 #include <algorithm>
 #include <assert.h>
 
@@ -205,6 +214,14 @@ void GazeboRosDiffDrive::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
                      this->robot_namespace_.c_str(), value.c_str());
         }
     }
+    this->max_accel=0;
+    if (!_sdf->HasElement("max_accel")) {
+        ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <max_accel>, defaults to %f",
+                 this->robot_namespace_.c_str(), this->max_accel);
+    } else {
+        this->max_accel = _sdf->GetElement("max_accel")->Get<double>();
+    }
+
     ROS_INFO("GazeboRosDiffDrive Plugin (ns = %s) <publishWheelJointState>, set to %s",
              this->robot_namespace_.c_str(), (this->publishWheelJointState_?"ture":"false"));
 
@@ -333,8 +350,38 @@ void GazeboRosDiffDrive::UpdateChild() {
 
         // Update robot in case new velocities have been requested
         getWheelVelocities();
-        joints_[LEFT]->SetVelocity(0, wheel_speed_[LEFT] / (wheel_diameter_ / 2.0));
-        joints_[RIGHT]->SetVelocity(0, wheel_speed_[RIGHT] / (wheel_diameter_ / 2.0));
+
+
+        double current_speed[2];
+
+        current_speed[LEFT] = joints_[LEFT]->GetVelocity(0)   * (wheel_diameter_ / 2.0);
+        current_speed[RIGHT] = joints_[RIGHT]->GetVelocity(0) * (wheel_diameter_ / 2.0);
+
+        if(max_accel==0
+                || (fabs(wheel_speed_[LEFT] - current_speed[LEFT]) < 0.01)
+                || (fabs(wheel_speed_[RIGHT] - current_speed[RIGHT]) < 0.01)) {
+            //if max_accel==0, or target speed is reached
+            joints_[LEFT]->SetVelocity(0, wheel_speed_[LEFT]/ (wheel_diameter_ / 2.0));
+            joints_[RIGHT]->SetVelocity(0, wheel_speed_[RIGHT]/ (wheel_diameter_ / 2.0));
+        }
+        else {
+
+            if(wheel_speed_[LEFT]>=current_speed[LEFT])
+                wheel_speed_instr_[LEFT]+=fmin(wheel_speed_[LEFT]-current_speed[LEFT],  max_accel * seconds_since_last_update);
+            else
+                wheel_speed_instr_[LEFT]+=fmax(wheel_speed_[LEFT]-current_speed[LEFT], -max_accel * seconds_since_last_update);
+
+            if(wheel_speed_[RIGHT]>current_speed[RIGHT])
+                wheel_speed_instr_[RIGHT]+=fmin(wheel_speed_[RIGHT]-current_speed[RIGHT], max_accel * seconds_since_last_update);
+            else
+                wheel_speed_instr_[RIGHT]+=fmax(wheel_speed_[RIGHT]-current_speed[RIGHT], -max_accel * seconds_since_last_update);
+
+            // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[LEFT], wheel_speed_[LEFT]);
+            // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[RIGHT],wheel_speed_[RIGHT]);
+
+            joints_[LEFT]->SetVelocity(0,wheel_speed_instr_[LEFT] / (wheel_diameter_ / 2.0));
+            joints_[RIGHT]->SetVelocity(0,wheel_speed_instr_[RIGHT] / (wheel_diameter_ / 2.0));
+        }
 
         last_update_time_+= common::Time(update_period_);
 
@@ -428,3 +475,4 @@ void GazeboRosDiffDrive::publishOdometry(double step_time) {
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosDiffDrive)
 }
+
