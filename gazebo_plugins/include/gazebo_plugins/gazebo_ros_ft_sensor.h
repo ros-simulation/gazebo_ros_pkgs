@@ -1,5 +1,7 @@
 /*
- *  Copyright (C) 2014
+ *  Gazebo - Outdoor Multi-Robot Simulator
+ *  Copyright (C) 2003  
+ *     Nate Koenig & Andrew Howard
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,6 +43,37 @@
 
 namespace gazebo
 {
+/// @addtogroup gazebo_dynamic_plugins Gazebo ROS Dynamic Plugins
+/// @{
+/** \defgroup GazeboRosFTSensor Plugin XML Reference and Example
+
+  \brief Ros Gazebo Ros Force/Torque Sensor Plugin.
+  
+  This is a model plugin which broadcasts geometry_msgs/WrenchStamped messages
+  with measured force and torque on a specified joint.
+  
+  The wrench is reported in the joint CHILD link frame and the measure direction 
+  is child-to-parent link.
+
+  Example Usage:
+
+  \verbatim
+      <!-- Enable the Joint Feedback -->
+      <gazebo reference="JOINT_NAME">
+        <provideFeedback>true</provideFeedback>
+      </gazebo>
+      <!-- The ft_sensor plugin -->
+      <gazebo>
+        <plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+          <updateRate>100.0</updateRate>
+          <topicName>ft_sensor_topic</topicName>
+          <jointName>JOINT_NAME</jointName>
+        </plugin>
+      </gazebo>
+  \endverbatim
+\{
+*/
+
 
 /// \brief GazeboRosFT controller
 /// This is a controller that simulates a 6 dof force sensor
