@@ -5,7 +5,6 @@
   <description>Interface for using ROS with the <a href="http://gazebosim.org/">Gazebo</a> simulator.</description>
 
   <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
 
   <license>BSD,LGPL,Apache 2.0</license>
 
