@@ -86,7 +86,7 @@ void GazeboRosIMU::LoadThread()
   if (!this->sdf->HasElement("gaussianNoise"))
   {
     ROS_INFO("imu plugin missing <gaussianNoise>, defaults to 0.0");
-    this->gaussian_noise_ = 0;
+    this->gaussian_noise_ = 0.0;
   }
   else
     this->gaussian_noise_ = this->sdf->Get<double>("gaussianNoise");
@@ -119,7 +119,7 @@ void GazeboRosIMU::LoadThread()
   {
     ROS_DEBUG("imu plugin missing <updateRate>, defaults to 0.0"
              " (as fast as possible)");
-    this->update_rate_ = 0;
+    this->update_rate_ = 0.0;
   }
   else
     this->update_rate_ = this->sdf->GetElement("updateRate")->Get<double>();
@@ -200,7 +200,7 @@ void GazeboRosIMU::UpdateChild()
   
   // rate control
   if (this->update_rate_ > 0 &&
-      (cur_time-this->last_time_).Double() < (1.0/this->update_rate_))
+      (cur_time - this->last_time_).Double() < (1.0 / this->update_rate_))
     return;
     
   if ((this->pub_.getNumSubscribers() > 0 && this->topic_name_ != ""))
