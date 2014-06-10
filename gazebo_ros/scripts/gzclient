@@ -2,7 +2,7 @@
 final="$@"
 
 EXT=so
-if [ $(uname) == "Darwin" ]; then
+if [ $(uname) = "Darwin" ]; then
     EXT=dylib
 fi
 
