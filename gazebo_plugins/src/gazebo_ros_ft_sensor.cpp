@@ -170,10 +170,10 @@ void GazeboRosFT::UpdateChild()
   // E.g: https://bitbucket.org/osrf/gazebo/raw/default/gazebo/sensors/ForceTorqueSensor.hh
   // Get force torque at the joint
   // The wrench is reported in the CHILD <frame>
-  // The <measure_direction> is child_to_parent
+  // The <measure_direction> is parent_to_child
   wrench = this->joint_->GetForceTorque(0);
-  force = wrench.body2Force;
-  torque = wrench.body2Torque;
+  force = -wrench.body2Force;
+  torque = -wrench.body2Torque;
 
 
   this->lock_.lock();
