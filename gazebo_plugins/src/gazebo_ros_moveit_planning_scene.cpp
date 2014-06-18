@@ -130,7 +130,7 @@ void GazeboRosMoveItPlanningScene::Load(physics::ModelPtr _model, sdf::ElementPt
   publish_planning_scene_service_ = this->rosnode_->advertiseService(aso);
 
   // Publish the full scene on the next update
-  publish_full_scene_ = false;
+  publish_full_scene_ = true;
 
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
@@ -168,9 +168,9 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
     } else {
       last_publish_time_ = ros::Time::now();
     }
-  } else {
-    publish_full_scene_ = false;
-  }
+  }// else {
+  //  publish_full_scene_ = false;
+  //}
 
   // Iterate through the tracked models and clear their dynamic information
   // This also sets objects to be removed if they currently aren't in the scene
@@ -214,7 +214,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
       collision_object_map_.find(model_name);
 
     // Create a new collision object representing this gazebo model if it's not in the map
-    if(found_collision_object == collision_object_map_.end()) {
+    if(found_collision_object == collision_object_map_.end() || publish_full_scene_){
       moveit_msgs::CollisionObject new_object;
       new_object.id = model_name;
       new_object.header.frame_id = "world";
@@ -459,6 +459,9 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
   }
 
   planning_scene_pub_.publish(planning_scene_msg_);
+
+  // no more full scene
+  publish_full_scene_ = false;
 }
 
 // Custom Callback Queue
