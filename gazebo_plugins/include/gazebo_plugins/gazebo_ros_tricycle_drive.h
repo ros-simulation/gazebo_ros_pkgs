@@ -99,6 +99,7 @@ private:
     void publishOdometry(double step_time);
     void publishWheelTF(); /// publishes the wheel tf's
     void publishWheelJointState();
+    void motorController(double target_speed, double target_angle, double dt);
 
     event::ConnectionPtr update_connection_;
 
@@ -109,12 +110,15 @@ private:
 
     double diameter_encoder_wheel_;
     double diameter_actuated_wheel_;
-    double wheel_acceleration;
-    double steering_speed;
+    double wheel_acceleration_;
+    double wheel_deceleration_;
+    double wheel_speed_tolerance_;
+    double steering_angle_tolerance_;
+    double steering_speed_;
     double separation_encoder_wheel_;
 
     OdomSource odom_source_;
-    double torque;
+    double wheel_torque_;
 
     std::string robot_namespace_;
     std::string command_topic_;

@@ -17,15 +17,18 @@
             <actuatedWheelDiameter>0.135</actuatedWheelDiameter>
             <encoderWheelDiameter>0.135</encoderWheelDiameter>
             <encoderWheelSeparation>0.548</encoderWheelSeparation>
-            <torque>20</torque>
             <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
             <odometrySource>encoder</odometrySource>
             <robotBaseFrame>base_link</robotBaseFrame>
             <updateRate>10.0</updateRate>
-            <wheel_acceleration>1.8</wheel_acceleration>
-            <steering_speed>1.8</steering_speed>
+            <wheelAcceleration>1.8</wheelAcceleration>
+            <wheelDeceleration>5.0</wheelDeceleration>
+            <wheelSpeedTolerance>0.05</wheelSpeedTolerance>
+            <wheelTorque>20</wheelTorque>
+            <steeringSpeed>0.4</steeringSpeed>
+            <steeringAngleTolerance>0.02</steeringAngleTolerance>
         </plugin>
     </gazebo>
     

@@ -24,13 +24,13 @@
             <rightJoint>right_hub_joint</rightJoint>
             <wheelSeparation>0.3</wheelSeparation>
             <wheelDiameter>0.18</wheelDiameter>
-            <torque>20</torque>
+            <wheelTorque>20</wheelTorque>
+            <wheelAcceleration>1.8</wheelAcceleration>
             <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
             <robotBaseFrame>base_link</robotBaseFrame>
             <updateRate>10.0</updateRate>
-            <max_accel>1.8</max_accel>
         </plugin>
     </gazebo>
     
