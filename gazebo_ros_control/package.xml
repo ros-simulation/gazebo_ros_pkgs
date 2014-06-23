@@ -4,13 +4,12 @@
   <description>gazebo_ros_control</description>
 
   <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/gazebo_ros_control</url>
-  <url type="bugtracker">https://github.com/osrf/gazebo_ros_pkgs/issues</url>
-  <url type="repository">https://github.com/osrf/gazebo_ros_pkgs</url>
+  <url type="bugtracker">https://github.com/ros-simulation/gazebo_ros_pkgs/issues</url>
+  <url type="repository">https://github.com/ros-simulation/gazebo_ros_pkgs</url>
 
   <author>Jonathan Bohren</author>
   <author>Dave Coleman</author>

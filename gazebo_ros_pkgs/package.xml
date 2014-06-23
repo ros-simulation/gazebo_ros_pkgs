@@ -5,13 +5,12 @@
   <description>Interface for using ROS with the <a href="http://gazebosim.org/">Gazebo</a> simulator.</description>
 
   <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
 
   <license>BSD,LGPL,Apache 2.0</license>
 
   <url type="website">http://gazebosim.org/wiki/Tutorials#ROS_Integration</url>
-  <url type="bugtracker">https://github.com/osrf/gazebo_ros_pkgs/issues</url>
-  <url type="repository">https://github.com/osrf/gazebo_ros_pkgs</url>
+  <url type="bugtracker">https://github.com/ros-simulation/gazebo_ros_pkgs/issues</url>
+  <url type="repository">https://github.com/ros-simulation/gazebo_ros_pkgs</url>
 
   <author>John Hsu, Nate Koenig, Dave Coleman</author>>
 

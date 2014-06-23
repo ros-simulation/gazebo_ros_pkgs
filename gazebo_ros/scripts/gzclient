@@ -1,10 +1,15 @@
 #!/bin/sh
 final="$@"
 
+EXT=so
+if [ $(uname) = "Darwin" ]; then
+    EXT=dylib
+fi
+
 # add ros plugin if does not exist
-if [ `expr "$final" : '.*libgazebo_ros_paths_plugin\.so.*'` -eq 0 ]
+if [ `expr "$final" : '.*libgazebo_ros_paths_plugin\.$EXT.*'` -eq 0 ]
 then
-    final="$final -g `catkin_find --first-only libgazebo_ros_paths_plugin.so`"
+    final="$final -g `catkin_find --first-only libgazebo_ros_paths_plugin.$EXT`"
 fi
 
 # Combine the commands

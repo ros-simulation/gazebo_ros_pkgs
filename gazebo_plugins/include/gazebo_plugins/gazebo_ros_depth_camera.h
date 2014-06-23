@@ -32,7 +32,6 @@
 #include <ros/callback_queue.h>
 #include <ros/advertise_options.h>
 
-#include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
 
 // ros messages stuff

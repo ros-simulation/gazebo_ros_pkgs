@@ -1,6 +1,6 @@
 #!/bin/bash
 extra_text=""
-if [ "$1" == "--break-main" ]; then
+if [ "$1" = "--break-main" ]; then
   extra_text="break main"
   shift
 fi
