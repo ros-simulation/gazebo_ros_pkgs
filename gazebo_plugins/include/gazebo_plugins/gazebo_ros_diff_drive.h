@@ -46,6 +46,7 @@
 // Gazebo
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 // ROS
 #include <ros/ros.h>
@@ -87,12 +88,9 @@ namespace gazebo {
       void publishWheelJointState();
 
 
-      physics::WorldPtr world;
+      GazeboRosPtr gazebo_ros_;
       physics::ModelPtr parent;
       event::ConnectionPtr update_connection_;
-
-      std::string left_joint_name_;
-      std::string right_joint_name_;
 
       double wheel_separation_;
       double wheel_diameter_;
@@ -104,7 +102,6 @@ namespace gazebo {
       std::vector<physics::JointPtr> joints_;
 
       // ROS STUFF
-      boost::shared_ptr<ros::NodeHandle> rosnode_;
       ros::Publisher odometry_publisher_;
       ros::Subscriber cmd_vel_subscriber_;
       boost::shared_ptr<tf::TransformBroadcaster> transform_broadcaster_;

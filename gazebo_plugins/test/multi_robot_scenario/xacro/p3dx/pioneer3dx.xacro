@@ -8,15 +8,15 @@
   <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/p3dx/pioneer3dx_body.xacro"/>
   <xacro:pioneer3dx_body name="chassis" parent="base_link" meshes="package://gazebo_plugins/test/multi_robot_scenario/meshes/p3dx"/>
   
-  <!-- Laser  
+  <!-- Laser  -->
   <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/laser/hokuyo.xacro"/>
   <xacro:laser name="front_laser" parent="chassis" xyz="0.16 0 0.1" rpy="0 0 0" meshes="package://gazebo_plugins/test/multi_robot_scenario/meshes/laser"/>
-   -->
+   
   
-  <!-- GPU Laser  -->
+  <!-- GPU Laser
   <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/laser/hokuyo_gpu.xacro"/>
   <xacro:laser_gpu name="front_laser" parent="chassis" xyz="0.16 0 0.1" rpy="0 0 0" meshes="package://gazebo_plugins/test/multi_robot_scenario/meshes/laser" />
-  
+    -->
   <xacro:include filename="$(find gazebo_plugins)/test/multi_robot_scenario/xacro/camera/camera.xacro"/>
   <xacro:cam name="front_camera" parent="chassis" xyz="0 0 0.5" rpy="0 0 0" />
   

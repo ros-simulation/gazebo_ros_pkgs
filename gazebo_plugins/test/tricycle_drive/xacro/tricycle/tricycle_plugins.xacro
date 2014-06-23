@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+      
+  <xacro:macro name="tricycle_drive">
+    <gazebo>
+        <plugin name="tricycle_drive_controller" filename="libgazebo_ros_tricycle_drive.so">
+            <rosDebugLevel>Debug</rosDebugLevel>
+            <robotNamespace></robotNamespace>
+            <publishWheelTF>false</publishWheelTF>
+            <publishWheelJointState>true</publishWheelJointState>
+            <alwaysOn>true</alwaysOn>
+            <steeringJoint>front_steering_joint</steeringJoint>
+            <actuatedWheelJoint>front_wheel_joint</actuatedWheelJoint>
+            <encoderWheelLeftJoint>left_wheel_joint</encoderWheelLeftJoint>
+            <encoderWheelRightJoint>right_wheel_joint</encoderWheelRightJoint>
+            <actuatedWheelDiameter>0.135</actuatedWheelDiameter>
+            <encoderWheelDiameter>0.135</encoderWheelDiameter>
+            <encoderWheelSeparation>0.548</encoderWheelSeparation>
+            <torque>20</torque>
+            <commandTopic>cmd_vel</commandTopic>
+            <odometryTopic>odom</odometryTopic>
+            <odometryFrame>odom</odometryFrame>
+            <odometrySource>encoder</odometrySource>
+            <robotBaseFrame>base_link</robotBaseFrame>
+            <updateRate>10.0</updateRate>
+            <wheel_acceleration>1.8</wheel_acceleration>
+            <steering_speed>1.8</steering_speed>
+        </plugin>
+    </gazebo>
+    
+  </xacro:macro>
+</robot>

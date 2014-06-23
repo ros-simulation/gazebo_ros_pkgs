@@ -38,7 +38,6 @@
 #include <tf/transform_listener.h>
 
 #include <gazebo_plugins/gazebo_ros_laser.h>
-#include <gazebo_plugins/gazebo_ros_sensor_util.h>
 
 namespace gazebo
 {

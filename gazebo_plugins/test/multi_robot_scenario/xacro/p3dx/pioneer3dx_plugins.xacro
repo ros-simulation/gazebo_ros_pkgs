@@ -15,6 +15,7 @@
   <xacro:macro name="pioneer3dx_diff_drive">
     <gazebo>
         <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+            <rosDebugLevel>Debug</rosDebugLevel>
             <robotNamespace></robotNamespace>
             <publishWheelTF>false</publishWheelTF>
             <publishWheelJointState>true</publishWheelJointState>
