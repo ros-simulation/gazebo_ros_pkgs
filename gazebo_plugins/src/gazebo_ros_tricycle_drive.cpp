@@ -256,7 +256,6 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !", 
     //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
 
-
 }
 
 // Finalize the controller
