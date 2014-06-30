@@ -166,6 +166,14 @@ namespace gazebo {
       this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
     }
 
+    this->publish_tf_ = false;
+    if (!_sdf->HasElement("publishTf")) {
+      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <publishTf>, defaults to %f",
+          this->robot_namespace_.c_str(), this->publish_tf_);
+    } else {
+      this->publish_tf_ = _sdf->GetElement("publishTf")->Get<bool>();
+    }
+
     // Initialize update rate stuff
     if (this->update_rate_ > 0.0) {
       this->update_period_ = 1.0 / this->update_rate_;
@@ -225,8 +233,8 @@ namespace gazebo {
           ros::VoidPtr(), &queue_);
 
     cmd_vel_subscriber_ = rosnode_->subscribe(so);
-
-    odometry_publisher_ = rosnode_->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
+    if(this->publish_tf_)
+      odometry_publisher_ = rosnode_->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
 
     // start custom queue for diff drive
     this->callback_queue_thread_ = 
@@ -246,7 +254,8 @@ namespace gazebo {
       (current_time - last_update_time_).Double();
     if (seconds_since_last_update > update_period_) {
 
-      publishOdometry(seconds_since_last_update);
+      if(this->publish_tf_)
+        publishOdometry(seconds_since_last_update);
 
       // Update robot in case new velocities have been requested
       getWheelVelocities();
