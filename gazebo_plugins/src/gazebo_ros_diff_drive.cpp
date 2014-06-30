@@ -166,7 +166,7 @@ namespace gazebo {
       this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
     }
 
-    this->publish_tf_ = false;
+    this->publish_tf_ = true;
     if (!_sdf->HasElement("publishTf")) {
       ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <publishTf>, defaults to %f",
           this->robot_namespace_.c_str(), this->publish_tf_);
