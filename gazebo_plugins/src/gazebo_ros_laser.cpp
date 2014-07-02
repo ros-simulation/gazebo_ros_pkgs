@@ -35,6 +35,7 @@
 #include <gazebo/sensors/SensorTypes.hh>
 
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 
 #include <gazebo_plugins/gazebo_ros_laser.h>
 
@@ -76,10 +77,8 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosLaser controller requires a Ray Sensor as its parent");
 
-  this->robot_namespace_ = "";
-  if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
-
+  this->robot_namespace_ =  GetRobotNamespace(_parent, _sdf, "Laser");
+  
   if (!this->sdf->HasElement("frameName"))
   {
     ROS_INFO("Laser plugin missing <frameName>, defaults to /world");
@@ -87,7 +86,8 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   }
   else
     this->frame_name_ = this->sdf->Get<std::string>("frameName");
-
+  
+  
   if (!this->sdf->HasElement("topicName"))
   {
     ROS_INFO("Laser plugin missing <topicName>, defaults to /world");
@@ -104,8 +104,9 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
-  }
-
+  }   
+  
+  ROS_INFO ( "Starting Laser Plugin (ns = %s)!", this->robot_namespace_.c_str() );
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
     boost::bind(&GazeboRosLaser::LoadThread, this));
@@ -116,16 +117,23 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 // Load the controller
 void GazeboRosLaser::LoadThread()
 {
-  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
   this->gazebo_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   this->gazebo_node_->Init(this->world_name_);
 
   this->pmq.startServiceThread();
 
+  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
+  
+  this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
+  if(this->tf_prefix_.empty()) {
+      this->tf_prefix_ = this->robot_namespace_;
+      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
+  }
+  ROS_INFO("Laser Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
+             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
+  
   // resolve tf prefix
-  std::string prefix;
-  this->rosnode_->getParam(std::string("tf_prefix"), prefix);
-  this->frame_name_ = tf::resolve(prefix, this->frame_name_);
+  this->frame_name_ = tf::resolve(this->tf_prefix_, this->frame_name_);
 
   if (this->topic_name_ != "")
   {

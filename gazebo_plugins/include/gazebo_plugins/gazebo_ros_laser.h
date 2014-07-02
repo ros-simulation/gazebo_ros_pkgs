@@ -36,6 +36,7 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/plugins/RayPlugin.hh>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 #include <gazebo_plugins/PubQueue.h>
 
@@ -59,6 +60,7 @@ namespace gazebo
     private: void LaserDisconnect();
 
     // Pointer to the model
+    GazeboRosPtr gazebo_ros_;
     private: std::string world_name_;
     private: physics::WorldPtr world_;
     /// \brief The parent sensor
@@ -74,6 +76,9 @@ namespace gazebo
 
     /// \brief frame transform name, should match link name
     private: std::string frame_name_;
+    
+    /// \brief tf prefix
+    private: std::string tf_prefix_;
 
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
