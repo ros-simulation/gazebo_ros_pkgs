@@ -93,8 +93,8 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
     std::map<std::string, OdomSource> odomOptions;
     odomOptions["encoder"] = ENCODER;
-    odomOptions["gazebo"] = GAZEBO;
-    gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, ENCODER );
+    odomOptions["world"] = WORLD;
+    gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
 
 
     joints_.resize ( 2 );
@@ -333,8 +333,8 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
         vt = tf::Vector3 ( odom_.pose.pose.position.x, odom_.pose.pose.position.y, odom_.pose.pose.position.z );
 
     }
-    if ( odom_source_ == GAZEBO ) {
-        // getting data form gazebo
+    if ( odom_source_ == WORLD ) {
+        // getting data form gazebo world
         math::Pose pose = parent->GetWorldPose();
         qt = tf::Quaternion ( pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w );
         vt = tf::Vector3 ( pose.pos.x, pose.pos.y, pose.pos.z );

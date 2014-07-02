@@ -82,7 +82,7 @@ class GazeboRosTricycleDrive : public ModelPlugin {
     enum OdomSource
     {
         ENCODER = 0,
-        GAZEBO = 1,
+        WORLD = 1,
     };
 public:
     GazeboRosTricycleDrive();

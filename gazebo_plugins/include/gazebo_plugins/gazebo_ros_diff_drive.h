@@ -75,7 +75,7 @@ namespace gazebo {
     enum OdomSource
     {
         ENCODER = 0,
-        GAZEBO = 1,
+        WORLD = 1,
     };
     public:
       GazeboRosDiffDrive();

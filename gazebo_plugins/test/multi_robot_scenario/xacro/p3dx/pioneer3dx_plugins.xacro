@@ -29,7 +29,7 @@
             <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
-            <odometrySource>gazebo</odometrySource>
+            <odometrySource>world</odometrySource>
             <robotBaseFrame>base_link</robotBaseFrame>
             <updateRate>10.0</updateRate>
         </plugin>
