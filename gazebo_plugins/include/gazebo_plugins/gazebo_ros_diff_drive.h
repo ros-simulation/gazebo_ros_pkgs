@@ -53,8 +53,8 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
-#include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/JointState.h>
 
 // Custom Callback Queue
@@ -72,6 +72,11 @@ namespace gazebo {
 
   class GazeboRosDiffDrive : public ModelPlugin {
 
+    enum OdomSource
+    {
+        ENCODER = 0,
+        GAZEBO = 1,
+    };
     public:
       GazeboRosDiffDrive();
       ~GazeboRosDiffDrive();
@@ -86,6 +91,7 @@ namespace gazebo {
       void getWheelVelocities();
       void publishWheelTF(); /// publishes the wheel tf's
       void publishWheelJointState();
+      void UpdateOdometryEncoder();
 
 
       GazeboRosPtr gazebo_ros_;
@@ -134,6 +140,10 @@ namespace gazebo {
       double update_rate_;
       double update_period_;
       common::Time last_update_time_;
+      
+      OdomSource odom_source_;
+      geometry_msgs::Pose2D pose_encoder_;
+      common::Time last_odom_update_;
       
     // Flags
     bool publishWheelTF_;

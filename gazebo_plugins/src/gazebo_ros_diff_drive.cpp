@@ -56,13 +56,6 @@
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
-#include <geometry_msgs/Twist.h>
-#include <nav_msgs/GetMap.h>
-#include <nav_msgs/Odometry.h>
-#include <boost/bind.hpp>
-#include <boost/thread/mutex.hpp>
 
 namespace gazebo
 {
@@ -98,6 +91,10 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
     gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
+    std::map<std::string, OdomSource> odomOptions;
+    odomOptions["encoder"] = ENCODER;
+    odomOptions["gazebo"] = GAZEBO;
+    gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, ENCODER );
 
 
     joints_.resize ( 2 );
@@ -193,6 +190,8 @@ void GazeboRosDiffDrive::publishWheelTF()
 // Update the controller
 void GazeboRosDiffDrive::UpdateChild()
 {
+  
+    if ( odom_source_ == ENCODER ) UpdateOdometryEncoder();
     common::Time current_time = parent->GetWorld()->GetSimTime();
     double seconds_since_last_update = ( current_time - last_update_time_ ).Double();
     if ( seconds_since_last_update > update_period_ ) {
@@ -272,31 +271,101 @@ void GazeboRosDiffDrive::QueueThread()
     }
 }
 
+void GazeboRosDiffDrive::UpdateOdometryEncoder()
+{
+    double vl = joints_[LEFT]->GetVelocity ( 0 );
+    double vr = joints_[RIGHT]->GetVelocity ( 0 );
+    common::Time current_time = parent->GetWorld()->GetSimTime();
+    double seconds_since_last_update = ( current_time - last_odom_update_ ).Double();
+    last_odom_update_ = current_time;
+
+    double b = wheel_separation_;
+
+    // Book: Sigwart 2011 Autonompus Mobile Robots page:337
+    double sl = vl * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
+    double sr = vr * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
+    double theta = ( sl - sr ) /b;
+
+
+    double dx = ( sl + sr ) /2.0 * cos ( pose_encoder_.theta + ( sl - sr ) / ( 2.0*b ) );
+    double dy = ( sl + sr ) /2.0 * sin ( pose_encoder_.theta + ( sl - sr ) / ( 2.0*b ) );
+    double dtheta = ( sl - sr ) /b;
+
+    pose_encoder_.x += dx;
+    pose_encoder_.y += dy;
+    pose_encoder_.theta += dtheta;
+
+    double w = dtheta/seconds_since_last_update;
+    double v = sqrt ( dx*dx+dy*dy ) /seconds_since_last_update;
+
+    tf::Quaternion qt;
+    tf::Vector3 vt;
+    qt.setRPY ( 0,0,pose_encoder_.theta );
+    vt = tf::Vector3 ( pose_encoder_.x, pose_encoder_.y, 0 );
+
+    odom_.pose.pose.position.x = vt.x();
+    odom_.pose.pose.position.y = vt.y();
+    odom_.pose.pose.position.z = vt.z();
+
+    odom_.pose.pose.orientation.x = qt.x();
+    odom_.pose.pose.orientation.y = qt.y();
+    odom_.pose.pose.orientation.z = qt.z();
+    odom_.pose.pose.orientation.w = qt.w();
+
+    odom_.twist.twist.angular.z = w;
+    odom_.twist.twist.linear.x = dx/seconds_since_last_update;
+    odom_.twist.twist.linear.y = dy/seconds_since_last_update;
+}
+
 void GazeboRosDiffDrive::publishOdometry ( double step_time )
 {
+   
     ros::Time current_time = ros::Time::now();
-    std::string odom_frame = gazebo_ros_->resolveTF(odometry_frame_);
-    std::string base_footprint_frame = gazebo_ros_->resolveTF(robot_base_frame_);
-    
-    // getting data for base_footprint to odom transform
-    math::Pose pose = this->parent->GetWorldPose();
+    std::string odom_frame = gazebo_ros_->resolveTF ( odometry_frame_ );
+    std::string base_footprint_frame = gazebo_ros_->resolveTF ( robot_base_frame_ );
 
-    tf::Quaternion qt ( pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w );
-    tf::Vector3 vt ( pose.pos.x, pose.pos.y, pose.pos.z );
+    tf::Quaternion qt;
+    tf::Vector3 vt;
+
+    if ( odom_source_ == ENCODER ) {
+        // getting data form encoder integration
+        qt = tf::Quaternion ( odom_.pose.pose.orientation.x, odom_.pose.pose.orientation.y, odom_.pose.pose.orientation.z, odom_.pose.pose.orientation.w );
+        vt = tf::Vector3 ( odom_.pose.pose.position.x, odom_.pose.pose.position.y, odom_.pose.pose.position.z );
+
+    }
+    if ( odom_source_ == GAZEBO ) {
+        // getting data form gazebo
+        math::Pose pose = parent->GetWorldPose();
+        qt = tf::Quaternion ( pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w );
+        vt = tf::Vector3 ( pose.pos.x, pose.pos.y, pose.pos.z );
+
+        odom_.pose.pose.position.x = vt.x();
+        odom_.pose.pose.position.y = vt.y();
+        odom_.pose.pose.position.z = vt.z();
+
+        odom_.pose.pose.orientation.x = qt.x();
+        odom_.pose.pose.orientation.y = qt.y();
+        odom_.pose.pose.orientation.z = qt.z();
+        odom_.pose.pose.orientation.w = qt.w();
+
+        // get velocity in /odom frame
+        math::Vector3 linear;
+        linear = parent->GetWorldLinearVel();
+        odom_.twist.twist.angular.z = parent->GetWorldAngularVel().z;
+
+        // convert velocity to child_frame_id (aka base_footprint)
+        float yaw = pose.rot.GetYaw();
+        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.x + sinf ( yaw ) * linear.y;
+        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.y - sinf ( yaw ) * linear.x;
+    }
 
     tf::Transform base_footprint_to_odom ( qt, vt );
     transform_broadcaster_->sendTransform (
         tf::StampedTransform ( base_footprint_to_odom, current_time,
                                odom_frame, base_footprint_frame ) );
 
-    // publish odom topic
-    odom_.pose.pose.position.x = pose.pos.x;
-    odom_.pose.pose.position.y = pose.pos.y;
 
-    odom_.pose.pose.orientation.x = pose.rot.x;
-    odom_.pose.pose.orientation.y = pose.rot.y;
-    odom_.pose.pose.orientation.z = pose.rot.z;
-    odom_.pose.pose.orientation.w = pose.rot.w;
+    // set covariance
     odom_.pose.covariance[0] = 0.00001;
     odom_.pose.covariance[7] = 0.00001;
     odom_.pose.covariance[14] = 1000000000000.0;
@@ -304,16 +373,8 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
     odom_.pose.covariance[28] = 1000000000000.0;
     odom_.pose.covariance[35] = 0.001;
 
-    // get velocity in /odom frame
-    math::Vector3 linear;
-    linear = this->parent->GetWorldLinearVel();
-    odom_.twist.twist.angular.z = this->parent->GetWorldAngularVel().z;
 
-    // convert velocity to child_frame_id (aka base_footprint)
-    float yaw = pose.rot.GetYaw();
-    odom_.twist.twist.linear.x = cosf ( yaw ) * linear.x + sinf ( yaw ) * linear.y;
-    odom_.twist.twist.linear.y = cosf ( yaw ) * linear.y - sinf ( yaw ) * linear.x;
-
+    // set header
     odom_.header.stamp = current_time;
     odom_.header.frame_id = odom_frame;
     odom_.child_frame_id = base_footprint_frame;

@@ -328,8 +328,6 @@ void GazeboRosTricycleDrive::UpdateOdometryEncoder()
     odom_.twist.twist.angular.z = w;
     odom_.twist.twist.linear.x = dx/seconds_since_last_update;
     odom_.twist.twist.linear.y = dy/seconds_since_last_update;
-
-
 }
 
 void GazeboRosTricycleDrive::publishOdometry ( double step_time )
