@@ -22,6 +22,7 @@
 #include <boost/bind.hpp>
 
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/fill_image.h>
 #include <image_transport/image_transport.h>
@@ -115,10 +116,9 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   // pr2_gazebo_plugins
   this->world = this->world_;
 
-  this->robot_namespace_ = "";
-  if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
-
+  std::stringstream ss;
+  this->robot_namespace_ =  GetRobotNamespace(_parent, _sdf, "Camera");
+  
   this->image_topic_name_ = "image_raw";
   if (this->sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = this->sdf->Get<std::string>("imageTopicName");
@@ -270,12 +270,8 @@ void GazeboRosCameraUtils::LoadThread()
   // associated ROS topics.
   this->parentSensor_->SetActive(false);
 
-  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_ +
-    "/" + this->camera_name_);
+  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_ + "/" + this->camera_name_);
 
-  this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
-
-  // resolve tf prefix
   std::string key;
   if(this->rosnode_->searchParam("tf_prefix", key)){
     std::string prefix;
@@ -283,6 +279,20 @@ void GazeboRosCameraUtils::LoadThread()
     this->frame_name_ = tf::resolve(prefix, this->frame_name_);
   }
 
+  this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
+  
+  // resolve tf prefix
+  this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
+  if(this->tf_prefix_.empty()) {
+      this->tf_prefix_ = this->robot_namespace_;
+      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
+  }
+  this->frame_name_ = tf::resolve(this->tf_prefix_, this->frame_name_);
+
+  ROS_INFO("Camera Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
+             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
+  
+  
   if (!this->camera_name_.empty())
   {
     dyn_srv_ =

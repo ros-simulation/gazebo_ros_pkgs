@@ -46,6 +46,7 @@
 #include <gazebo/common/Time.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/plugins/CameraPlugin.hh>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 namespace gazebo
 {
@@ -116,6 +117,9 @@ namespace gazebo
     /// \brief ROS camera name
     private: std::string camera_name_;
 
+    /// \brief tf prefix
+    private: std::string tf_prefix_;
+    
     /// \brief ROS image topic name
     protected: std::string image_topic_name_;
 

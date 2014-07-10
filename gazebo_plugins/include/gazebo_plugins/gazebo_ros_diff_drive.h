@@ -46,14 +46,16 @@
 // Gazebo
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 // ROS
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
-#include <nav_msgs/OccupancyGrid.h>
+#include <sensor_msgs/JointState.h>
 
 // Custom Callback Queue
 #include <ros/callback_queue.h>
@@ -70,6 +72,11 @@ namespace gazebo {
 
   class GazeboRosDiffDrive : public ModelPlugin {
 
+    enum OdomSource
+    {
+        ENCODER = 0,
+        WORLD = 1,
+    };
     public:
       GazeboRosDiffDrive();
       ~GazeboRosDiffDrive();
@@ -82,26 +89,30 @@ namespace gazebo {
     private:
       void publishOdometry(double step_time);
       void getWheelVelocities();
+      void publishWheelTF(); /// publishes the wheel tf's
+      void publishWheelJointState();
+      void UpdateOdometryEncoder();
 
-      physics::WorldPtr world;
+
+      GazeboRosPtr gazebo_ros_;
       physics::ModelPtr parent;
       event::ConnectionPtr update_connection_;
 
-      std::string left_joint_name_;
-      std::string right_joint_name_;
-
       double wheel_separation_;
       double wheel_diameter_;
-      double torque;
+      double wheel_torque;
       double wheel_speed_[2];
+	  double wheel_accel;
+      double wheel_speed_instr_[2];
 
-      physics::JointPtr joints[2];
+      std::vector<physics::JointPtr> joints_;
 
       // ROS STUFF
-      ros::NodeHandle* rosnode_;
       ros::Publisher odometry_publisher_;
       ros::Subscriber cmd_vel_subscriber_;
-      tf::TransformBroadcaster *transform_broadcaster_;
+      boost::shared_ptr<tf::TransformBroadcaster> transform_broadcaster_;
+      sensor_msgs::JointState joint_state_;
+      ros::Publisher joint_state_publisher_;      
       nav_msgs::Odometry odom_;
       std::string tf_prefix_;
 
@@ -129,6 +140,14 @@ namespace gazebo {
       double update_rate_;
       double update_period_;
       common::Time last_update_time_;
+      
+      OdomSource odom_source_;
+      geometry_msgs::Pose2D pose_encoder_;
+      common::Time last_odom_update_;
+      
+    // Flags
+    bool publishWheelTF_;
+    bool publishWheelJointState_;
 
   };
 

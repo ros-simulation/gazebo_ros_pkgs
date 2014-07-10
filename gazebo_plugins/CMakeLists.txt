@@ -72,6 +72,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES 
   vision_reconfigure 
+  gazebo_ros_utils 
   gazebo_ros_camera_utils 
   gazebo_ros_camera 
   gazebo_ros_multicamera 
@@ -89,8 +90,10 @@ catkin_package(
   gazebo_ros_prosilica 
   gazebo_ros_force 
   gazebo_ros_joint_trajectory 
+  gazebo_ros_joint_state_publisher 
   gazebo_ros_joint_pose_trajectory
   gazebo_ros_diff_drive
+  gazebo_ros_tricycle_drive
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
   gazebo_ros_planar_move
@@ -128,6 +131,9 @@ add_dependencies(hokuyo_node ${PROJECT_NAME}_gencfg)
 target_link_libraries(hokuyo_node
   ${catkin_LIBRARIES}
 )
+
+add_library(gazebo_ros_utils src/gazebo_ros_utils.cpp)
+target_link_libraries(gazebo_ros_utils ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(vision_reconfigure src/vision_reconfigure.cpp)
 add_dependencies(vision_reconfigure ${PROJECT_NAME}_gencfg)
@@ -203,12 +209,22 @@ add_library(gazebo_ros_joint_trajectory src/gazebo_ros_joint_trajectory.cpp)
 add_dependencies(gazebo_ros_joint_trajectory gazebo_msgs_gencpp)
 target_link_libraries(gazebo_ros_joint_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+
+add_library(gazebo_ros_joint_state_publisher src/gazebo_ros_joint_state_publisher.cpp)
+set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES LINK_FLAGS "${ld_flags}")
+set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES COMPILE_FLAGS "${cxx_flags}")
+add_dependencies(gazebo_ros_joint_state_publisher gazebo_msgs_gencpp)
+target_link_libraries(gazebo_ros_joint_state_publisher ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 add_library(gazebo_ros_joint_pose_trajectory src/gazebo_ros_joint_pose_trajectory.cpp)
 add_dependencies(gazebo_ros_joint_pose_trajectory gazebo_msgs_gencpp)
 target_link_libraries(gazebo_ros_joint_pose_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_diff_drive src/gazebo_ros_diff_drive.cpp)
-target_link_libraries(gazebo_ros_diff_drive ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(gazebo_ros_diff_drive gazebo_ros_utils ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_library(gazebo_ros_tricycle_drive src/gazebo_ros_tricycle_drive.cpp)
+target_link_libraries(gazebo_ros_tricycle_drive gazebo_ros_utils ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_skid_steer_drive src/gazebo_ros_skid_steer_drive.cpp)
 target_link_libraries(gazebo_ros_skid_steer_drive ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -236,6 +252,7 @@ install(TARGETS
   hokuyo_node 
   vision_reconfigure 
   camera_synchronizer
+  gazebo_ros_utils
   gazebo_ros_camera_utils
   gazebo_ros_camera
   gazebo_ros_multicamera
@@ -255,8 +272,10 @@ install(TARGETS
   gazebo_ros_prosilica
   gazebo_ros_force
   gazebo_ros_joint_trajectory
+  gazebo_ros_joint_state_publisher
   gazebo_ros_joint_pose_trajectory
   gazebo_ros_diff_drive
+  gazebo_ros_tricycle_drive
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
   gazebo_ros_planar_move
