@@ -1088,9 +1088,15 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
 
   // stuff only works in ODE right now
   ode_pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
+#if GAZEBO_MAJOR_VERSION > 2
   ode_pe->SetParam("percon_iters", req.ode_config.sor_pgs_precon_iters);
   ode_pe->SetParam("iters", req.ode_config.sor_pgs_iters);
   ode_pe->SetParam("sor", req.ode_config.sor_pgs_w);
+#else
+  ode_pe->SetSORPGSPreconIters(req.ode_config.sor_pgs_precon_iters);
+  ode_pe->SetSORPGSIters(req.ode_config.sor_pgs_iters);
+  ode_pe->SetSORPGSW(req.ode_config.sor_pgs_w);
+#endif
   ode_pe->SetWorldCFM(req.ode_config.cfm);
   ode_pe->SetWorldERP(req.ode_config.erp);
   ode_pe->SetContactSurfaceLayer(req.ode_config.contact_surface_layer);
@@ -1118,9 +1124,15 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
 
   // stuff only works in ODE right now
   res.ode_config.auto_disable_bodies = world_->GetPhysicsEngine()->GetAutoDisableFlag();
+#if GAZEBO_MAJOR_VERSION > 2
   res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(world_->GetPhysicsEngine()->GetParam("precon_iters"));
   res.ode_config.sor_pgs_iters = boost::any_cast<int>(world_->GetPhysicsEngine()->GetParam("iters"));
   res.ode_config.sor_pgs_w = boost::any_cast<double>(world_->GetPhysicsEngine()->GetParam("sor"));
+#else
+ res.ode_config.sor_pgs_precon_iters = world_->GetPhysicsEngine()->GetSORPGSPreconIters();
+  res.ode_config.sor_pgs_iters = world_->GetPhysicsEngine()->GetSORPGSIters();
+  res.ode_config.sor_pgs_w = world_->GetPhysicsEngine()->GetSORPGSW();
+#endif
   res.ode_config.contact_surface_layer = world_->GetPhysicsEngine()->GetContactSurfaceLayer();
   res.ode_config.contact_max_correcting_vel = world_->GetPhysicsEngine()->GetContactMaxCorrectingVel();
   res.ode_config.cfm = world_->GetPhysicsEngine()->GetWorldCFM();
@@ -1154,23 +1166,59 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
     for(unsigned int i=0;i< req.ode_joint_config.damping.size();i++)
       joint->SetDamping(i,req.ode_joint_config.damping[i]);
     for(unsigned int i=0;i< req.ode_joint_config.hiStop.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("hi_stop",i,req.ode_joint_config.hiStop[i]);
+#else
+      joint->SetAttribute("hi_stop",i,req.ode_joint_config.hiStop[i]);
+#endif
     for(unsigned int i=0;i< req.ode_joint_config.loStop.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("lo_stop",i,req.ode_joint_config.loStop[i]);
+#else
+      joint->SetAttribute("lo_stop",i,req.ode_joint_config.loStop[i]);
+#endif
     for(unsigned int i=0;i< req.ode_joint_config.erp.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("erp",i,req.ode_joint_config.erp[i]);
+#else
+      joint->SetAttribute("erp",i,req.ode_joint_config.erp[i]);
+#endif
     for(unsigned int i=0;i< req.ode_joint_config.cfm.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("cfm",i,req.ode_joint_config.cfm[i]);
+#else
+      joint->SetAttribute("cfm",i,req.ode_joint_config.cfm[i]);
+#endif
     for(unsigned int i=0;i< req.ode_joint_config.stop_erp.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("stop_erp",i,req.ode_joint_config.stop_erp[i]);
+#else
+      joint->SetAttribute("stop_erp",i,req.ode_joint_config.stop_erp[i]);
+#endif
     for(unsigned int i=0;i< req.ode_joint_config.stop_cfm.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("stop_cfm",i,req.ode_joint_config.stop_cfm[i]);
+#else
+      joint->SetAttribute("stop_cfm",i,req.ode_joint_config.stop_cfm[i]);
+#endif
     for(unsigned int i=0;i< req.ode_joint_config.fudge_factor.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("fudge_factor",i,req.ode_joint_config.fudge_factor[i]);
+#else
+      joint->SetAttribute("fudge_factor",i,req.ode_joint_config.fudge_factor[i]);
+#endif
     for(unsigned int i=0;i< req.ode_joint_config.fmax.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("fmax",i,req.ode_joint_config.fmax[i]);
+#else
+      joint->SetAttribute("fmax",i,req.ode_joint_config.fmax[i]);
+#endif
     for(unsigned int i=0;i< req.ode_joint_config.vel.size();i++)
+#if GAZEBO_MAJOR_VERSION > 2
       joint->SetParam("vel",i,req.ode_joint_config.vel[i]);
+#else
+      joint->SetAttribute("vel",i,req.ode_joint_config.vel[i]);
+#endif
 
     res.success = true;
     res.status_message = "SetJointProperties: properties set";
