@@ -33,6 +33,7 @@
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/RaySensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/transport/transport.hh>
 
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
