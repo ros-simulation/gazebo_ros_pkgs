@@ -215,6 +215,12 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
 
     // Create a new collision object representing this gazebo model if it's not in the map
     if(found_collision_object == collision_object_map_.end() || publish_full_scene_){
+
+      ROS_INFO("Creating collision object model %s, this=%s, objects=%u",
+               model_name.c_str(),
+               model_name_.c_str(),
+               (unsigned int)collision_object_map_.size());
+
       moveit_msgs::CollisionObject new_object;
       new_object.id = model_name;
       new_object.header.frame_id = "world";
@@ -264,7 +270,8 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
         const ShapePtr shape = collision->GetShape();
 
         // NOTE: In gazebo 2.2.2 Collision::GetWorldPose() does not work
-        gazebo::math::Pose collision_pose = collision->GetRelativePose()*link_pose;
+        //gazebo::math::Pose collision_pose = collision->GetRelativePose()*link_pose;
+        gazebo::math::Pose collision_pose = collision->GetInitialRelativePose() + link_pose;
         geometry_msgs::Pose collision_pose_msg;
         collision_pose_msg.position.x = collision_pose.pos.x;
         collision_pose_msg.position.y = collision_pose.pos.y;
@@ -277,10 +284,58 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
 
         // Always add pose information
         if(shape->HasType(Base::MESH_SHAPE)) {
-          object.mesh_poses.push_back(collision_pose_msg);
+          //object.mesh_poses.push_back(collision_pose_msg);
+          boost::shared_ptr<MeshShape> mesh_shape = boost::dynamic_pointer_cast<MeshShape>(shape);
+          std::string uri = mesh_shape->GetMeshURI();
+          const Mesh *mesh = MeshManager::Instance()->GetMesh(uri);
+          if(!mesh) {
+              gzwarn << "Shape has mesh type but mesh could not be retried from the MeshManager. Loading ad-hoc!" << std::endl;
+              gzwarn << " mesh uri: " <<uri<< std::endl;
+
+              // Load the mesh ad-hoc if the manager doesn't have it
+              // this happens with model:// uris
+              mesh = MeshManager::Instance()->Load(uri);
+
+              if(!mesh) {
+                gzwarn << "Mesh could not be loded: " << uri << std::endl;
+                continue;
+              }
+            } 
+
+          // Iterate over submeshes
+          unsigned n_submeshes = mesh->GetSubMeshCount();
+
+          for(unsigned m=0; m < n_submeshes; m++) {
+
+            const SubMesh *submesh = mesh->GetSubMesh(m);
+            unsigned n_vertices = submesh->GetVertexCount();
+
+            switch(submesh->GetPrimitiveType()) 
+            {
+              case SubMesh::POINTS:
+              case SubMesh::LINES:
+              case SubMesh::LINESTRIPS:
+                // These aren't supported
+                break;
+              case SubMesh::TRIANGLES:
+                {
+                  object.mesh_poses.push_back(collision_pose_msg);
+                  break;
+                }
+              case SubMesh::TRISTRIPS:
+                {
+                  object.mesh_poses.push_back(collision_pose_msg);
+                  break;
+                }
+              case SubMesh::TRIFANS:
+                // Unsupported
+                gzerr << "TRIFANS not supported yet." << std::endl;
+                break;
+            };
+          }
         } else if(shape->HasType(Base::PLANE_SHAPE)) {
           object.plane_poses.push_back(collision_pose_msg);
-        } else {
+        } else { //if (!shape->HasType(Base::MESH_SHAPE)) {
           object.primitive_poses.push_back(collision_pose_msg);
         }
 
@@ -344,6 +399,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                     }
 
                     object.meshes.push_back(mesh_msg);
+                    //object.mesh_poses.push_back(collision_pose_msg);
                     break;
                   }
                 case SubMesh::TRISTRIPS:
@@ -367,6 +423,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                     }
 
                     object.meshes.push_back(mesh_msg);
+                    //object.mesh_poses.push_back(collision_pose_msg);
                     break;
                   }
                 case SubMesh::TRIFANS:
@@ -429,6 +486,11 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
 
             object.primitives.push_back(primitive_msg);
           }
+          ROS_INFO("model %s has %u links",model_name.c_str(),links.size());
+          ROS_INFO("model %s has %u meshes, %u mesh poses",
+                   model_name.c_str(),
+                   (unsigned int)object.meshes.size(),
+                   (unsigned int)object.mesh_poses.size());
         }
       }
     }
