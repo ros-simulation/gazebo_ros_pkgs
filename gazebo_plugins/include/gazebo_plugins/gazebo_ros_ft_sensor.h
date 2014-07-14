@@ -1,29 +1,28 @@
 /*
- *  Gazebo - Outdoor Multi-Robot Simulator
- *  Copyright (C) 2003  
- *     Nate Koenig & Andrew Howard
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
+* Gazebo - Outdoor Multi-Robot Simulator
+* Copyright (C) 2003
+* Nate Koenig & Andrew Howard
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*
+*/
 /*
- * Desc: Force Torque Sensor Plugin
- * Author: Francisco Suarez-Ruiz
- * Date: 5 June 2014
- */
- 
+* Desc: Force Torque Sensor Plugin
+* Author: Francisco Suarez-Ruiz
+* Date: 5 June 2014
+*/
 #ifndef GAZEBO_ROS_FT_HH
 #define GAZEBO_ROS_FT_HH
 
@@ -47,30 +46,28 @@ namespace gazebo
 /// @{
 /** \defgroup GazeboRosFTSensor Plugin XML Reference and Example
 
-  \brief Ros Gazebo Ros Force/Torque Sensor Plugin.
-  
-  This is a model plugin which broadcasts geometry_msgs/WrenchStamped messages
-  with measured force and torque on a specified joint.
-  
-  The wrench is reported in the joint CHILD link frame and the measure direction 
-  is child-to-parent link.
+\brief Ros Gazebo Ros Force/Torque Sensor Plugin.
+This is a model plugin which broadcasts geometry_msgs/WrenchStamped messages
+with measured force and torque on a specified joint.
+The wrench is reported in the joint CHILD link frame and the measure direction
+is child-to-parent link.
 
-  Example Usage:
+Example Usage:
 
-  \verbatim
-      <!-- Enable the Joint Feedback -->
-      <gazebo reference="JOINT_NAME">
-        <provideFeedback>true</provideFeedback>
-      </gazebo>
-      <!-- The ft_sensor plugin -->
-      <gazebo>
-        <plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
-          <updateRate>100.0</updateRate>
-          <topicName>ft_sensor_topic</topicName>
-          <jointName>JOINT_NAME</jointName>
-        </plugin>
-      </gazebo>
-  \endverbatim
+\verbatim
+<!-- Enable the Joint Feedback -->
+<gazebo reference="JOINT_NAME">
+<provideFeedback>true</provideFeedback>
+</gazebo>
+<!-- The ft_sensor plugin -->
+<gazebo>
+<plugin name="ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+<updateRate>100.0</updateRate>
+<topicName>ft_sensor_topic</topicName>
+<jointName>JOINT_NAME</jointName>
+</plugin>
+</gazebo>
+\endverbatim
 \{
 */
 
@@ -91,6 +88,12 @@ class GazeboRosFT : public ModelPlugin
 
   /// \brief Update the controller
   protected: virtual void UpdateChild();
+  
+  /// \brief Gaussian noise
+  private: double gaussian_noise_;
+  private: unsigned int seed;
+  /// \brief Gaussian noise generator
+  private: double GaussianKernel(double mu, double sigma);
 
   /// \brief A pointer to the Gazebo joint
   private: physics::JointPtr joint_;
@@ -107,7 +110,7 @@ class GazeboRosFT : public ModelPlugin
   /// \brief A pointer to the Gazebo world
   private: physics::WorldPtr world_;
 
-  /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
+  /// \brief A pointer to the ROS node. A node will be instantiated if it does not exist.
   private: ros::NodeHandle* rosnode_;
   private: ros::Publisher pub_;
 
