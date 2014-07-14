@@ -1,28 +1,28 @@
 /*
- *  Gazebo - Outdoor Multi-Robot Simulator
- *  Copyright (C) 2003  
- *     Nate Koenig & Andrew Howard
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
+* Gazebo - Outdoor Multi-Robot Simulator
+* Copyright (C) 2003
+* Nate Koenig & Andrew Howard
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*
+*/
 /*
- * Desc: Force Torque Sensor Plugin
- * Author: Francisco Suarez-Ruiz
- * Date: 5 June 2014
- */
+* Desc: Force Torque Sensor Plugin
+* Author: Francisco Suarez-Ruiz
+* Date: 5 June 2014
+*/
 
 #include <gazebo_plugins/gazebo_ros_ft_sensor.h>
 #include <tf/tf.h>
@@ -36,6 +36,7 @@ GZ_REGISTER_MODEL_PLUGIN(GazeboRosFT);
 GazeboRosFT::GazeboRosFT()
 {
   this->ft_connect_count_ = 0;
+  this->seed = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,6 +93,14 @@ void GazeboRosFT::Load( physics::ModelPtr _model, sdf::ElementPtr _sdf )
   }
   else
     this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>();
+  
+  if (!_sdf->HasElement("gaussianNoise"))
+  {
+    ROS_INFO("imu plugin missing <gaussianNoise>, defaults to 0.0");
+    this->gaussian_noise_ = 0.0;
+  }
+  else
+    this->gaussian_noise_ = _sdf->Get<double>("gaussianNoise");
   
   if (!_sdf->HasElement("updateRate"))
   {
@@ -170,10 +179,10 @@ void GazeboRosFT::UpdateChild()
   // E.g: https://bitbucket.org/osrf/gazebo/raw/default/gazebo/sensors/ForceTorqueSensor.hh
   // Get force torque at the joint
   // The wrench is reported in the CHILD <frame>
-  // The <measure_direction> is parent_to_child
+  // The <measure_direction> is child_to_parent
   wrench = this->joint_->GetForceTorque(0);
-  force = -wrench.body2Force;
-  torque = -wrench.body2Torque;
+  force = wrench.body2Force;
+  torque = wrench.body2Torque;
 
 
   this->lock_.lock();
@@ -182,18 +191,42 @@ void GazeboRosFT::UpdateChild()
   this->wrench_msg_.header.stamp.sec = (this->world_->GetSimTime()).sec;
   this->wrench_msg_.header.stamp.nsec = (this->world_->GetSimTime()).nsec;
 
-  this->wrench_msg_.wrench.force.x    = force.x;
-  this->wrench_msg_.wrench.force.y    = force.y;
-  this->wrench_msg_.wrench.force.z    = force.z;
-  this->wrench_msg_.wrench.torque.x   = torque.x;
-  this->wrench_msg_.wrench.torque.y   = torque.y;
-  this->wrench_msg_.wrench.torque.z   = torque.z;
+  this->wrench_msg_.wrench.force.x = force.x + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.force.y = force.y + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.force.z = force.z + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.x = torque.x + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.y = torque.y + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.z = torque.z + this->GaussianKernel(0, this->gaussian_noise_);
 
   this->pub_.publish(this->wrench_msg_);
   this->lock_.unlock();
   
   // save last time stamp
   this->last_time_ = cur_time;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Utility for adding noise
+double GazeboRosFT::GaussianKernel(double mu, double sigma)
+{
+  // using Box-Muller transform to generate two independent standard
+  // normally disbributed normal variables see wikipedia
+
+  // normalized uniform random variable
+  double U = static_cast<double>(rand_r(&this->seed)) /
+             static_cast<double>(RAND_MAX);
+
+  // normalized uniform random variable
+  double V = static_cast<double>(rand_r(&this->seed)) /
+             static_cast<double>(RAND_MAX);
+
+  double X = sqrt(-2.0 * ::log(U)) * cos(2.0*M_PI * V);
+  // double Y = sqrt(-2.0 * ::log(U)) * sin(2.0*M_PI * V);
+
+  // there are 2 indep. vars, we'll just use X
+  // scale to our mu and sigma
+  X = sigma * X + mu;
+  return X;
 }
 
 // Custom Callback Queue
