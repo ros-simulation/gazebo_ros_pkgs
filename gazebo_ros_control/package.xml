@@ -4,6 +4,7 @@
   <description>gazebo_ros_control</description>
 
   <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
+  <maintainer email="adolfo.rodriguez@pal-robotics.com">Adolfo Rodriguez Tsouroukdissian</maintainer>
 
   <license>BSD</license>
 
