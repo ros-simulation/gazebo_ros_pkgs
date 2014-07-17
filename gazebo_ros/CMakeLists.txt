@@ -49,7 +49,6 @@ catkin_package(
   message_generation
   std_msgs
   gazebo_msgs
-  gazebo_plugins
 
   DEPENDS
     TinyXML

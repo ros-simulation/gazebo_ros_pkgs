@@ -2,6 +2,27 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.3 (2014-05-12)
+------------------
+* gazebo_plugins: add run-time dependency on gazebo_ros
+* Merge pull request `#176 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/176>`_ from ros-simulation/issue_175
+  Fix `#175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/175>`_: dynamic reconfigure dependency error
+* Remove unneeded dependency on pcl_ros
+* Fix `#175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/175>`_: dynamic reconfigure dependency error
+* Contributors: Steven Peters
+
+2.4.2 (2014-03-27)
+------------------
+* merging from hydro-devel
+* bump patch version for indigo-devel to 2.4.1
+* merging from indigo-devel after 2.3.4 release
+* "2.4.0"
+* catkin_generate_changelog
+* Contributors: John Hsu
+
+2.4.1 (2013-11-13)
+------------------
+
 2.3.5 (2014-03-26)
 ------------------
 * update test world for block laser
@@ -18,6 +39,7 @@ Changelog for package gazebo_plugins
 
 2.3.4 (2013-11-13)
 ------------------
+* rerelease because sdformat became libsdformat, but we also based change on 2.3.4 in hydro-devel.
 * Simplify ``gazebo_plugins/CMakeLists.txt``
   Replace ``cxx_flags`` and ``ld_flags`` variables with simpler cmake macros
   and eliminate unnecessary references to ``SDFormat_LIBRARIES``, since
@@ -28,6 +50,9 @@ Changelog for package gazebo_plugins
   undeclared dependency on automatically generated dynamic
   reconfigure files (GazeboRosCameraConfig.h for example). This
   commit declares several of those dependencies.
+
+2.4.0 (2013-10-14)
+------------------
 
 2.3.3 (2013-10-10)
 ------------------
