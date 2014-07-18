@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.4 (2014-07-18)
+------------------
 * Update package.xml
   Add new maintainer.
 * Should fix build error for binary releases.

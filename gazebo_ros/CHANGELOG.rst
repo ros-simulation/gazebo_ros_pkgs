@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.4 (2014-07-18)
+------------------
 * Fix repo names in package.xml's
 * fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
   Operator ``==`` is not recognized by sh scripts.
