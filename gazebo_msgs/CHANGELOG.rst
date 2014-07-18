@@ -2,6 +2,11 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix repo names in package.xml's
+* Contributors: Jon Binney
+
 2.4.3 (2014-05-12)
 ------------------
 

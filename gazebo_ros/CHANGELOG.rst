@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix repo names in package.xml's
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
+  Operator ``==`` is not recognized by sh scripts.
+* Add verbose parameter
+  Add verbose parameter for --verbose gazebo flag
+* added osx support for gazebo start scripts
+* Contributors: Arn-O, Jon Binney, Markus Achtelik, Vincenzo Comito
+
 2.4.3 (2014-05-12)
 ------------------
 * added osx support for gazebo start scripts

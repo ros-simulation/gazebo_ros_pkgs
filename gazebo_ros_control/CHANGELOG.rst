@@ -2,6 +2,23 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update package.xml
+  Add new maintainer.
+* Should fix build error for binary releases.
+  See: http://www.ros.org/debbuild/indigo.html?q=gazebo_ros_control
+* Updated package.xml
+* gazebo_ros_control: default_robot_hw_sim:  Suppressing pid error message
+  Depends on `ros-controls/control_toolbox#21 <https://github.com/ros-controls/control_toolbox/issues/21>`_
+* Revert 4776545, as it belongs in indigo-devel.
+* Fix repo names in package.xml's
+* gazebo_ros_control: default_robot_hw_sim: Suppressing pid error message, depends on `ros-controls/control_toolbox#21 <https://github.com/ros-controls/control_toolbox/issues/21>`_
+* gazebo_ros_control: Add dependency on angles
+* gazebo_ros_control: Add build-time dependency on gazebo
+  This fixes a regression caused by a889ef8b768861231a67b78781514d834f631b8e
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Alexander Bubeck, Dave Coleman, Jon Binney, Jonathan Bohren, Scott K Logan
+
 2.4.3 (2014-05-12)
 ------------------
 * Compatibility with Indigo's ros_control.

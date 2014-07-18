@@ -2,6 +2,45 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge branch 'hydro-devel' into indigo-devel
+* gazebo_ros_diff_drive gazebo_ros_tricycle_drive encoderSource option names updated
+* gazebo_ros_diff_drive is now able to use the wheels rotation of the optometry or the gazebo ground truth based on the 'odometrySource' parameter
+* simple linear controller for the tricycle_drive added
+* second robot for testing in tricycle_drive_scenario.launch added
+* Merge remote-tracking branch 'upstream/hydro-devel' into hydro-devel
+* BDS licenses header fixed and tricycle drive plugin added
+* format patch of hsu applied
+* Updated package.xml
+* Fix repo names in package.xml's
+* ros diff drive supports now an acceleration limit
+* Pioneer model: Diff_drive torque reduced
+* GPU Laser test example added
+* fixed gpu_laser to work with workspaces
+* hand_of_god: Adding hand-of-god plugin
+  ros_force: Fixing error messages to refer to the right plugin
+* Remove unneeded dependency on pcl_ros
+* minor fixes on relative paths in xacro for pioneer robot
+* gazebo test model pionneer 3dx updated with xacro path variables
+* pioneer model update for the multi_robot_scenario
+* Merge remote-tracking branch 'upstream/hydro-devel' into hydro-devel
+* fixed camera to work with workspaces
+* fixed links related to changed name
+* diff drive name changed to multi robot scenario
+* working camera added
+* Merge remote-tracking branch 'upstream/hydro-devel' into hydro-devel
+* fix in pioneer xacro model for diff_drive
+* Laser colour in rviz changed
+* A test model for the ros_diff_drive ros_laser and joint_state_publisher added
+* the ros_laser checkes now for the model name and adds it als prefix
+* joint velocity fixed using radius instead of diameter
+* ROS_INFO on laser plugin added to see if it starts
+* fetched with upstream
+* gazebo_ros_diff_drive was enhanced to publish the wheels tf or the wheels joint state depending on two additinal xml options <publishWheelTF> <publishWheelJointState>
+* Gazebo ROS joint state publisher added
+* Contributors: Dave Coleman, John Hsu, Jon Binney, Jonathan Bohren, Markus Bader, Steven Peters
+
 2.4.3 (2014-05-12)
 ------------------
 * gazebo_plugins: add run-time dependency on gazebo_ros
