@@ -152,7 +152,8 @@ public:
       joint_position_command_[j] = 0.0;
       joint_velocity_command_[j] = 0.0;
 
-      const std::string& hardware_interface = transmissions[j].actuators_[0].hardware_interface_;
+      const std::string &hardware_interface =
+        transmissions[j].actuators_[0].hardware_interfaces_[0];
 
       // Debug
       ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joint_names_[j]
@@ -288,7 +289,7 @@ public:
           break;
 
         case POSITION:
-          sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
+          sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
           break;
 
         case POSITION_PID:
