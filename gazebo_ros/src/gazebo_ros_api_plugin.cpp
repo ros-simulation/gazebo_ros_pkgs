@@ -1089,7 +1089,7 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
 
   // stuff only works in ODE right now
   ode_pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
-#if GAZEBO_MAJOR_VERSION >= 4
+#if GAZEBO_MAJOR_VERSION >= 3
   ode_pe->SetParam("precon_iters", req.ode_config.sor_pgs_precon_iters);
   ode_pe->SetParam("iters", req.ode_config.sor_pgs_iters);
   ode_pe->SetParam("sor", req.ode_config.sor_pgs_w);
@@ -1133,7 +1133,7 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   // stuff only works in ODE right now
   res.ode_config.auto_disable_bodies =
     world_->GetPhysicsEngine()->GetAutoDisableFlag();
-#if GAZEBO_MAJOR_VERSION >= 4
+#if GAZEBO_MAJOR_VERSION >= 3
   res.ode_config.sor_pgs_precon_iters = boost::any_cast<unsigned int>(
     world_->GetPhysicsEngine()->GetParam("precon_iters"));
   res.ode_config.sor_pgs_iters = boost::any_cast<unsigned int>(
