@@ -152,8 +152,13 @@ public:
       joint_position_command_[j] = 0.0;
       joint_velocity_command_[j] = 0.0;
 
+#if ROS_VERSION_MINOR > 10 || ROS_VERSION_MAJOR > 1
       const std::string &hardware_interface =
         transmissions[j].actuators_[0].hardware_interfaces_[0];
+#else
+      const std::string &hardware_interface =
+        transmissions[j].actuators_[0].hardware_interface_;
+#endif
 
       // Debug
       ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joint_names_[j]
