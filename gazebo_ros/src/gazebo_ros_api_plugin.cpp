@@ -1134,9 +1134,9 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   res.ode_config.auto_disable_bodies =
     world_->GetPhysicsEngine()->GetAutoDisableFlag();
 #if GAZEBO_MAJOR_VERSION >= 3
-  res.ode_config.sor_pgs_precon_iters = boost::any_cast<unsigned int>(
+  res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
     world_->GetPhysicsEngine()->GetParam("precon_iters"));
-  res.ode_config.sor_pgs_iters = boost::any_cast<unsigned int>(
+  res.ode_config.sor_pgs_iters = boost::any_cast<int>(
       world_->GetPhysicsEngine()->GetParam("iters"));
   res.ode_config.sor_pgs_w = boost::any_cast<double>(
       world_->GetPhysicsEngine()->GetParam("sor"));
@@ -1148,7 +1148,7 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
       world_->GetPhysicsEngine()->GetParam("cfm"));
   res.ode_config.erp = boost::any_cast<double>(
       world_->GetPhysicsEngine()->GetParam("erp"));
-  res.ode_config.max_contacts = boost::any_cast<double>(
+  res.ode_config.max_contacts = boost::any_cast<int>(
     world_->GetPhysicsEngine()->GetParam("max_contacts"));
 #else
   res.ode_config.sor_pgs_precon_iters = world_->GetPhysicsEngine()->GetSORPGSPreconIters();
