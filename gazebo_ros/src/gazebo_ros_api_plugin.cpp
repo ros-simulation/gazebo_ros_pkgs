@@ -21,6 +21,7 @@
  */
 
 #include <gazebo/common/Events.hh>
+#include <gazebo/gazebo_config.h>
 #include "gazebo_ros_api_plugin.h"
 
 namespace gazebo
@@ -1088,6 +1089,18 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
 
   // stuff only works in ODE right now
   ode_pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
+#if GAZEBO_MAJOR_VERSION >= 3
+  ode_pe->SetParam("precon_iters", req.ode_config.sor_pgs_precon_iters);
+  ode_pe->SetParam("iters", req.ode_config.sor_pgs_iters);
+  ode_pe->SetParam("sor", req.ode_config.sor_pgs_w);
+  ode_pe->SetParam("cfm", req.ode_config.cfm);
+  ode_pe->SetParam("erp", req.ode_config.erp);
+  ode_pe->SetParam("contact_surface_layer",
+      req.ode_config.contact_surface_layer);
+  ode_pe->SetParam("contact_max_correcting_vel",
+      req.ode_config.contact_max_correcting_vel);
+  ode_pe->SetParam("max_contacts", req.ode_config.max_contacts);
+#else
   ode_pe->SetSORPGSPreconIters(req.ode_config.sor_pgs_precon_iters);
   ode_pe->SetSORPGSIters(req.ode_config.sor_pgs_iters);
   ode_pe->SetSORPGSW(req.ode_config.sor_pgs_w);
@@ -1096,6 +1109,7 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   ode_pe->SetContactSurfaceLayer(req.ode_config.contact_surface_layer);
   ode_pe->SetContactMaxCorrectingVel(req.ode_config.contact_max_correcting_vel);
   ode_pe->SetMaxContacts(req.ode_config.max_contacts);
+#endif
 
   world_->SetPaused(is_paused);
 
@@ -1117,7 +1131,26 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   res.gravity.z = gravity.z;
 
   // stuff only works in ODE right now
-  res.ode_config.auto_disable_bodies = world_->GetPhysicsEngine()->GetAutoDisableFlag();
+  res.ode_config.auto_disable_bodies =
+    world_->GetPhysicsEngine()->GetAutoDisableFlag();
+#if GAZEBO_MAJOR_VERSION >= 3
+  res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
+    world_->GetPhysicsEngine()->GetParam("precon_iters"));
+  res.ode_config.sor_pgs_iters = boost::any_cast<int>(
+      world_->GetPhysicsEngine()->GetParam("iters"));
+  res.ode_config.sor_pgs_w = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("sor"));
+  res.ode_config.contact_surface_layer = boost::any_cast<double>(
+    world_->GetPhysicsEngine()->GetParam("contact_surface_layer"));
+  res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
+    world_->GetPhysicsEngine()->GetParam("contact_max_correcting_vel"));
+  res.ode_config.cfm = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("cfm"));
+  res.ode_config.erp = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("erp"));
+  res.ode_config.max_contacts = boost::any_cast<int>(
+    world_->GetPhysicsEngine()->GetParam("max_contacts"));
+#else
   res.ode_config.sor_pgs_precon_iters = world_->GetPhysicsEngine()->GetSORPGSPreconIters();
   res.ode_config.sor_pgs_iters = world_->GetPhysicsEngine()->GetSORPGSIters();
   res.ode_config.sor_pgs_w = world_->GetPhysicsEngine()->GetSORPGSW();
@@ -1126,6 +1159,7 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   res.ode_config.cfm = world_->GetPhysicsEngine()->GetWorldCFM();
   res.ode_config.erp = world_->GetPhysicsEngine()->GetWorldERP();
   res.ode_config.max_contacts = world_->GetPhysicsEngine()->GetMaxContacts();
+#endif
 
   res.success = true;
   res.status_message = "GetPhysicsProperties: got properties";
@@ -1153,6 +1187,26 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
   {
     for(unsigned int i=0;i< req.ode_joint_config.damping.size();i++)
       joint->SetDamping(i,req.ode_joint_config.damping[i]);
+#if GAZEBO_MAJOR_VERSION >= 4
+    for(unsigned int i=0;i< req.ode_joint_config.hiStop.size();i++)
+      joint->SetParam("hi_stop",i,req.ode_joint_config.hiStop[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.loStop.size();i++)
+      joint->SetParam("lo_stop",i,req.ode_joint_config.loStop[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.erp.size();i++)
+      joint->SetParam("erp",i,req.ode_joint_config.erp[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.cfm.size();i++)
+      joint->SetParam("cfm",i,req.ode_joint_config.cfm[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.stop_erp.size();i++)
+      joint->SetParam("stop_erp",i,req.ode_joint_config.stop_erp[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.stop_cfm.size();i++)
+      joint->SetParam("stop_cfm",i,req.ode_joint_config.stop_cfm[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.fudge_factor.size();i++)
+      joint->SetParam("fudge_factor",i,req.ode_joint_config.fudge_factor[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.fmax.size();i++)
+      joint->SetParam("fmax",i,req.ode_joint_config.fmax[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.vel.size();i++)
+      joint->SetParam("vel",i,req.ode_joint_config.vel[i]);
+#else
     for(unsigned int i=0;i< req.ode_joint_config.hiStop.size();i++)
       joint->SetAttribute("hi_stop",i,req.ode_joint_config.hiStop[i]);
     for(unsigned int i=0;i< req.ode_joint_config.loStop.size();i++)
@@ -1171,6 +1225,7 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
       joint->SetAttribute("fmax",i,req.ode_joint_config.fmax[i]);
     for(unsigned int i=0;i< req.ode_joint_config.vel.size();i++)
       joint->SetAttribute("vel",i,req.ode_joint_config.vel[i]);
+#endif
 
     res.success = true;
     res.status_message = "SetJointProperties: properties set";
