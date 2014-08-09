@@ -2,6 +2,34 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.4 (2014-07-18)
+------------------
+* Fix repo names in package.xml's
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
+  Operator ``==`` is not recognized by sh scripts.
+* Add verbose parameter
+  Add verbose parameter for --verbose gazebo flag
+* added osx support for gazebo start scripts
+* Contributors: Arn-O, Jon Binney, Markus Achtelik, Vincenzo Comito
+
+2.4.3 (2014-05-12)
+------------------
+* added osx support for gazebo start scripts
+* Remove gazebo_ros dependency on gazebo_plugins
+* Contributors: Markus Achtelik, Steven Peters
+
+2.4.2 (2014-03-27)
+------------------
+* merging from hydro-devel
+* bump patch version for indigo-devel to 2.4.1
+* merging from indigo-devel after 2.3.4 release
+* "2.4.0"
+* catkin_generate_changelog
+* Contributors: John Hsu
+
+2.4.1 (2013-11-13)
+------------------
+
 2.3.5 (2014-03-26)
 ------------------
 * gazebo_ros: [less-than-minor] fix newlines
@@ -13,6 +41,7 @@ Changelog for package gazebo_ros
 
 2.3.4 (2013-11-13)
 ------------------
+* rerelease because sdformat became libsdformat, but we also based change on 2.3.4 in hydro-devel.
 * remove debug statement
 * fix sdf spawn with initial pose
 * fix sdf spawn with initial pose
@@ -31,6 +60,9 @@ Changelog for package gazebo_ros
   When using the -wait option the script fails because is missing the time import
 * Use pre-increment for iterators
 * Fix iterator erase() problems
+
+2.4.0 (2013-10-14)
+------------------
 
 2.3.3 (2013-10-10)
 ------------------

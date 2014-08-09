@@ -1,9 +1,10 @@
 <package>
   <name>gazebo_ros_control</name>
-  <version>2.3.5</version>
+  <version>2.4.4</version>
   <description>gazebo_ros_control</description>
 
   <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
+  <maintainer email="adolfo.rodriguez@pal-robotics.com">Adolfo Rodriguez Tsouroukdissian</maintainer>
 
   <license>BSD</license>
 
@@ -17,21 +18,24 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend> 
-  <build_depend>gazebo_ros</build_depend> 
+  <build_depend>gazebo</build_depend>
   <build_depend>control_toolbox</build_depend> 
   <build_depend>controller_manager</build_depend> 
   <build_depend>pluginlib</build_depend> 
   <build_depend>transmission_interface</build_depend> 
   <build_depend>joint_limits_interface</build_depend>
   <build_depend>urdf</build_depend>
+  <build_depend>angles</build_depend>
   
-  <run_depend>roscpp</run_depend> 
+  <run_depend>roscpp</run_depend>
+  <run_depend>gazebo</run_depend>
   <run_depend>gazebo_ros</run_depend> 
   <run_depend>control_toolbox</run_depend> 
   <run_depend>controller_manager</run_depend> 
   <run_depend>pluginlib</run_depend> 
   <run_depend>transmission_interface</run_depend> 
   <run_depend>urdf</run_depend>
+  <run_depend>angles</run_depend>
 
   <export>
     <gazebo_ros_control plugin="${prefix}/robot_hw_sim_plugins.xml"/>

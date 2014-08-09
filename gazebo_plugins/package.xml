@@ -1,6 +1,6 @@
 <package>
   <name>gazebo_plugins</name>
-  <version>2.3.5</version>
+  <version>2.4.4</version>
   <description>
     Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
@@ -44,6 +44,7 @@
 
   <run_depend>gazebo</run_depend>
   <run_depend>gazebo_msgs</run_depend>
+  <run_depend>gazebo_ros</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>trajectory_msgs</run_depend>
