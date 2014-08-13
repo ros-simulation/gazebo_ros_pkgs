@@ -7,7 +7,7 @@
 
   <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
 
-  <license>BSD</license>
+  <license>BSD, Apache 2.0</license>
 
   <url type="website">http://gazebosim.org/wiki/Tutorials#ROS_Integration</url>
   <url type="bugtracker">https://github.com/ros-simulation/gazebo_ros_pkgs/issues</url>
