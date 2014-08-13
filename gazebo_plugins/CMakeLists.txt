@@ -38,7 +38,7 @@ endif()
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
-find_package(PCL REQUIRED)
+# find_package(PCL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 
 execute_process(COMMAND
@@ -66,6 +66,7 @@ include_directories(include
 
 link_directories(
   ${GAZEBO_LIBRARY_DIRS}
+  ${Boost_LIBRARY_DIRS}
 )
 
 catkin_package(

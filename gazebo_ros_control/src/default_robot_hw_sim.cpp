@@ -225,7 +225,7 @@ public:
                           &joint_effort_limits_[j]);
       if (joint_control_methods_[j] != EFFORT)
       {
-        // Initialize the PID controller. If no PID gain values are found, use joint->SetAngle() or
+        // Initialize the PID controller. If no PID gain values are found, use joint->SetPosition() or
         // joint->SetVelocity() to control the joint.
         const ros::NodeHandle nh(model_nh, robot_namespace + "/gazebo_ros_control/pid_gains/" +
                                  joint_names_[j]);
@@ -243,7 +243,7 @@ public:
         }
         else
         {
-          // joint->SetMaxForce() must be called if joint->SetAngle() or joint->SetVelocity() are
+          // joint->SetMaxForce() must be called if joint->SetPosition() or joint->SetVelocity() are
           // going to be called. joint->SetMaxForce() must *not* be called if joint->SetForce() is
           // going to be called.
           joint->SetMaxForce(0, joint_effort_limits_[j]);
@@ -300,7 +300,11 @@ public:
           break;
 
         case POSITION:
+#if GAZEBO_MAJOR_VERSION > 2
+          sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
+#else
           sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
+#endif
           break;
 
         case POSITION_PID:
