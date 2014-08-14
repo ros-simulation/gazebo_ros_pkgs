@@ -33,6 +33,7 @@
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/RaySensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/transport/transport.hh>
 
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
@@ -78,7 +79,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     gzthrow("GazeboRosLaser controller requires a Ray Sensor as its parent");
 
   this->robot_namespace_ =  GetRobotNamespace(_parent, _sdf, "Laser");
-  
+
   if (!this->sdf->HasElement("frameName"))
   {
     ROS_INFO("Laser plugin missing <frameName>, defaults to /world");
@@ -86,8 +87,8 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   }
   else
     this->frame_name_ = this->sdf->Get<std::string>("frameName");
-  
-  
+
+
   if (!this->sdf->HasElement("topicName"))
   {
     ROS_INFO("Laser plugin missing <topicName>, defaults to /world");
@@ -104,8 +105,8 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
-  }   
-  
+  }
+
   ROS_INFO ( "Starting Laser Plugin (ns = %s)!", this->robot_namespace_.c_str() );
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
@@ -123,7 +124,7 @@ void GazeboRosLaser::LoadThread()
   this->pmq.startServiceThread();
 
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
-  
+
   this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
   if(this->tf_prefix_.empty()) {
       this->tf_prefix_ = this->robot_namespace_;
@@ -131,7 +132,7 @@ void GazeboRosLaser::LoadThread()
   }
   ROS_INFO("Laser Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
              this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
-  
+
   // resolve tf prefix
   this->frame_name_ = tf::resolve(this->tf_prefix_, this->frame_name_);
 
@@ -159,8 +160,8 @@ void GazeboRosLaser::LaserConnect()
 {
   this->laser_connect_count_++;
   if (this->laser_connect_count_ == 1)
-    this->laser_scan_sub_ = 
-      this->gazebo_node_->Subscribe(this->parent_ray_sensor_->GetTopic(), 
+    this->laser_scan_sub_ =
+      this->gazebo_node_->Subscribe(this->parent_ray_sensor_->GetTopic(),
                                     &GazeboRosLaser::OnScan, this);
 }
 
@@ -190,12 +191,12 @@ void GazeboRosLaser::OnScan(ConstLaserScanStampedPtr &_msg)
   laser_msg.range_min = _msg->scan().range_min();
   laser_msg.range_max = _msg->scan().range_max();
   laser_msg.ranges.resize(_msg->scan().ranges_size());
-  std::copy(_msg->scan().ranges().begin(), 
-            _msg->scan().ranges().end(), 
+  std::copy(_msg->scan().ranges().begin(),
+            _msg->scan().ranges().end(),
             laser_msg.ranges.begin());
   laser_msg.intensities.resize(_msg->scan().intensities_size());
-  std::copy(_msg->scan().intensities().begin(), 
-            _msg->scan().intensities().end(), 
+  std::copy(_msg->scan().intensities().begin(),
+            _msg->scan().intensities().end(),
             laser_msg.intensities.begin());
   this->pub_queue_->push(laser_msg, this->pub_);
 }

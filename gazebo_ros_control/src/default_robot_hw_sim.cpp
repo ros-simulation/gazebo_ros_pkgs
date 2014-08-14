@@ -300,7 +300,11 @@ public:
           break;
 
         case POSITION:
+#if GAZEBO_MAJOR_VERSION >= 4
+          sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
+#else
           sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
+#endif
           break;
 
         case POSITION_PID:
