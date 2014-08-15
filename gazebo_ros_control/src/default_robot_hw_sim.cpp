@@ -152,7 +152,13 @@ public:
       joint_position_command_[j] = 0.0;
       joint_velocity_command_[j] = 0.0;
 
-      const std::string& hardware_interface = transmissions[j].actuators_[0].hardware_interface_;
+#if ROS_VERSION_MINOR > 10 || ROS_VERSION_MAJOR > 1
+      const std::string &hardware_interface =
+        transmissions[j].actuators_[0].hardware_interfaces_[0];
+#else
+      const std::string &hardware_interface =
+        transmissions[j].actuators_[0].hardware_interface_;
+#endif
 
       // Debug
       ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joint_names_[j]
@@ -288,7 +294,11 @@ public:
           break;
 
         case POSITION:
+#if GAZEBO_MAJOR_VERSION >= 4
+          sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
+#else
           sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
+#endif
           break;
 
         case POSITION_PID:
