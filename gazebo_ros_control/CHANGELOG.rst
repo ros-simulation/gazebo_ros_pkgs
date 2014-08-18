@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix typo: GAZEBO_VERSION_MAJOR -> GAZEBO_MAJOR_VERSION
+* Port fix_build branch for indigo-devel
+  See pull request `#221 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/221>`_
+* Contributors: Jose Luis Rivero, Steven Peters
+
 2.4.4 (2014-07-18)
 ------------------
 * Update package.xml

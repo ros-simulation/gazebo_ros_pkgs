@@ -2,6 +2,13 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Replace SetAngle with SetPosition for gazebo 4 and up
+* Port fix_build branch for indigo-devel
+  See pull request `#221 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/221>`_
+* Contributors: Jose Luis Rivero, Steven Peters
+
 2.4.4 (2014-07-18)
 ------------------
 * Merge branch 'hydro-devel' into indigo-devel
