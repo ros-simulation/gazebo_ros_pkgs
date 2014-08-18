@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.6 (2014-08-18)
+------------------
 * Update for hydro + gazebo 1.9
 * Fix build with gazebo4 and indigo
 * Fix repo names in package.xml's

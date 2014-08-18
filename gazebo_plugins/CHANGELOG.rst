@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.6 (2014-08-18)
+------------------
 * Fix build with gazebo4 and indigo
 * gazebo_ros_diff_drive gazebo_ros_tricycle_drive encoderSource option names updated
 * gazebo_ros_diff_drive is now able to use the wheels rotation of the optometry or the gazebo ground truth based on the 'odometrySource' parameter
