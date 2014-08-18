@@ -2,6 +2,26 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update for hydro + gazebo 1.9
+* Fix build with gazebo4 and indigo
+* Fix repo names in package.xml's
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
+  Operator ``==`` is not recognized by sh scripts.
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
+  Operator ``==`` is not recognized by sh scripts.
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
+  Operator ``==`` is not recognized by sh scripts.
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
+  Operator ``==`` is not recognized by sh scripts.
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
+  Operator ``==`` is not recognized by sh scripts.
+* Add verbose parameter
+  Add verbose parameter for --verbose gazebo flag
+* added osx support for gazebo start scripts
+* Contributors: Arn-O, Jon Binney, Markus Achtelik, Nate Koenig, Vincenzo Comito
+
 2.3.5 (2014-03-26)
 ------------------
 * gazebo_ros: [less-than-minor] fix newlines

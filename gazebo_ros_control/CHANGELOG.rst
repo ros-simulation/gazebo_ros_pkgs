@@ -2,6 +2,17 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update default_robot_hw_sim.cpp
+* Update for hydro + gazebo 1.9
+* Fix to work with gazebo3
+* Fix build with gazebo4 and indigo
+* Revert 4776545, as it belongs in indigo-devel.
+* Fix repo names in package.xml's
+* gazebo_ros_control: default_robot_hw_sim: Suppressing pid error message, depends on `ros-controls/control_toolbox#21 <https://github.com/ros-controls/control_toolbox/issues/21>`_
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Dave Coleman, Jon Binney, Jonathan Bohren, Nate Koenig, John Hsu
+
 2.3.5 (2014-03-26)
 ------------------
 * Removed some debugging code.

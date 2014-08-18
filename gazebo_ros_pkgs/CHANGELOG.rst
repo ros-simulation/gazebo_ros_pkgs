@@ -2,6 +2,12 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updated package.xml
+* Fix repo names in package.xml's
+* Contributors: Dave Coleman, Jon Binney
+
 2.3.5 (2014-03-26)
 ------------------
 

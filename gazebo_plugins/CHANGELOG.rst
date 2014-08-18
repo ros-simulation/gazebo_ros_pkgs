@@ -2,6 +2,47 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix build with gazebo4 and indigo
+* gazebo_ros_diff_drive gazebo_ros_tricycle_drive encoderSource option names updated
+* gazebo_ros_diff_drive is now able to use the wheels rotation of the optometry or the gazebo ground truth based on the 'odometrySource' parameter
+* simple linear controller for the tricycle_drive added
+* second robot for testing in tricycle_drive_scenario.launch added
+* BDS licenses header fixed and tricycle drive plugin added
+* Fix repo names in package.xml's
+* ros diff drive supports now an acceleration limit
+* Pioneer model: Diff_drive torque reduced
+* GPU Laser test example added
+* fixed gpu_laser to work with workspaces
+* Merge pull request `#139 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/139>`_ from jbohren-forks/hand-of-god
+  Adding hand-of-god plugin
+* HoG: adding install target
+* hand_of_god: Adding hand-of-god plugin
+  ros_force: Fixing error messages to refer to the right plugin
+* Remove unneeded dependency on pcl_ros
+  pcl_ros hasn't been released yet into indigo. I asked @wjwwood about
+  its status, and he pointed out that our dependency on pcl_ros
+  probably isn't necessary. Lo and behold, we removed it from the
+  header files, package.xml and CMakeLists.txt and gazebo_plugins
+  still compiles.
+* minor fixes on relative paths in xacro for pioneer robot
+* gazebo test model pionneer 3dx updated with xacro path variables
+* pioneer model update for the multi_robot_scenario
+* fixed camera to work with workspaces
+* fixed links related to changed name
+* diff drive name changed to multi robot scenario
+* working camera added
+* fix in pioneer xacro model for diff_drive
+* Laser colour in rviz changed
+* A test model for the ros_diff_drive ros_laser and joint_state_publisher added
+* the ros_laser checkes now for the model name and adds it als prefix
+* joint velocity fixed using radius instead of diameter
+* ROS_INFO on laser plugin added to see if it starts
+* gazebo_ros_diff_drive was enhanced to publish the wheels tf or the wheels joint state depending on two additinal xml options <publishWheelTF> <publishWheelJointState>
+* Gazebo ROS joint state publisher added
+* Contributors: Dave Coleman, Jon Binney, Jonathan Bohren, Markus Bader, Nate Koenig, Steven Peters
+
 2.3.5 (2014-03-26)
 ------------------
 * update test world for block laser
