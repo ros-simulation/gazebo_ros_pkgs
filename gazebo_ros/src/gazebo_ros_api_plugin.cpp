@@ -1134,22 +1134,86 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   res.ode_config.auto_disable_bodies =
     world_->GetPhysicsEngine()->GetAutoDisableFlag();
 #if GAZEBO_MAJOR_VERSION >= 3
-  res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
-    world_->GetPhysicsEngine()->GetParam("precon_iters"));
-  res.ode_config.sor_pgs_iters = boost::any_cast<int>(
-      world_->GetPhysicsEngine()->GetParam("iters"));
-  res.ode_config.sor_pgs_w = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("sor"));
-  res.ode_config.contact_surface_layer = boost::any_cast<double>(
-    world_->GetPhysicsEngine()->GetParam("contact_surface_layer"));
-  res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
-    world_->GetPhysicsEngine()->GetParam("contact_max_correcting_vel"));
-  res.ode_config.cfm = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("cfm"));
-  res.ode_config.erp = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("erp"));
-  res.ode_config.max_contacts = boost::any_cast<int>(
-    world_->GetPhysicsEngine()->GetParam("max_contacts"));
+  try
+  {
+    res.ode_config.sor_pgs_precon_iters =
+      boost::any_cast<int>(world_->GetPhysicsEngine()->GetParam("precon_iters"));
+  }
+  catch(boost::bad_lexical_cast &e)
+  {
+    ROS_ERROR("precon_iters not supported by current physics engine[%s].\n", e.what());
+    res.ode_config.sor_pgs_precon_iters = 0;
+  }
+  try
+  {
+    res.ode_config.sor_pgs_iters =
+      boost::any_cast<int>(world_->GetPhysicsEngine()->GetParam("iters"));
+  }
+  catch(boost::bad_lexical_cast &e)
+  {
+    ROS_ERROR("iters not supported by current physics engine[%s].\n", e.what());
+    res.ode_config.sor_pgs_iters = 0;
+  }
+  try
+  {
+    res.ode_config.sor_pgs_w =
+     boost::any_cast<double>(world_->GetPhysicsEngine()->GetParam("sor"));
+  }
+  catch(boost::bad_lexical_cast &e)
+  {
+    ROS_ERROR("sor not supported by current physics engine[%s].\n", e.what());
+    res.ode_config.sor_pgs_w = 0.0;
+  }
+  try
+  {
+    res.ode_config.contact_surface_layer = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("contact_surface_layer"));
+  }
+  catch(boost::bad_lexical_cast &e)
+  {
+    ROS_ERROR("contact_surface_layer not supported by current physics engine[%s].\n", e.what());
+    res.ode_config.contact_surface_layer = 0.0;
+  }
+  try
+  {
+    res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("contact_max_correcting_vel"));
+  }
+  catch(boost::bad_lexical_cast &e)
+  {
+    ROS_ERROR("contact_max_correcting_vel not supported by current physics engine[%s].\n", e.what());
+    res.ode_config.contact_max_correcting_vel = 0.0;
+  }
+  try
+  {
+    res.ode_config.cfm =
+      boost::any_cast<double>(world_->GetPhysicsEngine()->GetParam("cfm"));
+  }
+  catch(boost::bad_lexical_cast &e)
+  {
+    ROS_ERROR("cfm not supported by current physics engine[%s].\n", e.what());
+    res.ode_config.cfm = 0.0;
+  }
+  try
+  {
+    res.ode_config.erp =
+      boost::any_cast<double>(world_->GetPhysicsEngine()->GetParam("erp"));
+  }
+  catch(boost::bad_lexical_cast &e)
+  {
+    ROS_ERROR("erp not supported by current physics engine[%s].\n", e.what());
+    res.ode_config.erp = 0.0;
+  }
+  try
+  {
+    res.ode_config.max_contacts =
+      boost::any_cast<int>(world_->GetPhysicsEngine()->GetParam("max_contacts"));
+  }
+  catch(boost::bad_lexical_cast &e)
+  {
+    ROS_ERROR("max_contacts not supported by current physics engine[%s].\n", e.what());
+    res.ode_config.max_contacts = 0;
+  }
 #else
   res.ode_config.sor_pgs_precon_iters = world_->GetPhysicsEngine()->GetSORPGSPreconIters();
   res.ode_config.sor_pgs_iters = world_->GetPhysicsEngine()->GetSORPGSIters();
