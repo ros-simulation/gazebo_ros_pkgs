@@ -1082,40 +1082,50 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   world_->SetPaused(true);
 
   // supported updates
-  gazebo::physics::PhysicsEnginePtr ode_pe = (world_->GetPhysicsEngine());
-  ode_pe->SetMaxStepSize(req.time_step);
-  ode_pe->SetRealTimeUpdateRate(req.max_update_rate);
-  ode_pe->SetGravity(gazebo::math::Vector3(req.gravity.x,req.gravity.y,req.gravity.z));
+  gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
+  pe->SetMaxStepSize(req.time_step);
+  pe->SetRealTimeUpdateRate(req.max_update_rate);
+  pe->SetGravity(gazebo::math::Vector3(req.gravity.x,req.gravity.y,req.gravity.z));
 
-  // stuff only works in ODE right now
-  ode_pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
+  if (world_->GetPhysicsEngine()->GetType() == "ode")
+  {
+    // stuff only works in ODE right now
+    pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
 #if GAZEBO_MAJOR_VERSION >= 3
-  ode_pe->SetParam("precon_iters", req.ode_config.sor_pgs_precon_iters);
-  ode_pe->SetParam("iters", req.ode_config.sor_pgs_iters);
-  ode_pe->SetParam("sor", req.ode_config.sor_pgs_w);
-  ode_pe->SetParam("cfm", req.ode_config.cfm);
-  ode_pe->SetParam("erp", req.ode_config.erp);
-  ode_pe->SetParam("contact_surface_layer",
-      req.ode_config.contact_surface_layer);
-  ode_pe->SetParam("contact_max_correcting_vel",
-      req.ode_config.contact_max_correcting_vel);
-  ode_pe->SetParam("max_contacts", req.ode_config.max_contacts);
+    pe->SetParam("precon_iters", req.ode_config.sor_pgs_precon_iters);
+    pe->SetParam("iters", req.ode_config.sor_pgs_iters);
+    pe->SetParam("sor", req.ode_config.sor_pgs_w);
+    pe->SetParam("cfm", req.ode_config.cfm);
+    pe->SetParam("erp", req.ode_config.erp);
+    pe->SetParam("contact_surface_layer",
+        req.ode_config.contact_surface_layer);
+    pe->SetParam("contact_max_correcting_vel",
+        req.ode_config.contact_max_correcting_vel);
+    pe->SetParam("max_contacts", req.ode_config.max_contacts);
 #else
-  ode_pe->SetSORPGSPreconIters(req.ode_config.sor_pgs_precon_iters);
-  ode_pe->SetSORPGSIters(req.ode_config.sor_pgs_iters);
-  ode_pe->SetSORPGSW(req.ode_config.sor_pgs_w);
-  ode_pe->SetWorldCFM(req.ode_config.cfm);
-  ode_pe->SetWorldERP(req.ode_config.erp);
-  ode_pe->SetContactSurfaceLayer(req.ode_config.contact_surface_layer);
-  ode_pe->SetContactMaxCorrectingVel(req.ode_config.contact_max_correcting_vel);
-  ode_pe->SetMaxContacts(req.ode_config.max_contacts);
+    pe->SetSORPGSPreconIters(req.ode_config.sor_pgs_precon_iters);
+    pe->SetSORPGSIters(req.ode_config.sor_pgs_iters);
+    pe->SetSORPGSW(req.ode_config.sor_pgs_w);
+    pe->SetWorldCFM(req.ode_config.cfm);
+    pe->SetWorldERP(req.ode_config.erp);
+    pe->SetContactSurfaceLayer(req.ode_config.contact_surface_layer);
+    pe->SetContactMaxCorrectingVel(req.ode_config.contact_max_correcting_vel);
+    pe->SetMaxContacts(req.ode_config.max_contacts);
 #endif
 
-  world_->SetPaused(is_paused);
+    world_->SetPaused(is_paused);
 
-  res.success = true;
-  res.status_message = "physics engine updated";
-  return true;
+    res.success = true;
+    res.status_message = "physics engine updated";
+  }
+  else
+  {
+    /// \TODO: add support for simbody, dart and bullet physics properties.
+    ROS_ERROR("ROS set_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    res.success = false;
+    res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: set_physics_properties not supported.";
+  }
+  return res.success;
 }
 
 bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,
@@ -1131,39 +1141,49 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   res.gravity.z = gravity.z;
 
   // stuff only works in ODE right now
-  res.ode_config.auto_disable_bodies =
-    world_->GetPhysicsEngine()->GetAutoDisableFlag();
+  if (world_->GetPhysicsEngine()->GetType() == "ode")
+  {
+    res.ode_config.auto_disable_bodies =
+      world_->GetPhysicsEngine()->GetAutoDisableFlag();
 #if GAZEBO_MAJOR_VERSION >= 3
-  res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
-    world_->GetPhysicsEngine()->GetParam("precon_iters"));
-  res.ode_config.sor_pgs_iters = boost::any_cast<int>(
-      world_->GetPhysicsEngine()->GetParam("iters"));
-  res.ode_config.sor_pgs_w = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("sor"));
-  res.ode_config.contact_surface_layer = boost::any_cast<double>(
-    world_->GetPhysicsEngine()->GetParam("contact_surface_layer"));
-  res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
-    world_->GetPhysicsEngine()->GetParam("contact_max_correcting_vel"));
-  res.ode_config.cfm = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("cfm"));
-  res.ode_config.erp = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("erp"));
-  res.ode_config.max_contacts = boost::any_cast<int>(
-    world_->GetPhysicsEngine()->GetParam("max_contacts"));
+    res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
+      world_->GetPhysicsEngine()->GetParam("precon_iters"));
+    res.ode_config.sor_pgs_iters = boost::any_cast<int>(
+        world_->GetPhysicsEngine()->GetParam("iters"));
+    res.ode_config.sor_pgs_w = boost::any_cast<double>(
+        world_->GetPhysicsEngine()->GetParam("sor"));
+    res.ode_config.contact_surface_layer = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("contact_surface_layer"));
+    res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("contact_max_correcting_vel"));
+    res.ode_config.cfm = boost::any_cast<double>(
+        world_->GetPhysicsEngine()->GetParam("cfm"));
+    res.ode_config.erp = boost::any_cast<double>(
+        world_->GetPhysicsEngine()->GetParam("erp"));
+    res.ode_config.max_contacts = boost::any_cast<int>(
+      world_->GetPhysicsEngine()->GetParam("max_contacts"));
 #else
-  res.ode_config.sor_pgs_precon_iters = world_->GetPhysicsEngine()->GetSORPGSPreconIters();
-  res.ode_config.sor_pgs_iters = world_->GetPhysicsEngine()->GetSORPGSIters();
-  res.ode_config.sor_pgs_w = world_->GetPhysicsEngine()->GetSORPGSW();
-  res.ode_config.contact_surface_layer = world_->GetPhysicsEngine()->GetContactSurfaceLayer();
-  res.ode_config.contact_max_correcting_vel = world_->GetPhysicsEngine()->GetContactMaxCorrectingVel();
-  res.ode_config.cfm = world_->GetPhysicsEngine()->GetWorldCFM();
-  res.ode_config.erp = world_->GetPhysicsEngine()->GetWorldERP();
-  res.ode_config.max_contacts = world_->GetPhysicsEngine()->GetMaxContacts();
+    res.ode_config.sor_pgs_precon_iters = world_->GetPhysicsEngine()->GetSORPGSPreconIters();
+    res.ode_config.sor_pgs_iters = world_->GetPhysicsEngine()->GetSORPGSIters();
+    res.ode_config.sor_pgs_w = world_->GetPhysicsEngine()->GetSORPGSW();
+    res.ode_config.contact_surface_layer = world_->GetPhysicsEngine()->GetContactSurfaceLayer();
+    res.ode_config.contact_max_correcting_vel = world_->GetPhysicsEngine()->GetContactMaxCorrectingVel();
+    res.ode_config.cfm = world_->GetPhysicsEngine()->GetWorldCFM();
+    res.ode_config.erp = world_->GetPhysicsEngine()->GetWorldERP();
+    res.ode_config.max_contacts = world_->GetPhysicsEngine()->GetMaxContacts();
 #endif
 
-  res.success = true;
-  res.status_message = "GetPhysicsProperties: got properties";
-  return true;
+    res.success = true;
+    res.status_message = "GetPhysicsProperties: got properties";
+  }
+  else
+  {
+    /// \TODO: add support for simbody, dart and bullet physics properties.
+    ROS_ERROR("ROS get_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    res.success = false;
+    res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: get_physics_properties not supported.";
+  }
+  return res.success;
 }
 
 bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Request &req,
