@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   polled_camera
   diagnostic_updater
+  camera_info_manager
 )
 
 include (FindPkgConfig)
@@ -119,6 +120,7 @@ catkin_package(
   pcl_conversions
   image_transport 
   rosconsole
+  camera_info_manager
   DEPENDS 
     gazebo 
     SDF

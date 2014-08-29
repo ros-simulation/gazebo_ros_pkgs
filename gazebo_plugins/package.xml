@@ -41,6 +41,7 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>polled_camera</build_depend>
   <build_depend>diagnostic_updater</build_depend>
+  <build_depend>camera_info_manager</build_depend>
 
   <run_depend>gazebo</run_depend>
   <run_depend>gazebo_msgs</run_depend>
@@ -65,5 +66,6 @@
   <run_depend>message_generation</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>polled_camera</run_depend>
+  <run_depend>camera_info_manager</run_depend>
 
 </package>
