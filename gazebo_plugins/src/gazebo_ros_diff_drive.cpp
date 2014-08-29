@@ -105,6 +105,14 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
 
 
 
+    this->publish_tf_ = true;
+    if (!_sdf->HasElement("publishTf")) {
+      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <publishTf>, defaults to %f",
+          this->robot_namespace_.c_str(), this->publish_tf_);
+    } else {
+      this->publish_tf_ = _sdf->GetElement("publishTf")->Get<bool>();
+    }
+
     // Initialize update rate stuff
     if ( this->update_rate_ > 0.0 ) this->update_period_ = 1.0 / this->update_rate_;
     else this->update_period_ = 0.0;
@@ -119,7 +127,7 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     alive_ = true;
 
 
-    if(this->publishWheelJointState_)
+    if (this->publishWheelJointState_)
     {
         joint_state_publisher_ = gazebo_ros_->node()->advertise<sensor_msgs::JointState>("joint_states", 1000);
         ROS_INFO("%s: Advertise joint_states!", gazebo_ros_->info());
@@ -138,8 +146,11 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     cmd_vel_subscriber_ = gazebo_ros_->node()->subscribe(so);
     ROS_INFO("%s: Subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str());
 
-    odometry_publisher_ = gazebo_ros_->node()->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
-    ROS_INFO("%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str());
+    if (this->publish_tf_)
+    {
+      odometry_publisher_ = gazebo_ros_->node()->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
+      ROS_INFO("%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str());
+    }
 
     // start custom queue for diff drive
     this->callback_queue_thread_ =
@@ -195,7 +206,7 @@ void GazeboRosDiffDrive::UpdateChild()
     common::Time current_time = parent->GetWorld()->GetSimTime();
     double seconds_since_last_update = ( current_time - last_update_time_ ).Double();
     if ( seconds_since_last_update > update_period_ ) {
-        publishOdometry ( seconds_since_last_update );
+        if (this->publish_tf_) publishOdometry ( seconds_since_last_update );
         if ( publishWheelTF_ ) publishWheelTF();
         if ( publishWheelJointState_ ) publishWheelJointState();
 

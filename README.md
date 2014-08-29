@@ -6,7 +6,7 @@ Wrappers, tools and additional API's for using ROS with the Gazebo simulator. Fo
 [Installing gazebo_ros_pkgs](http://gazebosim.org/wiki/Tutorials/1.9/Installing_gazebo_ros_Packages)
 
 ### Documentation and Tutorials
-[On gazebosim.org](http://gazebosim.org/wiki/Tutorials#ROS_Integration)
+[On gazebosim.org](http://gazebosim.org/tutorials?cat=connect_ros)
 
 ### Develop and Contribute
 

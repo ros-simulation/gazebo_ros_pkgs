@@ -28,6 +28,7 @@
 #include <image_transport/image_transport.h>
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/ChannelFloat32.h>
+#include <camera_info_manager/camera_info_manager.h>
 
 #include <sdf/sdf.hh>
 
@@ -272,6 +273,11 @@ void GazeboRosCameraUtils::LoadThread()
 
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_ + "/" + this->camera_name_);
 
+  // initialize camera_info_manager
+  this->camera_info_manager_.reset(new camera_info_manager::CameraInfoManager(
+          *this->rosnode_, this->camera_name_));
+
+  // resolve tf prefix
   std::string key;
   if(this->rosnode_->searchParam("tf_prefix", key)){
     std::string prefix;
@@ -487,6 +493,59 @@ void GazeboRosCameraUtils::Init()
     }
   }
 
+  // fill CameraInfo
+  sensor_msgs::CameraInfo camera_info_msg;
+
+  camera_info_msg.header.frame_id = this->frame_name_;
+
+  camera_info_msg.height = this->height_;
+  camera_info_msg.width  = this->width_;
+  // distortion
+#if ROS_VERSION_MINIMUM(1, 3, 0)
+  camera_info_msg.distortion_model = "plumb_bob";
+  camera_info_msg.D.resize(5);
+#endif
+  camera_info_msg.D[0] = this->distortion_k1_;
+  camera_info_msg.D[1] = this->distortion_k2_;
+  camera_info_msg.D[2] = this->distortion_k3_;
+  camera_info_msg.D[3] = this->distortion_t1_;
+  camera_info_msg.D[4] = this->distortion_t2_;
+  // original camera_ matrix
+  camera_info_msg.K[0] = this->focal_length_;
+  camera_info_msg.K[1] = 0.0;
+  camera_info_msg.K[2] = this->cx_;
+  camera_info_msg.K[3] = 0.0;
+  camera_info_msg.K[4] = this->focal_length_;
+  camera_info_msg.K[5] = this->cy_;
+  camera_info_msg.K[6] = 0.0;
+  camera_info_msg.K[7] = 0.0;
+  camera_info_msg.K[8] = 1.0;
+  // rectification
+  camera_info_msg.R[0] = 1.0;
+  camera_info_msg.R[1] = 0.0;
+  camera_info_msg.R[2] = 0.0;
+  camera_info_msg.R[3] = 0.0;
+  camera_info_msg.R[4] = 1.0;
+  camera_info_msg.R[5] = 0.0;
+  camera_info_msg.R[6] = 0.0;
+  camera_info_msg.R[7] = 0.0;
+  camera_info_msg.R[8] = 1.0;
+  // camera_ projection matrix (same as camera_ matrix due
+  // to lack of distortion/rectification) (is this generated?)
+  camera_info_msg.P[0] = this->focal_length_;
+  camera_info_msg.P[1] = 0.0;
+  camera_info_msg.P[2] = this->cx_;
+  camera_info_msg.P[3] = -this->focal_length_ * this->hack_baseline_;
+  camera_info_msg.P[4] = 0.0;
+  camera_info_msg.P[5] = this->focal_length_;
+  camera_info_msg.P[6] = this->cy_;
+  camera_info_msg.P[7] = 0.0;
+  camera_info_msg.P[8] = 0.0;
+  camera_info_msg.P[9] = 0.0;
+  camera_info_msg.P[10] = 1.0;
+  camera_info_msg.P[11] = 0.0;
+
+  this->camera_info_manager_->setCameraInfo(camera_info_msg);
 
   // start custom queue for camera_
   this->callback_queue_thread_ = boost::thread(
@@ -560,58 +619,10 @@ void GazeboRosCameraUtils::PublishCameraInfo()
 void GazeboRosCameraUtils::PublishCameraInfo(
   ros::Publisher camera_info_publisher)
 {
-  sensor_msgs::CameraInfo camera_info_msg;
-  // fill CameraInfo
-  camera_info_msg.header.frame_id = this->frame_name_;
+  sensor_msgs::CameraInfo camera_info_msg = camera_info_manager_->getCameraInfo();
 
   camera_info_msg.header.stamp.sec = this->sensor_update_time_.sec;
   camera_info_msg.header.stamp.nsec = this->sensor_update_time_.nsec;
-  camera_info_msg.height = this->height_;
-  camera_info_msg.width  = this->width_;
-  // distortion
-#if ROS_VERSION_MINIMUM(1, 3, 0)
-  camera_info_msg.distortion_model = "plumb_bob";
-  camera_info_msg.D.resize(5);
-#endif
-  camera_info_msg.D[0] = this->distortion_k1_;
-  camera_info_msg.D[1] = this->distortion_k2_;
-  camera_info_msg.D[2] = this->distortion_k3_;
-  camera_info_msg.D[3] = this->distortion_t1_;
-  camera_info_msg.D[4] = this->distortion_t2_;
-  // original camera_ matrix
-  camera_info_msg.K[0] = this->focal_length_;
-  camera_info_msg.K[1] = 0.0;
-  camera_info_msg.K[2] = this->cx_;
-  camera_info_msg.K[3] = 0.0;
-  camera_info_msg.K[4] = this->focal_length_;
-  camera_info_msg.K[5] = this->cy_;
-  camera_info_msg.K[6] = 0.0;
-  camera_info_msg.K[7] = 0.0;
-  camera_info_msg.K[8] = 1.0;
-  // rectification
-  camera_info_msg.R[0] = 1.0;
-  camera_info_msg.R[1] = 0.0;
-  camera_info_msg.R[2] = 0.0;
-  camera_info_msg.R[3] = 0.0;
-  camera_info_msg.R[4] = 1.0;
-  camera_info_msg.R[5] = 0.0;
-  camera_info_msg.R[6] = 0.0;
-  camera_info_msg.R[7] = 0.0;
-  camera_info_msg.R[8] = 1.0;
-  // camera_ projection matrix (same as camera_ matrix due
-  // to lack of distortion/rectification) (is this generated?)
-  camera_info_msg.P[0] = this->focal_length_;
-  camera_info_msg.P[1] = 0.0;
-  camera_info_msg.P[2] = this->cx_;
-  camera_info_msg.P[3] = -this->focal_length_ * this->hack_baseline_;
-  camera_info_msg.P[4] = 0.0;
-  camera_info_msg.P[5] = this->focal_length_;
-  camera_info_msg.P[6] = this->cy_;
-  camera_info_msg.P[7] = 0.0;
-  camera_info_msg.P[8] = 0.0;
-  camera_info_msg.P[9] = 0.0;
-  camera_info_msg.P[10] = 1.0;
-  camera_info_msg.P[11] = 0.0;
 
   camera_info_publisher.publish(camera_info_msg);
 }

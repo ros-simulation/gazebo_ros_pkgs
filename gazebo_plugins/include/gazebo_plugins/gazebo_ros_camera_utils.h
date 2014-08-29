@@ -34,6 +34,7 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <std_msgs/Float64.h>
 #include <image_transport/image_transport.h>
+#include <camera_info_manager/camera_info_manager.h>
 
 // dynamic reconfigure stuff
 #include <gazebo_plugins/GazeboRosCameraConfig.h>
@@ -153,6 +154,9 @@ namespace gazebo
     protected: double distortion_k3_;
     protected: double distortion_t1_;
     protected: double distortion_t2_;
+
+    protected: boost::shared_ptr<camera_info_manager::CameraInfoManager> camera_info_manager_;
+
 
     /// \brief A mutex to lock access to fields
     /// that are used in ROS message callbacks
