@@ -313,6 +313,7 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
   double fl = ((double)this->width) / (2.0 *tan(hfov/2.0));
 
   // convert depth to point cloud
+  point_cloud.points.resize(cols_arg * rows_arg);
   for (uint32_t j=0; j<rows_arg; j++)
   {
     double pAngle;
@@ -368,12 +369,13 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
         point.b = 0;
       }
 
-      point_cloud.points.push_back(point);
+      point_cloud.points[i + j * cols_arg] = point;
     }
   }
 
   point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
-
+  point_cloud.width = cols_arg;
+  point_cloud.height = rows_arg;
   pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }
