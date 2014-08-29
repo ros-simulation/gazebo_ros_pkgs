@@ -170,9 +170,6 @@ void GazeboRosDiffDrive::publishWheelJointState()
     joint_state_.name.resize ( joints_.size() );
     joint_state_.position.resize ( joints_.size() );
 
-    if (this->publish_tf_)
-      publishOdometry(seconds_since_last_update);
-
     for ( int i = 0; i < 2; i++ ) {
         physics::JointPtr joint = joints_[i];
         math::Angle angle = joint->GetAngle ( 0 );
