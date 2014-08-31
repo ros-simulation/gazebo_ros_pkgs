@@ -370,7 +370,6 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
         iter_rgb[1] = 0;
         iter_rgb[2] = 0;
       }
-
     }
   }
 
