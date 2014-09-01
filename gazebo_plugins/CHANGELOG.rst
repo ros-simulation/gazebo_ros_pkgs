@@ -2,6 +2,30 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update gazebo_ros_openni_kinect.cpp
+* merging from hydro-devel into indigo-devel
+* Merge pull request `#204 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/204>`_ from fsuarez6/hydro-devel
+  gazebo_plugins: Adding ForceTorqueSensor Plugin
+* Updated to Apache 2.0 license
+* Merge pull request `#180 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/180>`_ from vrabaud/indigo-devel
+  remove PCL dependency
+* merging
+* check deprecation of gazebo::Joint::SetAngle by SetPosition
+* compatibility with gazebo 4.x
+* Update changelogs for the upcoming release
+* Fix build with gazebo4 and indigo
+* Added Gaussian Noise generator
+* publish organized pointcloud from openni plugin
+* Changed measurement direction to "parent to child"
+* gazebo_plugin: Added updateRate parameter to the gazebo_ros_imu plugin
+* gazebo_plugins: Adding ForceTorqueSensor Plugin
+* remove PCL dependency
+* ros_camera_utils: Adding CameraInfoManager to satisfy full ROS camera API (relies on https://github.com/ros-perception/image_common/pull/20 )
+  ros_camera_utils: Adding CameraInfoManager to satisfy full ROS camera API (relies on https://github.com/ros-perception/image_common/pull/20 )
+* Contributors: John Hsu, Jonathan Bohren, Jose Luis Rivero, Nate Koenig, Ryohei Ueda, Vincent Rabaud, fsuarez6, gborque, John Binney
+
 2.4.5 (2014-08-18)
 ------------------
 * Replace SetAngle with SetPosition for gazebo 4 and up

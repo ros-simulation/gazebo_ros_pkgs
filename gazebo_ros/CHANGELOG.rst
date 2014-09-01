@@ -2,6 +2,27 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#232 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/232>`_ from ros-simulation/fix_get_physics_properties_non_ode
+  Fix get physics properties non ode
+* Merge pull request `#183 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/183>`_ from ros-simulation/issue_182
+  Fix STL iterator errors, misc. cppcheck (`#182 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/182>`_)
+* check physics engine type before calling set_physics_properties and get_physics_properteis
+* check physics engine type before calling set_physics_properties and get_physics_properteis
+* Fixes for calling GetParam() with different physic engines.
+* 2.3.6
+* Update changelogs for the upcoming release
+* Fixed boost any cast
+* Removed a few warnings
+* Update for hydro + gazebo 1.9
+* Fix build with gazebo4 and indigo
+* Fix STL iterator errors, misc. cppcheck (`#182 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/182>`_)
+  There were some errors in STL iterators.
+  Initialized values of member variables in constructor.
+  Removed an unused variable (model_name).
+* Contributors: Carlos Agüero, John Hsu, Jose Luis Rivero, Nate Koenig, Steven Peters, hsu, osrf
+
 2.4.5 (2014-08-18)
 ------------------
 * Port fix_build branch for indigo-devel

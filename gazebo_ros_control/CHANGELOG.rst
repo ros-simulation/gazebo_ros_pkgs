@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update default_robot_hw_sim.cpp
+* Reduced changes
+* Fix to work with gazebo3
+* Fix build with gazebo4 and indigo
+* Update package.xml
+  Add new maintainer.
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Jose Luis Rivero, Nate Koenig, hsu
+
 2.4.5 (2014-08-18)
 ------------------
 * Fix typo: GAZEBO_VERSION_MAJOR -> GAZEBO_MAJOR_VERSION
