@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.6 (2014-09-01)
+------------------
 * Update gazebo_ros_openni_kinect.cpp
 * merging from hydro-devel into indigo-devel
 * Merge pull request `#204 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/204>`_ from fsuarez6/hydro-devel

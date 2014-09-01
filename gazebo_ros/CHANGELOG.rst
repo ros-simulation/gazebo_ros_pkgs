@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.6 (2014-09-01)
+------------------
 * Merge pull request `#232 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/232>`_ from ros-simulation/fix_get_physics_properties_non_ode
   Fix get physics properties non ode
 * Merge pull request `#183 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/183>`_ from ros-simulation/issue_182
