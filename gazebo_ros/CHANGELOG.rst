@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.7 (2014-09-01)
+------------------
 * check physics engine type before calling set_physics_properties and get_physics_properteis
 * Contributors: John Hsu
 
