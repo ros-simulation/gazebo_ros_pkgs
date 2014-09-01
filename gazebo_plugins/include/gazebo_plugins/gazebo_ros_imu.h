@@ -84,6 +84,9 @@ namespace gazebo
     private: math::Vector3 last_veul_;
     private: math::Vector3 apos_;
     private: math::Vector3 aeul_;
+    
+    // rate control
+    private: double update_rate_;
 
     /// \brief: keep initial pose to offset orientation in imu message
     private: math::Pose initial_pose_;
