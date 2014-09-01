@@ -2,6 +2,9 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.3.6 (2014-08-18)
 ------------------
 * Fix repo names in package.xml's
