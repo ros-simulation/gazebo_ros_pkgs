@@ -26,6 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
   polled_camera
   diagnostic_updater
   camera_info_manager
+  moveit_msgs
 )
 
 include (FindPkgConfig)
@@ -122,6 +123,7 @@ catkin_package(
   image_transport 
   rosconsole
   camera_info_manager
+  moveit_msgs
   DEPENDS 
     gazebo 
     SDF
@@ -146,7 +148,9 @@ add_dependencies(camera_synchronizer ${PROJECT_NAME}_gencfg)
 target_link_libraries(camera_synchronizer vision_reconfigure ${catkin_LIBRARIES})
 
 add_executable(pub_joint_trajectory_test test/pub_joint_trajectory_test.cpp)
-target_link_libraries(pub_joint_trajectory_test ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+# NOTE: QtGui and QtCore are required when using the GNU GoLD linker with Gazebo 2.2.2 which has poorly-specified so deps
+# More info here: https://bitbucket.org/osrf/gazebo/pull-request/1029/fix-second-order-dynamic-library/diff
+target_link_libraries(pub_joint_trajectory_test ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} QtGui QtCore)
 add_dependencies(pub_joint_trajectory_test ${catkin_EXPORTED_TARGETS}) # don't build until gazebo_msgs is done
 
 add_definitions(-fPIC) # what is this for?
@@ -183,6 +187,9 @@ target_link_libraries(gazebo_ros_laser ${GAZEBO_LIBRARIES} RayPlugin ${catkin_LI
 
 add_library(gazebo_ros_block_laser src/gazebo_ros_block_laser.cpp)
 target_link_libraries(gazebo_ros_block_laser ${GAZEBO_LIBRARIES} RayPlugin ${catkin_LIBRARIES})
+
+add_library(gazebo_ros_moveit_planning_scene src/gazebo_ros_moveit_planning_scene.cpp)
+target_link_libraries(gazebo_ros_moveit_planning_scene ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_p3d src/gazebo_ros_p3d.cpp)
 target_link_libraries(gazebo_ros_p3d ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -266,6 +273,7 @@ install(TARGETS
   gazebo_ros_openni_kinect
   gazebo_ros_openni_kinect
   gazebo_ros_laser
+  gazebo_ros_moveit_planning_scene
   gazebo_ros_block_laser
   gazebo_ros_p3d
   gazebo_ros_imu
