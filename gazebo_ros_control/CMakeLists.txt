@@ -23,6 +23,7 @@ catkin_package(
     controller_manager
     pluginlib
     transmission_interface
+    urdf
   INCLUDE_DIRS include
   DEPENDS gazebo
 )
