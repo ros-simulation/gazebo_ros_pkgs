@@ -152,6 +152,7 @@ target_link_libraries(camera_synchronizer vision_reconfigure ${catkin_LIBRARIES}
 
 add_executable(pub_joint_trajectory_test test/pub_joint_trajectory_test.cpp)
 target_link_libraries(pub_joint_trajectory_test ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES})
+add_dependencies(pub_joint_trajectory_test gazebo_msgs_gencpp)
 
 # below is possibly not needed any more with usage of QT_LIBRARIES:
 # -----------------------------------------------------------------
