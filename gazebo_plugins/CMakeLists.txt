@@ -260,6 +260,9 @@ target_link_libraries(gazebo_ros_hand_of_god ${GAZEBO_LIBRARIES} ${SDFormat_LIBR
 add_library(gazebo_ros_ft_sensor src/gazebo_ros_ft_sensor.cpp)
 target_link_libraries(gazebo_ros_ft_sensor ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_library(ThermoPlugin src/ThermoPlugin.cpp)
+target_link_libraries(ThermoPlugin ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 ##
 ## Add your new plugin here
 ##
@@ -303,6 +306,7 @@ install(TARGETS
   gazebo_ros_planar_move
   pub_joint_trajectory_test  
   gazebo_ros_gpu_laser
+  ThermoPlugin
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
