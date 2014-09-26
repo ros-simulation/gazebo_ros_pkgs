@@ -173,7 +173,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
     // Create the controller manager
     ROS_DEBUG_STREAM_NAMED("ros_control_plugin","Loading controller_manager");
     controller_manager_.reset
-      (new controller_manager::ControllerManager(robot_hw_sim_.get(), model_nh_));
+      (new gazebo_ros_control::GazeboControllerManager(robot_hw_sim_.get(), model_nh_));
 
     // Listen to the update event. This event is broadcast every simulation iteration.
     update_connection_ =

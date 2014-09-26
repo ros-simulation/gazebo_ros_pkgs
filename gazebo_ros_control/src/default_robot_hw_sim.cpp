@@ -3,6 +3,7 @@
  *
  *  Copyright (c) 2013, Open Source Robotics Foundation
  *  Copyright (c) 2013, The Johns Hopkins University
+ *  Copyright (c) 2014, Fraunhofer IPA
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,7 +35,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman, Johnathan Bohren
+/* Author: Dave Coleman, Johnathan Bohren, Felix Messmer
    Desc:   Hardware Interface for any simulated robot in Gazebo
 */
 
@@ -102,6 +103,7 @@ public:
     joint_upper_limits_.resize(n_dof_);
     joint_effort_limits_.resize(n_dof_);
     joint_control_methods_.resize(n_dof_);
+    hw_interfaces_available_.clear();
     pid_controllers_.resize(n_dof_);
     joint_position_.resize(n_dof_);
     joint_velocity_.resize(n_dof_);
@@ -149,10 +151,13 @@ public:
       }
       else if (joint_interfaces.size() > 1)
       {
-        ROS_WARN_STREAM_NAMED("default_robot_hw_sim", "Joint " << transmissions[j].joints_[0].name_ <<
+        ROS_INFO_STREAM_NAMED("default_robot_hw_sim", "Joint " << transmissions[j].joints_[0].name_ <<
           " of transmission " << transmissions[j].name_ << " specifies multiple hardware interfaces. " <<
-          "Currently the default robot hardware simulation interface only supports one.");
-        continue;
+          "This feature is now being added.");
+        //ROS_WARN_STREAM_NAMED("default_robot_hw_sim", "Joint " << transmissions[j].joints_[0].name_ <<
+          //" of transmission " << transmissions[j].name_ << " specifies multiple hardware interfaces. " <<
+          //"Currently the default robot hardware simulation interface only supports one.");
+        //continue;
       }
 
       // Add data from transmission
@@ -164,47 +169,90 @@ public:
       joint_position_command_[j] = 0.0;
       joint_velocity_command_[j] = 0.0;
 
-      const std::string& hardware_interface = joint_interfaces.front();
-
-      // Debug
-      ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joint_names_[j]
-        << "' of type '" << hardware_interface << "'");
 
       // Create joint state interface for all joints
       js_interface_.registerHandle(hardware_interface::JointStateHandle(
           joint_names_[j], &joint_position_[j], &joint_velocity_[j], &joint_effort_[j]));
-
+      
       // Decide what kind of command interface this actuator/joint has
       hardware_interface::JointHandle joint_handle;
-      if(hardware_interface == "EffortJointInterface")
+      
+      //const std::string& hardware_interface = joint_interfaces.front();
+      for(unsigned int i=0; i<joint_interfaces.size(); i++)
       {
-        // Create effort joint interface
-        joint_control_methods_[j] = EFFORT;
-        joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
-                                                       &joint_effort_command_[j]);
-        ej_interface_.registerHandle(joint_handle);
-      }
-      else if(hardware_interface == "PositionJointInterface")
-      {
-        // Create position joint interface
-        joint_control_methods_[j] = POSITION;
-        joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
-                                                       &joint_position_command_[j]);
-        pj_interface_.registerHandle(joint_handle);
-      }
-      else if(hardware_interface == "VelocityJointInterface")
-      {
-        // Create velocity joint interface
-        joint_control_methods_[j] = VELOCITY;
-        joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
-                                                       &joint_velocity_command_[j]);
-        vj_interface_.registerHandle(joint_handle);
-      }
-      else
-      {
-        ROS_FATAL_STREAM_NAMED("default_robot_hw_sim","No matching hardware interface found for '"
-          << hardware_interface );
-        return false;
+        // Debug
+        ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joint_names_[j]
+          << "' of type '" << joint_interfaces[i] << "'");
+        
+        
+        //add hardware interface and joint to map of hw_interfaces_available_
+        std::string hw_interface_type = "hardware_interface::"+joint_interfaces[i];
+        if(hw_interfaces_available_.find(hw_interface_type)!=hw_interfaces_available_.end())
+        {
+          ROS_INFO_STREAM("Hardware-Interface " << hw_interface_type << " already available. Adding joint " << joint_names_[j] << " to list.");
+          std::map< std::string, std::set<std::string> >::iterator it;
+          it=hw_interfaces_available_.find(hw_interface_type);
+          it->second.insert(joint_names_[j]);
+        }
+        else
+        {
+          ROS_INFO_STREAM("Adding Hardware-Interface " << hw_interface_type << ". Adding joint " << joint_names_[j] << " to list.");
+          std::set<std::string> supporting_joints;
+          supporting_joints.insert(joint_names_[j]);
+          hw_interfaces_available_.insert( std::pair< std::string, std::set<std::string> >(hw_interface_type, supporting_joints) );
+        }
+        
+        if(joint_interfaces[i] == "EffortJointInterface")
+        {
+          // Create effort joint interface
+          if(i==0){ joint_control_methods_[j] = EFFORT; } //use first entry for startup
+          map_control_method_to_hw_interface_.insert( std::pair<std::string, ControlMethod>(hw_interface_type,EFFORT) );
+          
+          joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
+                                                        &joint_effort_command_[j]);
+          ej_interface_.registerHandle(joint_handle);
+          
+          registerJointLimits(joint_names_[j], joint_handle, EFFORT,
+                          joint_limit_nh, urdf_model,
+                          &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
+                          &joint_effort_limits_[j]);
+        }
+        else if(joint_interfaces[i] == "PositionJointInterface")
+        {
+          // Create position joint interface
+          if(i==0){ joint_control_methods_[j] = POSITION; } //use first entry for startup
+          map_control_method_to_hw_interface_.insert( std::pair<std::string, ControlMethod>(hw_interface_type,POSITION) );
+          
+          joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
+                                                        &joint_position_command_[j]);
+          pj_interface_.registerHandle(joint_handle);
+          
+          registerJointLimits(joint_names_[j], joint_handle, POSITION,
+                          joint_limit_nh, urdf_model,
+                          &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
+                          &joint_effort_limits_[j]);
+        }
+        else if(joint_interfaces[i] == "VelocityJointInterface")
+        {
+          // Create velocity joint interface
+          if(i==0){ joint_control_methods_[j] = VELOCITY; } //use first entry for startup
+          map_control_method_to_hw_interface_.insert( std::pair<std::string, ControlMethod>(hw_interface_type,VELOCITY) );
+          
+          joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
+                                                        &joint_velocity_command_[j]);
+          vj_interface_.registerHandle(joint_handle);
+          
+          registerJointLimits(joint_names_[j], joint_handle, VELOCITY,
+                          joint_limit_nh, urdf_model,
+                          &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
+                          &joint_effort_limits_[j]);
+        }
+        else
+        {
+          ROS_FATAL_STREAM_NAMED("default_robot_hw_sim","No matching hardware interface found for '"
+            << joint_interfaces[i] );
+          return false;
+        }
       }
 
       // Get the gazebo joint that corresponds to the robot joint.
@@ -218,11 +266,9 @@ public:
         return false;
       }
       sim_joints_.push_back(joint);
-
-      registerJointLimits(joint_names_[j], joint_handle, joint_control_methods_[j],
-                          joint_limit_nh, urdf_model,
-                          &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
-                          &joint_effort_limits_[j]);
+            
+      //ToDo: Can a joint (gazebo::physics::JointPtr) be used for EFFORT if joint->SetMaxForce has been called before?
+      //ToDo: How to handle pid_gains if both POSITION and VELOCITY joint_control_methods_ are registered?
       if (joint_control_methods_[j] != EFFORT)
       {
         // Initialize the PID controller. If no PID gain values are found, use joint->SetAngle() or
@@ -231,15 +277,18 @@ public:
                                  joint_names_[j]);
         if (pid_controllers_[j].init(nh, true))
         {
-          switch (joint_control_methods_[j])
-          {
-            case POSITION:
-              joint_control_methods_[j] = POSITION_PID;
-              break;
-            case VELOCITY:
-              joint_control_methods_[j] = VELOCITY_PID;
-              break;
-          }
+          //switch (joint_control_methods_[j])
+          //{
+            //case POSITION:
+              //joint_control_methods_[j] = POSITION_PID;
+              //break;
+            //case VELOCITY:
+              //joint_control_methods_[j] = VELOCITY_PID;
+              //break;
+          //}
+          
+          ROS_WARN("POSITION_PID and VELOCITY_PID currently not supported!");
+          joint->SetMaxForce(0, joint_effort_limits_[j]);
         }
         else
         {
@@ -348,6 +397,32 @@ public:
       }
     }
   }
+  
+  
+  bool canSwitchHWInterface(std::string joint_name, std::string hw_interface_type)
+  {
+    std::map< std::string, std::set<std::string> >::iterator it = hw_interfaces_available_.find(hw_interface_type);
+    if(it->second.find(joint_name)!=it->second.end()) { return true; }
+    return false;
+  }
+  
+  bool doSwitchHWInterface(std::string joint_name, std::string hw_interface_type)
+  {
+    for(unsigned int i=0; i<joint_names_.size(); i++)
+    {
+      if(joint_names_[i] == joint_name)
+      {
+        if(map_control_method_to_hw_interface_.find(hw_interface_type)!=map_control_method_to_hw_interface_.end())
+        {
+          joint_control_methods_[i] = map_control_method_to_hw_interface_.find(hw_interface_type)->second;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  
 
 private:
   // Methods used to control a joint.
@@ -495,6 +570,8 @@ private:
   std::vector<double> joint_upper_limits_;
   std::vector<double> joint_effort_limits_;
   std::vector<ControlMethod> joint_control_methods_;
+  std::map< std::string, std::set<std::string> > hw_interfaces_available_;
+  std::map< std::string, ControlMethod > map_control_method_to_hw_interface_;
   std::vector<control_toolbox::Pid> pid_controllers_;
   std::vector<double> joint_position_;
   std::vector<double> joint_velocity_;

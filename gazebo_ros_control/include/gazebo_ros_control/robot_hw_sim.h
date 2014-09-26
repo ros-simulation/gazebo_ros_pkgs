@@ -79,6 +79,9 @@ namespace gazebo_ros_control {
     virtual void readSim(ros::Time time, ros::Duration period) = 0;
 
     virtual void writeSim(ros::Time time, ros::Duration period) = 0;
+    
+    virtual bool canSwitchHWInterface(const std::string &joint_name, const std::string &hwinterface_name) { return true; }
+    virtual bool doSwitchHWInterface(const std::string &joint_name, const std::string &hwinterface_name) { return true; }
 
   };
 

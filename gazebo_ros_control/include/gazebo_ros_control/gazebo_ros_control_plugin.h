@@ -57,8 +57,64 @@
 #include <controller_manager/controller_manager.h>
 #include <transmission_interface/transmission_parser.h>
 
+
+
+
+
+
+
+
+
+
 namespace gazebo_ros_control
 {
+
+
+
+class GazeboControllerManager : public controller_manager::ControllerManager
+{
+  RobotHWSim *robot_hw_sim_;
+  
+public:
+
+  GazeboControllerManager(RobotHWSim *robot_hw,
+                          const ros::NodeHandle& nh=ros::NodeHandle())
+                        : controller_manager::ControllerManager(robot_hw, nh), robot_hw_sim_(robot_hw) {}
+  
+  bool readyForSwitch(const std::list<hardware_interface::ControllerInfo> &info_list) 
+  {
+    ROS_WARN("Need to switch HW-Interface");
+    for (std::list<hardware_interface::ControllerInfo>::const_iterator it=info_list.begin(); it != info_list.end(); ++it)
+    {
+      ROS_INFO_STREAM("Name: " << it->name << ", Type: " << it->type << ", Hardware-Interface: " << it->hardware_interface);
+    }
+    
+    //canSwitchHWInterface
+    for (std::list<hardware_interface::ControllerInfo>::const_iterator list_it=info_list.begin(); list_it != info_list.end(); ++list_it)
+    {
+      for(std::set<std::string>::iterator set_it=list_it->resources.begin(); set_it!=list_it->resources.end(); ++set_it)
+      {
+        if(!robot_hw_sim_->canSwitchHWInterface(*set_it, list_it->hardware_interface))
+          return false;
+      }
+    }
+    
+    //doSwitchHWInterface
+    for (std::list<hardware_interface::ControllerInfo>::const_iterator list_it=info_list.begin(); list_it != info_list.end(); ++list_it)
+    {
+      for(std::set<std::string>::iterator set_it=list_it->resources.begin(); set_it!=list_it->resources.end(); ++set_it)
+      {
+        if(!robot_hw_sim_->doSwitchHWInterface(*set_it, list_it->hardware_interface))
+          return false;
+      }
+    }
+    
+    ROS_INFO("Done switching HW-Interface! Ready to switch Controllers!");
+    return true;
+  }
+};
+
+
 
 class GazeboRosControlPlugin : public gazebo::ModelPlugin
 {
