@@ -62,10 +62,6 @@
 
 
 
-
-
-
-
 namespace gazebo_ros_control
 {
 
@@ -81,13 +77,12 @@ public:
                           const ros::NodeHandle& nh=ros::NodeHandle())
                         : controller_manager::ControllerManager(robot_hw, nh), robot_hw_sim_(robot_hw) {}
   
-  bool readyForSwitch(const std::list<hardware_interface::ControllerInfo> &info_list) 
+  bool notifyHardwareInterface(const std::list<hardware_interface::ControllerInfo> &info_list) 
   {
-    ROS_WARN("Need to switch HW-Interface");
-    for (std::list<hardware_interface::ControllerInfo>::const_iterator it=info_list.begin(); it != info_list.end(); ++it)
-    {
-      ROS_INFO_STREAM("Name: " << it->name << ", Type: " << it->type << ", Hardware-Interface: " << it->hardware_interface);
-    }
+    //for (std::list<hardware_interface::ControllerInfo>::const_iterator it=info_list.begin(); it != info_list.end(); ++it)
+    //{
+      //ROS_DEBUG_STREAM("Name: " << it->name << ", Type: " << it->type << ", Hardware-Interface: " << it->hardware_interface);
+    //}
     
     //canSwitchHWInterface
     for (std::list<hardware_interface::ControllerInfo>::const_iterator list_it=info_list.begin(); list_it != info_list.end(); ++list_it)
@@ -109,7 +104,7 @@ public:
       }
     }
     
-    ROS_INFO("Done switching HW-Interface! Ready to switch Controllers!");
+    ROS_DEBUG("Done switching HW-Interface! Ready to switch Controllers!");
     return true;
   }
 };
