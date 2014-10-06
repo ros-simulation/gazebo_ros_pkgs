@@ -765,6 +765,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
 bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
                                        gazebo_msgs::GetModelState::Response &res)
 {
+  static std::map<std::string, unsigned int> access_count;
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.relative_entity_name));
   if (!model)
@@ -776,6 +777,22 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
   }
   else
   {
+    /**
+     * @brief creates a header for the result
+     * @author Markus Bader markus.bader@tuwien.ac.at
+     **/
+    {
+      std::map<std::string, unsigned int>::iterator it = access_count.find(req.model_name);
+      if(it == access_count.end()) {
+	access_count.insert( std::pair<std::string, unsigned int>(req.model_name, 1) );
+	res.header.seq = 1;
+      } else {
+	it->second++;
+	res.header.seq = it->second;
+      }
+      res.header.stamp = ros::Time::now();
+      res.header.frame_id = req.relative_entity_name; ///@ToDo this is a redundant information
+    }
     // get model pose
     gazebo::math::Pose       model_pose = model->GetWorldPose();
     gazebo::math::Vector3    model_pos = model_pose.pos;
