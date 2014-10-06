@@ -780,6 +780,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
     /**
      * @brief creates a header for the result
      * @author Markus Bader markus.bader@tuwien.ac.at
+     * @date 6th Oct 2014
      **/
     {
       std::map<std::string, unsigned int>::iterator it = access_count.find(req.model_name);
