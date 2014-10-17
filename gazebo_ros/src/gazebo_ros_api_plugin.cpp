@@ -1282,7 +1282,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
 
       //std::cout << " debug : " << relative_entity->GetName() << " : " << frame_pose << " : " << target_pose << std::endl;
       //target_pose = frame_pose + target_pose; // seems buggy, use my own
-      target_pose.pos = frame_pos + frame_rot.RotateVector(target_pos);
+      target_pose.pos = model->GetWorldPose().pos + frame_rot.RotateVector(target_pos);
       target_pose.rot = frame_rot * target_pose.rot;
      
       // Velocities should be commanded in the requested reference

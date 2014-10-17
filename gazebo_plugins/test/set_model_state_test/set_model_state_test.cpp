@@ -50,7 +50,6 @@ TEST (ModelStateTest, FrameTest)
   // Issue commands in the chassis frame
   state.model_name = "pioneer2dx";
   state.pose.orientation.w = 1.0;
-  state.twist.angular.z = M_PI/8;
   state.reference_frame = "pioneer2dx::chassis";
 
   // Wait for model to spawn
@@ -61,21 +60,22 @@ TEST (ModelStateTest, FrameTest)
   }
 
   // First, turn the robot so it's going about 45 degrees
+  state.pose.orientation.z = 0.04018;
   do
   {
     modelStatePub.publish(state);
-    ros::Duration(0.1).sleep();
+    ros::Duration(0.2).sleep();
     ros::spinOnce();
   } while(::fabs(curHeading_ - M_PI/4) > 0.05);
 
-  state.twist.angular.z = 0;
-  state.twist.linear.x = 1.0;
+  state.pose.orientation.z = 0;
+  state.pose.position.x = 0.1;
 
   // Now, stop the robot and drive forwards about 5 meters
   do
   {
     modelStatePub.publish(state);
-    ros::Duration(0.1).sleep();
+    ros::Duration(0.2).sleep();
     ros::spinOnce();
   } while(::sqrt(curX_*curX_ + curY_*curY_) < 5.0);
 
@@ -83,6 +83,20 @@ TEST (ModelStateTest, FrameTest)
   // and should be roughly sqrt(25/2)
   EXPECT_LT(::fabs(curX_ - 3.535533906), 0.2);
   EXPECT_LT(::fabs(curY_ - 3.535533906), 0.2);
+
+  state.pose.position.x = 0;
+  state.reference_frame = "world";
+
+  // Now, send the robot to (0, 0) in the world frame
+  do
+  {
+    modelStatePub.publish(state);
+    ros::Duration(0.2).sleep();
+    ros::spinOnce();
+  } while(::sqrt(curX_*curX_ + curY_*curY_) > 0.1);
+
+  EXPECT_LT(::fabs(curX_), 0.01);
+  EXPECT_LT(::fabs(curY_), 0.01);
 }
 
 int main(int argc, char **argv)
