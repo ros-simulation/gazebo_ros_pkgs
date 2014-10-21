@@ -265,7 +265,7 @@ class SpawnModel():
           success = gazebo_interface.spawn_sdf_model_client(self.model_name, model_xml, self.robot_namespace, 
                                                             initial_pose, self.reference_frame, self.gazebo_namespace)
         else:
-          print "Error: should not be here in spawner helper script, there is a bug"
+          rospy.logerr("Error: should not be here in spawner helper script, there is a bug")
           sys.exit(0)
 
         # set model configuration before unpause if user requested
@@ -274,7 +274,7 @@ class SpawnModel():
             success = gazebo_interface.set_model_configuration_client(self.model_name, self.param_name, 
                                                                       self.joint_names, self.joint_positions, self.gazebo_namespace)
           except rospy.ServiceException, e:
-            print "set model configuration service call failed: %s"%e
+            rospy.logerr("set model configuration service call failed: %s"%e)
 
         # unpause physics if user requested
         if self.unpause_physics:
@@ -283,7 +283,7 @@ class SpawnModel():
             unpause_physics = rospy.ServiceProxy('%s/unpause_physics'%(self.gazebo_namespace), Empty)
             unpause_physics()
           except rospy.ServiceException, e:
-            print "unpause physics service call failed: %s"%e
+            rospy.logerr("unpause physics service call failed: %s"%e)
 
         return
 
@@ -293,7 +293,7 @@ class SpawnModel():
             delete_model = rospy.ServiceProxy('%s/delete_model'%(self.gazebo_namespace), DeleteModel)
             delete_model(model_name=self.model_name)
         except rospy.ServiceException, e:
-            print "delete model service call failed: %s"%e
+            rospy.logerr("delete model service call failed: %s"%e)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
