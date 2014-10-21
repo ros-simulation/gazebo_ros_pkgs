@@ -164,7 +164,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
     urdf::Model urdf_model;
     const urdf::Model *const urdf_model_ptr = urdf_model.initString(urdf_string) ? &urdf_model : NULL;
 
-    if(!robot_hw_sim_->initSim(robot_namespace_, model_nh_, parent_model_, urdf_model_ptr, transmissions_))
+    if(!robot_hw_sim_->initSim(robot_namespace_, sdf_, model_nh_, parent_model_, urdf_model_ptr, transmissions_))
     {
       ROS_FATAL_NAMED("gazebo_ros_control","Could not initialize robot simulation interface");
       return;
@@ -186,6 +186,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
     ROS_FATAL_STREAM_NAMED("gazebo_ros_control","Failed to create robot simulation interface loader: "<<ex.what());
   }
 
+  e_stop_active_ = false;
   ROS_INFO_NAMED("gazebo_ros_control", "Loaded gazebo_ros_control.");
 }
 
@@ -206,7 +207,18 @@ void GazeboRosControlPlugin::Update()
     robot_hw_sim_->readSim(sim_time_ros, sim_period);
 
     // Compute the controller commands
-    controller_manager_->update(sim_time_ros, sim_period);
+    bool reset_ctrlrs;
+    if (robot_hw_sim_->eStopActive())
+    {
+      e_stop_active_ = true;
+      reset_ctrlrs = false;
+    }
+    else
+    {
+      reset_ctrlrs = e_stop_active_;
+      e_stop_active_ = false;
+    }
+    controller_manager_->update(sim_time_ros, sim_period, reset_ctrlrs);
   }
 
   // Update the gazebo model with the result of the controller

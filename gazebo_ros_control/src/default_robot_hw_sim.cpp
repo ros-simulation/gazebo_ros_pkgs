@@ -59,6 +59,7 @@
 #include <ros/ros.h>
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
+#include <std_msgs/Bool.h>
 
 // gazebo_ros_control
 #include <gazebo_ros_control/robot_hw_sim.h>
@@ -85,11 +86,13 @@ public:
 
   bool initSim(
     const std::string& robot_namespace,
+    const sdf::ElementPtr sdf,
     ros::NodeHandle model_nh,
     gazebo::physics::ModelPtr parent_model,
     const urdf::Model *const urdf_model,
     std::vector<transmission_interface::TransmissionInfo> transmissions)
   {
+    model_nh_ = model_nh;
     // getJointLimits() searches joint_limit_nh for joint limit parameters. The format of each
     // parameter's name is "joint_limits/<joint name>". An example is "joint_limits/axle_joint".
     const ros::NodeHandle joint_limit_nh(model_nh, robot_namespace);
@@ -257,6 +260,15 @@ public:
     registerInterface(&pj_interface_);
     registerInterface(&vj_interface_);
 
+    // Initialize the emergency stop code.
+    e_stop_active_ = false;
+    last_e_stop_active_ = false;
+    if (sdf->HasElement("eStopTopic"))
+    {
+      const std::string e_stop_topic = sdf->GetElement("eStopTopic")->Get<std::string>();
+      e_stop_sub_ = model_nh_.subscribe(e_stop_topic, 1, &DefaultRobotHWSim::eStopCB, this);
+    }
+
     return true;
   }
 
@@ -281,6 +293,21 @@ public:
 
   void writeSim(ros::Time time, ros::Duration period)
   {
+    // If the E-stop is active, joints controlled by position commands will maintain their positions.
+    if (e_stop_active_)
+    {
+      if (!last_e_stop_active_)
+      {
+        last_joint_position_command_ = joint_position_;
+        last_e_stop_active_ = true;
+      }
+      joint_position_command_ = last_joint_position_command_;
+    }
+    else
+    {
+      last_e_stop_active_ = false;
+    }
+
     ej_sat_interface_.enforceLimits(period);
     ej_limits_interface_.enforceLimits(period);
     pj_sat_interface_.enforceLimits(period);
@@ -294,7 +321,7 @@ public:
       {
         case EFFORT:
           {
-            const double effort = joint_effort_command_[j];
+            const double effort = e_stop_active_ ? 0 : joint_effort_command_[j];
             sim_joints_[j]->SetForce(0, effort);
           }
           break;
@@ -335,11 +362,12 @@ public:
           break;
 
         case VELOCITY:
-          sim_joints_[j]->SetVelocity(0, joint_velocity_command_[j]);
+          sim_joints_[j]->SetVelocity(0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
           break;
 
         case VELOCITY_PID:
-          const double error = joint_velocity_command_[j] - joint_velocity_[j];
+          const double error = e_stop_active_ ? -joint_velocity_[j] :
+            joint_velocity_command_[j] - joint_velocity_[j];
           const double effort_limit = joint_effort_limits_[j];
           const double effort = clamp(pid_controllers_[j].computeCommand(error, period),
                                       -effort_limit, effort_limit);
@@ -347,6 +375,11 @@ public:
           break;
       }
     }
+  }
+
+  bool eStopActive()
+  {
+    return e_stop_active_;
   }
 
 private:
@@ -475,6 +508,13 @@ private:
     }
   }
 
+  // Emergency stop callback
+  void eStopCB(const std_msgs::BoolConstPtr& e_stop_active)
+  {
+    e_stop_active_ = e_stop_active->data;
+  }
+
+  ros::NodeHandle model_nh_;
   unsigned int n_dof_;
 
   hardware_interface::JointStateInterface    js_interface_;
@@ -500,10 +540,14 @@ private:
   std::vector<double> joint_velocity_;
   std::vector<double> joint_effort_;
   std::vector<double> joint_effort_command_;
-  std::vector<double> joint_position_command_;
+  std::vector<double> joint_position_command_, last_joint_position_command_;
   std::vector<double> joint_velocity_command_;
 
   std::vector<gazebo::physics::JointPtr> sim_joints_;
+
+  // e_stop_active_ is true if the emergency stop is active.
+  bool e_stop_active_, last_e_stop_active_;
+  ros::Subscriber e_stop_sub_;  // Emergency stop subscriber
 };
 
 typedef boost::shared_ptr<DefaultRobotHWSim> DefaultRobotHWSimPtr;

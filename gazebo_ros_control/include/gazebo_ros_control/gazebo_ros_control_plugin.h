@@ -119,6 +119,8 @@ protected:
   ros::Time last_update_sim_time_ros_;
   ros::Time last_write_sim_time_ros_;
 
+  bool e_stop_active_;  // True if the emergency stop is active.
+
 };
 
 
