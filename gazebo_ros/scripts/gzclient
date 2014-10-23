@@ -7,7 +7,7 @@ if [ $(uname) = "Darwin" ]; then
 fi
 
 # add ros plugin if does not exist
-if [ `expr "$final" : '.*libgazebo_ros_paths_plugin\.$EXT.*'` -eq 0 ]
+if [ `expr "$final" : ".*libgazebo_ros_paths_plugin\.$EXT.*"` -eq 0 ]
 then
     final="$final -g `catkin_find --first-only libgazebo_ros_paths_plugin.$EXT`"
 fi
