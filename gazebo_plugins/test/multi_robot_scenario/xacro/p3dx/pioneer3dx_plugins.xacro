@@ -25,7 +25,8 @@
             <wheelSeparation>0.3</wheelSeparation>
             <wheelDiameter>0.18</wheelDiameter>
             <wheelTorque>20</wheelTorque>
-            <wheelAcceleration>1.8</wheelAcceleration>
+            <Acceleration_v>0.4</Acceleration_v>
+	    <Acceleration_w>0.4</Acceleration_w>
             <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
