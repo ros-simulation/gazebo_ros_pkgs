@@ -64,6 +64,10 @@ enum {
     RIGHT,
     LEFT,
 };
+enum {
+  V,
+  W,
+};
 
 GazeboRosDiffDrive::GazeboRosDiffDrive() {}
 
@@ -88,7 +92,8 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
 
     gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.34 );
     gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.15 );
-    gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
+    gazebo_ros_->getParameter<double> ( accel[V], "Acceleration_v", 0.0 );
+    gazebo_ros_->getParameter<double> ( accel[W], "Acceleration_w", 0.0 );
     gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
     std::map<std::string, OdomSource> odomOptions;
@@ -212,34 +217,36 @@ void GazeboRosDiffDrive::UpdateChild()
 
         // Update robot in case new velocities have been requested
         getWheelVelocities();
-
-        double current_speed[2];
-
-        current_speed[LEFT] = joints_[LEFT]->GetVelocity ( 0 )   * ( wheel_diameter_ / 2.0 );
-        current_speed[RIGHT] = joints_[RIGHT]->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
-
-        if ( wheel_accel == 0 ||
-                ( fabs ( wheel_speed_[LEFT] - current_speed[LEFT] ) < 0.01 ) ||
-                ( fabs ( wheel_speed_[RIGHT] - current_speed[RIGHT] ) < 0.01 ) ) {
+	double wheel_l = joints_[LEFT] ->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
+	double wheel_r = joints_[RIGHT]->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
+        double current_vr = (wheel_l + wheel_r)/2.0 ;
+        double current_va = (wheel_l - wheel_r)/wheel_diameter_ ;
+	double req_vr = x_;
+        double req_va = rot_;	
+	
+	
+        if (/*( accel[V] == 0 && accel[W] == 0)||*/
+                (( fabs ( req_vr - current_vr ) < 0.01 ) &&
+                 ( fabs ( req_va - current_va ) < 0.01 )) ) {
             //if max_accel == 0, or target speed is reached
-            joints_[LEFT]->SetVelocity ( 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
+            joints_[LEFT]->SetVelocity  ( 0, (req_vr + req_va * wheel_separation_ / 2.0)  / ( wheel_diameter_ / 2.0 ));
+            joints_[RIGHT]->SetVelocity ( 0, (req_vr - req_va * wheel_separation_ / 2.0)  / ( wheel_diameter_ / 2.0 ));
         } else {
-            if ( wheel_speed_[LEFT]>=current_speed[LEFT] )
-                wheel_speed_instr_[LEFT]+=fmin ( wheel_speed_[LEFT]-current_speed[LEFT],  wheel_accel * seconds_since_last_update );
+            if ( req_vr>=current_vr )
+                instr_vr += fmin ( req_vr - current_vr,  accel[V] * seconds_since_last_update );
             else
-                wheel_speed_instr_[LEFT]+=fmax ( wheel_speed_[LEFT]-current_speed[LEFT], -wheel_accel * seconds_since_last_update );
+                instr_vr += fmax ( req_vr - current_vr, -accel[V] * seconds_since_last_update );
 
-            if ( wheel_speed_[RIGHT]>current_speed[RIGHT] )
-                wheel_speed_instr_[RIGHT]+=fmin ( wheel_speed_[RIGHT]-current_speed[RIGHT], wheel_accel * seconds_since_last_update );
+            if ( req_va>=current_va )
+                instr_va += fmin ( req_va - current_va,  accel[W] * seconds_since_last_update );
             else
-                wheel_speed_instr_[RIGHT]+=fmax ( wheel_speed_[RIGHT]-current_speed[RIGHT], -wheel_accel * seconds_since_last_update );
+                instr_va += fmax ( req_va - current_va, -accel[W] * seconds_since_last_update );
 
-            // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[LEFT], wheel_speed_[LEFT]);
-            // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[RIGHT],wheel_speed_[RIGHT]);
+             //ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_vr, req_vr);
+             //ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_va, req_va);
 
-            joints_[LEFT]->SetVelocity ( 0,wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0,wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
+            joints_[LEFT]->SetVelocity  ( 0,(instr_vr + instr_va * wheel_separation_ / 2.0) / ( wheel_diameter_ / 2.0 ));
+            joints_[RIGHT]->SetVelocity ( 0,(instr_vr - instr_va * wheel_separation_ / 2.0) / ( wheel_diameter_ / 2.0 ));
         }
         last_update_time_+= common::Time ( update_period_ );
     }
