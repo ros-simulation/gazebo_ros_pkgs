@@ -71,6 +71,7 @@ include_directories(include
 
 link_directories(
   ${GAZEBO_LIBRARY_DIRS}
+  ${OGRE_LIBRARY_DIRS}
 )
 
 catkin_package(
