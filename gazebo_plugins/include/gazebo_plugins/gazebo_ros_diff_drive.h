@@ -92,7 +92,7 @@ private:
     void getWheelVelocities();
     void publishWheelTF(); /// publishes the wheel tf's
     void publishWheelJointState();
-    void UpdateOdometryEncoder();
+    void updateOdometryEncoder();
 
 
     GazeboRosPtr gazebo_ros_;

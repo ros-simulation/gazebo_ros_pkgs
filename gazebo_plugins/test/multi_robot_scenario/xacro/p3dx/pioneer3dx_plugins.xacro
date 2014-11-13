@@ -27,9 +27,9 @@
             <wheelTorque>20</wheelTorque>
             <wheelAcceleration>1.8</wheelAcceleration>
             <odometryTopic>odom</odometryTopic>
-            <odometryFrame>odom</odometryFrame>
-            <odometrySource>world</odometrySource>
+            <odometryFrame>odom</odometryFrame> 
             <robotBaseFrame>base_link</robotBaseFrame>
+            <odometrySource>world</odometrySource> <!-- world or encoder, on world it will deliver ground truth -->
             <tripRecorderTopic>trip_recorder</tripRecorderTopic>
             <tripRecorderScale>1000</tripRecorderScale>  <!-- scales to meters  -->
             <commandTopic>cmd_vel</commandTopic>
