@@ -57,8 +57,7 @@
 
 #include <ros/ros.h>
 
-namespace gazebo
-{
+namespace gazebo {
 
 enum {
     RIGHT,
@@ -71,8 +70,7 @@ GazeboRosDiffDrive::GazeboRosDiffDrive() {}
 GazeboRosDiffDrive::~GazeboRosDiffDrive() {}
 
 // Load the controller
-void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
-{
+void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf ) {
 
     this->parent = _parent;
     gazebo_ros_ = GazeboRosPtr ( new GazeboRos ( _parent, _sdf, "DiffDrive" ) );
@@ -82,20 +80,28 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameter<std::string> ( command_topic_, "commandTopic", "cmd_vel" );
     gazebo_ros_->getParameter<std::string> ( odometry_topic_, "odometryTopic", "odom" );
     gazebo_ros_->getParameter<std::string> ( odometry_frame_, "odometryFrame", "odom" );
+    gazebo_ros_->getParameter<std::string> ( trip_recorder_topic_, "tripRecorderTopic", "trip_recorder" );
+    gazebo_ros_->getParameter<std::string> ( command_current_topic_, "commandCurrentTopic", "cmd_vel_current" );
+    gazebo_ros_->getParameter<std::string> ( command_target_topic_, "commandTargetTopic", "cmd_vel_target" );
     gazebo_ros_->getParameter<std::string> ( robot_base_frame_, "robotBaseFrame", "base_footprint" );
     gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
     gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
+    
 
+    gazebo_ros_->getParameter<double> ( trip_recorder_scale_, "tripRecorderScale", 1000. );
     gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.34 );
     gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.15 );
     gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
     gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
+    
     std::map<std::string, OdomSource> odomOptions;
     odomOptions["encoder"] = ENCODER;
     odomOptions["world"] = WORLD;
     gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
 
+    odometry_frame_resolved_ = gazebo_ros_->resolveTF ( odometry_frame_ );
+    robot_base_frame_resolved_ = gazebo_ros_->resolveTF ( robot_base_frame_ );
 
     joints_.resize ( 2 );
     joints_[LEFT] = gazebo_ros_->getJoint ( parent, "leftJoint", "left_joint" );
@@ -106,11 +112,11 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
 
 
     this->publish_tf_ = true;
-    if (!_sdf->HasElement("publishTf")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <publishTf>, defaults to %d",
-          this->robot_namespace_.c_str(), this->publish_tf_);
+    if ( !_sdf->HasElement ( "publishTf" ) ) {
+        ROS_WARN ( "%s: <publishTf> is missing, using default %d!",
+                    gazebo_ros_->info(), this->publish_tf_ );
     } else {
-      this->publish_tf_ = _sdf->GetElement("publishTf")->Get<bool>();
+        this->publish_tf_ = _sdf->GetElement ( "publishTf" )->Get<bool>();
     }
 
     // Initialize update rate stuff
@@ -122,36 +128,55 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     wheel_speed_[RIGHT] = 0;
     wheel_speed_[LEFT] = 0;
 
-    x_ = 0;
-    rot_ = 0;
+    command_current_.linear.x = 0;
+    command_current_.linear.y = 0;
+    command_current_.linear.z = 0;
+    command_current_.angular.x = 0;
+    command_current_.angular.y = 0;
+    command_current_.angular.z = 0;
+    command_target_.linear.x = 0;
+    command_target_.linear.y = 0;
+    command_target_.linear.z = 0;
+    command_target_.angular.x = 0;
+    command_target_.angular.y = 0;
+    command_target_.angular.z = 0;
+    trip_recorder_ = 0;
+    trip_recorder_sub_meter_ = 0.;
     alive_ = true;
 
 
-    if (this->publishWheelJointState_)
-    {
-        joint_state_publisher_ = gazebo_ros_->node()->advertise<sensor_msgs::JointState>("joint_states", 1000);
-        ROS_INFO("%s: Advertise joint_states!", gazebo_ros_->info());
+    if ( this->publishWheelJointState_ ) {
+        joint_state_publisher_ = gazebo_ros_->node()->advertise<sensor_msgs::JointState> ( "joint_states", 1000 );
+        ROS_INFO ( "%s: Advertise joint_states!", gazebo_ros_->info() );
     }
 
-    transform_broadcaster_ = boost::shared_ptr<tf::TransformBroadcaster>(new tf::TransformBroadcaster());
+    transform_broadcaster_ = boost::shared_ptr<tf::TransformBroadcaster> ( new tf::TransformBroadcaster() );
 
     // ROS: Subscribe to the velocity command topic (usually "cmd_vel")
-    ROS_INFO("%s: Try to subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str());
+    ROS_INFO ( "%s: Try to subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
 
     ros::SubscribeOptions so =
-        ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
-                boost::bind(&GazeboRosDiffDrive::cmdVelCallback, this, _1),
-                ros::VoidPtr(), &queue_);
+        ros::SubscribeOptions::create<geometry_msgs::Twist> ( command_topic_, 1,
+                boost::bind ( &GazeboRosDiffDrive::cmdVelCallback, this, _1 ),
+                ros::VoidPtr(), &queue_ );
 
-    cmd_vel_subscriber_ = gazebo_ros_->node()->subscribe(so);
-    ROS_INFO("%s: Subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str());
+    cmd_vel_subscriber_ = gazebo_ros_->node()->subscribe ( so );
+    ROS_INFO ( "%s: Subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
 
-    if (this->publish_tf_)
-    {
-      odometry_publisher_ = gazebo_ros_->node()->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
-      ROS_INFO("%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str());
+    if ( this->publish_tf_ ) {
+        odometry_publisher_ = gazebo_ros_->node()->advertise<nav_msgs::Odometry> ( odometry_topic_, 1 );
+        ROS_INFO ( "%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str() );
     }
 
+    trip_recorder_publisher_ = gazebo_ros_->node()->advertise<std_msgs::UInt64> ( trip_recorder_topic_, 1 );
+    ROS_INFO ( "%s: Advertise trip recorder on %s scale by %f!", gazebo_ros_->info(), trip_recorder_topic_.c_str(), trip_recorder_scale_ );
+
+    command_current_publisher_ = gazebo_ros_->node()->advertise<geometry_msgs::Twist> ( command_current_topic_, 1 );
+    ROS_INFO ( "%s: Advertise current command on %s !", gazebo_ros_->info(), command_current_topic_.c_str() );
+
+    command_target_publisher_ = gazebo_ros_->node()->advertise<geometry_msgs::Twist> ( command_target_topic_, 1 );
+    ROS_INFO ( "%s: Advertise target command on %s !", gazebo_ros_->info(), command_target_topic_.c_str() );
+    
     // start custom queue for diff drive
     this->callback_queue_thread_ =
         boost::thread ( boost::bind ( &GazeboRosDiffDrive::QueueThread, this ) );
@@ -162,8 +187,7 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
 
 }
 
-void GazeboRosDiffDrive::publishWheelJointState()
-{
+void GazeboRosDiffDrive::publishWheelJointState() {
     ros::Time current_time = ros::Time::now();
 
     joint_state_.header.stamp = current_time;
@@ -179,14 +203,13 @@ void GazeboRosDiffDrive::publishWheelJointState()
     joint_state_publisher_.publish ( joint_state_ );
 }
 
-void GazeboRosDiffDrive::publishWheelTF()
-{
+void GazeboRosDiffDrive::publishWheelTF() {
     ros::Time current_time = ros::Time::now();
     for ( int i = 0; i < 2; i++ ) {
-        
-        std::string wheel_frame = gazebo_ros_->resolveTF(joints_[i]->GetChild()->GetName ());
-        std::string wheel_parent_frame = gazebo_ros_->resolveTF(joints_[i]->GetParent()->GetName ());
-        
+
+        std::string wheel_frame = gazebo_ros_->resolveTF ( joints_[i]->GetChild()->GetName () );
+        std::string wheel_parent_frame = gazebo_ros_->resolveTF ( joints_[i]->GetParent()->GetName () );
+
         math::Pose poseWheel = joints_[i]->GetChild()->GetRelativePose();
 
         tf::Quaternion qt ( poseWheel.rot.x, poseWheel.rot.y, poseWheel.rot.z, poseWheel.rot.w );
@@ -199,16 +222,17 @@ void GazeboRosDiffDrive::publishWheelTF()
 }
 
 // Update the controller
-void GazeboRosDiffDrive::UpdateChild()
-{
-  
+void GazeboRosDiffDrive::UpdateChild() {
     if ( odom_source_ == ENCODER ) UpdateOdometryEncoder();
     common::Time current_time = parent->GetWorld()->GetSimTime();
     double seconds_since_last_update = ( current_time - last_update_time_ ).Double();
     if ( seconds_since_last_update > update_period_ ) {
-        if (this->publish_tf_) publishOdometry ( seconds_since_last_update );
+        if ( this->publish_tf_ ) publishOdometry ();
         if ( publishWheelTF_ ) publishWheelTF();
         if ( publishWheelJointState_ ) publishWheelJointState();
+        
+        // publishes the agent state current and target command as well as distance moved
+	publishAgentState();
 
         // Update robot in case new velocities have been requested
         getWheelVelocities();
@@ -246,8 +270,7 @@ void GazeboRosDiffDrive::UpdateChild()
 }
 
 // Finalize the controller
-void GazeboRosDiffDrive::FiniChild()
-{
+void GazeboRosDiffDrive::FiniChild() {
     alive_ = false;
     queue_.clear();
     queue_.disable();
@@ -255,26 +278,22 @@ void GazeboRosDiffDrive::FiniChild()
     callback_queue_thread_.join();
 }
 
-void GazeboRosDiffDrive::getWheelVelocities()
-{
+void GazeboRosDiffDrive::getWheelVelocities() {
     boost::mutex::scoped_lock scoped_lock ( lock );
 
-    double vr = x_;
-    double va = rot_;
+    double vr = command_target_.linear.x;
+    double va = command_target_.angular.z;
 
     wheel_speed_[LEFT] = vr + va * wheel_separation_ / 2.0;
     wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;
 }
 
-void GazeboRosDiffDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg )
-{
+void GazeboRosDiffDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg ) {
     boost::mutex::scoped_lock scoped_lock ( lock );
-    x_ = cmd_msg->linear.x;
-    rot_ = cmd_msg->angular.z;
+    command_target_ = *cmd_msg;
 }
 
-void GazeboRosDiffDrive::QueueThread()
-{
+void GazeboRosDiffDrive::QueueThread() {
     static const double timeout = 0.01;
 
     while ( alive_ && gazebo_ros_->node()->ok() ) {
@@ -282,8 +301,7 @@ void GazeboRosDiffDrive::QueueThread()
     }
 }
 
-void GazeboRosDiffDrive::UpdateOdometryEncoder()
-{
+void GazeboRosDiffDrive::UpdateOdometryEncoder() {
     double vl = joints_[LEFT]->GetVelocity ( 0 );
     double vr = joints_[RIGHT]->GetVelocity ( 0 );
     common::Time current_time = parent->GetWorld()->GetSimTime();
@@ -306,8 +324,22 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     pose_encoder_.y += dy;
     pose_encoder_.theta += dtheta;
 
+    double d = sqrt ( dx*dx + dy*dy );
+    trip_recorder_sub_meter_ += d;
+    while ( trip_recorder_sub_meter_ >= 1.0 ) {
+        trip_recorder_sub_meter_ -= 1.0;
+        trip_recorder_++;
+    }
+
     double w = dtheta/seconds_since_last_update;
     double v = sqrt ( dx*dx+dy*dy ) /seconds_since_last_update;
+
+    command_current_.linear.x = v;
+    command_current_.linear.y = 0;
+    command_current_.linear.z = 0;
+    command_current_.angular.x = 0;
+    command_current_.angular.y = 0;
+    command_current_.angular.z = w;
 
     tf::Quaternion qt;
     tf::Vector3 vt;
@@ -328,12 +360,23 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     odom_.twist.twist.linear.y = dy/seconds_since_last_update;
 }
 
-void GazeboRosDiffDrive::publishOdometry ( double step_time )
-{
-   
+void GazeboRosDiffDrive::publishAgentState ( ) {
+    
+    if(command_current_publisher_.getNumSubscribers() > 0){
+      command_current_publisher_.publish(command_current_);
+    }
+    if(command_target_publisher_.getNumSubscribers() > 0){
+      command_target_publisher_.publish(command_target_);
+    }
+    if(trip_recorder_publisher_.getNumSubscribers() > 0){
+      std_msgs::UInt64 trip;
+      trip.data = (trip_recorder_ * trip_recorder_scale_) + (trip_recorder_sub_meter_ * trip_recorder_scale_) + 0.5;
+      trip_recorder_publisher_.publish(trip);
+    }
+}
+void GazeboRosDiffDrive::publishOdometry () {
+
     ros::Time current_time = ros::Time::now();
-    std::string odom_frame = gazebo_ros_->resolveTF ( odometry_frame_ );
-    std::string base_footprint_frame = gazebo_ros_->resolveTF ( robot_base_frame_ );
 
     tf::Quaternion qt;
     tf::Vector3 vt;
@@ -373,7 +416,7 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
     tf::Transform base_footprint_to_odom ( qt, vt );
     transform_broadcaster_->sendTransform (
         tf::StampedTransform ( base_footprint_to_odom, current_time,
-                               odom_frame, base_footprint_frame ) );
+                               odometry_frame_resolved_, robot_base_frame_resolved_ ) );
 
 
     // set covariance
@@ -387,8 +430,8 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
 
     // set header
     odom_.header.stamp = current_time;
-    odom_.header.frame_id = odom_frame;
-    odom_.child_frame_id = base_footprint_frame;
+    odom_.header.frame_id = odometry_frame_resolved_;
+    odom_.child_frame_id = robot_base_frame_resolved_;
 
     odometry_publisher_.publish ( odom_ );
 }

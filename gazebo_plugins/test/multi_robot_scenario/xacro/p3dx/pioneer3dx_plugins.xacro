@@ -26,11 +26,15 @@
             <wheelDiameter>0.18</wheelDiameter>
             <wheelTorque>20</wheelTorque>
             <wheelAcceleration>1.8</wheelAcceleration>
-            <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
             <odometrySource>world</odometrySource>
             <robotBaseFrame>base_link</robotBaseFrame>
+            <tripRecorderTopic>trip_recorder</tripRecorderTopic>
+            <tripRecorderScale>1000</tripRecorderScale>  <!-- scales to meters  -->
+            <commandTopic>cmd_vel</commandTopic>
+            <commandCurrentTopic>cmd_vel_current</commandCurrentTopic>
+	    <commandTargetTopic>cmd_vel_target</commandTargetTopic>
             <updateRate>10.0</updateRate>
         </plugin>
     </gazebo>
