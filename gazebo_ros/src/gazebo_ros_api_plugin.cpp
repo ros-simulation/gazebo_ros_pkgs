@@ -31,9 +31,7 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   physics_reconfigure_initialized_(false),
   world_created_(false),
   stop_(false),
-  plugin_loaded_(false),
-  pub_link_states_connection_count_(0),
-  pub_model_states_connection_count_(0)
+  plugin_loaded_(false)
 {
   robot_namespace_.clear();
 }
@@ -84,17 +82,11 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   // Delete Force and Wrench Jobs
   lock_.lock();
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
-  {
     delete (*iter);
-    iter = force_joint_jobs_.erase(iter);
-  }
   force_joint_jobs_.clear();
   ROS_DEBUG_STREAM_NAMED("api_plugin","ForceJointJobs deleted");
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
-  {
     delete (*iter);
-    iter = wrench_body_jobs_.erase(iter);
-  }
   wrench_body_jobs_.clear();
   lock_.unlock();
   ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
@@ -527,6 +519,9 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
   // get name space for the corresponding model plugins
   robot_namespace_ = req.robot_namespace;
 
+  // incoming robot name
+  std::string model_name = req.model_name;
+
   // incoming robot model string
   std::string model_xml = req.model_xml;
 
@@ -765,7 +760,6 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
 bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
                                        gazebo_msgs::GetModelState::Response &res)
 {
-  static std::map<std::string, unsigned int> access_count;
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.relative_entity_name));
   if (!model)
@@ -777,23 +771,6 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
   }
   else
   {
-    /**
-     * @brief creates a header for the result
-     * @author Markus Bader markus.bader@tuwien.ac.at
-     * @date 6th Oct 2014
-     **/
-    {
-      std::map<std::string, unsigned int>::iterator it = access_count.find(req.model_name);
-      if(it == access_count.end()) {
-	access_count.insert( std::pair<std::string, unsigned int>(req.model_name, 1) );
-	res.header.seq = 1;
-      } else {
-	it->second++;
-	res.header.seq = it->second;
-      }
-      res.header.stamp = ros::Time::now();
-      res.header.frame_id = req.relative_entity_name; ///@ToDo this is a redundant information
-    }
     // get model pose
     gazebo::math::Pose       model_pose = model->GetWorldPose();
     gazebo::math::Vector3    model_pos = model_pose.pos;
@@ -1755,7 +1732,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
       iter = wrench_body_jobs_.erase(iter);
     }
     else
-      ++iter;
+      iter++;
   }
   lock_.unlock();
 }
@@ -1785,7 +1762,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
       iter = force_joint_jobs_.erase(iter);
     }
     else
-      ++iter;
+      iter++;
   }
   lock_.unlock();
 }
