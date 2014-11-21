@@ -60,12 +60,12 @@
 namespace gazebo {
 
 enum {
-    RIGHT,
-    LEFT,
+    RIGHT = 0,
+    LEFT = 1,
 };
 enum {
-  V,
-  W,
+  FORWARD = 0,
+  ANGULAR = 1,
 };
 
 GazeboRosDiffDrive::GazeboRosDiffDrive() {}
@@ -95,8 +95,8 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameter<double> ( trip_recorder_scale_, "tripRecorderScale", 1000. );
     gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.34 );
     gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.15 );
-    gazebo_ros_->getParameter<double> ( accel[V], "Acceleration_v", 0.0 );
-    gazebo_ros_->getParameter<double> ( accel[W], "Acceleration_w", 0.0 );
+    gazebo_ros_->getParameter<double> ( accel[FORWARD], "Acceleration_v", 0.0 );
+    gazebo_ros_->getParameter<double> ( accel[ANGULAR], "Acceleration_w", 0.0 );
     gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
 
@@ -249,7 +249,7 @@ void GazeboRosDiffDrive::UpdateChild() {
         double req_va = va;	
 	
 	
-        if (/*( accel[V] == 0 && accel[W] == 0)||*/
+        if (/*( accel[FORWARD] == 0 && accel[ANGULAR] == 0)||*/
                 (( fabs ( req_vr - current_vr ) < 0.01 ) &&
                  ( fabs ( req_va - current_va ) < 0.01 )) ) {
             //if max_accel == 0, or target speed is reached
@@ -257,14 +257,14 @@ void GazeboRosDiffDrive::UpdateChild() {
             joints_[RIGHT]->SetVelocity ( 0, (req_vr - req_va * wheel_separation_ / 2.0)  / ( wheel_diameter_ / 2.0 ));
         } else {
             if ( req_vr>=current_vr )
-                instr_vr += fmin ( req_vr - current_vr,  accel[V] * seconds_since_last_update );
+                instr_vr += fmin ( req_vr - current_vr,  accel[FORWARD] * seconds_since_last_update );
             else
-                instr_vr += fmax ( req_vr - current_vr, -accel[V] * seconds_since_last_update );
+                instr_vr += fmax ( req_vr - current_vr, -accel[FORWARD] * seconds_since_last_update );
 
             if ( req_va>=current_va )
-                instr_va += fmin ( req_va - current_va,  accel[W] * seconds_since_last_update );
+                instr_va += fmin ( req_va - current_va,  accel[ANGULAR] * seconds_since_last_update );
             else
-                instr_va += fmax ( req_va - current_va, -accel[W] * seconds_since_last_update );
+                instr_va += fmax ( req_va - current_va, -accel[ANGULAR] * seconds_since_last_update );
 
              //ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_vr, req_vr);
              //ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_va, req_va);
