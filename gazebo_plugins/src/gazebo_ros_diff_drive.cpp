@@ -366,8 +366,6 @@ void GazeboRosDiffDrive::publishAgentState ( ) {
 
     if ( command_current_publisher_.getNumSubscribers() > 0 ) {
         command_current_publisher_.publish ( command_current_ );
-        std::cout << command_current_.linear.x << std::endl;
-        ROS_INFO ( "%s: command_current v %4.2f, w %4.2f !", gazebo_ros_->info(), command_current_.linear.x, command_current_.angular.z );
     }
     if ( command_target_publisher_.getNumSubscribers() > 0 ) {
         command_target_publisher_.publish ( command_target_ );
