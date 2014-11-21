@@ -26,7 +26,7 @@
             <wheelDiameter>0.18</wheelDiameter>
             <wheelTorque>20</wheelTorque>
             <Acceleration_v>0.4</Acceleration_v>
-	        <Acceleration_w>0.4</Acceleration_w>
+	    <Acceleration_w>0.4</Acceleration_w>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame> 
             <robotBaseFrame>base_link</robotBaseFrame>
