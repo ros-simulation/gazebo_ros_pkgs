@@ -32,6 +32,7 @@ if (PKG_CONFIG_FOUND)
   pkg_check_modules(XML libxml-2.0)
   pkg_check_modules(OGRE OGRE)
   pkg_check_modules(OGRE-Terrain OGRE-Terrain)
+  pkg_check_modules(OGRE-Paging OGRE-Paging)
 else()
   message(FATAL_ERROR "pkg-config is required; please install it")
 endif()
@@ -61,11 +62,14 @@ include_directories(include
   ${GAZEBO_INCLUDE_DIRS}
   ${OGRE_INCLUDE_DIRS}
   ${OGRE-Terrain_INCLUDE_DIRS}
+  ${OGRE-Paging_INCLUDE_DIRS}
 )
 
 link_directories(
   ${GAZEBO_LIBRARY_DIRS}
   ${OGRE_LIBRARY_DIRS}
+  ${OGRE-Terrain_LIBRARY_DIRS}
+  ${OGRE-Paging_LIBRARY_DIRS}
 )
 
 catkin_package(
