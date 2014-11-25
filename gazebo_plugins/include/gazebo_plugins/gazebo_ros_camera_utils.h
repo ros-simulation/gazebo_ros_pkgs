@@ -128,6 +128,10 @@ namespace gazebo
     protected: void PublishCameraInfo(ros::Publisher camera_info_publisher);
     protected: void PublishCameraInfo(common::Time &last_update_time);
     protected: void PublishCameraInfo();
+
+    /// \brief Gets CameraInfo from simulation
+    protected: sensor_msgs::CameraInfo GetCameraInfo();
+
     /// \brief Keep track of number of connctions for CameraInfo
     private: void InfoConnect();
     private: void InfoDisconnect();

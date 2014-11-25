@@ -329,6 +329,9 @@ void GazeboRosCameraUtils::LoadThread()
   // same timestamps.  This incurrs additional computational cost when
   // there are subscribers to camera_info, but better mimics behavior
   // of image_pipeline.
+  /// \TODO: currently, gazebo_ros_camera_plugin does not update
+  /// camera info when the resolution is changed. This needs to be
+  /// fixed.
   ros::AdvertiseOptions cio =
     ros::AdvertiseOptions::create<sensor_msgs::CameraInfo>(
     this->camera_info_topic_name_, 2,
@@ -337,7 +340,7 @@ void GazeboRosCameraUtils::LoadThread()
     ros::VoidPtr(), &this->camera_queue_);
   this->camera_info_pub_ = this->rosnode_->advertise(cio);
 
-  /* disabling fov and rate setting for each camera
+  /* fov and rate setting for each camera */
   ros::SubscribeOptions zoom_so =
     ros::SubscribeOptions::create<std_msgs::Float64>(
         "set_hfov", 1,
@@ -351,7 +354,6 @@ void GazeboRosCameraUtils::LoadThread()
         boost::bind(&GazeboRosCameraUtils::SetUpdateRate, this, _1),
         ros::VoidPtr(), &this->camera_queue_);
   this->cameraUpdateRateSubscriber_ = this->rosnode_->subscribe(rate_so);
-  */
 
   this->Init();
 }
@@ -493,13 +495,29 @@ void GazeboRosCameraUtils::Init()
     }
   }
 
+  // get camera info from sensor / user specified dat
+  // and save info in camera info manager
+  this->camera_info_manager_->setCameraInfo(this->GetCameraInfo());
+
+  // start custom queue for camera_
+  this->callback_queue_thread_ = boost::thread(
+    boost::bind(&GazeboRosCameraUtils::CameraQueueThread, this));
+
+  load_event_();
+  this->initialized_ = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Get CameraInfo
+sensor_msgs::CameraInfo GazeboRosCameraUtils::GetCameraInfo()
+{
   // fill CameraInfo
   sensor_msgs::CameraInfo camera_info_msg;
 
   camera_info_msg.header.frame_id = this->frame_name_;
 
-  camera_info_msg.height = this->height_;
-  camera_info_msg.width  = this->width_;
+  camera_info_msg.height = this->camera_->GetImageHeight();
+  camera_info_msg.width  = this->camera_->GetImageWidth();
   // distortion
 #if ROS_VERSION_MINIMUM(1, 3, 0)
   camera_info_msg.distortion_model = "plumb_bob";
@@ -545,14 +563,7 @@ void GazeboRosCameraUtils::Init()
   camera_info_msg.P[10] = 1.0;
   camera_info_msg.P[11] = 0.0;
 
-  this->camera_info_manager_->setCameraInfo(camera_info_msg);
-
-  // start custom queue for camera_
-  this->callback_queue_thread_ = boost::thread(
-    boost::bind(&GazeboRosCameraUtils::CameraQueueThread, this));
-
-  load_event_();
-  this->initialized_ = true;
+  return camera_info_msg;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -619,6 +630,10 @@ void GazeboRosCameraUtils::PublishCameraInfo()
 void GazeboRosCameraUtils::PublishCameraInfo(
   ros::Publisher camera_info_publisher)
 {
+  /// \TODO We should get updated camera info before publishing.
+  /// Ideally do below when someone requests a change to camera params.
+  this->camera_info_manager_->setCameraInfo(this->GetCameraInfo());
+
   sensor_msgs::CameraInfo camera_info_msg = camera_info_manager_->getCameraInfo();
 
   camera_info_msg.header.stamp.sec = this->sensor_update_time_.sec;
