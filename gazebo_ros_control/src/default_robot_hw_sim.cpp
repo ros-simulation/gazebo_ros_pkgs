@@ -90,7 +90,6 @@ public:
     const urdf::Model *const urdf_model,
     std::vector<transmission_interface::TransmissionInfo> transmissions)
   {
-    model_nh_ = model_nh;
     // getJointLimits() searches joint_limit_nh for joint limit parameters. The format of each
     // parameter's name is "joint_limits/<joint name>". An example is "joint_limits/axle_joint".
     const ros::NodeHandle joint_limit_nh(model_nh, robot_namespace);
@@ -504,7 +503,6 @@ private:
     }
   }
 
-  ros::NodeHandle model_nh_;
   unsigned int n_dof_;
 
   hardware_interface::JointStateInterface    js_interface_;
