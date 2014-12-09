@@ -137,9 +137,18 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
       << control_period_);
   }
 
-
   // Get parameters/settings for controllers from ROS param server
   model_nh_ = ros::NodeHandle(robot_namespace_);
+
+  // Initialize the emergency stop code.
+  e_stop_active_ = false;
+  last_e_stop_active_ = false;
+  if (sdf_->HasElement("eStopTopic"))
+  {
+    const std::string e_stop_topic = sdf_->GetElement("eStopTopic")->Get<std::string>();
+    e_stop_sub_ = model_nh_.subscribe(e_stop_topic, 1, &GazeboRosControlPlugin::eStopCB, this);
+  }
+
   ROS_INFO_NAMED("gazebo_ros_control", "Starting gazebo_ros_control plugin in namespace: %s", robot_namespace_.c_str());
 
   // Read urdf from ros parameter server then
@@ -164,7 +173,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
     urdf::Model urdf_model;
     const urdf::Model *const urdf_model_ptr = urdf_model.initString(urdf_string) ? &urdf_model : NULL;
 
-    if(!robot_hw_sim_->initSim(robot_namespace_, sdf_, model_nh_, parent_model_, urdf_model_ptr, transmissions_))
+    if(!robot_hw_sim_->initSim(robot_namespace_, model_nh_, parent_model_, urdf_model_ptr, transmissions_))
     {
       ROS_FATAL_NAMED("gazebo_ros_control","Could not initialize robot simulation interface");
       return;
@@ -186,7 +195,6 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
     ROS_FATAL_STREAM_NAMED("gazebo_ros_control","Failed to create robot simulation interface loader: "<<ex.what());
   }
 
-  e_stop_active_ = false;
   ROS_INFO_NAMED("gazebo_ros_control", "Loaded gazebo_ros_control.");
 }
 
@@ -198,6 +206,8 @@ void GazeboRosControlPlugin::Update()
   ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
   ros::Duration sim_period = sim_time_ros - last_update_sim_time_ros_;
 
+  robot_hw_sim_->eStopActive(e_stop_active_);
+
   // Check if we should update the controllers
   if(sim_period >= control_period_) {
     // Store this simulation time
@@ -208,15 +218,22 @@ void GazeboRosControlPlugin::Update()
 
     // Compute the controller commands
     bool reset_ctrlrs;
-    if (robot_hw_sim_->eStopActive())
+    if (e_stop_active_)
     {
-      e_stop_active_ = true;
       reset_ctrlrs = false;
+      last_e_stop_active_ = true;
     }
     else
     {
-      reset_ctrlrs = e_stop_active_;
-      e_stop_active_ = false;
+      if (last_e_stop_active_)
+      {
+        reset_ctrlrs = true;
+        last_e_stop_active_ = false;
+      }
+      else
+      {
+        reset_ctrlrs = false;
+      }
     }
     controller_manager_->update(sim_time_ros, sim_period, reset_ctrlrs);
   }
@@ -271,6 +288,12 @@ bool GazeboRosControlPlugin::parseTransmissionsFromURDF(const std::string& urdf_
 {
   transmission_interface::TransmissionParser::parse(urdf_string, transmissions_);
   return true;
+}
+
+// Emergency stop callback
+void GazeboRosControlPlugin::eStopCB(const std_msgs::BoolConstPtr& e_stop_active)
+{
+  e_stop_active_ = e_stop_active->data;
 }
 
 

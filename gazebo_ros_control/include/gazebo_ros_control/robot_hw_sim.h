@@ -36,7 +36,7 @@
 
 /// \brief Plugin template for hardware interfaces for ros_control and Gazebo
 
-/// \author Jonathon Brohen
+/// \author Jonathan Bohren
 /// \author Dave Coleman
 
 #ifndef __ROS_CONTROL_GAZEBO_ROBOT_HW_SIM_H
@@ -76,7 +76,6 @@ namespace gazebo_ros_control {
     /// Initialize the simulated robot hardware.
     ///
     /// \param robot_namespace  Robot namespace.
-    /// \param sdf  SDF data.
     /// \param model_nh  Model node handle.
     /// \param parent_model  Parent model.
     /// \param urdf_model  URDF model.
@@ -85,7 +84,6 @@ namespace gazebo_ros_control {
     /// \return  \c true if the simulated robot hardware is initialized successfully, \c false if not.
     virtual bool initSim(
         const std::string& robot_namespace,
-        const sdf::ElementPtr sdf,
         ros::NodeHandle model_nh, 
         gazebo::physics::ModelPtr parent_model,
         const urdf::Model *const urdf_model,
@@ -107,13 +105,12 @@ namespace gazebo_ros_control {
     /// \param period  Time since the last simulation step.
     virtual void writeSim(ros::Time time, ros::Duration period) = 0;
 
-    /// \brief Return the emergency stop state
+    /// \brief Set the emergency stop state
     ///
-    /// Return the simulated robot's emergency stop state. The default implementation of this function returns
-    /// \c false.
+    /// Set the simulated robot's emergency stop state. The default implementation of this function does nothing.
     ///
-    /// \return  \c true if the emergency stop is active, \c false if not.
-    virtual bool eStopActive() {return false;}
+    /// \param active  \c true if the emergency stop is active, \c false if not.
+    virtual void eStopActive(const bool active) {}
 
   };
 

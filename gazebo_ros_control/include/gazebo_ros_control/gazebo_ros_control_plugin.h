@@ -46,6 +46,7 @@
 // ROS
 #include <ros/ros.h>
 #include <pluginlib/class_loader.h>
+#include <std_msgs/Bool.h>
 
 // Gazebo
 #include <gazebo/gazebo.hh>
@@ -82,6 +83,7 @@ public:
   bool parseTransmissionsFromURDF(const std::string& urdf_string);
 
 protected:
+  void eStopCB(const std_msgs::BoolConstPtr& e_stop_active);
 
   // Node Handles
   ros::NodeHandle model_nh_; // namespaces to robot name
@@ -119,7 +121,9 @@ protected:
   ros::Time last_update_sim_time_ros_;
   ros::Time last_write_sim_time_ros_;
 
-  bool e_stop_active_;  // True if the emergency stop is active.
+  // e_stop_active_ is true if the emergency stop is active.
+  bool e_stop_active_, last_e_stop_active_;
+  ros::Subscriber e_stop_sub_;  // Emergency stop subscriber
 
 };
 

@@ -59,7 +59,6 @@
 #include <ros/ros.h>
 #include <angles/angles.h>
 #include <pluginlib/class_list_macros.h>
-#include <std_msgs/Bool.h>
 
 // gazebo_ros_control
 #include <gazebo_ros_control/robot_hw_sim.h>
@@ -86,7 +85,6 @@ public:
 
   bool initSim(
     const std::string& robot_namespace,
-    const sdf::ElementPtr sdf,
     ros::NodeHandle model_nh,
     gazebo::physics::ModelPtr parent_model,
     const urdf::Model *const urdf_model,
@@ -263,11 +261,6 @@ public:
     // Initialize the emergency stop code.
     e_stop_active_ = false;
     last_e_stop_active_ = false;
-    if (sdf->HasElement("eStopTopic"))
-    {
-      const std::string e_stop_topic = sdf->GetElement("eStopTopic")->Get<std::string>();
-      e_stop_sub_ = model_nh_.subscribe(e_stop_topic, 1, &DefaultRobotHWSim::eStopCB, this);
-    }
 
     return true;
   }
@@ -366,8 +359,11 @@ public:
           break;
 
         case VELOCITY_PID:
-          const double error = e_stop_active_ ? -joint_velocity_[j] :
-            joint_velocity_command_[j] - joint_velocity_[j];
+          double error;
+          if (e_stop_active_)
+            error = -joint_velocity_[j];
+          else
+            error = joint_velocity_command_[j] - joint_velocity_[j];
           const double effort_limit = joint_effort_limits_[j];
           const double effort = clamp(pid_controllers_[j].computeCommand(error, period),
                                       -effort_limit, effort_limit);
@@ -377,9 +373,9 @@ public:
     }
   }
 
-  bool eStopActive()
+  void eStopActive(const bool active)
   {
-    return e_stop_active_;
+    e_stop_active_ = active;
   }
 
 private:
@@ -508,12 +504,6 @@ private:
     }
   }
 
-  // Emergency stop callback
-  void eStopCB(const std_msgs::BoolConstPtr& e_stop_active)
-  {
-    e_stop_active_ = e_stop_active->data;
-  }
-
   ros::NodeHandle model_nh_;
   unsigned int n_dof_;
 
@@ -540,14 +530,14 @@ private:
   std::vector<double> joint_velocity_;
   std::vector<double> joint_effort_;
   std::vector<double> joint_effort_command_;
-  std::vector<double> joint_position_command_, last_joint_position_command_;
+  std::vector<double> joint_position_command_;
+  std::vector<double> last_joint_position_command_;
   std::vector<double> joint_velocity_command_;
 
   std::vector<gazebo::physics::JointPtr> sim_joints_;
 
   // e_stop_active_ is true if the emergency stop is active.
   bool e_stop_active_, last_e_stop_active_;
-  ros::Subscriber e_stop_sub_;  // Emergency stop subscriber
 };
 
 typedef boost::shared_ptr<DefaultRobotHWSim> DefaultRobotHWSimPtr;
