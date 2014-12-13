@@ -244,7 +244,7 @@ void GazeboRosDiffDrive::UpdateChild() {
 		double wheel_l = joints_[LEFT] ->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
 		double wheel_r = joints_[RIGHT]->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
         double current_vr = (wheel_l + wheel_r)/2.0 ;
-        double current_va = (wheel_l - wheel_r)/wheel_diameter_ ;
+        double current_va = (wheel_l - wheel_r)/wheel_separation_ ;
 		double req_vr = vr;
         double req_va = va;	
 	
@@ -271,6 +271,9 @@ void GazeboRosDiffDrive::UpdateChild() {
 
             joints_[LEFT]->SetVelocity  ( 0,(instr_vr + instr_va * wheel_separation_ / 2.0) / ( wheel_diameter_ / 2.0 ));
             joints_[RIGHT]->SetVelocity ( 0,(instr_vr - instr_va * wheel_separation_ / 2.0) / ( wheel_diameter_ / 2.0 ));
+            
+            //joints_[LEFT]->SetVelocity  ( 0,(vr + va * wheel_separation_ / 2.0) / ( wheel_diameter_ / 2.0 ));
+            //joints_[RIGHT]->SetVelocity ( 0,(vr - va * wheel_separation_ / 2.0) / ( wheel_diameter_ / 2.0 ));
         }
         last_update_time_+= common::Time ( update_period_ );
     }
