@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.7 (2014-12-15)
+------------------
 * Update Gazebo/ROS tutorial URL
 * Contributors: Jose Luis Rivero
 

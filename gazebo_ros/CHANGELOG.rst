@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.7 (2014-12-15)
+------------------
 * temporary hack to **fix** the -J joint position option (issue `#93 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/93>`_), sleeping for 1 second to avoid race condition. this branch should only be used for debugging, merge only as a last resort.
 * Fixing set model state method and test
 * Extended the fix for `#246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/246>`_ also to debug, gazebo, gzclient and perf scripts.

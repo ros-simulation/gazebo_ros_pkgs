@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.7 (2014-12-15)
+------------------
 * move declaration for DefaultRobotHWSim to header file
 * Contributors: ipa-fxm
 

@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.7 (2014-12-15)
+------------------
 * Merge pull request `#276 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/276>`_ from ros-simulation/gazebo_ogre_compile_flag_fix
   fix missing ogre flags: removed from gazebo default (5.x.x candidate) cmake config
 * Merge pull request `#238 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/238>`_ from ayrton04/indigo-devel
