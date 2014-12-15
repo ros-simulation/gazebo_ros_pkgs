@@ -8,7 +8,7 @@
 
   <license>BSD,LGPL,Apache 2.0</license>
 
-  <url type="website">http://gazebosim.org/wiki/Tutorials#ROS_Integration</url>
+  <url type="website">http://gazebosim.org/tutorials?cat=connect_ros</url>
   <url type="bugtracker">https://github.com/ros-simulation/gazebo_ros_pkgs/issues</url>
   <url type="repository">https://github.com/ros-simulation/gazebo_ros_pkgs</url>
 
