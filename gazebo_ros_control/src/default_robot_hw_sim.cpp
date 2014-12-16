@@ -354,12 +354,12 @@ void DefaultRobotHWSim::eStopActive(const bool active)
 // retrieved from joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
 // Return the joint's type, lower position limit, upper position limit, and effort limit.
 void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
-                           const hardware_interface::JointHandle& joint_handle,
-                           const ControlMethod ctrl_method,
-                           const ros::NodeHandle& joint_limit_nh,
-                           const urdf::Model *const urdf_model,
-                           int *const joint_type, double *const lower_limit,
-                           double *const upper_limit, double *const effort_limit)
+                         const hardware_interface::JointHandle& joint_handle,
+                         const ControlMethod ctrl_method,
+                         const ros::NodeHandle& joint_limit_nh,
+                         const urdf::Model *const urdf_model,
+                         int *const joint_type, double *const lower_limit,
+                         double *const upper_limit, double *const effort_limit)
 {
   *joint_type = urdf::Joint::UNKNOWN;
   *lower_limit = -std::numeric_limits<double>::max();
