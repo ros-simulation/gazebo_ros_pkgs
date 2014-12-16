@@ -24,6 +24,7 @@ catkin_package(
     pluginlib
     transmission_interface
   INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME} default_robot_hw_sim
   DEPENDS gazebo
 )
 
