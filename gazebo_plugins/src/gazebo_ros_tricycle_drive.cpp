@@ -222,17 +222,15 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
 {
     double applied_speed = target_speed;
     double applied_angle = target_angle;
-    double applied_steering_speed = 0;
 
     double current_speed = joint_wheel_actuated_->GetVelocity ( 0 );
     if ( wheel_acceleration_ > 0 ) {
         double diff_speed = current_speed - target_speed;
         if ( fabs ( diff_speed ) < wheel_speed_tolerance_ ) {
-            applied_speed = target_speed;
-        } else if ( diff_speed < target_speed ) {
-            applied_speed = current_speed + wheel_acceleration_ * dt;
-        } else {
-            applied_speed = current_speed - wheel_deceleration_ * dt;
+            applied_speed = current_speed;
+        } else if ( fabs(diff_speed) > wheel_acceleration_ * dt ) {
+            if(diff_speed > 0){ applied_speed = current_speed - wheel_acceleration_ * dt;}
+            else              { applied_speed = current_speed + wheel_deceleration_ * dt;}
         }
     }
     joint_wheel_actuated_->SetVelocity ( 0, applied_speed );
@@ -243,23 +241,19 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     if ( steering_speed_ > 0 ) {
         double diff_angle = current_angle - target_angle;
         if ( fabs ( diff_angle ) < steering_angle_tolerance_ ) {
-          applied_steering_speed = 0;
-        } else if ( diff_angle < target_speed ) {
-            applied_steering_speed = steering_speed_;
-        } else {
-            applied_steering_speed = -steering_speed_;
-        }
-      joint_steering_->SetVelocity ( 0, applied_steering_speed );
-    }else {
-#if GAZEBO_MAJOR_VERSION >= 4
-      joint_steering_->SetPosition ( 0, applied_angle );
-#else
-      joint_steering_->SetAngle ( 0, math::Angle ( applied_angle ) );
-#endif
+          applied_angle = current_angle;
+        } else if ( fabs(diff_angle) > steering_speed_ * dt) {
+	  if(diff_angle > 0){ applied_angle =  current_angle - steering_speed_ * dt;
+	  } else            { applied_angle =  current_angle + steering_speed_ * dt; }
+	}
     }
+#if GAZEBO_MAJOR_VERSION >= 4
+    joint_steering_->SetPosition ( 0, applied_angle );
+#else
+    joint_steering_->SetAngle ( 0, math::Angle ( applied_angle ) );
+#endif
     //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !", 
     //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
-
 }
 
 // Finalize the controller
