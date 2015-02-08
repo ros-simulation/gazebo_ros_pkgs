@@ -71,6 +71,7 @@ include_directories(include
 
 link_directories(
   ${GAZEBO_LIBRARY_DIRS}
+  ${OGRE_LIBRARY_DIRS}
 )
 
 catkin_package(
@@ -152,6 +153,7 @@ target_link_libraries(camera_synchronizer vision_reconfigure ${catkin_LIBRARIES}
 
 add_executable(pub_joint_trajectory_test test/pub_joint_trajectory_test.cpp)
 target_link_libraries(pub_joint_trajectory_test ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES})
+add_dependencies(pub_joint_trajectory_test gazebo_msgs_gencpp)
 
 # below is possibly not needed any more with usage of QT_LIBRARIES:
 # -----------------------------------------------------------------
@@ -323,3 +325,13 @@ install(DIRECTORY Media
 install(DIRECTORY test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   )
+
+# Tests
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(set_model_state-test
+                    test/set_model_state_test/set_model_state_test.test 
+                    test/set_model_state_test/set_model_state_test.cpp)
+  target_link_libraries(set_model_state-test ${catkin_LIBRARIES})
+endif()
+
