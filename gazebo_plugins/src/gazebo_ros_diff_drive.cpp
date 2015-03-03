@@ -162,6 +162,18 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
 
 }
 
+void GazeboRosDiffDrive::Reset()
+{
+  last_update_time_ = parent->GetWorld()->GetSimTime();
+  pose_encoder_.x = 0;
+  pose_encoder_.y = 0;
+  pose_encoder_.theta = 0;
+  x_ = 0;
+  rot_ = 0;
+  joints_[LEFT]->SetMaxForce ( 0, wheel_torque );
+  joints_[RIGHT]->SetMaxForce ( 0, wheel_torque );
+}
+
 void GazeboRosDiffDrive::publishWheelJointState()
 {
     ros::Time current_time = ros::Time::now();
@@ -202,9 +214,23 @@ void GazeboRosDiffDrive::publishWheelTF()
 void GazeboRosDiffDrive::UpdateChild()
 {
   
+    /* force reset SetMaxForce since Joint::Reset reset MaxForce to zero at
+       https://bitbucket.org/osrf/gazebo/src/8091da8b3c529a362f39b042095e12c94656a5d1/gazebo/physics/Joint.cc?at=gazebo2_2.2.5#cl-331
+       (this has been solved in https://bitbucket.org/osrf/gazebo/diff/gazebo/physics/Joint.cc?diff2=b64ff1b7b6ff&at=issue_964 )
+       and Joint::Reset is called after ModelPlugin::Reset, so we need to set maxForce to wheel_torque other than GazeboRosDiffDrive::Reset
+       (this seems to be solved in https://bitbucket.org/osrf/gazebo/commits/ec8801d8683160eccae22c74bf865d59fac81f1e)
+    */
+    for ( int i = 0; i < 2; i++ ) {
+      if ( fabs(wheel_torque -joints_[i]->GetMaxForce ( 0 )) > 1e-6 ) {
+        joints_[i]->SetMaxForce ( 0, wheel_torque );
+      }
+    }
+
+
     if ( odom_source_ == ENCODER ) UpdateOdometryEncoder();
     common::Time current_time = parent->GetWorld()->GetSimTime();
     double seconds_since_last_update = ( current_time - last_update_time_ ).Double();
+
     if ( seconds_since_last_update > update_period_ ) {
         if (this->publish_tf_) publishOdometry ( seconds_since_last_update );
         if ( publishWheelTF_ ) publishWheelTF();
