@@ -115,7 +115,10 @@ namespace gazebo
     private: sensor_msgs::PointCloud2 point_cloud_msg_;
     private: sensor_msgs::Image depth_image_msg_;
 
+    /// \brief Minimum range of the point cloud
     private: double point_cloud_cutoff_;
+    /// \brief Maximum range of the point cloud
+    private: double point_cloud_cutoff_max_;
 
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;
