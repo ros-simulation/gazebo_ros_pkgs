@@ -34,7 +34,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman, Johnathan Bohren
+/* Author: Dave Coleman, Jonathan Bohren
    Desc:   Hardware Interface for any simulated robot in Gazebo
 */
 
@@ -230,6 +230,10 @@ bool DefaultRobotHWSim::initSim(
   registerInterface(&pj_interface_);
   registerInterface(&vj_interface_);
 
+  // Initialize the emergency stop code.
+  e_stop_active_ = false;
+  last_e_stop_active_ = false;
+
   return true;
 }
 
@@ -254,6 +258,21 @@ void DefaultRobotHWSim::readSim(ros::Time time, ros::Duration period)
 
 void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
 {
+  // If the E-stop is active, joints controlled by position commands will maintain their positions.
+  if (e_stop_active_)
+  {
+    if (!last_e_stop_active_)
+    {
+      last_joint_position_command_ = joint_position_;
+      last_e_stop_active_ = true;
+    }
+    joint_position_command_ = last_joint_position_command_;
+  }
+  else
+  {
+    last_e_stop_active_ = false;
+  }
+
   ej_sat_interface_.enforceLimits(period);
   ej_limits_interface_.enforceLimits(period);
   pj_sat_interface_.enforceLimits(period);
@@ -267,7 +286,7 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
     {
       case EFFORT:
         {
-          const double effort = joint_effort_command_[j];
+          const double effort = e_stop_active_ ? 0 : joint_effort_command_[j];
           sim_joints_[j]->SetForce(0, effort);
         }
         break;
@@ -308,11 +327,15 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
         break;
 
       case VELOCITY:
-        sim_joints_[j]->SetVelocity(0, joint_velocity_command_[j]);
+        sim_joints_[j]->SetVelocity(0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
         break;
 
       case VELOCITY_PID:
-        const double error = joint_velocity_command_[j] - joint_velocity_[j];
+        double error;
+        if (e_stop_active_)
+          error = -joint_velocity_[j];
+        else
+          error = joint_velocity_command_[j] - joint_velocity_[j];
         const double effort_limit = joint_effort_limits_[j];
         const double effort = clamp(pid_controllers_[j].computeCommand(error, period),
                                     -effort_limit, effort_limit);
@@ -322,6 +345,10 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
   }
 }
 
+void DefaultRobotHWSim::eStopActive(const bool active)
+{
+  e_stop_active_ = active;
+}
 
 // Register the limits of the joint specified by joint_name and joint_handle. The limits are
 // retrieved from joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
@@ -444,7 +471,6 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
     }
   }
 }
-
 
 }
 

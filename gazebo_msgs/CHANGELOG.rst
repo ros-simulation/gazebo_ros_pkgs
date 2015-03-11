@@ -2,6 +2,11 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.7 (2014-12-15)
+------------------
+* Update Gazebo/ROS tutorial URL
+* Contributors: Jose Luis Rivero
+
 2.4.6 (2014-09-01)
 ------------------
 
