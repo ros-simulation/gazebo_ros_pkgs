@@ -83,8 +83,9 @@ class SpawnModel():
         self.wait_for_model_exists   = False
         self.urdf_format             = False
         self.sdf_format              = False
-        self.joint_names             = []
-        self.joint_positions         = []
+        self.joint_names             = rospy.get_param('~initial_joint_names',[])
+        self.joint_positions         = rospy.get_param('~initial_joint_positions',[])
+        self.bond                    = False
 
     def parseUserInputs(self):
         # get goal from commandline
@@ -194,7 +195,6 @@ class SpawnModel():
     def callSpawnService(self):
 
         # wait for model to exist
-        rospy.init_node('spawn_model')
 
         if not self.wait_for_model == "":
           rospy.Subscriber("%s/model_states"%(self.gazebo_namespace), ModelStates, self.checkForModel)
@@ -288,6 +288,7 @@ if __name__ == "__main__":
         print usage()
     else:
         print("spawn_model script started") # make this a print incase roscore has not been started
+        rospy.init_node('spawn_model')
         sm = SpawnModel()
         sm.parseUserInputs()
         sm.callSpawnService()
