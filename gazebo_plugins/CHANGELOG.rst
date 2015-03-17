@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.8 (2015-03-17)
+------------------
 * Merge pull request `#252 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/252>`_ from ros-simulation/pub_joint_trajectory_test_compile_fix
   fix compile error due to missing dependency
 * Merge pull request `#239 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/239>`_ from ayrton04/hydro-devel

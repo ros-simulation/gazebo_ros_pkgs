@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.8 (2015-03-17)
+------------------
 * Merge pull request `#235 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/235>`_ from ros-simulation/issue_93_set_joint_position_hydro
   add test for issue `#93 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/93>`_, set joint position on spawn_model
 * spawn_model: adding joint rosparam
