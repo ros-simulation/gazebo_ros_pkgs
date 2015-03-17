@@ -2,6 +2,23 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#252 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/252>`_ from ros-simulation/pub_joint_trajectory_test_compile_fix
+  fix compile error due to missing dependency
+* Merge pull request `#239 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/239>`_ from ayrton04/hydro-devel
+  Fixing handling of non-world frame velocities in setModelState.
+* Update CMakeLists.txt
+* Fixing set model state method and test
+* Adding test for set_model_state
+* fix compile error due to missing dependency
+* fix compiler warning
+* Merge pull request `#225 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/225>`_ from ros-simulation/update_header_license_hydro
+  update license to Apache 2.0 for hydro
+* merging from pull request `#192 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/192>`_
+* gazebo_plugins: moveit planning scene publisher
+* Contributors: John Hsu, Jonathan Bohren, Jose Luis Rivero, Robert Codd-Downey, Tom Moore, hsu
+
 2.3.7 (2014-09-01)
 ------------------
 * Merge pull request `#204 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/204>`_ from fsuarez6/hydro-devel

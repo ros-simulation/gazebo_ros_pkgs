@@ -2,6 +2,19 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#235 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/235>`_ from ros-simulation/issue_93_set_joint_position_hydro
+  add test for issue `#93 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/93>`_, set joint position on spawn_model
+* spawn_model: adding joint rosparam
+* temporary hack to **fix** the -J joint position option (issue `#93 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/93>`_), sleeping for 1 second to avoid race condition. this branch should only be used for debugging, merge only as a last resort.
+* Fixing set model state method and test
+* Specify physics engine in args to empty_world.launch
+* Fixing handling of non-world frame velocities in setModelState.
+* add test for issue `#93 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/93>`_, set joint position on spawn_model
+* update license to Apache 2.0 for hydro
+* Contributors: John Hsu, Jonathan Bohren, Steven Peters, Tom Moore, ayrton04, hsu
+
 2.3.7 (2014-09-01)
 ------------------
 * check physics engine type before calling set_physics_properties and get_physics_properteis
