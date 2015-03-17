@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.8 (2015-03-17)
+------------------
 * Specify physics engine in args to empty_world.launch
 * Contributors: Steven Peters
 

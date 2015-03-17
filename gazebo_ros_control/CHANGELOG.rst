@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.8 (2015-03-17)
+------------------
 * Merge pull request `#244 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/244>`_ from cottsay/control-urdf-fix
   gazebo_ros_control: add urdf to downstream catkin deps
 * Added emergency stop support.
