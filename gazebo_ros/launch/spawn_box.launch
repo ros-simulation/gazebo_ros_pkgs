@@ -1,0 +1,41 @@
+<launch>
+  <arg name="pos_x" default="0.0" />
+  <arg name="pos_y" default="0.0" />
+  <arg name="pos_z" default="0.0" />
+  <arg name="rot_r" default="0.0" />
+  <arg name="rot_p" default="0.0" />
+  <arg name="rot_y" default="0.0" />
+  <arg name="model_name" default="box" />
+
+  <arg name="color" default="Green" />
+  <arg name="size_x" default="0.5" />
+  <arg name="size_y" default="0.5" />
+  <arg name="size_z" default="0.5" />
+
+  <param name="/robot_description/$(arg model_name)"
+         value="&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;sdf version=&quot;1.2&quot;&gt;
+  &lt;model name=&quot;name&quot;&gt;
+    &lt;link name=&quot;link&quot;&gt;
+    &lt;collision name=&quot;surface&quot; &gt;
+      &lt;geometry&gt;
+        &lt;box&gt;&lt;size&gt;$(arg size_x) $(arg size_y) $(arg size_z)&lt;/size&gt;&lt;/box&gt;
+      &lt;/geometry&gt;
+    &lt;/collision&gt;
+    &lt;visual name=&quot;surface&quot; &gt;
+      &lt;geometry&gt;
+        &lt;box&gt;&lt;size&gt;$(arg size_x) $(arg size_y) $(arg size_z)&lt;/size&gt;&lt;/box&gt;
+      &lt;/geometry&gt;
+      &lt;material&gt;
+        &lt;script&gt;
+          &lt;name&gt;Gazebo/$(arg color)&lt;/name&gt;
+        &lt;/script&gt;
+      &lt;/material&gt;
+    &lt;/visual&gt;
+    &lt;/link&gt;
+  &lt;/model&gt;
+&lt;/sdf&gt;" />
+
+  <node name="$(anon spawn_box)" pkg="gazebo_ros" type="spawn_model" output="screen"
+        args="-sdf -param /robot_description/$(arg model_name) -model $(arg model_name) -x $(arg pos_x) -y $(arg pos_y) -z $(arg pos_z) -R $(arg rot_r) -P $(arg rot_p) -Y $(arg rot_y)" />
+</launch>

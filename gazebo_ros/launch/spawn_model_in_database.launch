@@ -1,0 +1,14 @@
+<launch>
+  <arg name="pos_x" default="0.0" />
+  <arg name="pos_y" default="0.0" />
+  <arg name="pos_z" default="0.0" />
+  <arg name="rot_r" default="0.0" />
+  <arg name="rot_p" default="0.0" />
+  <arg name="rot_y" default="0.0" />
+  <arg name="model_name" default="table_model" />
+
+  <arg name="type_name" default="table" />
+
+  <node name="$(anon spawn_table)" pkg="gazebo_ros" type="spawn_model" output="screen"
+        arg="-sdf -database $(arg type_name) -model $(arg model_name) -x $(arg pos_x) -y $(arg pos_y) -z $(arg pos_z) -R $(arg rot_r) -P $(arg rot_p) -Y $(arg rot_y)" />
+</launch>
