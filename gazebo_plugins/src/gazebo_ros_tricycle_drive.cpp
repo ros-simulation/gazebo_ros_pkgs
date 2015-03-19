@@ -70,47 +70,56 @@ GazeboRosTricycleDrive::GazeboRosTricycleDrive() {}
 GazeboRosTricycleDrive::~GazeboRosTricycleDrive() {}
 
 // Load the controller
-void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
-{
+void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf ){
     parent = _parent;
     gazebo_ros_ = GazeboRosPtr ( new GazeboRos ( _parent, _sdf, "TricycleDrive" ) );
     // Make sure the ROS node for Gazebo has already been initialized
     gazebo_ros_->isInitialized();
 
-    gazebo_ros_->getParameter<double> ( diameter_actuated_wheel_, "actuatedWheelDiameter", 0.15 );
-    gazebo_ros_->getParameter<double> ( diameter_encoder_wheel_, "encoderWheelDiameter", 0.15 );
-    gazebo_ros_->getParameter<double> ( wheel_torque_, "wheelTorque", 5.0 );
-    gazebo_ros_->getParameter<std::string> ( command_topic_, "commandTopic", "cmd_vel" );
+	gazebo_ros_->getParameter<std::string> ( command_topic_, "commandTopic", "cmd_vel" );
     gazebo_ros_->getParameter<std::string> ( odometry_topic_, "odometryTopic", "odom" );
     gazebo_ros_->getParameter<std::string> ( odometry_frame_, "odometryFrame", "odom" );
-    gazebo_ros_->getParameter<std::string> ( robot_base_frame_, "robotBaseFrame", "base_link" );
+    gazebo_ros_->getParameter<std::string> ( trip_recorder_topic_, "tripRecorderTopic", "trip_recorder" );
+    gazebo_ros_->getParameter<std::string> ( command_current_topic_, "commandCurrentTopic", "cmd_vel_current" );
+    gazebo_ros_->getParameter<std::string> ( command_target_topic_, "commandTargetTopic", "cmd_vel_target" );
+    gazebo_ros_->getParameter<std::string> ( robot_base_frame_, "robotBaseFrame", "base_footprint" );
+    gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
+    gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
 
-    gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
+	gazebo_ros_->getParameter<double> ( trip_recorder_scale_, "tripRecorderScale", 1000. );
+    gazebo_ros_->getParameter<double> ( diameter_actuated_wheel_, "actuatedWheelDiameter", 0.15 );
+    gazebo_ros_->getParameter<double> ( diameter_encoder_wheel_, "encoderWheelDiameter", 0.15 );
     gazebo_ros_->getParameter<double> ( wheel_acceleration_, "wheelAcceleration", 0 );
     gazebo_ros_->getParameter<double> ( wheel_deceleration_, "wheelDeceleration", wheel_acceleration_ );
     gazebo_ros_->getParameter<double> ( wheel_speed_tolerance_, "wheelSpeedTolerance", 0.01 );
     gazebo_ros_->getParameter<double> ( steering_speed_, "steeringSpeed", 0 );
     gazebo_ros_->getParameter<double> ( steering_angle_tolerance_, "steeringAngleTolerance", 0.01 );
     gazebo_ros_->getParameter<double> ( separation_encoder_wheel_, "encoderWheelSeparation", 0.5 );
+    gazebo_ros_->getParameter<double> ( wheel_torque_, "wheelTorque", 5.0 );
+    gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
 
-    gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
-    gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
-
-    gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
-
-    joint_steering_ = gazebo_ros_->getJoint ( parent, "steeringJoint", "front_steering_joint" );
-    joint_wheel_actuated_ = gazebo_ros_->getJoint ( parent, "actuatedWheelJoint", "front_wheel_joint" );
-    joint_wheel_encoder_left_ = gazebo_ros_->getJoint ( parent, "encoderWheelLeftJoint", "left_wheel_joint" );
-    joint_wheel_encoder_right_ = gazebo_ros_->getJoint ( parent, "encoderWheelRightJoint", "right_wheel_joint" );
-
-    std::map<std::string, OdomSource> odomOptions;
+	std::map<std::string, OdomSource> odomOptions;
     odomOptions["encoder"] = ENCODER;
     odomOptions["world"] = WORLD;
     gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
 
+	odometry_frame_resolved_ = gazebo_ros_->resolveTF ( odometry_frame_ );
+    robot_base_frame_resolved_ = gazebo_ros_->resolveTF ( robot_base_frame_ );
+
+	joint_wheel_encoder_left_ = gazebo_ros_->getJoint ( parent, "encoderWheelLeftJoint", "left_wheel_joint" );
+    joint_wheel_encoder_right_ = gazebo_ros_->getJoint ( parent, "encoderWheelRightJoint", "right_wheel_joint" );
+    joint_steering_ = gazebo_ros_->getJoint ( parent, "steeringJoint", "front_steering_joint" );
+    joint_wheel_actuated_ = gazebo_ros_->getJoint ( parent, "actuatedWheelJoint", "front_wheel_joint" );
     joint_wheel_actuated_->SetMaxForce ( 0, wheel_torque_ );
     joint_steering_->SetMaxForce ( 0, wheel_torque_ );
-
+    
+    this->publish_tf_ = true;
+    if ( !_sdf->HasElement ( "publishTf" ) ) {
+        ROS_WARN ( "%s: <publishTf> is missing, using default %d!",
+                   gazebo_ros_->info(), this->publish_tf_ );
+    } else {
+        this->publish_tf_ = _sdf->GetElement ( "publishTf" )->Get<bool>();
+    }
 
     // Initialize update rate stuff
     if ( this->update_rate_ > 0.0 ) this->update_period_ = 1.0 / this->update_rate_;
@@ -118,6 +127,20 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
     last_actuator_update_ = parent->GetWorld()->GetSimTime();
 
     // Initialize velocity stuff
+    command_current_.linear.x = 0;
+    command_current_.linear.y = 0;
+    command_current_.linear.z = 0;
+    command_current_.angular.x = 0;
+    command_current_.angular.y = 0;
+    command_current_.angular.z = 0;
+    command_target_.linear.x = 0;
+    command_target_.linear.y = 0;
+    command_target_.linear.z = 0;
+    command_target_.angular.x = 0;
+    command_target_.angular.y = 0;
+    command_target_.angular.z = 0;
+    trip_recorder_ = 0;
+    trip_recorder_sub_meter_ = 0.;
     alive_ = true;
 
     if ( this->publishWheelJointState_ ) {
@@ -137,9 +160,22 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
 
     cmd_vel_subscriber_ = gazebo_ros_->node()->subscribe ( so );
     ROS_INFO ( "%s: Subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
+    
+    
+    
+    if ( this->publish_tf_ ) {
+        odometry_publisher_ = gazebo_ros_->node()->advertise<nav_msgs::Odometry> ( odometry_topic_, 1 );
+        ROS_INFO ( "%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str() );
+    }
 
-    odometry_publisher_ = gazebo_ros_->node()->advertise<nav_msgs::Odometry> ( odometry_topic_, 1 );
-    ROS_INFO ( "%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str() );
+    trip_recorder_publisher_ = gazebo_ros_->node()->advertise<std_msgs::UInt64> ( trip_recorder_topic_, 1 );
+    ROS_INFO ( "%s: Advertise trip recorder on %s scale by %f!", gazebo_ros_->info(), trip_recorder_topic_.c_str(), trip_recorder_scale_ );
+
+    command_current_publisher_ = gazebo_ros_->node()->advertise<geometry_msgs::Twist> ( command_current_topic_, 1 );
+    ROS_INFO ( "%s: Advertise current command on %s !", gazebo_ros_->info(), command_current_topic_.c_str() );
+
+    command_target_publisher_ = gazebo_ros_->node()->advertise<geometry_msgs::Twist> ( command_target_topic_, 1 );
+    ROS_INFO ( "%s: Advertise target command on %s !", gazebo_ros_->info(), command_target_topic_.c_str() );
 
     // start custom queue for diff drive
     this->callback_queue_thread_ = boost::thread ( boost::bind ( &GazeboRosTricycleDrive::QueueThread, this ) );
@@ -149,8 +185,7 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
 
 }
 
-void GazeboRosTricycleDrive::publishWheelJointState()
-{
+void GazeboRosTricycleDrive::publishWheelJointState(){
     std::vector<physics::JointPtr> joints;
     joints.push_back ( joint_steering_ );
     joints.push_back ( joint_wheel_actuated_ );
@@ -172,8 +207,7 @@ void GazeboRosTricycleDrive::publishWheelJointState()
     joint_state_publisher_.publish ( joint_state_ );
 }
 
-void GazeboRosTricycleDrive::publishWheelTF()
-{
+void GazeboRosTricycleDrive::publishWheelTF(){
     ros::Time current_time = ros::Time::now();
     std::vector<physics::JointPtr> joints;
     joints.push_back ( joint_steering_ );
@@ -195,16 +229,17 @@ void GazeboRosTricycleDrive::publishWheelTF()
 
 }
 // Update the controller
-void GazeboRosTricycleDrive::UpdateChild()
-{
-    if ( odom_source_ == ENCODER ) UpdateOdometryEncoder();
+void GazeboRosTricycleDrive::UpdateChild(){
+    UpdateOdometryEncoder();
     common::Time current_time = parent->GetWorld()->GetSimTime();
     double seconds_since_last_update = ( current_time - last_actuator_update_ ).Double();
     if ( seconds_since_last_update > update_period_ ) {
-
-        publishOdometry ( seconds_since_last_update );
+        if ( this->publish_tf_ ) publishOdometry ( seconds_since_last_update );
         if ( publishWheelTF_ ) publishWheelTF();
         if ( publishWheelJointState_ ) publishWheelJointState();
+
+		// publishes the agent state current and target command as well as distance moved
+        publishAgentState();
 
         double target_wheel_roation_speed = cmd_.speed / ( diameter_actuated_wheel_ / 2.0 );
         double target_steering_angle = cmd_.angle;
@@ -213,27 +248,25 @@ void GazeboRosTricycleDrive::UpdateChild()
 
         //ROS_INFO("v = %f, w = %f !", target_wheel_roation_speed, target_steering_angle);
 
-        last_actuator_update_ += common::Time ( update_period_ );
+        last_actuator_update_+= common::Time ( update_period_ );
     }
 }
 
 
-void GazeboRosTricycleDrive::motorController ( double target_speed, double target_angle, double dt )
-{
+void GazeboRosTricycleDrive::motorController ( double target_speed, double target_angle, double dt ){
     double applied_speed = target_speed;
     double applied_angle = target_angle;
-    double applied_steering_speed = 0;
+    double wheel_acceleration_rad = wheel_acceleration_ / ( diameter_actuated_wheel_ / 2.0 );
+    double wheel_deceleration_rad = wheel_deceleration_ / ( diameter_actuated_wheel_ / 2.0 );
 
     double current_speed = joint_wheel_actuated_->GetVelocity ( 0 );
     if ( wheel_acceleration_ > 0 ) {
-        double diff_speed = current_speed - target_speed;
+        double diff_speed = target_speed - current_speed;
         if ( fabs ( diff_speed ) < wheel_speed_tolerance_ ) {
-            applied_speed = target_speed;
-        } else if ( diff_speed < target_speed ) {
-            applied_speed = current_speed + wheel_acceleration_ * dt;
-        } else {
-            applied_speed = current_speed - wheel_deceleration_ * dt;
-        }
+            applied_speed = current_speed;
+        } 
+        else if ( diff_speed >   wheel_acceleration_rad * dt ){ applied_speed = current_speed + wheel_acceleration_rad * dt;}
+        else if ( diff_speed < - wheel_deceleration_rad * dt ){ applied_speed = current_speed - wheel_deceleration_rad * dt;}
     }
     joint_wheel_actuated_->SetVelocity ( 0, applied_speed );
     
@@ -243,28 +276,23 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     if ( steering_speed_ > 0 ) {
         double diff_angle = current_angle - target_angle;
         if ( fabs ( diff_angle ) < steering_angle_tolerance_ ) {
-          applied_steering_speed = 0;
-        } else if ( diff_angle < target_speed ) {
-            applied_steering_speed = steering_speed_;
-        } else {
-            applied_steering_speed = -steering_speed_;
-        }
-      joint_steering_->SetVelocity ( 0, applied_steering_speed );
-    }else {
-#if GAZEBO_MAJOR_VERSION >= 4
-      joint_steering_->SetPosition ( 0, applied_angle );
-#else
-      joint_steering_->SetAngle ( 0, math::Angle ( applied_angle ) );
-#endif
+          applied_angle = current_angle;
+        } else if ( fabs(diff_angle) > steering_speed_ * dt) {
+	  if(diff_angle > 0){ applied_angle =  current_angle - steering_speed_ * dt;
+	  } else            { applied_angle =  current_angle + steering_speed_ * dt; }
+	}
     }
-    //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !", 
-    //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
-
+#if GAZEBO_MAJOR_VERSION >= 4
+    joint_steering_->SetPosition ( 0, applied_angle );
+#else
+    joint_steering_->SetAngle ( 0, math::Angle ( applied_angle ) );
+#endif
+    //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f] !"/*/%3.2f*/, 
+    //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle/*, applied_steering_speed*/ );
 }
 
 // Finalize the controller
-void GazeboRosTricycleDrive::FiniChild()
-{
+void GazeboRosTricycleDrive::FiniChild(){
     alive_ = false;
     queue_.clear();
     queue_.disable();
@@ -272,15 +300,14 @@ void GazeboRosTricycleDrive::FiniChild()
     callback_queue_thread_.join();
 }
 
-void GazeboRosTricycleDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg )
-{
+void GazeboRosTricycleDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg ){
     boost::mutex::scoped_lock scoped_lock ( lock );
     cmd_.speed = cmd_msg->linear.x;
     cmd_.angle = cmd_msg->angular.z;
+    command_target_ = *cmd_msg;
 }
 
-void GazeboRosTricycleDrive::QueueThread()
-{
+void GazeboRosTricycleDrive::QueueThread(){
     static const double timeout = 0.01;
 
     while ( alive_ && gazebo_ros_->node()->ok() ) {
@@ -288,8 +315,7 @@ void GazeboRosTricycleDrive::QueueThread()
     }
 }
 
-void GazeboRosTricycleDrive::UpdateOdometryEncoder()
-{
+void GazeboRosTricycleDrive::UpdateOdometryEncoder(){
     double vl = joint_wheel_encoder_left_->GetVelocity ( 0 );
     double vr = joint_wheel_encoder_right_->GetVelocity ( 0 );
     common::Time current_time = parent->GetWorld()->GetSimTime();
@@ -311,27 +337,60 @@ void GazeboRosTricycleDrive::UpdateOdometryEncoder()
     pose_encoder_.x += dx;
     pose_encoder_.y += dy;
     pose_encoder_.theta += dtheta;
+    
+    double d = sqrt ( dx*dx + dy*dy );
+    trip_recorder_sub_meter_ += d;
+    while ( trip_recorder_sub_meter_ >= 1.0 ) {
+        trip_recorder_sub_meter_ -= 1.0;
+        trip_recorder_++;
+    }
 
     double w = dtheta/seconds_since_last_update;
     double v = sqrt ( dx*dx+dy*dy ) /seconds_since_last_update;
+    
+    double phi = joint_steering_->GetAngle( 0 ).Radian();
 
-    tf::Quaternion qt;
-    tf::Vector3 vt;
-    qt.setRPY ( 0,0,pose_encoder_.theta );
-    vt = tf::Vector3 ( pose_encoder_.x, pose_encoder_.y, 0 );
+    command_current_.linear.x = v;
+    command_current_.linear.y = 0;
+    command_current_.linear.z = 0;
+    command_current_.angular.x = 0;
+    command_current_.angular.y = 0;
+    command_current_.angular.z = phi;
 
-    odom_.pose.pose.position.x = vt.x();
-    odom_.pose.pose.position.y = vt.y();
-    odom_.pose.pose.position.z = vt.z();
+    if ( odom_source_ == ENCODER ) {
+        tf::Quaternion qt;
+        tf::Vector3 vt;
+        qt.setRPY ( 0,0,pose_encoder_.theta );
+        vt = tf::Vector3 ( pose_encoder_.x, pose_encoder_.y, 0 );
 
-    odom_.pose.pose.orientation.x = qt.x();
-    odom_.pose.pose.orientation.y = qt.y();
-    odom_.pose.pose.orientation.z = qt.z();
-    odom_.pose.pose.orientation.w = qt.w();
+        odom_.pose.pose.position.x = vt.x();
+        odom_.pose.pose.position.y = vt.y();
+        odom_.pose.pose.position.z = vt.z();
 
-    odom_.twist.twist.angular.z = w;
-    odom_.twist.twist.linear.x = dx/seconds_since_last_update;
-    odom_.twist.twist.linear.y = dy/seconds_since_last_update;
+        odom_.pose.pose.orientation.x = qt.x();
+        odom_.pose.pose.orientation.y = qt.y();
+        odom_.pose.pose.orientation.z = qt.z();
+        odom_.pose.pose.orientation.w = qt.w();
+
+        odom_.twist.twist.angular.z = phi;
+        odom_.twist.twist.linear.x = dx/seconds_since_last_update;
+        odom_.twist.twist.linear.y = dy/seconds_since_last_update;
+    }
+}
+
+void GazeboRosTricycleDrive::publishAgentState ( ) {
+
+    if ( command_current_publisher_.getNumSubscribers() > 0 ) {
+        command_current_publisher_.publish ( command_current_ );
+    }
+    if ( command_target_publisher_.getNumSubscribers() > 0 ) {
+        command_target_publisher_.publish ( command_target_ );
+    }
+    if ( trip_recorder_publisher_.getNumSubscribers() > 0 ) {
+        std_msgs::UInt64 trip;
+        trip.data = ( trip_recorder_ * trip_recorder_scale_ ) + ( trip_recorder_sub_meter_ * trip_recorder_scale_ ) + 0.5;
+        trip_recorder_publisher_.publish ( trip );
+    }
 }
 
 void GazeboRosTricycleDrive::publishOdometry ( double step_time )
@@ -368,7 +427,7 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
         // get velocity in /odom frame
         math::Vector3 linear;
         linear = parent->GetWorldLinearVel();
-        odom_.twist.twist.angular.z = parent->GetWorldAngularVel().z;
+        odom_.twist.twist.angular.z = joint_steering_->GetAngle( 0 ).Radian();//parent->GetWorldAngularVel().z;
 
         // convert velocity to child_frame_id (aka base_footprint)
         float yaw = pose.rot.GetYaw();
