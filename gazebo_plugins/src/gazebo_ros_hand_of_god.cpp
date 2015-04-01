@@ -102,11 +102,10 @@ namespace gazebo
     // Store the model
     model_ = _parent;
 
-    // Disable gravity for the hog
-    model_->SetGravityMode(false);
-
     // Get the floating link
     floating_link_ = model_->GetLink(link_name_);
+    // Disable gravity for the hog
+    floating_link_->SetGravityMode(false);
     if(!floating_link_) {
       ROS_ERROR("Floating link not found!");
       const std::vector<physics::LinkPtr> &links = model_->GetLinks();
