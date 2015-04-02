@@ -61,6 +61,8 @@ namespace gazebo {
     LEFT_FRONT=1,
     RIGHT_REAR=2,
     LEFT_REAR=3,
+    RIGHT_MID=4,
+    LEFT_MID=5
   };
 
   GazeboRosSkidSteerDrive::GazeboRosSkidSteerDrive() {}
@@ -89,7 +91,7 @@ namespace gazebo {
     this->broadcast_tf_ = false;
     if (!_sdf->HasElement("broadcastTF")) {
       if (!this->broadcast_tf_)
-    	  ROS_INFO("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to false.",this->robot_namespace_.c_str());
+        ROS_INFO("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to false.",this->robot_namespace_.c_str());
       else ROS_INFO("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to true.",this->robot_namespace_.c_str());
           
     } else {
@@ -113,13 +115,13 @@ namespace gazebo {
           this->right_front_joint_name_ = _sdf->GetElement("rightFrontJoint")->Get<std::string>();
         }
 
-	this->left_rear_joint_name_ = "left_rear_joint";
-	if (!_sdf->HasElement("leftRearJoint")) {
-	  ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <leftRearJoint>, defaults to \"%s\"",
-		  this->robot_namespace_.c_str(), this->left_rear_joint_name_.c_str());
-	} else {
-	  this->left_rear_joint_name_ = _sdf->GetElement("leftRearJoint")->Get<std::string>();
-	}
+    this->left_rear_joint_name_ = "left_rear_joint";
+    if (!_sdf->HasElement("leftRearJoint")) {
+      ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <leftRearJoint>, defaults to \"%s\"",
+        this->robot_namespace_.c_str(), this->left_rear_joint_name_.c_str());
+    } else {
+      this->left_rear_joint_name_ = _sdf->GetElement("leftRearJoint")->Get<std::string>();
+    }
 
     this->right_rear_joint_name_ = "right_rear_joint";
     if (!_sdf->HasElement("rightRearJoint")) {
@@ -129,13 +131,21 @@ namespace gazebo {
       this->right_rear_joint_name_ = _sdf->GetElement("rightRearJoint")->Get<std::string>();
     }
 
+    this->left_mid_joint_name_ = "";
+    if (_sdf->HasElement("leftMidJoint")) {
+      this->left_mid_joint_name_ = _sdf->GetElement("leftMidJoint")->Get<std::string>();
+    }
+
+    this->right_mid_joint_name_ = "";
+    if (_sdf->HasElement("rightMidJoint")) {
+      this->right_mid_joint_name_ = _sdf->GetElement("rightMidJoint")->Get<std::string>();
+    }
 
     // This assumes that front and rear wheel spacing is identical
     /*this->wheel_separation_ = this->parent->GetJoint(left_front_joint_name_)->GetAnchor(0).Distance(
-    		this->parent->GetJoint(right_front_joint_name_)->GetAnchor(0));*/
+        this->parent->GetJoint(right_front_joint_name_)->GetAnchor(0));*/
 
     this->wheel_separation_ = 0.4;
-
     if (!_sdf->HasElement("wheelSeparation")) {
       ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <wheelSeparation>, defaults to value from robot_description: %f",
           this->robot_namespace_.c_str(), this->wheel_separation_);
@@ -213,7 +223,9 @@ namespace gazebo {
     wheel_speed_[RIGHT_FRONT] = 0;
     wheel_speed_[LEFT_FRONT] = 0;
     wheel_speed_[RIGHT_REAR] = 0;
-	wheel_speed_[LEFT_REAR] = 0;
+    wheel_speed_[LEFT_REAR] = 0;
+    wheel_speed_[RIGHT_MID] = 0;
+    wheel_speed_[LEFT_MID] = 0;
 
     x_ = 0;
     rot_ = 0;
@@ -223,6 +235,8 @@ namespace gazebo {
     joints[RIGHT_FRONT] = this->parent->GetJoint(right_front_joint_name_);
     joints[LEFT_REAR] = this->parent->GetJoint(left_rear_joint_name_);
     joints[RIGHT_REAR] = this->parent->GetJoint(right_rear_joint_name_);
+    if (_sdf->HasElement("leftMidJoint")) joints[LEFT_MID] = this->parent->GetJoint(left_mid_joint_name_);
+    if (_sdf->HasElement("rightMidJoint")) joints[RIGHT_MID] = this->parent->GetJoint(right_mid_joint_name_);
 
     if (!joints[LEFT_FRONT]) {
       char error[200];
@@ -241,25 +255,27 @@ namespace gazebo {
     }
 
     if (!joints[LEFT_REAR]) {
-	 char error[200];
-	 snprintf(error, 200,
-		 "GazeboRosSkidSteerDrive Plugin (ns = %s) couldn't get left rear hinge joint named \"%s\"",
-		 this->robot_namespace_.c_str(), this->left_rear_joint_name_.c_str());
-	 gzthrow(error);
+   char error[200];
+   snprintf(error, 200,
+     "GazeboRosSkidSteerDrive Plugin (ns = %s) couldn't get left rear hinge joint named \"%s\"",
+     this->robot_namespace_.c_str(), this->left_rear_joint_name_.c_str());
+   gzthrow(error);
    }
 
    if (!joints[RIGHT_REAR]) {
-	 char error[200];
-	 snprintf(error, 200,
-		 "GazeboRosSkidSteerDrive Plugin (ns = %s) couldn't get right rear hinge joint named \"%s\"",
-		 this->robot_namespace_.c_str(), this->right_rear_joint_name_.c_str());
-	 gzthrow(error);
+   char error[200];
+   snprintf(error, 200,
+     "GazeboRosSkidSteerDrive Plugin (ns = %s) couldn't get right rear hinge joint named \"%s\"",
+     this->robot_namespace_.c_str(), this->right_rear_joint_name_.c_str());
+   gzthrow(error);
    }
 
     joints[LEFT_FRONT]->SetMaxForce(0, torque);
     joints[RIGHT_FRONT]->SetMaxForce(0, torque);
     joints[LEFT_REAR]->SetMaxForce(0, torque);
     joints[RIGHT_REAR]->SetMaxForce(0, torque);
+    if (joints[LEFT_MID]) joints[LEFT_MID]->SetMaxForce(0, torque);
+    if (joints[RIGHT_MID]) joints[RIGHT_MID]->SetMaxForce(0, torque);
 
     // Make sure the ROS node for Gazebo has already been initialized
     if (!ros::isInitialized())
@@ -312,6 +328,8 @@ namespace gazebo {
       joints[RIGHT_FRONT]->SetVelocity(0, wheel_speed_[RIGHT_FRONT] / (wheel_diameter_ / 2.0));
       joints[LEFT_REAR]->SetVelocity(0, wheel_speed_[LEFT_REAR] / (wheel_diameter_ / 2.0));
       joints[RIGHT_REAR]->SetVelocity(0, wheel_speed_[RIGHT_REAR] / (wheel_diameter_ / 2.0));
+      if (joints[LEFT_MID]) joints[LEFT_MID]->SetVelocity(0, wheel_speed_[LEFT_MID] / (wheel_diameter_ / 2.0));
+      if (joints[RIGHT_MID]) joints[RIGHT_MID]->SetVelocity(0, wheel_speed_[RIGHT_MID] / (wheel_diameter_ / 2.0));
 
       last_update_time_+= common::Time(update_period_);
 
@@ -335,9 +353,11 @@ namespace gazebo {
 
     wheel_speed_[RIGHT_FRONT] = vr + va * wheel_separation_ / 2.0;
     wheel_speed_[RIGHT_REAR] = vr + va * wheel_separation_ / 2.0;
+    wheel_speed_[RIGHT_MID] = vr + va * wheel_separation_ / 2.0;
 
     wheel_speed_[LEFT_FRONT] = vr - va * wheel_separation_ / 2.0;
     wheel_speed_[LEFT_REAR] = vr - va * wheel_separation_ / 2.0;
+    wheel_speed_[LEFT_MID] = vr - va * wheel_separation_ / 2.0;
 
   }
 
@@ -374,7 +394,7 @@ namespace gazebo {
     tf::Transform base_footprint_to_odom(qt, vt);
     if (this->broadcast_tf_) {
 
-    	transform_broadcaster_->sendTransform(
+      transform_broadcaster_->sendTransform(
         tf::StampedTransform(base_footprint_to_odom, current_time,
             odom_frame, base_footprint_frame));
 

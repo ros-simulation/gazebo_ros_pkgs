@@ -68,7 +68,7 @@ namespace gazebo {
   class GazeboRosSkidSteerDrive : public ModelPlugin {
 
     public:
-	  GazeboRosSkidSteerDrive();
+    GazeboRosSkidSteerDrive();
       ~GazeboRosSkidSteerDrive();
       void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
@@ -88,13 +88,15 @@ namespace gazebo {
       std::string right_front_joint_name_;
       std::string left_rear_joint_name_;
       std::string right_rear_joint_name_;
+      std::string left_mid_joint_name_;
+      std::string right_mid_joint_name_;
 
       double wheel_separation_;
       double wheel_diameter_;
       double torque;
-      double wheel_speed_[4];
+      double wheel_speed_[6];
 
-      physics::JointPtr joints[4];
+      physics::JointPtr joints[6];
 
       // ROS STUFF
       ros::NodeHandle* rosnode_;
