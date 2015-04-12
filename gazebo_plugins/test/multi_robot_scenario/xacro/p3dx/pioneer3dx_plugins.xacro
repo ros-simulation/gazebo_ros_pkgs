@@ -28,7 +28,7 @@
             <Acceleration_v>0.4</Acceleration_v>
 	    <Acceleration_w>0.4</Acceleration_w>
             <odometryTopic>odom</odometryTopic>
-            <odometryFrame>odom</odometryFrame> 
+            <odometryFrame>odom</odometryFrame>
             <robotBaseFrame>base_link</robotBaseFrame>
             <odometrySource>world</odometrySource> <!-- world or encoder, on world it will deliver ground truth -->
             <tripRecorderTopic>trip_recorder</tripRecorderTopic>
