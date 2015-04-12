@@ -4,6 +4,7 @@
 import sys
 import rospy
 import os
+import time
 
 from gazebo_msgs.msg import *
 from gazebo_msgs.srv import *
@@ -37,6 +38,8 @@ def spawn_urdf_model_client(model_name, model_xml, robot_namespace, initial_pose
 def set_model_configuration_client(model_name, model_param_name, joint_names, joint_positions, gazebo_namespace):
     rospy.loginfo("Waiting for service %s/set_model_configuration"%gazebo_namespace)
     rospy.wait_for_service(gazebo_namespace+'/set_model_configuration')
+    rospy.loginfo("temporary hack to **fix** the -J joint position option (issue #93), sleeping for 1 second to avoid race condition.");
+    time.sleep(1)
     try:
       set_model_configuration = rospy.ServiceProxy(gazebo_namespace+'/set_model_configuration', SetModelConfiguration)
       rospy.loginfo("Calling service %s/set_model_configuration"%gazebo_namespace)
