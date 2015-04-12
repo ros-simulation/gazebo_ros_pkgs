@@ -57,7 +57,8 @@
 
 #include <ros/ros.h>
 
-namespace gazebo {
+namespace gazebo
+{
 
 enum {
   RIGHT = 0,
@@ -195,7 +196,7 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
 
 }
 
-void GazeboRosDiffDrive::publishWheelJointState() 
+void GazeboRosDiffDrive::publishWheelJointState()
 {
     ros::Time current_time = ros::Time::now();
 
@@ -232,7 +233,7 @@ void GazeboRosDiffDrive::publishWheelTF()
 }
 
 // Update the controller
-void GazeboRosDiffDrive::UpdateChild() 
+void GazeboRosDiffDrive::UpdateChild()
 {
     updateOdometryEncoder();
     common::Time current_time = parent->GetWorld()->GetSimTime();

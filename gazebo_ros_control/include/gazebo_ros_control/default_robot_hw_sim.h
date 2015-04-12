@@ -34,7 +34,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman, Johnathan Bohren
+/* Author: Dave Coleman, Jonathan Bohren
    Desc:   Hardware Interface for any simulated robot in Gazebo
 */
 
@@ -86,6 +86,8 @@ public:
 
   virtual void writeSim(ros::Time time, ros::Duration period);
 
+  virtual void eStopActive(const bool active);
+
 protected:
   // Methods used to control a joint.
   enum ControlMethod {EFFORT, POSITION, POSITION_PID, VELOCITY, VELOCITY_PID};
@@ -127,9 +129,13 @@ protected:
   std::vector<double> joint_effort_;
   std::vector<double> joint_effort_command_;
   std::vector<double> joint_position_command_;
+  std::vector<double> last_joint_position_command_;
   std::vector<double> joint_velocity_command_;
 
   std::vector<gazebo::physics::JointPtr> sim_joints_;
+
+  // e_stop_active_ is true if the emergency stop is active.
+  bool e_stop_active_, last_e_stop_active_;
 };
 
 typedef boost::shared_ptr<DefaultRobotHWSim> DefaultRobotHWSimPtr;

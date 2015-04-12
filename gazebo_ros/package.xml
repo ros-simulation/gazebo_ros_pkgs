@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>gazebo_ros</name>
-  <version>2.4.6</version>
+  <version>2.4.8</version>
   <description>
     Provides ROS plugins that offer message and service publishers for interfacing with <a href="http://gazebosim.org">Gazebo</a> through ROS.
     Formally simulator_gazebo/gazebo
@@ -12,7 +12,7 @@
 
   <license>Apache 2.0</license>
 
-  <url type="website">http://gazebosim.org/wiki/Tutorials#ROS_Integration</url>
+  <url type="website">http://gazebosim.org/tutorials?cat=connect_ros</url>
   <url type="bugtracker">https://github.com/ros-simulation/gazebo_ros_pkgs/issues</url>
   <url type="repository">https://github.com/ros-simulation/gazebo_ros_pkgs</url>
 

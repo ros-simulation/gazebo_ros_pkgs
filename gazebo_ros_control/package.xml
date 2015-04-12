@@ -1,6 +1,6 @@
 <package>
   <name>gazebo_ros_control</name>
-  <version>2.4.6</version>
+  <version>2.4.8</version>
   <description>gazebo_ros_control</description>
 
   <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>

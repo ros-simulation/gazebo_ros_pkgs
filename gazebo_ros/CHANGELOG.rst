@@ -2,6 +2,24 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.8 (2015-03-17)
+------------------
+* Specify physics engine in args to empty_world.launch
+* Contributors: Steven Peters
+
+2.4.7 (2014-12-15)
+------------------
+* temporary hack to **fix** the -J joint position option (issue `#93 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/93>`_), sleeping for 1 second to avoid race condition. this branch should only be used for debugging, merge only as a last resort.
+* Fixing set model state method and test
+* Extended the fix for `#246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/246>`_ also to debug, gazebo, gzclient and perf scripts.
+* Update Gazebo/ROS tutorial URL
+* [gazebo_ros] Fix for `#246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/246>`_
+  Fixing issue `#246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/246>`_ in gzserver.
+* Fixing handling of non-world frame velocities in setModelState.
+* update headers to apache 2.0 license
+* update headers to apache 2.0 license
+* Contributors: John Hsu, Jose Luis Rivero, Martin Pecka, Tom Moore, ayrton04
+
 2.4.6 (2014-09-01)
 ------------------
 * Merge pull request `#232 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/232>`_ from ros-simulation/fix_get_physics_properties_non_ode
