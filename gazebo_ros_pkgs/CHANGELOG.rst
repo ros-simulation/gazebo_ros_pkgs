@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.8 (2015-03-17)
+------------------
+
 2.4.7 (2014-12-15)
 ------------------
 * Update Gazebo/ROS tutorial URL
