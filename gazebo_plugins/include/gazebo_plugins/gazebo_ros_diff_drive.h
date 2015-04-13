@@ -56,6 +56,7 @@
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/JointState.h>
+#include <std_msgs/UInt64.h>
 
 // Custom Callback Queue
 #include <ros/callback_queue.h>
@@ -81,30 +82,31 @@ namespace gazebo {
       GazeboRosDiffDrive();
       ~GazeboRosDiffDrive();
       void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
-      void Reset();
 
     protected:
       virtual void UpdateChild();
       virtual void FiniChild();
 
     private:
-      void publishOdometry(double step_time);
+      void publishOdometry();
+      void publishAgentState ();  /// publishes the agent state current and target command as well as distance moved
       void getWheelVelocities();
       void publishWheelTF(); /// publishes the wheel tf's
       void publishWheelJointState();
-      void UpdateOdometryEncoder();
+      void updateOdometryEncoder();
 
 
       GazeboRosPtr gazebo_ros_;
       physics::ModelPtr parent;
       event::ConnectionPtr update_connection_;
 
-      double wheel_separation_;
-      double wheel_diameter_;
-      double wheel_torque;
-      double wheel_speed_[2];
-	  double wheel_accel;
-      double wheel_speed_instr_[2];
+    double wheel_separation_;
+    double wheel_diameter_;
+    double wheel_torque;
+    double wheel_speed_[2];
+    double accel[2];
+    double vr,va;
+    double instr_vr, instr_va;
 
       std::vector<physics::JointPtr> joints_;
 
@@ -116,14 +118,27 @@ namespace gazebo {
       ros::Publisher joint_state_publisher_;      
       nav_msgs::Odometry odom_;
       std::string tf_prefix_;
+      ros::Publisher trip_recorder_publisher_;  /// publishes the distance moved
+      ros::Publisher command_current_publisher_;  /// publishes the current executed command
+      ros::Publisher command_target_publisher_;   /// publishes the target command
+      double trip_recorder_scale_;
+      double trip_recorder_sub_meter_;
+      uint64_t  trip_recorder_;
+      geometry_msgs::Twist command_current_;
+      geometry_msgs::Twist command_target_;
 
       boost::mutex lock;
 
       std::string robot_namespace_;
       std::string command_topic_;
       std::string odometry_topic_;
+      std::string trip_recorder_topic_;
+      std::string command_current_topic_;
+      std::string command_target_topic_;
       std::string odometry_frame_;
+      std::string odometry_frame_resolved_;
       std::string robot_base_frame_;
+      std::string robot_base_frame_resolved_;
       bool publish_tf_;
       // Custom Callback Queue
       ros::CallbackQueue queue_;
@@ -133,9 +148,7 @@ namespace gazebo {
       // DiffDrive stuff
       void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& cmd_msg);
 
-      double x_;
-      double rot_;
-      bool alive_;
+       bool alive_;
 
       // Update Rate
       double update_rate_;

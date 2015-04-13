@@ -61,8 +61,12 @@ namespace gazebo
 {
 
 enum {
-    RIGHT,
-    LEFT,
+  RIGHT = 0,
+  LEFT = 1,
+};
+enum {
+  FORWARD = 0,
+  ANGULAR = 1,
 };
 
 GazeboRosDiffDrive::GazeboRosDiffDrive() {}
@@ -82,20 +86,29 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameter<std::string> ( command_topic_, "commandTopic", "cmd_vel" );
     gazebo_ros_->getParameter<std::string> ( odometry_topic_, "odometryTopic", "odom" );
     gazebo_ros_->getParameter<std::string> ( odometry_frame_, "odometryFrame", "odom" );
+    gazebo_ros_->getParameter<std::string> ( trip_recorder_topic_, "tripRecorderTopic", "trip_recorder" );
+    gazebo_ros_->getParameter<std::string> ( command_current_topic_, "commandCurrentTopic", "cmd_vel_current" );
+    gazebo_ros_->getParameter<std::string> ( command_target_topic_, "commandTargetTopic", "cmd_vel_target" );
     gazebo_ros_->getParameter<std::string> ( robot_base_frame_, "robotBaseFrame", "base_footprint" );
     gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
     gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
 
+
+    gazebo_ros_->getParameter<double> ( trip_recorder_scale_, "tripRecorderScale", 1000. );
     gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.34 );
     gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.15 );
-    gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
+    gazebo_ros_->getParameter<double> ( accel[FORWARD], "Acceleration_v", 0.0 );
+    gazebo_ros_->getParameter<double> ( accel[ANGULAR], "Acceleration_w", 0.0 );
     gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
+
     std::map<std::string, OdomSource> odomOptions;
     odomOptions["encoder"] = ENCODER;
     odomOptions["world"] = WORLD;
     gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
 
+    odometry_frame_resolved_ = gazebo_ros_->resolveTF ( odometry_frame_ );
+    robot_base_frame_resolved_ = gazebo_ros_->resolveTF ( robot_base_frame_ );
 
     joints_.resize ( 2 );
     joints_[LEFT] = gazebo_ros_->getJoint ( parent, "leftJoint", "left_joint" );
@@ -106,11 +119,11 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
 
 
     this->publish_tf_ = true;
-    if (!_sdf->HasElement("publishTf")) {
-      ROS_WARN("GazeboRosDiffDrive Plugin (ns = %s) missing <publishTf>, defaults to %d",
-          this->robot_namespace_.c_str(), this->publish_tf_);
+    if ( !_sdf->HasElement ( "publishTf" ) ) {
+        ROS_WARN ( "%s: <publishTf> is missing, using default %d!",
+                   gazebo_ros_->info(), this->publish_tf_ );
     } else {
-      this->publish_tf_ = _sdf->GetElement("publishTf")->Get<bool>();
+        this->publish_tf_ = _sdf->GetElement ( "publishTf" )->Get<bool>();
     }
 
     // Initialize update rate stuff
@@ -122,8 +135,20 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     wheel_speed_[RIGHT] = 0;
     wheel_speed_[LEFT] = 0;
 
-    x_ = 0;
-    rot_ = 0;
+    command_current_.linear.x = 0;
+    command_current_.linear.y = 0;
+    command_current_.linear.z = 0;
+    command_current_.angular.x = 0;
+    command_current_.angular.y = 0;
+    command_current_.angular.z = 0;
+    command_target_.linear.x = 0;
+    command_target_.linear.y = 0;
+    command_target_.linear.z = 0;
+    command_target_.angular.x = 0;
+    command_target_.angular.y = 0;
+    command_target_.angular.z = 0;
+    trip_recorder_ = 0;
+    trip_recorder_sub_meter_ = 0.;
     alive_ = true;
 
 
@@ -152,6 +177,15 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
       ROS_INFO("%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str());
     }
 
+    trip_recorder_publisher_ = gazebo_ros_->node()->advertise<std_msgs::UInt64> ( trip_recorder_topic_, 1 );
+    ROS_INFO ( "%s: Advertise trip recorder on %s scale by %f!", gazebo_ros_->info(), trip_recorder_topic_.c_str(), trip_recorder_scale_ );
+
+    command_current_publisher_ = gazebo_ros_->node()->advertise<geometry_msgs::Twist> ( command_current_topic_, 1 );
+    ROS_INFO ( "%s: Advertise current command on %s !", gazebo_ros_->info(), command_current_topic_.c_str() );
+
+    command_target_publisher_ = gazebo_ros_->node()->advertise<geometry_msgs::Twist> ( command_target_topic_, 1 );
+    ROS_INFO ( "%s: Advertise target command on %s !", gazebo_ros_->info(), command_target_topic_.c_str() );
+
     // start custom queue for diff drive
     this->callback_queue_thread_ =
         boost::thread ( boost::bind ( &GazeboRosDiffDrive::QueueThread, this ) );
@@ -160,18 +194,6 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     this->update_connection_ =
         event::Events::ConnectWorldUpdateBegin ( boost::bind ( &GazeboRosDiffDrive::UpdateChild, this ) );
 
-}
-
-void GazeboRosDiffDrive::Reset()
-{
-  last_update_time_ = parent->GetWorld()->GetSimTime();
-  pose_encoder_.x = 0;
-  pose_encoder_.y = 0;
-  pose_encoder_.theta = 0;
-  x_ = 0;
-  rot_ = 0;
-  joints_[LEFT]->SetMaxForce ( 0, wheel_torque );
-  joints_[RIGHT]->SetMaxForce ( 0, wheel_torque );
 }
 
 void GazeboRosDiffDrive::publishWheelJointState()
@@ -213,59 +235,50 @@ void GazeboRosDiffDrive::publishWheelTF()
 // Update the controller
 void GazeboRosDiffDrive::UpdateChild()
 {
-  
-    /* force reset SetMaxForce since Joint::Reset reset MaxForce to zero at
-       https://bitbucket.org/osrf/gazebo/src/8091da8b3c529a362f39b042095e12c94656a5d1/gazebo/physics/Joint.cc?at=gazebo2_2.2.5#cl-331
-       (this has been solved in https://bitbucket.org/osrf/gazebo/diff/gazebo/physics/Joint.cc?diff2=b64ff1b7b6ff&at=issue_964 )
-       and Joint::Reset is called after ModelPlugin::Reset, so we need to set maxForce to wheel_torque other than GazeboRosDiffDrive::Reset
-       (this seems to be solved in https://bitbucket.org/osrf/gazebo/commits/ec8801d8683160eccae22c74bf865d59fac81f1e)
-    */
-    for ( int i = 0; i < 2; i++ ) {
-      if ( fabs(wheel_torque -joints_[i]->GetMaxForce ( 0 )) > 1e-6 ) {
-        joints_[i]->SetMaxForce ( 0, wheel_torque );
-      }
-    }
-
-
-    if ( odom_source_ == ENCODER ) UpdateOdometryEncoder();
+    updateOdometryEncoder();
     common::Time current_time = parent->GetWorld()->GetSimTime();
     double seconds_since_last_update = ( current_time - last_update_time_ ).Double();
 
     if ( seconds_since_last_update > update_period_ ) {
-        if (this->publish_tf_) publishOdometry ( seconds_since_last_update );
+        if ( this->publish_tf_ ) publishOdometry ();
         if ( publishWheelTF_ ) publishWheelTF();
         if ( publishWheelJointState_ ) publishWheelJointState();
 
+        // publishes the agent state current and target command as well as distance moved
+        publishAgentState();
+
         // Update robot in case new velocities have been requested
         getWheelVelocities();
-
-        double current_speed[2];
-
-        current_speed[LEFT] = joints_[LEFT]->GetVelocity ( 0 )   * ( wheel_diameter_ / 2.0 );
-        current_speed[RIGHT] = joints_[RIGHT]->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
-
-        if ( wheel_accel == 0 ||
-                ( fabs ( wheel_speed_[LEFT] - current_speed[LEFT] ) < 0.01 ) ||
-                ( fabs ( wheel_speed_[RIGHT] - current_speed[RIGHT] ) < 0.01 ) ) {
+		double wheel_l = joints_[LEFT] ->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
+		double wheel_r = joints_[RIGHT]->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
+        double current_vr = (wheel_l + wheel_r)/2.0 ;
+        double current_va = (wheel_l - wheel_r)/wheel_separation_ ;
+		double req_vr = vr;
+        double req_va = va;	
+	
+	
+        if (/*( accel[FORWARD] == 0 && accel[ANGULAR] == 0)||*/
+                (( fabs ( req_vr - current_vr ) < 0.01 ) &&
+                 ( fabs ( req_va - current_va ) < 0.01 )) ) {
             //if max_accel == 0, or target speed is reached
-            joints_[LEFT]->SetVelocity ( 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
+            joints_[LEFT]->SetVelocity  ( 0, (req_vr + req_va * wheel_separation_ / 2.0)  / ( wheel_diameter_ / 2.0 ));
+            joints_[RIGHT]->SetVelocity ( 0, (req_vr - req_va * wheel_separation_ / 2.0)  / ( wheel_diameter_ / 2.0 ));
         } else {
-            if ( wheel_speed_[LEFT]>=current_speed[LEFT] )
-                wheel_speed_instr_[LEFT]+=fmin ( wheel_speed_[LEFT]-current_speed[LEFT],  wheel_accel * seconds_since_last_update );
+            if ( req_vr>=current_vr )
+                instr_vr += fmin ( req_vr - current_vr,  accel[FORWARD] * seconds_since_last_update );
             else
-                wheel_speed_instr_[LEFT]+=fmax ( wheel_speed_[LEFT]-current_speed[LEFT], -wheel_accel * seconds_since_last_update );
+                instr_vr += fmax ( req_vr - current_vr, -accel[FORWARD] * seconds_since_last_update );
 
-            if ( wheel_speed_[RIGHT]>current_speed[RIGHT] )
-                wheel_speed_instr_[RIGHT]+=fmin ( wheel_speed_[RIGHT]-current_speed[RIGHT], wheel_accel * seconds_since_last_update );
+            if ( req_va>=current_va )
+                instr_va += fmin ( req_va - current_va,  accel[ANGULAR] * seconds_since_last_update );
             else
-                wheel_speed_instr_[RIGHT]+=fmax ( wheel_speed_[RIGHT]-current_speed[RIGHT], -wheel_accel * seconds_since_last_update );
+                instr_va += fmax ( req_va - current_va, -accel[ANGULAR] * seconds_since_last_update );
 
-            // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[LEFT], wheel_speed_[LEFT]);
-            // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[RIGHT],wheel_speed_[RIGHT]);
+             //ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_vr, req_vr);
+             //ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_va, req_va);
 
-            joints_[LEFT]->SetVelocity ( 0,wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0,wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
+            joints_[LEFT]->SetVelocity  ( 0,(instr_vr + instr_va * wheel_separation_ / 2.0) / ( wheel_diameter_ / 2.0 ));
+            joints_[RIGHT]->SetVelocity ( 0,(instr_vr - instr_va * wheel_separation_ / 2.0) / ( wheel_diameter_ / 2.0 ));
         }
         last_update_time_+= common::Time ( update_period_ );
     }
@@ -285,8 +298,8 @@ void GazeboRosDiffDrive::getWheelVelocities()
 {
     boost::mutex::scoped_lock scoped_lock ( lock );
 
-    double vr = x_;
-    double va = rot_;
+    vr = command_target_.linear.x;
+    va = command_target_.angular.z;
 
     wheel_speed_[LEFT] = vr + va * wheel_separation_ / 2.0;
     wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;
@@ -295,8 +308,7 @@ void GazeboRosDiffDrive::getWheelVelocities()
 void GazeboRosDiffDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg )
 {
     boost::mutex::scoped_lock scoped_lock ( lock );
-    x_ = cmd_msg->linear.x;
-    rot_ = cmd_msg->angular.z;
+    command_target_ = *cmd_msg;
 }
 
 void GazeboRosDiffDrive::QueueThread()
@@ -308,7 +320,7 @@ void GazeboRosDiffDrive::QueueThread()
     }
 }
 
-void GazeboRosDiffDrive::UpdateOdometryEncoder()
+void GazeboRosDiffDrive::updateOdometryEncoder()
 {
     double vl = joints_[LEFT]->GetVelocity ( 0 );
     double vr = joints_[RIGHT]->GetVelocity ( 0 );
@@ -318,7 +330,7 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
 
     double b = wheel_separation_;
 
-    // Book: Sigwart 2011 Autonompus Mobile Robots page:337
+    // Book: Sigwart 2011 Autonomous Mobile Robots page:337
     double sl = vl * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
     double sr = vr * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
     double theta = ( sl - sr ) /b;
@@ -332,31 +344,60 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     pose_encoder_.y += dy;
     pose_encoder_.theta += dtheta;
 
+    double d = sqrt ( dx*dx + dy*dy );
+    trip_recorder_sub_meter_ += d;
+    while ( trip_recorder_sub_meter_ >= 1.0 ) {
+        trip_recorder_sub_meter_ -= 1.0;
+        trip_recorder_++;
+    }
+
     double w = dtheta/seconds_since_last_update;
     double v = sqrt ( dx*dx+dy*dy ) /seconds_since_last_update;
 
-    tf::Quaternion qt;
-    tf::Vector3 vt;
-    qt.setRPY ( 0,0,pose_encoder_.theta );
-    vt = tf::Vector3 ( pose_encoder_.x, pose_encoder_.y, 0 );
+    command_current_.linear.x = v;
+    command_current_.linear.y = 0;
+    command_current_.linear.z = 0;
+    command_current_.angular.x = 0;
+    command_current_.angular.y = 0;
+    command_current_.angular.z = w;
 
-    odom_.pose.pose.position.x = vt.x();
-    odom_.pose.pose.position.y = vt.y();
-    odom_.pose.pose.position.z = vt.z();
+    if ( odom_source_ == ENCODER ) {
+        tf::Quaternion qt;
+        tf::Vector3 vt;
+        qt.setRPY ( 0,0,pose_encoder_.theta );
+        vt = tf::Vector3 ( pose_encoder_.x, pose_encoder_.y, 0 );
 
-    odom_.pose.pose.orientation.x = qt.x();
-    odom_.pose.pose.orientation.y = qt.y();
-    odom_.pose.pose.orientation.z = qt.z();
-    odom_.pose.pose.orientation.w = qt.w();
+        odom_.pose.pose.position.x = vt.x();
+        odom_.pose.pose.position.y = vt.y();
+        odom_.pose.pose.position.z = vt.z();
 
-    odom_.twist.twist.angular.z = w;
-    odom_.twist.twist.linear.x = dx/seconds_since_last_update;
-    odom_.twist.twist.linear.y = dy/seconds_since_last_update;
+        odom_.pose.pose.orientation.x = qt.x();
+        odom_.pose.pose.orientation.y = qt.y();
+        odom_.pose.pose.orientation.z = qt.z();
+        odom_.pose.pose.orientation.w = qt.w();
+
+        odom_.twist.twist.angular.z = w;
+        odom_.twist.twist.linear.x = dx/seconds_since_last_update;
+        odom_.twist.twist.linear.y = dy/seconds_since_last_update;
+    }
 }
 
-void GazeboRosDiffDrive::publishOdometry ( double step_time )
-{
-   
+void GazeboRosDiffDrive::publishAgentState ( ) {
+
+    if ( command_current_publisher_.getNumSubscribers() > 0 ) {
+        command_current_publisher_.publish ( command_current_ );
+    }
+    if ( command_target_publisher_.getNumSubscribers() > 0 ) {
+        command_target_publisher_.publish ( command_target_ );
+    }
+    if ( trip_recorder_publisher_.getNumSubscribers() > 0 ) {
+        std_msgs::UInt64 trip;
+        trip.data = ( trip_recorder_ * trip_recorder_scale_ ) + ( trip_recorder_sub_meter_ * trip_recorder_scale_ ) + 0.5;
+        trip_recorder_publisher_.publish ( trip );
+    }
+}
+void GazeboRosDiffDrive::publishOdometry () {
+
     ros::Time current_time = ros::Time::now();
     std::string odom_frame = gazebo_ros_->resolveTF ( odometry_frame_ );
     std::string base_footprint_frame = gazebo_ros_->resolveTF ( robot_base_frame_ );
@@ -399,7 +440,7 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
     tf::Transform base_footprint_to_odom ( qt, vt );
     transform_broadcaster_->sendTransform (
         tf::StampedTransform ( base_footprint_to_odom, current_time,
-                               odom_frame, base_footprint_frame ) );
+                               odometry_frame_resolved_, robot_base_frame_resolved_ ) );
 
 
     // set covariance
@@ -413,8 +454,8 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
 
     // set header
     odom_.header.stamp = current_time;
-    odom_.header.frame_id = odom_frame;
-    odom_.child_frame_id = base_footprint_frame;
+    odom_.header.frame_id = odometry_frame_resolved_;
+    odom_.child_frame_id = robot_base_frame_resolved_;
 
     odometry_publisher_.publish ( odom_ );
 }
