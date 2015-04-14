@@ -25,12 +25,17 @@
             <wheelSeparation>0.3</wheelSeparation>
             <wheelDiameter>0.18</wheelDiameter>
             <wheelTorque>20</wheelTorque>
-            <wheelAcceleration>1.8</wheelAcceleration>
-            <commandTopic>cmd_vel</commandTopic>
+            <Acceleration_v>0.4</Acceleration_v>
+	    <Acceleration_w>0.4</Acceleration_w>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
-            <odometrySource>world</odometrySource>
             <robotBaseFrame>base_link</robotBaseFrame>
+            <odometrySource>world</odometrySource> <!-- world or encoder, on world it will deliver ground truth -->
+            <tripRecorderTopic>trip_recorder</tripRecorderTopic>
+            <tripRecorderScale>1000</tripRecorderScale>  <!-- scales to meters  -->
+            <commandTopic>cmd_vel</commandTopic>
+            <commandCurrentTopic>cmd_vel_current</commandCurrentTopic>
+	    <commandTargetTopic>cmd_vel_target</commandTargetTopic>
             <updateRate>10.0</updateRate>
         </plugin>
     </gazebo>

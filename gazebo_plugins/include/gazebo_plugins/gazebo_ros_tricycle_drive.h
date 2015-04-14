@@ -55,6 +55,7 @@
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/JointState.h>
+#include <std_msgs/UInt64.h>
 
 // Custom Callback Queue
 #include <ros/callback_queue.h>
@@ -94,13 +95,15 @@ protected:
     virtual void FiniChild();
 
 private:
-    GazeboRosPtr gazebo_ros_;
-    physics::ModelPtr parent;
     void publishOdometry(double step_time);
+    void publishAgentState ();  /// publishes the agent state current and target command as well as distance moved
     void publishWheelTF(); /// publishes the wheel tf's
     void publishWheelJointState();
+    void updateOdometryEncoder();
     void motorController(double target_speed, double target_angle, double dt);
 
+	GazeboRosPtr gazebo_ros_;
+    physics::ModelPtr parent;
     event::ConnectionPtr update_connection_;
 
     physics::JointPtr joint_steering_;
@@ -120,11 +123,7 @@ private:
     OdomSource odom_source_;
     double wheel_torque_;
 
-    std::string robot_namespace_;
-    std::string command_topic_;
-    std::string odometry_topic_;
-    std::string odometry_frame_;
-    std::string robot_base_frame_;
+    
 
     // ROS STUFF
     ros::Publisher odometry_publisher_;
@@ -133,10 +132,29 @@ private:
     sensor_msgs::JointState joint_state_;
     ros::Publisher joint_state_publisher_;
     nav_msgs::Odometry odom_;
+    std::string tf_prefix_;
+    ros::Publisher trip_recorder_publisher_;
+    ros::Publisher command_current_publisher_;
+    ros::Publisher command_target_publisher_;
+    double trip_recorder_scale_;
+    double trip_recorder_sub_meter_;
+    uint64_t  trip_recorder_;
+    geometry_msgs::Twist command_current_;
+    geometry_msgs::Twist command_target_;
 
     boost::mutex lock;
 
-
+	std::string robot_namespace_;
+    std::string command_topic_;
+    std::string odometry_topic_;
+    std::string trip_recorder_topic_;
+    std::string command_current_topic_;
+    std::string command_target_topic_;
+    std::string odometry_frame_;
+    std::string odometry_frame_resolved_;
+    std::string robot_base_frame_;
+    std::string robot_base_frame_resolved_;
+    bool publish_tf_;
     // Custom Callback Queue
     ros::CallbackQueue queue_;
     boost::thread callback_queue_thread_;
