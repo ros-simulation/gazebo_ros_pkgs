@@ -256,10 +256,10 @@ namespace gazebo {
 	 gzthrow(error);
    }
 
-    joints[LEFT_FRONT]->SetMaxForce(0, torque);
-    joints[RIGHT_FRONT]->SetMaxForce(0, torque);
-    joints[LEFT_REAR]->SetMaxForce(0, torque);
-    joints[RIGHT_REAR]->SetMaxForce(0, torque);
+    joints[LEFT_FRONT]->SetParam("fmax", 0, torque);
+    joints[RIGHT_FRONT]->SetParam("fmax", 0, torque);
+    joints[LEFT_REAR]->SetParam("fmax", 0, torque);
+    joints[RIGHT_REAR]->SetParam("fmax", 0, torque);
 
     // Make sure the ROS node for Gazebo has already been initialized
     if (!ros::isInitialized())
@@ -308,10 +308,10 @@ namespace gazebo {
 
       // Update robot in case new velocities have been requested
       getWheelVelocities();
-      joints[LEFT_FRONT]->SetVelocity(0, wheel_speed_[LEFT_FRONT] / (wheel_diameter_ / 2.0));
-      joints[RIGHT_FRONT]->SetVelocity(0, wheel_speed_[RIGHT_FRONT] / (wheel_diameter_ / 2.0));
-      joints[LEFT_REAR]->SetVelocity(0, wheel_speed_[LEFT_REAR] / (wheel_diameter_ / 2.0));
-      joints[RIGHT_REAR]->SetVelocity(0, wheel_speed_[RIGHT_REAR] / (wheel_diameter_ / 2.0));
+      joints[LEFT_FRONT]->SetParam("vel", 0, wheel_speed_[LEFT_FRONT] / (wheel_diameter_ / 2.0));
+      joints[RIGHT_FRONT]->SetParam("vel", 0, wheel_speed_[RIGHT_FRONT] / (wheel_diameter_ / 2.0));
+      joints[LEFT_REAR]->SetParam("vel", 0, wheel_speed_[LEFT_REAR] / (wheel_diameter_ / 2.0));
+      joints[RIGHT_REAR]->SetParam("vel", 0, wheel_speed_[RIGHT_REAR] / (wheel_diameter_ / 2.0));
 
       last_update_time_+= common::Time(update_period_);
 
