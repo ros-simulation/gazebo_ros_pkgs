@@ -219,7 +219,11 @@ bool DefaultRobotHWSim::initSim(
         // joint->SetParam("fmax") must be called if joint->SetAngle() or joint->SetParam("vel") are
         // going to be called. joint->SetParam("fmax") must *not* be called if joint->SetForce() is
         // going to be called.
+#if GAZEBO_MAJOR_VERSION > 2
         joint->SetParam("fmax", 0, joint_effort_limits_[j]);
+#else
+        joint->SetMaxForce(0, joint_effort_limits_[j]);
+#endif
       }
     }
   }
@@ -327,7 +331,11 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
         break;
 
       case VELOCITY:
+#if GAZEBO_MAJOR_VERSION > 2
         sim_joints_[j]->SetParam("vel", 0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+#else
+        sim_joints_[j]->SetVelocity(0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+#endif
         break;
 
       case VELOCITY_PID:
