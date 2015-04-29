@@ -4,8 +4,9 @@ Changelog for package gazebo_plugins
 
 Forthcoming
 -----------
+* run_depend on libgazebo5-dev instead of gazebo5
 * Changed the rosdep key for gazebo to gazebo5, for Jade Gazebo5 will be used.
-* Contributors: William Woodall
+* Contributors: Steven Peters, William Woodall
 
 2.4.8 (2015-03-17)
 ------------------
