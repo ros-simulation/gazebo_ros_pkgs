@@ -17,9 +17,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>gazebo5</build_depend>
   <build_depend>gazebo_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>libgazebo5-dev</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>trajectory_msgs</build_depend>
   <build_depend>std_srvs</build_depend>

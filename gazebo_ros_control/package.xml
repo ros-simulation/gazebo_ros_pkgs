@@ -18,9 +18,9 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
-  <build_depend>gazebo5</build_depend>
   <build_depend>control_toolbox</build_depend>
   <build_depend>controller_manager</build_depend>
+  <build_depend>libgazebo5-dev</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>transmission_interface</build_depend>
   <build_depend>joint_limits_interface</build_depend>
