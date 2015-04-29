@@ -199,7 +199,7 @@ bool DefaultRobotHWSim::initSim(
     if (joint_control_methods_[j] != EFFORT)
     {
       // Initialize the PID controller. If no PID gain values are found, use joint->SetAngle() or
-      // joint->SetVelocity() to control the joint.
+      // joint->SetParam("vel") to control the joint.
       const ros::NodeHandle nh(model_nh, robot_namespace + "/gazebo_ros_control/pid_gains/" +
                                joint_names_[j]);
       if (pid_controllers_[j].init(nh, true))
@@ -216,10 +216,10 @@ bool DefaultRobotHWSim::initSim(
       }
       else
       {
-        // joint->SetMaxForce() must be called if joint->SetAngle() or joint->SetVelocity() are
-        // going to be called. joint->SetMaxForce() must *not* be called if joint->SetForce() is
+        // joint->SetParam("fmax") must be called if joint->SetAngle() or joint->SetParam("vel") are
+        // going to be called. joint->SetParam("fmax") must *not* be called if joint->SetForce() is
         // going to be called.
-        joint->SetMaxForce(0, joint_effort_limits_[j]);
+        joint->SetParam("fmax", 0, joint_effort_limits_[j]);
       }
     }
   }
@@ -327,7 +327,7 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
         break;
 
       case VELOCITY:
-        sim_joints_[j]->SetVelocity(0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+        sim_joints_[j]->SetParam("vel", 0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
         break;
 
       case VELOCITY_PID:
