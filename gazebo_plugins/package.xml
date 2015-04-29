@@ -17,7 +17,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>gazebo</build_depend>
+  <build_depend>gazebo5</build_depend>
   <build_depend>gazebo_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
@@ -42,7 +42,7 @@
   <build_depend>diagnostic_updater</build_depend>
   <build_depend>camera_info_manager</build_depend>
 
-  <run_depend>gazebo</run_depend>
+  <run_depend>gazebo5</run_depend>
   <run_depend>gazebo_msgs</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>geometry_msgs</run_depend>
