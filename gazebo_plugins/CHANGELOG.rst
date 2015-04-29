@@ -2,6 +2,11 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Changed the rosdep key for gazebo to gazebo5, for Jade Gazebo5 will be used.
+* Contributors: William Woodall
+
 2.4.8 (2015-03-17)
 ------------------
 * fixed mistake at calculation of joint velocity

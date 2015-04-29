@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Changed the rosdep key for gazebo to gazebo5, for Jade Gazebo5 will be used.
+* Contributors: William Woodall
+
 2.4.8 (2015-03-17)
 ------------------
 * Specify physics engine in args to empty_world.launch
