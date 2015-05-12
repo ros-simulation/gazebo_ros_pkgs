@@ -21,6 +21,7 @@ Example Usage:
     <jointName>joint_name</jointName>
     <mimicJoint>mimic_joint_name</mimicJoint>
     <multiplier>1.0</multiplier>
+    <offset>0.0</offset>
   </plugin>
 </gazebo>
 \endverbatim
@@ -49,7 +50,7 @@ class MimicJoint: public ModelPlugin
   private: double multiplier_;
 
   /// \brief multiplier
-  private: double bias_;
+  private: double offset_;
 
   /// \brief A pointer to the Gazebo joint
   private: physics::JointPtr joint_;

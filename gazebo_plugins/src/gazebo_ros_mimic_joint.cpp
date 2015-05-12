@@ -37,13 +37,13 @@ void MimicJoint::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   else
     this->mimic_joint_name_ = _sdf->GetElement("mimicJoint")->Get<std::string>();
 
-  if (!_sdf->HasElement("bias"))
+  if (!_sdf->HasElement("offset"))
   {
-    ROS_INFO("mimic_joint missing <bias>, set default to 0.0");
-    this->bias_ = 0.0;
+    ROS_INFO("mimic_joint missing <offset>, set default to 0.0");
+    this->offset_ = 0.0;
   }
   else
-    this->bias_ = _sdf->GetElement("bias")->Get<double>();
+    this->offset_ = _sdf->GetElement("offset")->Get<double>();
 
   if (!_sdf->HasElement("multiplier"))
   {
@@ -69,5 +69,5 @@ void MimicJoint::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
 void MimicJoint::UpdateChild()
 {
-  this->mimic_joint_->SetPosition(0, this->joint_->GetAngle(0).Radian()*this->multiplier_ + this->bias_);
+  this->mimic_joint_->SetPosition(0, this->joint_->GetAngle(0).Radian()*this->multiplier_ + this->offset_);
 }
