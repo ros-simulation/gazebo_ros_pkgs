@@ -1,5 +1,5 @@
-#ifndef GAZEBO_ROS_FT_HH
-#define GAZEBO_ROS_FT_HH
+#ifndef GAZEBO_ROS_MIMIC_JOINT_HH
+#define GAZEBO_ROS_MIMIC_JOINT_HH
 
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/Plugin.hh>
@@ -47,6 +47,9 @@ class MimicJoint: public ModelPlugin
   
   /// \brief multiplier
   private: double multiplier_;
+
+  /// \brief multiplier
+  private: double bias_;
 
   /// \brief A pointer to the Gazebo joint
   private: physics::JointPtr joint_;
