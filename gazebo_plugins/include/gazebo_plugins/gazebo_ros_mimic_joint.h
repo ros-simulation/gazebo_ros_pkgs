@@ -22,6 +22,7 @@ Example Usage:
     <mimicJoint>mimic_joint_name</mimicJoint>
     <multiplier>1.0</multiplier>
     <offset>0.0</offset>
+    <pgain>1.0</pgain>
   </plugin>
 </gazebo>
 \endverbatim
