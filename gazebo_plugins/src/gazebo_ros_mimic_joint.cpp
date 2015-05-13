@@ -53,6 +53,14 @@ void MimicJoint::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   else
     this->multiplier_ = _sdf->GetElement("multiplier")->Get<double>();
 
+  if (!_sdf->HasElement("pgain"))
+  {
+    ROS_INFO("mimic_joint missing <pgain>, set default to 1.0");
+    this->p_ = 1.0;
+  }
+  else
+    this->p_ = _sdf->GetElement("pgain")->Get<double>();
+
 
   // Get the name of the parent model
   std::string modelName = _sdf->GetParent()->Get<std::string>("name");
@@ -69,5 +77,9 @@ void MimicJoint::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
 void MimicJoint::UpdateChild()
 {
-  this->mimic_joint_->SetPosition(0, this->joint_->GetAngle(0).Radian()*this->multiplier_ + this->offset_);
+  const double desired_angle = this->joint_->GetAngle(0).Radian()*this->multiplier_ + this->offset_;
+  const double error = desired_angle - this->mimic_joint_->GetAngle(0).Radian();
+  const double force = this->p_*error;
+  this->mimic_joint_->SetForce(0, force);
+  //this->mimic_joint_->SetPosition(0, this->joint_->GetAngle(0).Radian()*this->multiplier_ + this->offset_);
 }

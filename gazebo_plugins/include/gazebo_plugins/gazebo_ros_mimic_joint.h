@@ -49,8 +49,11 @@ class MimicJoint: public ModelPlugin
   /// \brief multiplier
   private: double multiplier_;
 
-  /// \brief multiplier
+  /// \brief offset
   private: double offset_;
+
+  /// \brief proportionnal gain
+  private: double p_;
 
   /// \brief A pointer to the Gazebo joint
   private: physics::JointPtr joint_;
