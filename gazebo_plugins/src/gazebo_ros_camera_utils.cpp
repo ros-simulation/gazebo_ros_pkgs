@@ -258,6 +258,10 @@ event::ConnectionPtr GazeboRosCameraUtils::OnLoad(const boost::function<void()>&
 // Load the controller
 void GazeboRosCameraUtils::LoadThread()
 {
+  // Synchronize loading for multicamera setup, without this, not all transport
+  // topics may be advertised. This might be due to a bug in image_transport
+  boost::mutex::scoped_lock lock(*this->image_connect_count_lock_);
+
   // Exit if no ROS
   if (!ros::isInitialized())
   {
