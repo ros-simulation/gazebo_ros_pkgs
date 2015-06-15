@@ -294,8 +294,15 @@ private:
   bool plugin_loaded_;
 
   // detect if sigint event occurs
-  bool stop_; 
+  bool stop_;
   gazebo::event::ConnectionPtr sigint_event_;
+
+  // \brief last published ROS simulation time
+  rosgraph_msgs::Clock ros_time_;
+
+  // \brief target rate for publishing ROS simulation time (in Hz)
+  double ros_time_publish_rate_;
+
 
   std::string robot_namespace_;
 
