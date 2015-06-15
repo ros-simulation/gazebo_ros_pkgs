@@ -30,8 +30,9 @@ namespace gazebo
 GazeboRosApiPlugin::GazeboRosApiPlugin() :
   physics_reconfigure_initialized_(false),
   world_created_(false),
+  plugin_loaded_(false),
   stop_(false),
-  plugin_loaded_(false)
+  ros_time_publish_rate_(100.0)
 {
   robot_namespace_.clear();
 }
@@ -472,6 +473,8 @@ void GazeboRosApiPlugin::advertiseServices()
 
   // set param for use_sim_time if not set by user already
   nh_->setParam("/use_sim_time", true);
+  nh_->param("/sim_time_rate", ros_time_publish_rate_, ros_time_publish_rate_);
+  ros_time_publish_rate_ = std::max(ros_time_publish_rate_, 0.1);
 
   // todo: contemplate setting environment variable ROBOT=sim here???
 
@@ -1776,7 +1779,6 @@ void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::Wo
 {
   ROS_ERROR("CLOCK2");
   gazebo::common::Time currentTime = gazebo::msgs::Convert( msg->sim_time() );
-  rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros
   pub_clock_.publish(ros_time_);
@@ -1784,10 +1786,15 @@ void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::Wo
 void GazeboRosApiPlugin::publishSimTime()
 {
   gazebo::common::Time currentTime = world_->GetSimTime();
-  rosgraph_msgs::Clock ros_time_;
-  ros_time_.clock.fromSec(currentTime.Double());
-  //  publish time to ros
-  pub_clock_.publish(ros_time_);
+
+  double time_since_last_msg = (currentTime - gazebo::common::Time(ros_time_.clock.sec, ros_time_.clock.nsec)).Double();
+  if(time_since_last_msg >= 1.0/ros_time_publish_rate_) {
+    ros_time_.clock.sec = currentTime.sec;
+    ros_time_.clock.nsec = currentTime.nsec;
+
+    //  publish time to ros
+    pub_clock_.publish(ros_time_);
+  }
 }
 
 void GazeboRosApiPlugin::publishLinkStates()
