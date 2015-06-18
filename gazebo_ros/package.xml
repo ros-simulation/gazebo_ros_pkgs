@@ -37,8 +37,8 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>tinyxml</build_depend>
 
-  <run_depend>gazebo5</run_depend>
   <run_depend>gazebo_msgs</run_depend>
+  <run_depend>libgazebo5-dev</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>tf</run_depend>
