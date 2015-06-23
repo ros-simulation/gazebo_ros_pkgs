@@ -2,7 +2,90 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.8 (2015-03-17)
+------------------
+* Merge pull request `#244 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/244>`_ from cottsay/control-urdf-fix
+  gazebo_ros_control: add urdf to downstream catkin deps
+* Added emergency stop support.
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Jim Rothrock, Scott K Logan
+
+2.4.7 (2014-12-15)
+------------------
+* move declaration for DefaultRobotHWSim to header file
+* Contributors: ipa-fxm
+
+2.4.6 (2014-09-01)
+------------------
+* Update default_robot_hw_sim.cpp
+* Reduced changes
+* Fix to work with gazebo3
+* Fix build with gazebo4 and indigo
+* Update package.xml
+  Add new maintainer.
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Jose Luis Rivero, Nate Koenig, hsu
+
+2.4.5 (2014-08-18)
+------------------
+* Fix typo: GAZEBO_VERSION_MAJOR -> GAZEBO_MAJOR_VERSION
+* Port fix_build branch for indigo-devel
+  See pull request `#221 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/221>`_
+* Contributors: Jose Luis Rivero, Steven Peters
+
+2.4.4 (2014-07-18)
+------------------
+* Update package.xml
+  Add new maintainer.
+* Should fix build error for binary releases.
+  See: http://www.ros.org/debbuild/indigo.html?q=gazebo_ros_control
+* Updated package.xml
+* gazebo_ros_control: default_robot_hw_sim:  Suppressing pid error message
+  Depends on `ros-controls/control_toolbox#21 <https://github.com/ros-controls/control_toolbox/issues/21>`_
+* Revert 4776545, as it belongs in indigo-devel.
+* Fix repo names in package.xml's
+* gazebo_ros_control: default_robot_hw_sim: Suppressing pid error message, depends on `ros-controls/control_toolbox#21 <https://github.com/ros-controls/control_toolbox/issues/21>`_
+* gazebo_ros_control: Add dependency on angles
+* gazebo_ros_control: Add build-time dependency on gazebo
+  This fixes a regression caused by a889ef8b768861231a67b78781514d834f631b8e
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Alexander Bubeck, Dave Coleman, Jon Binney, Jonathan Bohren, Scott K Logan
+
+2.4.3 (2014-05-12)
+------------------
+* Compatibility with Indigo's ros_control.
+  Also fixes `#184 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/184>`_.
+* Remove build-time dependency on gazebo_ros.
+* Fix broken build due to wrong rosconsole macro use
+* Contributors: Adolfo Rodriguez Tsouroukdissian
+
+2.4.2 (2014-03-27)
+------------------
+* merging from hydro-devel
+* bump patch version for indigo-devel to 2.4.1
+* merging from indigo-devel after 2.3.4 release
+* Merge branch 'hydro-devel' of github.com:ros-simulation/gazebo_ros_pkgs into indigo-devel
+* "2.4.0"
+* catkin_generate_changelog
+* Contributors: John Hsu
+
 2.4.1 (2013-11-13)
+------------------
+
+2.3.5 (2014-03-26)
+------------------
+* Removed some debugging code.
+* joint->SetAngle() and joint->SetVelocity() are now used to control
+  position-controlled joints and velocity-controlled joints that do not
+  have PID gain values stored on the Parameter Server.
+* Position-controlled and velocity-controlled joints now use PID controllers
+  instead of calling SetAngle() or SetVelocity(). readSim() now longer calls
+  angles::shortest_angular_distance() when a joint is prismatic.
+  PLUGINLIB_EXPORT_CLASS is now used to register the plugin.
+* gazebo_ros_control now depends on control_toolbox.
+* Added support for the position hardware interface. Completed support for the
+  velocity hardware interface.
+* Removed the "support more hardware interfaces" line.
+* Contributors: Jim Rothrock
+
+2.3.4 (2013-11-13)
 ------------------
 * rerelease because sdformat became libsdformat, but we also based change on 2.3.4 in hydro-devel.
 * Merge pull request `#144 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/144>`_ from meyerj/fix-125

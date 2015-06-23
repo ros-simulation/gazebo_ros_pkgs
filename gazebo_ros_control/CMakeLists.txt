@@ -4,13 +4,14 @@ project(gazebo_ros_control)
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  gazebo_ros
+  control_toolbox
   controller_manager
   hardware_interface 
   transmission_interface
   pluginlib
   joint_limits_interface
   urdf
+  angles
 )
 
 # Depend on system install of Gazebo 
@@ -19,11 +20,12 @@ find_package(gazebo REQUIRED)
 catkin_package(
   CATKIN_DEPENDS
     roscpp
-    gazebo_ros
     controller_manager
     pluginlib
     transmission_interface
+    urdf
   INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME} default_robot_hw_sim
   DEPENDS gazebo
 )
 
@@ -33,6 +35,7 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${GAZEBO_INCLUDE_DIRS}
 )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
 ## Libraries
 add_library(${PROJECT_NAME} src/gazebo_ros_control_plugin.cpp)

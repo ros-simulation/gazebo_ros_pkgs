@@ -10,5 +10,4 @@ controller manager and connects it to a Gazebo model.
 
 ## Future Direction
 
- - Implement tranmissions
- - In the default plugin support more hardware interfaces
+ - Implement transmissions

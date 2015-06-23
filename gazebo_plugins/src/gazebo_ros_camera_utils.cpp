@@ -22,11 +22,13 @@
 #include <boost/bind.hpp>
 
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/fill_image.h>
 #include <image_transport/image_transport.h>
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/ChannelFloat32.h>
+#include <camera_info_manager/camera_info_manager.h>
 
 #include <sdf/sdf.hh>
 
@@ -85,22 +87,22 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   const std::string &_camera_name_suffix,
   double _hack_baseline)
 {
-  // default Load
-  this->Load(_parent, _sdf);
+  // default Load:
+  // provide _camera_name_suffix to prevent LoadThread() creating the ros::NodeHandle with
+  //an incomplete this->camera_name_ namespace. There was a race condition when the _camera_name_suffix
+  //was appended in this function.
+  this->Load(_parent, _sdf, _camera_name_suffix);
 
   // overwrite hack baseline if specified at load
   // example usage in gazebo_ros_multicamera
   this->hack_baseline_ = _hack_baseline;
-
-  // overwrite camera suffix
-  // example usage in gazebo_ros_multicamera
-  this->camera_name_ += _camera_name_suffix;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
 void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
-  sdf::ElementPtr _sdf)
+  sdf::ElementPtr _sdf,
+  const std::string &_camera_name_suffix)
 {
   // Get the world name.
   std::string world_name = _parent->GetWorldName();
@@ -115,10 +117,9 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   // pr2_gazebo_plugins
   this->world = this->world_;
 
-  this->robot_namespace_ = "";
-  if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
-
+  std::stringstream ss;
+  this->robot_namespace_ =  GetRobotNamespace(_parent, _sdf, "Camera");
+  
   this->image_topic_name_ = "image_raw";
   if (this->sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = this->sdf->Get<std::string>("imageTopicName");
@@ -132,6 +133,10 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     ROS_DEBUG("Camera plugin missing <cameraName>, default to empty");
   else
     this->camera_name_ = this->sdf->Get<std::string>("cameraName");
+
+  // overwrite camera suffix
+  // example usage in gazebo_ros_multicamera
+  this->camera_name_ += _camera_name_suffix;
 
   if (!this->sdf->HasElement("frameName"))
     ROS_DEBUG("Camera plugin missing <frameName>, defaults to /world");
@@ -266,10 +271,11 @@ void GazeboRosCameraUtils::LoadThread()
   // associated ROS topics.
   this->parentSensor_->SetActive(false);
 
-  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_ +
-    "/" + this->camera_name_);
+  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_ + "/" + this->camera_name_);
 
-  this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
+  // initialize camera_info_manager
+  this->camera_info_manager_.reset(new camera_info_manager::CameraInfoManager(
+          *this->rosnode_, this->camera_name_));
 
   // resolve tf prefix
   std::string key;
@@ -279,6 +285,20 @@ void GazeboRosCameraUtils::LoadThread()
     this->frame_name_ = tf::resolve(prefix, this->frame_name_);
   }
 
+  this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
+  
+  // resolve tf prefix
+  this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
+  if(this->tf_prefix_.empty()) {
+      this->tf_prefix_ = this->robot_namespace_;
+      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
+  }
+  this->frame_name_ = tf::resolve(this->tf_prefix_, this->frame_name_);
+
+  ROS_INFO("Camera Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
+             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
+  
+  
   if (!this->camera_name_.empty())
   {
     dyn_srv_ =
@@ -473,6 +493,59 @@ void GazeboRosCameraUtils::Init()
     }
   }
 
+  // fill CameraInfo
+  sensor_msgs::CameraInfo camera_info_msg;
+
+  camera_info_msg.header.frame_id = this->frame_name_;
+
+  camera_info_msg.height = this->height_;
+  camera_info_msg.width  = this->width_;
+  // distortion
+#if ROS_VERSION_MINIMUM(1, 3, 0)
+  camera_info_msg.distortion_model = "plumb_bob";
+  camera_info_msg.D.resize(5);
+#endif
+  camera_info_msg.D[0] = this->distortion_k1_;
+  camera_info_msg.D[1] = this->distortion_k2_;
+  camera_info_msg.D[2] = this->distortion_k3_;
+  camera_info_msg.D[3] = this->distortion_t1_;
+  camera_info_msg.D[4] = this->distortion_t2_;
+  // original camera_ matrix
+  camera_info_msg.K[0] = this->focal_length_;
+  camera_info_msg.K[1] = 0.0;
+  camera_info_msg.K[2] = this->cx_;
+  camera_info_msg.K[3] = 0.0;
+  camera_info_msg.K[4] = this->focal_length_;
+  camera_info_msg.K[5] = this->cy_;
+  camera_info_msg.K[6] = 0.0;
+  camera_info_msg.K[7] = 0.0;
+  camera_info_msg.K[8] = 1.0;
+  // rectification
+  camera_info_msg.R[0] = 1.0;
+  camera_info_msg.R[1] = 0.0;
+  camera_info_msg.R[2] = 0.0;
+  camera_info_msg.R[3] = 0.0;
+  camera_info_msg.R[4] = 1.0;
+  camera_info_msg.R[5] = 0.0;
+  camera_info_msg.R[6] = 0.0;
+  camera_info_msg.R[7] = 0.0;
+  camera_info_msg.R[8] = 1.0;
+  // camera_ projection matrix (same as camera_ matrix due
+  // to lack of distortion/rectification) (is this generated?)
+  camera_info_msg.P[0] = this->focal_length_;
+  camera_info_msg.P[1] = 0.0;
+  camera_info_msg.P[2] = this->cx_;
+  camera_info_msg.P[3] = -this->focal_length_ * this->hack_baseline_;
+  camera_info_msg.P[4] = 0.0;
+  camera_info_msg.P[5] = this->focal_length_;
+  camera_info_msg.P[6] = this->cy_;
+  camera_info_msg.P[7] = 0.0;
+  camera_info_msg.P[8] = 0.0;
+  camera_info_msg.P[9] = 0.0;
+  camera_info_msg.P[10] = 1.0;
+  camera_info_msg.P[11] = 0.0;
+
+  this->camera_info_manager_->setCameraInfo(camera_info_msg);
 
   // start custom queue for camera_
   this->callback_queue_thread_ = boost::thread(
@@ -546,58 +619,10 @@ void GazeboRosCameraUtils::PublishCameraInfo()
 void GazeboRosCameraUtils::PublishCameraInfo(
   ros::Publisher camera_info_publisher)
 {
-  sensor_msgs::CameraInfo camera_info_msg;
-  // fill CameraInfo
-  camera_info_msg.header.frame_id = this->frame_name_;
+  sensor_msgs::CameraInfo camera_info_msg = camera_info_manager_->getCameraInfo();
 
   camera_info_msg.header.stamp.sec = this->sensor_update_time_.sec;
   camera_info_msg.header.stamp.nsec = this->sensor_update_time_.nsec;
-  camera_info_msg.height = this->height_;
-  camera_info_msg.width  = this->width_;
-  // distortion
-#if ROS_VERSION_MINIMUM(1, 3, 0)
-  camera_info_msg.distortion_model = "plumb_bob";
-  camera_info_msg.D.resize(5);
-#endif
-  camera_info_msg.D[0] = this->distortion_k1_;
-  camera_info_msg.D[1] = this->distortion_k2_;
-  camera_info_msg.D[2] = this->distortion_k3_;
-  camera_info_msg.D[3] = this->distortion_t1_;
-  camera_info_msg.D[4] = this->distortion_t2_;
-  // original camera_ matrix
-  camera_info_msg.K[0] = this->focal_length_;
-  camera_info_msg.K[1] = 0.0;
-  camera_info_msg.K[2] = this->cx_;
-  camera_info_msg.K[3] = 0.0;
-  camera_info_msg.K[4] = this->focal_length_;
-  camera_info_msg.K[5] = this->cy_;
-  camera_info_msg.K[6] = 0.0;
-  camera_info_msg.K[7] = 0.0;
-  camera_info_msg.K[8] = 1.0;
-  // rectification
-  camera_info_msg.R[0] = 1.0;
-  camera_info_msg.R[1] = 0.0;
-  camera_info_msg.R[2] = 0.0;
-  camera_info_msg.R[3] = 0.0;
-  camera_info_msg.R[4] = 1.0;
-  camera_info_msg.R[5] = 0.0;
-  camera_info_msg.R[6] = 0.0;
-  camera_info_msg.R[7] = 0.0;
-  camera_info_msg.R[8] = 1.0;
-  // camera_ projection matrix (same as camera_ matrix due
-  // to lack of distortion/rectification) (is this generated?)
-  camera_info_msg.P[0] = this->focal_length_;
-  camera_info_msg.P[1] = 0.0;
-  camera_info_msg.P[2] = this->cx_;
-  camera_info_msg.P[3] = -this->focal_length_ * this->hack_baseline_;
-  camera_info_msg.P[4] = 0.0;
-  camera_info_msg.P[5] = this->focal_length_;
-  camera_info_msg.P[6] = this->cy_;
-  camera_info_msg.P[7] = 0.0;
-  camera_info_msg.P[8] = 0.0;
-  camera_info_msg.P[9] = 0.0;
-  camera_info_msg.P[10] = 1.0;
-  camera_info_msg.P[11] = 0.0;
 
   camera_info_publisher.publish(camera_info_msg);
 }

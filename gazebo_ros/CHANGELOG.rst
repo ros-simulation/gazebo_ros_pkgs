@@ -2,7 +2,89 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.8 (2015-03-17)
+------------------
+* Specify physics engine in args to empty_world.launch
+* Contributors: Steven Peters
+
+2.4.7 (2014-12-15)
+------------------
+* temporary hack to **fix** the -J joint position option (issue `#93 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/93>`_), sleeping for 1 second to avoid race condition. this branch should only be used for debugging, merge only as a last resort.
+* Fixing set model state method and test
+* Extended the fix for `#246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/246>`_ also to debug, gazebo, gzclient and perf scripts.
+* Update Gazebo/ROS tutorial URL
+* [gazebo_ros] Fix for `#246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/246>`_
+  Fixing issue `#246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/246>`_ in gzserver.
+* Fixing handling of non-world frame velocities in setModelState.
+* update headers to apache 2.0 license
+* update headers to apache 2.0 license
+* Contributors: John Hsu, Jose Luis Rivero, Martin Pecka, Tom Moore, ayrton04
+
+2.4.6 (2014-09-01)
+------------------
+* Merge pull request `#232 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/232>`_ from ros-simulation/fix_get_physics_properties_non_ode
+  Fix get physics properties non ode
+* Merge pull request `#183 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/183>`_ from ros-simulation/issue_182
+  Fix STL iterator errors, misc. cppcheck (`#182 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/182>`_)
+* check physics engine type before calling set_physics_properties and get_physics_properteis
+* check physics engine type before calling set_physics_properties and get_physics_properteis
+* Fixes for calling GetParam() with different physic engines.
+* 2.3.6
+* Update changelogs for the upcoming release
+* Fixed boost any cast
+* Removed a few warnings
+* Update for hydro + gazebo 1.9
+* Fix build with gazebo4 and indigo
+* Fix STL iterator errors, misc. cppcheck (`#182 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/182>`_)
+  There were some errors in STL iterators.
+  Initialized values of member variables in constructor.
+  Removed an unused variable (model_name).
+* Contributors: Carlos Agüero, John Hsu, Jose Luis Rivero, Nate Koenig, Steven Peters, hsu, osrf
+
+2.4.5 (2014-08-18)
+------------------
+* Port fix_build branch for indigo-devel
+  See pull request `#221 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/221>`_
+* Contributors: Jose Luis Rivero
+
+2.4.4 (2014-07-18)
+------------------
+* Fix repo names in package.xml's
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_
+  Operator ``==`` is not recognized by sh scripts.
+* Add verbose parameter
+  Add verbose parameter for --verbose gazebo flag
+* added osx support for gazebo start scripts
+* Contributors: Arn-O, Jon Binney, Markus Achtelik, Vincenzo Comito
+
+2.4.3 (2014-05-12)
+------------------
+* added osx support for gazebo start scripts
+* Remove gazebo_ros dependency on gazebo_plugins
+* Contributors: Markus Achtelik, Steven Peters
+
+2.4.2 (2014-03-27)
+------------------
+* merging from hydro-devel
+* bump patch version for indigo-devel to 2.4.1
+* merging from indigo-devel after 2.3.4 release
+* "2.4.0"
+* catkin_generate_changelog
+* Contributors: John Hsu
+
 2.4.1 (2013-11-13)
+------------------
+
+2.3.5 (2014-03-26)
+------------------
+* gazebo_ros: [less-than-minor] fix newlines
+* gazebo_ros: remove assignment to self
+  If this is needed for any twisted reason, it should be made clear
+  anyway. Assuming this line is harmless and removing it because it
+  generates cppcheck warnings.
+* Contributors: Paul Mathieu
+
+2.3.4 (2013-11-13)
 ------------------
 * rerelease because sdformat became libsdformat, but we also based change on 2.3.4 in hydro-devel.
 * remove debug statement

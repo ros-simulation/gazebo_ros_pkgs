@@ -34,6 +34,7 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <std_msgs/Float64.h>
 #include <image_transport/image_transport.h>
+#include <camera_info_manager/camera_info_manager.h>
 
 // dynamic reconfigure stuff
 #include <gazebo_plugins/GazeboRosCameraConfig.h>
@@ -46,6 +47,7 @@
 #include <gazebo/common/Time.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/plugins/CameraPlugin.hh>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 namespace gazebo
 {
@@ -62,7 +64,10 @@ namespace gazebo
     /// \brief Load the plugin.
     /// \param[in] _parent Take in SDF root element.
     /// \param[in] _sdf SDF values.
-    public: void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
+    /// \param[in] _camera_name_suffix required before calling LoadThread
+    public: void Load(sensors::SensorPtr _parent,
+                      sdf::ElementPtr _sdf,
+                      const std::string &_camera_name_suffix = "");
 
     /// \brief Load the plugin.
     /// \param[in] _parent Take in SDF root element.
@@ -113,6 +118,9 @@ namespace gazebo
     /// \brief ROS camera name
     private: std::string camera_name_;
 
+    /// \brief tf prefix
+    private: std::string tf_prefix_;
+    
     /// \brief ROS image topic name
     protected: std::string image_topic_name_;
 
@@ -146,6 +154,9 @@ namespace gazebo
     protected: double distortion_k3_;
     protected: double distortion_t1_;
     protected: double distortion_t2_;
+
+    protected: boost::shared_ptr<camera_info_manager::CameraInfoManager> camera_info_manager_;
+
 
     /// \brief A mutex to lock access to fields
     /// that are used in ROS message callbacks

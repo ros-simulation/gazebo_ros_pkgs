@@ -31,7 +31,7 @@
 #include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
-#include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
 
 #include <tf/tf.h>
 
@@ -246,24 +246,29 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
       this->point_cloud_msg_.height = this->height;
       this->point_cloud_msg_.row_step = this->point_cloud_msg_.point_step * this->width;
 
-      pcl::PointCloud<pcl::PointXYZRGB> point_cloud;
-      point_cloud.points.resize(0);
-      point_cloud.is_dense = true;
+      sensor_msgs::PointCloud2Modifier pcd_modifier(point_cloud_msg_);
+      pcd_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+      pcd_modifier.resize(_width*_height);
+
+      point_cloud_msg_.is_dense = true;
+
+      sensor_msgs::PointCloud2Iterator<float> iter_x(point_cloud_msg_, "x");
+      sensor_msgs::PointCloud2Iterator<float> iter_y(point_cloud_msg_, "y");
+      sensor_msgs::PointCloud2Iterator<float> iter_z(point_cloud_msg_, "z");
+      sensor_msgs::PointCloud2Iterator<float> iter_rgb(point_cloud_msg_, "rgb");
 
       for (unsigned int i = 0; i < _width; i++)
       {
-        for (unsigned int j = 0; j < _height; j++)
+        for (unsigned int j = 0; j < _height; j++, ++iter_x, ++iter_y, ++iter_z, ++iter_rgb)
         {
           unsigned int index = (j * _width) + i;
-          pcl::PointXYZRGB point;
-          point.x = _pcd[4 * index];
-          point.y = _pcd[4 * index + 1];
-          point.z = _pcd[4 * index + 2];
-          point.rgb = _pcd[4 * index + 3];
-          point_cloud.points.push_back(point);
+          *iter_x = _pcd[4 * index];
+          *iter_y = _pcd[4 * index + 1];
+          *iter_z = _pcd[4 * index + 2];
+          *iter_rgb = _pcd[4 * index + 3];
           if (i == _width /2 && j == _height / 2)
           {
-            uint32_t rgb = *reinterpret_cast<int*>(&point.rgb);
+            uint32_t rgb = *reinterpret_cast<int*>(&(*iter_rgb));
             uint8_t r = (rgb >> 16) & 0x0000ff;
             uint8_t g = (rgb >> 8)  & 0x0000ff;
             uint8_t b = (rgb)       & 0x0000ff;
@@ -271,10 +276,6 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
           }
         }
       }
-
-      point_cloud.header = pcl_conversions::toPCL(point_cloud_msg_.header);
-
-      pcl::toROSMsg(point_cloud, this->point_cloud_msg_);
 
       this->point_cloud_pub_.publish(this->point_cloud_msg_);
       this->lock_.unlock();
@@ -361,10 +362,16 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
     uint32_t rows_arg, uint32_t cols_arg,
     uint32_t step_arg, void* data_arg)
 {
-  pcl::PointCloud<pcl::PointXYZRGB> point_cloud;
+  sensor_msgs::PointCloud2Modifier pcd_modifier(point_cloud_msg);
+  pcd_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+  pcd_modifier.resize(rows_arg*cols_arg);
 
-  point_cloud.points.resize(0);
-  point_cloud.is_dense = true;
+  sensor_msgs::PointCloud2Iterator<float> iter_x(point_cloud_msg_, "x");
+  sensor_msgs::PointCloud2Iterator<float> iter_y(point_cloud_msg_, "y");
+  sensor_msgs::PointCloud2Iterator<float> iter_z(point_cloud_msg_, "z");
+  sensor_msgs::PointCloud2Iterator<uint8_t> iter_rgb(point_cloud_msg_, "rgb");
+
+  point_cloud_msg.is_dense = true;
 
   float* toCopyFrom = (float*)data_arg;
   int index = 0;
@@ -379,7 +386,7 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
     if (rows_arg>1) pAngle = atan2( (double)j - 0.5*(double)(rows_arg-1), fl);
     else            pAngle = 0.0;
 
-    for (uint32_t i=0; i<cols_arg; i++)
+    for (uint32_t i=0; i<cols_arg; i++, ++iter_x, ++iter_y, ++iter_z, ++iter_rgb)
     {
       double yAngle;
       if (cols_arg>1) yAngle = atan2( (double)i - 0.5*(double)(cols_arg-1), fl);
@@ -391,17 +398,16 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
       // hardcoded rotation rpy(-M_PI/2, 0, -M_PI/2) is built-in
       // to urdf, where the *_optical_frame should have above relative
       // rotation from the physical camera *_frame
-      pcl::PointXYZRGB point;
-      point.x      = depth * tan(yAngle);
-      point.y      = depth * tan(pAngle);
+      *iter_x      = depth * tan(yAngle);
+      *iter_y      = depth * tan(pAngle);
       if(depth > this->point_cloud_cutoff_)
       {
-        point.z    = depth;
+        *iter_z    = depth;
       }
       else //point in the unseeable range
       {
-        point.x = point.y = point.z = std::numeric_limits<float>::quiet_NaN ();
-        point_cloud.is_dense = false;
+        *iter_x = *iter_y = *iter_z = std::numeric_limits<float>::quiet_NaN ();
+        point_cloud_msg.is_dense = false;
       }
 
       // put image color data for each point
@@ -409,32 +415,27 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
       if (this->image_msg_.data.size() == rows_arg*cols_arg*3)
       {
         // color
-        point.r = image_src[i*3+j*cols_arg*3+0];
-        point.g = image_src[i*3+j*cols_arg*3+1];
-        point.b = image_src[i*3+j*cols_arg*3+2];
+        iter_rgb[0] = image_src[i*3+j*cols_arg*3+0];
+        iter_rgb[1] = image_src[i*3+j*cols_arg*3+1];
+        iter_rgb[2] = image_src[i*3+j*cols_arg*3+2];
       }
       else if (this->image_msg_.data.size() == rows_arg*cols_arg)
       {
         // mono (or bayer?  @todo; fix for bayer)
-        point.r = image_src[i+j*cols_arg];
-        point.g = image_src[i+j*cols_arg];
-        point.b = image_src[i+j*cols_arg];
+        iter_rgb[0] = image_src[i+j*cols_arg];
+        iter_rgb[1] = image_src[i+j*cols_arg];
+        iter_rgb[2] = image_src[i+j*cols_arg];
       }
       else
       {
         // no image
-        point.r = 0;
-        point.g = 0;
-        point.b = 0;
+        iter_rgb[0] = 0;
+        iter_rgb[1] = 0;
+        iter_rgb[2] = 0;
       }
-
-      point_cloud.points.push_back(point);
     }
   }
 
-  point_cloud.header = pcl_conversions::toPCL(point_cloud_msg.header);
-
-  pcl::toROSMsg(point_cloud, point_cloud_msg);
   return true;
 }
 

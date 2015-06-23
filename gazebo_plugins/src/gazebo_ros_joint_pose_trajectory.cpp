@@ -340,8 +340,14 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
           {
             // this is not the most efficient way to set things
             if (this->joints_[i])
+            {
+#if GAZEBO_MAJOR_VERSION >= 4
+              this->joints_[i]->SetPosition(0,
+#else
               this->joints_[i]->SetAngle(0,
+#endif
                 this->points_[this->trajectory_index].positions[i]);
+            }
           }
 
           // set model pose

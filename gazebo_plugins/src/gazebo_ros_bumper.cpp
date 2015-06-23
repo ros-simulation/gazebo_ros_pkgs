@@ -121,6 +121,9 @@ void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // simulation iteration.
   this->update_connection_ = this->parentSensor->ConnectUpdated(
      boost::bind(&GazeboRosBumper::OnContact, this));
+
+  // Make sure the parent sensor is active.
+  this->parentSensor->SetActive(true);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

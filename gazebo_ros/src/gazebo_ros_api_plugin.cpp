@@ -21,6 +21,7 @@
  */
 
 #include <gazebo/common/Events.hh>
+#include <gazebo/gazebo_config.h>
 #include "gazebo_ros_api_plugin.h"
 
 namespace gazebo
@@ -30,7 +31,9 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   physics_reconfigure_initialized_(false),
   world_created_(false),
   stop_(false),
-  plugin_loaded_(false)
+  plugin_loaded_(false),
+  pub_link_states_connection_count_(0),
+  pub_model_states_connection_count_(0)
 {
   robot_namespace_.clear();
 }
@@ -81,11 +84,17 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   // Delete Force and Wrench Jobs
   lock_.lock();
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
+  {
     delete (*iter);
+    iter = force_joint_jobs_.erase(iter);
+  }
   force_joint_jobs_.clear();
   ROS_DEBUG_STREAM_NAMED("api_plugin","ForceJointJobs deleted");
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
+  {
     delete (*iter);
+    iter = wrench_body_jobs_.erase(iter);
+  }
   wrench_body_jobs_.clear();
   lock_.unlock();
   ROS_DEBUG_STREAM_NAMED("api_plugin","WrenchBodyJobs deleted");
@@ -113,9 +122,9 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
     ROS_ERROR("Something other than this gazebo_ros_api plugin started ros::init(...), command line arguments may not be parsed properly.");
 
   // check if the ros master is available - required
-  while(!ros::master::check()) 
+  while(!ros::master::check())
   {
-    ROS_WARN_STREAM_NAMED("api_plugin","No ROS master - start roscore to continue...");    
+    ROS_WARN_STREAM_NAMED("api_plugin","No ROS master - start roscore to continue...");
     // wait 0.5 second
     usleep(500*1000); // can't use ROS Time here b/c node handle is not yet initialized
 
@@ -518,9 +527,6 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
   // get name space for the corresponding model plugins
   robot_namespace_ = req.robot_namespace;
 
-  // incoming robot name
-  std::string model_name = req.model_name;
-
   // incoming robot model string
   std::string model_xml = req.model_xml;
 
@@ -643,20 +649,20 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   if (isSDF(model_xml))
   {
     updateSDFAttributes(gazebo_model_xml, model_name, initial_xyz, initial_q);
-    
+
     // Walk recursively through the entire SDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!this->robot_namespace_.empty()) 
+    if (!this->robot_namespace_.empty())
     {
       // Get root element for SDF
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("sdf");
-      model_tixml = (!model_tixml) ? 
+      model_tixml = (!model_tixml) ?
           gazebo_model_xml.FirstChild("gazebo") : model_tixml;
-      if (model_tixml) 
+      if (model_tixml)
       {
         walkChildAddRobotNamespace(model_tixml);
-      } 
-      else 
+      }
+      else
       {
         ROS_WARN("Unable to add robot namespace to xml");
       }
@@ -666,18 +672,18 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   {
     updateURDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
     updateURDFName(gazebo_model_xml, model_name);
-    
+
     // Walk recursively through the entire URDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!this->robot_namespace_.empty()) 
+    if (!this->robot_namespace_.empty())
     {
       // Get root element for URDF
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("robot");
-      if (model_tixml) 
+      if (model_tixml)
       {
         walkChildAddRobotNamespace(model_tixml);
-      } 
-      else 
+      }
+      else
       {
         ROS_WARN("Unable to add robot namespace to xml");
       }
@@ -1081,27 +1087,50 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   world_->SetPaused(true);
 
   // supported updates
-  gazebo::physics::PhysicsEnginePtr ode_pe = (world_->GetPhysicsEngine());
-  ode_pe->SetMaxStepSize(req.time_step);
-  ode_pe->SetRealTimeUpdateRate(req.max_update_rate);
-  ode_pe->SetGravity(gazebo::math::Vector3(req.gravity.x,req.gravity.y,req.gravity.z));
+  gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
+  pe->SetMaxStepSize(req.time_step);
+  pe->SetRealTimeUpdateRate(req.max_update_rate);
+  pe->SetGravity(gazebo::math::Vector3(req.gravity.x,req.gravity.y,req.gravity.z));
 
-  // stuff only works in ODE right now
-  ode_pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
-  ode_pe->SetSORPGSPreconIters(req.ode_config.sor_pgs_precon_iters);
-  ode_pe->SetSORPGSIters(req.ode_config.sor_pgs_iters);
-  ode_pe->SetSORPGSW(req.ode_config.sor_pgs_w);
-  ode_pe->SetWorldCFM(req.ode_config.cfm);
-  ode_pe->SetWorldERP(req.ode_config.erp);
-  ode_pe->SetContactSurfaceLayer(req.ode_config.contact_surface_layer);
-  ode_pe->SetContactMaxCorrectingVel(req.ode_config.contact_max_correcting_vel);
-  ode_pe->SetMaxContacts(req.ode_config.max_contacts);
+  if (world_->GetPhysicsEngine()->GetType() == "ode")
+  {
+    // stuff only works in ODE right now
+    pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
+#if GAZEBO_MAJOR_VERSION >= 3
+    pe->SetParam("precon_iters", req.ode_config.sor_pgs_precon_iters);
+    pe->SetParam("iters", req.ode_config.sor_pgs_iters);
+    pe->SetParam("sor", req.ode_config.sor_pgs_w);
+    pe->SetParam("cfm", req.ode_config.cfm);
+    pe->SetParam("erp", req.ode_config.erp);
+    pe->SetParam("contact_surface_layer",
+        req.ode_config.contact_surface_layer);
+    pe->SetParam("contact_max_correcting_vel",
+        req.ode_config.contact_max_correcting_vel);
+    pe->SetParam("max_contacts", req.ode_config.max_contacts);
+#else
+    pe->SetSORPGSPreconIters(req.ode_config.sor_pgs_precon_iters);
+    pe->SetSORPGSIters(req.ode_config.sor_pgs_iters);
+    pe->SetSORPGSW(req.ode_config.sor_pgs_w);
+    pe->SetWorldCFM(req.ode_config.cfm);
+    pe->SetWorldERP(req.ode_config.erp);
+    pe->SetContactSurfaceLayer(req.ode_config.contact_surface_layer);
+    pe->SetContactMaxCorrectingVel(req.ode_config.contact_max_correcting_vel);
+    pe->SetMaxContacts(req.ode_config.max_contacts);
+#endif
 
-  world_->SetPaused(is_paused);
+    world_->SetPaused(is_paused);
 
-  res.success = true;
-  res.status_message = "physics engine updated";
-  return true;
+    res.success = true;
+    res.status_message = "physics engine updated";
+  }
+  else
+  {
+    /// \TODO: add support for simbody, dart and bullet physics properties.
+    ROS_ERROR("ROS set_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    res.success = false;
+    res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: set_physics_properties not supported.";
+  }
+  return res.success;
 }
 
 bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,
@@ -1117,19 +1146,49 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   res.gravity.z = gravity.z;
 
   // stuff only works in ODE right now
-  res.ode_config.auto_disable_bodies = world_->GetPhysicsEngine()->GetAutoDisableFlag();
-  res.ode_config.sor_pgs_precon_iters = world_->GetPhysicsEngine()->GetSORPGSPreconIters();
-  res.ode_config.sor_pgs_iters = world_->GetPhysicsEngine()->GetSORPGSIters();
-  res.ode_config.sor_pgs_w = world_->GetPhysicsEngine()->GetSORPGSW();
-  res.ode_config.contact_surface_layer = world_->GetPhysicsEngine()->GetContactSurfaceLayer();
-  res.ode_config.contact_max_correcting_vel = world_->GetPhysicsEngine()->GetContactMaxCorrectingVel();
-  res.ode_config.cfm = world_->GetPhysicsEngine()->GetWorldCFM();
-  res.ode_config.erp = world_->GetPhysicsEngine()->GetWorldERP();
-  res.ode_config.max_contacts = world_->GetPhysicsEngine()->GetMaxContacts();
+  if (world_->GetPhysicsEngine()->GetType() == "ode")
+  {
+    res.ode_config.auto_disable_bodies =
+      world_->GetPhysicsEngine()->GetAutoDisableFlag();
+#if GAZEBO_MAJOR_VERSION >= 3
+    res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
+      world_->GetPhysicsEngine()->GetParam("precon_iters"));
+    res.ode_config.sor_pgs_iters = boost::any_cast<int>(
+        world_->GetPhysicsEngine()->GetParam("iters"));
+    res.ode_config.sor_pgs_w = boost::any_cast<double>(
+        world_->GetPhysicsEngine()->GetParam("sor"));
+    res.ode_config.contact_surface_layer = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("contact_surface_layer"));
+    res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
+      world_->GetPhysicsEngine()->GetParam("contact_max_correcting_vel"));
+    res.ode_config.cfm = boost::any_cast<double>(
+        world_->GetPhysicsEngine()->GetParam("cfm"));
+    res.ode_config.erp = boost::any_cast<double>(
+        world_->GetPhysicsEngine()->GetParam("erp"));
+    res.ode_config.max_contacts = boost::any_cast<int>(
+      world_->GetPhysicsEngine()->GetParam("max_contacts"));
+#else
+    res.ode_config.sor_pgs_precon_iters = world_->GetPhysicsEngine()->GetSORPGSPreconIters();
+    res.ode_config.sor_pgs_iters = world_->GetPhysicsEngine()->GetSORPGSIters();
+    res.ode_config.sor_pgs_w = world_->GetPhysicsEngine()->GetSORPGSW();
+    res.ode_config.contact_surface_layer = world_->GetPhysicsEngine()->GetContactSurfaceLayer();
+    res.ode_config.contact_max_correcting_vel = world_->GetPhysicsEngine()->GetContactMaxCorrectingVel();
+    res.ode_config.cfm = world_->GetPhysicsEngine()->GetWorldCFM();
+    res.ode_config.erp = world_->GetPhysicsEngine()->GetWorldERP();
+    res.ode_config.max_contacts = world_->GetPhysicsEngine()->GetMaxContacts();
+#endif
 
-  res.success = true;
-  res.status_message = "GetPhysicsProperties: got properties";
-  return true;
+    res.success = true;
+    res.status_message = "GetPhysicsProperties: got properties";
+  }
+  else
+  {
+    /// \TODO: add support for simbody, dart and bullet physics properties.
+    ROS_ERROR("ROS get_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    res.success = false;
+    res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: get_physics_properties not supported.";
+  }
+  return res.success;
 }
 
 bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Request &req,
@@ -1153,6 +1212,26 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
   {
     for(unsigned int i=0;i< req.ode_joint_config.damping.size();i++)
       joint->SetDamping(i,req.ode_joint_config.damping[i]);
+#if GAZEBO_MAJOR_VERSION >= 4
+    for(unsigned int i=0;i< req.ode_joint_config.hiStop.size();i++)
+      joint->SetParam("hi_stop",i,req.ode_joint_config.hiStop[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.loStop.size();i++)
+      joint->SetParam("lo_stop",i,req.ode_joint_config.loStop[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.erp.size();i++)
+      joint->SetParam("erp",i,req.ode_joint_config.erp[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.cfm.size();i++)
+      joint->SetParam("cfm",i,req.ode_joint_config.cfm[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.stop_erp.size();i++)
+      joint->SetParam("stop_erp",i,req.ode_joint_config.stop_erp[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.stop_cfm.size();i++)
+      joint->SetParam("stop_cfm",i,req.ode_joint_config.stop_cfm[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.fudge_factor.size();i++)
+      joint->SetParam("fudge_factor",i,req.ode_joint_config.fudge_factor[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.fmax.size();i++)
+      joint->SetParam("fmax",i,req.ode_joint_config.fmax[i]);
+    for(unsigned int i=0;i< req.ode_joint_config.vel.size();i++)
+      joint->SetParam("vel",i,req.ode_joint_config.vel[i]);
+#else
     for(unsigned int i=0;i< req.ode_joint_config.hiStop.size();i++)
       joint->SetAttribute("hi_stop",i,req.ode_joint_config.hiStop[i]);
     for(unsigned int i=0;i< req.ode_joint_config.loStop.size();i++)
@@ -1171,6 +1250,7 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
       joint->SetAttribute("fmax",i,req.ode_joint_config.fmax[i]);
     for(unsigned int i=0;i< req.ode_joint_config.vel.size();i++)
       joint->SetAttribute("vel",i,req.ode_joint_config.vel[i]);
+#endif
 
     res.success = true;
     res.status_message = "SetJointProperties: properties set";
@@ -1207,8 +1287,13 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
 
       //std::cout << " debug : " << relative_entity->GetName() << " : " << frame_pose << " : " << target_pose << std::endl;
       //target_pose = frame_pose + target_pose; // seems buggy, use my own
-      target_pose.pos = frame_pos + frame_rot.RotateVector(target_pos);
+      target_pose.pos = model->GetWorldPose().pos + frame_rot.RotateVector(target_pos);
       target_pose.rot = frame_rot * target_pose.rot;
+
+      // Velocities should be commanded in the requested reference
+      // frame, so we need to translate them to the world frame
+      target_pos_dot = frame_rot.RotateVector(target_pos_dot);
+      target_rot_dot = frame_rot.RotateVector(target_rot_dot);
     }
     /// @todo: FIXME map is really wrong, need to use tf here somehow
     else if (req.model_state.reference_frame == "" || req.model_state.reference_frame == "world" || req.model_state.reference_frame == "map" || req.model_state.reference_frame == "/map" )
@@ -1491,7 +1576,6 @@ void GazeboRosApiPlugin::transformWrench( gazebo::math::Vector3 &target_force, g
   target_torque = target_to_reference.rot.RotateVector(reference_torque);
 
   // target force is the refence force rotated by the target->reference transform
-  target_force = target_force;
   target_torque = target_torque + target_to_reference.pos.Cross(target_force);
 }
 
@@ -1658,7 +1742,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
       iter = wrench_body_jobs_.erase(iter);
     }
     else
-      iter++;
+      ++iter;
   }
   lock_.unlock();
 }
@@ -1688,7 +1772,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
       iter = force_joint_jobs_.erase(iter);
     }
     else
-      iter++;
+      ++iter;
   }
   lock_.unlock();
 }
@@ -1869,7 +1953,7 @@ void GazeboRosApiPlugin::physicsReconfigureThread()
   physics_reconfigure_set_client_ = nh_->serviceClient<gazebo_msgs::SetPhysicsProperties>("/gazebo/set_physics_properties");
   physics_reconfigure_get_client_ = nh_->serviceClient<gazebo_msgs::GetPhysicsProperties>("/gazebo/get_physics_properties");
 
-  // Wait until the rest of this plugin is loaded and the services are being offered 
+  // Wait until the rest of this plugin is loaded and the services are being offered
   physics_reconfigure_set_client_.waitForExistence();
   physics_reconfigure_get_client_.waitForExistence();
 
@@ -1898,7 +1982,7 @@ void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
 void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
                                              gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
 {
-  // This function can handle both regular SDF files and <include> SDFs that are used with the 
+  // This function can handle both regular SDF files and <include> SDFs that are used with the
   // Gazebo Model Database
 
   TiXmlElement* pose_element; // This is used by both reguar and database SDFs
@@ -1929,30 +2013,30 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     // Check SDF for world element
     TiXmlElement* world_tixml = gazebo_tixml->FirstChildElement("world");
     if (!world_tixml)
-    {      
+    {
       ROS_WARN("Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
       return;
     }
     // If not <model> element, check SDF for required include element
-    model_tixml = world_tixml->FirstChildElement("include");    
+    model_tixml = world_tixml->FirstChildElement("include");
     if (!model_tixml)
-    {      
+    {
       ROS_WARN("Could not find <include> element in sdf, so name and initial position cannot be applied");
       return;
     }
 
     // Check for name element
-    TiXmlElement* name_tixml = model_tixml->FirstChildElement("name");    
+    TiXmlElement* name_tixml = model_tixml->FirstChildElement("name");
     if (!name_tixml)
-    {      
+    {
       // Create the name element
       name_tixml = new TiXmlElement("name");
       model_tixml->LinkEndChild(name_tixml);
-    }      
+    }
 
     // Set the text within the name element
     TiXmlText* text = new TiXmlText(model_name);
-    name_tixml->LinkEndChild( text );    
+    name_tixml->LinkEndChild( text );
   }
 
 
@@ -1981,7 +2065,7 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
                 << model_rpy.x << " " << model_rpy.y << " " << model_rpy.z;
 
     // Add value to pose element
-    TiXmlText* text = new TiXmlText(pose_stream.str());      
+    TiXmlText* text = new TiXmlText(pose_stream.str());
     TiXmlElement* new_pose_element = new TiXmlElement("pose");
     new_pose_element->LinkEndChild(text);
     model_tixml->LinkEndChild(new_pose_element);
@@ -2144,7 +2228,7 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
   }
 }
 
-bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
                                          gazebo_msgs::SpawnModel::Response &res)
 {
   // push to factory iface
@@ -2157,7 +2241,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   gazebo::msgs::Factory msg;
   gazebo::msgs::Init(msg, "spawn_model");
   msg.set_sdf( gazebo_model_xml_string );
-  
+
   //ROS_ERROR("attempting to spawn model name [%s] [%s]", model_name.c_str(),gazebo_model_xml_string.c_str());
 
   // FIXME: should use entity_info or add lock to World::receiveMutex
@@ -2197,11 +2281,11 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
 
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if (world_->GetModel(model_name)) 
+      if (world_->GetModel(model_name))
         break;
     }
 
-    ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now() 
+    ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now()
       << " for model " << model_name << " to spawn");
 
     usleep(2000);

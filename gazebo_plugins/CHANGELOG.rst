@@ -2,7 +2,132 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.8 (2015-03-17)
+------------------
+* fixed mistake at calculation of joint velocity
+* [gazebo_ros_diff_drive] force call SetMaxForce since this Joint::Reset in gazebo/physics/Joint.cc reset MaxForce to zero and ModelPlugin::Reset is called after Joint::Reset
+* add PointCloudCutoffMax
+* Contributors: Kei Okada, Michael Ferguson, Sabrina Heerklotz
+
+2.4.7 (2014-12-15)
+------------------
+* Merge pull request `#276 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/276>`_ from ros-simulation/gazebo_ogre_compile_flag_fix
+  fix missing ogre flags: removed from gazebo default (5.x.x candidate) cmake config
+* Merge pull request `#238 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/238>`_ from ayrton04/indigo-devel
+  Fixing handling of non-world frame velocities in setModelState.
+* fix missing ogre flags (removed from gazebo cmake config)
+* change header to use opencv2/opencv.hpp issue `#274 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/274>`_
+* Update Gazebo/ROS tutorial URL
+* Merge pull request `#237 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/237>`_ from ros-simulation/update_header_license
+  Update header license for Indigo
+* Contributors: John Hsu, Jose Luis Rivero, Robert Codd-Downey, Tom Moore, hsu
+
+2.4.6 (2014-09-01)
+------------------
+* Update gazebo_ros_openni_kinect.cpp
+* merging from hydro-devel into indigo-devel
+* Merge pull request `#204 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/204>`_ from fsuarez6/hydro-devel
+  gazebo_plugins: Adding ForceTorqueSensor Plugin
+* Updated to Apache 2.0 license
+* Merge pull request `#180 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/180>`_ from vrabaud/indigo-devel
+  remove PCL dependency
+* merging
+* check deprecation of gazebo::Joint::SetAngle by SetPosition
+* compatibility with gazebo 4.x
+* Update changelogs for the upcoming release
+* Fix build with gazebo4 and indigo
+* Added Gaussian Noise generator
+* publish organized pointcloud from openni plugin
+* Changed measurement direction to "parent to child"
+* gazebo_plugin: Added updateRate parameter to the gazebo_ros_imu plugin
+* gazebo_plugins: Adding ForceTorqueSensor Plugin
+* remove PCL dependency
+* ros_camera_utils: Adding CameraInfoManager to satisfy full ROS camera API (relies on https://github.com/ros-perception/image_common/pull/20 )
+  ros_camera_utils: Adding CameraInfoManager to satisfy full ROS camera API (relies on https://github.com/ros-perception/image_common/pull/20 )
+* Contributors: John Hsu, Jonathan Bohren, Jose Luis Rivero, Nate Koenig, Ryohei Ueda, Vincent Rabaud, fsuarez6, gborque, John Binney
+
+2.4.5 (2014-08-18)
+------------------
+* Replace SetAngle with SetPosition for gazebo 4 and up
+* Port fix_build branch for indigo-devel
+  See pull request `#221 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/221>`_
+* Contributors: Jose Luis Rivero, Steven Peters
+
+2.4.4 (2014-07-18)
+------------------
+* Merge branch 'hydro-devel' into indigo-devel
+* gazebo_ros_diff_drive gazebo_ros_tricycle_drive encoderSource option names updated
+* gazebo_ros_diff_drive is now able to use the wheels rotation of the optometry or the gazebo ground truth based on the 'odometrySource' parameter
+* simple linear controller for the tricycle_drive added
+* second robot for testing in tricycle_drive_scenario.launch added
+* Merge remote-tracking branch 'upstream/hydro-devel' into hydro-devel
+* BDS licenses header fixed and tricycle drive plugin added
+* format patch of hsu applied
+* Updated package.xml
+* Fix repo names in package.xml's
+* ros diff drive supports now an acceleration limit
+* Pioneer model: Diff_drive torque reduced
+* GPU Laser test example added
+* fixed gpu_laser to work with workspaces
+* hand_of_god: Adding hand-of-god plugin
+  ros_force: Fixing error messages to refer to the right plugin
+* Remove unneeded dependency on pcl_ros
+* minor fixes on relative paths in xacro for pioneer robot
+* gazebo test model pionneer 3dx updated with xacro path variables
+* pioneer model update for the multi_robot_scenario
+* Merge remote-tracking branch 'upstream/hydro-devel' into hydro-devel
+* fixed camera to work with workspaces
+* fixed links related to changed name
+* diff drive name changed to multi robot scenario
+* working camera added
+* Merge remote-tracking branch 'upstream/hydro-devel' into hydro-devel
+* fix in pioneer xacro model for diff_drive
+* Laser colour in rviz changed
+* A test model for the ros_diff_drive ros_laser and joint_state_publisher added
+* the ros_laser checkes now for the model name and adds it als prefix
+* joint velocity fixed using radius instead of diameter
+* ROS_INFO on laser plugin added to see if it starts
+* fetched with upstream
+* gazebo_ros_diff_drive was enhanced to publish the wheels tf or the wheels joint state depending on two additinal xml options <publishWheelTF> <publishWheelJointState>
+* Gazebo ROS joint state publisher added
+* Contributors: Dave Coleman, John Hsu, Jon Binney, Jonathan Bohren, Markus Bader, Steven Peters
+
+2.4.3 (2014-05-12)
+------------------
+* gazebo_plugins: add run-time dependency on gazebo_ros
+* Merge pull request `#176 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/176>`_ from ros-simulation/issue_175
+  Fix `#175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/175>`_: dynamic reconfigure dependency error
+* Remove unneeded dependency on pcl_ros
+* Fix `#175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/175>`_: dynamic reconfigure dependency error
+* Contributors: Steven Peters
+
+2.4.2 (2014-03-27)
+------------------
+* merging from hydro-devel
+* bump patch version for indigo-devel to 2.4.1
+* merging from indigo-devel after 2.3.4 release
+* "2.4.0"
+* catkin_generate_changelog
+* Contributors: John Hsu
+
 2.4.1 (2013-11-13)
+------------------
+
+2.3.5 (2014-03-26)
+------------------
+* update test world for block laser
+* this corrects the right orientation of the laser scan and improves on comparison between 2 double numbers
+* Initialize ``depth_image_connect_count_`` in openni_kinect plugin
+* multicamera bad namespace. Fixes `#161 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/161>`_
+  There was a race condition between GazeboRosCameraUtils::LoadThread
+  creating the ros::NodeHandle and GazeboRosCameraUtils::Load
+  suffixing the camera name in the namespace
+* Use function for accessing scene node in gazebo_ros_video
+* readded the trailing whitespace for cleaner diff
+* the parent sensor in gazebo seems not to be active
+* Contributors: Dejan Pangercic, Ian Chen, John Hsu, Jordi Pages, Toni Oliver, Ugo Cupcic
+
+2.3.4 (2013-11-13)
 ------------------
 * rerelease because sdformat became libsdformat, but we also based change on 2.3.4 in hydro-devel.
 * Simplify ``gazebo_plugins/CMakeLists.txt``

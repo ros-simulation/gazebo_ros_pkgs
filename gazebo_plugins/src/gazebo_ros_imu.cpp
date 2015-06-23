@@ -86,7 +86,7 @@ void GazeboRosIMU::LoadThread()
   if (!this->sdf->HasElement("gaussianNoise"))
   {
     ROS_INFO("imu plugin missing <gaussianNoise>, defaults to 0.0");
-    this->gaussian_noise_ = 0;
+    this->gaussian_noise_ = 0.0;
   }
   else
     this->gaussian_noise_ = this->sdf->Get<double>("gaussianNoise");
@@ -114,6 +114,15 @@ void GazeboRosIMU::LoadThread()
   }
   else
     this->offset_.rot = this->sdf->Get<math::Vector3>("rpyOffset");
+  
+  if (!this->sdf->HasElement("updateRate"))
+  {
+    ROS_DEBUG("imu plugin missing <updateRate>, defaults to 0.0"
+             " (as fast as possible)");
+    this->update_rate_ = 0.0;
+  }
+  else
+    this->update_rate_ = this->sdf->GetElement("updateRate")->Get<double>();
 
 
   // Make sure the ROS node for Gazebo has already been initialized
@@ -187,6 +196,13 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 // Update the controller
 void GazeboRosIMU::UpdateChild()
 {
+  common::Time cur_time = this->world_->GetSimTime();
+  
+  // rate control
+  if (this->update_rate_ > 0 &&
+      (cur_time - this->last_time_).Double() < (1.0 / this->update_rate_))
+    return;
+    
   if ((this->pub_.getNumSubscribers() > 0 && this->topic_name_ != ""))
   {
     math::Pose pose;
@@ -202,8 +218,6 @@ void GazeboRosIMU::UpdateChild()
     // apply rpy offsets
     rot = this->offset_.rot*rot;
     rot.Normalize();
-
-    common::Time cur_time = this->world_->GetSimTime();
 
     // get Rates
     math::Vector3 vpos = this->link->GetWorldLinearVel();
