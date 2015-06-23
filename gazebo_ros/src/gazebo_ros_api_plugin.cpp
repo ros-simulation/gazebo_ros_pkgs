@@ -54,6 +54,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   }
 
   // Disconnect slots
+  gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
@@ -157,7 +158,6 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
 void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
 {
   // make sure things are only called once
-  gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
   lock_.lock();
   if (world_created_)
   {
