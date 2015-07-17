@@ -28,8 +28,12 @@
   <build_depend>angles</build_depend>
 
   <run_depend>roscpp</run_depend>
-  <run_depend>gazebo5</run_depend>
   <run_depend>gazebo_ros</run_depend>
+  <!--
+    Need to use libgazebo5-dev since run script needs pkg-config
+    See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
+  -->
+  <run_depend>libgazebo5-dev</run_depend>
   <run_depend>control_toolbox</run_depend>
   <run_depend>controller_manager</run_depend>
   <run_depend>pluginlib</run_depend>

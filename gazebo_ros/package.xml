@@ -37,8 +37,12 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>tinyxml</build_depend>
 
-  <run_depend>gazebo5</run_depend>
   <run_depend>gazebo_msgs</run_depend>
+  <!--
+    Need to use libgazebo5-dev since run script needs pkg-config
+    See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
+  -->
+  <run_depend>libgazebo5-dev</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>tf</run_depend>
