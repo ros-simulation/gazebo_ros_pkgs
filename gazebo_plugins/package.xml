@@ -45,6 +45,10 @@
   <run_depend>gazebo_msgs</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <!--
+    Need to use libgazebo5-dev since run script needs pkg-config
+    See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
+  -->
   <run_depend>libgazebo5-dev</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>trajectory_msgs</run_depend>
