@@ -55,6 +55,8 @@ catkin_package(
 )
 
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
+
 
 set(cxx_flags)
 foreach (item ${GAZEBO_CFLAGS})

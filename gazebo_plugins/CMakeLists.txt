@@ -70,7 +70,9 @@ link_directories(
   ${OGRE_LIBRARY_DIRS}
   ${OGRE-Terrain_LIBRARY_DIRS}
   ${OGRE-Paging_LIBRARY_DIRS}
+  ${catkin_LIBRARY_DIRS}
 )
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
 catkin_package(
