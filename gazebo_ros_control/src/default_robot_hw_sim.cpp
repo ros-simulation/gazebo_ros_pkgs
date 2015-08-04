@@ -65,7 +65,7 @@ bool DefaultRobotHWSim::initSim(
 {
   // getJointLimits() searches joint_limit_nh for joint limit parameters. The format of each
   // parameter's name is "joint_limits/<joint name>". An example is "joint_limits/axle_joint".
-  const ros::NodeHandle joint_limit_nh(model_nh, robot_namespace);
+  const ros::NodeHandle joint_limit_nh(model_nh);
 
   // Resize vectors to our DOF
   n_dof_ = transmissions.size();
@@ -200,7 +200,7 @@ bool DefaultRobotHWSim::initSim(
     {
       // Initialize the PID controller. If no PID gain values are found, use joint->SetAngle() or
       // joint->SetVelocity() to control the joint.
-      const ros::NodeHandle nh(model_nh, robot_namespace + "/gazebo_ros_control/pid_gains/" +
+      const ros::NodeHandle nh(model_nh, "/gazebo_ros_control/pid_gains/" +
                                joint_names_[j]);
       if (pid_controllers_[j].init(nh, true))
       {
