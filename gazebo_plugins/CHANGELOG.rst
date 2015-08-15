@@ -2,6 +2,16 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adds range plugin for infrared and ultrasound sensors from PAL Robotics
+* Import changes from jade-branch
+* Add range world and launch file
+* Add ifdefs to fix build with gazebo2
+* Use Joint::SetParam for joint velocity motors
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* Contributors: Bence Magyar, Jose Luis Rivero, Steven Peters
+
 2.4.8 (2015-03-17)
 ------------------
 * fixed mistake at calculation of joint velocity

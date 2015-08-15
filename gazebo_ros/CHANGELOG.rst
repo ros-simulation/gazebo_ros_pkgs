@@ -2,6 +2,14 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Import changes from jade-branch
+* Add range world and launch file
+* fix crash
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* Contributors: Bence Magyar, Ian Chen, Jose Luis Rivero, Steven Peters
+
 2.4.8 (2015-03-17)
 ------------------
 * Specify physics engine in args to empty_world.launch
