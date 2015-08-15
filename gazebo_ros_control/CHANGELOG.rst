@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.9 (2015-08-16)
+------------------
 * Import changes from jade-branch
 * add missing dependencies
 * Fix DefaultRobotHWSim puts robotNamespace twice

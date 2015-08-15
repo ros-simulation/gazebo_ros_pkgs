@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.9 (2015-08-16)
+------------------
 * Adds range plugin for infrared and ultrasound sensors from PAL Robotics
 * Import changes from jade-branch
 * Add range world and launch file

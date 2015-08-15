@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.9 (2015-08-16)
+------------------
 * Import changes from jade-branch
 * Add range world and launch file
 * fix crash
