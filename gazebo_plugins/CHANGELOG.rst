@@ -2,6 +2,28 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Port of Pal Robotics range sensor plugin to Jade
+* Added a comment about the need of libgazebo5-dev in runtime
+* Added gazebo version check
+* Added missing files
+* Added elevator plugin
+* Use c++11
+* run_depend on libgazebo5-dev (`#323 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323>`_)
+  Declare the dependency.
+  It can be fixed later if we don't want it.
+* Contributors: Jose Luis Rivero, Nate Koenig, Steven Peters
+
+* Port of Pal Robotics range sensor plugin to Jade
+* Added a comment about the need of libgazebo5-dev in runtime
+* Added gazebo version check
+* Added missing files
+* Added elevator plugin
+* Use c++11
+* run_depend on libgazebo5-dev
+* Contributors: Jose Luis Rivero, Nate Koenig, Steven Peters
+
 2.5.0 (2015-04-30)
 ------------------
 * run_depend on libgazebo5-dev instead of gazebo5
@@ -17,10 +39,8 @@ Changelog for package gazebo_plugins
 
 2.4.7 (2014-12-15)
 ------------------
-* Merge pull request `#276 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/276>`_ from ros-simulation/gazebo_ogre_compile_flag_fix
-  fix missing ogre flags: removed from gazebo default (5.x.x candidate) cmake config
-* Merge pull request `#238 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/238>`_ from ayrton04/indigo-devel
-  Fixing handling of non-world frame velocities in setModelState.
+* fix missing ogre flags: removed from gazebo default (5.x.x candidate) cmake config
+* Fixing handling of non-world frame velocities in setModelState.
 * fix missing ogre flags (removed from gazebo cmake config)
 * change header to use opencv2/opencv.hpp issue `#274 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/274>`_
 * Update Gazebo/ROS tutorial URL
