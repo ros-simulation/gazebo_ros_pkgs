@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.1 (2015-08-16)
+------------------
 * Port of Pal Robotics range sensor plugin to Jade
 * Added a comment about the need of libgazebo5-dev in runtime
 * Added missing files

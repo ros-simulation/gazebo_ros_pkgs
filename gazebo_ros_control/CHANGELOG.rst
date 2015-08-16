@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.1 (2015-08-16)
+------------------
 * Fix DefaultRobotHWSim puts robotNamespace twice
   DefaultRobotHWSim::initSim() member function uses both
   namespaced NodeHandle and robot_namespace string to create
