@@ -94,6 +94,7 @@ catkin_package(
   gazebo_ros_block_laser 
   gazebo_ros_p3d 
   gazebo_ros_imu 
+  gazebo_ros_imu_sensor
   gazebo_ros_f3d 
   gazebo_ros_ft_sensor
   gazebo_ros_bumper 
@@ -207,6 +208,9 @@ target_link_libraries(gazebo_ros_p3d ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${B
 add_library(gazebo_ros_imu src/gazebo_ros_imu.cpp)
 target_link_libraries(gazebo_ros_imu ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_library(gazebo_ros_imu_sensor src/gazebo_ros_imu_sensor.cpp)
+target_link_libraries(gazebo_ros_imu_sensor ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 add_library(gazebo_ros_f3d src/gazebo_ros_f3d.cpp)
 target_link_libraries(gazebo_ros_f3d ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
@@ -289,6 +293,7 @@ install(TARGETS
   gazebo_ros_block_laser
   gazebo_ros_p3d
   gazebo_ros_imu
+  gazebo_ros_imu_sensor
   gazebo_ros_f3d
   gazebo_ros_ft_sensor
   gazebo_ros_bumper
