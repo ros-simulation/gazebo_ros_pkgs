@@ -130,10 +130,9 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   }
   else
   {
-    std::string scoped_name = sensor->GetScopedName(); //HACK to find the model name
+    std::string scoped_name = sensor->GetParentName(); //HACK to find the model name
     std::size_t it = scoped_name.find("::");
-    scoped_name = scoped_name.substr(it+2);
-    it = scoped_name.find("::");
+
     robot_namespace = "/" +scoped_name.substr(0,it)+"/";
     ROS_WARN_STREAM("missing <robotNamespace>, set to default: " << robot_namespace);
   }
