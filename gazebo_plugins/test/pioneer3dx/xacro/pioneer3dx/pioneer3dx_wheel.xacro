@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot  
-  xmlns:xacro="http://ros.org/wiki/xacro">
-  <property name="M_PI" value="3.1415926535897931" />
+  xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="M_PI" value="3.1415926535897931" />
 
   <xacro:macro name="pioneer_wheel" params="side parent xyz rpy radius meshes">   
 
@@ -21,7 +21,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="${meshes}/${side}_hubcap.stl"/>
+        <mesh filename="${meshes}/hubcap.dae"/>
       </geometry>
       <material name="HubcapYellow">
         <color rgba="1.0 0.811 0.151 1.0"/>
@@ -54,7 +54,7 @@
     <visual name="base_visual">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="${meshes}/${side}_wheel.stl"/>
+        <mesh filename="${meshes}/wheel.dae"/>
       </geometry>
       <material name="WheelBlack">
         <color rgba="0.117 0.117 0.117 1"/>

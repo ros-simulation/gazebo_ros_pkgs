@@ -2,12 +2,11 @@
 
   <arg name="robot_name" default="p3dx" />
   <arg name="robot_position" default="-x 0.0 -y 0.0 -z 0.01" />
-  
     
   <group ns="$(arg robot_name)">
 
     <!-- Load the URDF into the ROS Parameter Server -->
-    <param name="robot_description" command="$(find xacro)/xacro.py '$(find gazebo_plugins)/test/multi_robot_scenario/xacro/p3dx/pioneer3dx.xacro'" />
+    <param name="robot_description" command="$(find xacro)/xacro --check-order '$(find gazebo_plugins)/test/pioneer3dx/xacro/pioneer3dx/pioneer3dx.xacro'" />
   
     <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model $(arg robot_name) -param robot_description $(arg robot_position) "/>

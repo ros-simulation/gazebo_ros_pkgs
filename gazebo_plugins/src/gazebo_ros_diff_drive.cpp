@@ -248,8 +248,8 @@ void GazeboRosDiffDrive::UpdateChild()
                 ( fabs ( wheel_speed_[LEFT] - current_speed[LEFT] ) < 0.01 ) ||
                 ( fabs ( wheel_speed_[RIGHT] - current_speed[RIGHT] ) < 0.01 ) ) {
             //if max_accel == 0, or target speed is reached
-            joints_[LEFT]->SetVelocity ( 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
+            wheel_applied_vel[LEFT ] = wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 );
+            wheel_applied_vel[RIGHT] = wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 );
         } else {
             if ( wheel_speed_[LEFT]>=current_speed[LEFT] )
                 wheel_speed_instr_[LEFT]+=fmin ( wheel_speed_[LEFT]-current_speed[LEFT],  wheel_accel * seconds_since_last_update );
@@ -264,11 +264,13 @@ void GazeboRosDiffDrive::UpdateChild()
             // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[LEFT], wheel_speed_[LEFT]);
             // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[RIGHT],wheel_speed_[RIGHT]);
 
-            joints_[LEFT]->SetVelocity ( 0,wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0,wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
+            wheel_applied_vel[LEFT ] = wheel_speed_instr_[LEFT ] / ( wheel_diameter_ / 2.0 );
+            wheel_applied_vel[RIGHT] = wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 );
         }
         last_update_time_+= common::Time ( update_period_ );
     }
+    joints_[LEFT ]->SetParam("vel", 0, wheel_applied_vel[LEFT ] );
+    joints_[RIGHT]->SetParam("vel", 0, wheel_applied_vel[RIGHT] );
 }
 
 // Finalize the controller

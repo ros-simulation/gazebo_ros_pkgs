@@ -1,0 +1,22 @@
+<launch>
+
+  <arg name="rivz" default="0" />
+  <arg name="room" default="cave" />
+  <env name="GAZEBO_MODEL_PATH" value="$(find gazebo_plugins)/test/pioneer3dx/models/"/>    
+  
+   <!-- Gazebo  -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch" />
+
+  <!-- Robot with diff drive -->
+  <include file="$(find gazebo_plugins)/test/pioneer3dx/launch/pioneer3dx.gazebo.launch">
+     <arg name="robot_position" value="-x -7.0 -y -7.0 -z 0.01 -Y 0.78" />
+   </include>
+     
+  <node name="$(arg room)" pkg="gazebo_ros" type="spawn_model" args="-file $(find gazebo_plugins)/test/pioneer3dx/models/$(arg room)/model.sdf -sdf -x 0 -y -0 -z 0 -model $(arg room)" />
+     
+  <!-- RVIZ   -->
+  <group if="$(arg rivz)">
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find gazebo_plugins)/test/pioneer3dx/launch/pioneer3dx.rviz" />
+  </group>
+  
+</launch>
