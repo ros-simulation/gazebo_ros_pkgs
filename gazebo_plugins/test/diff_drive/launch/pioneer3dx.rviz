@@ -4,13 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
         - /Status1
-        - /RobotModel1
         - /TF1/Tree1
         - /LaserScan1
-        - /LaserScan2
-        - /Camera1
       Splitter Ratio: 0.528662
     Tree Height: 340
   - Class: rviz/Selection
@@ -133,8 +129,8 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: RobotModel
-      Robot Description: r1/robot_description
-      TF Prefix: r1
+      Robot Description: robot_description
+      TF Prefix: ""
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -143,35 +139,35 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        r1/base_link:
+        base_link:
           Value: true
-        r1/battery0:
+        battery0:
           Value: true
-        r1/center_hubcap:
+        center_hubcap:
           Value: true
-        r1/center_wheel:
+        center_wheel:
           Value: true
-        r1/chassis:
+        chassis:
           Value: true
-        r1/front_camera:
+        front_camera:
           Value: true
-        r1/front_laser:
+        front_laser:
           Value: true
-        r1/left_hub:
+        left_hub:
           Value: true
-        r1/left_wheel:
+        left_wheel:
           Value: true
-        r1/odom:
+        odom:
           Value: true
-        r1/right_hub:
+        right_hub:
           Value: true
-        r1/right_wheel:
+        right_wheel:
           Value: true
-        r1/sonar:
+        sonar:
           Value: true
-        r1/swivel:
+        swivel:
           Value: true
-        r1/top:
+        top:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -179,28 +175,28 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        r1/odom:
-          r1/base_link:
-            r1/chassis:
-              r1/battery0:
+        odom:
+          base_link:
+            chassis:
+              battery0:
                 {}
-              r1/front_camera:
+              front_camera:
                 {}
-              r1/front_laser:
+              front_laser:
                 {}
-              r1/left_hub:
-                r1/left_wheel:
+              left_hub:
+                left_wheel:
                   {}
-              r1/right_hub:
-                r1/right_wheel:
+              right_hub:
+                right_wheel:
                   {}
-              r1/sonar:
+              sonar:
                 {}
-              r1/swivel:
-                r1/center_wheel:
-                  r1/center_hubcap:
+              swivel:
+                center_wheel:
+                  center_hubcap:
                     {}
-              r1/top:
+              top:
                 {}
       Update Interval: 0
       Value: true
@@ -245,43 +241,14 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.03
       Style: Flat Squares
-      Topic: /r1/front_laser/scan
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/LaserScan
-      Color: 255; 85; 255
-      Color Transformer: FlatColor
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 3.49902e-38
-      Min Color: 0; 0; 0
-      Min Intensity: -999999
-      Name: LaserScan
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.03
-      Style: Flat Squares
-      Topic: /r2/front_laser/scan
+      Topic: /front_laser/scan
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
-      Image Topic: /r1/front_camera/image_raw
+      Image Topic: front_camera/image_raw
       Name: Camera
       Overlay Alpha: 0.5
       Queue Size: 2
@@ -297,7 +264,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: r1/base_link
+    Fixed Frame: base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -318,22 +285,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.33926
+      Distance: 1.32825
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.113405
-        Y: 0.12509
-        Z: 0.654478
+        X: 0.13569
+        Y: -0.0369408
+        Z: 0.348515
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.480398
+      Pitch: 0.120398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.52537
+      Yaw: 5.50042
     Saved: ~
 Window Geometry:
   Camera:
