@@ -4,9 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Status1
         - /TF1/Tree1
-        - /LaserScan1
       Splitter Ratio: 0.528662
     Tree Height: 340
   - Class: rviz/Selection
@@ -129,8 +127,8 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: RobotModel
-      Robot Description: robot_description
-      TF Prefix: ""
+      Robot Description: p3dx/robot_description
+      TF Prefix: p3dx
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -139,35 +137,35 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_link:
+        p3dx/base_link:
           Value: true
-        battery0:
+        p3dx/battery0:
           Value: true
-        center_hubcap:
+        p3dx/center_hubcap:
           Value: true
-        center_wheel:
+        p3dx/center_wheel:
           Value: true
-        chassis:
+        p3dx/chassis:
           Value: true
-        front_camera:
+        p3dx/front_camera:
           Value: true
-        front_laser:
+        p3dx/front_laser:
           Value: true
-        left_hub:
+        p3dx/left_hub:
           Value: true
-        left_wheel:
+        p3dx/left_wheel:
           Value: true
-        odom:
+        p3dx/odom:
           Value: true
-        right_hub:
+        p3dx/right_hub:
           Value: true
-        right_wheel:
+        p3dx/right_wheel:
           Value: true
-        sonar:
+        p3dx/sonar:
           Value: true
-        swivel:
+        p3dx/swivel:
           Value: true
-        top:
+        p3dx/top:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -175,28 +173,28 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        odom:
-          base_link:
-            chassis:
-              battery0:
+        p3dx/odom:
+          p3dx/base_link:
+            p3dx/chassis:
+              p3dx/battery0:
                 {}
-              front_camera:
+              p3dx/front_camera:
                 {}
-              front_laser:
+              p3dx/front_laser:
                 {}
-              left_hub:
-                left_wheel:
+              p3dx/left_hub:
+                p3dx/left_wheel:
                   {}
-              right_hub:
-                right_wheel:
+              p3dx/right_hub:
+                p3dx/right_wheel:
                   {}
-              sonar:
+              p3dx/sonar:
                 {}
-              swivel:
-                center_wheel:
-                  center_hubcap:
+              p3dx/swivel:
+                p3dx/center_wheel:
+                  p3dx/center_hubcap:
                     {}
-              top:
+              p3dx/top:
                 {}
       Update Interval: 0
       Value: true
@@ -241,14 +239,14 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.03
       Style: Flat Squares
-      Topic: /front_laser/scan
+      Topic: /p3dx/front_laser/scan
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
-      Image Topic: front_camera/image_raw
+      Image Topic: /p3dx/front_camera/image_raw
       Name: Camera
       Overlay Alpha: 0.5
       Queue Size: 2
@@ -264,7 +262,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_link
+    Fixed Frame: p3dx/base_link
     Frame Rate: 30
   Name: root
   Tools:
