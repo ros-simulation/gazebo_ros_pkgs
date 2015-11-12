@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="rviz" default="1" />
+  
+   <!-- Gazebo  -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch" />
+
+  <!-- Robot with diff drive -->
+  <include file="$(find gazebo_plugins)/test/diff_drive/launch/pioneer3dx.gazebo.launch">
+     <arg name="robot_position" value="-x 0.0 -y 0.0 -z 0.01 -Y 0.0" />
+   </include>
+   
+  <!-- RVIZ   -->
+  <group if="$(arg rviz)">
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find gazebo_plugins)/test/diff_drive/launch/pioneer3dx.rviz" />
+  </group>
+  
+</launch>

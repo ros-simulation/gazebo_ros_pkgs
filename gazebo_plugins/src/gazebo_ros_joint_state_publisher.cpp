@@ -28,6 +28,7 @@
 #include <gazebo_plugins/gazebo_ros_joint_state_publisher.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
+#include <boost/algorithm/string.hpp>
 
 using namespace gazebo;
 
