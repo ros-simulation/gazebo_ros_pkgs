@@ -4,7 +4,11 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
+        - /Status1
+        - /RobotModel1
         - /TF1/Tree1
+        - /Camera1
       Splitter Ratio: 0.528662
     Tree Height: 340
   - Class: rviz/Selection
@@ -25,7 +29,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: Camera
 Visualization Manager:
   Class: ""
   Displays:
@@ -127,8 +131,8 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: RobotModel
-      Robot Description: p3dx/robot_description
-      TF Prefix: p3dx
+      Robot Description: r1/robot_description
+      TF Prefix: r1
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -137,35 +141,35 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        p3dx/base_link:
+        r1/base_link:
           Value: true
-        p3dx/battery0:
+        r1/battery0:
           Value: true
-        p3dx/center_hubcap:
+        r1/center_hubcap:
           Value: true
-        p3dx/center_wheel:
+        r1/center_wheel:
           Value: true
-        p3dx/chassis:
+        r1/chassis:
           Value: true
-        p3dx/front_camera:
+        r1/front_camera:
           Value: true
-        p3dx/front_laser:
+        r1/front_laser:
           Value: true
-        p3dx/left_hub:
+        r1/left_hub:
           Value: true
-        p3dx/left_wheel:
+        r1/left_wheel:
           Value: true
-        p3dx/odom:
+        r1/odom:
           Value: true
-        p3dx/right_hub:
+        r1/right_hub:
           Value: true
-        p3dx/right_wheel:
+        r1/right_wheel:
           Value: true
-        p3dx/sonar:
+        r1/sonar:
           Value: true
-        p3dx/swivel:
+        r1/swivel:
           Value: true
-        p3dx/top:
+        r1/top:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -173,47 +177,31 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        p3dx/odom:
-          p3dx/base_link:
-            p3dx/chassis:
-              p3dx/battery0:
+        r1/odom:
+          r1/base_link:
+            r1/chassis:
+              r1/battery0:
                 {}
-              p3dx/front_camera:
+              r1/front_camera:
                 {}
-              p3dx/front_laser:
+              r1/front_laser:
                 {}
-              p3dx/left_hub:
-                p3dx/left_wheel:
+              r1/left_hub:
+                r1/left_wheel:
                   {}
-              p3dx/right_hub:
-                p3dx/right_wheel:
+              r1/right_hub:
+                r1/right_wheel:
                   {}
-              p3dx/sonar:
+              r1/sonar:
                 {}
-              p3dx/swivel:
-                p3dx/center_wheel:
-                  p3dx/center_hubcap:
+              r1/swivel:
+                r1/center_wheel:
+                  r1/center_hubcap:
                     {}
-              p3dx/top:
+              r1/top:
                 {}
       Update Interval: 0
       Value: true
-    - Alpha: 1
-      Class: rviz/RobotModel
-      Collision Enabled: false
-      Enabled: true
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        Link Tree Style: Links in Alphabetic Order
-      Name: RobotModel
-      Robot Description: r2/robot_description
-      TF Prefix: r2
-      Update Interval: 0
-      Value: true
-      Visual Enabled: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -246,7 +234,7 @@ Visualization Manager:
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
-      Image Topic: /p3dx/front_camera/image_raw
+      Image Topic: /r1/front_camera/image_raw
       Name: Camera
       Overlay Alpha: 0.5
       Queue Size: 2
@@ -262,7 +250,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: p3dx/base_link
+    Fixed Frame: r1/base_link
     Frame Rate: 30
   Name: root
   Tools:
