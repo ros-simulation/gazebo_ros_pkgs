@@ -89,6 +89,8 @@ class GazeboRosForce : public ModelPlugin
   /// \brief The custom callback queue thread function.
   private: void QueueThread();
 
+  private: physics::ModelPtr parent_;
+
   /// \brief A pointer to the gazebo world.
   private: physics::WorldPtr world_;
 

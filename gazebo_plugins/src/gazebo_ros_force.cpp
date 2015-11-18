@@ -61,6 +61,11 @@ GazeboRosForce::~GazeboRosForce()
 // Load the controller
 void GazeboRosForce::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
+  ROS_INFO("Loading gazebo_ros_force");
+
+  // Set attached model;
+  this->parent_ = _model;
+
   // Get the world name.
   this->world_ = _model->GetWorld();
   
@@ -118,6 +123,8 @@ void GazeboRosForce::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // simulation iteration.
   this->update_connection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboRosForce::UpdateChild, this));
+
+  ROS_INFO("Loaded gazebo_ros_force");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -137,10 +144,24 @@ void GazeboRosForce::UpdateObjectForce(const geometry_msgs::Wrench::ConstPtr& _m
 void GazeboRosForce::UpdateChild()
 {
   this->lock_.lock();
-  math::Vector3 force(this->wrench_msg_.force.x,this->wrench_msg_.force.y,this->wrench_msg_.force.z);
-  math::Vector3 torque(this->wrench_msg_.torque.x,this->wrench_msg_.torque.y,this->wrench_msg_.torque.z);
-  this->link_->AddForce(force);
-  this->link_->AddTorque(torque);
+  math::Pose parent_pose = this->link_->GetWorldPose();
+  physics::Model_V models = this->world_->GetModels();
+  for (size_t i = 0; i < models.size(); i++) {
+    if (models[i]->GetName() == this->parent_->GetName()) {
+      continue;
+    }
+    math::Pose model_pose = models[i]->GetWorldPose();
+    math::Pose diff = parent_pose - model_pose;
+    double norm = diff.pos.GetLength();
+
+    if (norm < 3.0) {
+      math::Vector3 force = diff.pos.Normalize() * (0.5 / norm);
+      physics::Link_V links = models[i]->GetLinks();
+      for (size_t j = 0; j < links.size(); j++) {
+        links[j]->AddForce(force);
+      }
+    }
+  }
   this->lock_.unlock();
 }
 
