@@ -108,13 +108,13 @@ public:
 
   /// \brief Destructor
   ~GazeboRosApiPlugin();
-  
+
   /// \bried Detect if sig-int shutdown signal is recieved
   void shutdownSignal();
 
   /// \brief Gazebo-inherited load function
-  /// 
-  /// Called before Gazebo is loaded. Must not block. 
+  ///
+  /// Called before Gazebo is loaded. Must not block.
   /// Capitalized per Gazebo cpp style guidelines
   /// \param _argc Number of command line arguments.
   /// \param _argv Array of command line arguments.
@@ -243,11 +243,11 @@ private:
   void stripXmlDeclaration(std::string &model_xml);
 
   /// \brief Update the model name and pose of the SDF file before sending to Gazebo
-  void updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+  void updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
                            gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
   /// \brief Update the model pose of the URDF file before sending to Gazebo
-  void updateURDFModelPose(TiXmlDocument &gazebo_model_xml, 
+  void updateURDFModelPose(TiXmlDocument &gazebo_model_xml,
                            gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
 
   /// \brief Update the model name of the URDF file before sending to Gazebo
@@ -257,7 +257,7 @@ private:
   void walkChildAddRobotNamespace(TiXmlNode* robot_xml);
 
   /// \brief
-  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name, 
+  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
                        gazebo_msgs::SpawnModel::Response &res);
 
   /// \brief helper function for applyBodyWrench
@@ -294,7 +294,7 @@ private:
   bool plugin_loaded_;
 
   // detect if sigint event occurs
-  bool stop_; 
+  bool stop_;
   gazebo::event::ConnectionPtr sigint_event_;
 
   std::string robot_namespace_;
@@ -361,6 +361,7 @@ private:
   dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
 
   ros::Publisher     pub_clock_;
+  gazebo::common::Time wall_time_offset_;
 
   /// \brief A mutex to lock access to fields that are used in ROS message callbacks
   boost::mutex lock_;

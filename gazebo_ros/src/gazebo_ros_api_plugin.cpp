@@ -216,6 +216,15 @@ void GazeboRosApiPlugin::advertiseServices()
 {
   // publish clock for simulated ros time
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
+  bool sim_time_wall_offset = false;
+  if(nh_->getParam("/sim_time_wall_offset", sim_time_wall_offset) && sim_time_wall_offset)
+  {
+    wall_time_offset_.SetToWallTime();
+  }
+  else
+  {
+    wall_time_offset_ = gazebo::common::Time(0);
+  }
 
   // Advertise spawn services on the custom queue - DEPRECATED IN HYDRO
   std::string spawn_gazebo_model_service_name("spawn_gazebo_model");
@@ -1780,7 +1789,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
 void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
 {
   ROS_ERROR("CLOCK2");
-  gazebo::common::Time currentTime = gazebo::msgs::Convert( msg->sim_time() );
+  gazebo::common::Time currentTime = wall_time_offset_ + gazebo::msgs::Convert( msg->sim_time() );
   rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros
@@ -1788,7 +1797,7 @@ void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::Wo
 }
 void GazeboRosApiPlugin::publishSimTime()
 {
-  gazebo::common::Time currentTime = world_->GetSimTime();
+  gazebo::common::Time currentTime = wall_time_offset_ + world_->GetSimTime();
   rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros
@@ -2300,4 +2309,3 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
 // Register this plugin with the simulator
 GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosApiPlugin)
 }
-
