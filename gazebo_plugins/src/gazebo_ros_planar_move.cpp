@@ -118,6 +118,19 @@ namespace gazebo
     y_ = 0;
     rot_ = 0;
     alive_ = true;
+    recover_roll_velocity_p_gain_  = 0; /*10.0;*/
+    recover_pitch_velocity_p_gain_ = 0; /*10.0;*/
+    recover_z_velocity_p_gain_ = 0; /*1.0;*/
+
+    if (sdf->HasElement("recover_roll_velocity_p_gain"))
+      (sdf->GetElement("recover_roll_velocity_p_gain")->GetValue()->Get(recover_roll_velocity_p_gain_));
+    if (sdf->HasElement("recover_pitch_velocity_p_gain"))
+      (sdf->GetElement("recover_pitch_velocity_p_gain")->GetValue()->Get(recover_pitch_velocity_p_gain_));
+    if (sdf->HasElement("recover_z_velocity_p_gain"))
+      (sdf->GetElement("recover_z_velocity_p_gain")->GetValue()->Get(recover_z_velocity_p_gain_));
+    ROS_INFO("PlanarMovePlugin (ns = %s) recover_roll_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_roll_velocity_p_gain_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) recover_pitch_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_pitch_velocity_p_gain_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) recover_z_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_z_velocity_p_gain_);
 
     // Ensure that ROS has been initialized and subscribe to cmd_vel
     if (!ros::isInitialized()) 
@@ -154,21 +167,31 @@ namespace gazebo
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboRosPlanarMove::UpdateChild, this));
 
+    this->last_time_ = parent_->GetWorld()->GetSimTime();
   }
 
   // Update the controller
   void GazeboRosPlanarMove::UpdateChild() 
   {
     boost::mutex::scoped_lock scoped_lock(lock);
+    common::Time current_time = parent_->GetWorld()->GetSimTime();
     math::Pose pose = parent_->GetWorldPose();
     float yaw = pose.rot.GetYaw();
+
+    math::Vector3 gravity(parent_->GetWorld()->GetPhysicsEngine()->GetGravity());
+    math::Vector3 linear_vel = parent_->GetRelativeLinearVel();
+
     parent_->SetLinearVel(math::Vector3(
           x_ * cosf(yaw) - y_ * sinf(yaw), 
           y_ * cosf(yaw) + x_ * sinf(yaw), 
-          0));
-    parent_->SetAngularVel(math::Vector3(0, 0, rot_));
+          recover_z_velocity_p_gain_ * linear_vel.z + gravity.z*(current_time-this->last_time_).Double()));
+
+    float pitch = pose.rot.GetPitch() * cosf(yaw) + pose.rot.GetRoll()  * sinf(yaw);
+    float roll  = pose.rot.GetRoll()  * cosf(yaw) - pose.rot.GetPitch() * sinf(yaw);
+    parent_->SetAngularVel(math::Vector3(-recover_roll_velocity_p_gain_ * roll,
+                                         -recover_pitch_velocity_p_gain_* pitch,
+                                         rot_));
     if (odometry_rate_ > 0.0) {
-      common::Time current_time = parent_->GetWorld()->GetSimTime();
       double seconds_since_last_update = 
         (current_time - last_odom_publish_time_).Double();
       if (seconds_since_last_update > (1.0 / odometry_rate_)) {
@@ -176,6 +199,7 @@ namespace gazebo
         last_odom_publish_time_ = current_time;
       }
     }
+    this->last_time_ = parent_->GetWorld()->GetSimTime();
   }
 
   // Finalize the controller
