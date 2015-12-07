@@ -92,6 +92,18 @@ namespace gazebo {
       double recover_roll_velocity_p_gain_;
       double recover_pitch_velocity_p_gain_;
       double recover_z_velocity_p_gain_;
+      double x_velocity_limit_max_;
+      double x_velocity_limit_min_;
+      double y_velocity_limit_max_;
+      double y_velocity_limit_min_;
+      double rot_velocity_limit_max_;
+      double rot_velocity_limit_min_;
+      double x_acceleration_limit_max_;
+      double x_acceleration_limit_min_;
+      double y_acceleration_limit_max_;
+      double y_acceleration_limit_min_;
+      double rot_acceleration_limit_max_;
+      double rot_acceleration_limit_min_;
 
       common::Time last_time_;
       common::Time last_odom_publish_time_;

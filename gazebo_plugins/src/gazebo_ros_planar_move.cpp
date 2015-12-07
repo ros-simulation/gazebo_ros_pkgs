@@ -132,6 +132,55 @@ namespace gazebo
     ROS_INFO("PlanarMovePlugin (ns = %s) recover_pitch_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_pitch_velocity_p_gain_);
     ROS_INFO("PlanarMovePlugin (ns = %s) recover_z_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_z_velocity_p_gain_);
 
+    x_velocity_limit_max_ = 10000.0;
+    x_velocity_limit_min_ = 10000.0;
+    y_velocity_limit_max_ = 10000.0;
+    y_velocity_limit_min_ = 10000.0;
+    rot_velocity_limit_max_ = 10000.0;
+    rot_velocity_limit_min_ = 10000.0;
+    x_acceleration_limit_max_ = 10000.0;
+    x_acceleration_limit_min_ = 10000.0;
+    y_acceleration_limit_max_ = 10000.0;
+    y_acceleration_limit_min_ = 10000.0;
+    rot_acceleration_limit_max_ = 10000.0;
+    rot_acceleration_limit_min_ = 10000.0;
+    if (sdf->HasElement("x_velocity_limit_max"))
+      (sdf->GetElement("x_velocity_limit_max")->GetValue()->Get(x_velocity_limit_max_));
+    if (sdf->HasElement("x_velocity_limit_min"))
+      (sdf->GetElement("x_velocity_limit_min")->GetValue()->Get(x_velocity_limit_min_));
+    if (sdf->HasElement("y_velocity_limit_max"))
+      (sdf->GetElement("y_velocity_limit_max")->GetValue()->Get(y_velocity_limit_max_));
+    if (sdf->HasElement("y_velocity_limit_min"))
+      (sdf->GetElement("y_velocity_limit_min")->GetValue()->Get(y_velocity_limit_min_));
+    if (sdf->HasElement("rot_velocity_limit_max"))
+      (sdf->GetElement("rot_velocity_limit_max")->GetValue()->Get(rot_velocity_limit_max_));
+    if (sdf->HasElement("rot_velocity_limit_min"))
+      (sdf->GetElement("rot_velocity_limit_min")->GetValue()->Get(rot_velocity_limit_min_));
+    if (sdf->HasElement("x_acceleration_limit_max"))
+      (sdf->GetElement("x_acceleration_limit_max")->GetValue()->Get(x_acceleration_limit_max_));
+    if (sdf->HasElement("x_acceleration_limit_min"))
+      (sdf->GetElement("x_acceleration_limit_min")->GetValue()->Get(x_acceleration_limit_min_));
+    if (sdf->HasElement("y_acceleration_limit_max"))
+      (sdf->GetElement("y_acceleration_limit_max")->GetValue()->Get(y_acceleration_limit_max_));
+    if (sdf->HasElement("y_acceleration_limit_min"))
+      (sdf->GetElement("y_acceleration_limit_min")->GetValue()->Get(y_acceleration_limit_min_));
+    if (sdf->HasElement("rot_acceleration_limit_max"))
+      (sdf->GetElement("rot_acceleration_limit_max")->GetValue()->Get(rot_acceleration_limit_max_));
+    if (sdf->HasElement("rot_acceleration_limit_min"))
+      (sdf->GetElement("rot_acceleration_limit_min")->GetValue()->Get(rot_acceleration_limit_min_));
+    ROS_INFO("PlanarMovePlugin (ns = %s) x_velocity_limit_max_ = %f", robot_namespace_.c_str(), x_velocity_limit_max_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) x_velocity_limit_min_ = %f", robot_namespace_.c_str(), x_velocity_limit_min_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) y_velocity_limit_max_ = %f", robot_namespace_.c_str(), y_velocity_limit_max_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) y_velocity_limit_min_ = %f", robot_namespace_.c_str(), y_velocity_limit_min_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) rot_velocity_limit_max_ = %f", robot_namespace_.c_str(), rot_velocity_limit_max_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) rot_velocity_limit_min_ = %f", robot_namespace_.c_str(), rot_velocity_limit_min_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) x_acceleration_limit_max_ = %f", robot_namespace_.c_str(), x_acceleration_limit_max_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) x_acceleration_limit_min_ = %f", robot_namespace_.c_str(), x_acceleration_limit_min_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) y_acceleration_limit_max_ = %f", robot_namespace_.c_str(), y_acceleration_limit_max_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) y_acceleration_limit_min_ = %f", robot_namespace_.c_str(), y_acceleration_limit_min_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) rot_acceleration_limit_max_ = %f", robot_namespace_.c_str(), rot_acceleration_limit_max_);
+    ROS_INFO("PlanarMovePlugin (ns = %s) rot_acceleration_limit_min_ = %f", robot_namespace_.c_str(), rot_acceleration_limit_min_);
+
     // Ensure that ROS has been initialized and subscribe to cmd_vel
     if (!ros::isInitialized()) 
     {
@@ -177,14 +226,35 @@ namespace gazebo
     common::Time current_time = parent_->GetWorld()->GetSimTime();
     math::Pose pose = parent_->GetWorldPose();
     float yaw = pose.rot.GetYaw();
+    float dt  = (current_time-this->last_time_).Double();
 
     math::Vector3 gravity(parent_->GetWorld()->GetPhysicsEngine()->GetGravity());
-    math::Vector3 linear_vel = parent_->GetRelativeLinearVel();
+    math::Vector3 linear_vel = parent_->GetWorldLinearVel();
+    math::Vector3 angular_vel = parent_->GetWorldAngularVel();
 
-    parent_->SetLinearVel(math::Vector3(
-          x_ * cosf(yaw) - y_ * sinf(yaw), 
-          y_ * cosf(yaw) + x_ * sinf(yaw), 
-          recover_z_velocity_p_gain_ * linear_vel.z + gravity.z*(current_time-this->last_time_).Double()));
+    // command velocity in world coords + fake gravity
+    math::Vector3 command_vel(x_ * cosf(yaw) - y_ * sinf(yaw), 
+                              y_ * cosf(yaw) + x_ * sinf(yaw), 
+                              recover_z_velocity_p_gain_ * linear_vel.z + gravity.z * dt);
+
+    // accel limit
+    math::Vector3 command_acc = (command_vel - linear_vel)/dt;
+    if ( command_acc.x > x_acceleration_limit_max_)  command_vel.x = linear_vel.x + x_acceleration_limit_max_*dt;
+    if ( command_acc.x < x_acceleration_limit_min_)  command_vel.x = linear_vel.x + x_acceleration_limit_min_*dt;
+    if ( command_acc.y > y_acceleration_limit_max_)  command_vel.y = linear_vel.y + y_acceleration_limit_max_*dt;
+    if ( command_acc.y < y_acceleration_limit_min_)  command_vel.y = linear_vel.y + y_acceleration_limit_min_*dt;
+    if ( (rot_ - angular_vel.z)/dt > rot_acceleration_limit_max_) rot_ = angular_vel.z + rot_acceleration_limit_max_*dt;
+    if ( (rot_ - angular_vel.z)/dt < rot_acceleration_limit_min_) rot_ = angular_vel.z + rot_acceleration_limit_min_*dt;
+
+    // velocity limit
+    if ( command_vel.x > x_velocity_limit_max_ ) command_vel.x = x_velocity_limit_max_;
+    if ( command_vel.x < x_velocity_limit_min_ ) command_vel.x = x_velocity_limit_min_;
+    if ( command_vel.y > y_velocity_limit_max_ ) command_vel.y = y_velocity_limit_max_;
+    if ( command_vel.y < y_velocity_limit_min_ ) command_vel.y = y_velocity_limit_min_;
+    if ( rot_ > rot_velocity_limit_max_ ) rot_ = rot_velocity_limit_max_;
+    if ( rot_ < rot_velocity_limit_min_ ) rot_ = rot_velocity_limit_min_;
+
+    parent_->SetLinearVel(command_vel);
 
     float pitch = pose.rot.GetPitch() * cosf(yaw) + pose.rot.GetRoll()  * sinf(yaw);
     float roll  = pose.rot.GetRoll()  * cosf(yaw) - pose.rot.GetPitch() * sinf(yaw);
