@@ -89,6 +89,11 @@ namespace gazebo {
       double y_;
       double rot_;
       bool alive_;
+      double recover_roll_velocity_p_gain_;
+      double recover_pitch_velocity_p_gain_;
+      double recover_z_velocity_p_gain_;
+
+      common::Time last_time_;
       common::Time last_odom_publish_time_;
       math::Pose last_odom_pose_;
 
