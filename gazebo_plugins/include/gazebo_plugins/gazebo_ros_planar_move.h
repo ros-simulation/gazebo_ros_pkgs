@@ -92,8 +92,10 @@ namespace gazebo {
       double recover_roll_velocity_p_gain_;
       double recover_pitch_velocity_p_gain_;
       double recover_z_velocity_p_gain_;
+      double joint_state_idel_sec_;
 
       common::Time last_time_;
+      common::Time last_cmd_subscribe_time_;
       common::Time last_odom_publish_time_;
       math::Pose last_odom_pose_;
 

@@ -132,6 +132,13 @@ namespace gazebo
     ROS_INFO("PlanarMovePlugin (ns = %s) recover_pitch_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_pitch_velocity_p_gain_);
     ROS_INFO("PlanarMovePlugin (ns = %s) recover_z_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_z_velocity_p_gain_);
 
+
+    // joint_state_idel_sec
+    joint_state_idel_sec_ = -1;
+    if (sdf->HasElement("joint_state_idel_sec"))
+      (sdf->GetElement("joint_state_idel_sec")->GetValue()->Get(joint_state_idel_sec_));
+    last_cmd_subscribe_time_ = parent_->GetWorld()->GetSimTime();
+
     // Ensure that ROS has been initialized and subscribe to cmd_vel
     if (!ros::isInitialized()) 
     {
@@ -178,13 +185,12 @@ namespace gazebo
     math::Pose pose = parent_->GetWorldPose();
     float yaw = pose.rot.GetYaw();
 
-    math::Vector3 gravity(parent_->GetWorld()->GetPhysicsEngine()->GetGravity());
     math::Vector3 linear_vel = parent_->GetRelativeLinearVel();
 
     parent_->SetLinearVel(math::Vector3(
           x_ * cosf(yaw) - y_ * sinf(yaw), 
           y_ * cosf(yaw) + x_ * sinf(yaw), 
-          recover_z_velocity_p_gain_ * linear_vel.z + gravity.z*(current_time-this->last_time_).Double()));
+          0);
 
     float pitch = pose.rot.GetPitch() * cosf(yaw) + pose.rot.GetRoll()  * sinf(yaw);
     float roll  = pose.rot.GetRoll()  * cosf(yaw) - pose.rot.GetPitch() * sinf(yaw);
@@ -218,6 +224,7 @@ namespace gazebo
     x_ = cmd_msg->linear.x;
     y_ = cmd_msg->linear.y;
     rot_ = cmd_msg->angular.z;
+    last_cmd_subscribe_time_ = parent_->GetWorld()->GetSimTime();
   }
 
   void GazeboRosPlanarMove::QueueThread() 
