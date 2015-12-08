@@ -104,8 +104,10 @@ namespace gazebo {
       double y_acceleration_limit_min_;
       double rot_acceleration_limit_max_;
       double rot_acceleration_limit_min_;
+      double joint_state_idel_sec_;
 
       common::Time last_time_;
+      common::Time last_cmd_subscribe_time_;
       common::Time last_odom_publish_time_;
       math::Pose last_odom_pose_;
 

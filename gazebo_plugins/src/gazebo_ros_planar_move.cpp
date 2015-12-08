@@ -181,6 +181,12 @@ namespace gazebo
     ROS_INFO("PlanarMovePlugin (ns = %s) rot_acceleration_limit_max_ = %f", robot_namespace_.c_str(), rot_acceleration_limit_max_);
     ROS_INFO("PlanarMovePlugin (ns = %s) rot_acceleration_limit_min_ = %f", robot_namespace_.c_str(), rot_acceleration_limit_min_);
 
+    // joint_state_idel_sec
+    joint_state_idel_sec_ = -1;
+    if (sdf->HasElement("joint_state_idel_sec"))
+      (sdf->GetElement("joint_state_idel_sec")->GetValue()->Get(joint_state_idel_sec_));
+    last_cmd_subscribe_time_ = parent_->GetWorld()->GetSimTime();
+
     // Ensure that ROS has been initialized and subscribe to cmd_vel
     if (!ros::isInitialized()) 
     {
@@ -232,6 +238,15 @@ namespace gazebo
     math::Vector3 linear_vel = parent_->GetWorldLinearVel();
     math::Vector3 angular_vel = parent_->GetWorldAngularVel();
 
+    // check for joint_state_idel_sec_
+    if ( joint_state_idel_sec_ > 0 &&
+         (current_time-this->last_cmd_subscribe_time_).Double() > joint_state_idel_sec_ ) {
+      if (int((current_time-this->last_cmd_subscribe_time_).Double()*1000)%5000 < 1 ) {
+        ROS_WARN("PlanarMovePlugin (ns = %s) did not received %s for %f sec",
+                 robot_namespace_.c_str(), command_topic_.c_str(), joint_state_idel_sec_);
+      }
+      x_ = y_ = rot_ = 0;
+    }
     // command velocity in world coords + fake gravity
     math::Vector3 command_vel(x_ * cosf(yaw) - y_ * sinf(yaw), 
                               y_ * cosf(yaw) + x_ * sinf(yaw), 
@@ -288,6 +303,7 @@ namespace gazebo
     x_ = cmd_msg->linear.x;
     y_ = cmd_msg->linear.y;
     rot_ = cmd_msg->angular.z;
+    last_cmd_subscribe_time_ = parent_->GetWorld()->GetSimTime();
   }
 
   void GazeboRosPlanarMove::QueueThread() 
