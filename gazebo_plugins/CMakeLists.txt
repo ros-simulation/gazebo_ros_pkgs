@@ -78,6 +78,10 @@ if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
   catkin_package(  INCLUDE_DIRS include LIBRARIES gazebo_ros_elevator)
 endif()
 
+if (GAZEBO_VERSION VERSION_GREATER 7.0 OR GAZEBO_VERSION VERSION_EQUAL 7.0)
+  catkin_package(INCLUDE_DIRS include LIBRARIES gazebo_ros_motor_thermal)
+endif()
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES 
@@ -177,6 +181,12 @@ if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
   add_library(gazebo_ros_elevator src/gazebo_ros_elevator.cpp)
   add_dependencies(gazebo_ros_elevator ${PROJECT_NAME}_gencfg)
   target_link_libraries(gazebo_ros_elevator ${GAZEBO_LIBRARIES} ElevatorPlugin ${catkin_LIBRARIES})
+endif()
+
+if (GAZEBO_VERSION VERSION_GREATER 7.0 OR GAZEBO_VERSION VERSION_EQUAL 7.0)
+  add_library(gazebo_ros_motor_thermal src/gazebo_ros_motor_thermal.cpp)
+  add_dependencies(gazebo_ros_motor_thermal ${PROJECT_NAME}_gencfg)
+  target_link_libraries(gazebo_ros_motor_thermal ${GAZEBO_LIBRARIES} MotorThermalPlugin ${catkin_LIBRARIES})
 endif()
 
 add_library(gazebo_ros_multicamera src/gazebo_ros_multicamera.cpp)
@@ -313,6 +323,13 @@ install(TARGETS
 
 if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
   install(TARGETS gazebo_ros_elevator
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    )
+endif()
+
+if (GAZEBO_VERSION VERSION_GREATER 7.0 OR GAZEBO_VERSION VERSION_EQUAL 7.0)
+  install(TARGETS gazebo_ros_motor_thermal
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     )
