@@ -234,11 +234,11 @@ void GazeboRosProsilica::pollCallback(polled_camera::GetPolledImage::Request& re
         this->roiCameraInfoMsg->D[3] = this->distortion_t1_;
         this->roiCameraInfoMsg->D[4] = this->distortion_t2_;
         // original camera matrix
-        this->roiCameraInfoMsg->K[0] = this->focal_length_;
+        this->roiCameraInfoMsg->K[0] = this->focal_length_x_;
         this->roiCameraInfoMsg->K[1] = 0.0;
         this->roiCameraInfoMsg->K[2] = this->cx_ - req.roi.x_offset;
         this->roiCameraInfoMsg->K[3] = 0.0;
-        this->roiCameraInfoMsg->K[4] = this->focal_length_;
+        this->roiCameraInfoMsg->K[4] = this->focal_length_y_;
         this->roiCameraInfoMsg->K[5] = this->cy_ - req.roi.y_offset;
         this->roiCameraInfoMsg->K[6] = 0.0;
         this->roiCameraInfoMsg->K[7] = 0.0;
@@ -254,12 +254,12 @@ void GazeboRosProsilica::pollCallback(polled_camera::GetPolledImage::Request& re
         this->roiCameraInfoMsg->R[7] = 0.0;
         this->roiCameraInfoMsg->R[8] = 1.0;
         // camera projection matrix (same as camera matrix due to lack of distortion/rectification) (is this generated?)
-        this->roiCameraInfoMsg->P[0] = this->focal_length_;
+        this->roiCameraInfoMsg->P[0] = this->focal_length_x_;
         this->roiCameraInfoMsg->P[1] = 0.0;
         this->roiCameraInfoMsg->P[2] = this->cx_ - req.roi.x_offset;
-        this->roiCameraInfoMsg->P[3] = -this->focal_length_ * this->hack_baseline_;
+        this->roiCameraInfoMsg->P[3] = -this->focal_length_x_ * this->hack_baseline_;
         this->roiCameraInfoMsg->P[4] = 0.0;
-        this->roiCameraInfoMsg->P[5] = this->focal_length_;
+        this->roiCameraInfoMsg->P[5] = this->focal_length_y_;
         this->roiCameraInfoMsg->P[6] = this->cy_ - req.roi.y_offset;
         this->roiCameraInfoMsg->P[7] = 0.0;
         this->roiCameraInfoMsg->P[8] = 0.0;
