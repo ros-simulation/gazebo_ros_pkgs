@@ -108,8 +108,8 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
     odomOptions["world"] = WORLD;
     gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
 
-    joint_wheel_actuated_->SetMaxForce ( 0, wheel_torque_ );
-    joint_steering_->SetMaxForce ( 0, wheel_torque_ );
+    joint_wheel_actuated_->SetParam("fmax", 0, wheel_torque_ );
+    joint_steering_->SetParam("fmax", 0, wheel_torque_ );
 
 
     // Initialize update rate stuff
