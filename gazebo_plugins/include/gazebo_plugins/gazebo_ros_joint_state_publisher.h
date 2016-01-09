@@ -31,6 +31,9 @@
 #define JOINT_STATE_PUBLISHER_PLUGIN_HH
 
 #include <boost/bind.hpp>
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
