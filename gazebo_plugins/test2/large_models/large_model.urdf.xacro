@@ -11,7 +11,7 @@
        xmlns:rendering="http://playerstage.sourceforge.net/gazebo/xmlschema/#rendering"
        xmlns:renderable="http://playerstage.sourceforge.net/gazebo/xmlschema/#renderable"
        xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
-       xmlns:xacro="http://ros.org/wiki/xacro"
+       xmlns:xacro="http://www.ros.org/wiki/xacro"
        xmlns:physics="http://playerstage.sourceforge.net/gazebo/xmlschema/#physics">
 
   <link name="world"/>

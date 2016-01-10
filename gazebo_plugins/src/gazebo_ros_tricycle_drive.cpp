@@ -108,8 +108,8 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
     odomOptions["world"] = WORLD;
     gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
 
-    joint_wheel_actuated_->SetMaxForce ( 0, wheel_torque_ );
-    joint_steering_->SetMaxForce ( 0, wheel_torque_ );
+    joint_wheel_actuated_->SetParam("fmax", 0, wheel_torque_ );
+    joint_steering_->SetParam("fmax", 0, wheel_torque_ );
 
 
     // Initialize update rate stuff
@@ -167,7 +167,7 @@ void GazeboRosTricycleDrive::publishWheelJointState()
         joint_state_.name[i] = joints[i]->GetName();
         joint_state_.position[i] = joints[i]->GetAngle ( 0 ).Radian();
         joint_state_.velocity[i] = joints[i]->GetVelocity ( 0 );
-        joint_state_.effort[i] = joints[i]->GetForce ( 0 );
+        joint_state_.effort[i] = joints[i]->GetParam ("fmax", 0 );
     }
     joint_state_publisher_.publish ( joint_state_ );
 }

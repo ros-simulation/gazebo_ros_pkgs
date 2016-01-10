@@ -256,10 +256,10 @@ namespace gazebo {
 	 gzthrow(error);
    }
 
-    joints[LEFT_FRONT]->SetMaxForce(0, torque);
-    joints[RIGHT_FRONT]->SetMaxForce(0, torque);
-    joints[LEFT_REAR]->SetMaxForce(0, torque);
-    joints[RIGHT_REAR]->SetMaxForce(0, torque);
+    joints[LEFT_FRONT]->SetParam("fmax", 0, torque);
+    joints[RIGHT_FRONT]->SetParam("fmax", 0, torque);
+    joints[LEFT_REAR]->SetParam("fmax", 0, torque);
+    joints[RIGHT_REAR]->SetParam("fmax", 0, torque);
 
     // Make sure the ROS node for Gazebo has already been initialized
     if (!ros::isInitialized())
