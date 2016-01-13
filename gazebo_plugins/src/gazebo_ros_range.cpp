@@ -35,6 +35,7 @@
 /** \author Jose Capriles, Bence Magyar. */
 
 #include "gazebo_plugins/gazebo_ros_range.h"
+#include "gazebo_plugins/gazebo_ros_utils.h"
 
 #include <algorithm>
 #include <string>
@@ -92,8 +93,9 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   this->last_update_time_ = common::Time(0);
 
+  GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST;
   this->parent_ray_sensor_ =
-    boost::dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
+    dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
 
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosRange controller requires a Ray Sensor as its parent");
