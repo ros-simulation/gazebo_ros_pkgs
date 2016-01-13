@@ -230,8 +230,13 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   this->parent_ray_sensor_->SetActive(false);
 
+#if GAZEBO_MAJOR_VERSION >= 6
+  auto maxAngle = this->parent_ray_sensor_->AngleMax();
+  auto minAngle = this->parent_ray_sensor_->AngleMin();
+#else
   math::Angle maxAngle = this->parent_ray_sensor_->GetAngleMax();
   math::Angle minAngle = this->parent_ray_sensor_->GetAngleMin();
+#endif
 
   double maxRange = this->parent_ray_sensor_->GetRangeMax();
   double minRange = this->parent_ray_sensor_->GetRangeMin();
@@ -240,8 +245,13 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   int verticalRayCount = this->parent_ray_sensor_->GetVerticalRayCount();
   int verticalRangeCount = this->parent_ray_sensor_->GetVerticalRangeCount();
+#if GAZEBO_MAJOR_VERSION >= 6
+  auto verticalMaxAngle = this->parent_ray_sensor_->VerticalAngleMax();
+  auto verticalMinAngle = this->parent_ray_sensor_->VerticalAngleMin();
+#else
   math::Angle verticalMaxAngle = this->parent_ray_sensor_->GetVerticalAngleMax();
   math::Angle verticalMinAngle = this->parent_ray_sensor_->GetVerticalAngleMin();
+#endif
 
   double yDiff = maxAngle.Radian() - minAngle.Radian();
   double pDiff = verticalMaxAngle.Radian() - verticalMinAngle.Radian();
