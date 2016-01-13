@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include <gazebo_plugins/gazebo_ros_block_laser.h>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/HingeJoint.hh>
@@ -86,7 +87,8 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->node_ = transport::NodePtr(new transport::Node());
   this->node_->Init(worldName);
 
-  this->parent_ray_sensor_ = boost::dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
+  GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST;
+  this->parent_ray_sensor_ = dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
 
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosBlockLaser controller requires a Ray Sensor as its parent");

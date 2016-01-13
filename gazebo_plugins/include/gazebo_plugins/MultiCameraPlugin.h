@@ -43,7 +43,7 @@ namespace gazebo
                               unsigned int _width, unsigned int _height,
                               unsigned int _depth, const std::string &_format);
 
-    protected: boost::shared_ptr<sensors::MultiCameraSensor> parentSensor;
+    protected: sensors::MultiCameraSensorPtr parentSensor;
 
     protected: std::vector<unsigned int> width, height, depth;
     protected: std::vector<std::string> format;
