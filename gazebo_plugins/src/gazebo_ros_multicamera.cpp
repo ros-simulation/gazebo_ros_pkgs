@@ -77,12 +77,17 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     util->image_connect_count_ = this->image_connect_count_;
     util->image_connect_count_lock_ = this->image_connect_count_lock_;
     util->was_active_ = this->was_active_;
-    if (this->camera[i]->GetName().find("left") != std::string::npos)
+#if GAZEBO_MAJOR_VERSION >= 7
+    std::string camera_i_name = this->camera[i]->Name();
+#else
+    std::string camera_i_name = this->camera[i]->GetName();
+#endif
+    if (camera_i_name.find("left") != std::string::npos)
     {
       // FIXME: hardcoded, left hack_baseline_ 0
       util->Load(_parent, _sdf, "/left", 0.0);
     }
-    else if (this->camera[i]->GetName().find("right") != std::string::npos)
+    else if (camera_i_name.find("right") != std::string::npos)
     {
       double hackBaseline = 0.0;
       if (_sdf->HasElement("hackBaseline"))

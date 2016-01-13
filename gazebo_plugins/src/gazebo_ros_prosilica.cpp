@@ -209,7 +209,11 @@ void GazeboRosProsilica::pollCallback(polled_camera::GetPolledImage::Request& re
   {
     {
       // Get a pointer to image data
+#if GAZEBO_MAJOR_VERSION >= 7
+      src = this->parentSensor->GetCamera()->ImageData(0);
+#else
       src = this->parentSensor->GetCamera()->GetImageData(0);
+#endif
 
       if (src)
       {

@@ -376,7 +376,11 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
   float* toCopyFrom = (float*)data_arg;
   int index = 0;
 
+#if GAZEBO_MAJOR_VERSION >= 7
+  double hfov = this->parentSensor->GetDepthCamera()->HFOV().Radian();
+#else
   double hfov = this->parentSensor->GetDepthCamera()->GetHFOV().Radian();
+#endif
   double fl = ((double)this->width) / (2.0 *tan(hfov/2.0));
 
   // convert depth to point cloud
