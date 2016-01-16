@@ -39,6 +39,7 @@
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/sensors/Sensor.hh>
+#include <gazebo/gazebo_config.h>
 #include <ros/ros.h>
 
 #ifndef GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST
