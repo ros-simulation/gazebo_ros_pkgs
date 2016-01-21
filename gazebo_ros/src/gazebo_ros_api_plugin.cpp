@@ -776,6 +776,26 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
   }
   else
   {
+     /**
+     * @brief creates a header for the result
+     * @author Markus Bader markus.bader@tuwien.ac.at
+     * @date 21th Nov 2014
+     **/
+    {
+      std::map<std::string, unsigned int>::iterator it = access_count_get_model_state_.find(req.model_name);
+      if(it == access_count_get_model_state_.end()) 
+      {
+        access_count_get_model_state_.insert( std::pair<std::string, unsigned int>(req.model_name, 1) );
+        res.header.seq = 1;
+      } 
+      else 
+      {
+        it->second++;
+        res.header.seq = it->second;
+      }
+      res.header.stamp = ros::Time::now();
+      res.header.frame_id = req.relative_entity_name; /// @brief this is a redundant information
+    }
     // get model pose
     gazebo::math::Pose       model_pose = model->GetWorldPose();
     gazebo::math::Vector3    model_pos = model_pose.pos;

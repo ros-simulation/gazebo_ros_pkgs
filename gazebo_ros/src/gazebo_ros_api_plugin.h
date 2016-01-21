@@ -388,7 +388,9 @@ private:
 
   std::vector<GazeboRosApiPlugin::WrenchBodyJob*> wrench_body_jobs_;
   std::vector<GazeboRosApiPlugin::ForceJointJob*> force_joint_jobs_;
-
+  
+  /// \brief index counters to count the accesses on models via GetModelState
+  std::map<std::string, unsigned int> access_count_get_model_state_; 
 };
 }
 #endif
