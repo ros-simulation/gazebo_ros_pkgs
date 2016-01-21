@@ -130,6 +130,10 @@ namespace gazebo {
       double update_period_;
       common::Time last_update_time_;
 
+      double covariance_x_;
+      double covariance_y_;
+      double covariance_yaw_;
+
   };
 
 }

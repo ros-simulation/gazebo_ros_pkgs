@@ -201,6 +201,30 @@ namespace gazebo {
       this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
     }
 
+    this->covariance_x_ = 0.0001;
+    if (!_sdf->HasElement("covariance_x")) {
+      ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <covariance_x>, defaults to %f",
+          this->robot_namespace_.c_str(), covariance_x_);
+    } else {
+      covariance_x_ = _sdf->GetElement("covariance_x")->Get<double>();
+    }
+
+    this->covariance_y_ = 0.0001;
+    if (!_sdf->HasElement("covariance_y")) {
+      ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <covariance_y>, defaults to %f",
+          this->robot_namespace_.c_str(), covariance_y_);
+    } else {
+      covariance_y_ = _sdf->GetElement("covariance_y")->Get<double>();
+    }
+
+    this->covariance_yaw_ = 0.01;
+    if (!_sdf->HasElement("covariance_yaw")) {
+      ROS_WARN("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <covariance_yaw>, defaults to %f",
+          this->robot_namespace_.c_str(), covariance_yaw_);
+    } else {
+      covariance_yaw_ = _sdf->GetElement("covariance_yaw")->Get<double>();
+    }
+
     // Initialize update rate stuff
     if (this->update_rate_ > 0.0) {
       this->update_period_ = 1.0 / this->update_rate_;
@@ -402,12 +426,12 @@ namespace gazebo {
     odom_.pose.pose.orientation.y = pose.rot.y;
     odom_.pose.pose.orientation.z = pose.rot.z;
     odom_.pose.pose.orientation.w = pose.rot.w;
-    odom_.pose.covariance[0] = 0.00001;
-    odom_.pose.covariance[7] = 0.00001;
+    odom_.pose.covariance[0] = this->covariance_x_;
+    odom_.pose.covariance[7] = this->covariance_y_;
     odom_.pose.covariance[14] = 1000000000000.0;
     odom_.pose.covariance[21] = 1000000000000.0;
     odom_.pose.covariance[28] = 1000000000000.0;
-    odom_.pose.covariance[35] = 0.01;
+    odom_.pose.covariance[35] = this->covariance_yaw_;
 
     // get velocity in /odom frame
     math::Vector3 linear;
@@ -418,6 +442,12 @@ namespace gazebo {
     float yaw = pose.rot.GetYaw();
     odom_.twist.twist.linear.x = cosf(yaw) * linear.x + sinf(yaw) * linear.y;
     odom_.twist.twist.linear.y = cosf(yaw) * linear.y - sinf(yaw) * linear.x;
+    odom_.twist.covariance[0] = this->covariance_x_;
+    odom_.twist.covariance[7] = this->covariance_y_;
+    odom_.twist.covariance[14] = 1000000000000.0;
+    odom_.twist.covariance[21] = 1000000000000.0;
+    odom_.twist.covariance[28] = 1000000000000.0;
+    odom_.twist.covariance[35] = this->covariance_yaw_;
 
     odom_.header.stamp = current_time;
     odom_.header.frame_id = odom_frame;
