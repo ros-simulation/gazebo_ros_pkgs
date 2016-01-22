@@ -116,7 +116,6 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
     joint_steering_->SetMaxForce ( 0, wheel_torque_ );
 #endif
 
-
     // Initialize update rate stuff
     if ( this->update_rate_ > 0.0 ) this->update_period_ = 1.0 / this->update_rate_;
     else this->update_period_ = 0.0;
@@ -172,7 +171,7 @@ void GazeboRosTricycleDrive::publishWheelJointState()
         joint_state_.name[i] = joints[i]->GetName();
         joint_state_.position[i] = joints[i]->GetAngle ( 0 ).Radian();
         joint_state_.velocity[i] = joints[i]->GetVelocity ( 0 );
-        joint_state_.effort[i] = joints[i]->GetForce ( 0 );
+        joint_state_.effort[i] = joints[i]->GetParam ("fmax", 0 );
     }
     joint_state_publisher_.publish ( joint_state_ );
 }

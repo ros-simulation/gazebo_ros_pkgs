@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <property name="M_PI" value="3.1415926535897931" />
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="M_PI" value="3.1415926535897931" />
 
   <xacro:macro name="pioneer_sonar" params="name parent xyz rpy meshes">   
   
@@ -19,7 +19,7 @@
     <visual name="front_sonar_vis">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="${meshes}/back_sonar.stl"/>
+        <mesh filename="${meshes}/back_sonar.dae"/>
       </geometry>
       <material name="SonarYellow">
         <color rgba="0.715 0.583 0.210 1.0"/>

@@ -100,6 +100,7 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     joints_.resize ( 2 );
     joints_[LEFT] = gazebo_ros_->getJoint ( parent, "leftJoint", "left_joint" );
     joints_[RIGHT] = gazebo_ros_->getJoint ( parent, "rightJoint", "right_joint" );
+
 #if GAZEBO_MAJOR_VERSION > 2
     joints_[LEFT]->SetParam ( "fmax", 0, wheel_torque );
     joints_[RIGHT]->SetParam ( "fmax", 0, wheel_torque );
@@ -107,8 +108,6 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     joints_[LEFT]->SetMaxForce ( 0, wheel_torque );
     joints_[RIGHT]->SetMaxForce ( 0, wheel_torque );
 #endif
-
-
 
     this->publish_tf_ = true;
     if (!_sdf->HasElement("publishTf")) {
@@ -263,13 +262,8 @@ void GazeboRosDiffDrive::UpdateChild()
                 ( fabs ( wheel_speed_[LEFT] - current_speed[LEFT] ) < 0.01 ) ||
                 ( fabs ( wheel_speed_[RIGHT] - current_speed[RIGHT] ) < 0.01 ) ) {
             //if max_accel == 0, or target speed is reached
-#if GAZEBO_MAJOR_VERSION > 2
-            joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
-#else
-            joints_[LEFT]->SetVelocity ( 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
-#endif
+            wheel_applied_vel[LEFT ] = wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 );
+            wheel_applied_vel[RIGHT] = wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 );
         } else {
             if ( wheel_speed_[LEFT]>=current_speed[LEFT] )
                 wheel_speed_instr_[LEFT]+=fmin ( wheel_speed_[LEFT]-current_speed[LEFT],  wheel_accel * seconds_since_last_update );
@@ -284,14 +278,18 @@ void GazeboRosDiffDrive::UpdateChild()
             // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[LEFT], wheel_speed_[LEFT]);
             // ROS_INFO("actual wheel speed = %lf, issued wheel speed= %lf", current_speed[RIGHT],wheel_speed_[RIGHT]);
 
-#if GAZEBO_MAJOR_VERSION > 2
-            joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
-#else
-            joints_[LEFT]->SetVelocity ( 0,wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0,wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
-#endif
+            wheel_applied_vel[LEFT ] = wheel_speed_instr_[LEFT ] / ( wheel_diameter_ / 2.0 );
+            wheel_applied_vel[RIGHT] = wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 );
         }
+
+#if GAZEBO_MAJOR_VERSION > 2
+        joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
+        joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
+#else
+        joints_[LEFT]->SetVelocity ( 0,wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
+        joints_[RIGHT]->SetVelocity ( 0,wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
+#endif
+
         last_update_time_+= common::Time ( update_period_ );
     }
 }
