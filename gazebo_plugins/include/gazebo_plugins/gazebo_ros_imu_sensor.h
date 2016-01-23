@@ -31,7 +31,14 @@ namespace gazebo
   {
     class ImuSensor;
   }
-
+  /**
+  @anchor GazeboRosImuSensor
+  \ref GazeboRosImuSensor is a plugin to simulate an Inertial Motion Unit sensor, the main differences from \ref GazeboRosIMU are:
+  - inheritance from SensorPlugin instead of ModelPlugin,
+  - measurements are given by gazebo ImuSensor instead of being computed by the ros plugin,
+  - gravity is included in inertial measurements.
+  */
+  /** @brief Gazebo Ros imu sensor plugin. */
   class GazeboRosImuSensor : public SensorPlugin
   {
   public:
