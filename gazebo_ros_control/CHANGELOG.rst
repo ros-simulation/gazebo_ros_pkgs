@@ -46,6 +46,22 @@ Changelog for package gazebo_ros_control
 * Changed the rosdep key for gazebo to gazebo5, for Jade Gazebo5 will be used.
 * Contributors: Steven Peters, William Woodall
 
+2.4.9 (2015-08-16)
+------------------
+* Import changes from jade-branch
+* add missing dependencies
+* Add ifdefs to fix build with gazebo2
+  It was broken by `#315 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/315>`_.
+  Fixes `#321 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/321>`_.
+* Use Joint::SetParam for joint velocity motors
+  Before gazebo5, Joint::SetVelocity and SetMaxForce
+  were used to set joint velocity motors.
+  The API has changed in gazebo5, to use Joint::SetParam
+  instead.
+  The functionality is still available through the SetParam API.
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* Contributors: Akiyoshi Ochiai, Jose Luis Rivero, Steven Peters, ipa-fxm
+
 2.4.8 (2015-03-17)
 ------------------
 * Merge pull request `#244 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/244>`_ from cottsay/control-urdf-fix

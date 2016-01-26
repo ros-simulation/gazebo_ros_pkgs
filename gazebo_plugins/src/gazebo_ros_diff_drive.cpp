@@ -127,6 +127,10 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     wheel_speed_[RIGHT] = 0;
     wheel_speed_[LEFT] = 0;
 
+    // Initialize velocity support stuff
+    wheel_speed_instr_[RIGHT] = 0;
+    wheel_speed_instr_[LEFT] = 0;
+
     x_ = 0;
     rot_ = 0;
     alive_ = true;

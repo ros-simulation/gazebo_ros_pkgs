@@ -73,6 +73,11 @@ link_directories(
   ${OGRE-Terrain_LIBRARY_DIRS}
   ${OGRE-Paging_LIBRARY_DIRS}
 )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+
+if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
+  catkin_package(  INCLUDE_DIRS include LIBRARIES gazebo_ros_elevator)
+endif()
 
 if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
   catkin_package(  INCLUDE_DIRS include LIBRARIES gazebo_ros_elevator)
