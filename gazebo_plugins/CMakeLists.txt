@@ -109,6 +109,7 @@ catkin_package(
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
   gazebo_ros_planar_move
+  gazebo_ros_vacuum_gripper
   
   CATKIN_DEPENDS 
   message_generation 
@@ -265,6 +266,9 @@ target_link_libraries(gazebo_ros_ft_sensor ${GAZEBO_LIBRARIES} ${catkin_LIBRARIE
 add_library(gazebo_ros_range src/gazebo_ros_range.cpp)
 target_link_libraries(gazebo_ros_range ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} RayPlugin)
 
+add_library(gazebo_ros_vacuum_gripper src/gazebo_ros_vacuum_gripper.cpp)
+target_link_libraries(gazebo_ros_vacuum_gripper ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 ##
 ## Add your new plugin here
 ##
@@ -305,6 +309,7 @@ install(TARGETS
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
   gazebo_ros_planar_move
+  gazebo_ros_vacuum_gripper
   pub_joint_trajectory_test  
   gazebo_ros_gpu_laser
   gazebo_ros_range
