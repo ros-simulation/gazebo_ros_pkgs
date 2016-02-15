@@ -68,7 +68,21 @@ enum {
 GazeboRosDiffDrive::GazeboRosDiffDrive() {}
 
 // Destructor
-GazeboRosDiffDrive::~GazeboRosDiffDrive() {}
+GazeboRosDiffDrive::~GazeboRosDiffDrive() {
+  
+    ROS_DEBUG("Calling FiniChild in GazeboRosDiffDrive");
+    
+    event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+    
+    odometry_publisher_.shutdown();
+    joint_state_publisher_.shutdown();
+    cmd_vel_subscriber_.shutdown();
+    
+    queue_.clear();
+    queue_.disable();
+    alive_ = false;
+    callback_queue_thread_.join();
+}
 
 // Load the controller
 void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf )

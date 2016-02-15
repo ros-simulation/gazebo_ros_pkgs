@@ -128,11 +128,18 @@ public:
                 namespace_ = _parent->GetName();
             }
         }
-        if ( !namespace_.empty() )
+        if ( !namespace_.empty() ){
             this->namespace_ += "/";
-        rosnode_ = boost::shared_ptr<ros::NodeHandle> ( new ros::NodeHandle ( namespace_ ) );
+	}
+        rosnode_ = boost::shared_ptr<ros::NodeHandle> ( new ros::NodeHandle ( "~/" + namespace_ ) );
         info_text = plugin_ + "(ns = " + namespace_ + ")";
         readCommonParameter ();
+    }
+    /**
+     * Destructor
+     **/
+    virtual ~GazeboRos(){
+	this->rosnode_->shutdown();
     }
     /**
      * Constructor
@@ -212,6 +219,8 @@ public:
     void isInitialized();
 
 
+    const std::string getPluginName() const;
+    const std::string getNamespace() const;
     /**
      * reads the follwoing _tag_name paramer or sets a _default value
      * @param _value

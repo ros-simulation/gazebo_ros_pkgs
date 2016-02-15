@@ -18,9 +18,9 @@
   <xacro:laser_gpu name="front_laser" parent="chassis" xyz="0.16 0 0.1" rpy="0 0 0" meshes="package://gazebo_plugins/test/pioneer3dx/meshes/laser" />
     -->
   
-  <!-- Camera  -->
+  <!-- Camera  
   <xacro:include filename="$(find gazebo_plugins)/test/diff_drive/xacro/camera/camera.xacro"/>
   <xacro:cam name="front_camera" parent="chassis" xyz="0 0 0.5" rpy="0 0 0" />
-  
+  -->
   
 </robot>

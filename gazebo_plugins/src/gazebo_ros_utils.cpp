@@ -52,6 +52,12 @@ const boost::shared_ptr<ros::NodeHandle>& GazeboRos ::node() const {
 std::string GazeboRos ::resolveTF(const std::string &name) {
     return tf::resolve(tf_prefix_, name);
 }
+const std::string GazeboRos ::getPluginName() const{
+    return plugin_;
+}
+const std::string GazeboRos ::getNamespace() const{
+    return namespace_;
+}
 void GazeboRos ::readCommonParameter() {
 
     ROS_INFO("Starting plugin %s!", info());
