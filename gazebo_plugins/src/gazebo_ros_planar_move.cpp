@@ -124,7 +124,7 @@ namespace gazebo
     alive_ = true;
     recover_roll_velocity_p_gain_  = 0; /*10.0;*/
     recover_pitch_velocity_p_gain_ = 0; /*10.0;*/
-    recover_z_velocity_p_gain_ = 0; /*1.0;*/
+    recover_z_velocity_p_gain_ = 50; /*1.0;*/
 
     if (sdf->HasElement("recover_roll_velocity_p_gain"))
       (sdf->GetElement("recover_roll_velocity_p_gain")->GetValue()->Get(recover_roll_velocity_p_gain_));
@@ -136,18 +136,18 @@ namespace gazebo
     ROS_INFO("PlanarMovePlugin (ns = %s) recover_pitch_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_pitch_velocity_p_gain_);
     ROS_INFO("PlanarMovePlugin (ns = %s) recover_z_velocity_p_gain_ = %f", robot_namespace_.c_str(), recover_z_velocity_p_gain_);
 
-    x_velocity_limit_max_ = 10000.0;
-    x_velocity_limit_min_ = 10000.0;
-    y_velocity_limit_max_ = 10000.0;
-    y_velocity_limit_min_ = 10000.0;
-    rot_velocity_limit_max_ = 10000.0;
-    rot_velocity_limit_min_ = 10000.0;
-    x_acceleration_limit_max_ = 10000.0;
-    x_acceleration_limit_min_ = 10000.0;
-    y_acceleration_limit_max_ = 10000.0;
-    y_acceleration_limit_min_ = 10000.0;
-    rot_acceleration_limit_max_ = 10000.0;
-    rot_acceleration_limit_min_ = 10000.0;
+    x_velocity_limit_max_ = 1.0;
+    x_velocity_limit_min_ =-1.0;
+    y_velocity_limit_max_ = 1.0;
+    y_velocity_limit_min_ =-1.0;
+    rot_velocity_limit_max_ = 1.0;
+    rot_velocity_limit_min_ =-1.0;
+    x_acceleration_limit_max_ = 1.0;
+    x_acceleration_limit_min_ =-1.0;
+    y_acceleration_limit_max_ = 1.0;
+    y_acceleration_limit_min_ =-1.0;
+    rot_acceleration_limit_max_ = 1.0;
+    rot_acceleration_limit_min_ =-1.0;
 
     if (sdf->HasElement("x_velocity_limit_max"))
       (sdf->GetElement("x_velocity_limit_max")->GetValue()->Get(x_velocity_limit_max_));
