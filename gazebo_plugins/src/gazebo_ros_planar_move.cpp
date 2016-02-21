@@ -258,11 +258,12 @@ namespace gazebo
                                 -recover_roll_velocity_p_gain_ * pose.rot.GetPitch(),
                                 rot_);
     // put on the ground
-    double dist;
+    double distBelow;
     std::string entityName;
-    parent_->GetNearestEntityBelow(dist, entityName);
-    //std::cerr << entityName << ", dist = " << dist << " " << pose.pos.z << std::endl;
-    if ( dist > 0.3 ) {
+    gazebo::physics::EntityPtr entityBelow;
+    gazebo::physics::EntityPtr fromEntity = parent_;
+    this->GetNearestEntityBelow(fromEntity, distBelow, entityName);
+    if ( ( ! entityName.empty() ) && distBelow >  0.001 ) {
       linear_cmd_.z += recover_z_velocity_p_gain_ * gravity.z * dt;
     }
 
