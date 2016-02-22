@@ -115,20 +115,20 @@ namespace gazebo {
       math::Vector3 last_linear_cmd_;
       math::Vector3 last_angular_cmd_;
 
-      //
+     //
+     gazebo::physics::RayShapePtr rayShape_;
+     //
      void GetNearestEntityBelow(physics::EntityPtr _fromEntity,
                                 double &_distBelow,
                                 std::string &_entityName)
      {
        gazebo::physics::EntityPtr entityBelow = _fromEntity;
-       gazebo::physics::RayShapePtr rayShape = boost::dynamic_pointer_cast<physics::RayShape>(
-         _fromEntity->GetWorld()->GetPhysicsEngine()->CreateShape("ray", physics::CollisionPtr()));
        math::Vector3 start = _fromEntity->GetWorldPose().pos;
        math::Vector3 end = start;
        while ( entityBelow && ( entityBelow->GetParentModel() == _fromEntity->GetParentModel() ) ) {
          end.z -= 1000;
-         rayShape->SetPoints(start, end); // Set the ray based on starting and ending points relative to the body.
-         rayShape->GetIntersection(_distBelow, _entityName);
+         rayShape_->SetPoints(start, end); // Set the ray based on starting and ending points relative to the body.
+         rayShape_->GetIntersection(_distBelow, _entityName);
          entityBelow = parent_->GetWorld()->GetEntity(_entityName);
          start.z -= (_distBelow + 0.00001);
        }

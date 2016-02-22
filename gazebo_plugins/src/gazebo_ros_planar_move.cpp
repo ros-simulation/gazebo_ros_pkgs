@@ -228,6 +228,9 @@ namespace gazebo
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboRosPlanarMove::UpdateChild, this));
 
+    rayShape_ = boost::dynamic_pointer_cast<physics::RayShape>(
+         parent_->GetWorld()->GetPhysicsEngine()->CreateShape("ray", physics::CollisionPtr()));
+
     this->last_time_ = parent_->GetWorld()->GetSimTime();
   }
 
