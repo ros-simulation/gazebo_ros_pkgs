@@ -192,6 +192,35 @@
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
         <gravity>1</gravity>
+        <sensor name="sensor_ray" type="ray">
+          <pose>0.25 0.0 0.0 0.0 0.0 0.0</pose>
+          <visualize>true</visualize>
+          <ray>
+            <scan display="true">
+              <horizontal>
+                <samples>641</samples>
+                <resolution>1.0</resolution>
+                <min_angle>-1.0</min_angle>
+                <max_angle>1.0</max_angle>
+              </horizontal>
+              <!--vertical samples="1" resolution="1.0" min_angle="-0.5236" max_angle="0.5236" /-->
+            </scan>
+            <range>
+              <min>0.15</min>
+              <max>30.0</max>
+            </range>
+          </ray>
+          <!-- test plugin -->
+          <plugin name="plugin_1" filename="libgazebo_ros_laser.so">
+            <gaussianNoise>0.005</gaussianNoise>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>20</updateRate>
+            <topicName>base_scan</topicName>
+            <frameName>chassis</frameName>
+          </plugin>
+          <always_on>true</always_on>
+          <update_rate>2.0</update_rate>
+        </sensor>
       </link>
       <link name='right_wheel'>
         <pose>0.1 -0.17 0.11 0 1.5707 1.5707</pose>
