@@ -95,6 +95,11 @@ void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/
     imu_msg.linear_acceleration_covariance[4] = gn2;
     imu_msg.linear_acceleration_covariance[8] = gn2;
 
+    //preparing message header
+    imu_msg.header.frame_id = body_name;
+    imu_msg.header.stamp.sec = current_time.sec;
+    imu_msg.header.stamp.nsec = current_time.nsec;
+
     //publishing data
     imu_data_publisher.publish(imu_msg);
 
@@ -149,7 +154,7 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
     ROS_WARN_STREAM("missing <topicName>, set to /namespace/default: " << topic_name);
   }
 
-  //BODY, UNUSED
+  //BODY NAME
   if (sdf->HasElement("bodyName"))
   {
     body_name =  sdf->Get<std::string>("bodyName");

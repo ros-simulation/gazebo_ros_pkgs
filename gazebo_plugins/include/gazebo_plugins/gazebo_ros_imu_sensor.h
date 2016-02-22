@@ -93,7 +93,7 @@ namespace gazebo
     std::string robot_namespace;
     /// \brief The data is published on the topic named: /robot_namespace/topic_name.
     std::string topic_name;
-    /// \brief Name of the link of the IMU, unused parameter.
+    /// \brief Name of the link of the IMU.
     std::string body_name;
     /// \brief Sensor update rate.
     double update_rate;
