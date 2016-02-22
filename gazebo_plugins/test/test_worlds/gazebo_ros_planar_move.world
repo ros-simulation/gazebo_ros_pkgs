@@ -368,7 +368,7 @@
                 filename="libgazebo_ros_planar_move.so">
           <commandTopic>cmd_vel</commandTopic>
           <odometryTopic>odom</odometryTopic>
-          <odometryFrame>odonm</odometryFrame>
+          <odometryFrame>odom</odometryFrame>
           <odometryRate>20.0</odometryRate>
           <robotBaseFrame>chassis</robotBaseFrame>
           <joint_state_idel_sec>3.0</joint_state_idel_sec>
