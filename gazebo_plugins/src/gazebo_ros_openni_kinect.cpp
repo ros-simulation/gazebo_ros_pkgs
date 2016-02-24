@@ -382,6 +382,7 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
   // reconvert to original height and width after the flat reshape
   point_cloud_msg.height = rows_arg;
   point_cloud_msg.width = cols_arg;
+  point_cloud_msg.row_step = cols_arg * point_cloud_msg.point_step;
 
   return true;
 }
