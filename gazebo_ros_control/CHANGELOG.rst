@@ -2,6 +2,47 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* clean up merge from indigo-devel
+* merging from indigo-devel
+* Use Joint::SetParam for joint velocity motors
+  Before gazebo5, Joint::SetVelocity and SetMaxForce
+  were used to set joint velocity motors.
+  The API has changed in gazebo5, to use Joint::SetParam
+  instead.
+  The functionality is still available through the SetParam API.
+  cherry-picked from indigo-devel
+  Add ifdefs to fix build with gazebo2
+  It was broken by `#315 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/315>`_.
+  Fixes `#321 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/321>`_.
+* 2.4.9
+* Generate changelog
+* Import changes from jade-branch
+* add missing dependencies
+* Fix DefaultRobotHWSim puts robotNamespace twice
+  DefaultRobotHWSim::initSim() member function uses both
+  namespaced NodeHandle and robot_namespace string to create
+  parameter names.
+  For example,  if a robotNamespace is "rrbot",
+  DefaultRobotHWSim tries to get parameters from following names:
+  - /rrbot/rrbot/gazebo_ros_control/pid_gains/*
+  - /rrbot/rrbot/joint_limits/*
+  This commit change these names to:
+  - /rrbot/gazebo_ros_control/pid_gains/*
+  - /rrbot/joint_limits/*
+* Add ifdefs to fix build with gazebo2
+  It was broken by `#315 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/315>`_.
+  Fixes `#321 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/321>`_.
+* Use Joint::SetParam for joint velocity motors
+  Before gazebo5, Joint::SetVelocity and SetMaxForce
+  were used to set joint velocity motors.
+  The API has changed in gazebo5, to use Joint::SetParam
+  instead.
+  The functionality is still available through the SetParam API.
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* Contributors: Akiyoshi Ochiai, John Hsu, Jose Luis Rivero, Steven Peters, ipa-fxm
+
 2.5.1 (2015-08-16)
 ------------------
 * Fix DefaultRobotHWSim puts robotNamespace twice
