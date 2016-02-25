@@ -49,7 +49,11 @@ before_script:
 script:
   - cd ~/ros/ws_$REPOSITORY_NAME
   - catkin build -j4 --verbose --summary
-  - catkin run_tests -p1 -j4 --summary
+  # Run tests
+  - catkin run_tests
+  # catkin run_tests always returns 0, use catkin_test_results to check for errors
+  # https://github.com/catkin/catkin_tools/issues/245
+  - catkin_test_results
 
 notifications:
   email: false
