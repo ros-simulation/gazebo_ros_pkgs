@@ -2,7 +2,6 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<<<<<<< HEAD
 Forthcoming
 -----------
 * merging from indigo-devel
