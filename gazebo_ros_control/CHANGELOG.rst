@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.2 (2016-02-25)
+------------------
 * clean up merge from indigo-devel
 * merging from indigo-devel
 * Use Joint::SetParam for joint velocity motors

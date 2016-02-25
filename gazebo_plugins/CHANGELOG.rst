@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.2 (2016-02-25)
+------------------
 * Fix row_step of openni_kinect plugin
 * remove duplicated code during merge
 * merging from indigo-devel
