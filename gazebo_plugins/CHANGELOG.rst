@@ -2,6 +2,40 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_ros_utils.h: include gazebo_config.h
+  Make sure to include gazebo_config.h,
+  which defines the GAZEBO_MAJOR_VERSION macro
+* Fix compiler error with SetHFOV
+  In gazebo7, the rendering::Camera::SetHFOV function
+  is overloaded with a potential for ambiguity,
+  as reported in the following issue:
+  https://bitbucket.org/osrf/gazebo/issues/1830
+  This fixes the build by explicitly defining the
+  Angle type.
+* Add missing boost header
+  Some boost headers were remove from gazebo7 header files
+  and gazebo_ros_joint_state_publisher.cpp was using it
+  implicitly.
+* Fix gazebo7 build errors
+  The SensorPtr types have changed from boost:: pointers
+  to std:: pointers,
+  which requires boost::dynamic_pointer_cast to change to
+  std::dynamic_pointer_cast.
+  A helper macro is added that adds a `using` statement
+  corresponding to the correct type of dynamic_pointer_cast.
+  This macro should be narrowly scoped to protect
+  other code.
+* Fix gazebo6 deprecation warnings
+  Several RaySensor functions are deprecated in gazebo6
+  and are removed in gazebo7.
+  The return type is changed to use ignition math
+  and the function name is changed.
+  This adds ifdef's to handle the changes.
+* Added a missing initialization inside Differential Drive
+* Contributors: Mirko Ferrati, Steven Peters
+
 2.4.9 (2015-08-16)
 ------------------
 * Adds range plugin for infrared and ultrasound sensors from PAL Robotics
