@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.10 (2016-02-25)
+-------------------
 * Fix invalid signal name on OS X
   scripts/gazebo: line 30: kill: SIGINT: invalid signal specification
 * Restart package resolving from last position, do not start all over.

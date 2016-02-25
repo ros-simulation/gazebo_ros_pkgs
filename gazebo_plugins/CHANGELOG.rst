@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.10 (2016-02-25)
+-------------------
 * gazebo_ros_utils.h: include gazebo_config.h
   Make sure to include gazebo_config.h,
   which defines the GAZEBO_MAJOR_VERSION macro
