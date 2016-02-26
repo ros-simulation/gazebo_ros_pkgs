@@ -317,8 +317,8 @@ void GazeboRosDiffDrive::getWheelVelocities()
     double vr = x_;
     double va = rot_;
 
-    wheel_speed_[LEFT] = vr + va * wheel_separation_ / 2.0;
-    wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;
+    wheel_speed_[LEFT] = vr - va * wheel_separation_ / 2.0;
+    wheel_speed_[RIGHT] = vr + va * wheel_separation_ / 2.0;
 }
 
 void GazeboRosDiffDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg )
@@ -350,12 +350,12 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     // Book: Sigwart 2011 Autonompus Mobile Robots page:337
     double sl = vl * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
     double sr = vr * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
-    double theta = ( sl - sr ) /b;
-
-
-    double dx = ( sl + sr ) /2.0 * cos ( pose_encoder_.theta + ( sl - sr ) / ( 2.0*b ) );
-    double dy = ( sl + sr ) /2.0 * sin ( pose_encoder_.theta + ( sl - sr ) / ( 2.0*b ) );
-    double dtheta = ( sl - sr ) /b;
+    double sdiff = sr - sl;
+    double ssum = sl + sr; 
+    
+    double dx = ( ssum ) /2.0 * cos ( pose_encoder_.theta + ( sdiff ) / ( 2.0*b ) );
+    double dy = ( ssum ) /2.0 * sin ( pose_encoder_.theta + ( sdiff ) / ( 2.0*b ) );
+    double dtheta = ( sdiff ) /b;
 
     pose_encoder_.x += dx;
     pose_encoder_.y += dy;
