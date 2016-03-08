@@ -9,7 +9,7 @@
           type="gzserver"
           respawn="false" 
           output="screen"
-          args="-r $(find gazebo_ros)/test/set_model_state_test/set_model_state_test_p2dx.world" />
+          args="-r $(find gazebo_ros)/test/common_worlds/p2dx.world" />
 
     <test test-name="set_model_state_test" 
           pkg="gazebo_plugins" 
