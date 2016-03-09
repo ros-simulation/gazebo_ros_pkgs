@@ -2,7 +2,14 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-<<<<<<< HEAD
+2.5.2 (2016-02-25)
+------------------
+* merging from indigo-devel
+* 2.4.9
+* Generate changelog
+* GetModelState modification for jade
+* Contributors: John Hsu, Jose Luis Rivero, Markus Bader
+
 2.5.1 (2015-08-16)
 ------------------
 

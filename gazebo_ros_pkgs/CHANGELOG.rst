@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2016-02-25)
+------------------
+* merging from indigo-devel
+* 2.4.9
+* Generate changelog
+* Contributors: John Hsu, Jose Luis Rivero
+
 2.5.1 (2015-08-16)
 ------------------
 

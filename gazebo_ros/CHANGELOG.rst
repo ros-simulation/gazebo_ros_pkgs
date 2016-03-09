@@ -2,6 +2,25 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.2 (2016-02-25)
+------------------
+* merging from indigo-devel
+* Merge pull request `#302 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/302>`_ from maxbader/jade-devel-GetModelState
+  Header for GetModelState service request for jade-devel
+* Fix invalid signal name on OS X
+  scripts/gazebo: line 30: kill: SIGINT: invalid signal specification
+* Fix invalid signal name on OS X
+  scripts/gazebo: line 30: kill: SIGINT: invalid signal specification
+* Restart package resolving from last position, do not start all over.
+* 2.4.9
+* Generate changelog
+* Import changes from jade-branch
+* Add range world and launch file
+* fix crash
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* GetModelState modification for jade
+* Contributors: Bence Magyar, Boris Gromov, Guillaume Walck, Ian Chen, John Hsu, Jose Luis Rivero, Markus Bader, Steven Peters, hsu
+
 2.5.1 (2015-08-16)
 ------------------
 * Port of Pal Robotics range sensor plugin to Jade
