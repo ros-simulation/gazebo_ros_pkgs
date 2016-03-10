@@ -306,6 +306,7 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
 {
   sensor_msgs::PointCloud2Modifier pcd_modifier(point_cloud_msg);
   pcd_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+  // convert to flat array shape, we need to reconvert later
   pcd_modifier.resize(rows_arg*cols_arg);
   point_cloud_msg.is_dense = true;
 
@@ -377,6 +378,11 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
       }
     }
   }
+
+  // reconvert to original height and width after the flat reshape
+  point_cloud_msg.height = rows_arg;
+  point_cloud_msg.width = cols_arg;
+  point_cloud_msg.row_step = point_cloud_msg.point_step * point_cloud_msg.width;
 
   return true;
 }
