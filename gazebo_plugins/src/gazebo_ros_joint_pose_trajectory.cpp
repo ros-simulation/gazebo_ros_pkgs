@@ -202,7 +202,6 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
   {
     this->points_[i].positions.resize(chain_size);
     this->points_[i].time_from_start = trajectory->points[i].time_from_start;
-
     for (unsigned int j = 0; j < chain_size; ++j)
     {
       this->points_[i].positions[j] = trajectory->points[i].positions[j];
