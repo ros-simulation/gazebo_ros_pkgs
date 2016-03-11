@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <launch>
 
+  <env name="GAZEBO_PLUGIN_PATH" value="$(find gazebo_plugins)/../../../devel/lib"/>
+
   <include file="$(find gazebo_ros)/launch/range_world.launch">
     <arg name="gui" value="false"/>
   </include>
