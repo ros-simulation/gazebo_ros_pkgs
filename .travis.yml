@@ -50,7 +50,7 @@ script:
   - cd ~/ros/ws_$REPOSITORY_NAME
   - catkin build -j4 --verbose --summary
   # Run tests
-  - catkin run_tests
+  - catkin run_tests -j1 # have to run only 1 test at a time to ensure no gazebo instances collide
   # catkin run_tests always returns 0, use catkin_test_results to check for errors
   # https://github.com/catkin/catkin_tools/issues/245
   - catkin_test_results
