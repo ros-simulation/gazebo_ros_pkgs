@@ -257,9 +257,9 @@ namespace gazebo
       x_ = y_ = rot_ = 0;
     }
     linear_cmd_ = math::Vector3 (x_, y_, 0);
-    angular_cmd_ = math::Vector3(-recover_pitch_velocity_p_gain_* pose.rot.GetRoll(),
-                                -recover_roll_velocity_p_gain_ * pose.rot.GetPitch(),
-                                rot_);
+    angular_cmd_ = math::Vector3(-recover_roll_velocity_p_gain_ * pose.rot.GetRoll(),
+                                 -recover_pitch_velocity_p_gain_* pose.rot.GetPitch(),
+                                 rot_);
     // put on the ground
     double distBelow;
     std::string entityName;
@@ -292,6 +292,12 @@ namespace gazebo
     // compensate to horizental velocity
     math::Matrix3 pitch = math::Matrix3();
     pitch.SetFromAxis(math::Vector3(0,-1,0), pose.rot.GetPitch());
+
+    if ( angular_cmd_.x >  M_PI/2 ) angular_cmd_.x =  M_PI/2;
+    if ( angular_cmd_.x < -M_PI/2 ) angular_cmd_.x = -M_PI/2;
+    if ( angular_cmd_.y >  M_PI/2 ) angular_cmd_.y =  M_PI/2;
+    if ( angular_cmd_.y < -M_PI/2 ) angular_cmd_.y = -M_PI/2;
+
     parent_->SetLinearVel(pose.rot.GetAsMatrix4() * pitch * linear_cmd_);
     parent_->SetAngularVel(pose.rot.GetAsMatrix4() * angular_cmd_);
 

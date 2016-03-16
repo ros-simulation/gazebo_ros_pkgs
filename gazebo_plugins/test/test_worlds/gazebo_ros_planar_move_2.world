@@ -1,0 +1,283 @@
+<sdf version='1.4'>
+  <world name='default'>
+    <light name='sun' type='directional'>
+      <cast_shadows>1</cast_shadows>
+      <pose>0 0 10 0 -0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+    <model name='ground_plane'>
+      <static>1</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+            </friction>
+            <bounce/>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <visual name='visual'>
+          <cast_shadows>0</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Grey</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+    </model>
+    <model name="slope1">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>5 5 0.01</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+            </friction>
+            <bounce/>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>5 5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <script>Gazebo/WoodPallet</script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="slope2">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>5 5 0.01</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+            </friction>
+            <bounce/>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>5 5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <script>Gazebo/WoodPallet</script>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <physics type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+    </physics>
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>1</shadows>
+    </scene>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+    <model name='robot'>
+      <link name='base_link'>
+        <inertial>
+          <pose>0 0 0.8 0 0 0</pose>
+          <mass>20</mass>
+          <inertia>
+            <ixx>1.0</ixx>
+            <iyy>1.0</iyy>
+            <izz>1.0</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <pose>0 0 0 0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.4</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name='visual'>
+          <pose>0 0 0 0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.4</radius>
+              <length>0.1</length>
+            </cylinder>
+           </geometry>
+        </visual>
+        <sensor name="sensor_ray" type="ray">
+          <pose>0.4 0 0 0 0 0</pose>
+          <visualize>true</visualize>
+          <ray>
+            <scan display="true">
+              <horizontal>
+                <samples>641</samples>
+                <resolution>1.0</resolution>
+                <min_angle>-1.0</min_angle>
+                <max_angle>1.0</max_angle>
+              </horizontal>
+              <!--vertical samples="1" resolution="1.0" min_angle="-0.5236" max_angle="0.5236" /-->
+            </scan>
+            <range>
+              <min>0.15</min>
+              <max>30.0</max>
+            </range>
+          </ray>
+          <!-- test plugin -->
+          <plugin name="plugin_1" filename="libgazebo_ros_laser.so">
+            <gaussianNoise>0.005</gaussianNoise>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>20</updateRate>
+            <topicName>base_scan</topicName>
+            <frameName>base_link</frameName>
+          </plugin>
+          <always_on>true</always_on>
+          <update_rate>2.0</update_rate>
+        </sensor>
+      </link>
+      <static>0</static>
+        <plugin name="object_controller"
+                filename="libgazebo_ros_planar_move.so">
+          <commandTopic>cmd_vel</commandTopic>
+          <odometryTopic>odom</odometryTopic>
+          <odometryFrame>odom</odometryFrame>
+          <odometryRate>20.0</odometryRate>
+          <robotBaseFrame>chassis</robotBaseFrame>
+          <joint_state_idel_sec>3.0</joint_state_idel_sec>
+
+          <recover_roll_velocity_p_gain>10.0</recover_roll_velocity_p_gain>
+          <recover_pitch_velocity_p_gain>10.0</recover_pitch_velocity_p_gain>
+          <recover_z_velocity_p_gain>50.0</recover_z_velocity_p_gain>
+          <x_velocity_limit_max>0.5</x_velocity_limit_max>
+          <x_velocity_limit_min>-0.5</x_velocity_limit_min>
+          <y_velocity_limit_max>0.5</y_velocity_limit_max>
+          <y_velocity_limit_min>-0.5</y_velocity_limit_min>
+          <rot_velocity_limit_max>0.5</rot_velocity_limit_max>
+          <rot_velocity_limit_min>-0.5</rot_velocity_limit_min>
+          <x_acceleration_limit_max>1.5</x_acceleration_limit_max>
+          <x_acceleration_limit_min>-1.5</x_acceleration_limit_min>
+          <y_acceleration_limit_max>1.0</y_acceleration_limit_max>
+          <y_acceleration_limit_min>-1.0</y_acceleration_limit_min>
+          <rot_acceleration_limit_max>0.5</rot_acceleration_limit_max>
+          <rot_acceleration_limit_min>-0.5</rot_acceleration_limit_min>
+          <tilt_angle_par_max_velocity>0</tilt_angle_par_max_velocity>
+
+        </plugin>
+    </model>
+    <state world_name='default'>
+      <sim_time>350 317000000</sim_time>
+      <real_time>101 310248604</real_time>
+      <wall_time>1411160586 171302518</wall_time>
+      <model name='ground_plane'>
+        <pose>0 0 0 0 -0 0</pose>
+        <link name='link'>
+          <pose>0 0 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='robot'>
+        <link name='base_link'>
+          <!-- <pose>0 0 1.5 0 0 1.5707</pose> -->
+          <!-- <pose>0 0 1.5 0.4 0.7 1.5707</pose> -->
+          <!-- <pose>0 0 1.5 0.4 0.7 0.0</pose> -->
+          <pose>0 0 1.5 0.4 0.0 1.5707</pose>
+          <!-- <pose>0 0 1.5 0.4 0.0 0</pose> -->
+        </link>
+      </model>
+      <model name='slope1'>
+        <link name='link'>
+          <pose>0 3 0.3125 0 -0.124355 1.5707</pose> <!-- 1/8 slope -->
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='slope2'>
+        <link name='link'>
+          <pose>3 0 0.3125 0 -0.124355 0</pose> <!-- 1/8 slope -->
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+    </state>
+  </world>
+</sdf>
