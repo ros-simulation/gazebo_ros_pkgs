@@ -77,9 +77,9 @@ void GazeboRosCamera::OnNewFrame(const unsigned char *_image,
     const std::string &_format)
 {
 # if GAZEBO_MAJOR_VERSION >= 7
-  this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+  common::Time sensor_update_time = this->parentSensor_->LastMeasurementTime();
 # else
-  this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
+  common::Time sensor_update_time = this->parentSensor_->GetLastMeasurementTime();
 # endif
 
   if (!this->parentSensor->IsActive())
@@ -92,12 +92,18 @@ void GazeboRosCamera::OnNewFrame(const unsigned char *_image,
   {
     if ((*this->image_connect_count_) > 0)
     {
-      common::Time cur_time = this->world_->GetSimTime();
-      if (cur_time - this->last_update_time_ >= this->update_period_)
+      // OnNewFrame is triggered at the gazebo sensor <update_rate>
+      // while there is also a plugin <updateRate> that can throttle the
+      // rate down further (but then why not reduce the sensor rate?
+      // what is the use case?).
+      // Setting the <updateRate> to zero will make this plugin
+      // update at the gazebo sensor <update_rate>, update_period_ will be
+      // zero and the conditional always will be true.
+      if (sensor_update_time - this->last_update_time_ >= this->update_period_)
       {
-        this->PutCameraData(_image);
-        this->PublishCameraInfo();
-        this->last_update_time_ = cur_time;
+        this->PutCameraData(_image, sensor_update_time);
+        this->PublishCameraInfo(sensor_update_time);
+        this->last_update_time_ = sensor_update_time;
       }
     }
   }
