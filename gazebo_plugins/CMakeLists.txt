@@ -368,4 +368,10 @@ if (CATKIN_ENABLE_TESTING)
                     test/set_model_state_test/set_model_state_test.cpp)
   add_rostest(test/range/range_plugin.test)
   target_link_libraries(set_model_state-test ${catkin_LIBRARIES})
+
+  # Can't run this and the above test together
+  # add_rostest_gtest(camera-test
+  #                   test/camera/camera.test
+  #                   test/camera/camera.cpp)
+  # target_link_libraries(camera-test ${catkin_LIBRARIES})
 endif()
