@@ -42,6 +42,8 @@ namespace gazebo
 
     std::vector<GazeboRosCameraUtils*> utils;
 
+    protected: void OnNewFrame(const unsigned char *_image,
+                   GazeboRosCameraUtils* util);
     /// \brief Update the controller
     /// FIXME: switch to function vectors
     protected: virtual void OnNewFrameLeft(const unsigned char *_image,
