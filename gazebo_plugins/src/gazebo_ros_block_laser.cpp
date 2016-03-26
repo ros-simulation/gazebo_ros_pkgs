@@ -158,15 +158,41 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->rosnode_->getParam(std::string("tf_prefix"), prefix);
   this->frame_name_ = tf::resolve(prefix, this->frame_name_);
 
+
+  point_step_ = 16;
+  cloud_msg_.header.frame_id = frame_name_;
+  cloud_msg_.fields.resize(4);
+  cloud_msg_.fields[0].name = "x";
+  cloud_msg_.fields[0].offset = 0;
+  cloud_msg_.fields[0].datatype = sensor_msgs::PointField::FLOAT32;
+  cloud_msg_.fields[0].count = 1;
+  cloud_msg_.fields[1].name = "y";
+  cloud_msg_.fields[1].offset = 4;
+  cloud_msg_.fields[1].datatype = sensor_msgs::PointField::FLOAT32;
+  cloud_msg_.fields[1].count = 1;
+  cloud_msg_.fields[2].name = "z";
+  cloud_msg_.fields[2].offset = 8;
+  cloud_msg_.fields[2].datatype = sensor_msgs::PointField::FLOAT32;
+  cloud_msg_.fields[2].count = 1;
+  cloud_msg_.fields[3].name = "intensity";
+  cloud_msg_.fields[3].offset = 12;
+  cloud_msg_.fields[3].datatype = sensor_msgs::PointField::FLOAT32;
+  cloud_msg_.fields[3].count = 1;
+  // cloud_msg_.fields[4].name = "ring";
+  // cloud_msg_.fields[4].offset = 20;
+  // cloud_msg_.fields[4].datatype = sensor_msgs::PointField::UINT16;
+  // cloud_msg_.fields[4].count = 1;
+  cloud_msg_.point_step = point_step_;
+
   // set size of cloud message, starts at 0!! FIXME: not necessary
-  this->cloud_msg_.points.clear();
-  this->cloud_msg_.channels.clear();
-  this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
+  // this->cloud_msg_.points.clear();
+  // this->cloud_msg_.channels.clear();
+  // this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
 
   if (this->topic_name_ != "")
   {
     // Custom Callback Queue
-    ros::AdvertiseOptions ao = ros::AdvertiseOptions::create<sensor_msgs::PointCloud>(
+    ros::AdvertiseOptions ao = ros::AdvertiseOptions::create<sensor_msgs::PointCloud2>(
       this->topic_name_,1,
       boost::bind( &GazeboRosBlockLaser::LaserConnect,this),
       boost::bind( &GazeboRosBlockLaser::LaserDisconnect,this), ros::VoidPtr(), &this->laser_queue_);
@@ -223,145 +249,78 @@ void GazeboRosBlockLaser::OnNewLaserScans()
 // Put laser data to the interface
 void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 {
-  int i, hja, hjb;
-  int j, vja, vjb;
-  double vb, hb;
-  int    j1, j2, j3, j4; // four corners indices
-  double r1, r2, r3, r4, r; // four corner values + interpolated range
-  double intensity;
 
+  //clock_t start = clock();
   this->parent_ray_sensor_->SetActive(false);
 
-#if GAZEBO_MAJOR_VERSION >= 6
-  auto maxAngle = this->parent_ray_sensor_->AngleMax();
-  auto minAngle = this->parent_ray_sensor_->AngleMin();
-#else
-  math::Angle maxAngle = this->parent_ray_sensor_->GetAngleMax();
-  math::Angle minAngle = this->parent_ray_sensor_->GetAngleMin();
-#endif
+  int vertialRangeCnt = parent_ray_sensor_->GetLaserShape()->GetVerticalSampleCount();
+  int rangeCnt = parent_ray_sensor_->GetLaserShape()->GetSampleCount();
+  if(vertialRangeCnt*rangeCnt == 0) return;
 
-  double maxRange = this->parent_ray_sensor_->GetRangeMax();
-  double minRange = this->parent_ray_sensor_->GetRangeMin();
-  int rayCount = this->parent_ray_sensor_->GetRayCount();
-  int rangeCount = this->parent_ray_sensor_->GetRangeCount();
+  
+  double maxAngle = parent_ray_sensor_->GetAngleMax().Radian();
+  double minAngle = parent_ray_sensor_->GetAngleMin().Radian();
+  
+  double vertialMaxAngle = parent_ray_sensor_->GetVerticalAngleMax().Radian();
+  double vertialMinAngle = parent_ray_sensor_->GetVerticalAngleMin().Radian();
+  
 
-  int verticalRayCount = this->parent_ray_sensor_->GetVerticalRayCount();
-  int verticalRangeCount = this->parent_ray_sensor_->GetVerticalRangeCount();
-#if GAZEBO_MAJOR_VERSION >= 6
-  auto verticalMaxAngle = this->parent_ray_sensor_->VerticalAngleMax();
-  auto verticalMinAngle = this->parent_ray_sensor_->VerticalAngleMin();
-#else
-  math::Angle verticalMaxAngle = this->parent_ray_sensor_->GetVerticalAngleMax();
-  math::Angle verticalMinAngle = this->parent_ray_sensor_->GetVerticalAngleMin();
-#endif
+  // std::cout << "count: " << vertialRangeCnt << "  " 
+  //      << rangeCnt << "  " 
+  //      << vertialRangeCnt*rangeCnt << std::endl;
+  double delta_angle = (maxAngle - minAngle )/rangeCnt;
+  double delta_vertial_angle = (vertialMaxAngle - vertialMinAngle)/vertialRangeCnt;
+  
+  double maxRange = parent_ray_sensor_->GetRangeMax();
+  double minRange = parent_ray_sensor_->GetRangeMin();
+  
+  cloud_msg_.header.stamp.sec  = (world->GetSimTime()).sec;
+  cloud_msg_.header.stamp.nsec = (world->GetSimTime()).nsec;
+  
+  cloud_msg_.data.resize(vertialRangeCnt*rangeCnt*point_step_);
 
-  double yDiff = maxAngle.Radian() - minAngle.Radian();
-  double pDiff = verticalMaxAngle.Radian() - verticalMinAngle.Radian();
+  cloud_msg_.width = rangeCnt;
+  cloud_msg_.height = vertialRangeCnt;
 
+  cloud_msg_.is_bigendian = false;
+  cloud_msg_.is_dense = true;
 
-  // set size of cloud message everytime!
-  //int r_size = rangeCount * verticalRangeCount;
-  this->cloud_msg_.points.clear();
-  this->cloud_msg_.channels.clear();
-  this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
+  std::vector<double> ranges;
+  parent_ray_sensor_->GetRanges(ranges);
 
-  /***************************************************************/
-  /*                                                             */
-  /*  point scan from laser                                      */
-  /*                                                             */
-  /***************************************************************/
-  boost::mutex::scoped_lock sclock(this->lock);
-  // Add Frame Name
-  this->cloud_msg_.header.frame_id = this->frame_name_;
-  this->cloud_msg_.header.stamp.sec = _updateTime.sec;
-  this->cloud_msg_.header.stamp.nsec = _updateTime.nsec;
-
-  for (j = 0; j<verticalRangeCount; j++)
+  float x, y, z, intensity;
+  double ray;
+  float * ptr = (float*)( cloud_msg_.data.data() );
+  
+  for(int i = 0; i < vertialRangeCnt; ++i) 
   {
-    // interpolating in vertical direction
-    vb = (verticalRangeCount == 1) ? 0 : (double) j * (verticalRayCount - 1) / (verticalRangeCount - 1);
-    vja = (int) floor(vb);
-    vjb = std::min(vja + 1, verticalRayCount - 1);
-    vb = vb - floor(vb); // fraction from min
+    double vertialAngle = vertialMaxAngle - delta_vertial_angle*i; 
+    double angle = minAngle;
+    double cos_va = cos(vertialAngle);
+    double sin_va = sin(vertialAngle);
+    int range_id = i*rangeCnt; 
+    for(int j = 0; j < rangeCnt; j++)
+    { 
+      // ray = parent_ray_sensor_->GetLaserShape()->GetRange(range_id);
+      ray = ranges[range_id];
+      //intensity = parent_ray_sensor_->GetLaserShape()->GetRetro(i*rangeCnt + j);
+      //ray = sensor_model_(ray, dt); //add noise
 
-    assert(vja >= 0 && vja < verticalRayCount);
-    assert(vjb >= 0 && vjb < verticalRayCount);
+       x = ray*cos_va*cos(angle);
+       y = ray*cos_va*sin(angle);
+       z = ray*sin_va;
 
-    for (i = 0; i<rangeCount; i++)
-    {
-      // Interpolate the range readings from the rays in horizontal direction
-      hb = (rangeCount == 1)? 0 : (double) i * (rayCount - 1) / (rangeCount - 1);
-      hja = (int) floor(hb);
-      hjb = std::min(hja + 1, rayCount - 1);
-      hb = hb - floor(hb); // fraction from min
-
-      assert(hja >= 0 && hja < rayCount);
-      assert(hjb >= 0 && hjb < rayCount);
-
-      // indices of 4 corners
-      j1 = hja + vja * rayCount;
-      j2 = hjb + vja * rayCount;
-      j3 = hja + vjb * rayCount;
-      j4 = hjb + vjb * rayCount;
-      // range readings of 4 corners
-      r1 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j1) , maxRange-minRange);
-      r2 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j2) , maxRange-minRange);
-      r3 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j3) , maxRange-minRange);
-      r4 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j4) , maxRange-minRange);
-
-      // Range is linear interpolation if values are close,
-      // and min if they are very different
-      r = (1-vb)*((1 - hb) * r1 + hb * r2)
-         +   vb *((1 - hb) * r3 + hb * r4);
-
-      // Intensity is averaged
-      intensity = 0.25*(this->parent_ray_sensor_->GetLaserShape()->GetRetro(j1) +
-                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j2) +
-                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j3) +
-                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j4));
-
-      // std::cout << " block debug "
-      //           << "  ij("<<i<<","<<j<<")"
-      //           << "  j1234("<<j1<<","<<j2<<","<<j3<<","<<j4<<")"
-      //           << "  r1234("<<r1<<","<<r2<<","<<r3<<","<<r4<<")"
-      //           << std::endl;
-
-      // get angles of ray to get xyz for point
-      double yAngle = 0.5*(hja+hjb) * yDiff / (rayCount -1) + minAngle.Radian();
-      double pAngle = 0.5*(vja+vjb) * pDiff / (verticalRayCount -1) + verticalMinAngle.Radian();
-
-      /***************************************************************/
-      /*                                                             */
-      /*  point scan from laser                                      */
-      /*                                                             */
-      /***************************************************************/
-      //compare 2 doubles
-      double diffRange = maxRange - minRange;
-      double diff  = diffRange - r;
-      if (fabs(diff) < EPSILON_DIFF)
-      {
-        // no noise if at max range
-        geometry_msgs::Point32 point;
-        //pAngle is rotated by yAngle:
-        point.x = r * cos(pAngle) * cos(yAngle);
-        point.y = r * cos(pAngle) * sin(yAngle);
-        point.z = -r * sin(pAngle);
-
-        this->cloud_msg_.points.push_back(point); 
-      } 
-      else 
-      { 
-        geometry_msgs::Point32 point;
-        //pAngle is rotated by yAngle:
-        point.x = r * cos(pAngle) * cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        point.y = r * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        point.z = -r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        this->cloud_msg_.points.push_back(point); 
-      } // only 1 channel 
-
-      this->cloud_msg_.channels[0].values.push_back(intensity + this->GaussianKernel(0,this->gaussian_noise_)) ;
+       *(ptr + 0)  = x;
+       *(ptr + 1)  = y;
+       *(ptr + 2)  = z;
+       *(ptr + 3) = intensity;
+       ptr += cloud_msg_.fields.size();
+       angle += delta_angle;
+       range_id++;
     }
+
   }
+
   this->parent_ray_sensor_->SetActive(true);
 
   // send data out via ros message
