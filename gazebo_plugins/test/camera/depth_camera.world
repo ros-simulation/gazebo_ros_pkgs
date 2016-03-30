@@ -21,7 +21,7 @@
 
   <model name="model_1">
     <static>false</static>
-    <pose>0.0 2.0 2.0 0.0 0.0 0.0</pose>
+    <pose>2.0 0.0 4.0 0.0 0.0 0.0</pose>
     <link name="link_1">
       <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
       <inertial>
@@ -85,8 +85,15 @@
         </surface>
         <laser_retro>100.0</laser_retro>
       </collision>
+    </link>
+  </model>
 
-      <sensor name="depth_camera" type="depth">
+  <model name="camera_model">
+    <static>true</static>
+    <pose>0.0 0.0 0.5 0.0 0.0 0.0</pose>
+    <link name="camera_link">
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <sensor type="depth" name="camera1">
         <update_rate>0.5</update_rate>
         <camera name="head">
           <!-- TODO(lucasw) is noise used? 
@@ -111,12 +118,14 @@
           <alwaysOn>true</alwaysOn>
           <!-- Keep this zero, update_rate will control the frame rate -->
           <updateRate>0.0</updateRate>
+          <cameraName>camera1</cameraName>
           <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <!-- neither camera info is getting published, frame_id is empty 
+            in points and both image headers -->
           <depthImageTopicCameraInfoName>depth/camera_info</depthImageCameraInfoTopicName>
           <pointCloudTopicName>points</pointCloudTopicName>
-          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <cameraName>depth_cam</cameraName>
           <frameName>camera_link</frameName>
           <!-- TODO(lucasw) is this used by depth camera at all? -->
           <hackBaseline>0.07</hackBaseline>
@@ -127,7 +136,6 @@
           <distortionT1>0.0</distortionT1>
           <distortionT2>0.0</distortionT2>
         </plugin>
-        <always_on>true</always_on>
       </sensor>
     </link>
   </model>

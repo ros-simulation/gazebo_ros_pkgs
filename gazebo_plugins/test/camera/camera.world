@@ -21,7 +21,7 @@
 
   <model name="model_1">
     <static>false</static>
-    <pose>0.0 2.0 2.0 0.0 0.0 0.0</pose>
+    <pose>2.0 0.0 4.0 0.0 0.0 0.0</pose>
     <link name="link_1">
       <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
       <inertial>
@@ -85,7 +85,14 @@
         </surface>
         <laser_retro>100.0</laser_retro>
       </collision>
+    </link>
+  </model>
 
+  <model name="camera_model">
+    <static>true</static>
+    <pose>0.0 0.0 0.5 0.0 0.0 0.0</pose>
+    <link name="cmaera_link">
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
     <sensor type="camera" name="camera1">
       <update_rate>0.5</update_rate>
       <camera name="head">

@@ -98,7 +98,6 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
 void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
     GazeboRosCameraUtils* util)
 {
-  GazeboRosCameraUtils* util = this->utils[0];
 # if GAZEBO_MAJOR_VERSION >= 7
   common::Time sensor_update_time = util->parentSensor_->LastMeasurementTime();
 # else
