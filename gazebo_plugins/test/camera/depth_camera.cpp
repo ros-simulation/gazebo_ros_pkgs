@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <image_transport/image_transport.h>
 #include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
 
 class DepthCameraTest : public testing::Test
 {
@@ -9,15 +10,19 @@ protected:
   {
     has_new_image_ = false;
     has_new_depth_ = false;
+    has_new_points_ = false;
   }
 
   ros::NodeHandle nh_;
   image_transport::Subscriber cam_sub_;
   image_transport::Subscriber depth_sub_;
+  ros::Subscriber points_sub_;
   bool has_new_image_;
   ros::Time image_stamp_;
   bool has_new_depth_;
   ros::Time depth_stamp_;
+  bool has_new_points_;
+  ros::Time points_stamp_;
 public:
   void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
@@ -28,6 +33,11 @@ public:
   {
     depth_stamp_ = msg->header.stamp;
     has_new_depth_ = true;
+  }
+  void pointsCallback(const sensor_msgs::PointCloud2ConstPtr& msg)
+  {
+    points_stamp_ = msg->header.stamp;
+    has_new_points_ = true;
   }
 };
 
@@ -42,7 +52,9 @@ TEST_F(DepthCameraTest, cameraSubscribeTest)
   depth_sub_ = it.subscribe("camera1/depth/image_raw", 1,
                             &DepthCameraTest::depthCallback,
                             dynamic_cast<DepthCameraTest*>(this));
-
+  points_sub_ = nh_.subscribe("camera1/points", 1,
+                             &DepthCameraTest::pointsCallback,
+                             dynamic_cast<DepthCameraTest*>(this));
 #if 0
   // wait for gazebo to start publishing
   // TODO(lucasw) this isn't really necessary since this test
@@ -60,13 +72,14 @@ TEST_F(DepthCameraTest, cameraSubscribeTest)
   }
 #endif
 
-  while (!has_new_image_ || !has_new_depth_)
+  while (!has_new_image_ || !has_new_depth_ || !has_new_points_)
   {
     ros::spinOnce();
     ros::Duration(0.1).sleep();
   }
 
   EXPECT_EQ(depth_stamp_.toSec(), image_stamp_.toSec());
+  EXPECT_EQ(depth_stamp_.toSec(), points_stamp_.toSec());
   // This check depends on the update period being much longer
   // than the expected difference between now and the received image time
   // TODO(lucasw)
@@ -80,8 +93,13 @@ TEST_F(DepthCameraTest, cameraSubscribeTest)
   ROS_INFO_STREAM(time_diff);
   EXPECT_LT(time_diff, 0.5);
 
+  time_diff = (ros::Time::now() - points_stamp_).toSec();
+  ROS_INFO_STREAM(time_diff);
+  EXPECT_LT(time_diff, 0.5);
+
   cam_sub_.shutdown();
   depth_sub_.shutdown();
+  points_sub_.shutdown();
 }
 
 int main(int argc, char** argv)
