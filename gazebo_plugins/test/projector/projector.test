@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="gui" default="false"/>
+  <node name="gazebo_projector" pkg="gazebo_ros" type="gzserver"
+      args="$(find gazebo_plugins)/test/projector/projector.world"
+      output="screen"/>
+
+  <group if="$(arg gui)">
+    <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient"
+        respawn="false" output="screen"/>
+  </group>
+
+  <test test-name="test_projector" pkg="gazebo_plugins" type="toggle.py">
+  </test>
+</launch>
