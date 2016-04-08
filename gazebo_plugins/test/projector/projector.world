@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 <sdf version="1.4">
-
+  <!--
+    cd ~/catkin_ws/src/gazebo_ros_pkgs/gazebo_plugins/test/projector
+    GAZEBO_RESOURCE_PATH=`pwd` roslaunch gazebo_plugins projector.test gui:=true
+    rostopic pub /projector_plugin/projector std_msgs/Int32 "data: 0"
+    rostopic pub /projector_plugin/projector std_msgs/Int32 "data: 1"
+    -->
   <world name="default">
     <include>
       <uri>model://ground_plane</uri>
@@ -102,7 +107,7 @@
       </projector>
     </link>
       <plugin name="projector_plugin" filename="libgazebo_ros_projector.so">
-        <projector>projector_test/projector_plugin_test</projector>
+        <projector>projector_link/projector_plugin_test</projector>
         <alwaysOn>false</alwaysOn>
         <updateRate>15.0</updateRate>
         <textureName>checker.png</textureName>

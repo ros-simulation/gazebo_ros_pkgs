@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="laser_texture"
+      default="$(find gazebo_plugins)/test/projector/checker.png" />
+
+  <link name="world"/>
+
+  <joint name="joint_projector" type="fixed">
+    <origin xyz="0 0 2.0" rpy="0.0 0 0" />
+    <parent link="world" />
+    <child link="link_projector" />
+  </joint>
+
+  <link name="link_projector">
+    <visual>
+      <geometry>
+        <cylinder length="0.2" radius="0.05" />
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1.0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+  </link>
+
+  <gazebo reference="link_projector">
+    <projector name="projector_test_1">
+      <!-- setting the pose will produce glitches even when attached to a revolute joint -->
+      <pose>0 0 0 0 0 0</pose>
+      <texture>$(arg texture)</texture>
+      <fov>0.95</fov>
+      <near_clip>0.1</near_clip>
+      <far_clip>10.0</far_clip>
+    </projector>
+  </gazebo>
+  <gazebo>
+    <plugin name="projector_controller" filename="libgazebo_ros_projector.so">
+      <projector>link_projector/projector_test_1</projector>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>15.0</updateRate>
+      <textureName>$(arg texture)</textureName>
+      <!--filterTextureName>stereo_projection_pattern_filter.png</filterTextureName-->
+      <textureTopicName>projector_controller/image</textureTopicName>
+      <projectorTopicName>projector_controller/projector</projectorTopicName>
+    </plugin>
+  </gazebo>
+
+</robot>
