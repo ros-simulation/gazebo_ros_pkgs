@@ -115,5 +115,30 @@
         <projectorTopicName>projector_plugin/projector</projectorTopicName>
       </plugin>
   </model>
+
+
+  <model name="projector_model2">
+    <static>true</static>
+    <pose>0.25 0.0 0.5 0.0 0.0 0.0</pose>
+    <link name="projector_link2">
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <projector name="projector_plugin_test2">
+        <pose>0 0 0 0 0 0</pose>
+        <texture>checker.png</texture>
+        <fov>1.4</fov>
+        <near_clip>0.1</near_clip>
+        <far_clip>6</far_clip>
+      </projector>
+    </link>
+      <plugin name="projector_plugin2" filename="libgazebo_ros_projector.so">
+        <projector>projector_link2/projector_plugin_test2</projector>
+        <alwaysOn>false</alwaysOn>
+        <updateRate>15.0</updateRate>
+        <textureName>checker.png</textureName>
+        <textureTopicName>projector_plugin2/image</textureTopicName>
+        <projectorTopicName>projector_plugin2/projector</projectorTopicName>
+      </plugin>
+  </model>
+
   </world>
 </sdf>
