@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="gui" default="false"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="$(find gazebo_plugins)/test/projector" />
   <node name="gazebo_projector" pkg="gazebo_ros" type="gzserver"
       args="$(find gazebo_plugins)/test/projector/projector.world"
       output="screen"/>
