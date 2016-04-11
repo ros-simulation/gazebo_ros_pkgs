@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.3 (2016-04-11)
+------------------
 * Include binary in runtime
 * Remove ROS remapping arguments from gazebo_ros launch scripts.
 * Contributors: Jose Luis Rivero, Martin Pecka
