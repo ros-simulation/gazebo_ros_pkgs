@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.2 (2016-02-25)
 ------------------
 * merging from indigo-devel

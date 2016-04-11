@@ -2,6 +2,12 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Include binary in runtime
+* Remove ROS remapping arguments from gazebo_ros launch scripts.
+* Contributors: Jose Luis Rivero, Martin Pecka
+
 2.5.2 (2016-02-25)
 ------------------
 * merging from indigo-devel
