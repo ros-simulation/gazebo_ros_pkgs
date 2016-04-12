@@ -131,7 +131,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   ROS_INFO("INFO: gazebo_ros_laser plugin should set minimum intensity to %f due to cutoff in hokuyo filters." , this->hokuyo_min_intensity_);
 
-  if (!_sdf->GetElement("updateRate"))
+  if (!_sdf->HasElement("updateRate"))
   {
     ROS_INFO("Block laser plugin missing <updateRate>, defaults to 0");
     this->update_rate_ = 0;

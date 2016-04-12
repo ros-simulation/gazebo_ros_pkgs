@@ -144,7 +144,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   else
     this->gaussian_noise_ = this->sdf->Get<double>("gaussianNoise");
 
-  if (!this->sdf->GetElement("updateRate"))
+  if (!this->sdf->HasElement("updateRate"))
   {
     ROS_INFO("Range plugin missing <updateRate>, defaults to 0");
     this->update_rate_ = 0;

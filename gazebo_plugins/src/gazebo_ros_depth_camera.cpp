@@ -78,29 +78,29 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
   this->camera_ = this->depthCamera;
 
   // using a different default
-  if (!_sdf->GetElement("imageTopicName"))
+  if (!_sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = "ir/image_raw";
   if (!_sdf->HasElement("cameraInfoTopicName"))
     this->camera_info_topic_name_ = "ir/camera_info";
 
   // point cloud stuff
-  if (!_sdf->GetElement("pointCloudTopicName"))
+  if (!_sdf->HasElement("pointCloudTopicName"))
     this->point_cloud_topic_name_ = "points";
   else
     this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->Get<std::string>();
 
   // depth image stuff
-  if (!_sdf->GetElement("depthImageTopicName"))
+  if (!_sdf->HasElement("depthImageTopicName"))
     this->depth_image_topic_name_ = "depth/image_raw";
   else
     this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->Get<std::string>();
 
-  if (!_sdf->GetElement("depthImageCameraInfoTopicName"))
+  if (!_sdf->HasElement("depthImageCameraInfoTopicName"))
     this->depth_image_camera_info_topic_name_ = "depth/camera_info";
   else
     this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->Get<std::string>();
 
-  if (!_sdf->GetElement("pointCloudCutoff"))
+  if (!_sdf->HasElement("pointCloudCutoff"))
     this->point_cloud_cutoff_ = 0.4;
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->Get<double>();
