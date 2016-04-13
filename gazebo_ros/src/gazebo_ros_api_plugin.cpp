@@ -22,7 +22,7 @@
 
 #include <gazebo/common/Events.hh>
 #include <gazebo/gazebo_config.h>
-#include "gazebo_ros_api_plugin.h"
+#include <gazebo_ros/gazebo_ros_api_plugin.h>
 
 namespace gazebo
 {
