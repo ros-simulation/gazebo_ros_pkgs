@@ -211,7 +211,7 @@ add_library(gazebo_ros_f3d src/gazebo_ros_f3d.cpp)
 target_link_libraries(gazebo_ros_f3d ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_bumper src/gazebo_ros_bumper.cpp)
-add_dependencies(gazebo_ros_bumper gazebo_msgs_gencpp)
+add_dependencies(gazebo_ros_bumper ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_bumper ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ContactPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_projector src/gazebo_ros_projector.cpp)
@@ -225,18 +225,18 @@ add_library(gazebo_ros_force src/gazebo_ros_force.cpp)
 target_link_libraries(gazebo_ros_force ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_joint_trajectory src/gazebo_ros_joint_trajectory.cpp)
-add_dependencies(gazebo_ros_joint_trajectory gazebo_msgs_gencpp)
+add_dependencies(gazebo_ros_joint_trajectory ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_joint_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 
 add_library(gazebo_ros_joint_state_publisher src/gazebo_ros_joint_state_publisher.cpp)
 set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-add_dependencies(gazebo_ros_joint_state_publisher gazebo_msgs_gencpp)
+add_dependencies(gazebo_ros_joint_state_publisher ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_joint_state_publisher ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_joint_pose_trajectory src/gazebo_ros_joint_pose_trajectory.cpp)
-add_dependencies(gazebo_ros_joint_pose_trajectory gazebo_msgs_gencpp)
+add_dependencies(gazebo_ros_joint_pose_trajectory ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_joint_pose_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_diff_drive src/gazebo_ros_diff_drive.cpp)
