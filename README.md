@@ -1,5 +1,7 @@
 # gazebo_ros_pkgs
 
+[![Build Status](http://build.ros.org/buildStatus/icon?job=Ipr__gazebo_ros_pkgs__ubuntu_trusty_amd64)](http://build.ros.org/job/Ipr__gazebo_ros_pkgs__ubuntu_trusty_amd64)
+
 Wrappers, tools and additional API's for using ROS with the Gazebo simulator. Formally simulator_gazebo stack, gazebo_pkgs is a meta package. Now Catkinized and works with the standalone Gazebo debian.
 
 ### Installation
