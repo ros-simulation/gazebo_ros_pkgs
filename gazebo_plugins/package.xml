@@ -5,7 +5,7 @@
     Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
 
-  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
+  <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
 
   <license>BSD, Apache 2.0</license>
 
