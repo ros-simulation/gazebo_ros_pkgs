@@ -55,7 +55,13 @@ catkin_package(
     TinyXML
 )
 
-include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
+include_directories(
+  include
+  ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+  ${SDFormat_INCLUDE_DIRS}
+  ${TinyXML_INCLUDE_DIRS})
 
 set(cxx_flags)
 foreach (item ${GAZEBO_CFLAGS})
