@@ -22,5 +22,5 @@ then
     final="$final -s `catkin_find --first-only libgazebo_ros_api_plugin.$EXT`"
 fi
 
-setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
+setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo
 . $setup_path/setup.sh && gzserver $final
