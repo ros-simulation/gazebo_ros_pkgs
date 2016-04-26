@@ -63,6 +63,8 @@ include_directories(
   ${SDFormat_INCLUDE_DIRS}
   ${TinyXML_INCLUDE_DIRS})
 
+link_directories(${catkin_LIBRARY_DIRS})
+
 set(cxx_flags)
 foreach (item ${GAZEBO_CFLAGS})
   set(cxx_flags "${cxx_flags} ${item}")
