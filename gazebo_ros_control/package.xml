@@ -20,7 +20,7 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>control_toolbox</build_depend>
   <build_depend>controller_manager</build_depend>
-  <build_depend>libgazebo5-dev</build_depend>
+  <build_depend>libgazebo7-dev</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>hardware_interface</build_depend>
   <build_depend>transmission_interface</build_depend>
@@ -32,10 +32,10 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <!--
-    Need to use libgazebo5-dev since run script needs pkg-config
+    Need to use libgazebo7-dev since run script needs pkg-config
     See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
   -->
-  <run_depend>libgazebo5-dev</run_depend>
+  <run_depend>libgazebo7-dev</run_depend>
   <run_depend>control_toolbox</run_depend>
   <run_depend>controller_manager</run_depend>
   <run_depend>pluginlib</run_depend>
