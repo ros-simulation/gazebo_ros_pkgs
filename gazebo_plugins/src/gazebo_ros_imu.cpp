@@ -126,7 +126,7 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("frameName"))
   {
-    ROS_INFO("Laser plugin missing <frameName>, defaults to <bodyName>");
+    ROS_INFO("imu plugin missing <frameName>, defaults to <bodyName>");
     this->frame_name_ = link_name_;
   }
   else
