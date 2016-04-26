@@ -38,6 +38,8 @@
   <build_depend>tinyxml</build_depend>
 
   <run_depend>gazebo_msgs</run_depend>
+  <!-- Needed to pull in the setup.sh file for the tests -->
+  <run_depend>gazebo</run_depend>
   <!--
     Need to use libgazebo7-dev since run script needs pkg-config
     See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
@@ -53,5 +55,6 @@
   <run_depend>message_generation</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tinyxml</run_depend>
+
 
 </package>
