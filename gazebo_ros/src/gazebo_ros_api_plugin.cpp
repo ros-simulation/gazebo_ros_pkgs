@@ -22,7 +22,7 @@
 
 #include <gazebo/common/Events.hh>
 #include <gazebo/gazebo_config.h>
-#include "gazebo_ros_api_plugin.h"
+#include <gazebo_ros/gazebo_ros_api_plugin.h>
 
 namespace gazebo
 {
@@ -577,7 +577,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
       ROS_DEBUG_ONCE("Package name [%s] has path [%s]", package_name.c_str(), package_path.c_str());
 
       model_xml.replace(pos1,(pos2-pos1),package_path);
-      pos1 = model_xml.find(package_prefix,0);
+      pos1 = model_xml.find(package_prefix, pos1);
     }
   }
   // ROS_DEBUG("Model XML\n\n%s\n\n ",model_xml.c_str());

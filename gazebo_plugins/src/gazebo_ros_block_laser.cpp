@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include <gazebo_plugins/gazebo_ros_block_laser.h>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/HingeJoint.hh>
@@ -86,7 +87,8 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->node_ = transport::NodePtr(new transport::Node());
   this->node_->Init(worldName);
 
-  this->parent_ray_sensor_ = boost::dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
+  GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST;
+  this->parent_ray_sensor_ = dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
 
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosBlockLaser controller requires a Ray Sensor as its parent");
@@ -129,7 +131,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   ROS_INFO("INFO: gazebo_ros_laser plugin should set minimum intensity to %f due to cutoff in hokuyo filters." , this->hokuyo_min_intensity_);
 
-  if (!_sdf->GetElement("updateRate"))
+  if (!_sdf->HasElement("updateRate"))
   {
     ROS_INFO("Block laser plugin missing <updateRate>, defaults to 0");
     this->update_rate_ = 0;
@@ -230,8 +232,13 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   this->parent_ray_sensor_->SetActive(false);
 
+#if GAZEBO_MAJOR_VERSION >= 6
+  auto maxAngle = this->parent_ray_sensor_->AngleMax();
+  auto minAngle = this->parent_ray_sensor_->AngleMin();
+#else
   math::Angle maxAngle = this->parent_ray_sensor_->GetAngleMax();
   math::Angle minAngle = this->parent_ray_sensor_->GetAngleMin();
+#endif
 
   double maxRange = this->parent_ray_sensor_->GetRangeMax();
   double minRange = this->parent_ray_sensor_->GetRangeMin();
@@ -240,8 +247,13 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   int verticalRayCount = this->parent_ray_sensor_->GetVerticalRayCount();
   int verticalRangeCount = this->parent_ray_sensor_->GetVerticalRangeCount();
+#if GAZEBO_MAJOR_VERSION >= 6
+  auto verticalMaxAngle = this->parent_ray_sensor_->VerticalAngleMax();
+  auto verticalMinAngle = this->parent_ray_sensor_->VerticalAngleMin();
+#else
   math::Angle verticalMaxAngle = this->parent_ray_sensor_->GetVerticalAngleMax();
   math::Angle verticalMinAngle = this->parent_ray_sensor_->GetVerticalAngleMin();
+#endif
 
   double yDiff = maxAngle.Radian() - minAngle.Radian();
   double pDiff = verticalMaxAngle.Radian() - verticalMinAngle.Radian();

@@ -39,6 +39,7 @@
 #include <tf/tf.h>
 
 #include <gazebo_plugins/gazebo_ros_bumper.h>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 namespace gazebo
 {
@@ -65,7 +66,8 @@ GazeboRosBumper::~GazeboRosBumper()
 // Load the controller
 void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
-  this->parentSensor = boost::dynamic_pointer_cast<sensors::ContactSensor>(_parent);
+  GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST;
+  this->parentSensor = dynamic_pointer_cast<sensors::ContactSensor>(_parent);
   if (!this->parentSensor)
   {
     ROS_ERROR("Contact sensor parent is not of type ContactSensor");
@@ -80,7 +82,7 @@ void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // "publishing contact/collisions to this topic name: "
   //   << this->bumper_topic_name_ << std::endl;
   this->bumper_topic_name_ = "bumper_states";
-  if (_sdf->GetElement("bumperTopicName"))
+  if (_sdf->HasElement("bumperTopicName"))
     this->bumper_topic_name_ =
       _sdf->GetElement("bumperTopicName")->Get<std::string>();
 

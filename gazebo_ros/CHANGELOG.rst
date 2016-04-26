@@ -2,6 +2,21 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.10 (2016-02-25)
+-------------------
+* Fix invalid signal name on OS X
+  scripts/gazebo: line 30: kill: SIGINT: invalid signal specification
+* Restart package resolving from last position, do not start all over.
+* Contributors: Boris Gromov, Guillaume Walck
+
+2.4.9 (2015-08-16)
+------------------
+* Import changes from jade-branch
+* Add range world and launch file
+* fix crash
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* Contributors: Bence Magyar, Ian Chen, Jose Luis Rivero, Steven Peters
+
 2.4.8 (2015-03-17)
 ------------------
 * Specify physics engine in args to empty_world.launch
