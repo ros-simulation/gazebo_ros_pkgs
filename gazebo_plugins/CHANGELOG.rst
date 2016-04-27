@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.4 (2016-04-27)
+------------------
 * merge indigo, jade to kinetic-devel
 * Accept /world for the frameName parameter in gazebo_ros_p3d
 * Upgrade to gazebo 7 and remove deprecated driver_base dependency

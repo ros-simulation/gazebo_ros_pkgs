@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.4 (2016-04-27)
+------------------
 * merge indigo, jade to kinetic-devel
 * Upgrade to gazebo 7 and remove deprecated driver_base dependency
   * Upgrade to gazebo 7 and remove deprecated driver_base dependency
