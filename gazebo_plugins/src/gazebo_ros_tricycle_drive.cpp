@@ -261,6 +261,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     double diff_angle = current_angle - target_angle;
     if ( steering_speed_ > 0 ) {
       // this means we will steer using steering speed 
+      double applied_steering_speed = 0;
       if (fabs(diff_angle) < steering_angle_tolerance_ ) {
         // we're withing angle tolerance
         applied_steering_speed = 0;
