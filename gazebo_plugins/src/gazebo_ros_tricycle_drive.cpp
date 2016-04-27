@@ -229,14 +229,24 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     double applied_angle = target_angle;
 
     double current_speed = joint_wheel_actuated_->GetVelocity ( 0 );
-    if ( wheel_acceleration_ > 0 ) {
-        double diff_speed = current_speed - target_speed;
-        if ( fabs ( diff_speed ) < wheel_speed_tolerance_ ) {
-            applied_speed = current_speed;
-        } else if ( fabs(diff_speed) > wheel_acceleration_ * dt ) {
-            if(diff_speed > 0){ applied_speed = current_speed - wheel_acceleration_ * dt;}
-            else              { applied_speed = current_speed + wheel_deceleration_ * dt;}
+    if (wheel_acceleration_ > 0)
+    {
+      double diff_speed = current_speed - target_speed;
+      if ( fabs ( diff_speed ) < wheel_speed_tolerance_ )
+      {
+        applied_speed = current_speed;
+      }
+      else if ( fabs(diff_speed) > wheel_acceleration_ * dt )
+      {
+        if(diff_speed > 0)
+        {
+          applied_speed = current_speed - wheel_acceleration_ * dt;
         }
+        else
+        {
+          applied_speed = current_speed + wheel_deceleration_ * dt;
+        }
+      }
     }
 #if GAZEBO_MAJOR_VERSION > 2
     joint_wheel_actuated_->SetParam ( "vel", 0, applied_speed );
