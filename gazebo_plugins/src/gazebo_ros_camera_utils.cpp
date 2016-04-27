@@ -320,7 +320,7 @@ void GazeboRosCameraUtils::LoadThread()
     this->image_topic_name_, 2,
     boost::bind(&GazeboRosCameraUtils::ImageConnect, this),
     boost::bind(&GazeboRosCameraUtils::ImageDisconnect, this),
-    ros::VoidPtr(), &this->camera_queue_);
+    ros::VoidPtr(), true);
 
   // camera info publish rate will be synchronized to image sensor
   // publish rates.
@@ -334,7 +334,7 @@ void GazeboRosCameraUtils::LoadThread()
     this->camera_info_topic_name_, 2,
     boost::bind(&GazeboRosCameraUtils::ImageConnect, this),
     boost::bind(&GazeboRosCameraUtils::ImageDisconnect, this),
-    ros::VoidPtr(), &this->camera_queue_);
+    ros::VoidPtr(), true);
   this->camera_info_pub_ = this->rosnode_->advertise(cio);
 
   /* disabling fov and rate setting for each camera
