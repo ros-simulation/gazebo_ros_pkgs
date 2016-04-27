@@ -22,7 +22,7 @@
 
 #include <gazebo/common/Events.hh>
 #include <gazebo/gazebo_config.h>
-#include "gazebo_ros_api_plugin.h"
+#include <gazebo_ros/gazebo_ros_api_plugin.h>
 
 namespace gazebo
 {
@@ -33,7 +33,8 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   stop_(false),
   plugin_loaded_(false),
   pub_link_states_connection_count_(0),
-  pub_model_states_connection_count_(0)
+  pub_model_states_connection_count_(0),
+  pub_clock_frequency_(0)
 {
   robot_namespace_.clear();
 }
@@ -482,7 +483,8 @@ void GazeboRosApiPlugin::advertiseServices()
   nh_->setParam("/use_sim_time", true);
 
   // todo: contemplate setting environment variable ROBOT=sim here???
-
+  nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
+  last_pub_clock_time_ = world_->GetSimTime();
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
@@ -1800,18 +1802,28 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
 void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
 {
   ROS_ERROR("CLOCK2");
+  gazebo::common::Time sim_time = world_->GetSimTime();
+  if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
+    return;
+
   gazebo::common::Time currentTime = gazebo::msgs::Convert( msg->sim_time() );
   rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros
+  last_pub_clock_time_ = sim_time;
   pub_clock_.publish(ros_time_);
 }
 void GazeboRosApiPlugin::publishSimTime()
 {
+  gazebo::common::Time sim_time = world_->GetSimTime();
+  if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
+    return;
+
   gazebo::common::Time currentTime = world_->GetSimTime();
   rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros
+  last_pub_clock_time_ = sim_time;
   pub_clock_.publish(ros_time_);
 }
 

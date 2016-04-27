@@ -53,6 +53,13 @@ Changelog for package gazebo_ros
 * Changed the rosdep key for gazebo to gazebo5, for Jade Gazebo5 will be used.
 * Contributors: Steven Peters, William Woodall
 
+2.4.10 (2016-02-25)
+-------------------
+* Fix invalid signal name on OS X
+  scripts/gazebo: line 30: kill: SIGINT: invalid signal specification
+* Restart package resolving from last position, do not start all over.
+* Contributors: Boris Gromov, Guillaume Walck
+
 2.4.9 (2015-08-16)
 ------------------
 * Import changes from jade-branch
