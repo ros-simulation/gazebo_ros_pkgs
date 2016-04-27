@@ -156,9 +156,10 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->apos_ = 0;
   this->aeul_ = 0;
 
-  // if frameName specified is "world", "/map" or "map" report
+  // if frameName specified is "/world", "world", "/map" or "map" report
   // back inertial values in the gazebo world
-  if (this->frame_name_ != "world" &&
+  if (this->frame_name_ != "/world" &&
+      this->frame_name_ != "world" &&
       this->frame_name_ != "/map" &&
       this->frame_name_ != "map")
   {

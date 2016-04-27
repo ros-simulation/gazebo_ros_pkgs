@@ -36,7 +36,11 @@ catkin_package(
   DEPENDS gazebo
 )
 
-link_directories(${GAZEBO_LIBRARY_DIRS})
+link_directories(
+  ${GAZEBO_LIBRARY_DIRS}
+  ${catkin_LIBRARY_DIRS}
+)
+
 include_directories(include
   ${Boost_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
