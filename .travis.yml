@@ -1,0 +1,59 @@
+sudo: required
+dist: trusty
+language: generic
+compiler:
+  - gcc
+env:
+  global:
+    - CI_ROS_DISTRO=jade
+
+before_install:
+  - export CI_SOURCE_PATH=$(pwd)
+  - export REPOSITORY_NAME=${PWD##*/}
+  - echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
+  # Add ROS repositories
+  - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > 
+                            /etc/apt/sources.list.d/ros-latest.list'
+  - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+  - sudo apt-get update
+  # Install and initialize rosdep
+  - sudo apt-get install -qq -y python-dev                
+                                python-catkin-pkg         
+                                python-rosdep             
+                                python-wstool             
+                                ros-$CI_ROS_DISTRO-catkin 
+                                ros-$CI_ROS_DISTRO-ros    
+                                python-rosinstall         
+                                python-catkin-tools       
+                                python-catkin-pkg         
+                                python-rospkg             
+                                python-vcstools
+  - sudo `which rosdep` init
+  - rosdep update
+  # Use rosdep to install dependencies
+  - rosdep install --default-yes --from-paths ./ --rosdistro $CI_ROS_DISTRO
+
+install:
+  # Create workspace
+  - mkdir -p ~/ros/ws_$REPOSITORY_NAME
+  - cd ~/ros/ws_$REPOSITORY_NAME
+  - catkin config --init --mkdirs
+  - cd src
+  # Link the repo we are testing to the new workspace
+  - ln -s $CI_SOURCE_PATH .
+
+before_script:
+  - source /opt/ros/$CI_ROS_DISTRO/setup.bash
+  - rospack profile
+
+script:
+  - cd ~/ros/ws_$REPOSITORY_NAME
+  - catkin build -j4 --verbose --summary
+  # Run tests
+  - catkin run_tests -j1 # have to run only 1 test at a time to ensure no gazebo instances collide
+  # catkin run_tests always returns 0, use catkin_test_results to check for errors
+  # https://github.com/catkin/catkin_tools/issues/245
+  - catkin_test_results
+
+notifications:
+  email: false

@@ -72,33 +72,33 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
   this->camera_ = this->depthCamera;
 
   // using a different default
-  if (!_sdf->GetElement("imageTopicName"))
+  if (!_sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = "ir/image_raw";
   if (!_sdf->HasElement("cameraInfoTopicName"))
     this->camera_info_topic_name_ = "ir/camera_info";
 
   // point cloud stuff
-  if (!_sdf->GetElement("pointCloudTopicName"))
+  if (!_sdf->HasElement("pointCloudTopicName"))
     this->point_cloud_topic_name_ = "points";
   else
     this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->Get<std::string>();
 
   // depth image stuff
-  if (!_sdf->GetElement("depthImageTopicName"))
+  if (!_sdf->HasElement("depthImageTopicName"))
     this->depth_image_topic_name_ = "depth/image_raw";
   else
     this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->Get<std::string>();
 
-  if (!_sdf->GetElement("depthImageCameraInfoTopicName"))
+  if (!_sdf->HasElement("depthImageCameraInfoTopicName"))
     this->depth_image_camera_info_topic_name_ = "depth/camera_info";
   else
     this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->Get<std::string>();
 
-  if (!_sdf->GetElement("pointCloudCutoff"))
+  if (!_sdf->HasElement("pointCloudCutoff"))
     this->point_cloud_cutoff_ = 0.4;
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->Get<double>();
-  if (!_sdf->GetElement("pointCloudCutoffMax"))
+  if (!_sdf->HasElement("pointCloudCutoffMax"))
     this->point_cloud_cutoff_max_ = 5.0;
   else
     this->point_cloud_cutoff_max_ = _sdf->GetElement("pointCloudCutoffMax")->Get<double>();
@@ -306,6 +306,7 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
 {
   sensor_msgs::PointCloud2Modifier pcd_modifier(point_cloud_msg);
   pcd_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+  // convert to flat array shape, we need to reconvert later
   pcd_modifier.resize(rows_arg*cols_arg);
   point_cloud_msg.is_dense = true;
 
@@ -377,6 +378,11 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
       }
     }
   }
+
+  // reconvert to original height and width after the flat reshape
+  point_cloud_msg.height = rows_arg;
+  point_cloud_msg.width = cols_arg;
+  point_cloud_msg.row_step = point_cloud_msg.point_step * point_cloud_msg.width;
 
   return true;
 }

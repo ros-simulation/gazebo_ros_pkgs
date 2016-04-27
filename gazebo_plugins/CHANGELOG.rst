@@ -2,6 +2,134 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2016-04-11)
+------------------
+
+2.5.2 (2016-02-25)
+------------------
+* Fix row_step of openni_kinect plugin
+* remove duplicated code during merge
+* merging from indigo-devel
+* Merge pull request `#368 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/368>`_ from l0g1x/jade-devel
+  Covariance for published twist in skid steer plugin
+* gazebo_ros_utils.h: include gazebo_config.h
+  Make sure to include gazebo_config.h,
+  which defines the GAZEBO_MAJOR_VERSION macro
+* Fix compiler error with SetHFOV
+  In gazebo7, the rendering::Camera::SetHFOV function
+  is overloaded with a potential for ambiguity,
+  as reported in the following issue:
+  https://bitbucket.org/osrf/gazebo/issues/1830
+  This fixes the build by explicitly defining the
+  Angle type.
+* Add missing boost header
+  Some boost headers were remove from gazebo7 header files
+  and gazebo_ros_joint_state_publisher.cpp was using it
+  implicitly.
+* Fix gazebo7 build errors
+  The SensorPtr types have changed from boost:: pointers
+  to std:: pointers,
+  which requires boost::dynamic_pointer_cast to change to
+  std::dynamic_pointer_cast.
+  A helper macro is added that adds a `using` statement
+  corresponding to the correct type of dynamic_pointer_cast.
+  This macro should be narrowly scoped to protect
+  other code.
+* gazebo_ros_utils.h: include gazebo_config.h
+  Make sure to include gazebo_config.h,
+  which defines the GAZEBO_MAJOR_VERSION macro
+* Use Joint::SetParam for joint velocity motors
+  Before gazebo5, Joint::SetVelocity and SetMaxForce
+  were used to set joint velocity motors.
+  The API has changed in gazebo5, to use Joint::SetParam
+  instead.
+  The functionality is still available through the SetParam API.
+  cherry-picked from indigo-devel
+  Add ifdefs to fix build with gazebo2
+  It was broken by `#315 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/315>`_.
+  Fixes `#321 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/321>`_.
+* Fix gazebo6 deprecation warnings
+  Several RaySensor functions are deprecated in gazebo6
+  and are removed in gazebo7.
+  The return type is changed to use ignition math
+  and the function name is changed.
+  This adds ifdef's to handle the changes.
+* Fix compiler error with SetHFOV
+  In gazebo7, the rendering::Camera::SetHFOV function
+  is overloaded with a potential for ambiguity,
+  as reported in the following issue:
+  https://bitbucket.org/osrf/gazebo/issues/1830
+  This fixes the build by explicitly defining the
+  Angle type.
+* Add missing boost header
+  Some boost headers were remove from gazebo7 header files
+  and gazebo_ros_joint_state_publisher.cpp was using it
+  implicitly.
+* Fix gazebo7 build errors
+  The SensorPtr types have changed from boost:: pointers
+  to std:: pointers,
+  which requires boost::dynamic_pointer_cast to change to
+  std::dynamic_pointer_cast.
+  A helper macro is added that adds a `using` statement
+  corresponding to the correct type of dynamic_pointer_cast.
+  This macro should be narrowly scoped to protect
+  other code.
+* Fix gazebo6 deprecation warnings
+  Several RaySensor functions are deprecated in gazebo6
+  and are removed in gazebo7.
+  The return type is changed to use ignition math
+  and the function name is changed.
+  This adds ifdef's to handle the changes.
+* Publish organized point cloud from openni_kinect plugin
+* Added covariance matrix for published twist message in the skid steer plugin, as packages such as robot_localization require an associated non-zero covariance matrix
+* Added a missing initialization inside Differential Drive
+* 2.4.9
+* Generate changelog
+* Merge pull request `#335 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/335>`_ from pal-robotics-forks/add_range_sensor_plugin
+  Adds range plugin for infrared and ultrasound sensors from PAL Robotics
+* Import changes from jade-branch
+* Add range world and launch file
+* Adds range plugin for infrared and ultrasound sensors from PAL Robotics
+* Add ifdefs to fix build with gazebo2
+  It was broken by `#315 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/315>`_.
+  Fixes `#321 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/321>`_.
+* Use Joint::SetParam for joint velocity motors
+  Before gazebo5, Joint::SetVelocity and SetMaxForce
+  were used to set joint velocity motors.
+  The API has changed in gazebo5, to use Joint::SetParam
+  instead.
+  The functionality is still available through the SetParam API.
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* Contributors: Bence Magyar, John Hsu, Jose Luis Rivero, Kentaro Wada, Krystian, Mirko Ferrati, Steven Peters, hsu
+
+2.5.1 (2015-08-16)
+------------------
+* Port of Pal Robotics range sensor plugin to Jade
+* Added a comment about the need of libgazebo5-dev in runtime
+* Added gazebo version check
+* Added missing files
+* Added elevator plugin
+* Use c++11
+* run_depend on libgazebo5-dev (`#323 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323>`_)
+  Declare the dependency.
+  It can be fixed later if we don't want it.
+* Contributors: Jose Luis Rivero, Nate Koenig, Steven Peters
+
+* Port of Pal Robotics range sensor plugin to Jade
+* Added a comment about the need of libgazebo5-dev in runtime
+* Added gazebo version check
+* Added missing files
+* Added elevator plugin
+* Use c++11
+* run_depend on libgazebo5-dev
+* Contributors: Jose Luis Rivero, Nate Koenig, Steven Peters
+
+2.5.0 (2015-04-30)
+------------------
+* run_depend on libgazebo5-dev instead of gazebo5
+* Changed the rosdep key for gazebo to gazebo5, for Jade Gazebo5 will be used.
+* Contributors: Steven Peters, William Woodall
+
 2.4.9 (2015-08-16)
 ------------------
 * Adds range plugin for infrared and ultrasound sensors from PAL Robotics
@@ -21,10 +149,8 @@ Changelog for package gazebo_plugins
 
 2.4.7 (2014-12-15)
 ------------------
-* Merge pull request `#276 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/276>`_ from ros-simulation/gazebo_ogre_compile_flag_fix
-  fix missing ogre flags: removed from gazebo default (5.x.x candidate) cmake config
-* Merge pull request `#238 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/238>`_ from ayrton04/indigo-devel
-  Fixing handling of non-world frame velocities in setModelState.
+* fix missing ogre flags: removed from gazebo default (5.x.x candidate) cmake config
+* Fixing handling of non-world frame velocities in setModelState.
 * fix missing ogre flags (removed from gazebo cmake config)
 * change header to use opencv2/opencv.hpp issue `#274 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/274>`_
 * Update Gazebo/ROS tutorial URL

@@ -62,5 +62,4 @@ catkin_package(
   geometry_msgs
   sensor_msgs
   std_srvs
-  message_generation
   )

@@ -2,6 +2,57 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.3 (2016-04-11)
+------------------
+* Include binary in runtime
+* Remove ROS remapping arguments from gazebo_ros launch scripts.
+* Contributors: Jose Luis Rivero, Martin Pecka
+
+2.5.2 (2016-02-25)
+------------------
+* merging from indigo-devel
+* Merge pull request `#302 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/302>`_ from maxbader/jade-devel-GetModelState
+  Header for GetModelState service request for jade-devel
+* Fix invalid signal name on OS X
+  scripts/gazebo: line 30: kill: SIGINT: invalid signal specification
+* Fix invalid signal name on OS X
+  scripts/gazebo: line 30: kill: SIGINT: invalid signal specification
+* Restart package resolving from last position, do not start all over.
+* 2.4.9
+* Generate changelog
+* Import changes from jade-branch
+* Add range world and launch file
+* fix crash
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* GetModelState modification for jade
+* Contributors: Bence Magyar, Boris Gromov, Guillaume Walck, Ian Chen, John Hsu, Jose Luis Rivero, Markus Bader, Steven Peters, hsu
+
+2.5.1 (2015-08-16)
+------------------
+* Port of Pal Robotics range sensor plugin to Jade
+* Added a comment about the need of libgazebo5-dev in runtime
+* Added missing files
+* Added elevator plugin
+* Use c++11
+* run_depend on libgazebo5-dev (`#323 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323>`_)
+  Declare the dependency.
+  It can be fixed later if we don't want it.
+* Contributors: Jose Luis Rivero, Nate Koenig, Steven Peters
+
+* Port of Pal Robotics range sensor plugin to Jade
+* Added a comment about the need of libgazebo5-dev in runtime
+* Added missing files
+* Added elevator plugin
+* Use c++11
+* run_depend on libgazebo5-dev
+* Contributors: Jose Luis Rivero, Nate Koenig, Steven Peters
+
+2.5.0 (2015-04-30)
+------------------
+* run_depend on libgazebo5-dev instead of gazebo5
+* Changed the rosdep key for gazebo to gazebo5, for Jade Gazebo5 will be used.
+* Contributors: Steven Peters, William Woodall
+
 2.4.9 (2015-08-16)
 ------------------
 * Import changes from jade-branch
