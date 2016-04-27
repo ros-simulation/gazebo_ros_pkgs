@@ -77,12 +77,12 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     util->image_connect_count_ = this->image_connect_count_;
     util->image_connect_count_lock_ = this->image_connect_count_lock_;
     util->was_active_ = this->was_active_;
-    if (this->camera[i]->GetName().find("left") != std::string::npos)
+    if (this->camera[i]->Name().find("left") != std::string::npos)
     {
       // FIXME: hardcoded, left hack_baseline_ 0
       util->Load(_parent, _sdf, "/left", 0.0);
     }
-    else if (this->camera[i]->GetName().find("right") != std::string::npos)
+    else if (this->camera[i]->Name().find("right") != std::string::npos)
     {
       double hackBaseline = 0.0;
       if (_sdf->HasElement("hackBaseline"))
@@ -100,7 +100,7 @@ void GazeboRosMultiCamera::OnNewFrameLeft(const unsigned char *_image,
     const std::string &_format)
 {
   GazeboRosCameraUtils* util = this->utils[0];
-  util->sensor_update_time_ = util->parentSensor_->GetLastUpdateTime();
+  util->sensor_update_time_ = util->parentSensor_->LastUpdateTime();
 
   if (util->parentSensor_->IsActive())
   {
@@ -121,7 +121,7 @@ void GazeboRosMultiCamera::OnNewFrameRight(const unsigned char *_image,
     const std::string &_format)
 {
   GazeboRosCameraUtils* util = this->utils[1];
-  util->sensor_update_time_ = util->parentSensor_->GetLastUpdateTime();
+  util->sensor_update_time_ = util->parentSensor_->LastUpdateTime();
 
   if (util->parentSensor_->IsActive())
   {

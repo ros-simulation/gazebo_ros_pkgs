@@ -86,7 +86,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // Get then name of the parent sensor
   this->parent_sensor_ = _parent;
   // Get the world name.
-  std::string worldName = _parent->GetWorldName();
+  std::string worldName = _parent->WorldName();
   this->world_ = physics::get_world(worldName);
   // save pointers
   this->sdf = _sdf;
@@ -169,8 +169,8 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
       this->range_msg_.radiation_type = sensor_msgs::Range::INFRARED;
 
   this->range_msg_.field_of_view = fov_;
-  this->range_msg_.max_range = this->parent_ray_sensor_->GetRangeMax();
-  this->range_msg_.min_range = this->parent_ray_sensor_->GetRangeMin();
+  this->range_msg_.max_range = this->parent_ray_sensor_->RangeMax();
+  this->range_msg_.min_range = this->parent_ray_sensor_->RangeMin();
 
   // Init ROS
   if (ros::isInitialized())
@@ -247,7 +247,7 @@ void GazeboRosRange::OnNewLaserScans()
     if (cur_time - this->last_update_time_ >= this->update_period_)
     {
       common::Time sensor_update_time =
-        this->parent_sensor_->GetLastUpdateTime();
+        this->parent_sensor_->LastUpdateTime();
       this->PutRangeData(sensor_update_time);
       this->last_update_time_ = cur_time;
     }
@@ -279,18 +279,18 @@ void GazeboRosRange::PutRangeData(common::Time &_updateTime)
     // find ray with minimal range
     range_msg_.range = std::numeric_limits<sensor_msgs::Range::_range_type>::max();
 
-    int num_ranges = parent_ray_sensor_->GetLaserShape()->GetSampleCount() * parent_ray_sensor_->GetLaserShape()->GetVerticalSampleCount();
+    int num_ranges = parent_ray_sensor_->LaserShape()->GetSampleCount() * parent_ray_sensor_->LaserShape()->GetVerticalSampleCount();
 
     for(int i = 0; i < num_ranges; ++i)
     {
-        double ray = parent_ray_sensor_->GetLaserShape()->GetRange(i);
+        double ray = parent_ray_sensor_->LaserShape()->GetRange(i);
         if (ray < range_msg_.range)
             range_msg_.range = ray;
     }
 
     // add Gaussian noise and limit to min/max range
     if (range_msg_.range < range_msg_.max_range)
-        range_msg_.range = std::min(range_msg_.range + this->GaussianKernel(0,gaussian_noise_), parent_ray_sensor_->GetRangeMax());
+        range_msg_.range = std::min(range_msg_.range + this->GaussianKernel(0,gaussian_noise_), parent_ray_sensor_->RangeMax());
 
     this->parent_ray_sensor_->SetActive(true);
 

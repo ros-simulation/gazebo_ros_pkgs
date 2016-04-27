@@ -62,7 +62,7 @@ inline std::string GetModelName ( const sensors::SensorPtr &parent )
 {
     std::string modelName;
     std::vector<std::string> values;
-    std::string scopedName = parent->GetScopedName();
+    std::string scopedName = parent->ScopedName();
     boost::replace_all ( scopedName, "::", "," );
     boost::split ( values, scopedName, boost::is_any_of ( "," ) );
     if ( values.size() < 2 ) {
