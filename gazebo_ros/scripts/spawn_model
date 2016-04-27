@@ -21,6 +21,7 @@
 import rospy, sys, os, time
 import string
 import warnings
+import re
 
 from gazebo_ros import gazebo_interface
 
@@ -63,6 +64,7 @@ def usage():
     -P <pitch in radians> - optional: initial pose, use 0 if left out
     -Y <yaw in radians> - optional: initial pose, use 0 if left out
     -J <joint_name joint_position> - optional: initialize the specified joint at the specified value
+    -package_to_model - optional: convert urdf <mesh filename="package://..." to <mesh filename="model://..."
     -b - optional: bond to gazebo and delete the model when this program is interrupted
     '''
     sys.exit(1)
@@ -86,6 +88,7 @@ class SpawnModel():
         self.sdf_format              = False
         self.joint_names             = []
         self.joint_positions         = []
+        self.package_to_model        = False
         self.bond                    = False
 
     def parseUserInputs(self):
@@ -175,6 +178,8 @@ class SpawnModel():
           if sys.argv[i] == '-Y':
             if len(sys.argv) > i+1:
               self.initial_rpy[2] = float(sys.argv[i+1])
+          if sys.argv[i] == '-package_to_model':
+              self.package_to_model = True;
           if sys.argv[i] == '-b':
             self.bond = True
 
@@ -246,6 +251,9 @@ class SpawnModel():
         else:
           print "Error: user specified param or filename is an empty string"
           sys.exit(0)
+
+        if self.package_to_model:
+            model_xml = re.sub("<\s*mesh\s+filename\s*=\s*([\"|'])package://","<mesh filename=\g<1>model://", model_xml)
 
         # setting initial pose
         initial_pose = Pose()

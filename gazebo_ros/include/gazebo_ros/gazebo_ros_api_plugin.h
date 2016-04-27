@@ -361,6 +361,8 @@ private:
   dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
 
   ros::Publisher     pub_clock_;
+  int pub_clock_frequency_;
+  gazebo::common::Time last_pub_clock_time_;
 
   /// \brief A mutex to lock access to fields that are used in ROS message callbacks
   boost::mutex lock_;
