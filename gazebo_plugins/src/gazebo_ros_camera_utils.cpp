@@ -320,7 +320,7 @@ void GazeboRosCameraUtils::LoadThread()
     this->image_topic_name_, 2,
     boost::bind(&GazeboRosCameraUtils::ImageConnect, this),
     boost::bind(&GazeboRosCameraUtils::ImageDisconnect, this),
-    ros::VoidPtr(), &this->camera_queue_);
+    ros::VoidPtr(), true);
 
   // camera info publish rate will be synchronized to image sensor
   // publish rates.

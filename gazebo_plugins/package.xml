@@ -73,4 +73,8 @@
   <run_depend>camera_info_manager</run_depend>
   <run_depend>std_msgs</run_depend>
 
+  <!-- When moved to format 2, this can be turned test_depend -->
+  <build_depend>rostest</build_depend>
+  <run_depend>rostest</run_depend>
+
 </package>
