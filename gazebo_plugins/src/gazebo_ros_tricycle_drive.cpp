@@ -227,18 +227,26 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
 {
     double applied_speed = target_speed;
     double applied_angle = target_angle;
-    double applied_steering_speed = 0;
 
     double current_speed = joint_wheel_actuated_->GetVelocity ( 0 );
-    if ( wheel_acceleration_ > 0 ) {
-        double diff_speed = current_speed - target_speed;
-        if ( fabs ( diff_speed ) < wheel_speed_tolerance_ ) {
-            applied_speed = target_speed;
-        } else if ( diff_speed < target_speed ) {
-            applied_speed = current_speed + wheel_acceleration_ * dt;
-        } else {
-            applied_speed = current_speed - wheel_deceleration_ * dt;
+    if (wheel_acceleration_ > 0)
+    {
+      double diff_speed = current_speed - target_speed;
+      if ( fabs ( diff_speed ) < wheel_speed_tolerance_ )
+      {
+        applied_speed = current_speed;
+      }
+      else if ( fabs(diff_speed) > wheel_acceleration_ * dt )
+      {
+        if(diff_speed > 0)
+        {
+          applied_speed = current_speed - wheel_acceleration_ * dt;
         }
+        else
+        {
+          applied_speed = current_speed + wheel_deceleration_ * dt;
+        }
+      }
     }
 #if GAZEBO_MAJOR_VERSION > 2
     joint_wheel_actuated_->SetParam ( "vel", 0, applied_speed );
@@ -247,32 +255,68 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
 #endif
     
     double current_angle = joint_steering_->GetAngle ( 0 ).Radian();
-    if(target_angle > +M_PI / 2.0) target_angle =  +M_PI / 2.0;
-    if(target_angle < -M_PI / 2.0) target_angle =  -M_PI / 2.0;
+
+    // truncate target angle
+    if (target_angle > +M_PI / 2.0)
+    {
+      target_angle =  +M_PI / 2.0;
+    }
+    else if (target_angle < -M_PI / 2.0)
+    {
+      target_angle =  -M_PI / 2.0;
+    }
+
+    // if steering_speed_ is > 0, use speed control, otherwise use position control
+    // With position control, one cannot expect dynamics to work correctly.
+    double diff_angle = current_angle - target_angle;
     if ( steering_speed_ > 0 ) {
-        double diff_angle = current_angle - target_angle;
-        if ( fabs ( diff_angle ) < steering_angle_tolerance_ ) {
-          applied_steering_speed = 0;
-        } else if ( diff_angle < target_speed ) {
-            applied_steering_speed = steering_speed_;
-        } else {
-            applied_steering_speed = -steering_speed_;
-        }
+      // this means we will steer using steering speed 
+      double applied_steering_speed = 0;
+      if (fabs(diff_angle) < steering_angle_tolerance_ ) {
+        // we're withing angle tolerance
+        applied_steering_speed = 0;
+      } else if ( diff_angle < target_speed ) {
+        // steer toward target angle
+        applied_steering_speed = steering_speed_;
+      } else {
+        // steer toward target angle
+        applied_steering_speed = -steering_speed_;
+      }
+
+      // use speed control, not recommended, for better dynamics use force control
 #if GAZEBO_MAJOR_VERSION > 2
       joint_steering_->SetParam ( "vel", 0, applied_steering_speed );
 #else
       joint_steering_->SetVelocity ( 0, applied_steering_speed );
 #endif
-    }else {
+    }
+    else {
+      // steering_speed_ is zero, use position control.
+      // This is not a good idea if we want dynamics to work.
+      if (fabs(diff_angle) < steering_speed_ * dt)
+      {
+        // we can take a step and still not overshoot target
+        if(diff_angle > 0)
+        {
+          applied_angle =  current_angle - steering_speed_ * dt;
+        }
+        else
+        {
+          applied_angle =  current_angle + steering_speed_ * dt;
+        }
+      }
+      else
+      {
+        applied_angle = target_angle;
+      }
 #if GAZEBO_MAJOR_VERSION >= 4
-      joint_steering_->SetPosition ( 0, applied_angle );
+      joint_steering_->SetPosition(0, applied_angle);
 #else
-      joint_steering_->SetAngle ( 0, math::Angle ( applied_angle ) );
+      joint_steering_->SetAngle(0, math::Angle(applied_angle));
 #endif
     }
     //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !", 
     //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
-
 }
 
 // Finalize the controller
