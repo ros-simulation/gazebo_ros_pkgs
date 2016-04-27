@@ -249,7 +249,7 @@ class SpawnModel():
           sys.exit(0)
 
         if self.package_to_model:
-            model_xml = re.sub("<\s*mesh\s+filename\s*=\s*\"package:/?/?","<mesh filename=\"model://", model_xml)
+            model_xml = re.sub("<\s*mesh\s+filename\s*=\s*([\"|'])package://","<mesh filename=\g<1>model://", model_xml)
 
         # setting initial pose
         initial_pose = Pose()
