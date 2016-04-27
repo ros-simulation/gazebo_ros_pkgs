@@ -2,6 +2,18 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* merge indigo, jade to kinetic-devel
+* Upgrade to gazebo 7 and remove deprecated driver_base dependency
+  * Upgrade to gazebo 7 and remove deprecated driver_base dependency
+  * disable gazebo_ros_control until dependencies are met
+  * Remove stray backslash
+* spawn_model: adding -b option to bond to the model and delete it on sigint
+* Update maintainer for Kinetic release
+* Allow respawning gazebo node.
+* Contributors: Hugo Boyer, Isaac IY Saito, Jackie Kay, Jonathan Bohren, Jose Luis Rivero, Steven Peters
+
 2.5.3 (2016-04-11)
 ------------------
 * Include binary in runtime

@@ -2,6 +2,18 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* merge indigo, jade to kinetic-devel
+* Accept /world for the frameName parameter in gazebo_ros_p3d
+* Upgrade to gazebo 7 and remove deprecated driver_base dependency
+  * Upgrade to gazebo 7 and remove deprecated driver_base dependency
+  * disable gazebo_ros_control until dependencies are met
+  * Remove stray backslash
+* Update maintainer for Kinetic release
+* use HasElement in if condition
+* Contributors: Hugo Boyer, Jackie Kay, Jose Luis Rivero, Steven Peters, William Woodall, Yuki Furuta
+
 2.5.3 (2016-04-11)
 ------------------
 
