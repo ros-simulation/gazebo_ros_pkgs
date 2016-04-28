@@ -371,7 +371,6 @@ if (CATKIN_ENABLE_TESTING)
   add_rostest(test/range/range_plugin.test)
   target_link_libraries(set_model_state-test ${catkin_LIBRARIES})
 
-  # Can't run these and the above test together
   add_rostest_gtest(depth_camera-test
                     test/camera/depth_camera.test
                     test/camera/depth_camera.cpp)
