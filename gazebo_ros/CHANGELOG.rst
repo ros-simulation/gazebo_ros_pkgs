@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.4 (2016-04-27)
+------------------
 * Update maintainer for Kinetic release
 * support to change clock frequncy from ros param
 * Allow respawning gazebo node.

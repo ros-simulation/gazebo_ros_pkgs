@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.4 (2016-04-27)
+------------------
 
 * Also accept "/world" as frameName parameter in gazebo_ros_p3d plugin 
 * IMU supports frameName 
