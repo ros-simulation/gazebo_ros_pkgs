@@ -41,7 +41,7 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include <sensor_msgs/PointCloud.h>
+#include <sensor_msgs/PointCloud2.h>
 
 namespace gazebo
 {
@@ -83,7 +83,7 @@ namespace gazebo
     private: ros::Publisher pub_;
 
     /// \brief ros message
-    private: sensor_msgs::PointCloud cloud_msg_;
+    private: sensor_msgs::PointCloud2 cloud_msg_;
    
     /// \brief topic name
     private: std::string topic_name_;
@@ -106,7 +106,7 @@ namespace gazebo
 
     /// update rate of this sensor
     private: double update_rate_;
-
+    private: int point_step_;
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
 
