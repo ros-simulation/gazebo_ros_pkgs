@@ -67,7 +67,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // load plugin
   RayPlugin::Load(_parent, this->sdf);
   // Get the world name.
-  std::string worldName = _parent->GetWorldName();
+  std::string worldName = _parent->WorldName();
   this->world_ = physics::get_world(worldName);
   // save pointers
   this->sdf = _sdf;
@@ -162,7 +162,7 @@ void GazeboRosLaser::LaserConnect()
   this->laser_connect_count_++;
   if (this->laser_connect_count_ == 1)
     this->laser_scan_sub_ =
-      this->gazebo_node_->Subscribe(this->parent_ray_sensor_->GetTopic(),
+      this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
                                     &GazeboRosLaser::OnScan, this);
 }
 

@@ -188,7 +188,7 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-  this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
+  this->depth_sensor_update_time_ = this->parentSensor->LastUpdateTime();
   if (this->parentSensor->IsActive())
   {
     if (this->point_cloud_connect_count_ <= 0 &&
@@ -225,8 +225,8 @@ void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-  //ROS_ERROR("camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
-  this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
+  //ROS_ERROR("camera_ new frame %s %s",this->parentSensor_->Name().c_str(),this->frame_name_.c_str());
+  this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
 
   if (this->parentSensor->IsActive())
   {
@@ -318,7 +318,7 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
   float* toCopyFrom = (float*)data_arg;
   int index = 0;
 
-  double hfov = this->parentSensor->GetDepthCamera()->GetHFOV().Radian();
+  double hfov = this->parentSensor->DepthCamera()->HFOV().Radian();
   double fl = ((double)this->width) / (2.0 *tan(hfov/2.0));
 
   // convert depth to point cloud
@@ -434,7 +434,7 @@ void GazeboRosOpenniKinect::PublishCameraInfo()
 
   if (this->depth_info_connect_count_ > 0)
   {
-    this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
+    this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
     common::Time cur_time = this->world_->GetSimTime();
     if (cur_time - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
     {

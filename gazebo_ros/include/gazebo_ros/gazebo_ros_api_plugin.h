@@ -141,9 +141,6 @@ public:
   /// \brief Function for inserting a URDF into Gazebo from ROS Service Call
   bool spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
 
-  /// \brief Function for inserting a URDF into Gazebo from ROS Service Call. Deprecated in ROS Hydro - replace with spawnURDFModel()
-  ROS_DEPRECATED bool spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
-
   /// \brief Both SDFs and converted URDFs get sent to this function for further manipulation from a ROS Service call
   bool spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,gazebo_msgs::SpawnModel::Response &res);
 
@@ -317,7 +314,6 @@ private:
   gazebo::event::ConnectionPtr pub_model_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
-  ros::ServiceServer spawn_gazebo_model_service_; // DEPRECATED IN HYDRO
   ros::ServiceServer spawn_sdf_model_service_;
   ros::ServiceServer spawn_urdf_model_service_;
   ros::ServiceServer delete_model_service_;

@@ -79,7 +79,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->parent_sensor_ = _parent;
 
   // Get the world name.
-  std::string worldName = _parent->GetWorldName();
+  std::string worldName = _parent->WorldName();
   this->world_ = physics::get_world(worldName);
 
   last_update_time_ = this->world_->GetSimTime();
@@ -206,7 +206,7 @@ void GazeboRosBlockLaser::OnNewLaserScans()
 {
   if (this->topic_name_ != "")
   {
-    common::Time sensor_update_time = this->parent_sensor_->GetLastUpdateTime();
+    common::Time sensor_update_time = this->parent_sensor_->LastUpdateTime();
     if (last_update_time_ < sensor_update_time)
     {
       this->PutLaserData(sensor_update_time);
@@ -240,13 +240,13 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
   math::Angle minAngle = this->parent_ray_sensor_->GetAngleMin();
 #endif
 
-  double maxRange = this->parent_ray_sensor_->GetRangeMax();
-  double minRange = this->parent_ray_sensor_->GetRangeMin();
-  int rayCount = this->parent_ray_sensor_->GetRayCount();
-  int rangeCount = this->parent_ray_sensor_->GetRangeCount();
+  double maxRange = this->parent_ray_sensor_->RangeMax();
+  double minRange = this->parent_ray_sensor_->RangeMin();
+  int rayCount = this->parent_ray_sensor_->RayCount();
+  int rangeCount = this->parent_ray_sensor_->RangeCount();
 
-  int verticalRayCount = this->parent_ray_sensor_->GetVerticalRayCount();
-  int verticalRangeCount = this->parent_ray_sensor_->GetVerticalRangeCount();
+  int verticalRayCount = this->parent_ray_sensor_->VerticalRayCount();
+  int verticalRangeCount = this->parent_ray_sensor_->VerticalRangeCount();
 #if GAZEBO_MAJOR_VERSION >= 6
   auto verticalMaxAngle = this->parent_ray_sensor_->VerticalAngleMax();
   auto verticalMinAngle = this->parent_ray_sensor_->VerticalAngleMin();
@@ -304,10 +304,10 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
       j3 = hja + vjb * rayCount;
       j4 = hjb + vjb * rayCount;
       // range readings of 4 corners
-      r1 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j1) , maxRange-minRange);
-      r2 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j2) , maxRange-minRange);
-      r3 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j3) , maxRange-minRange);
-      r4 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j4) , maxRange-minRange);
+      r1 = std::min(this->parent_ray_sensor_->LaserShape()->GetRange(j1) , maxRange-minRange);
+      r2 = std::min(this->parent_ray_sensor_->LaserShape()->GetRange(j2) , maxRange-minRange);
+      r3 = std::min(this->parent_ray_sensor_->LaserShape()->GetRange(j3) , maxRange-minRange);
+      r4 = std::min(this->parent_ray_sensor_->LaserShape()->GetRange(j4) , maxRange-minRange);
 
       // Range is linear interpolation if values are close,
       // and min if they are very different
@@ -315,10 +315,10 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
          +   vb *((1 - hb) * r3 + hb * r4);
 
       // Intensity is averaged
-      intensity = 0.25*(this->parent_ray_sensor_->GetLaserShape()->GetRetro(j1) +
-                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j2) +
-                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j3) +
-                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j4));
+      intensity = 0.25*(this->parent_ray_sensor_->LaserShape()->GetRetro(j1) +
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j2) +
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j3) +
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j4));
 
       // std::cout << " block debug "
       //           << "  ij("<<i<<","<<j<<")"
