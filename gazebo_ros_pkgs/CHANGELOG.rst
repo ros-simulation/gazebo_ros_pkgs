@@ -2,10 +2,10 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.5.5 (2016-04-28)
+2.5.6 (2016-04-28)
 ------------------
 
-2.5.4 (2016-04-27)
+2.5.5 (2016-04-27)
 ------------------
 * merge indigo, jade to kinetic-devel
 * Update maintainer for Kinetic release
