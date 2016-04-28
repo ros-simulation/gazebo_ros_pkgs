@@ -218,15 +218,6 @@ void GazeboRosApiPlugin::advertiseServices()
   // publish clock for simulated ros time
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
 
-  // Advertise spawn services on the custom queue - DEPRECATED IN HYDRO
-  std::string spawn_gazebo_model_service_name("spawn_gazebo_model");
-  ros::AdvertiseServiceOptions spawn_gazebo_model_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
-                                                                  spawn_gazebo_model_service_name,
-                                                                  boost::bind(&GazeboRosApiPlugin::spawnGazeboModel,this,_1,_2),
-                                                                  ros::VoidPtr(), &gazebo_queue_);
-  spawn_gazebo_model_service_ = nh_->advertiseService(spawn_gazebo_model_aso);
-
   // Advertise spawn services on the custom queue
   std::string spawn_sdf_model_service_name("spawn_sdf_model");
   ros::AdvertiseServiceOptions spawn_sdf_model_aso =
@@ -588,14 +579,6 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
 
   // Model is now considered convert to SDF
   return spawnSDFModel(req,res);
-}
-
-// DEPRECATED IN HYDRO
-bool GazeboRosApiPlugin::spawnGazeboModel(gazebo_msgs::SpawnModel::Request &req,
-                                          gazebo_msgs::SpawnModel::Response &res)
-{
-  ROS_WARN_STREAM_NAMED("api_plugin","/gazebo/spawn_gazebo_model is deprecated, use /gazebo/spawn_sdf_model instead");
-  spawnSDFModel(req, res);
 }
 
 bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
