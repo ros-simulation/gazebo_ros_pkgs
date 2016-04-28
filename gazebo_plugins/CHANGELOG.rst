@@ -2,6 +2,25 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
+* Also accept "/world" as frameName parameter in gazebo_ros_p3d plugin 
+* IMU supports frameName 
+* Added missing link_directories() 
+* Publish organized point cloud from openni_kinect plugin 
+* Fix row_step of openni_kinect plugin 
+* Add rostest to accompany range plugin world 
+* Fix gazebo_ros_joint_pose_trajectory.cpp bug that caused simulated trajectories to run fast
+* hog: making only the hand of god link zero-g. this lets you use the hand of god on a single link in a gravity-affected model
+* gazebo_ros_joint_pose_trajectory.cpp BUG that caused simulated trajectories to run fast
+* diffdrive: add parameter legacyMode for not breaking old packages 
+  Left and right wheel are inverted - if you put in the real right wheel
+  in the previous state of the plugin the robot drives into the opposite direction.
+* Add vacuum gripper plugin
+* tricycle drive motorController debugged
+* Contributors: Benjamin Blumer, Christian Holl, Horatiu George Todoran, John Hsu, Jonathan Bohren, Jose Luis Rivero, Kentaro Wada, Steven Peters, Yuki Furuta
+
 2.5.3 (2016-04-11)
 ------------------
 

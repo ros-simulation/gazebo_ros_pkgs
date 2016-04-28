@@ -2,6 +2,15 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update maintainer for Kinetic release
+* support to change clock frequncy from ros param
+* Allow respawning gazebo node.
+* Add option to change package:// to model:// when loading urdf file 
+* Fix string replacement to look for mesh filename surrounded by single or double quotes.
+* Contributors: Isaac IY Saito, John Hsu, Jose Luis Rivero, Kei Okada, Steven Peters, Yuki Furuta
+
 2.5.3 (2016-04-11)
 ------------------
 * Include binary in runtime

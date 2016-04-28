@@ -2,6 +2,12 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* merge indigo to jade prior to kinetic release
+* Update also the gazebo_ros_control package
+* Contributors: Jose Luis Rivero, Steven Peters
+
 2.5.3 (2016-04-11)
 ------------------
 
