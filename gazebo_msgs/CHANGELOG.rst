@@ -2,6 +2,9 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.4 (2016-04-27)
 ------------------
 * merge indigo, jade to kinetic-devel

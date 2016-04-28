@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove deprecated spawn_gazebo_model service
+* Contributors: Steven Peters
+
 2.5.4 (2016-04-27)
 ------------------
 * merge indigo, jade to kinetic-devel

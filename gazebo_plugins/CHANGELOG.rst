@@ -2,6 +2,11 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix gazebo7 deprecation warnings on kinetic
+* Contributors: Steven Peters
+
 2.5.4 (2016-04-27)
 ------------------
 * merge indigo, jade to kinetic-devel
