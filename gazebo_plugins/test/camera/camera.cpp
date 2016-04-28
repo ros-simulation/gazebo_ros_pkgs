@@ -60,7 +60,7 @@ TEST_F(CameraTest, cameraSubscribeTest)
   // this likely isn't that robust - what if the testing system is really slow?
   double time_diff = (ros::Time::now() - image_stamp_).toSec();
   ROS_INFO_STREAM(time_diff);
-  EXPECT_LT(time_diff, 0.5);
+  EXPECT_LT(time_diff, 1.0);
   cam_sub_.shutdown();
 }
 

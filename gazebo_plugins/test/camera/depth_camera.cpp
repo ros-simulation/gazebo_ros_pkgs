@@ -80,22 +80,25 @@ TEST_F(DepthCameraTest, cameraSubscribeTest)
 
   EXPECT_EQ(depth_stamp_.toSec(), image_stamp_.toSec());
   EXPECT_EQ(depth_stamp_.toSec(), points_stamp_.toSec());
-  // This check depends on the update period being much longer
-  // than the expected difference between now and the received image time
+  // This check depends on the update period (currently 1.0/update_rate = 2.0 seconds)
+  // being much longer than the expected difference between now and the
+  // received image time.
+  const double max_time = 1.0;
+  const ros::Time current_time = ros::Time::now();
   // TODO(lucasw)
   // this likely isn't that robust - what if the testing system is really slow?
   double time_diff;
-  time_diff = (ros::Time::now() - image_stamp_).toSec();
+  time_diff = (current_time - image_stamp_).toSec();
   ROS_INFO_STREAM(time_diff);
-  EXPECT_LT(time_diff, 0.5);
+  EXPECT_LT(time_diff, max_time);
 
-  time_diff = (ros::Time::now() - depth_stamp_).toSec();
+  time_diff = (current_time - depth_stamp_).toSec();
   ROS_INFO_STREAM(time_diff);
-  EXPECT_LT(time_diff, 0.5);
+  EXPECT_LT(time_diff, max_time);
 
-  time_diff = (ros::Time::now() - points_stamp_).toSec();
+  time_diff = (current_time - points_stamp_).toSec();
   ROS_INFO_STREAM(time_diff);
-  EXPECT_LT(time_diff, 0.5);
+  EXPECT_LT(time_diff, max_time);
 
   cam_sub_.shutdown();
   depth_sub_.shutdown();
