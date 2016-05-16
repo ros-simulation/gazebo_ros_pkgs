@@ -162,10 +162,16 @@ namespace gazebo
     this->rosnode_->getParam(std::string("tf_prefix"), prefix);
     this->frame_name_ = tf::resolve(prefix, this->frame_name_);
 
-    // set size of cloud message, starts at 0!! FIXME: not necessary
     this->cloud_msg_.points.clear();
     this->cloud_msg_.channels.clear();
+    // Intensity channel
     this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
+    this->cloud_msg_.channels[0].name = "intensity";
+    // Elevation angle group changing from 0 to <number of vertical rays> - 1.
+    // This is useful for algorithms that need sweeps from each individual laser.
+    // Such a mapping assigns each point to its corresponding 'elevation angle' group.
+    this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
+    this->cloud_msg_.channels[1].name = "elevation";
 
     if (this->topic_name_ != "")
     {
@@ -277,12 +283,13 @@ namespace gazebo
     double yDiff = maxAngle.Radian() - minAngle.Radian();
     double pDiff = verticalMaxAngle.Radian() - verticalMinAngle.Radian();
 
-
-    // set size of cloud message everytime!
-    //int r_size = rangeCount * verticalRangeCount;
     this->cloud_msg_.points.clear();
-    this->cloud_msg_.channels.clear();
-    this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
+    this->cloud_msg_.channels[0].values.clear();
+    this->cloud_msg_.channels[1].values.clear();
+    this->cloud_msg_.points.reserve(verticalRayCount * rayCount);
+    this->cloud_msg_.channels[0].values.reserve(verticalRayCount * rayCount);
+    this->cloud_msg_.channels[1].values.reserve(verticalRayCount * rayCount);
+
 
     /***************************************************************/
     /*                                                             */
@@ -390,17 +397,16 @@ namespace gazebo
           point.y = r * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
           point.z = r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
           this->cloud_msg_.points.push_back(point); 
-        } // only 1 channel 
+        }
 
         this->cloud_msg_.channels[0].values.push_back(intensity + this->GaussianKernel(0,this->gaussian_noise_)) ;
+        this->cloud_msg_.channels[1].values.push_back(std::min(std::round(vja + vb), verticalRayCount - 1.0));
       }
     }
     this->parent_ray_sensor_->SetActive(true);
 
     // send data out via ros message
     this->pub_.publish(this->cloud_msg_);
-
-
 
   }
 
