@@ -39,12 +39,15 @@
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/ChannelFloat32.h>
 
+
 #include <tf/tf.h>
 
 #define EPSILON_DIFF 0.000001
 
 namespace gazebo
 {
+	unsigned int GazeboRosBlockLaser::plugin_instances_ = 0;
+
   // Register this plugin with the simulator
   GZ_REGISTER_SENSOR_PLUGIN(GazeboRosBlockLaser)
 
@@ -72,6 +75,7 @@ namespace gazebo
   // Load the controller
   void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   {
+    this->plugin_instances_++;
     // load plugin
     RayPlugin::Load(_parent, _sdf);
 
@@ -115,8 +119,12 @@ namespace gazebo
       this->topic_name_ = "/world";
     }
     else
-      this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>();
-
+      // Concatenate the sensor id to the topic to prevent topic nane clashes.
+#if GAZEBO_MAJOR_VERSION >= 6
+      this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>() + boost::lexical_cast<std::string>(this->plugin_instances_ - 1);
+      #else
+      this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>() + boost::lexical_cast<std::string>(this->plugin_instances_ - 1);
+    #endif
     if (!_sdf->HasElement("gaussianNoise"))
     {
       ROS_INFO("Block laser plugin missing <gaussianNoise>, defaults to 0.0");
@@ -180,7 +188,7 @@ namespace gazebo
 
     if (this->topic_name_ != "")
     {
-      // Custom Callback Queue
+      // Custom Callback Queue      
       ros::AdvertiseOptions ao = ros::AdvertiseOptions::create<sensor_msgs::PointCloud>(
           this->topic_name_,1,
           boost::bind( &GazeboRosBlockLaser::LaserConnect,this),
@@ -203,6 +211,7 @@ namespace gazebo
   void GazeboRosBlockLaser::LaserConnect()
   {
     this->laser_connect_count_++;
+    ROS_INFO("Block laser plugin - LaserConnect : Number of connections : %d", this->laser_connect_count_);
     this->parent_ray_sensor_->SetActive(true);
   }
   ////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +219,7 @@ namespace gazebo
   void GazeboRosBlockLaser::LaserDisconnect()
   {
     this->laser_connect_count_--;
-
+    ROS_INFO("Block laser plugin - LaserDisconnect : Number of connections : %d", this->laser_connect_count_);
     if (this->laser_connect_count_ == 0)
       this->parent_ray_sensor_->SetActive(false);
   }
