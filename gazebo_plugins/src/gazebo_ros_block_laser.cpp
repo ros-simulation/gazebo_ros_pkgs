@@ -83,7 +83,7 @@ namespace gazebo
     std::string worldName = _parent->WorldName();
 #else
     std::string worldName = _parent->GetWorldName();
-    #endif
+#endif
     this->world_ = physics::get_world(worldName);
 
     last_update_time_ = this->world_->GetSimTime();
@@ -140,10 +140,15 @@ namespace gazebo
       ROS_INFO("Block laser plugin missing <updateRate>, defaults to 0");
       this->update_rate_ = 0;
     }
-    else
+    else {
       this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
-    // FIXME:  update the update_rate_
+      if(this->update_rate_ < 0){
+        ROS_INFO("Block laser plugin nagetive <updateRate>, defaults to 0");
+        this->update_rate_ = 0;
+      }
+    }
 
+    this->parent_ray_sensor_->SetUpdateRate(this->update_rate_);
 
     this->laser_connect_count_ = 0;
 
