@@ -60,6 +60,7 @@ void MultiCameraPlugin::Load(sensors::SensorPtr _sensor,
     return;
   }
 
+#if GAZEBO_MAJOR_VERSION < 7
   for (unsigned int i = 0; i < this->parentSensor->GetCameraCount(); ++i)
   {
     this->camera.push_back(this->parentSensor->GetCamera(i));
@@ -71,6 +72,19 @@ void MultiCameraPlugin::Load(sensors::SensorPtr _sensor,
     this->format.push_back(this->camera[i]->GetImageFormat());
 
     std::string cameraName = this->parentSensor->GetCamera(i)->GetName();
+#else
+  for (unsigned int i = 0; i < this->parentSensor->CameraCount(); ++i)
+  {
+    this->camera.push_back(this->parentSensor->Camera(i));
+
+    // save camera attributes
+    this->width.push_back(this->camera[i]->ImageWidth());
+    this->height.push_back(this->camera[i]->ImageHeight());
+    this->depth.push_back(this->camera[i]->ImageDepth());
+    this->format.push_back(this->camera[i]->ImageFormat());
+
+    std::string cameraName = this->parentSensor->Camera(i)->Name();
+#endif
     // gzdbg << "camera(" << i << ") name [" << cameraName << "]\n";
 
     // FIXME: hardcoded 2 camera support only

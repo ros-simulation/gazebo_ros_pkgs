@@ -105,7 +105,11 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   const std::string &_camera_name_suffix)
 {
   // Get the world name.
+#if GAZEBO_MAJOR_VERSION < 5
   std::string world_name = _parent->GetWorldName();
+#else
+  std::string world_name = _parent->WorldName();
+#endif
 
   // Get the world_
   this->world_ = physics::get_world(world_name);
@@ -474,7 +478,11 @@ void GazeboRosCameraUtils::Init()
 
   double computed_focal_length =
     (static_cast<double>(this->width_)) /
+#if GAZEBO_MAJOR_VERSION < 7
     (2.0 * tan(this->camera_->GetHFOV().Radian() / 2.0));
+#else
+    (2.0 * tan(this->camera_->HFOV().Radian() / 2.0));
+#endif
 
   if (this->focal_length_ == 0)
   {
@@ -491,8 +499,13 @@ void GazeboRosCameraUtils::Init()
                " focal_length = width_ / (2.0 * tan(HFOV/2.0)),"
                " the explected focal_lengtth value is [%f],"
                " please update your camera_ model description accordingly.",
+#if GAZEBO_MAJOR_VERSION < 7
                 this->focal_length_, this->parentSensor_->GetName().c_str(),
                 this->width_, this->camera_->GetHFOV().Radian(),
+#else
+                this->focal_length_, this->parentSensor_->Name().c_str(),
+                this->width_, this->camera_->HFOV().Radian(),
+#endif
                 computed_focal_length);
     }
   }
@@ -610,7 +623,11 @@ void GazeboRosCameraUtils::PublishCameraInfo()
 
   if (this->camera_info_pub_.getNumSubscribers() > 0)
   {
+#if GAZEBO_MAJOR_VERSION < 7
     this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
+#else
+    this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+#endif
     common::Time cur_time = this->world_->GetSimTime();
     if (cur_time - this->last_info_update_time_ >= this->update_period_)
     {
