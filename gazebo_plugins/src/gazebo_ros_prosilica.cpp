@@ -132,9 +132,9 @@ void GazeboRosProsilica::OnNewImageFrame(const unsigned char *_image,
   // should do nothing except turning camera on/off, as we are using service.
   /// @todo: consider adding thumbnailing feature here if subscribed.
 #if GAZEBO_MAJOR_VERSION < 7
-  common::Time sensor_update_time = this->parentSensor_->LastUpdateTime();
-#else
   common::Time sensor_update_time = this->parentSensor_->GetLastUpdateTime();
+#else
+  common::Time sensor_update_time = this->parentSensor_->LastUpdateTime();
 #endif
   // as long as ros is connected, parent is active
   //ROS_ERROR("debug image count %d",this->image_connect_count_);
