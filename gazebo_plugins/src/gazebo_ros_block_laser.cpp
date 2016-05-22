@@ -46,16 +46,16 @@
 
 namespace gazebo
 {
-	unsigned int GazeboRosBlockLaser::plugin_instances_ = 0;
+  unsigned int GazeboRosBlockLaser::plugin_instances_ = 0;
 
   // Register this plugin with the simulator
-  GZ_REGISTER_SENSOR_PLUGIN(GazeboRosBlockLaser)
+  GZ_REGISTER_SENSOR_PLUGIN(GazeboRosBlockLaser);
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // Constructor
-    GazeboRosBlockLaser::GazeboRosBlockLaser()
-    {
-    }
+  ////////////////////////////////////////////////////////////////////////////////
+  // Constructor
+  GazeboRosBlockLaser::GazeboRosBlockLaser()
+  {
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // Destructor
@@ -122,9 +122,9 @@ namespace gazebo
       // Concatenate the sensor id to the topic to prevent topic nane clashes.
 #if GAZEBO_MAJOR_VERSION >= 6
       this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>() + boost::lexical_cast<std::string>(this->plugin_instances_ - 1);
-      #else
-      this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>() + boost::lexical_cast<std::string>(this->plugin_instances_ - 1);
-    #endif
+#else
+    this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>() + boost::lexical_cast<std::string>(this->plugin_instances_ - 1);
+#endif
     if (!_sdf->HasElement("gaussianNoise"))
     {
       ROS_INFO("Block laser plugin missing <gaussianNoise>, defaults to 0.0");
