@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- */
+*/
 /*
  * Desc: Ros Block Laser controller.
  * Author: Nathan Koenig
  * Date: 01 Feb 2007
- */
+*/
 
 #include <algorithm>
 #include <assert.h>
@@ -164,7 +164,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   if (!ros::isInitialized())
   {
     ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
-        << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
 
@@ -188,11 +188,11 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (this->topic_name_ != "")
   {
-    // Custom Callback Queue      
+    // Custom Callback Queue
     ros::AdvertiseOptions ao = ros::AdvertiseOptions::create<sensor_msgs::PointCloud>(
-        this->topic_name_,1,
-        boost::bind( &GazeboRosBlockLaser::LaserConnect,this),
-        boost::bind( &GazeboRosBlockLaser::LaserDisconnect,this), ros::VoidPtr(), &this->laser_queue_);
+      this->topic_name_,1,
+      boost::bind( &GazeboRosBlockLaser::LaserConnect,this),
+      boost::bind( &GazeboRosBlockLaser::LaserDisconnect,this), ros::VoidPtr(), &this->laser_queue_);
     this->pub_ = this->rosnode_->advertise(ao);
   }
 
@@ -267,7 +267,6 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   double maxRange = this->parent_ray_sensor_->RangeMax();
   double minRange = this->parent_ray_sensor_->RangeMin();
-
   int rayCount = this->parent_ray_sensor_->RayCount();
   int rangeCount = this->parent_ray_sensor_->RangeCount();
 
@@ -360,19 +359,19 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
       // Range is linear interpolation if values are close,
       // and min if they are very different
       r = (1-vb)*((1 - hb) * r1 + hb * r2)
-        +   vb *((1 - hb) * r3 + hb * r4);
+         +   vb *((1 - hb) * r3 + hb * r4);
 
       // Intensity is averaged
 #if GAZEBO_MAJOR_VERSION >= 6
       intensity = 0.25*(this->parent_ray_sensor_->LaserShape()->GetRetro(j1) +
-          this->parent_ray_sensor_->LaserShape()->GetRetro(j2) +
-          this->parent_ray_sensor_->LaserShape()->GetRetro(j3) +
-          this->parent_ray_sensor_->LaserShape()->GetRetro(j4));
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j2) +
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j3) +
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j4));
 #else
       intensity = 0.25*(this->parent_ray_sensor_->GetLaserShape()->GetRetro(j1) +
-          this->parent_ray_sensor_->GetLaserShape()->GetRetro(j2) +
-          this->parent_ray_sensor_->GetLaserShape()->GetRetro(j3) +
-          this->parent_ray_sensor_->GetLaserShape()->GetRetro(j4));
+                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j2) +
+                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j3) +
+                        this->parent_ray_sensor_->GetLaserShape()->GetRetro(j4));
 #endif
       // std::cout << " block debug "
       //           << "  ij("<<i<<","<<j<<")"
@@ -421,6 +420,8 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   // send data out via ros message
   this->pub_.publish(this->cloud_msg_);
+
+
 
 }
 
