@@ -105,7 +105,7 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   const std::string &_camera_name_suffix)
 {
   // Get the world name.
-#if GAZEBO_MAJOR_VERSION < 5
+#if GAZEBO_MAJOR_VERSION < 7
   std::string world_name = _parent->GetWorldName();
 #else
   std::string world_name = _parent->WorldName();
