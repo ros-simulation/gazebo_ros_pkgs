@@ -171,7 +171,7 @@ void GazeboRosLaser::LaserConnect()
   this->laser_connect_count_++;
   if (this->laser_connect_count_ == 1)
     this->laser_scan_sub_ =
-#if GAZEBO_MAJOR_VERSION < 5
+#if GAZEBO_MAJOR_VERSION < 7
       this->gazebo_node_->Subscribe(this->parent_ray_sensor_->GetTopic(),
                                     &GazeboRosLaser::OnScan, this);
 #else
