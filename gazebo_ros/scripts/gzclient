@@ -12,6 +12,8 @@ then
     final="$final -g `catkin_find --first-only libgazebo_ros_paths_plugin.$EXT`"
 fi
 
+desired_master_uri="$GAZEBO_MASTER_URI"
+
 # Combine the commands
 setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
-. $setup_path/setup.sh && gzclient $final
+. $setup_path/setup.sh && GAZEBO_MASTER_URI="$desired_master_uri" gzclient $final
