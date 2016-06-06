@@ -277,14 +277,6 @@ void GazeboRosCameraUtils::LoadThread()
   this->camera_info_manager_.reset(new camera_info_manager::CameraInfoManager(
           *this->rosnode_, this->camera_name_));
 
-  // resolve tf prefix
-  std::string key;
-  if(this->rosnode_->searchParam("tf_prefix", key)){
-    std::string prefix;
-    this->rosnode_->getParam(key, prefix);
-    this->frame_name_ = tf::resolve(prefix, this->frame_name_);
-  }
-
   this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
   
   // resolve tf prefix
