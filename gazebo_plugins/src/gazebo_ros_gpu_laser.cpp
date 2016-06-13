@@ -34,6 +34,7 @@
 #include <gazebo/sensors/GpuRaySensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/transport/transport.hh>
+#include <gazebo/gazebo_config.h>
 
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
@@ -69,8 +70,14 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
   // load plugin
   GpuRayPlugin::Load(_parent, this->sdf);
+
   // Get the world name.
+# if GAZEBO_MAJOR_VERSION >= 7
+  std::string worldName = _parent->WorldName();
+# else
   std::string worldName = _parent->GetWorldName();
+# endif
+
   this->world_ = physics::get_world(worldName);
   // save pointers
   this->sdf = _sdf;
@@ -167,7 +174,11 @@ void GazeboRosLaser::LaserConnect()
   this->laser_connect_count_++;
   if (this->laser_connect_count_ == 1)
     this->laser_scan_sub_ =
+# if GAZEBO_MAJOR_VERSION >= 7
+      this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
+# else
       this->gazebo_node_->Subscribe(this->parent_ray_sensor_->GetTopic(),
+# endif
                                     &GazeboRosLaser::OnScan, this);
 }
 
