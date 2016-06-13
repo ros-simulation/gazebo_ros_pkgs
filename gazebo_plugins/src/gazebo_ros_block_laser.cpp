@@ -35,7 +35,6 @@
 #include <gazebo/sensors/RaySensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/transport/Node.hh>
-#include <gazebo/gazebo_config.h>
 
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/ChannelFloat32.h>

@@ -18,7 +18,6 @@
 #include <gazebo/sensors/CameraSensor.hh>
 #include <gazebo_plugins/MultiCameraPlugin.h>
 #include <gazebo_plugins/gazebo_ros_utils.h>
-#include <gazebo/gazebo_config.h>
 
 using namespace gazebo;
 GZ_REGISTER_SENSOR_PLUGIN(MultiCameraPlugin)
