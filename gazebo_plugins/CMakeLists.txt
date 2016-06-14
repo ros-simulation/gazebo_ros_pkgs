@@ -80,6 +80,10 @@ if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
   catkin_package(  INCLUDE_DIRS include LIBRARIES gazebo_ros_elevator)
 endif()
 
+if (GAZEBO_VERSION VERSION_GREATER 7.3 OR GAZEBO_VERSION VERSION_EQUAL 7.3)
+  catkin_package(INCLUDE_DIRS include LIBRARIES gazebo_ros_harness)
+endif()
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES 
@@ -195,6 +199,13 @@ target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_camera_utils ${GAZEBO_
 
 add_library(gazebo_ros_gpu_laser src/gazebo_ros_gpu_laser.cpp)
 target_link_libraries(gazebo_ros_gpu_laser ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} GpuRayPlugin)
+
+if (GAZEBO_VERSION VERSION_GREATER 7.3 OR GAZEBO_VERSION VERSION_EQUAL 7.3)
+  add_library(gazebo_ros_harness src/gazebo_ros_harness.cpp)
+  add_dependencies(gazebo_ros_harness ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(gazebo_ros_harness ${GAZEBO_LIBRARIES}
+    ${Boost_LIBRARIES} HarnessPlugin ${catkin_LIBRARIES})
+endif()
 
 add_library(gazebo_ros_laser src/gazebo_ros_laser.cpp)
 target_link_libraries(gazebo_ros_laser ${GAZEBO_LIBRARIES} RayPlugin ${catkin_LIBRARIES})
@@ -319,6 +330,13 @@ install(TARGETS
 
 if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
   install(TARGETS gazebo_ros_elevator
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    )
+endif()
+
+if (GAZEBO_VERSION VERSION_GREATER 7.3 OR GAZEBO_VERSION VERSION_EQUAL 7.3)
+  install(TARGETS gazebo_ros_harness
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     )
