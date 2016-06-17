@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 /*
  * Desc: ros laser controller.
  * Author: Nathan Koenig
@@ -40,6 +40,7 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <sensor_msgs/PointCloud.h>
 
@@ -84,7 +85,7 @@ namespace gazebo
 
     /// \brief ros message
     private: sensor_msgs::PointCloud cloud_msg_;
-   
+
     /// \brief topic name
     private: std::string topic_name_;
 
@@ -110,6 +111,11 @@ namespace gazebo
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
 
+    /// \brief The number of Gazebo models loaded this plugin.
+    /// This helps naming ROS topics as new models start publishing 
+    /// data. The value is only incremented to avoid topic name clashes.
+    private: static unsigned int plugin_instances_; 
+
     // Custom Callback Queue
     private: ros::CallbackQueue laser_queue_;
     private: void LaserQueueThread();
@@ -121,7 +127,6 @@ namespace gazebo
     public: void OnStats( const boost::shared_ptr<msgs::WorldStatistics const> &_msg);
 
   };
-
 }
 
 #endif

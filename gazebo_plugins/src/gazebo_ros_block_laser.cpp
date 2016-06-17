@@ -18,7 +18,7 @@
  * Desc: Ros Block Laser controller.
  * Author: Nathan Koenig
  * Date: 01 Feb 2007
- */
+*/
 
 #include <algorithm>
 #include <assert.h>
@@ -39,14 +39,17 @@
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/ChannelFloat32.h>
 
+
 #include <tf/tf.h>
 
 #define EPSILON_DIFF 0.000001
 
 namespace gazebo
 {
+unsigned int GazeboRosBlockLaser::plugin_instances_ = 0;
+
 // Register this plugin with the simulator
-GZ_REGISTER_SENSOR_PLUGIN(GazeboRosBlockLaser)
+GZ_REGISTER_SENSOR_PLUGIN(GazeboRosBlockLaser);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor
@@ -72,6 +75,7 @@ GazeboRosBlockLaser::~GazeboRosBlockLaser()
 // Load the controller
 void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
+  this->plugin_instances_++;
   // load plugin
   RayPlugin::Load(_parent, _sdf);
 
@@ -79,7 +83,11 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->parent_sensor_ = _parent;
 
   // Get the world name.
+#if GAZEBO_MAJOR_VERSION >= 6
+  std::string worldName = _parent->WorldName();
+#else
   std::string worldName = _parent->GetWorldName();
+#endif
   this->world_ = physics::get_world(worldName);
 
   last_update_time_ = this->world_->GetSimTime();
@@ -111,8 +119,12 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     this->topic_name_ = "/world";
   }
   else
-    this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>();
-
+    // Concatenate the sensor id to the topic to prevent topic nane clashes.
+#if GAZEBO_MAJOR_VERSION >= 6
+    this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>() + boost::lexical_cast<std::string>(this->plugin_instances_ - 1);
+#else
+  this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>() + boost::lexical_cast<std::string>(this->plugin_instances_ - 1);
+#endif
   if (!_sdf->HasElement("gaussianNoise"))
   {
     ROS_INFO("Block laser plugin missing <gaussianNoise>, defaults to 0.0");
@@ -136,10 +148,15 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     ROS_INFO("Block laser plugin missing <updateRate>, defaults to 0");
     this->update_rate_ = 0;
   }
-  else
+  else {
     this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
-  // FIXME:  update the update_rate_
+    if(this->update_rate_ < 0){
+      ROS_INFO("Block laser plugin nagetive <updateRate>, defaults to 0");
+      this->update_rate_ = 0;
+    }
+  }
 
+  this->parent_ray_sensor_->SetUpdateRate(this->update_rate_);
 
   this->laser_connect_count_ = 0;
 
@@ -158,10 +175,16 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   this->rosnode_->getParam(std::string("tf_prefix"), prefix);
   this->frame_name_ = tf::resolve(prefix, this->frame_name_);
 
-  // set size of cloud message, starts at 0!! FIXME: not necessary
   this->cloud_msg_.points.clear();
   this->cloud_msg_.channels.clear();
+  // Intensity channel
   this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
+  this->cloud_msg_.channels[0].name = "intensity";
+  // Elevation angle group changing from 0 to <number of vertical rays> - 1.
+  // This is useful for algorithms that need sweeps from each individual laser.
+  // Such a mapping assigns each point to its corresponding 'elevation angle' group.
+  this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
+  this->cloud_msg_.channels[1].name = "elevation";
 
   if (this->topic_name_ != "")
   {
@@ -188,6 +211,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 void GazeboRosBlockLaser::LaserConnect()
 {
   this->laser_connect_count_++;
+  ROS_INFO("Block laser plugin - LaserConnect : Number of connections : %d", this->laser_connect_count_);
   this->parent_ray_sensor_->SetActive(true);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +219,7 @@ void GazeboRosBlockLaser::LaserConnect()
 void GazeboRosBlockLaser::LaserDisconnect()
 {
   this->laser_connect_count_--;
-
+  ROS_INFO("Block laser plugin - LaserDisconnect : Number of connections : %d", this->laser_connect_count_);
   if (this->laser_connect_count_ == 0)
     this->parent_ray_sensor_->SetActive(false);
 }
@@ -206,7 +230,11 @@ void GazeboRosBlockLaser::OnNewLaserScans()
 {
   if (this->topic_name_ != "")
   {
+#if GAZEBO_MAJOR_VERSION >= 6
+    common::Time sensor_update_time = this->parent_sensor_->LastUpdateTime();
+#else
     common::Time sensor_update_time = this->parent_sensor_->GetLastUpdateTime();
+#endif
     if (last_update_time_ < sensor_update_time)
     {
       this->PutLaserData(sensor_update_time);
@@ -232,25 +260,35 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   this->parent_ray_sensor_->SetActive(false);
 
+  // NOTE : verticalRangeCount = verticalRayCount * (vertical resolution)
 #if GAZEBO_MAJOR_VERSION >= 6
   auto maxAngle = this->parent_ray_sensor_->AngleMax();
   auto minAngle = this->parent_ray_sensor_->AngleMin();
+
+  double maxRange = this->parent_ray_sensor_->RangeMax();
+  double minRange = this->parent_ray_sensor_->RangeMin();
+  int rayCount = this->parent_ray_sensor_->RayCount();
+  int rangeCount = this->parent_ray_sensor_->RangeCount();
+
+  int verticalRayCount = this->parent_ray_sensor_->VerticalRayCount();
+  int verticalRangeCount = this->parent_ray_sensor_->VerticalRangeCount();
+
+  auto verticalMaxAngle = this->parent_ray_sensor_->VerticalAngleMax();
+  auto verticalMinAngle = this->parent_ray_sensor_->VerticalAngleMin();
+
 #else
   math::Angle maxAngle = this->parent_ray_sensor_->GetAngleMax();
   math::Angle minAngle = this->parent_ray_sensor_->GetAngleMin();
-#endif
 
   double maxRange = this->parent_ray_sensor_->GetRangeMax();
   double minRange = this->parent_ray_sensor_->GetRangeMin();
+
   int rayCount = this->parent_ray_sensor_->GetRayCount();
   int rangeCount = this->parent_ray_sensor_->GetRangeCount();
 
   int verticalRayCount = this->parent_ray_sensor_->GetVerticalRayCount();
   int verticalRangeCount = this->parent_ray_sensor_->GetVerticalRangeCount();
-#if GAZEBO_MAJOR_VERSION >= 6
-  auto verticalMaxAngle = this->parent_ray_sensor_->VerticalAngleMax();
-  auto verticalMinAngle = this->parent_ray_sensor_->VerticalAngleMin();
-#else
+
   math::Angle verticalMaxAngle = this->parent_ray_sensor_->GetVerticalAngleMax();
   math::Angle verticalMinAngle = this->parent_ray_sensor_->GetVerticalAngleMin();
 #endif
@@ -258,12 +296,13 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
   double yDiff = maxAngle.Radian() - minAngle.Radian();
   double pDiff = verticalMaxAngle.Radian() - verticalMinAngle.Radian();
 
-
-  // set size of cloud message everytime!
-  //int r_size = rangeCount * verticalRangeCount;
   this->cloud_msg_.points.clear();
-  this->cloud_msg_.channels.clear();
-  this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
+  this->cloud_msg_.channels[0].values.clear();
+  this->cloud_msg_.channels[1].values.clear();
+  this->cloud_msg_.points.reserve(verticalRayCount * rayCount);
+  this->cloud_msg_.channels[0].values.reserve(verticalRayCount * rayCount);
+  this->cloud_msg_.channels[1].values.reserve(verticalRayCount * rayCount);
+
 
   /***************************************************************/
   /*                                                             */
@@ -304,22 +343,36 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
       j3 = hja + vjb * rayCount;
       j4 = hjb + vjb * rayCount;
       // range readings of 4 corners
+
+#if GAZEBO_MAJOR_VERSION >= 6
+      r1 = std::min(this->parent_ray_sensor_->LaserShape()->GetRange(j1) , maxRange-minRange);
+      r2 = std::min(this->parent_ray_sensor_->LaserShape()->GetRange(j2) , maxRange-minRange);
+      r3 = std::min(this->parent_ray_sensor_->LaserShape()->GetRange(j3) , maxRange-minRange);
+      r4 = std::min(this->parent_ray_sensor_->LaserShape()->GetRange(j4) , maxRange-minRange);
+#else
       r1 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j1) , maxRange-minRange);
       r2 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j2) , maxRange-minRange);
       r3 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j3) , maxRange-minRange);
       r4 = std::min(this->parent_ray_sensor_->GetLaserShape()->GetRange(j4) , maxRange-minRange);
 
+#endif
       // Range is linear interpolation if values are close,
       // and min if they are very different
       r = (1-vb)*((1 - hb) * r1 + hb * r2)
          +   vb *((1 - hb) * r3 + hb * r4);
 
       // Intensity is averaged
+#if GAZEBO_MAJOR_VERSION >= 6
+      intensity = 0.25*(this->parent_ray_sensor_->LaserShape()->GetRetro(j1) +
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j2) +
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j3) +
+                        this->parent_ray_sensor_->LaserShape()->GetRetro(j4));
+#else
       intensity = 0.25*(this->parent_ray_sensor_->GetLaserShape()->GetRetro(j1) +
                         this->parent_ray_sensor_->GetLaserShape()->GetRetro(j2) +
                         this->parent_ray_sensor_->GetLaserShape()->GetRetro(j3) +
                         this->parent_ray_sensor_->GetLaserShape()->GetRetro(j4));
-
+#endif
       // std::cout << " block debug "
       //           << "  ij("<<i<<","<<j<<")"
       //           << "  j1234("<<j1<<","<<j2<<","<<j3<<","<<j4<<")"
@@ -345,7 +398,7 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         //pAngle is rotated by yAngle:
         point.x = r * cos(pAngle) * cos(yAngle);
         point.y = r * cos(pAngle) * sin(yAngle);
-        point.z = -r * sin(pAngle);
+        point.z = r * sin(pAngle);
 
         this->cloud_msg_.points.push_back(point); 
       } 
@@ -355,11 +408,12 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         //pAngle is rotated by yAngle:
         point.x = r * cos(pAngle) * cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         point.y = r * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        point.z = -r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.z = r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         this->cloud_msg_.points.push_back(point); 
-      } // only 1 channel 
+      }
 
       this->cloud_msg_.channels[0].values.push_back(intensity + this->GaussianKernel(0,this->gaussian_noise_)) ;
+      this->cloud_msg_.channels[1].values.push_back(std::min(std::round(vja + vb), verticalRayCount - 1.0));
     }
   }
   this->parent_ray_sensor_->SetActive(true);
