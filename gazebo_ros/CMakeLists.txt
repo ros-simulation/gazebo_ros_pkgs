@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(gazebo_ros)
 
 find_package(catkin REQUIRED COMPONENTS
+  gazebo_dev
   cmake_modules
   roslib
   roscpp
@@ -10,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   rosgraph_msgs
   dynamic_reconfigure
-  message_generation
   std_msgs
   gazebo_msgs
 )
@@ -21,10 +21,6 @@ if (PKG_CONFIG_FOUND)
 else()
   message(FATAL_ERROR "pkg-config is required; please install it")
 endif()
-
-# Depend on system install of Gazebo
-find_package(gazebo REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
 find_package(Boost REQUIRED COMPONENTS thread)
 
@@ -47,7 +43,6 @@ catkin_package(
     tf
     rosgraph_msgs
     dynamic_reconfigure
-    message_generation
     std_msgs
     gazebo_msgs
 
@@ -59,10 +54,8 @@ include_directories(
   include
   ${Boost_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${GAZEBO_INCLUDE_DIRS}
   ${SDFormat_INCLUDE_DIRS}
-  ${TinyXML_INCLUDE_DIRS}
-)
+  ${TinyXML_INCLUDE_DIRS})
 
 link_directories(${catkin_LIBRARY_DIRS})
 
@@ -76,25 +69,23 @@ foreach (item ${GAZEBO_LDFLAGS})
   set(ld_flags "${ld_flags} ${item}")
 endforeach ()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
-
 ## Plugins
 add_library(gazebo_ros_api_plugin src/gazebo_ros_api_plugin.cpp)
 add_dependencies(gazebo_ros_api_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 set_target_properties(gazebo_ros_api_plugin PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_api_plugin PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_api_plugin ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML_LIBRARIES})
+target_link_libraries(gazebo_ros_api_plugin ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML_LIBRARIES})
 
 add_library(gazebo_ros_paths_plugin src/gazebo_ros_paths_plugin.cpp)
 add_dependencies(gazebo_ros_paths_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 set_target_properties(gazebo_ros_paths_plugin PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 set_target_properties(gazebo_ros_paths_plugin PROPERTIES LINK_FLAGS "${ld_flags}")
-target_link_libraries(gazebo_ros_paths_plugin ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(gazebo_ros_paths_plugin ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 # Install Gazebo System Plugins
 install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
+  )
 
 # Install Gazebo Scripts
 install(PROGRAMS scripts/gazebo
