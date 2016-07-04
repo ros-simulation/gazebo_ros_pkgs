@@ -72,33 +72,33 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
   this->camera_ = this->depthCamera;
 
   // using a different default
-  if (!_sdf->GetElement("imageTopicName"))
+  if (!_sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = "ir/image_raw";
   if (!_sdf->HasElement("cameraInfoTopicName"))
     this->camera_info_topic_name_ = "ir/camera_info";
 
   // point cloud stuff
-  if (!_sdf->GetElement("pointCloudTopicName"))
+  if (!_sdf->HasElement("pointCloudTopicName"))
     this->point_cloud_topic_name_ = "points";
   else
     this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->Get<std::string>();
 
   // depth image stuff
-  if (!_sdf->GetElement("depthImageTopicName"))
+  if (!_sdf->HasElement("depthImageTopicName"))
     this->depth_image_topic_name_ = "depth/image_raw";
   else
     this->depth_image_topic_name_ = _sdf->GetElement("depthImageTopicName")->Get<std::string>();
 
-  if (!_sdf->GetElement("depthImageCameraInfoTopicName"))
+  if (!_sdf->HasElement("depthImageCameraInfoTopicName"))
     this->depth_image_camera_info_topic_name_ = "depth/camera_info";
   else
     this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->Get<std::string>();
 
-  if (!_sdf->GetElement("pointCloudCutoff"))
+  if (!_sdf->HasElement("pointCloudCutoff"))
     this->point_cloud_cutoff_ = 0.4;
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->Get<double>();
-  if (!_sdf->GetElement("pointCloudCutoffMax"))
+  if (!_sdf->HasElement("pointCloudCutoffMax"))
     this->point_cloud_cutoff_max_ = 5.0;
   else
     this->point_cloud_cutoff_max_ = _sdf->GetElement("pointCloudCutoffMax")->Get<double>();
@@ -109,27 +109,27 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
 
 void GazeboRosOpenniKinect::Advertise()
 {
-  ros::AdvertiseOptions point_cloud_ao = 
+  ros::AdvertiseOptions point_cloud_ao =
     ros::AdvertiseOptions::create<sensor_msgs::PointCloud2 >(
       this->point_cloud_topic_name_,1,
       boost::bind( &GazeboRosOpenniKinect::PointCloudConnect,this),
-      boost::bind( &GazeboRosOpenniKinect::PointCloudDisconnect,this), 
+      boost::bind( &GazeboRosOpenniKinect::PointCloudDisconnect,this),
       ros::VoidPtr(), &this->camera_queue_);
   this->point_cloud_pub_ = this->rosnode_->advertise(point_cloud_ao);
 
-  ros::AdvertiseOptions depth_image_ao = 
+  ros::AdvertiseOptions depth_image_ao =
     ros::AdvertiseOptions::create< sensor_msgs::Image >(
       this->depth_image_topic_name_,1,
       boost::bind( &GazeboRosOpenniKinect::DepthImageConnect,this),
-      boost::bind( &GazeboRosOpenniKinect::DepthImageDisconnect,this), 
+      boost::bind( &GazeboRosOpenniKinect::DepthImageDisconnect,this),
       ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_pub_ = this->rosnode_->advertise(depth_image_ao);
 
-  ros::AdvertiseOptions depth_image_camera_info_ao = 
+  ros::AdvertiseOptions depth_image_camera_info_ao =
     ros::AdvertiseOptions::create<sensor_msgs::CameraInfo>(
         this->depth_image_camera_info_topic_name_,1,
         boost::bind( &GazeboRosOpenniKinect::DepthInfoConnect,this),
-        boost::bind( &GazeboRosOpenniKinect::DepthInfoDisconnect,this), 
+        boost::bind( &GazeboRosOpenniKinect::DepthInfoDisconnect,this),
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
 }
@@ -181,14 +181,18 @@ void GazeboRosOpenniKinect::DepthInfoDisconnect()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image, 
-    unsigned int _width, unsigned int _height, unsigned int _depth, 
+void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
+    unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
+# if GAZEBO_MAJOR_VERSION >= 7
+  this->depth_sensor_update_time_ = this->parentSensor->LastUpdateTime();
+# else
   this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
+# endif
   if (this->parentSensor->IsActive())
   {
     if (this->point_cloud_connect_count_ <= 0 &&
@@ -218,15 +222,19 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image, 
-    unsigned int _width, unsigned int _height, unsigned int _depth, 
+void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
+    unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
   //ROS_ERROR("camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
+# if GAZEBO_MAJOR_VERSION >= 7
+  this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+# else
   this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
+# endif
 
   if (this->parentSensor->IsActive())
   {
@@ -318,7 +326,11 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
   float* toCopyFrom = (float*)data_arg;
   int index = 0;
 
+# if GAZEBO_MAJOR_VERSION >= 7
+  double hfov = this->parentSensor->DepthCamera()->HFOV().Radian();
+# else
   double hfov = this->parentSensor->GetDepthCamera()->GetHFOV().Radian();
+# endif
   double fl = ((double)this->width) / (2.0 *tan(hfov/2.0));
 
   // convert depth to point cloud
@@ -434,7 +446,11 @@ void GazeboRosOpenniKinect::PublishCameraInfo()
 
   if (this->depth_info_connect_count_ > 0)
   {
+# if GAZEBO_MAJOR_VERSION >= 7
+    this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+# else
     this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
+# endif
     common::Time cur_time = this->world_->GetSimTime();
     if (cur_time - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
     {

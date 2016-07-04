@@ -2,6 +2,14 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.4 (2016-04-27)
+------------------
+* fix wrong dependencies
+* Contributors: Jose Luis Rivero, Steven Peters, Yuki Furuta
+
+2.5.3 (2016-04-11)
+------------------
+
 2.5.2 (2016-02-25)
 ------------------
 * merging from indigo-devel
@@ -15,6 +23,9 @@ Changelog for package gazebo_msgs
 
 2.5.0 (2015-04-30)
 ------------------
+
+2.4.10 (2016-02-25)
+-------------------
 
 2.4.9 (2015-08-16)
 ------------------

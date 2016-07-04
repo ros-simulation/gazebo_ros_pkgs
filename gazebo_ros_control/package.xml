@@ -1,10 +1,9 @@
 <package>
   <name>gazebo_ros_control</name>
-  <version>2.5.2</version>
+  <version>2.5.5</version>
   <description>gazebo_ros_control</description>
 
-  <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
-  <maintainer email="adolfo.rodriguez@pal-robotics.com">Adolfo Rodriguez Tsouroukdissian</maintainer>
+  <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
 
   <license>BSD</license>
 

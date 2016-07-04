@@ -1,11 +1,11 @@
 <package>
   <name>gazebo_plugins</name>
-  <version>2.5.2</version>
+  <version>2.5.5</version>
   <description>
     Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
 
-  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
+  <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
 
   <license>BSD, Apache 2.0</license>
 
@@ -72,5 +72,9 @@
   <run_depend>polled_camera</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>std_msgs</run_depend>
+
+  <!-- When moved to format 2, this can be turned test_depend -->
+  <build_depend>rostest</build_depend>
+  <run_depend>rostest</run_depend>
 
 </package>
