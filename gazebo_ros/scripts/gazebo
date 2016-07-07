@@ -33,5 +33,5 @@ if [ "$desired_master_uri" = "" ]; then
 	desired_master_uri="$GAZEBO_MASTER_URI"
 fi
 
-# Combine the commands
+# Run the gazebo script, which runs both gzserver and gzclient
 GAZEBO_MASTER_URI="$desired_master_uri" gazebo $client_final $final
