@@ -36,8 +36,4 @@ if [ "$desired_master_uri" = "" ]; then
 fi
 
 # Combine the commands
-GAZEBO_MASTER_URI="$desired_master_uri" gzserver $final & 
-GAZEBO_MASTER_URI="$desired_master_uri" gzclient $client_final
-
-# Kill the server
-kill -s $SIGNAL $!
+GAZEBO_MASTER_URI="$desired_master_uri" gazebo $client_final $final
