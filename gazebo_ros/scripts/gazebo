@@ -6,7 +6,10 @@ final="$@"
 final=`echo "$final" | sed 's/[^ ]*:=[^ ]* \?//g'`
 
 EXT=so
-
+if [ $(uname) = "Darwin" ]; then
+    EXT=dylib
+fi
+ 
 # add ros path plugin if it does not already exist in the passed in arguments
 if [ `expr "$final" : ".*libgazebo_ros_paths_plugin\.$EXT.*"` -eq 0 ]
 then
