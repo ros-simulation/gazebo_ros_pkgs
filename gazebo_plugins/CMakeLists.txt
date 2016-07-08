@@ -77,11 +77,11 @@ link_directories(
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
-if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
+if (NOT GAZEBO_VERSION VERSION_LESS 6.0)
   catkin_package(  INCLUDE_DIRS include LIBRARIES gazebo_ros_elevator)
 endif()
 
-if (GAZEBO_VERSION VERSION_GREATER 7.3 OR GAZEBO_VERSION VERSION_EQUAL 7.3)
+if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
   catkin_package(INCLUDE_DIRS include LIBRARIES gazebo_ros_harness)
 endif()
 
@@ -180,7 +180,7 @@ add_library(gazebo_ros_camera src/gazebo_ros_camera.cpp)
 add_dependencies(gazebo_ros_camera ${PROJECT_NAME}_gencfg)
 target_link_libraries(gazebo_ros_camera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
 
-if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
+if (NOT GAZEBO_VERSION VERSION_LESS 6.0)
   add_library(gazebo_ros_elevator src/gazebo_ros_elevator.cpp)
   add_dependencies(gazebo_ros_elevator ${PROJECT_NAME}_gencfg)
   target_link_libraries(gazebo_ros_elevator ${GAZEBO_LIBRARIES} ElevatorPlugin ${catkin_LIBRARIES})
@@ -201,7 +201,7 @@ target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_camera_utils ${GAZEBO_
 add_library(gazebo_ros_gpu_laser src/gazebo_ros_gpu_laser.cpp)
 target_link_libraries(gazebo_ros_gpu_laser ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} GpuRayPlugin)
 
-if (GAZEBO_VERSION VERSION_GREATER 7.3 OR GAZEBO_VERSION VERSION_EQUAL 7.3)
+if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
   add_library(gazebo_ros_harness src/gazebo_ros_harness.cpp)
   add_dependencies(gazebo_ros_harness ${catkin_EXPORTED_TARGETS})
   target_link_libraries(gazebo_ros_harness ${GAZEBO_LIBRARIES}
@@ -325,14 +325,14 @@ install(TARGETS
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
 
-if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
+if (NOT GAZEBO_VERSION VERSION_LESS 6.0)
   install(TARGETS gazebo_ros_elevator
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     )
 endif()
 
-if (GAZEBO_VERSION VERSION_GREATER 7.3 OR GAZEBO_VERSION VERSION_EQUAL 7.3)
+if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
   install(TARGETS gazebo_ros_harness
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
