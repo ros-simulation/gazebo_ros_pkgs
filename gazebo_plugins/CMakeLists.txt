@@ -132,8 +132,6 @@ catkin_package(
   rosconsole
   camera_info_manager
   std_msgs
-  DEPENDS 
-    SDF
   )
 add_dependencies(${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
@@ -239,7 +237,7 @@ add_library(gazebo_ros_joint_state_publisher src/gazebo_ros_joint_state_publishe
 set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES COMPILE_FLAGS "${cxx_flags}")
 add_dependencies(gazebo_ros_joint_state_publisher ${catkin_EXPORTED_TARGETS})
-target_link_libraries(gazebo_ros_joint_state_publisher ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(gazebo_ros_joint_state_publisher ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_joint_pose_trajectory src/gazebo_ros_joint_pose_trajectory.cpp)
 add_dependencies(gazebo_ros_joint_pose_trajectory ${catkin_EXPORTED_TARGETS})
@@ -263,7 +261,7 @@ target_link_libraries(gazebo_ros_planar_move ${catkin_LIBRARIES} ${Boost_LIBRARI
 add_library(gazebo_ros_hand_of_god src/gazebo_ros_hand_of_god.cpp)
 set_target_properties(gazebo_ros_hand_of_god PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_hand_of_god PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-target_link_libraries(gazebo_ros_hand_of_god ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(gazebo_ros_hand_of_god ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_ft_sensor src/gazebo_ros_ft_sensor.cpp)
 target_link_libraries(gazebo_ros_ft_sensor ${catkin_LIBRARIES} ${Boost_LIBRARIES})
