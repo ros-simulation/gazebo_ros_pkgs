@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.11 (2016-07-14)
+-------------------
 * Use NOT VERSION_LESS to simplify cmake logic
 * Added an interface to gazebo's harness plugin
 * Merge pull request `#460 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/460>`_ from furushchev/fix-camera-util

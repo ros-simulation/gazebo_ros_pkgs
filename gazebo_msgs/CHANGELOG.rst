@@ -2,8 +2,8 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.11 (2016-07-14)
+-------------------
 * [gazebo_msgs] fix wrong dependencies
 * Contributors: Yuki Furuta
 
