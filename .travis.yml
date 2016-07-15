@@ -31,7 +31,7 @@ before_install:
   - sudo `which rosdep` init
   - rosdep update
   # Use rosdep to install dependencies
-  - rosdep install --default-yes --from-paths ./ --rosdistro $CI_ROS_DISTRO
+  - rosdep install --default-yes --ignore-src --from-paths ./ --rosdistro $CI_ROS_DISTRO
 
 install:
   # Create workspace
