@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2016-07-20)
+------------------
 * Honor GAZEBO_MASTER_URI for gzserver and gzclient.
 * Contributors: Martin Pecka
 

@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2016-07-20)
+------------------
 * Use NOT VERSION_LESS to simplify cmake logic
 * Added an interface to gazebo's harness plugin
 * removed extra includes
