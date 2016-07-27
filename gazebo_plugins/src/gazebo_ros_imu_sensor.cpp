@@ -27,12 +27,20 @@ gazebo::GazeboRosImuSensor::GazeboRosImuSensor(): SensorPlugin()
   gyroscope_data = math::Vector3(0, 0, 0);
   orientation = math::Quaternion(1,0,0,0);
   seed=0;
+  sensor=NULL;
 }
 
 void gazebo::GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr sensor_, sdf::ElementPtr sdf_)
 {
   sdf=sdf_;
   sensor=dynamic_cast<gazebo::sensors::ImuSensor*>(sensor_.get());
+
+  if(sensor==NULL)
+  {
+    ROS_FATAL("Error: Sensor pointer is NULL!");
+    return;
+  }
+
   sensor->SetActive(true);
 
   if(!LoadParameters())
