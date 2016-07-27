@@ -65,9 +65,15 @@ void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/
 
   if(imu_data_publisher.getNumSubscribers() > 0)
   {
+#if GAZEBO_MAJOR_VERSION >= 6
+    orientation = offset.rot*sensor->Orientation(); //applying offsets to the orientation measurement
+    accelerometer_data = sensor->LinearAcceleration();
+    gyroscope_data = sensor->AngularVelocity();
+#else
     orientation = offset.rot*sensor->GetOrientation(); //applying offsets to the orientation measurement
     accelerometer_data = sensor->GetLinearAcceleration();
     gyroscope_data = sensor->GetAngularVelocity();
+#endif
 
     //Guassian noise is applied to all measurements
     imu_msg.orientation.x = orientation.x + GuassianKernel(0,gaussian_noise);
