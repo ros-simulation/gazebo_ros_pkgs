@@ -62,7 +62,7 @@ void gazebo::GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr sensor_, sdf::E
   connection = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosImuSensor::UpdateChild, this, _1));
 
 #if GAZEBO_MAJOR_VERSION >= 7
-  last_time = LastUpdateTime();
+  last_time = sensor->LastUpdateTime();
 #else
   last_time = sensor->GetLastUpdateTime();
 #endif
@@ -71,7 +71,7 @@ void gazebo::GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr sensor_, sdf::E
 void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/*_info*/)
 {
 #if GAZEBO_MAJOR_VERSION >= 7
-  common::Time current_time = LastUpdateTime();
+  common::Time current_time = sensor->LastUpdateTime();
 #else
   common::Time current_time = sensor->GetLastUpdateTime();
 #endif
