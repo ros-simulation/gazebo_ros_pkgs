@@ -61,12 +61,20 @@ void gazebo::GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr sensor_, sdf::E
 
   connection = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosImuSensor::UpdateChild, this, _1));
 
+#if GAZEBO_MAJOR_VERSION >= 6
+  last_time = LastUpdateTime();
+#else
   last_time = sensor->GetLastUpdateTime();
+#endif
 }
 
 void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/*_info*/)
 {
+#if GAZEBO_MAJOR_VERSION >= 6
+  common::Time current_time = LastUpdateTime();
+#else
   common::Time current_time = sensor->GetLastUpdateTime();
+#endif
 
   if(update_rate>0 && (current_time-last_time).Double() < 1.0/update_rate) //update rate check
     return;
@@ -149,7 +157,11 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   }
   else
   {
+#if GAZEBO_MAJOR_VERSION >= 6
+    std::string scoped_name = sensor->ParentName();
+#else
     std::string scoped_name = sensor->GetParentName(); //HACK to find the model name
+#endif
     std::size_t it = scoped_name.find("::");
 
     robot_namespace = "/" +scoped_name.substr(0,it)+"/";
