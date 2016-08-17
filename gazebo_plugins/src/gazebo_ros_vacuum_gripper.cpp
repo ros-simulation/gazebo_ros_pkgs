@@ -214,9 +214,9 @@ void GazeboRosVacuumGripper::UpdateChild()
       double norm = diff.pos.GetLength();
       if (norm <= max_distance_) {
         links[j]->SetLinearAccel(link_->GetWorldLinearAccel());
-        links[j]->SetAngularAccel(link_->GetWorldAngularAccel());
+        links[j]->SetAngularAccel(math::Vector3(0, 0, 0));
         links[j]->SetLinearVel(link_->GetWorldLinearVel());
-        links[j]->SetAngularVel(link_->GetWorldAngularVel());
+        links[j]->SetAngularVel(math::Vector3(0, 0, 0));
         if (norm <= min_distance_) {
           // apply friction like force
           // TODO(unknown): should apply friction actually
