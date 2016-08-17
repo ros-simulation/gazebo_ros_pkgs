@@ -217,18 +217,19 @@ void GazeboRosVacuumGripper::UpdateChild()
         links[j]->SetAngularAccel(link_->GetWorldAngularAccel());
         links[j]->SetLinearVel(link_->GetWorldLinearVel());
         links[j]->SetAngularVel(link_->GetWorldAngularVel());
-        double norm_force = 1 / norm;
         if (norm <= min_distance_) {
           // apply friction like force
           // TODO(unknown): should apply friction actually
           link_pose.Set(parent_pose.pos, link_pose.rot);
           links[j]->SetWorldPose(link_pose);
+        } else {
+          double norm_force = 1 / norm;
+          if (norm_force > max_force_) {
+            norm_force = max_force_;
+          }
+          math::Vector3 force = norm_force * diff.pos.Normalize();
+          links[j]->AddForce(force);
         }
-        if (norm_force > max_force_) {
-          norm_force = max_force_;
-        }
-        math::Vector3 force = norm_force * diff.pos.Normalize();
-        links[j]->AddForce(force);
         grasping_msg.data = true;
       }
     }
