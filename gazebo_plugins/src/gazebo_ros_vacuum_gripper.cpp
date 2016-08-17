@@ -110,6 +110,26 @@ void GazeboRosVacuumGripper::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     return;
   }
 
+  // Parameters for Vacuum Mechanism
+  // max force: [N]
+  if (_sdf->HasElement("maxForce")) {
+    max_force_ = _sdf->GetElement("maxForce")->Get<double>();
+  } else {
+    max_force_ = 20;
+  }
+  // max distance to apply force: [m]
+  if (_sdf->HasElement("maxDistance")) {
+    max_distance_ = _sdf->GetElement("maxDistance")->Get<double>();
+  } else {
+    max_distance_ = 0.05;
+  }
+  // distance to apply friction: [m]
+  if (_sdf->HasElement("minDistance")) {
+    min_distance_ = _sdf->GetElement("minDistance")->Get<double>();
+  } else {
+    min_distance_ = 0.01;
+  }
+
   rosnode_ = new ros::NodeHandle(robot_namespace_);
 
   // Custom Callback Queue
@@ -192,20 +212,20 @@ void GazeboRosVacuumGripper::UpdateChild()
       math::Pose link_pose = links[j]->GetWorldPose();
       math::Pose diff = parent_pose - link_pose;
       double norm = diff.pos.GetLength();
-      if (norm < 0.05) {
+      if (norm <= max_distance_) {
         links[j]->SetLinearAccel(link_->GetWorldLinearAccel());
         links[j]->SetAngularAccel(link_->GetWorldAngularAccel());
         links[j]->SetLinearVel(link_->GetWorldLinearVel());
         links[j]->SetAngularVel(link_->GetWorldAngularVel());
         double norm_force = 1 / norm;
-        if (norm < 0.01) {
+        if (norm <= min_distance_) {
           // apply friction like force
           // TODO(unknown): should apply friction actually
           link_pose.Set(parent_pose.pos, link_pose.rot);
           links[j]->SetWorldPose(link_pose);
         }
-        if (norm_force > 20) {
-          norm_force = 20;  // max_force
+        if (norm_force > max_force_) {
+          norm_force = max_force_;
         }
         math::Vector3 force = norm_force * diff.pos.Normalize();
         links[j]->AddForce(force);

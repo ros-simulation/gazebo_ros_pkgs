@@ -142,6 +142,11 @@ class GazeboRosVacuumGripper : public ModelPlugin
   /// \brief for setting ROS name space
   private: std::string robot_namespace_;
 
+  /// \brief vacuum mechanism parameters
+  private: double max_force_;
+  private: double max_distance_;
+  private: double min_distance_;
+
   // Custom Callback Queue
   private: ros::CallbackQueue queue_;
   /// \brief Thead object for the running callback Thread.
