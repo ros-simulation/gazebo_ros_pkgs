@@ -107,6 +107,7 @@ catkin_package(
   gazebo_ros_projector 
   gazebo_ros_prosilica 
   gazebo_ros_force 
+  gazebo_ros_pose 
   gazebo_ros_joint_trajectory 
   gazebo_ros_joint_state_publisher 
   gazebo_ros_joint_pose_trajectory
@@ -237,6 +238,9 @@ target_link_libraries(gazebo_ros_prosilica gazebo_ros_camera_utils ${GAZEBO_LIBR
 add_library(gazebo_ros_force src/gazebo_ros_force.cpp)
 target_link_libraries(gazebo_ros_force ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_library(gazebo_ros_pose src/gazebo_ros_pose.cpp)
+target_link_libraries(gazebo_ros_pose ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 add_library(gazebo_ros_joint_trajectory src/gazebo_ros_joint_trajectory.cpp)
 add_dependencies(gazebo_ros_joint_trajectory ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_joint_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -310,6 +314,7 @@ install(TARGETS
   gazebo_ros_projector
   gazebo_ros_prosilica
   gazebo_ros_force
+  gazebo_ros_pose
   gazebo_ros_joint_trajectory
   gazebo_ros_joint_state_publisher
   gazebo_ros_joint_pose_trajectory
