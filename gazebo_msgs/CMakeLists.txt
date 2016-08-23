@@ -45,6 +45,7 @@ add_service_files(DIRECTORY srv FILES
   SetLinkState.srv
   SetPhysicsProperties.srv
   SetJointTrajectory.srv
+  SetPose.srv
   )
 
 generate_messages(DEPENDENCIES
