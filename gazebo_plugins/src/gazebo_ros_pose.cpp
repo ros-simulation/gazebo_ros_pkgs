@@ -100,6 +100,13 @@ void GazeboRosPose::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   else
     this->service_name_ = "";
 
+  if (_sdf->HasElement("velocityFeedback"))
+  {
+    this->use_velocity_feedback_ = _sdf->GetElement("velocityFeedback")->Get<bool>();
+  }
+  else
+    this->use_velocity_feedback_ = false;
+
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
@@ -172,12 +179,26 @@ void GazeboRosPose::UpdateChild()
                                this->pose_msg_.orientation.x,
                                this->pose_msg_.orientation.y,
                                this->pose_msg_.orientation.z);
-  math::Pose pose(position, orientation);
-  this->model_->SetLinkWorldPose(pose, this->link_);
-  this->model_->SetLinearVel(math::Vector3(0, 0, 0));
-  this->model_->SetLinearAccel(math::Vector3(0, 0, 0));
-  this->model_->SetAngularVel(math::Vector3(0, 0, 0));
-  this->model_->SetAngularAccel(math::Vector3(0, 0, 0));
+  math::Pose target_pose(position, orientation);
+
+  if (!use_velocity_feedback_) {
+    this->model_->SetLinkWorldPose(target_pose, this->link_);
+    this->model_->SetLinearVel(math::Vector3(0, 0, 0));
+    this->model_->SetLinearAccel(math::Vector3(0, 0, 0));
+    this->model_->SetAngularVel(math::Vector3(0, 0, 0));
+    this->model_->SetAngularAccel(math::Vector3(0, 0, 0));
+  } else {
+    math:: Pose current_pose = this->link_->GetWorldPose();
+    math:: Pose diff_pose = target_pose - current_pose;
+    math::Vector3 diff_pos = diff_pose.pos;
+    math::Quaternion diff_rot = diff_pose.rot;
+    ROS_INFO_STREAM("target_pose - current_pose: " << target_pose - current_pose);
+    this->link_->SetLinearVel(math::Vector3(diff_pos.x, diff_pos.y, diff_pos.z));
+    this->link_->SetLinearAccel(math::Vector3(0, 0, 0));
+    this->link_->SetAngularVel(math::Vector3(diff_rot.GetRoll(), diff_rot.GetPitch(), diff_rot.GetYaw()));
+    this->link_->SetAngularAccel(math::Vector3(0, 0, 0));
+  }
+
   this->lock_.unlock();
 }
 

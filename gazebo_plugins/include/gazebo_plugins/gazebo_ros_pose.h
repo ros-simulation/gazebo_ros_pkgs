@@ -127,6 +127,8 @@ class GazeboRosPose : public ModelPlugin
 
   // Pointer to the update event connection
   private: event::ConnectionPtr update_connection_;
+
+  private: bool use_velocity_feedback_;
 };
 /** \} */
 /// @}
