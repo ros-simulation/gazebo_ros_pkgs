@@ -22,11 +22,18 @@ fi
 
 client_final="-g `catkin_find --first-only libgazebo_ros_paths_plugin.$EXT`"
 
-# Combine the commands
 setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
-. $setup_path/setup.sh 
-gzserver $final & 
-gzclient $client_final
+
+# source setup.sh, but keep local modifications to GAZEBO_MASTER_URI
+desired_master_uri="$GAZEBO_MASTER_URI"
+. $setup_path/setup.sh
+if [ "$desired_master_uri" = "" ]; then
+	desired_master_uri="$GAZEBO_MASTER_URI"
+fi
+
+# Combine the commands
+GAZEBO_MASTER_URI="$desired_master_uri" gzserver $final & 
+GAZEBO_MASTER_URI="$desired_master_uri" gzclient $client_final
 
 # Kill the server
 kill -s $SIGNAL $!

@@ -68,6 +68,9 @@ namespace gazebo
     /// \brief store link name
     private: std::string link_name_;
 
+    /// \brief store frame name
+    private: std::string frame_name_;
+
     /// \brief topic name
     private: std::string topic_name_;
 

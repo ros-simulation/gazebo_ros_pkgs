@@ -82,7 +82,7 @@ void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // "publishing contact/collisions to this topic name: "
   //   << this->bumper_topic_name_ << std::endl;
   this->bumper_topic_name_ = "bumper_states";
-  if (_sdf->GetElement("bumperTopicName"))
+  if (_sdf->HasElement("bumperTopicName"))
     this->bumper_topic_name_ =
       _sdf->GetElement("bumperTopicName")->Get<std::string>();
 
@@ -136,7 +136,11 @@ void GazeboRosBumper::OnContact()
     return;
 
   msgs::Contacts contacts;
+# if GAZEBO_MAJOR_VERSION >= 7
+  contacts = this->parentSensor->Contacts();
+# else
   contacts = this->parentSensor->GetContacts();
+# endif
   /// \TODO: need a time for each Contact in i-loop, they may differ
   this->contact_state_msg_.header.frame_id = this->frame_name_;
   this->contact_state_msg_.header.stamp = ros::Time(contacts.time().sec(),
@@ -210,7 +214,7 @@ void GazeboRosBumper::OnContact()
     // For each collision contact
     // Create a ContactState
     gazebo_msgs::ContactState state;
-    /// \TODO: 
+    /// \TODO:
     gazebo::msgs::Contact contact = contacts.contact(i);
 
     state.collision1_name = contact.collision1();
