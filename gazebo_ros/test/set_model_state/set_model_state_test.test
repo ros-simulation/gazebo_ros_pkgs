@@ -12,7 +12,7 @@
           args="-r $(find gazebo_ros)/test/common_worlds/p2dx.world" />
 
     <test test-name="set_model_state_test" 
-          pkg="gazebo_plugins" 
+          pkg="gazebo_ros"
           type="set_model_state-test" 
           clear_params="true" 
           time-limit="100.0" />
