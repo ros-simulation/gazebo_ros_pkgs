@@ -13,6 +13,7 @@
   <arg name="respawn_gazebo" default="false"/>
   <arg name="use_clock_frequency" default="false"/>
   <arg name="pub_clock_frequency" default="100"/>
+  <arg name="required_gui" default="false"/>
 
   <!-- set use_sim_time flag -->
   <group if="$(arg use_sim_time)">
@@ -38,7 +39,7 @@
 	
   <!-- start gazebo client -->
   <group if="$(arg gui)">
-    <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
+    <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen" required="$(arg required_gui)"/>
   </group>
 
 </launch>
