@@ -223,6 +223,7 @@ void GazeboRosP3D::UpdateChild()
         this->pose_msg_.header.stamp.sec = cur_time.sec;
         this->pose_msg_.header.stamp.nsec = cur_time.nsec;
 
+        this->pose_msg_.child_frame_id = this->link_name_;
 
         math::Pose pose, frame_pose;
         math::Vector3 frame_vpos;
