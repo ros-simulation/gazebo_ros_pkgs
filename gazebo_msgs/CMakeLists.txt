@@ -25,6 +25,10 @@ add_message_files(
   )
 
 add_service_files(DIRECTORY srv FILES
+  AddForceSensor.srv
+  AddJoint.srv
+  AddLink.srv
+  AddTorqueSensor.srv
   ApplyBodyWrench.srv
   DeleteModel.srv
   GetLinkState.srv
