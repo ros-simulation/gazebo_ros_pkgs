@@ -35,6 +35,8 @@ catkin_python_setup()
 generate_dynamic_reconfigure_options(cfg/Physics.cfg)
 
 catkin_package(
+  INCLUDE_DIRS
+  include
   LIBRARIES
   gazebo_ros_api_plugin
   gazebo_ros_paths_plugin

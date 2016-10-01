@@ -72,6 +72,14 @@
 #include "gazebo_msgs/SetLinkState.h"
 #include "gazebo_msgs/GetLinkState.h"
 
+// Headers for torque control
+#include "gazebo_msgs/AddForceSensor.h"
+#include "gazebo_msgs/AddJoint.h"
+#include "gazebo_msgs/AddTorqueSensor.h"
+#include "gazebo_msgs/JointStates.h"
+#include "gazebo_msgs/StartTimer.h"
+#include "gazebo_ros/shared_memory.h"
+
 // Topics
 #include "gazebo_msgs/ModelState.h"
 #include "gazebo_msgs/LinkState.h"
@@ -130,11 +138,17 @@ public:
   void onLinkStatesConnect();
 
   /// \brief
+  void onJointStatesConnect();
+  
+  /// \brief
   void onModelStatesConnect();
 
   /// \brief
   void onLinkStatesDisconnect();
 
+  /// \brief
+  void onJointStatesDisconnect();
+  
   /// \brief
   void onModelStatesDisconnect();
 
@@ -219,6 +233,9 @@ public:
   void updateLinkState(const gazebo_msgs::LinkState::ConstPtr& link_state);
 
   /// \brief
+  void updateLinkStates(const gazebo_msgs::LinkStates::ConstPtr& link_states);
+
+  /// \brief
   bool applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &req,gazebo_msgs::ApplyBodyWrench::Response &res);
 
 private:
@@ -236,6 +253,9 @@ private:
   /// \brief
   void publishLinkStates();
 
+  /// \brief
+  void publishJointStates();
+  
   /// \brief
   void publishModelStates();
 
@@ -281,6 +301,18 @@ private:
   /// \brief utility for checking if string is in SDF format
   bool isSDF(std::string model_xml);
 
+  /// \brief Daichi
+  bool startTimerServiceCB(gazebo_msgs::StartTimer::Request& req, gazebo_msgs::StartTimer::Response& res);
+
+  /// \brief Daichi
+  bool addForceSensorServiceCB(gazebo_msgs::AddForceSensor::Request& req, gazebo_msgs::AddForceSensor::Response& res);
+
+  /// \brief Daichi
+  bool addJointServiceCB(gazebo_msgs::AddJoint::Request& req, gazebo_msgs::AddJoint::Response& res);
+
+  /// \brief Daichi
+  bool addTorqueSensorServiceCB(gazebo_msgs::AddTorqueSensor::Request& req, gazebo_msgs::AddTorqueSensor::Response& res);
+  
   /// \brief Connect to Gazebo via its plugin interface, get a pointer to the world, start events
   void loadGazeboRosApiPlugin(std::string world_name);
 
@@ -290,6 +322,11 @@ private:
   /// \brief convert xml to Pose
   gazebo::math::Vector3 parseVector3(const std::string &str);
 
+  /// \brief Daichi
+  void readJointEffortsTimerCB(const ros::TimerEvent& e);
+  void writeJointStatesTimerCB(const ros::TimerEvent& e);
+  void writeForcesTimerCB(const ros::TimerEvent& e);
+  
   // track if the desconstructor event needs to occur
   bool plugin_loaded_;
 
@@ -314,6 +351,7 @@ private:
   gazebo::event::ConnectionPtr force_update_event_;
   gazebo::event::ConnectionPtr time_update_event_;
   gazebo::event::ConnectionPtr pub_link_states_event_;
+  gazebo::event::ConnectionPtr pub_joint_states_event_;
   gazebo::event::ConnectionPtr pub_model_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
@@ -342,12 +380,19 @@ private:
   ros::ServiceServer unpause_physics_service_;
   ros::ServiceServer clear_joint_forces_service_;
   ros::ServiceServer clear_body_wrenches_service_;
+  ros::ServiceServer server_start_timer_;
+  ros::ServiceServer server_add_force_sensor_;
+  ros::ServiceServer server_add_joint_;
+  ros::ServiceServer server_add_torque_sensor_;
   ros::Subscriber    set_link_state_topic_;
+  ros::Subscriber    set_link_states_topic_;
   ros::Subscriber    set_model_state_topic_;
   ros::Publisher     pub_link_states_;
+  ros::Publisher     pub_joint_states_;
   ros::Publisher     pub_model_states_;
-  int                pub_link_states_connection_count_;
-  int                pub_model_states_connection_count_;
+  int32_t            pub_link_states_connection_count_;
+  int32_t            pub_joint_states_connection_count_;
+  int32_t            pub_model_states_connection_count_;
 
   // ROS comm
   boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;
@@ -392,7 +437,26 @@ private:
   std::vector<GazeboRosApiPlugin::ForceJointJob*> force_joint_jobs_;
   
   /// \brief index counters to count the accesses on models via GetModelState
-  std::map<std::string, unsigned int> access_count_get_model_state_; 
+  std::map<std::string, unsigned int> access_count_get_model_state_;
+
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> joint_effort_;
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> joint_states_;
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> joint_torque_;
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> external_force_x_;
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> external_force_y_;
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> external_force_z_;
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> external_moment_x_;
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> external_moment_y_;
+  std::map<std::string, gazebo::SharedMemoryPtr<double>> external_moment_z_;
+
+  std::map<std::string, ros::Duration> effort_time_;
+  std::map<std::string, gazebo::physics::JointPtr> joint_;
+  std::map<std::string, std::string> torque_sensor_to_joint_;
+  std::map<std::string, std::string> force_sensor_to_joint_;
+
+  ros::Timer timer_read_joint_efforts_;
+  ros::Timer timer_write_joint_states_;
+  ros::Timer timer_write_forces_;
 };
 }
 #endif
