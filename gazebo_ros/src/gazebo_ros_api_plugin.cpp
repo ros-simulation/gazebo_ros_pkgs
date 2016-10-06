@@ -1045,7 +1045,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
   res.link_state.twist.linear.z = body_vpos.z;
   res.link_state.twist.angular.x = body_veul.x;
   res.link_state.twist.angular.y = body_veul.y;
-  res.link_state.twist.angular.z = body_veul.x;
+  res.link_state.twist.angular.z = body_veul.z;
   res.link_state.reference_frame = req.reference_frame;
 
   res.success = true;
