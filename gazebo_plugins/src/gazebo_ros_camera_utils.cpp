@@ -312,11 +312,19 @@ void GazeboRosCameraUtils::LoadThread()
              this->image_topic_name_.c_str());
   }
 
-  this->image_pub_ = this->itnode_->advertise(
-    this->image_topic_name_, 2,
-    boost::bind(&GazeboRosCameraUtils::ImageConnect, this),
-    boost::bind(&GazeboRosCameraUtils::ImageDisconnect, this),
-    ros::VoidPtr(), true);
+  try
+  {
+    this->image_pub_ = this->itnode_->advertise(
+      this->image_topic_name_, 2,
+      boost::bind(&GazeboRosCameraUtils::ImageConnect, this),
+      boost::bind(&GazeboRosCameraUtils::ImageDisconnect, this),
+      ros::VoidPtr(), true);
+  }
+  catch(...)
+  {
+    ROS_WARN("Unable to load image_transport plugin for topic [%s]",
+             this->image_topic_name_.c_str());
+  }
 
   // camera info publish rate will be synchronized to image sensor
   // publish rates.
