@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gazebo_plugins)
 
+option(ENABLE_DISPLAY_TESTS "Enable the building of tests that requires a display" OFF)
+
 find_package(catkin REQUIRED COMPONENTS 
   message_generation 
   gazebo_msgs 
@@ -372,16 +374,18 @@ if (CATKIN_ENABLE_TESTING)
   add_rostest(test/range/range_plugin.test)
   target_link_libraries(set_model_state-test ${catkin_LIBRARIES})
 
-  add_rostest_gtest(depth_camera-test
-                    test/camera/depth_camera.test
-                    test/camera/depth_camera.cpp)
-  target_link_libraries(depth_camera-test ${catkin_LIBRARIES})
-  add_rostest_gtest(multicamera-test
-                    test/camera/multicamera.test
-                    test/camera/multicamera.cpp)
-  target_link_libraries(multicamera-test ${catkin_LIBRARIES})
-  add_rostest_gtest(camera-test
-                    test/camera/camera.test
-                    test/camera/camera.cpp)
-  target_link_libraries(camera-test ${catkin_LIBRARIES})
+  if (ENABLE_DISPLAY_TESTS)
+    add_rostest_gtest(depth_camera-test
+                      test/camera/depth_camera.test
+                      test/camera/depth_camera.cpp)
+    target_link_libraries(depth_camera-test ${catkin_LIBRARIES})
+    add_rostest_gtest(multicamera-test
+                      test/camera/multicamera.test
+                      test/camera/multicamera.cpp)
+    target_link_libraries(multicamera-test ${catkin_LIBRARIES})
+    add_rostest_gtest(camera-test
+                      test/camera/camera.test
+                      test/camera/camera.cpp)
+    target_link_libraries(camera-test ${catkin_LIBRARIES})
+  endif()
 endif()
