@@ -27,11 +27,59 @@
 
 #include <map>
 
-namespace gazebo
-{
+namespace gazebo {
 
 typedef std::vector<std::string> V_string;
 typedef std::map<std::string, std::string> M_string;
+
+class ROSPackageURISchemeResolver : public common::URISchemeResolver
+{
+  public: ROSPackageURISchemeResolver() {}
+
+  public: virtual ~ROSPackageURISchemeResolver() {}
+
+  public: virtual std::string GetHandledURIScheme()
+  {
+    return "model";
+  }
+
+  public: virtual std::string ResolveURI(const std::string &_uri)
+  {
+    int index = _uri.find("://");
+    std::string filename;
+    std::string prefix = _uri.substr(0, index);
+
+    if (prefix != "model")
+    {
+        gzerr << "URI " << _uri << " with scheme '" << prefix
+              << "' given to a resolver for scheme 'model'" << std::endl;
+        return filename;
+    }
+
+    std::string suffix = _uri.substr(index + 3, _uri.size() - index - 3);
+    int firstSlashIndex = suffix.find("/");
+
+    if (firstSlashIndex == suffix.npos)
+    { // we cannot handle URIs without a package name
+      return filename;
+    }
+
+    std::string package = suffix.substr(0, firstSlashIndex);
+    std::string pathInPackage = suffix.substr(firstSlashIndex + 1, suffix.size() - firstSlashIndex - 1);
+
+    std::string packagePath = ros::package::getPath(package);
+    if (packagePath.empty())
+    {
+      return filename;
+    }
+
+    filename = (boost::filesystem::path(packagePath) / pathInPackage).string();
+
+    gzdbg << "Resolved " << _uri << " to " << filename << std::endl;
+
+    return filename;
+  }
+};
 
 class GazeboRosPathsPlugin : public SystemPlugin
 {
@@ -92,6 +140,10 @@ public:
     // set .gazeborc path to something else, so we don't pick up default ~/.gazeborc
     std::string gazeborc = ros::package::getPath("gazebo_ros")+"/.do_not_use_gazeborc";
     setenv("GAZEBORC",gazeborc.c_str(),1);
+
+    gazebo::common::URISchemeResolverPtr resolver;
+    resolver.reset(new ROSPackageURISchemeResolver());
+    gazebo::common::SystemPaths::Instance()->AddURISchemeResolver(resolver);
   }
 
 };
