@@ -27,11 +27,12 @@ add_message_files(
 add_service_files(DIRECTORY srv FILES
   ApplyBodyWrench.srv
   DeleteModel.srv
+  DeleteLight.srv
   GetLinkState.srv
   GetPhysicsProperties.srv
   SetJointProperties.srv
   SetModelConfiguration.srv
-  SpawnModel.srv
+  SpawnEntity.srv
   ApplyJointEffort.srv
   GetJointProperties.srv
   GetModelProperties.srv
@@ -45,6 +46,8 @@ add_service_files(DIRECTORY srv FILES
   SetLinkState.srv
   SetPhysicsProperties.srv
   SetJointTrajectory.srv
+  GetLightProperties.srv
+  SetLightProperties.srv
   )
 
 generate_messages(DEPENDENCIES
