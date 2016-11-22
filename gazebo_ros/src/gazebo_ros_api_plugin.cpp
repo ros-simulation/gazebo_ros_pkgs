@@ -554,11 +554,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
 
   if (!isURDF(model_xml))
   {
-<<<<<<< 896b6a8744bcb1b862044afef4b968a3f6591c33
-    ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model format is not URDF.");
-=======
-    ROS_ERROR("SpawnModel: Failure - entity format is invalid.");
->>>>>>> [gazebo_ros] Changed the spawn model methods to spawn also lights.
+    ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - entity format is invalid.");
     res.success = false;
     res.status_message = "SpawnModel: Failure - entity format is invalid.";
     return false;
