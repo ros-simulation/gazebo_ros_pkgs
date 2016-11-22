@@ -32,7 +32,7 @@ add_service_files(DIRECTORY srv FILES
   GetPhysicsProperties.srv
   SetJointProperties.srv
   SetModelConfiguration.srv
-  SpawnEntity.srv
+  SpawnModel.srv
   ApplyJointEffort.srv
   GetJointProperties.srv
   GetModelProperties.srv

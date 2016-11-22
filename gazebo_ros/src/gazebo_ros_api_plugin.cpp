@@ -220,22 +220,22 @@ void GazeboRosApiPlugin::advertiseServices()
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
 
   // Advertise spawn services on the custom queue
-  std::string spawn_sdf_entity_service_name("spawn_sdf_entity");
-  ros::AdvertiseServiceOptions spawn_sdf_entity_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnEntity>(
-                                                                  spawn_sdf_entity_service_name,
-                                                                  boost::bind(&GazeboRosApiPlugin::spawnSDFEntity,this,_1,_2),
+  std::string spawn_sdf_model_service_name("spawn_sdf_entity");
+  ros::AdvertiseServiceOptions spawn_sdf_model_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
+                                                                  spawn_sdf_model_service_name,
+                                                                  boost::bind(&GazeboRosApiPlugin::spawnSDFModel,this,_1,_2),
                                                                   ros::VoidPtr(), &gazebo_queue_);
-  spawn_sdf_entity_service_ = nh_->advertiseService(spawn_sdf_entity_aso);
+  spawn_sdf_model_service_ = nh_->advertiseService(spawn_sdf_model_aso);
 
   // Advertise spawn services on the custom queue
-  std::string spawn_urdf_entity_service_name("spawn_urdf_entity");
-  ros::AdvertiseServiceOptions spawn_urdf_entity_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnEntity>(
-                                                                  spawn_urdf_entity_service_name,
-                                                                  boost::bind(&GazeboRosApiPlugin::spawnURDFEntity,this,_1,_2),
+  std::string spawn_urdf_model_service_name("spawn_urdf_model");
+  ros::AdvertiseServiceOptions spawn_urdf_model_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
+                                                                  spawn_urdf_model_service_name,
+                                                                  boost::bind(&GazeboRosApiPlugin::spawnURDFModel,this,_1,_2),
                                                                   ros::VoidPtr(), &gazebo_queue_);
-  spawn_urdf_entity_service_ = nh_->advertiseService(spawn_urdf_entity_aso);
+  spawn_urdf_model_service_ = nh_->advertiseService(spawn_urdf_model_aso);
 
   // Advertise delete services on the custom queue
   std::string delete_model_service_name("delete_model");
@@ -542,42 +542,42 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
   }
 }
 
-bool GazeboRosApiPlugin::spawnURDFEntity(gazebo_msgs::SpawnEntity::Request &req,
-                                         gazebo_msgs::SpawnEntity::Response &res)
+bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
+                                        gazebo_msgs::SpawnModel::Response &res)
 {
   // get namespace for the corresponding entity plugins
-  std::string entity_namespace = req.entity_namespace;
+  std::string model_namespace = req.model_namespace;
 
   // incoming entity string
-  std::string entity_xml = req.entity_xml;
+  std::string model_xml = req.model_xml;
 
-  if (!isURDF(entity_xml))
+  if (!isURDF(model_xml))
   {
-    ROS_ERROR("SpawnEntity: Failure - entity format is not URDF.");
+    ROS_ERROR("SpawnModel: Failure - entity format is not URDF.");
     res.success = false;
-    res.status_message = "SpawnEntity: Failure - entity format is not URDF.";
+    res.status_message = "SpawnModel: Failure - entity format is not URDF.";
     return false;
   }
 
-  /// STRIP DECLARATION <? ... xml version="1.0" ... ?> from entity_xml
+  /// STRIP DECLARATION <? ... xml version="1.0" ... ?> from model_xml
   /// @todo: does tinyxml have functionality for this?
   /// @todo: should gazebo take care of the declaration?
   {
     std::string open_bracket("<?");
     std::string close_bracket("?>");
-    size_t pos1 = entity_xml.find(open_bracket,0);
-    size_t pos2 = entity_xml.find(close_bracket,0);
+    size_t pos1 = model_xml.find(open_bracket,0);
+    size_t pos2 = model_xml.find(close_bracket,0);
     if (pos1 != std::string::npos && pos2 != std::string::npos)
-      entity_xml.replace(pos1,pos2-pos1+2,std::string(""));
+      model_xml.replace(pos1,pos2-pos1+2,std::string(""));
   }
 
   // Now, replace package://xxx with the full path to the package
   {
     std::string package_prefix("package://");
-    size_t pos1 = entity_xml.find(package_prefix,0);
+    size_t pos1 = model_xml.find(package_prefix,0);
     while (pos1 != std::string::npos)
     {
-      size_t pos2 = entity_xml.find("/", pos1+10);
+      size_t pos2 = model_xml.find("/", pos1+10);
       //ROS_DEBUG(" pos %d %d",(int)pos1, (int)pos2);
       if (pos2 == std::string::npos || pos1 >= pos2)
       {
@@ -585,7 +585,7 @@ bool GazeboRosApiPlugin::spawnURDFEntity(gazebo_msgs::SpawnEntity::Request &req,
         break;
       }
 
-      std::string package_name = entity_xml.substr(pos1+10,pos2-pos1-10);
+      std::string package_name = model_xml.substr(pos1+10,pos2-pos1-10);
       //ROS_DEBUG("package name [%s]", package_name.c_str());
       std::string package_path = ros::package::getPath(package_name);
       if (package_path.empty())
@@ -597,26 +597,26 @@ bool GazeboRosApiPlugin::spawnURDFEntity(gazebo_msgs::SpawnEntity::Request &req,
       }
       ROS_DEBUG_ONCE("Package name [%s] has path [%s]", package_name.c_str(), package_path.c_str());
 
-      entity_xml.replace(pos1,(pos2-pos1),package_path);
-      pos1 = entity_xml.find(package_prefix, pos1);
+      model_xml.replace(pos1,(pos2-pos1),package_path);
+      pos1 = model_xml.find(package_prefix, pos1);
     }
   }
-  // ROS_DEBUG("Model XML\n\n%s\n\n ",entity_xml.c_str());
+  // ROS_DEBUG("Model XML\n\n%s\n\n ",model_xml.c_str());
 
-  req.entity_xml = entity_xml;
+  req.model_xml = model_xml;
 
   // Model is now considered convert to SDF
-  return spawnSDFEntity(req,res);
+  return spawnSDFModel(req,res);
 }
 
-bool GazeboRosApiPlugin::spawnSDFEntity(gazebo_msgs::SpawnEntity::Request &req,
-                                        gazebo_msgs::SpawnEntity::Response &res)
+bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
+                                       gazebo_msgs::SpawnModel::Response &res)
 {
   // incoming entity name
-  std::string entity_name = req.entity_name;
+  std::string model_name = req.model_name;
 
   // get name space for the corresponding model plugins
-  std::string entity_namespace = req.entity_namespace;
+  std::string model_namespace = req.model_namespace;
 
   // get initial pose of model
   gazebo::math::Vector3 initial_xyz(req.initial_pose.position.x,req.initial_pose.position.y,req.initial_pose.position.z);
@@ -637,44 +637,44 @@ bool GazeboRosApiPlugin::spawnSDFEntity(gazebo_msgs::SpawnEntity::Request &req,
   /// @todo: map is really wrong, need to use tf here somehow
   else if (req.reference_frame == "" || req.reference_frame == "world" || req.reference_frame == "map" || req.reference_frame == "/map")
   {
-    ROS_DEBUG("SpawnEntity: reference_frame is empty/world/map, using inertial frame");
+    ROS_DEBUG("SpawnModel: reference_frame is empty/world/map, using inertial frame");
   }
   else
   {
     res.success = false;
-    res.status_message = "SpawnEntity: reference reference_frame not found, did you forget to scope the link by model name?";
+    res.status_message = "SpawnModel: reference reference_frame not found, did you forget to scope the link by model name?";
     return true;
   }
 
   // incoming robot model string
-  std::string entity_xml = req.entity_xml;
+  std::string model_xml = req.model_xml;
 
   // store resulting Gazebo Model XML to be sent to spawn queue
   // get incoming string containg either an URDF or a Gazebo Model XML
   // grab from parameter server if necessary convert to SDF if necessary
-  stripXmlDeclaration(entity_xml);
+  stripXmlDeclaration(model_xml);
 
   // put string in TiXmlDocument for manipulation
-  TiXmlDocument gazebo_entity_xml;
-  gazebo_entity_xml.Parse(entity_xml.c_str());
+  TiXmlDocument gazebo_model_xml;
+  gazebo_model_xml.Parse(model_xml.c_str());
 
   // optional model manipulations: update initial pose && replace model name
-  if (isSDF(entity_xml))
+  if (isSDF(model_xml))
   {
-    updateSDFAttributes(gazebo_entity_xml, entity_name, initial_xyz, initial_q);
+    updateSDFAttributes(gazebo_model_xml, model_name, initial_xyz, initial_q);
 
     // Walk recursively through the entire SDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!entity_namespace.empty())
+    if (!model_namespace.empty())
     {
       // Get root element for SDF
       // TODO: implement the spawning also with <light></light> and <model></model>
-      TiXmlNode* entity_tixml = gazebo_entity_xml.FirstChild("sdf");
-      entity_tixml = (!entity_tixml) ?
-          gazebo_entity_xml.FirstChild("gazebo") : entity_tixml;
-      if (entity_tixml)
+      TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("sdf");
+      model_tixml = (!model_tixml) ?
+          gazebo_model_xml.FirstChild("gazebo") : model_tixml;
+      if (model_tixml)
       {
-        walkChildAddRobotNamespace(entity_tixml, entity_namespace);
+        walkChildAddRobotNamespace(model_tixml, model_namespace);
       }
       else
       {
@@ -682,20 +682,20 @@ bool GazeboRosApiPlugin::spawnSDFEntity(gazebo_msgs::SpawnEntity::Request &req,
       }
     }
   }
-  else if (isURDF(entity_xml))
+  else if (isURDF(model_xml))
   {
-    updateURDFModelPose(gazebo_entity_xml, initial_xyz, initial_q);
-    updateURDFName(gazebo_entity_xml, entity_name);
+    updateURDFModelPose(gazebo_model_xml, initial_xyz, initial_q);
+    updateURDFName(gazebo_model_xml, model_name);
 
     // Walk recursively through the entire URDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!entity_namespace.empty())
+    if (!model_namespace.empty())
     {
       // Get root element for URDF
-      TiXmlNode* entity_tixml = gazebo_entity_xml.FirstChild("robot");
-      if (entity_tixml)
+      TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("robot");
+      if (model_tixml)
       {
-        walkChildAddRobotNamespace(entity_tixml, entity_namespace);
+        walkChildAddRobotNamespace(model_tixml, model_namespace);
       }
       else
       {
@@ -705,14 +705,14 @@ bool GazeboRosApiPlugin::spawnSDFEntity(gazebo_msgs::SpawnEntity::Request &req,
   }
   else
   {
-    ROS_ERROR("GazeboRosApiPlugin SpawnEntity Failure: input xml format not recognized");
+    ROS_ERROR("GazeboRosApiPlugin SpawnModel Failure: input xml format not recognized");
     res.success = false;
-    res.status_message = std::string("GazeboRosApiPlugin SpawnEntity Failure: input entity_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.");
+    res.status_message = std::string("GazeboRosApiPlugin SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.");
     return true;
   }
 
   // do spawning check if spawn worked, return response
-  return spawnAndConform(gazebo_entity_xml, entity_name, res);
+  return spawnAndConform(gazebo_model_xml, model_name, res);
 }
 
 bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
@@ -1818,21 +1818,21 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   return true;
 }
 
-bool GazeboRosApiPlugin::isURDF(std::string entity_xml)
+bool GazeboRosApiPlugin::isURDF(std::string model_xml)
 {
   TiXmlDocument doc_in;
-  doc_in.Parse(entity_xml.c_str());
+  doc_in.Parse(model_xml.c_str());
   if (doc_in.FirstChild("robot"))
     return true;
   else
     return false;
 }
 
-bool GazeboRosApiPlugin::isSDF(std::string entity_xml)
+bool GazeboRosApiPlugin::isSDF(std::string model_xml)
 {
   // FIXME: very crude check
   TiXmlDocument doc_in;
-  doc_in.Parse(entity_xml.c_str());
+  doc_in.Parse(model_xml.c_str());
   if (doc_in.FirstChild("gazebo") ||
       doc_in.FirstChild("sdf")) // sdf
     return true;
@@ -2102,22 +2102,22 @@ void GazeboRosApiPlugin::physicsReconfigureThread()
   ROS_INFO("Physics dynamic reconfigure ready.");
 }
 
-void GazeboRosApiPlugin::stripXmlDeclaration(std::string &entity_xml)
+void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
 {
   // incoming robot model string is a string containing a Gazebo Model XML
-  /// STRIP DECLARATION <? ... xml version="1.0" ... ?> from entity_xml
+  /// STRIP DECLARATION <? ... xml version="1.0" ... ?> from model_xml
   /// @todo: does tinyxml have functionality for this?
   /// @todo: should gazebo take care of the declaration?
   std::string open_bracket("<?");
   std::string close_bracket("?>");
-  size_t pos1 = entity_xml.find(open_bracket,0);
-  size_t pos2 = entity_xml.find(close_bracket,0);
+  size_t pos1 = model_xml.find(open_bracket,0);
+  size_t pos2 = model_xml.find(close_bracket,0);
   if (pos1 != std::string::npos && pos2 != std::string::npos)
-    entity_xml.replace(pos1,pos2-pos1+2,std::string(""));
+    model_xml.replace(pos1,pos2-pos1+2,std::string(""));
 }
 
-void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_entity_xml,
-                                             std::string entity_name,
+void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml,
+                                             std::string model_name,
                                              gazebo::math::Vector3 initial_xyz,
                                              gazebo::math::Quaternion initial_q)
 {
@@ -2127,7 +2127,7 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_entity_xml,
   TiXmlElement* pose_element; // This is used by both reguar and database SDFs
 
   // Check SDF for requires SDF element
-  TiXmlElement* gazebo_tixml = gazebo_entity_xml.FirstChildElement("sdf");
+  TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("sdf");
   if (!gazebo_tixml)
   {
     ROS_WARN("Could not find <sdf> element in sdf, so name and initial position cannot be applied");
@@ -2135,17 +2135,17 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_entity_xml,
   }
 
   // Check SDF for optional model element. May not have one
-  TiXmlElement* entity_tixml = gazebo_tixml->FirstChildElement("model");
-  if (entity_tixml)
+  TiXmlElement* model_tixml = gazebo_tixml->FirstChildElement("model");
+  if (model_tixml)
   {
     // Update entity name
-    if (entity_tixml->Attribute("name") != NULL)
+    if (model_tixml->Attribute("name") != NULL)
     {
       // removing old entity name
-      entity_tixml->RemoveAttribute("name");
+      model_tixml->RemoveAttribute("name");
     }
     // replace with user specified name
-    entity_tixml->SetAttribute("name",entity_name);
+    model_tixml->SetAttribute("name",model_name);
   }
   else
   {
@@ -2157,30 +2157,30 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_entity_xml,
       return;
     }
     // If not <model> element, check SDF for required include element
-    entity_tixml = world_tixml->FirstChildElement("include");
-    if (!entity_tixml)
+    model_tixml = world_tixml->FirstChildElement("include");
+    if (!model_tixml)
     {
       ROS_WARN("Could not find <include> element in sdf, so name and initial position cannot be applied");
       return;
     }
 
     // Check for name element
-    TiXmlElement* name_tixml = entity_tixml->FirstChildElement("name");
+    TiXmlElement* name_tixml = model_tixml->FirstChildElement("name");
     if (!name_tixml)
     {
       // Create the name element
       name_tixml = new TiXmlElement("name");
-      entity_tixml->LinkEndChild(name_tixml);
+      model_tixml->LinkEndChild(name_tixml);
     }
 
     // Set the text within the name element
-    TiXmlText* text = new TiXmlText(entity_name);
+    TiXmlText* text = new TiXmlText(model_name);
     name_tixml->LinkEndChild( text );
   }
 
 
   // Check for the pose element
-  pose_element = entity_tixml->FirstChildElement("pose");
+  pose_element = model_tixml->FirstChildElement("pose");
   gazebo::math::Pose model_pose;
 
   // Create the pose element if it doesn't exist
@@ -2189,7 +2189,7 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_entity_xml,
   {
     // save pose_element in math::Pose and remove child
     model_pose = this->parsePose(pose_element->GetText());
-    entity_tixml->RemoveChild(pose_element);
+    model_tixml->RemoveChild(pose_element);
   }
 
   // Set and link the pose element after adding initial pose
@@ -2207,7 +2207,7 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_entity_xml,
     TiXmlText* text = new TiXmlText(pose_stream.str());
     TiXmlElement* new_pose_element = new TiXmlElement("pose");
     new_pose_element->LinkEndChild(text);
-    entity_tixml->LinkEndChild(new_pose_element);
+    model_tixml->LinkEndChild(new_pose_element);
   }
 }
 
@@ -2277,19 +2277,19 @@ gazebo::math::Vector3 GazeboRosApiPlugin::parseVector3(const std::string &str)
   }
 }
 
-void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_entity_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
+void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
 {
-  TiXmlElement* entity_tixml = (gazebo_entity_xml.FirstChildElement("robot"));
-  if (entity_tixml)
+  TiXmlElement* model_tixml = (gazebo_model_xml.FirstChildElement("robot"));
+  if (model_tixml)
   {
-    // replace initial pose of entity
+    // replace initial pose of model
     // find first instance of xyz and rpy, replace with initial pose
-    TiXmlElement* origin_key = entity_tixml->FirstChildElement("origin");
+    TiXmlElement* origin_key = model_tixml->FirstChildElement("origin");
 
     if (!origin_key)
     {
       origin_key = new TiXmlElement("origin");
-      entity_tixml->LinkEndChild(origin_key);
+      model_tixml->LinkEndChild(origin_key);
     }
 
     gazebo::math::Vector3 xyz;
@@ -2322,29 +2322,29 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_entity_xml, g
     ROS_WARN("could not find <model> element in sdf, so name and initial position is not applied");
 }
 
-void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_entity_xml, std::string entity_name)
+void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
 {
-  TiXmlElement* entity_tixml = gazebo_entity_xml.FirstChildElement("robot");
-  // replace entity name if one is specified by the user
-  if (entity_tixml)
+  TiXmlElement* model_tixml = gazebo_model_xml.FirstChildElement("robot");
+  // replace model name if one is specified by the user
+  if (model_tixml)
   {
-    if (entity_tixml->Attribute("name") != NULL)
+    if (model_tixml->Attribute("name") != NULL)
     {
-      // removing old entity name
-      entity_tixml->RemoveAttribute("name");
+      // removing old model name
+      model_tixml->RemoveAttribute("name");
     }
     // replace with user specified name
-    entity_tixml->SetAttribute("name",entity_name);
+    model_tixml->SetAttribute("name",model_name);
   }
   else
     ROS_WARN("could not find <robot> element in URDF, name not replaced");
 }
 
-void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* entity_xml,
-                                                    std::string &entity_namespace)
+void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* model_xml,
+                                                    std::string &model_namespace)
 {
   TiXmlNode* child = 0;
-  child = entity_xml->IterateChildren(child);
+  child = model_xml->IterateChildren(child);
   while (child != NULL)
   {
     if (child->ValueStr().find(std::string("plugin")) == 0)
@@ -2358,20 +2358,20 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* entity_xml,
           child_elem = child->ToElement()->FirstChildElement("robotNamespace");
         }
         TiXmlElement* key = new TiXmlElement("robotNamespace");
-        TiXmlText* val = new TiXmlText(entity_namespace);
+        TiXmlText* val = new TiXmlText(model_namespace);
         key->LinkEndChild(val);
         child->ToElement()->LinkEndChild(key);
       }
     }
-    walkChildAddRobotNamespace(child, entity_namespace);
-    child = entity_xml->IterateChildren(child);
+    walkChildAddRobotNamespace(child, model_namespace);
+    child = model_xml->IterateChildren(child);
   }
 }
 
-bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_entity_xml, std::string entity_name,
-                                         gazebo_msgs::SpawnEntity::Response &res)
+bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
+                                         gazebo_msgs::SpawnModel::Response &res)
 {
-  std::string entity_type = gazebo_entity_xml.RootElement()->FirstChild()->Value();
+  std::string entity_type = gazebo_model_xml.RootElement()->FirstChild()->Value();
   // Convert the entity type to lower case
   std::transform(entity_type.begin(), entity_type.end(), entity_type.begin(), ::tolower);
 
@@ -2379,30 +2379,30 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_entity_xml, std::
 
   // push to factory iface
   std::ostringstream stream;
-  stream << gazebo_entity_xml;
-  std::string gazebo_entity_xml_string = stream.str();
-  ROS_DEBUG("Gazebo Model XML\n\n%s\n\n ",gazebo_entity_xml_string.c_str());
+  stream << gazebo_model_xml;
+  std::string gazebo_model_xml_string = stream.str();
+  ROS_DEBUG("Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
 
   // publish to factory topic
   gazebo::msgs::Factory msg;
   gazebo::msgs::Init(msg, "spawn_model");
-  msg.set_sdf( gazebo_entity_xml_string );
+  msg.set_sdf( gazebo_model_xml_string );
 
-  //ROS_ERROR("attempting to spawn model name [%s] [%s]", entity_name.c_str(),gazebo_entity_xml_string.c_str());
+  //ROS_ERROR("attempting to spawn model name [%s] [%s]", model_name.c_str(),gazebo_model_xml_string.c_str());
 
   // FIXME: should use entity_info or add lock to World::receiveMutex
   // looking for Model to see if it exists already
-  gazebo::msgs::Request *entity_info_msg = gazebo::msgs::CreateRequest("entity_info", entity_name);
+  gazebo::msgs::Request *entity_info_msg = gazebo::msgs::CreateRequest("entity_info", model_name);
   request_pub_->Publish(*entity_info_msg,true);
   // todo: should wait for response response_sub_, check to see that if _msg->response == "nonexistant"
 
-  gazebo::physics::ModelPtr model = world_->GetModel(entity_name);
-  gazebo::physics::LightPtr light = world_->Light(entity_name);
+  gazebo::physics::ModelPtr model = world_->GetModel(model_name);
+  gazebo::physics::LightPtr light = world_->Light(model_name);
   if ((isLight && light != NULL) || (model != NULL))
   {
-    ROS_ERROR("SpawnEntity: Failure - entity name %s already exist.",entity_name.c_str());
+    ROS_ERROR("SpawnModel: Failure - entity name %s already exist.",model_name.c_str());
     res.success = false;
-    res.status_message = "SpawnEntity: Failure - entity already exists.";
+    res.status_message = "SpawnModel: Failure - entity already exists.";
     return true;
   }
 
@@ -2412,9 +2412,9 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_entity_xml, std::
     {
       // Publish the light message to spawn the light (Gazebo 7 and up)
       sdf::SDF sdf_light;
-      sdf_light.SetFromString(gazebo_entity_xml_string);
+      sdf_light.SetFromString(gazebo_model_xml_string);
       gazebo::msgs::Light msg = gazebo::msgs::LightFromSDF(sdf_light.Root()->GetElement("light"));
-      msg.set_name(entity_name);
+      msg.set_name(model_name);
       factory_light_pub_->Publish(msg);
     }
     else
@@ -2438,28 +2438,28 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_entity_xml, std::
     if (ros::Time::now() > timeout)
     {
       res.success = false;
-      res.status_message = std::string("SpawnEntity: Entity pushed to spawn queue, but spawn service")
+      res.status_message = std::string("SpawnModel: Entity pushed to spawn queue, but spawn service")
         + std::string(" timed out waiting for entity to appear in simulation under the name ")
-        + entity_name;
+        + model_name;
       return true;
     }
 
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if ((isLight && world_->Light(entity_name) != NULL)
-          || (world_->GetModel(entity_name) != NULL))
+      if ((isLight && world_->Light(model_name) != NULL)
+          || (world_->GetModel(model_name) != NULL))
         break;
     }
 
     ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now()
-      << " for entity " << entity_name << " to spawn");
+      << " for entity " << model_name << " to spawn");
 
     usleep(2000);
   }
 
   // set result
   res.success = true;
-  res.status_message = std::string("SpawnEntity: Successfully spawned entity");
+  res.status_message = std::string("SpawnModel: Successfully spawned entity");
   return true;
 }
 
