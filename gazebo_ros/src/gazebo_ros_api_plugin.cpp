@@ -221,7 +221,7 @@ void GazeboRosApiPlugin::advertiseServices()
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
 
   // Advertise spawn services on the custom queue
-  std::string spawn_sdf_model_service_name("spawn_sdf_entity");
+  std::string spawn_sdf_model_service_name("spawn_sdf_model");
   ros::AdvertiseServiceOptions spawn_sdf_model_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
                                                                   spawn_sdf_model_service_name,
@@ -554,9 +554,13 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
 
   if (!isURDF(model_xml))
   {
+<<<<<<< 896b6a8744bcb1b862044afef4b968a3f6591c33
     ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model format is not URDF.");
+=======
+    ROS_ERROR("SpawnModel: Failure - entity format is invalid.");
+>>>>>>> [gazebo_ros] Changed the spawn model methods to spawn also lights.
     res.success = false;
-    res.status_message = "SpawnModel: Failure - entity format is not URDF.";
+    res.status_message = "SpawnModel: Failure - entity format is invalid.";
     return false;
   }
 
@@ -593,7 +597,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
       {
         ROS_FATAL_NAMED("api_plugin", "Package[%s] does not have a path",package_name.c_str());
         res.success = false;
-        res.status_message = std::string("urdf reference package name does not exist: ")+package_name;
+        res.status_message = "urdf reference package name does not exist: " + package_name;
         return false;
       }
       ROS_DEBUG_ONCE_NAMED("api_plugin", "Package name [%s] has path [%s]", package_name.c_str(), package_path.c_str());
@@ -708,7 +712,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   {
     ROS_ERROR_NAMED("api_plugin", "GazeboRosApiPlugin SpawnModel Failure: input xml format not recognized");
     res.success = false;
-    res.status_message = std::string("GazeboRosApiPlugin SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.");
+    res.status_message = "GazeboRosApiPlugin SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.";
     return true;
   }
 
@@ -760,7 +764,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
     if (ros::Time::now() > timeout)
     {
       res.success = false;
-      res.status_message = std::string("DeleteModel: Model pushed to delete queue, but delete service timed out waiting for model to disappear from simulation");
+      res.status_message = "DeleteModel: Model pushed to delete queue, but delete service timed out waiting for model to disappear from simulation";
       return true;
     }
     {
@@ -773,7 +777,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
 
   // set result
   res.success = true;
-  res.status_message = std::string("DeleteModel: successfully deleted model");
+  res.status_message = "DeleteModel: successfully deleted model";
   return true;
 }
 
@@ -782,22 +786,25 @@ bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
 {
   gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
 
-  if (phy_light == NULL) {
+  if (phy_light == NULL)
+  {
     res.success = false;
-    res.status_message = std::string("DeleteLight: Requested light ") + req.light_name + std::string(" not found!");
+    res.status_message = "DeleteLight: Requested light " + req.light_name + " not found!";
   }
-  else {
+  else
+  {
     gazebo::msgs::Request* msg = gazebo::msgs::CreateRequest("entity_delete", req.light_name);
     request_pub_->Publish(*msg, true);
 
     res.success = false;
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 100; i++)
+    {
       phy_light = world_->Light(req.light_name);
-      if (phy_light == NULL) {
+      if (phy_light == NULL)
+      {
         res.success = true;
-        res.status_message = std::string("DeleteLight: ") + req.light_name
-                           + std::string(" successfully deleted");
+        res.status_message = "DeleteLight: " + req.light_name + " successfully deleted";
         return true;
       }
       // Check every 100ms
@@ -805,8 +812,8 @@ bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
     }
   }
 
-  res.status_message = std::string("DeleteLight: Timeout reached while removing light \"") +
-                       req.light_name + std::string("\"");
+  res.status_message = "DeleteLight: Timeout reached while removing light \"" + req.light_name
+                       + "\"";
 
   return true;
 }
@@ -1127,11 +1134,13 @@ bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Req
 {
   gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
 
-  if (phy_light == NULL) {
+  if (phy_light == NULL)
+  {
       res.success = false;
-      res.status_message = std::string("getLightProperties: Requested light ") + req.light_name + std::string(" not found!");
+      res.status_message = "getLightProperties: Requested light " + req.light_name + " not found!";
   }
-  else {
+  else
+  {
     gazebo::msgs::Light light;
     phy_light->FillMsg(light);
 
@@ -1155,11 +1164,13 @@ bool GazeboRosApiPlugin::setLightProperties(gazebo_msgs::SetLightProperties::Req
 {
   gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
 
-  if (phy_light == NULL) {
+  if (phy_light == NULL)
+  {
     res.success = false;
-    res.status_message = std::string("setLightProperties: Requested light ") + req.light_name + std::string(" not found!");
+    res.status_message = "setLightProperties: Requested light " + req.light_name + " not found!";
   }
-  else {
+  else
+  {
     gazebo::msgs::Light light;
 
     phy_light->FillMsg(light);
@@ -2406,22 +2417,17 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
     return true;
   }
 
-  #if GAZEBO_MAJOR_VERSION > 6
-    // for Gazebo 7 and up, use a different method to spawn lights
-    if (isLight)
-    {
-      // Publish the light message to spawn the light (Gazebo 7 and up)
-      sdf::SDF sdf_light;
-      sdf_light.SetFromString(gazebo_model_xml_string);
-      gazebo::msgs::Light msg = gazebo::msgs::LightFromSDF(sdf_light.Root()->GetElement("light"));
-      msg.set_name(model_name);
-      factory_light_pub_->Publish(msg);
-    }
-    else
-  #else
-    // for Gazebo 6 and lower, use the standard factory to spawn all object
-    if (true)
-  #endif
+  // for Gazebo 7 and up, use a different method to spawn lights
+  if (isLight)
+  {
+    // Publish the light message to spawn the light (Gazebo 7 and up)
+    sdf::SDF sdf_light;
+    sdf_light.SetFromString(gazebo_model_xml_string);
+    gazebo::msgs::Light msg = gazebo::msgs::LightFromSDF(sdf_light.Root()->GetElement("light"));
+    msg.set_name(model_name);
+    factory_light_pub_->Publish(msg);
+  }
+  else
   {
     // Publish the factory message
     factory_pub_->Publish(msg);
@@ -2438,9 +2444,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
     if (ros::Time::now() > timeout)
     {
       res.success = false;
-      res.status_message = std::string("SpawnModel: Entity pushed to spawn queue, but spawn service")
-        + std::string(" timed out waiting for entity to appear in simulation under the name ")
-        + model_name;
+      res.status_message = "SpawnModel: Entity pushed to spawn queue, but spawn service timed out waiting for entity to appear in simulation under the name " + model_name;
       return true;
     }
 
@@ -2459,7 +2463,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
 
   // set result
   res.success = true;
-  res.status_message = std::string("SpawnModel: Successfully spawned entity");
+  res.status_message = "SpawnModel: Successfully spawned entity";
   return true;
 }
 
