@@ -266,7 +266,7 @@ private:
   void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
 
   /// \brief
-  void walkChildAddRobotNamespace(TiXmlNode* model_xml, std::string &model_namespace);
+  void walkChildAddRobotNamespace(TiXmlNode* model_xml);
 
   /// \brief
   bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
@@ -308,6 +308,8 @@ private:
   // detect if sigint event occurs
   bool stop_;
   gazebo::event::ConnectionPtr sigint_event_;
+
+  std::string robot_namespace_;
 
   gazebo::transport::NodePtr gazebonode_;
   gazebo::transport::SubscriberPtr stat_sub_;

@@ -36,6 +36,7 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   pub_model_states_connection_count_(0),
   pub_clock_frequency_(0)
 {
+  robot_namespace_.clear();
 }
 
 GazeboRosApiPlugin::~GazeboRosApiPlugin()
@@ -545,8 +546,8 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
 bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
                                         gazebo_msgs::SpawnModel::Response &res)
 {
-  // get namespace for the corresponding entity plugins
-  std::string model_namespace = req.model_namespace;
+  // get namespace for the corresponding model plugins
+  robot_namespace_ = req.robot_namespace;
 
   // incoming entity string
   std::string model_xml = req.model_xml;
@@ -615,8 +616,8 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   // incoming entity name
   std::string model_name = req.model_name;
 
-  // get name space for the corresponding model plugins
-  std::string model_namespace = req.model_namespace;
+  // get namespace for the corresponding model plugins
+  robot_namespace_ = req.robot_namespace;
 
   // get initial pose of model
   gazebo::math::Vector3 initial_xyz(req.initial_pose.position.x,req.initial_pose.position.y,req.initial_pose.position.z);
@@ -665,7 +666,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
 
     // Walk recursively through the entire SDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!model_namespace.empty())
+    if (!this->robot_namespace_.empty())
     {
       // Get root element for SDF
       // TODO: implement the spawning also with <light></light> and <model></model>
@@ -674,7 +675,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
           gazebo_model_xml.FirstChild("gazebo") : model_tixml;
       if (model_tixml)
       {
-        walkChildAddRobotNamespace(model_tixml, model_namespace);
+        walkChildAddRobotNamespace(model_tixml);
       }
       else
       {
@@ -689,13 +690,13 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
 
     // Walk recursively through the entire URDF, locate plugin tags and
     // add robotNamespace as a child with the correct namespace
-    if (!model_namespace.empty())
+    if (!this->robot_namespace_.empty())
     {
       // Get root element for URDF
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("robot");
       if (model_tixml)
       {
-        walkChildAddRobotNamespace(model_tixml, model_namespace);
+        walkChildAddRobotNamespace(model_tixml);
       }
       else
       {
@@ -2340,8 +2341,7 @@ void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::st
     ROS_WARN("could not find <robot> element in URDF, name not replaced");
 }
 
-void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* model_xml,
-                                                    std::string &model_namespace)
+void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* model_xml)
 {
   TiXmlNode* child = 0;
   child = model_xml->IterateChildren(child);
@@ -2358,12 +2358,12 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* model_xml,
           child_elem = child->ToElement()->FirstChildElement("robotNamespace");
         }
         TiXmlElement* key = new TiXmlElement("robotNamespace");
-        TiXmlText* val = new TiXmlText(model_namespace);
+        TiXmlText* val = new TiXmlText(robot_namespace_);
         key->LinkEndChild(val);
         child->ToElement()->LinkEndChild(key);
       }
     }
-    walkChildAddRobotNamespace(child, model_namespace);
+    walkChildAddRobotNamespace(child);
     child = model_xml->IterateChildren(child);
   }
 }
