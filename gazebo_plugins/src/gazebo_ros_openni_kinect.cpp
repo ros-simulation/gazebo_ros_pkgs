@@ -335,13 +335,19 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
       pcl::PointXYZRGB point;
       point.x      = depth * tan(yAngle);
       point.y      = depth * tan(pAngle);
-      if(depth > this->point_cloud_cutoff_)
+      if (depth == 0.0f) // gazebo returns 0.0 when no object was rendered 
+      {
+        // set "no returns" to +infinity according to REP-117
+        point.z = std::numeric_limits<float>::infinity();
+      }
+      else if(depth > this->point_cloud_cutoff_)
       {
         point.z    = depth;
       }
-      else //point in the unseeable range
+      else //point in the unusable range
       {
-        point.x = point.y = point.z = std::numeric_limits<float>::quiet_NaN ();
+        // set "too close" measurements to -inf according to REP-117
+        point.x = point.y = point.z = -std::numeric_limits<float>::infinity();
         point_cloud.is_dense = false;
       }
 
@@ -393,8 +399,6 @@ bool GazeboRosOpenniKinect::FillDepthImageHelper(
   image_msg.data.resize(rows_arg * cols_arg * sizeof(float));
   image_msg.is_bigendian = 0;
 
-  const float bad_point = std::numeric_limits<float>::quiet_NaN();
-
   float* dest = (float*)(&(image_msg.data[0]));
   float* toCopyFrom = (float*)data_arg;
   int index = 0;
@@ -405,15 +409,17 @@ bool GazeboRosOpenniKinect::FillDepthImageHelper(
     for (uint32_t i = 0; i < cols_arg; i++)
     {
       float depth = toCopyFrom[index++];
-
-      if (depth > this->point_cloud_cutoff_)
+      if (depth == 0.0f) // gazebo returns 0.0 when no object was rendered 
       {
-        dest[i + j * cols_arg] = depth;
+        // set "no returns" to +infinity according to REP-117
+        depth = std::numeric_limits<float>::infinity();
       }
-      else //point in the unseeable range
+      else if (depth <= this->point_cloud_cutoff_) //point in the unusable range
       {
-        dest[i + j * cols_arg] = bad_point;
+        // set "too close" measurements to -inf according to REP-117
+        depth = -std::numeric_limits<float>::infinity();
       }
+      dest[i + j * cols_arg] = depth;
     }
   }
   return true;
