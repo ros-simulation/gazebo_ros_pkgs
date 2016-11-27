@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed getLinkState service's angular velocity return
+* Contributors: Jared
+
 2.4.11 (2016-07-14)
 -------------------
 * GAZEBO_MASTER_URI is loaded from setup.sh if empty in environment.
