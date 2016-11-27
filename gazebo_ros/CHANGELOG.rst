@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.12 (2016-11-27)
+-------------------
 * Fixed getLinkState service's angular velocity return
 * Contributors: Jared
 
