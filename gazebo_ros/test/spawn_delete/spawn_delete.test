@@ -1,0 +1,13 @@
+<launch>
+    <param name="/use_sim_time" value="true" />
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="gui"     value="false" />
+      <arg name="verbose" value="true" />
+    </include>
+
+    <test test-name="spawn_detele_test" 
+          pkg="gazebo_ros" 
+          type="spawn_delete-test" 
+          clear_params="true" 
+          time-limit="10.0" />
+</launch>
