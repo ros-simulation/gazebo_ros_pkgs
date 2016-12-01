@@ -1,4 +1,9 @@
 #!/bin/sh
+[ -L ${0} ] && SCRIPT_DIR=$(readlink ${0}) || SCRIPT_DIR=${0}
+SCRIPT_DIR=$(dirname ${SCRIPT_DIR})
+
+. ${SCRIPT_DIR}/libcommon.sh
+
 final="$@"
 
 EXT=so
@@ -20,6 +25,8 @@ desired_master_uri="$GAZEBO_MASTER_URI"
 if [ "$desired_master_uri" = "" ]; then
 	desired_master_uri="$GAZEBO_MASTER_URI"
 fi
+
+final=$(relocate_remappings "${final}")
 
 # Combine the commands
 GAZEBO_MASTER_URI="$desired_master_uri" gzclient $final

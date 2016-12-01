@@ -51,6 +51,7 @@ catkin_package(
   std_msgs
   gazebo_msgs
 
+
   DEPENDS
     TinyXML
 )
@@ -96,9 +97,17 @@ install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
   )
 
 # Install Gazebo Scripts
-install(PROGRAMS scripts/gazebo scripts/debug scripts/gzclient scripts/gzserver scripts/gdbrun scripts/perf scripts/spawn_model
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+install(PROGRAMS scripts/gazebo
+                 scripts/debug
+		 scripts/gzclient
+		 scripts/gzserver
+		 scripts/gdbrun
+		 scripts/perf
+		 scripts/spawn_model
+		 scripts/libcommon.sh
+        DESTINATION
+                 ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 # Install Gazebo launch files
 install(DIRECTORY launch/
