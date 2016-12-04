@@ -40,6 +40,7 @@
 
 
 #include <gazebo_ros_control/default_robot_hw_sim.h>
+#include <urdf/model.h>
 
 
 namespace
@@ -381,7 +382,7 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
 
   if (urdf_model != NULL)
   {
-    const boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model->getJoint(joint_name);
+    const urdf::JointConstSharedPtr urdf_joint = urdf_model->getJoint(joint_name);
     if (urdf_joint != NULL)
     {
       *joint_type = urdf_joint->type;
