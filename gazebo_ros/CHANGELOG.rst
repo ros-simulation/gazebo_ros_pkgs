@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.8 (2016-12-06)
+------------------
 * Workaround to support gazebo and ROS arguments in the command line
 * Fix ROS remapping by reverting "Remove ROS remapping arguments from gazebo_ros launch scripts.
 * Fixed getlinkstate service's angular velocity return
