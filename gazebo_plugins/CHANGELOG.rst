@@ -2,6 +2,11 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix camera distortion coefficients order. Now {k1, k2, p1, p2, k3}
+* Contributors: Enrique Fernandez
+
 2.6.0 (2016-08-04)
 ------------------
 * Use NOT VERSION_LESS to simplify cmake logic
