@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.6.1 (2016-12-06)
+------------------
 * Workaround to support gazebo and ROS arguments in the command line
 * Fix ROS remappings by reverting "Remove ROS remapping arguments from gazebo_ros launch scripts"
 * Added comments regarding 'headless' arg. Added 'recording' arg as switch for -r
