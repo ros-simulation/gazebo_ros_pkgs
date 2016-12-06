@@ -2,6 +2,12 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix camera distortion coefficients order. Now {k1, k2, p1, p2, k3}
+* Added an interface to gazebo's harness plugin
+* Contributors: Enrique Fernandez, Steven Peters, Nate Koenig
+
 2.5.7 (2016-06-10)
 ------------------
 

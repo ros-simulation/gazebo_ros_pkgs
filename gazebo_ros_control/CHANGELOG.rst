@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.7 (2016-06-10)
 ------------------
 * delete CATKIN_IGNORE in gazebo_ros_control (`#456 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/456>`_)

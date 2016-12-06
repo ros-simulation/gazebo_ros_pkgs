@@ -2,6 +2,14 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Workaround to support gazebo and ROS arguments in the command line
+* Fix ROS remapping by reverting "Remove ROS remapping arguments from gazebo_ros launch scripts.
+* Fixed getlinkstate service's angular velocity return
+* Honor GAZEBO_MASTER_URI in gzserver and gzclient
+* Contributors: Jared, Jon Binney, Jordan Liviero, Jose Luis Rivero, Martin Pecka
+
 2.5.7 (2016-06-10)
 ------------------
 
