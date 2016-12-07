@@ -38,7 +38,7 @@ else()
 endif()
 
 # Depend on system install of Gazebo and SDFormat
-find_package(gazebo REQUIRED)
+find_package(GAZEBO REQUIRED)
 find_package(SDFormat REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
