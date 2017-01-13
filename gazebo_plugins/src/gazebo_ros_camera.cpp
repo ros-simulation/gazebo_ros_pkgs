@@ -82,6 +82,19 @@ void GazeboRosCamera::OnNewFrame(const unsigned char *_image,
   this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
 # endif
 
+  const bool trigger_mode = this->trigger_topic_name_.size();
+  bool triggered = false;
+
+  if (trigger_mode)
+  {
+    boost::mutex::scoped_lock lock(*this->image_trigger_count_lock_);
+    if (trigger_count_ > 0)
+    {
+      trigger_count_--;
+      triggered = true;
+    }
+  }
+
   if (!this->parentSensor->IsActive())
   {
     if ((*this->image_connect_count_) > 0)
@@ -93,7 +106,9 @@ void GazeboRosCamera::OnNewFrame(const unsigned char *_image,
     if ((*this->image_connect_count_) > 0)
     {
       common::Time cur_time = this->world_->GetSimTime();
-      if (cur_time - this->last_update_time_ >= this->update_period_)
+      if ((trigger_mode && triggered) ||
+          (!trigger_mode && (cur_time - this->last_update_time_ >=
+          this->update_period_)))
       {
         this->PutCameraData(_image);
         this->PublishCameraInfo();

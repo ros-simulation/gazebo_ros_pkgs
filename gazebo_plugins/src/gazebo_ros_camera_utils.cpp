@@ -128,6 +128,10 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   if (this->sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = this->sdf->Get<std::string>("imageTopicName");
 
+  this->trigger_topic_name_ = "";
+  if (this->sdf->HasElement("triggerTopicName"))
+    this->trigger_topic_name_ = this->sdf->Get<std::string>("triggerTopicName");
+
   this->camera_info_topic_name_ = "camera_info";
   if (this->sdf->HasElement("cameraInfoTopicName"))
     this->camera_info_topic_name_ =
@@ -251,6 +255,9 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
     boost::bind(&GazeboRosCameraUtils::LoadThread, this));
+
+  if (!this->image_trigger_count_lock_) this->image_trigger_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
+  trigger_count_ = 0;
 }
 
 event::ConnectionPtr GazeboRosCameraUtils::OnLoad(const boost::function<void()>& load_function)
@@ -349,6 +356,13 @@ void GazeboRosCameraUtils::LoadThread()
   this->cameraUpdateRateSubscriber_ = this->rosnode_->subscribe(rate_so);
   */
 
+  ros::SubscribeOptions trigger_so =
+    ros::SubscribeOptions::create<std_msgs::Empty>(
+        this->trigger_topic_name_, 1,
+        boost::bind(&GazeboRosCameraUtils::TriggerCamera, this, _1),
+        ros::VoidPtr(), &this->camera_queue_);
+  this->trigger_subscriber_ = this->rosnode_->subscribe(trigger_so);
+
   this->Init();
 }
 
@@ -361,6 +375,14 @@ void GazeboRosCameraUtils::SetHFOV(const std_msgs::Float64::ConstPtr& hfov)
 #else
   this->camera_->SetHFOV(gazebo::math::Angle(hfov->data));
 #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// trigger your camera
+void GazeboRosCameraUtils::TriggerCamera(const std_msgs::Empty::ConstPtr& dummy)
+{
+  boost::mutex::scoped_lock lock(*this->image_trigger_count_lock_);
+  trigger_count_++;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

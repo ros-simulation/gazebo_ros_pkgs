@@ -32,6 +32,7 @@
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <std_msgs/Empty.h>
 #include <std_msgs/Float64.h>
 #include <image_transport/image_transport.h>
 #include <camera_info_manager/camera_info_manager.h>
@@ -103,6 +104,15 @@ namespace gazebo
     private: void SetHFOV(const std_msgs::Float64::ConstPtr& hfov);
     private: void SetUpdateRate(const std_msgs::Float64::ConstPtr& update_rate);
 
+    /// \brief Trigger camera function
+    private: void TriggerCamera(const std_msgs::Empty::ConstPtr& dummy);
+
+    /// \brief A mutex to lock access to image_trigger_count_
+    protected: boost::shared_ptr<boost::mutex> image_trigger_count_lock_;
+
+    /// \brief The number of image triggers we've received but not serviced
+    protected: int trigger_count_;
+
     /// \brief A pointer to the ROS node.
     ///  A node will be instantiated if it does not exist.
     protected: ros::NodeHandle* rosnode_;
@@ -123,6 +133,11 @@ namespace gazebo
     
     /// \brief ROS image topic name
     protected: std::string image_topic_name_;
+
+    /// \brief ROS image trigger topic name
+    protected: std::string trigger_topic_name_;
+
+    private: ros::Subscriber trigger_subscriber_;
 
     /// \brief Publish CameraInfo to the ROS topic
     protected: void PublishCameraInfo(ros::Publisher camera_info_publisher);
