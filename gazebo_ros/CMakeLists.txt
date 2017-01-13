@@ -55,6 +55,10 @@ catkin_package(
     TinyXML
 )
 
+# Add a hook so that when setup.sh is sourced, the model directories of
+# all ROS packages are added to GAZEBO_MODELS_PATH
+catkin_add_env_hooks(setup_gazebo_env SHELLS sh DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/env-hooks)
+
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${SDFormat_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
 
 set(cxx_flags)
