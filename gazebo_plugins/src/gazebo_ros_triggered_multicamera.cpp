@@ -84,8 +84,7 @@ void GazeboRosTriggeredMultiCamera::Load(sensors::SensorPtr _parent,
 # endif
     {
       // FIXME: hardcoded, left hack_baseline_ 0
-      GazeboRosCameraUtils *utils = dynamic_cast<GazeboRosCameraUtils *>(cam);
-      utils->Load(_parent, _sdf, "/left", 0.0);
+      cam->Load(_parent, _sdf, "/left", 0.0);
     }
 # if GAZEBO_MAJOR_VERSION >= 7
     else if (this->camera[i]->Name().find("right") != std::string::npos)
@@ -96,8 +95,7 @@ void GazeboRosTriggeredMultiCamera::Load(sensors::SensorPtr _parent,
       double hackBaseline = 0.0;
       if (_sdf->HasElement("hackBaseline"))
         hackBaseline = _sdf->Get<double>("hackBaseline");
-      GazeboRosCameraUtils *utils = dynamic_cast<GazeboRosCameraUtils *>(cam);
-      utils->Load(_parent, _sdf, "/right", hackBaseline);
+      cam->Load(_parent, _sdf, "/right", hackBaseline);
     }
     this->triggered_cameras.push_back(cam);
   }
@@ -110,17 +108,7 @@ void GazeboRosTriggeredMultiCamera::OnNewFrameLeft(const unsigned char *_image,
     const std::string &_format)
 {
   GazeboRosTriggeredCamera * cam = this->triggered_cameras[0];
-# if GAZEBO_MAJOR_VERSION >= 7
-  cam->sensor_update_time_ = cam->parentSensor_->LastUpdateTime();
-# else
-  cam->sensor_update_time_ = cam->parentSensor_->GetLastUpdateTime();
-# endif
-
-  common::Time cur_time = cam->world_->GetSimTime();
-  cam->PutCameraData(_image);
-  cam->PublishCameraInfo();
-  cam->last_update_time_ = cur_time;
-  cam->SetCameraEnabled(false);
+  cam->OnNewFrame(_image, _width, _height, _depth, _format);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,16 +118,6 @@ void GazeboRosTriggeredMultiCamera::OnNewFrameRight(const unsigned char *_image,
     const std::string &_format)
 {
   GazeboRosTriggeredCamera * cam = this->triggered_cameras[1];
-# if GAZEBO_MAJOR_VERSION >= 7
-  cam->sensor_update_time_ = cam->parentSensor_->LastUpdateTime();
-# else
-  cam->sensor_update_time_ = cam->parentSensor_->GetLastUpdateTime();
-# endif
-
-  common::Time cur_time = cam->world_->GetSimTime();
-  cam->PutCameraData(_image);
-  cam->PublishCameraInfo();
-  cam->last_update_time_ = cur_time;
-  cam->SetCameraEnabled(false);
+  cam->OnNewFrame(_image, _width, _height, _depth, _format);
 }
 }
