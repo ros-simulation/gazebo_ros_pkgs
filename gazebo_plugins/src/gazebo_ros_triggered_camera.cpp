@@ -33,6 +33,7 @@
 
 namespace gazebo
 {
+
 // Register this plugin with the simulator
 GZ_REGISTER_SENSOR_PLUGIN(GazeboRosTriggeredCamera)
 
@@ -69,6 +70,22 @@ void GazeboRosTriggeredCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr 
   this->camera_ = this->camera;
 
   GazeboRosCameraUtils::Load(_parent, _sdf);
+
+  this->preRenderConnection_ =
+      event::Events::ConnectPreRender(
+          std::bind(&GazeboRosTriggeredCamera::PreRender, this));
+}
+
+void GazeboRosTriggeredCamera::Load(sensors::SensorPtr _parent,
+  sdf::ElementPtr _sdf,
+  const std::string &_camera_name_suffix,
+  double _hack_baseline)
+{
+  GazeboRosCameraUtils::Load(_parent, _sdf, _camera_name_suffix, _hack_baseline);
+
+  this->preRenderConnection_ =
+      event::Events::ConnectPreRender(
+      std::bind(&GazeboRosTriggeredCamera::PreRender, this));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,19 +106,23 @@ void GazeboRosTriggeredCamera::OnNewFrame(const unsigned char *_image,
     this->PublishCameraInfo();
   }
   this->SetCameraEnabled(false);
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->triggered = false;
 }
 
 void GazeboRosTriggeredCamera::TriggerCamera()
 {
-  this->preRenderConnection_ =
-      event::Events::ConnectPreRender(
-          std::bind(&GazeboRosTriggeredCamera::PreRender, this));
+  std::lock_guard<std::mutex> lock(this->mutex);
+  if (!this->parentSensor_)
+    return;
+  this->triggered = true;
 }
 
 void GazeboRosTriggeredCamera::PreRender()
 {
-  this->SetCameraEnabled(true);
-  this->preRenderConnection_.reset();
+  std::lock_guard<std::mutex> lock(this->mutex);
+  if (this->triggered)
+    this->SetCameraEnabled(true);
 }
 
 void GazeboRosTriggeredCamera::SetCameraEnabled(const bool _enabled)
