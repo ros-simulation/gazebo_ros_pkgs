@@ -22,6 +22,7 @@
 #ifndef GAZEBO_ROS_TRIGGERED_CAMERA_HH
 #define GAZEBO_ROS_TRIGGERED_CAMERA_HH
 
+#include <mutex>
 #include <string>
 
 // library for processing camera data for gazebo / ros conversions
@@ -45,6 +46,15 @@ namespace gazebo
     /// \param take in SDF root element
     public: void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
 
+    /// \brief Load the plugin.
+    /// \param[in] _parent Take in SDF root element.
+    /// \param[in] _sdf SDF values.
+    /// \param[in] _camera_name_suffix Suffix of the camera name.
+    /// \param[in] _hack_baseline Multiple camera baseline.
+    public: void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf,
+                      const std::string &_camera_name_suffix,
+                      double _hack_baseline);
+
     /// \brief Update the controller
     protected: virtual void OnNewFrame(const unsigned char *_image,
                    unsigned int _width, unsigned int _height,
@@ -57,6 +67,10 @@ namespace gazebo
     public: void SetCameraEnabled(const bool _enabled);
 
     protected: void PreRender();
+
+    protected: bool triggered = false;
+
+    protected: std::mutex mutex;
 
     friend class GazeboRosTriggeredMultiCamera;
   };
