@@ -647,7 +647,7 @@ void GazeboRosCameraUtils::PublishCameraInfo()
   if (this->camera_info_pub_.getNumSubscribers() > 0)
   {
 # if GAZEBO_MAJOR_VERSION >= 7
-    this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+    this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
 # else
     this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
 # endif
