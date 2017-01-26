@@ -95,7 +95,7 @@ void GazeboRosTriggeredCamera::OnNewFrame(const unsigned char *_image,
     const std::string &_format)
 {
 # if GAZEBO_MAJOR_VERSION >= 7
-  this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+  this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
 # else
   this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
 # endif
