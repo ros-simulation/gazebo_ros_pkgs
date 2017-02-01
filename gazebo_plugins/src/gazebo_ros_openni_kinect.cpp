@@ -245,6 +245,9 @@ void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
+
+  // Publish camera info
+  this->PublishCameraInfo();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
