@@ -124,7 +124,7 @@
           <depthImageTopicName>depth/image_raw</depthImageTopicName>
           <!-- neither camera info is getting published, frame_id is empty 
             in points and both image headers -->
-          <depthImageTopicCameraInfoName>depth/camera_info</depthImageCameraInfoTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
           <pointCloudTopicName>points</pointCloudTopicName>
           <frameName>camera_link</frameName>
           <!-- TODO(lucasw) is this used by depth camera at all? -->
