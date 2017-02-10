@@ -626,15 +626,14 @@ void GazeboRosCameraUtils::PublishCameraInfo()
   if (this->camera_info_pub_.getNumSubscribers() > 0)
   {
 # if GAZEBO_MAJOR_VERSION >= 7
-    this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+    this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
 # else
-    this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
+    this->sensor_update_time_ = this->parentSensor_->GetLastMeasurementTime();
 # endif
-    common::Time cur_time = this->world_->GetSimTime();
-    if (cur_time - this->last_info_update_time_ >= this->update_period_)
+    if (this->sensor_update_time_ - this->last_info_update_time_ >= this->update_period_)
     {
       this->PublishCameraInfo(this->camera_info_pub_);
-      this->last_info_update_time_ = cur_time;
+      this->last_info_update_time_ = this->sensor_update_time_;
     }
   }
 }
