@@ -16,7 +16,7 @@
 */
 
 /*
- * Desc: Video plugin for displaying ROS image topics on Ogre textures 
+ * Desc: Video plugin for displaying ROS image topics on Ogre textures
  * Author: Piyush Khandelwal
  * Date: 26 July 2013
  */
@@ -39,14 +39,14 @@
 #include <gazebo/rendering/rendering.hh>
 #include <gazebo/transport/TransportTypes.hh>
 
-namespace gazebo 
+namespace gazebo
 {
 
-  class VideoVisual : public rendering::Visual 
+  class VideoVisual : public rendering::Visual
   {
-    public: 
+    public:
       VideoVisual(
-          const std::string &name, rendering::VisualPtr parent, 
+          const std::string &name, rendering::VisualPtr parent,
           int height, int width);
       virtual ~VideoVisual();
       void render(const cv::Mat& image);
@@ -54,12 +54,12 @@ namespace gazebo
       Ogre::TexturePtr texture_;
       int height_;
       int width_;
-  }; 
+  };
 
-  class GazeboRosVideo : public VisualPlugin 
+  class GazeboRosVideo : public VisualPlugin
   {
-    public: 
-    
+    public:
+
       GazeboRosVideo();
       virtual ~GazeboRosVideo();
 

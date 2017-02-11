@@ -13,12 +13,12 @@ double curHeading_;
 bool vehicleSpawned_;
 
 void modelStatesCallback(const gazebo_msgs::ModelStatesConstPtr &msg)
-{ 
+{
   // Find the robot's state, update pose variables
   size_t modelCount = msg->name.size();
   tf::Quaternion quat;
   double dummy;
-  
+
   for(size_t modelInd = 0; modelInd < modelCount; ++modelInd)
   {
     if(msg->name[modelInd] == "pioneer2dx")
@@ -37,7 +37,7 @@ void modelStatesCallback(const gazebo_msgs::ModelStatesConstPtr &msg)
 }
 
 TEST (ModelStateTest, FrameTest)
-{ 
+{
   vehicleSpawned_ = false;
   curHeading_ = 0;
 

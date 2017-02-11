@@ -2,8 +2,8 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <property name="M_PI" value="3.1415926535897931" />
 
-  <xacro:macro name="pioneer_swivel" params="parent xyz rpy meshes">   
-  
+  <xacro:macro name="pioneer_swivel" params="parent xyz rpy meshes">
+
   <!-- Swivel -->
   <joint name="chassis_swivel_joint" type="continuous">
     <origin xyz="${xyz}" rpy="${rpy}"/>
@@ -39,7 +39,7 @@
   <gazebo reference="swivel">
     <material value="Gazebo/Grey"/>
   </gazebo>
-  
+
   <!-- Center Wheel -->
   <joint name="swivel_wheel_joint" type="continuous">
     <origin xyz="-0.026 0 -0.016" rpy="0 0 0"/>
@@ -76,7 +76,7 @@
   <gazebo reference="center_wheel">
     <material value="Gazebo/Black"/>
   </gazebo>
-    
+
   <!-- Center Hubcap -->
   <joint name="wheel_hubcap_joint" type="fixed">
     <origin xyz="-0.0035 0 -0.001" rpy="0 0 0"/>
@@ -104,11 +104,11 @@
         <box size="0 0 0"/>
       </geometry>
     </collision>
-  </link>   
+  </link>
   <gazebo reference="center_hubcap">
     <material value="Gazebo/Grey"/>
   </gazebo>
-  
+
   </xacro:macro>
 
 </robot>

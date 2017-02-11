@@ -9,13 +9,13 @@
   <arg name="debug" default="false"/>
   <arg name="physics" default="ode"/>
   <arg name="verbose" default="true"/>
-  <arg name="world" default="gazebo_ros_range"/> 
+  <arg name="world" default="gazebo_ros_range"/>
 
   <!-- set use_sim_time flag -->
   <group if="$(arg use_sim_time)">
     <param name="/use_sim_time" value="true" />
   </group>
- 
+
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find gazebo_plugins)/test/test_worlds/$(arg world).world"/>
     <arg name="gui" value="$(arg gui)"/>

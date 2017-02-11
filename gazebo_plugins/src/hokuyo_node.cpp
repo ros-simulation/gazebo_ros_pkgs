@@ -40,7 +40,7 @@ void callback(gazebo_plugins::HokuyoConfig &config, uint32_t level)
   ROS_INFO("Reconfigure request : %f %f %i %i %i %s %i %s %f %i",
            config.min_ang, config.max_ang, (int)config.intensity, config.cluster, config.skip,
            config.port.c_str(), (int)config.calibrate_time, config.frame_id.c_str(), config.time_offset, (int)config.allow_unsafe_settings);
-  
+
   // do nothing for now
 
   ROS_INFO("Reconfigure to : %f %f %i %i %i %s %i %s %f %i",

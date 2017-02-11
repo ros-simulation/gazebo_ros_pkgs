@@ -79,7 +79,7 @@ namespace gazebo
     // Get sdf parameters
     if(_sdf->HasElement("robotNamespace")) {
       this->robot_namespace_ = _sdf->Get<std::string>("robotNamespace") + "/";
-    }  
+    }
 
     if(_sdf->HasElement("frameId")) {
       this->frame_id_ = _sdf->Get<std::string>("frameId");
@@ -142,7 +142,7 @@ namespace gazebo
       if(!errored) {
         ROS_ERROR("%s",ex.what());
         errored = true;
-      } 
+      }
       return;
     }
 
@@ -182,7 +182,7 @@ namespace gazebo
     hog_actual_tform.transform.rotation.x = world_pose.rot.x;
     hog_actual_tform.transform.rotation.y = world_pose.rot.y;
     hog_actual_tform.transform.rotation.z = world_pose.rot.z;
-    
+
     tf_broadcaster_->sendTransform(hog_actual_tform);
   }
 

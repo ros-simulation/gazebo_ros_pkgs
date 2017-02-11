@@ -768,12 +768,12 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
      **/
     {
       std::map<std::string, unsigned int>::iterator it = access_count_get_model_state_.find(req.model_name);
-      if(it == access_count_get_model_state_.end()) 
+      if(it == access_count_get_model_state_.end())
       {
         access_count_get_model_state_.insert( std::pair<std::string, unsigned int>(req.model_name, 1) );
         res.header.seq = 1;
-      } 
-      else 
+      }
+      else
       {
         it->second++;
         res.header.seq = it->second;

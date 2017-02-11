@@ -114,7 +114,7 @@ void GazeboRosIMU::LoadThread()
   }
   else
     this->offset_.rot = this->sdf->Get<math::Vector3>("rpyOffset");
-  
+
   if (!this->sdf->HasElement("updateRate"))
   {
     ROS_DEBUG("imu plugin missing <updateRate>, defaults to 0.0"
@@ -204,12 +204,12 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 void GazeboRosIMU::UpdateChild()
 {
   common::Time cur_time = this->world_->GetSimTime();
-  
+
   // rate control
   if (this->update_rate_ > 0 &&
       (cur_time - this->last_time_).Double() < (1.0 / this->update_rate_))
     return;
-    
+
   if ((this->pub_.getNumSubscribers() > 0 && this->topic_name_ != ""))
   {
     math::Pose pose;

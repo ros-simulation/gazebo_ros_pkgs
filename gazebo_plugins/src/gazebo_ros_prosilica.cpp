@@ -122,8 +122,8 @@ void GazeboRosProsilica::Advertise()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-void GazeboRosProsilica::OnNewImageFrame(const unsigned char *_image, 
-    unsigned int _width, unsigned int _height, unsigned int _depth, 
+void GazeboRosProsilica::OnNewImageFrame(const unsigned char *_image,
+    unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
   if (!this->rosnode_->getParam(this->mode_param_name,this->mode_))

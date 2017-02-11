@@ -85,13 +85,13 @@ namespace gazebo {
       this->robot_namespace_ =
         _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
     }
-    
+
     this->broadcast_tf_ = false;
     if (!_sdf->HasElement("broadcastTF")) {
       if (!this->broadcast_tf_)
     	  ROS_INFO("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to false.",this->robot_namespace_.c_str());
       else ROS_INFO("GazeboRosSkidSteerDrive Plugin (ns = %s) missing <broadcastTF>, defaults to true.",this->robot_namespace_.c_str());
-          
+
     } else {
       this->broadcast_tf_ = _sdf->GetElement("broadcastTF")->Get<bool>();
     }

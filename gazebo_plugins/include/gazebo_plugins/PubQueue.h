@@ -27,7 +27,7 @@
 #include <ros/ros.h>
 
 
-/// \brief Container for a (ROS publisher, outgoing message) pair.  
+/// \brief Container for a (ROS publisher, outgoing message) pair.
 /// We'll have queues of these.  Templated on a ROS message type.
 template<class T>
 class PubMessagePair
@@ -61,7 +61,7 @@ class PubQueue
     boost::function<void()> notify_func_;
 
   public:
-    PubQueue(QueuePtr queue, 
+    PubQueue(QueuePtr queue,
              boost::shared_ptr<boost::mutex> queue_lock,
              boost::function<void()> notify_func) :
       queue_(queue), queue_lock_(queue_lock), notify_func_(notify_func) {}
@@ -111,7 +111,7 @@ class PubMultiQueue
 
     /// \brief Service a given queue by popping outgoing message off it and
     /// publishing them.
-    template <class T> 
+    template <class T>
     void serviceFunc(boost::shared_ptr<PubQueue<T> > pq)
     {
       std::vector<boost::shared_ptr<PubMessagePair<T> > > els;
@@ -123,10 +123,10 @@ class PubMultiQueue
         (*it)->pub_.publish((*it)->msg_);
       }
     }
-  
+
   public:
     PubMultiQueue() {}
-    ~PubMultiQueue() 
+    ~PubMultiQueue()
     {
       if(service_thread_.joinable())
       {

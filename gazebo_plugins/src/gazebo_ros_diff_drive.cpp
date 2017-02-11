@@ -86,10 +86,10 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
     gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
     gazebo_ros_->getParameterBoolean ( legacy_mode_, "legacyMode", true );
-    
-    if (!_sdf->HasElement("legacyMode")) 
+
+    if (!_sdf->HasElement("legacyMode"))
     {
-      ROS_ERROR("GazeboRosDiffDrive Plugin missing <legacyMode>, defaults to true\n" 
+      ROS_ERROR("GazeboRosDiffDrive Plugin missing <legacyMode>, defaults to true\n"
 	       "This setting assumes you have a old package, where the right and left wheel are changed to fix a former code issue\n"
 	       "To get rid of this error just set <legacyMode> to false if you just created a new package.\n"
 	       "To fix an old package you have to exchange left wheel by the right wheel.\n"
@@ -221,10 +221,10 @@ void GazeboRosDiffDrive::publishWheelTF()
 {
     ros::Time current_time = ros::Time::now();
     for ( int i = 0; i < 2; i++ ) {
-        
+
         std::string wheel_frame = gazebo_ros_->resolveTF(joints_[i]->GetChild()->GetName ());
         std::string wheel_parent_frame = gazebo_ros_->resolveTF(joints_[i]->GetParent()->GetName ());
-        
+
         math::Pose poseWheel = joints_[i]->GetChild()->GetRelativePose();
 
         tf::Quaternion qt ( poseWheel.rot.x, poseWheel.rot.y, poseWheel.rot.z, poseWheel.rot.w );
@@ -239,7 +239,7 @@ void GazeboRosDiffDrive::publishWheelTF()
 // Update the controller
 void GazeboRosDiffDrive::UpdateChild()
 {
-  
+
     /* force reset SetParam("fmax") since Joint::Reset reset MaxForce to zero at
        https://bitbucket.org/osrf/gazebo/src/8091da8b3c529a362f39b042095e12c94656a5d1/gazebo/physics/Joint.cc?at=gazebo2_2.2.5#cl-331
        (this has been solved in https://bitbucket.org/osrf/gazebo/diff/gazebo/physics/Joint.cc?diff2=b64ff1b7b6ff&at=issue_964 )
@@ -332,12 +332,12 @@ void GazeboRosDiffDrive::getWheelVelocities()
     if(legacy_mode_)
     {
       wheel_speed_[LEFT] = vr + va * wheel_separation_ / 2.0;
-      wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;     
+      wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;
     }
     else
     {
       wheel_speed_[LEFT] = vr - va * wheel_separation_ / 2.0;
-      wheel_speed_[RIGHT] = vr + va * wheel_separation_ / 2.0;      
+      wheel_speed_[RIGHT] = vr + va * wheel_separation_ / 2.0;
     }
 }
 
@@ -370,8 +370,8 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     // Book: Sigwart 2011 Autonompus Mobile Robots page:337
     double sl = vl * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
     double sr = vr * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
-    double ssum = sl + sr; 
-    
+    double ssum = sl + sr;
+
     double sdiff;
     if(legacy_mode_)
     {
@@ -379,10 +379,10 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     }
     else
     {
-      
+
       sdiff = sr - sl;
     }
-    
+
     double dx = ( ssum ) /2.0 * cos ( pose_encoder_.theta + ( sdiff ) / ( 2.0*b ) );
     double dy = ( ssum ) /2.0 * sin ( pose_encoder_.theta + ( sdiff ) / ( 2.0*b ) );
     double dtheta = ( sdiff ) /b;
@@ -415,7 +415,7 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
 
 void GazeboRosDiffDrive::publishOdometry ( double step_time )
 {
-   
+
     ros::Time current_time = ros::Time::now();
     std::string odom_frame = gazebo_ros_->resolveTF ( odometry_frame_ );
     std::string base_footprint_frame = gazebo_ros_->resolveTF ( robot_base_frame_ );

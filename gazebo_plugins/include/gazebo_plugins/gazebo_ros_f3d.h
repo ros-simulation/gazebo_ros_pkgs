@@ -56,7 +56,7 @@ class GazeboRosF3D : public ModelPlugin
 
   /// \brief Update the controller
   protected: virtual void UpdateChild();
-  
+
   private: physics::WorldPtr world_;
 
   /// \brief A pointer to the Gazebo Body

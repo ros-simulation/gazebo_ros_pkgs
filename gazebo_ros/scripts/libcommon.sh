@@ -6,7 +6,7 @@
 relocate_remappings()
 {
   command_line=${1}
-  
+
   for w in $command_line; do
     if $(echo $w | grep -q ':='); then
       ros_remaps="$ros_remaps $w"

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-  <!-- Thanks to Martin Guenther 
+  <!-- Thanks to Martin Guenther
   see https://github.com/uos/uos_tools/blob/fuerte/uos_common_urdf/common.xacro and
   see http://answers.gazebosim.org/question/4372/the-inertia-matrix-explained/ -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">

@@ -84,7 +84,7 @@ namespace gazebo
 
     /// \brief ros message
     private: sensor_msgs::PointCloud cloud_msg_;
-   
+
     /// \brief topic name
     private: std::string topic_name_;
 
