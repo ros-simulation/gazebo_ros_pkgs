@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  
-      
+
+
   <xacro:macro name="tricycle_drive">
     <gazebo>
         <plugin name="tricycle_drive_controller" filename="libgazebo_ros_tricycle_drive.so">
@@ -31,6 +31,6 @@
             <steeringAngleTolerance>0.02</steeringAngleTolerance>
         </plugin>
     </gazebo>
-    
+
   </xacro:macro>
 </robot>

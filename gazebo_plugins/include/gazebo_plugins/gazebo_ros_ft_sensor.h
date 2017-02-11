@@ -85,7 +85,7 @@ class GazeboRosFT : public ModelPlugin
 
   /// \brief Update the controller
   protected: virtual void UpdateChild();
-  
+
   /// \brief Gaussian noise
   private: double gaussian_noise_;
   private: unsigned int seed;
@@ -94,16 +94,16 @@ class GazeboRosFT : public ModelPlugin
 
   /// \brief A pointer to the Gazebo joint
   private: physics::JointPtr joint_;
-  
+
   /// \brief A pointer to the Gazebo parent link
   private: physics::LinkPtr parent_link_;
-  
+
   /// \brief A pointer to the Gazebo child link
   private: physics::LinkPtr child_link_;
-  
+
   /// \brief A pointer to the Gazebo model
   private: physics::ModelPtr model_;
-  
+
   /// \brief A pointer to the Gazebo world
   private: physics::WorldPtr world_;
 
@@ -129,10 +129,10 @@ class GazeboRosFT : public ModelPlugin
 
   /// \brief A mutex to lock access to fields that are used in message callbacks
   private: boost::mutex lock_;
-  
+
   /// \brief save last_time
   private: common::Time last_time_;
-  
+
   // rate control
   private: double update_rate_;
 

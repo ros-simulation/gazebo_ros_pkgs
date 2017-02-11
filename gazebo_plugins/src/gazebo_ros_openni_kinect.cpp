@@ -109,27 +109,27 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
 
 void GazeboRosOpenniKinect::Advertise()
 {
-  ros::AdvertiseOptions point_cloud_ao = 
+  ros::AdvertiseOptions point_cloud_ao =
     ros::AdvertiseOptions::create<sensor_msgs::PointCloud2 >(
       this->point_cloud_topic_name_,1,
       boost::bind( &GazeboRosOpenniKinect::PointCloudConnect,this),
-      boost::bind( &GazeboRosOpenniKinect::PointCloudDisconnect,this), 
+      boost::bind( &GazeboRosOpenniKinect::PointCloudDisconnect,this),
       ros::VoidPtr(), &this->camera_queue_);
   this->point_cloud_pub_ = this->rosnode_->advertise(point_cloud_ao);
 
-  ros::AdvertiseOptions depth_image_ao = 
+  ros::AdvertiseOptions depth_image_ao =
     ros::AdvertiseOptions::create< sensor_msgs::Image >(
       this->depth_image_topic_name_,1,
       boost::bind( &GazeboRosOpenniKinect::DepthImageConnect,this),
-      boost::bind( &GazeboRosOpenniKinect::DepthImageDisconnect,this), 
+      boost::bind( &GazeboRosOpenniKinect::DepthImageDisconnect,this),
       ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_pub_ = this->rosnode_->advertise(depth_image_ao);
 
-  ros::AdvertiseOptions depth_image_camera_info_ao = 
+  ros::AdvertiseOptions depth_image_camera_info_ao =
     ros::AdvertiseOptions::create<sensor_msgs::CameraInfo>(
         this->depth_image_camera_info_topic_name_,1,
         boost::bind( &GazeboRosOpenniKinect::DepthInfoConnect,this),
-        boost::bind( &GazeboRosOpenniKinect::DepthInfoDisconnect,this), 
+        boost::bind( &GazeboRosOpenniKinect::DepthInfoDisconnect,this),
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
 }
@@ -181,8 +181,8 @@ void GazeboRosOpenniKinect::DepthInfoDisconnect()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image, 
-    unsigned int _width, unsigned int _height, unsigned int _depth, 
+void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
+    unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
@@ -218,8 +218,8 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
-void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image, 
-    unsigned int _width, unsigned int _height, unsigned int _depth, 
+void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
+    unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)

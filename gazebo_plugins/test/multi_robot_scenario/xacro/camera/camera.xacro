@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<!-- Camera --> 
+<!-- Camera -->
 <xacro:macro name="cam" params="name parent xyz rpy">
-    
+
   <joint name="${parent}_${name}_joint" type="fixed">
       <axis xyz="0 0 1" />
       <origin xyz="${xyz}" rpy="${rpy}"/>
       <parent link="${parent}"/>
       <child link="${name}"/>
   </joint>
-      
+
   <!-- Camera -->
   <link name="${name}">
     <inertial>
@@ -35,7 +35,7 @@
   <gazebo reference="${name}">
     <material value="Gazebo/Grey"/>
   </gazebo>
-    
+
   <gazebo reference="${name}">
     <sensor type="camera" name="camera1">
       <update_rate>30.0</update_rate>
@@ -52,7 +52,7 @@
         </clip>
         <noise>
           <type>gaussian</type>
-          <!-- Noise is sampled independently per pixel on each frame.  
+          <!-- Noise is sampled independently per pixel on each frame.
                That pixel's noise value is added to each of its color
                channels, which at that point lie in the range [0,1]. -->
           <mean>0.0</mean>
@@ -75,7 +75,7 @@
         <distortionT2>0.0</distortionT2>
       </plugin>
     </sensor>
-  </gazebo>  
-  
+  </gazebo>
+
 </xacro:macro>
 </robot>

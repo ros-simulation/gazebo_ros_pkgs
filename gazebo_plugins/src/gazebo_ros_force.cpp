@@ -63,7 +63,7 @@ void GazeboRosForce::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   // Get the world name.
   this->world_ = _model->GetWorld();
-  
+
   // load parameters
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace"))

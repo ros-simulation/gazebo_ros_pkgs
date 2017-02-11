@@ -45,7 +45,7 @@ namespace gazebo
 /** \defgroup GazeboRosProjector Plugin XML Reference and Example
 
   \brief Ros Texture Projector Controller.
-  
+
   This is a controller that controls texture projection into the world from a given body.
 
   Example Usage:
@@ -57,9 +57,9 @@ namespace gazebo
         <alwaysOn>true</alwaysOn>
         <updateRate>15.0</updateRate>
         <textureName>stereo_projection_pattern_alpha.png</textureName>
-        <filterTextureName>stereo_projection_pattern_filter.png</filterTextureName>        
+        <filterTextureName>stereo_projection_pattern_filter.png</filterTextureName>
         <textureTopicName>projector_controller/image</textureTopicName>
-        <projectorTopicName>projector_controller/projector</projectorTopicName>        
+        <projectorTopicName>projector_controller/projector</projectorTopicName>
         <fov>0.785398163</fov>
         <nearClipDist>0.1</nearClipDist>
         <farClipDist>10</farClipDist>
@@ -68,7 +68,7 @@ namespace gazebo
     </body:empty>
   </model:phyiscal>
   \endverbatim
- 
+
 \{
 */
 
@@ -92,17 +92,17 @@ class GazeboRosProjector : public ModelPlugin
   private: void LoadImage(const std_msgs::String::ConstPtr& imageMsg);
 
   /// \brief Callbakc when a projector toggle is published
-  private: void ToggleProjector(const std_msgs::Int32::ConstPtr& projectorMsg);  
+  private: void ToggleProjector(const std_msgs::Int32::ConstPtr& projectorMsg);
 
   /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
   private: ros::NodeHandle* rosnode_;
   private: ros::Subscriber imageSubscriber_;
-  private: ros::Subscriber projectorSubscriber_;  
+  private: ros::Subscriber projectorSubscriber_;
 
- /// \brief ROS texture topic name  
+ /// \brief ROS texture topic name
   private: std::string texture_topic_name_;
 
-  /// \brief ROS projector topic name    
+  /// \brief ROS projector topic name
   private: std::string projector_topic_name_;
 
   /// \brief For setting ROS name space
@@ -115,8 +115,8 @@ class GazeboRosProjector : public ModelPlugin
 
   private: event::ConnectionPtr add_model_event_;
 
-  private: transport::NodePtr node_; 
-  private: transport::PublisherPtr projector_pub_; 
+  private: transport::NodePtr node_;
+  private: transport::PublisherPtr projector_pub_;
 };
 
 /** \} */

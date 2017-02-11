@@ -89,7 +89,7 @@ class BumperTest(unittest.TestCase):
           if abs(self.fz_avg - 98.1) < 0.01:
             print "z force ",self.fz_avg
             self.success = True
-        
+
 
     def test_bumper(self):
         print "LNK\n"
@@ -112,7 +112,7 @@ class BumperTest(unittest.TestCase):
             self.checkContact()
             time.sleep(0.1)
         self.assert_(self.success)
-        
+
 if __name__ == '__main__':
     print "Waiting for test to start at time "
     rostest.run(PKG, sys.argv[0], BumperTest, sys.argv) #, text_mode=True)

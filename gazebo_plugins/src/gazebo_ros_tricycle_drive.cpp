@@ -253,7 +253,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
 #else
     joint_wheel_actuated_->SetVelocity ( 0, applied_speed );
 #endif
-    
+
     double current_angle = joint_steering_->GetAngle ( 0 ).Radian();
 
     // truncate target angle
@@ -270,7 +270,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     // With position control, one cannot expect dynamics to work correctly.
     double diff_angle = current_angle - target_angle;
     if ( steering_speed_ > 0 ) {
-      // this means we will steer using steering speed 
+      // this means we will steer using steering speed
       double applied_steering_speed = 0;
       if (fabs(diff_angle) < steering_angle_tolerance_ ) {
         // we're withing angle tolerance
@@ -315,7 +315,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
       joint_steering_->SetAngle(0, math::Angle(applied_angle));
 #endif
     }
-    //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !", 
+    //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !",
     //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
 }
 

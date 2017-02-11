@@ -51,7 +51,7 @@
 namespace gazebo_ros_control {
 
   // Struct for passing loaded joint data
-  struct JointData 
+  struct JointData
   {
     std::string name_;
     std::string hardware_interface_;
@@ -65,7 +65,7 @@ namespace gazebo_ros_control {
   /// \brief Gazebo plugin version of RobotHW
   ///
   /// An object of class RobotHWSim represents a robot's simulated hardware.
-  class RobotHWSim : public hardware_interface::RobotHW 
+  class RobotHWSim : public hardware_interface::RobotHW
   {
   public:
 
@@ -84,7 +84,7 @@ namespace gazebo_ros_control {
     /// \return  \c true if the simulated robot hardware is initialized successfully, \c false if not.
     virtual bool initSim(
         const std::string& robot_namespace,
-        ros::NodeHandle model_nh, 
+        ros::NodeHandle model_nh,
         gazebo::physics::ModelPtr parent_model,
         const urdf::Model *const urdf_model,
         std::vector<transmission_interface::TransmissionInfo> transmissions) = 0;

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-/* 
+/*
  * Author: John Hsu, Nate Koenig, Dave Coleman
  * Desc: External interfaces for Gazebo
  */
@@ -54,7 +54,7 @@ public:
   }
 
   /**
-   * @brief Set Gazebo Path/Resources Configurations GAZEBO_MODEL_PATH, PLUGIN_PATH and 
+   * @brief Set Gazebo Path/Resources Configurations GAZEBO_MODEL_PATH, PLUGIN_PATH and
             GAZEBO_MEDIA_PATH by adding paths to GazeboConfig based on ros::package
    */
   void LoadPaths()

@@ -3,7 +3,7 @@
   <property name="M_PI" value="3.1415926535897931" />
 
   <xacro:macro name="battery_block" params="name parent x y z mass">
-    
+
   <joint name="${parent}_${name}_joint" type="fixed">
     <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
     <parent link="${parent}"/>
@@ -30,7 +30,7 @@
   <gazebo reference="${name}">
     <material value="Gazebo/Black"/>
   </gazebo>
-  
+
   </xacro:macro>
 
 </robot>

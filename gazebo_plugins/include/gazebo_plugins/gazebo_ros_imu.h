@@ -87,7 +87,7 @@ namespace gazebo
     private: math::Vector3 last_veul_;
     private: math::Vector3 apos_;
     private: math::Vector3 aeul_;
-    
+
     // rate control
     private: double update_rate_;
 

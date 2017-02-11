@@ -50,7 +50,7 @@
 // 		<alwaysOn>true</alwaysOn>
 //       </plugin>
 //   </gazebo>
-      
+
 
 
 namespace gazebo {
@@ -80,7 +80,7 @@ private:
     double update_rate_;
     double update_period_;
     common::Time last_update_time_;
-    
+
 };
 
 // Register this plugin with the simulator

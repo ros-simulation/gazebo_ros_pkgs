@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<!-- Front Laser --> 
+<!-- Front Laser -->
 <xacro:macro name="laser" params="name parent xyz rpy meshes" >
-  
+
   <joint name="${parent}_${name}_joint" type="fixed">
       <axis xyz="0 0 1" />
       <origin xyz="${xyz}" rpy="${rpy}"/>
       <parent link="${parent}"/>
       <child link="${name}"/>
     </joint>
-    
+
     <link name="${name}">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -30,7 +30,7 @@
         <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
       </inertial>
     </link>
-    
+
     <gazebo reference="${name}">
         <sensor name="laser" type="ray">
         <pose>0 0 0 0 0 0</pose>
@@ -50,7 +50,7 @@
               <resolution>0.01</resolution>
             </range>
           </ray>
-          
+
           <plugin name="laser" filename="libgazebo_ros_laser.so" >
             <robotNamespace></robotNamespace>
             <topicName>${name}/scan</topicName>
@@ -59,10 +59,10 @@
           <!--
           <plugin name="laser" filename="libRayPlugin.so" />
           -->
-          
+
           <always_on>1</always_on>
           <update_rate>30</update_rate>
-          <visualize>true</visualize>        
+          <visualize>true</visualize>
         </sensor>
     </gazebo>
 </xacro:macro>
