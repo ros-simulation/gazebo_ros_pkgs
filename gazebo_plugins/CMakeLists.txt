@@ -4,24 +4,23 @@ project(gazebo_plugins)
 option(ENABLE_DISPLAY_TESTS "Enable the building of tests that requires a display" OFF)
 
 find_package(catkin REQUIRED COMPONENTS 
-  message_generation 
-  gazebo_msgs 
-  roscpp 
-  rospy 
-  nodelet 
-  angles 
-  std_srvs 
-  geometry_msgs 
-  sensor_msgs 
-  nav_msgs 
-  urdf 
-  tf 
-  tf2_ros 
-  dynamic_reconfigure 
-  driver_base 
-  rosgraph_msgs 
-  trajectory_msgs 
-  image_transport 
+  message_generation
+  gazebo_msgs
+  roscpp
+  rospy
+  nodelet
+  angles
+  std_srvs
+  geometry_msgs
+  sensor_msgs
+  nav_msgs
+  urdf
+  tf
+  tf2_ros
+  dynamic_reconfigure
+  rosgraph_msgs
+  trajectory_msgs
+  image_transport
   rosconsole
   cv_bridge
   polled_camera
