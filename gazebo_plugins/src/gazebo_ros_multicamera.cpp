@@ -129,22 +129,6 @@ void GazeboRosMultiCamera::OnNewFrameRight(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
-<<<<<<< 901f2fc11e1216a28fa342a6c345bd62716bd66c
-  GazeboRosCameraUtils* util = this->utils[1];
-  util->sensor_update_time_ = util->parentSensor_->LastUpdateTime();
-
-  if (util->parentSensor_->IsActive())
-  {
-    common::Time cur_time = util->world_->GetSimTime();
-    if (cur_time - util->last_update_time_ >= util->update_period_)
-    {
-      util->PutCameraData(_image);
-      util->PublishCameraInfo();
-      util->last_update_time_ = cur_time;
-    }
-  }
-=======
   OnNewFrame(_image, this->utils[1]);
->>>>>>> #408 Make the multi camera timestamps current rather than outdated, also reuse the same update code
 }
 }
