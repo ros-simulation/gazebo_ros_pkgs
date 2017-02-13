@@ -192,9 +192,9 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
     return;
 
 # if GAZEBO_MAJOR_VERSION >= 7
-  this->depth_sensor_update_time_ = this->parentSensor->LastUpdateTime();
+  this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
 # else
-  this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
+  this->depth_sensor_update_time_ = this->parentSensor->GetLastMeasurementTime();
 # endif
   if (this->parentSensor->IsActive())
   {
@@ -232,9 +232,9 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
     return;
 
 # if GAZEBO_MAJOR_VERSION >= 7
-  this->depth_sensor_update_time_ = this->parentSensor->LastUpdateTime();
+  this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
 # else
-  this->depth_sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
+  this->depth_sensor_update_time_ = this->parentSensor->GetLastMeasurementTime();
 # endif
   if (!this->parentSensor->IsActive())
   {
@@ -302,9 +302,9 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
 
   //ROS_ERROR("camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
 # if GAZEBO_MAJOR_VERSION >= 7
-  this->sensor_update_time_ = this->parentSensor->LastUpdateTime();
+  this->sensor_update_time_ = this->parentSensor->LastMeasurementTime();
 # else
-  this->sensor_update_time_ = this->parentSensor->GetLastUpdateTime();
+  this->sensor_update_time_ = this->parentSensor->GetLastMeasurementTime();
 # endif
 
   if (!this->parentSensor->IsActive())
@@ -316,7 +316,11 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
   else
   {
     if ((*this->image_connect_count_) > 0)
+    {
       this->PutCameraData(_image);
+      // TODO(lucasw) publish camera info with depth image
+      // this->PublishCameraInfo(sensor_update_time);
+    }
   }
 }
 
@@ -502,15 +506,15 @@ void GazeboRosDepthCamera::PublishCameraInfo()
   if (this->depth_info_connect_count_ > 0)
   {
 # if GAZEBO_MAJOR_VERSION >= 7
-    this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+    common::Time sensor_update_time = this->parentSensor_->LastMeasurementTime();
 # else
-    this->sensor_update_time_ = this->parentSensor_->GetLastUpdateTime();
+    common::Time sensor_update_time = this->parentSensor_->GetLastMeasurementTime();
 # endif
-    common::Time cur_time = this->world_->GetSimTime();
-    if (cur_time - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
+    this->sensor_update_time_ = sensor_update_time;
+    if (sensor_update_time - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
     {
-      this->PublishCameraInfo(this->depth_image_camera_info_pub_);
-      this->last_depth_image_camera_info_update_time_ = cur_time;
+      this->PublishCameraInfo(this->depth_image_camera_info_pub_);  // , sensor_update_time);
+      this->last_depth_image_camera_info_update_time_ = sensor_update_time;
     }
   }
 }
