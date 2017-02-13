@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.6.1 (2016-12-06)
+------------------
+* Workaround to support gazebo and ROS arguments in the command line
+* Fix ROS remappings by reverting "Remove ROS remapping arguments from gazebo_ros launch scripts"
+* Added comments regarding 'headless' arg. Added 'recording' arg as switch for -r
+* Fixed getlinkstate service's angular velocity return
+* Add a roslaunch 'required' argument: enables the 'required' flag on gazebo_gui node
+* Add an argument to enable required flag on gazebo gui, same tag name "required" as in ROS
+* Contributors: Jared, Jon Binney, Jordan Liviero, Jose Luis Rivero, vincentrou
+
 2.6.0 (2016-08-04)
 ------------------
 * Honor GAZEBO_MASTER_URI for gzserver and gzclient.

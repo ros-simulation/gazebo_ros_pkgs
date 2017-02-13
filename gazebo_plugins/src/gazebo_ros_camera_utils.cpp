@@ -524,11 +524,14 @@ void GazeboRosCameraUtils::Init()
   camera_info_msg.distortion_model = "plumb_bob";
   camera_info_msg.D.resize(5);
 #endif
+  // D = {k1, k2, t1, t2, k3}, as specified in:
+  // - sensor_msgs/CameraInfo: http://docs.ros.org/api/sensor_msgs/html/msg/CameraInfo.html
+  // - OpenCV: http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
   camera_info_msg.D[0] = this->distortion_k1_;
   camera_info_msg.D[1] = this->distortion_k2_;
-  camera_info_msg.D[2] = this->distortion_k3_;
-  camera_info_msg.D[3] = this->distortion_t1_;
-  camera_info_msg.D[4] = this->distortion_t2_;
+  camera_info_msg.D[2] = this->distortion_t1_;
+  camera_info_msg.D[3] = this->distortion_t2_;
+  camera_info_msg.D[4] = this->distortion_k3_;
   // original camera_ matrix
   camera_info_msg.K[0] = this->focal_length_;
   camera_info_msg.K[1] = 0.0;
