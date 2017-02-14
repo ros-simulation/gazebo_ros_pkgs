@@ -132,9 +132,9 @@ void GazeboRosProsilica::OnNewImageFrame(const unsigned char *_image,
   // should do nothing except turning camera on/off, as we are using service.
   /// @todo: consider adding thumbnailing feature here if subscribed.
 # if GAZEBO_MAJOR_VERSION >= 7
-  common::Time sensor_update_time = this->parentSensor_->LastUpdateTime();
+  common::Time sensor_update_time = this->parentSensor_->LastMeasurementTime();
 # else
-  common::Time sensor_update_time = this->parentSensor_->GetLastUpdateTime();
+  common::Time sensor_update_time = this->parentSensor_->GetLastMeasurementTime();
 # endif
 
   // as long as ros is connected, parent is active
@@ -153,12 +153,11 @@ void GazeboRosProsilica::OnNewImageFrame(const unsigned char *_image,
     {
       if ((*this->image_connect_count_) > 0)
       {
-        common::Time cur_time = this->world_->GetSimTime();
-        if (cur_time - this->last_update_time_ >= this->update_period_)
+        if (sensor_update_time - this->last_update_time_ >= this->update_period_)
         {
           this->PutCameraData(_image, sensor_update_time);
           this->PublishCameraInfo(sensor_update_time);
-          this->last_update_time_ = cur_time;
+          this->last_update_time_ = sensor_update_time;
         }
       }
     }
@@ -227,9 +226,9 @@ void GazeboRosProsilica::pollCallback(polled_camera::GetPolledImage::Request& re
         this->roiCameraInfoMsg->header.frame_id = this->frame_name_;
 
 # if GAZEBO_MAJOR_VERSION >= 7
-        common::Time roiLastRenderTime = this->parentSensor_->LastUpdateTime();
+        common::Time roiLastRenderTime = this->parentSensor_->LastMeasurementTime();
 # else
-        common::Time roiLastRenderTime = this->parentSensor_->GetLastUpdateTime();
+        common::Time roiLastRenderTime = this->parentSensor_->GetLastMeasurementTime();
 # endif
         this->roiCameraInfoMsg->header.stamp.sec = roiLastRenderTime.sec;
         this->roiCameraInfoMsg->header.stamp.nsec = roiLastRenderTime.nsec;
@@ -285,9 +284,9 @@ void GazeboRosProsilica::pollCallback(polled_camera::GetPolledImage::Request& re
         this->image_msg_.header.frame_id    = this->frame_name_;
 
 # if GAZEBO_MAJOR_VERSION >= 7
-        common::Time lastRenderTime = this->parentSensor_->LastUpdateTime();
+        common::Time lastRenderTime = this->parentSensor_->LastMeasurementTime();
 # else
-        common::Time lastRenderTime = this->parentSensor_->GetLastUpdateTime();
+        common::Time lastRenderTime = this->parentSensor_->GetLastMeasurementTime();
 # endif
         this->image_msg_.header.stamp.sec = lastRenderTime.sec;
         this->image_msg_.header.stamp.nsec = lastRenderTime.nsec;
@@ -313,9 +312,9 @@ void GazeboRosProsilica::pollCallback(polled_camera::GetPolledImage::Request& re
           this->roiImageMsg = &image;
           this->roiImageMsg->header.frame_id = this->frame_name_;
 # if GAZEBO_MAJOR_VERSION >= 7
-          common::Time roiLastRenderTime = this->parentSensor_->LastUpdateTime();
+          common::Time roiLastRenderTime = this->parentSensor_->LastMeasurementTime();
 # else
-          common::Time roiLastRenderTime = this->parentSensor_->GetLastUpdateTime();
+          common::Time roiLastRenderTime = this->parentSensor_->GetLastMeasurementTime();
 # endif
           this->roiImageMsg->header.stamp.sec = roiLastRenderTime.sec;
           this->roiImageMsg->header.stamp.nsec = roiLastRenderTime.nsec;
