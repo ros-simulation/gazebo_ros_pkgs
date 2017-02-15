@@ -177,7 +177,7 @@ bool DefaultRobotHWSim::initSim(
     else
     {
       ROS_FATAL_STREAM_NAMED("default_robot_hw_sim","No matching hardware interface found for '"
-        << hardware_interface );
+        << hardware_interface << "' while loading interfaces for " << joint_names_[j] );
       return false;
     }
 
