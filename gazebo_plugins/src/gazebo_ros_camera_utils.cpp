@@ -352,11 +352,7 @@ void GazeboRosCameraUtils::LoadThread()
 // Set Horizontal Field of View
 void GazeboRosCameraUtils::SetHFOV(const std_msgs::Float64::ConstPtr& hfov)
 {
-#if GAZEBO_MAJOR_VERSION >= 7
   this->camera_->SetHFOV(ignition::math::Angle(hfov->data));
-#else
-  this->camera_->SetHFOV(gazebo::math::Angle(hfov->data));
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
