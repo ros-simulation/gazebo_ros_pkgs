@@ -71,7 +71,7 @@ namespace gazebo
   {
     // Make sure the ROS node for Gazebo has already been initalized
     if (!ros::isInitialized()) {
-      ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      ROS_FATAL_STREAM_NAMED("hand_of_god", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
                        << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
       return;
     }
@@ -95,7 +95,7 @@ namespace gazebo
     if(_sdf->HasElement("linkName")) {
       this->link_name_ = _sdf->Get<std::string>("linkName");
     } else {
-      ROS_FATAL_STREAM("The hand-of-god plugin requires a `linkName` parameter tag");
+      ROS_FATAL_STREAM_NAMED("hand_of_god", "The hand-of-god plugin requires a `linkName` parameter tag");
       return;
     }
 
@@ -107,10 +107,10 @@ namespace gazebo
     // Disable gravity for the hog
     floating_link_->SetGravityMode(false);
     if(!floating_link_) {
-      ROS_ERROR("Floating link not found!");
+      ROS_ERROR_NAMED("hand_of_god", "Floating link not found!");
       const std::vector<physics::LinkPtr> &links = model_->GetLinks();
       for(unsigned i=0; i < links.size(); i++) {
-        ROS_ERROR_STREAM(" -- Link "<<i<<": "<<links[i]->GetName());
+        ROS_ERROR_STREAM_NAMED("hand_of_god", " -- Link "<<i<<": "<<links[i]->GetName());
       }
       return;
     }
@@ -140,7 +140,7 @@ namespace gazebo
       errored = false;
     } catch (tf2::TransformException ex){
       if(!errored) {
-        ROS_ERROR("%s",ex.what());
+        ROS_ERROR_NAMED("hand_of_god", "%s",ex.what());
         errored = true;
       }
       return;

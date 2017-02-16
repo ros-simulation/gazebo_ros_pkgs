@@ -126,7 +126,7 @@ namespace gazebo
     robot_namespace_ = "";
     if (!sdf->HasElement("robotNamespace"))
     {
-      ROS_WARN("GazeboRosVideo plugin missing <robotNamespace>, "
+      ROS_WARN_NAMED("video", "GazeboRosVideo plugin missing <robotNamespace>, "
           "defaults to \"%s\".", robot_namespace_.c_str());
     }
     else
@@ -138,7 +138,7 @@ namespace gazebo
     topic_name_ = "image_raw";
     if (!sdf->HasElement("topicName"))
     {
-      ROS_WARN("GazeboRosVideo Plugin (ns = %s) missing <topicName>, "
+      ROS_WARN_NAMED("video", "GazeboRosVideo Plugin (ns = %s) missing <topicName>, "
           "defaults to \"%s\".", robot_namespace_.c_str(), topic_name_.c_str());
     }
     else
@@ -148,7 +148,7 @@ namespace gazebo
 
     int height = 240;
     if (!sdf->HasElement("height")) {
-      ROS_WARN("GazeboRosVideo Plugin (ns = %s) missing <height>, "
+      ROS_WARN_NAMED("video", "GazeboRosVideo Plugin (ns = %s) missing <height>, "
           "defaults to %i.", robot_namespace_.c_str(), height);
     }
     else
@@ -158,7 +158,7 @@ namespace gazebo
 
     int width = 320;
     if (!sdf->HasElement("width")) {
-      ROS_WARN("GazeboRosVideo Plugin (ns = %s) missing <width>, "
+      ROS_WARN_NAMED("video", "GazeboRosVideo Plugin (ns = %s) missing <width>, "
           "defaults to %i", robot_namespace_.c_str(), width);
     }
     else
@@ -189,7 +189,7 @@ namespace gazebo
           ros::VoidPtr(), &queue_);
     camera_subscriber_ =
       rosnode_->subscribe(so);
-    ROS_INFO("GazeboRosVideo (%s, ns = %s) has started!",
+    ROS_INFO_NAMED("video", "GazeboRosVideo (%s, ns = %s) has started!",
         gazebo_source.c_str(), robot_namespace_.c_str());
     new_image_available_ = false;
 

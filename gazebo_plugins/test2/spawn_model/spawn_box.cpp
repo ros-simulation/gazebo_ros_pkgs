@@ -63,14 +63,14 @@ TEST(SpawnTest, spawnSingleBox)
 
   // load urdf file
   std::string urdf_filename = std::string(g_argv[1]);
-  ROS_DEBUG("loading file: %s",urdf_filename.c_str());
+  ROS_DEBUG_NAMED("spawn_box", "loading file: %s",urdf_filename.c_str());
   // read urdf / gazebo model xml from file
   TiXmlDocument xml_in(urdf_filename);
   xml_in.LoadFile();
   std::ostringstream stream;
   stream << xml_in;
   spawn_model.request.model_xml = stream.str(); // load xml file
-  ROS_DEBUG("XML string: %s",stream.str().c_str());
+  ROS_DEBUG_NAMED("spawn_box", "XML string: %s",stream.str().c_str());
 
   spawn_model.request.robot_namespace = "";
   geometry_msgs::Pose pose;
@@ -95,14 +95,14 @@ TEST(SpawnTest, spawnBoxStack)
 
   // load urdf file
   std::string urdf_filename = std::string(g_argv[1]);
-  ROS_DEBUG("loading file: %s",urdf_filename.c_str());
+  ROS_DEBUG_NAMED("spawn_box", "loading file: %s",urdf_filename.c_str());
   // read urdf / gazebo model xml from file
   TiXmlDocument xml_in(urdf_filename);
   xml_in.LoadFile();
   std::ostringstream stream;
   stream << xml_in;
   spawn_model.request.model_xml = stream.str(); // load xml file
-  ROS_DEBUG("XML string: %s",stream.str().c_str());
+  ROS_DEBUG_NAMED("spawn_box", "XML string: %s",stream.str().c_str());
 
   spawn_model.request.robot_namespace = "";
   spawn_model.request.reference_frame = "";

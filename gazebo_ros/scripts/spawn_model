@@ -37,7 +37,7 @@ model_database_template = """<sdf version="1.4">
       <uri>model://MODEL_NAME</uri>
     </include>
   </world>
-</sdf>"""        
+</sdf>"""
 
 def usage():
     print '''Commands:
@@ -101,17 +101,17 @@ class SpawnModel():
             self.unpause_physics = True
           if sys.argv[i] == '-urdf':
             if self.sdf_format == True:
-                print "Error: you cannot specify both urdf and sdf format xml, must pick one"
-                sys.exit(0)
+                rospy.logerror("Error: you cannot specify both urdf and sdf format xml, must pick one",
+                sys.exit(0))
             else:
               self.urdf_format = True;
           if sys.argv[i] == '-sdf' or sys.argv[i] == '-gazebo':
             if self.urdf_format == True:
-                print "Error: you cannot specify both urdf and sdf format xml, must pick one"
-                sys.exit(0)
+                rospy.logerror("Error: you cannot specify both urdf and sdf format xml, must pick one",
+                sys.exit(0))
             else:
                 if sys.argv[i] == '-gazebo':
-                    print "Deprecated: the -gazebo tag is now -sdf"
+                    rospy.logwarn("Deprecated: the -gazebo tag is now -sdf")
                     warnings.warn("Deprecated: the -gazebo tag is now -sdf", DeprecationWarning)
                 self.sdf_format = True;
           if sys.argv[i] == '-J':
@@ -119,27 +119,27 @@ class SpawnModel():
               self.joint_names.append(sys.argv[i+1])
               self.joint_positions.append(float(sys.argv[i+2]))
             else:
-              print "Error: must specify a joint name and joint value pair"
-              sys.exit(0)
+              rospy.logerror("Error: must specify a joint name and joint value pair",
+              sys.exit(0))
           if sys.argv[i] == '-param':
             if len(sys.argv) > i+1:
               if self.file_name != "" or self.database_name != "":
-                print "Error: you cannot specify file name if parameter or database name is given, must pick one source of model xml"
-                sys.exit(0)
+                rospy.logerror("Error: you cannot specify file name if parameter or database name is given, must pick one source of model xml",
+                sys.exit(0))
               else:
                 self.param_name = sys.argv[i+1]
           if sys.argv[i] == '-file':
             if len(sys.argv) > i+1:
               if self.param_name != "" or self.database_name != "":
-                print "Error: you cannot specify parameter if file or database name is given, must pick one source of model xml"
-                sys.exit(0)
+                rospy.logerror("Error: you cannot specify parameter if file or database name is given, must pick one source of model xml",
+                sys.exit(0))
               else:
                 self.file_name = sys.argv[i+1]
           if sys.argv[i] == '-database':
             if len(sys.argv) > i+1:
               if self.param_name != "" or self.file_name != "":
-                print "Error: you cannot specify parameter if file or parameter name is given, must pick one source of model xml"
-                sys.exit(0)
+                rospy.logerror("Error: you cannot specify parameter if file or parameter name is given, must pick one source of model xml",
+                sys.exit(0))
               else:
                 self.database_name = sys.argv[i+1]
           if sys.argv[i] == '-model':
@@ -184,11 +184,11 @@ class SpawnModel():
             self.bond = True
 
         if not self.sdf_format and not self.urdf_format:
-          print "Error: you must specify incoming format as either urdf or sdf format xml"
-          sys.exit(0)
+          rospy.logerror("Error: you must specify incoming format as either urdf or sdf format xml",
+          sys.exit(0))
         if self.model_name == "":
-          print "Error: you must specify model name"
-          sys.exit(0)
+          rospy.logerror("Error: you must specify model name",
+          sys.exit(0))
 
     def checkForModel(self,model):
         for n in model.name:
@@ -199,7 +199,7 @@ class SpawnModel():
     # Generate a blank SDF file with an include for the model from the model database
     def createDatabaseCode(self, database_name):
         return model_database_template.replace("MODEL_NAME", database_name);
-    
+
     def callSpawnService(self):
 
         # wait for model to exist
@@ -215,41 +215,41 @@ class SpawnModel():
           sys.exit(0)
 
         if self.file_name != "":
-          rospy.loginfo("Loading model xml from file")
+          rospy.loginfo("Loading model XML from file")
           if os.path.exists(self.file_name):
             if os.path.isdir(self.file_name):
-              print "Error: file name is a path?", self.file_name
+              rospy.logerror("Error: file name is a path?", self.file_name)
               sys.exit(0)
             if not os.path.isfile(self.file_name):
-              print "Error: unable to open file", self.file_name
+              rospy.logerror("Error: unable to open file", self.file_name)
               sys.exit(0)
           else:
-            print "Error: file does not exist", self.file_name
+            rospy.logerror("Error: file does not exist", self.file_name)
             sys.exit(0)
           # load file
           f = open(self.file_name,'r')
           model_xml = f.read()
           if model_xml == "":
-            print "Error: file is empty", self.file_name
+            rospy.logerror("Error: file is empty", self.file_name)
             sys.exit(0)
 
         # ROS Parameter
         elif self.param_name != "":
-          rospy.loginfo( "Loading model xml from ros parameter")
+          rospy.loginfo( "Loading model XML from ros parameter")
           model_xml = rospy.get_param(self.param_name)
           if model_xml == "":
-            print "Error: param does not exist or is empty"
+            rospy.logerror("Error: param does not exist or is empty")
             sys.exit(0)
 
         # Gazebo Model Database
         elif self.database_name != "":
-          rospy.loginfo( "Loading model xml from Gazebo Model Database")
+          rospy.loginfo( "Loading model XML from Gazebo Model Database")
           model_xml = self.createDatabaseCode(self.database_name)
           if model_xml == "":
-            print "Error: an error occured generating the SDF file"
+            rospy.logerror("Error: an error occured generating the SDF file")
             sys.exit(0)
         else:
-          print "Error: user specified param or filename is an empty string"
+          rospy.logerror("Error: user specified param or filename is an empty string")
           sys.exit(0)
 
         if self.package_to_model:
@@ -267,22 +267,22 @@ class SpawnModel():
 
         # spawn model
         if self.urdf_format:
-          success = gazebo_interface.spawn_urdf_model_client(self.model_name, model_xml, self.robot_namespace, 
+          success = gazebo_interface.spawn_urdf_model_client(self.model_name, model_xml, self.robot_namespace,
                                                              initial_pose, self.reference_frame, self.gazebo_namespace)
         elif self.sdf_format:
-          success = gazebo_interface.spawn_sdf_model_client(self.model_name, model_xml, self.robot_namespace, 
+          success = gazebo_interface.spawn_sdf_model_client(self.model_name, model_xml, self.robot_namespace,
                                                             initial_pose, self.reference_frame, self.gazebo_namespace)
         else:
-          print "Error: should not be here in spawner helper script, there is a bug"
+          rospy.logerror("Error: should not be here in spawner helper script, there is a bug")
           sys.exit(0)
 
         # set model configuration before unpause if user requested
         if len(self.joint_names) != 0:
           try:
-            success = gazebo_interface.set_model_configuration_client(self.model_name, self.param_name, 
+            success = gazebo_interface.set_model_configuration_client(self.model_name, self.param_name,
                                                                       self.joint_names, self.joint_positions, self.gazebo_namespace)
           except rospy.ServiceException, e:
-            print "set model configuration service call failed: %s"%e
+            rospy.logerror("Set model configuration service call failed: %s", e)
 
         # unpause physics if user requested
         if self.unpause_physics:
@@ -291,7 +291,7 @@ class SpawnModel():
             unpause_physics = rospy.ServiceProxy('%s/unpause_physics'%(self.gazebo_namespace), Empty)
             unpause_physics()
           except rospy.ServiceException, e:
-            print "unpause physics service call failed: %s"%e
+            rospy.logerror("Unpause physics service call failed: %s", e)
 
         return
 
@@ -301,13 +301,13 @@ class SpawnModel():
             delete_model = rospy.ServiceProxy('%s/delete_model'%(self.gazebo_namespace), DeleteModel)
             delete_model(model_name=self.model_name)
         except rospy.ServiceException, e:
-            print "delete model service call failed: %s"%e
+            rospy.logerror("Delete model service call failed: %s", e)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print usage()
     else:
-        print("spawn_model script started") # make this a print incase roscore has not been started
+        print("SpawnModel script started") # make this a print incase roscore has not been started
         sm = SpawnModel()
         sm.parseUserInputs()
         sm.callSpawnService()
@@ -315,4 +315,3 @@ if __name__ == "__main__":
         if sm.bond:
             rospy.on_shutdown(sm.callDeleteService)
             rospy.spin()
-

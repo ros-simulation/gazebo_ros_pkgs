@@ -87,16 +87,16 @@ inline std::string GetRobotNamespace ( const sensors::SensorPtr &parent, const s
     if ( sdf->HasElement ( "robotNamespace" ) ) {
         name_space = sdf->Get<std::string> ( "robotNamespace" );
         if ( name_space.empty() ) {
-            ss << "the 'robotNamespace' param was empty";
+            ss << "The 'robotNamespace' param was empty";
             name_space = GetModelName ( parent );
         } else {
             ss << "Using the 'robotNamespace' param: '" <<  name_space << "'";
         }
     } else {
-        ss << "the 'robotNamespace' param did not exit";
+        ss << "The 'robotNamespace' param did not exit";
     }
     if ( pInfo != NULL ) {
-        ROS_INFO ( "%s Plugin (robotNamespace = %s), Info: %s" , pInfo, name_space.c_str(), ss.str().c_str() );
+        ROS_INFO_NAMED("utils", "%s Plugin: %s" , pInfo, ss.str().c_str() );
     }
     return name_space;
 }
@@ -130,7 +130,7 @@ public:
         : sdf_ ( _sdf ), plugin_ ( _plugin ) {
         namespace_ = _parent->GetName ();
         if ( !sdf_->HasElement ( "robotNamespace" ) ) {
-            ROS_INFO ( "%s missing <robotNamespace>, defaults is %s", plugin_.c_str(), namespace_.c_str() );
+            ROS_INFO_NAMED("utils", "%s missing <robotNamespace>, defaults is %s", plugin_.c_str(), namespace_.c_str() );
         }  else {
             namespace_ = sdf_->GetElement ( "robotNamespace" )->Get<std::string>();
             if ( namespace_.empty() ) {
@@ -165,7 +165,7 @@ public:
             ss << "the 'robotNamespace' param did not exit";
         }
         info_text = plugin_ + "(ns = " + namespace_ + ")";
-        ROS_INFO ( "%s: %s" , info_text.c_str(), ss.str().c_str() );
+        ROS_INFO_NAMED("utils", "%s: %s" , info_text.c_str(), ss.str().c_str() );
         readCommonParameter ();
     }
 
@@ -232,7 +232,7 @@ public:
     void getParameter ( T &_value, const char *_tag_name, const T &_default ) {
         _value = _default;
         if ( !sdf_->HasElement ( _tag_name ) ) {
-            ROS_WARN ( "%s: missing <%s> default is %s", info(), _tag_name, boost::lexical_cast<std::string> ( _default ).c_str() );
+            ROS_WARN_NAMED("utils", "%s: missing <%s> default is %s", info(), _tag_name, boost::lexical_cast<std::string> ( _default ).c_str() );
         } else {
             this->getParameter<T> ( _value, _tag_name );
         }
@@ -249,7 +249,7 @@ public:
         if ( sdf_->HasElement ( _tag_name ) ) {
             _value = sdf_->GetElement ( _tag_name )->Get<T>();
         }
-        ROS_DEBUG ( "%s: <%s> = %s", info(), _tag_name, boost::lexical_cast<std::string> ( _value ).c_str() );
+        ROS_DEBUG_NAMED("utils", "%s: <%s> = %s", info(), _tag_name, boost::lexical_cast<std::string> ( _value ).c_str() );
 
     }
 
@@ -264,7 +264,7 @@ public:
     void getParameter ( T &_value, const char *_tag_name, const std::map<std::string, T> &_options, const T &_default ) {
         _value = _default;
         if ( !sdf_->HasElement ( _tag_name ) ) {
-            ROS_WARN ( "%s: missing <%s> default is %s", info(), _tag_name, boost::lexical_cast<std::string> ( _default ).c_str() );
+            ROS_WARN_NAMED("utils", "%s: missing <%s> default is %s", info(), _tag_name, boost::lexical_cast<std::string> ( _default ).c_str() );
         } else {
             this->getParameter<T> ( _value, _tag_name, _options );
         }
@@ -283,18 +283,15 @@ public:
             std::string value = sdf_->GetElement ( _tag_name )->Get<std::string>();
             it = _options.find ( value );
             if ( it == _options.end() ) {
-                ROS_WARN ( "%s: <%s> no matching key to %s", info(), _tag_name, value.c_str() );
+                ROS_WARN_NAMED("utils", "%s: <%s> no matching key to %s", info(), _tag_name, value.c_str() );
             } else {
                 _value = it->second;
             }
         }
-        ROS_DEBUG ( "%s: <%s> = %s := %s",  info(), _tag_name, ( it == _options.end() ?"default":it->first.c_str() ), boost::lexical_cast<std::string> ( _value ).c_str() );
+        ROS_DEBUG_NAMED("utils", "%s: <%s> = %s := %s",  info(), _tag_name, ( it == _options.end() ?"default":it->first.c_str() ), boost::lexical_cast<std::string> ( _value ).c_str() );
     }
 };
 
 typedef boost::shared_ptr<GazeboRos> GazeboRosPtr;
 }
 #endif
-
-
-

@@ -99,7 +99,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("frameName"))
   {
-    ROS_INFO("Block laser plugin missing <frameName>, defaults to /world");
+    ROS_INFO_NAMED("block_laser", "Block laser plugin missing <frameName>, defaults to /world");
     this->frame_name_ = "/world";
   }
   else
@@ -107,7 +107,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("topicName"))
   {
-    ROS_INFO("Block laser plugin missing <topicName>, defaults to /world");
+    ROS_INFO_NAMED("block_laser", "Block laser plugin missing <topicName>, defaults to /world");
     this->topic_name_ = "/world";
   }
   else
@@ -115,7 +115,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("gaussianNoise"))
   {
-    ROS_INFO("Block laser plugin missing <gaussianNoise>, defaults to 0.0");
+    ROS_INFO_NAMED("block_laser", "Block laser plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0;
   }
   else
@@ -123,17 +123,17 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("hokuyoMinIntensity"))
   {
-    ROS_INFO("Block laser plugin missing <hokuyoMinIntensity>, defaults to 101");
+    ROS_INFO_NAMED("block_laser", "Block laser plugin missing <hokuyoMinIntensity>, defaults to 101");
     this->hokuyo_min_intensity_ = 101;
   }
   else
     this->hokuyo_min_intensity_ = _sdf->GetElement("hokuyoMinIntensity")->Get<double>();
 
-  ROS_INFO("INFO: gazebo_ros_laser plugin should set minimum intensity to %f due to cutoff in hokuyo filters." , this->hokuyo_min_intensity_);
+  ROS_DEBUG_NAMED("block_laser", "gazebo_ros_laser plugin should set minimum intensity to %f due to cutoff in hokuyo filters." , this->hokuyo_min_intensity_);
 
   if (!_sdf->HasElement("updateRate"))
   {
-    ROS_INFO("Block laser plugin missing <updateRate>, defaults to 0");
+    ROS_INFO_NAMED("block_laser", "Block laser plugin missing <updateRate>, defaults to 0");
     this->update_rate_ = 0;
   }
   else
@@ -146,7 +146,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("block_laser", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -215,7 +215,7 @@ void GazeboRosBlockLaser::OnNewLaserScans()
   }
   else
   {
-    ROS_INFO("gazebo_ros_block_laser topic name not set");
+    ROS_INFO_NAMED("block_laser", "gazebo_ros_block_laser topic name not set");
   }
 }
 
@@ -412,4 +412,3 @@ void GazeboRosBlockLaser::OnStats( const boost::shared_ptr<msgs::WorldStatistics
 
 
 }
-

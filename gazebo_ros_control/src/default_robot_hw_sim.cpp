@@ -187,7 +187,7 @@ bool DefaultRobotHWSim::initSim(
     gazebo::physics::JointPtr joint = parent_model->GetJoint(joint_names_[j]);
     if (!joint)
     {
-      ROS_ERROR_STREAM("This robot has a joint named \"" << joint_names_[j]
+      ROS_ERROR_STREAM_NAMED("default_robot_hw", "This robot has a joint named \"" << joint_names_[j]
         << "\" which is not in the gazebo model.");
       return false;
     }

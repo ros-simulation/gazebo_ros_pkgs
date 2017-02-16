@@ -56,7 +56,7 @@ void GazeboRosHarness::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Init ROS
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("Not loading plugin since ROS hasn't been "
+    ROS_FATAL_STREAM_NAMED("harness", "Not loading plugin since ROS hasn't been "
           << "properly initialized.  Try starting gazebo with ros plugin:\n"
           << "  gazebo -s libgazebo_ros_api_plugin.so\n");
     return;

@@ -46,7 +46,7 @@ void GazeboRosJointStatePublisher::Load ( physics::ModelPtr _parent, sdf::Elemen
 
     this->robot_namespace_ = parent_->GetName ();
     if ( !_sdf->HasElement ( "robotNamespace" ) ) {
-        ROS_INFO ( "GazeboRosJointStatePublisher Plugin missing <robotNamespace>, defaults to \"%s\"",
+        ROS_INFO_NAMED("joint_state_publisher", "GazeboRosJointStatePublisher Plugin missing <robotNamespace>, defaults to \"%s\"",
                    this->robot_namespace_.c_str() );
     } else {
         this->robot_namespace_ = _sdf->GetElement ( "robotNamespace" )->Get<std::string>();
@@ -66,7 +66,7 @@ void GazeboRosJointStatePublisher::Load ( physics::ModelPtr _parent, sdf::Elemen
 
     this->update_rate_ = 100.0;
     if ( !_sdf->HasElement ( "updateRate" ) ) {
-        ROS_WARN ( "GazeboRosJointStatePublisher Plugin (ns = %s) missing <updateRate>, defaults to %f",
+        ROS_WARN_NAMED("joint_state_publisher", "GazeboRosJointStatePublisher Plugin (ns = %s) missing <updateRate>, defaults to %f",
                    this->robot_namespace_.c_str(), this->update_rate_ );
     } else {
         this->update_rate_ = _sdf->GetElement ( "updateRate" )->Get<double>();
@@ -82,10 +82,10 @@ void GazeboRosJointStatePublisher::Load ( physics::ModelPtr _parent, sdf::Elemen
 
     for ( unsigned int i = 0; i< joint_names_.size(); i++ ) {
         joints_.push_back ( this->parent_->GetJoint ( joint_names_[i] ) );
-        ROS_INFO ( "GazeboRosJointStatePublisher is going to publish joint: %s", joint_names_[i].c_str() );
+        ROS_INFO_NAMED("joint_state_publisher", "GazeboRosJointStatePublisher is going to publish joint: %s", joint_names_[i].c_str() );
     }
 
-    ROS_INFO ( "Starting GazeboRosJointStatePublisher Plugin (ns = %s)!, parent name: %s", this->robot_namespace_.c_str(), parent_->GetName ().c_str() );
+    ROS_INFO_NAMED("joint_state_publisher", "Starting GazeboRosJointStatePublisher Plugin (ns = %s)!, parent name: %s", this->robot_namespace_.c_str(), parent_->GetName ().c_str() );
 
     tf_prefix_ = tf::getPrefixParam ( *rosnode_ );
     joint_state_publisher_ = rosnode_->advertise<sensor_msgs::JointState> ( "joint_states",1000 );
@@ -126,4 +126,3 @@ void GazeboRosJointStatePublisher::publishJointStates() {
     }
     joint_state_publisher_.publish ( joint_state_ );
 }
-

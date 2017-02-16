@@ -90,12 +90,12 @@ void VisionReconfigure::ReconfigureCallback(gazebo_plugins::CameraSynchronizerCo
              config.forearm_r_trig_mode == gazebo_plugins::CameraSynchronizer_AlternateProjector ||
              config.forearm_l_trig_mode == gazebo_plugins::CameraSynchronizer_AlternateProjector)
     {
-      ROS_WARN("Alternate Projector Mode not supported in simulation, setting projector to on for now");
+      ROS_WARN_NAMED("vision_reconfigure", "Alternate Projector Mode not supported in simulation, setting projector to on for now");
       this->projector_msg_.data = 1;
     }
     else
     {
-      ROS_DEBUG("Projector only supported for modes: WithProjector and AlternateProjector");
+      ROS_DEBUG_NAMED("vision_reconfigure", "Projector only supported for modes: WithProjector and AlternateProjector");
       this->projector_msg_.data = 0;
     }
   }
@@ -105,7 +105,7 @@ void VisionReconfigure::ReconfigureCallback(gazebo_plugins::CameraSynchronizerCo
   }
   else
   {
-    ROS_ERROR("projector_mode is not in any recognized state [%d]",config.projector_mode);
+    ROS_ERROR_NAMED("vision_reconfigure", "projector_mode is not in any recognized state [%d]",config.projector_mode);
   }
 
   this->pub_projector_.publish(projector_msg_);
@@ -142,4 +142,3 @@ void VisionReconfigure::spin(double spin_frequency)
     loop_rate.sleep();
   }
 }
-

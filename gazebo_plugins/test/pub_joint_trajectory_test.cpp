@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     jt.points[i].positions.push_back(-0.2);
     // set duration
     jt.points[i].time_from_start = ros::Duration(dt);
-    ROS_INFO("test: angles[%d][%f, %f]",n,x1,x2);
+    ROS_INFO_NAMED("joint_trajectory_test", "test: angles[%d][%f, %f]",n,x1,x2);
   }
 
   // pub_.publish(jt); // use publisher

@@ -43,7 +43,7 @@ namespace gazebo
     robot_namespace_ = "";
     if (!sdf->HasElement("robotNamespace"))
     {
-      ROS_INFO("PlanarMovePlugin missing <robotNamespace>, "
+      ROS_INFO_NAMED("planar_move", "PlanarMovePlugin missing <robotNamespace>, "
           "defaults to \"%s\"", robot_namespace_.c_str());
     }
     else
@@ -55,7 +55,7 @@ namespace gazebo
     command_topic_ = "cmd_vel";
     if (!sdf->HasElement("commandTopic"))
     {
-      ROS_WARN("PlanarMovePlugin (ns = %s) missing <commandTopic>, "
+      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <commandTopic>, "
           "defaults to \"%s\"",
           robot_namespace_.c_str(), command_topic_.c_str());
     }
@@ -67,7 +67,7 @@ namespace gazebo
     odometry_topic_ = "odom";
     if (!sdf->HasElement("odometryTopic"))
     {
-      ROS_WARN("PlanarMovePlugin (ns = %s) missing <odometryTopic>, "
+      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <odometryTopic>, "
           "defaults to \"%s\"",
           robot_namespace_.c_str(), odometry_topic_.c_str());
     }
@@ -79,7 +79,7 @@ namespace gazebo
     odometry_frame_ = "odom";
     if (!sdf->HasElement("odometryFrame"))
     {
-      ROS_WARN("PlanarMovePlugin (ns = %s) missing <odometryFrame>, "
+      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <odometryFrame>, "
           "defaults to \"%s\"",
           robot_namespace_.c_str(), odometry_frame_.c_str());
     }
@@ -91,7 +91,7 @@ namespace gazebo
     robot_base_frame_ = "base_footprint";
     if (!sdf->HasElement("robotBaseFrame"))
     {
-      ROS_WARN("PlanarMovePlugin (ns = %s) missing <robotBaseFrame>, "
+      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <robotBaseFrame>, "
           "defaults to \"%s\"",
           robot_namespace_.c_str(), robot_base_frame_.c_str());
     }
@@ -103,7 +103,7 @@ namespace gazebo
     odometry_rate_ = 20.0;
     if (!sdf->HasElement("odometryRate"))
     {
-      ROS_WARN("PlanarMovePlugin (ns = %s) missing <odometryRate>, "
+      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <odometryRate>, "
           "defaults to %f",
           robot_namespace_.c_str(), odometry_rate_);
     }
@@ -122,7 +122,7 @@ namespace gazebo
     // Ensure that ROS has been initialized and subscribe to cmd_vel
     if (!ros::isInitialized())
     {
-      ROS_FATAL_STREAM("PlanarMovePlugin (ns = " << robot_namespace_
+      ROS_FATAL_STREAM_NAMED("planar_move", "PlanarMovePlugin (ns = " << robot_namespace_
         << "). A ROS node for Gazebo has not been initialized, "
         << "unable to load plugin. Load the Gazebo system plugin "
         << "'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
@@ -130,7 +130,7 @@ namespace gazebo
     }
     rosnode_.reset(new ros::NodeHandle(robot_namespace_));
 
-    ROS_DEBUG("OCPlugin (%s) has started!",
+    ROS_DEBUG_NAMED("planar_move", "OCPlugin (%s) has started!",
         robot_namespace_.c_str());
 
     tf_prefix_ = tf::getPrefixParam(*rosnode_);
@@ -273,4 +273,3 @@ namespace gazebo
 
   GZ_REGISTER_MODEL_PLUGIN(GazeboRosPlanarMove)
 }
-
