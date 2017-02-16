@@ -188,7 +188,7 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-  this->depth_sensor_update_time_ = this->parentSensor->LastUpdateTime();
+  this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
   if (this->parentSensor->IsActive())
   {
     if (this->point_cloud_connect_count_ <= 0 &&
@@ -226,7 +226,7 @@ void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
     return;
 
   //ROS_ERROR_NAMED("openni_kinect", "camera_ new frame %s %s",this->parentSensor_->Name().c_str(),this->frame_name_.c_str());
-  this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+  this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
 
   if (this->parentSensor->IsActive())
   {
@@ -434,12 +434,12 @@ void GazeboRosOpenniKinect::PublishCameraInfo()
 
   if (this->depth_info_connect_count_ > 0)
   {
-    this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
+    this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
     common::Time cur_time = this->world_->GetSimTime();
-    if (cur_time - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
+    if (this->sensor_update_time_ - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
     {
       this->PublishCameraInfo(this->depth_image_camera_info_pub_);
-      this->last_depth_image_camera_info_update_time_ = cur_time;
+      this->last_depth_image_camera_info_update_time_ = this->sensor_update_time_;
     }
   }
 }

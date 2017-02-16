@@ -606,12 +606,11 @@ void GazeboRosCameraUtils::PublishCameraInfo()
 
   if (this->camera_info_pub_.getNumSubscribers() > 0)
   {
-    this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
-    common::Time cur_time = this->world_->GetSimTime();
-    if (cur_time - this->last_info_update_time_ >= this->update_period_)
+    this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
+    if (this->sensor_update_time_ - this->last_info_update_time_ >= this->update_period_)
     {
       this->PublishCameraInfo(this->camera_info_pub_);
-      this->last_info_update_time_ = cur_time;
+      this->last_info_update_time_ = this->sensor_update_time_;
     }
   }
 }
