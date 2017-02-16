@@ -225,7 +225,7 @@ void GazeboRosOpenniKinect::OnNewImageFrame(const unsigned char *_image,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-  //ROS_ERROR("camera_ new frame %s %s",this->parentSensor_->Name().c_str(),this->frame_name_.c_str());
+  //ROS_ERROR_NAMED("openni_kinect", "camera_ new frame %s %s",this->parentSensor_->Name().c_str(),this->frame_name_.c_str());
   this->sensor_update_time_ = this->parentSensor_->LastUpdateTime();
 
   if (this->parentSensor->IsActive())
@@ -429,7 +429,7 @@ bool GazeboRosOpenniKinect::FillDepthImageHelper(
 
 void GazeboRosOpenniKinect::PublishCameraInfo()
 {
-  ROS_DEBUG("publishing default camera info, then openni kinect camera info");
+  ROS_DEBUG_NAMED("openni_kinect", "publishing default camera info, then openni kinect camera info");
   GazeboRosCameraUtils::PublishCameraInfo();
 
   if (this->depth_info_connect_count_ > 0)

@@ -59,7 +59,7 @@ GazeboRosVacuumGripper::~GazeboRosVacuumGripper()
 // Load the controller
 void GazeboRosVacuumGripper::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  ROS_INFO("Loading gazebo_ros_vacuum_gripper");
+  ROS_INFO_NAMED("vacuum_gripper", "Loading gazebo_ros_vacuum_gripper");
 
   // Set attached model;
   parent_ = _model;
@@ -74,7 +74,7 @@ void GazeboRosVacuumGripper::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   if (!_sdf->HasElement("bodyName"))
   {
-    ROS_FATAL("vacuum_gripper plugin missing <bodyName>, cannot proceed");
+    ROS_FATAL_NAMED("vacuum_gripper", "vacuum_gripper plugin missing <bodyName>, cannot proceed");
     return;
   }
   else
@@ -88,15 +88,15 @@ void GazeboRosVacuumGripper::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     for (size_t i = 0; i < links.size(); i++) {
       found += std::string(" ") + links[i]->GetName();
     }
-    ROS_FATAL("gazebo_ros_vacuum_gripper plugin error: link named: %s does not exist", link_name_.c_str());
-    ROS_FATAL("gazebo_ros_vacuum_gripper plugin error: You should check it exists and is not connected with fixed joint");
-    ROS_FATAL("gazebo_ros_vacuum_gripper plugin error: Found links are: %s", found.c_str());
+    ROS_FATAL_NAMED("vacuum_gripper", "gazebo_ros_vacuum_gripper plugin error: link named: %s does not exist", link_name_.c_str());
+    ROS_FATAL_NAMED("vacuum_gripper", "gazebo_ros_vacuum_gripper plugin error: You should check it exists and is not connected with fixed joint");
+    ROS_FATAL_NAMED("vacuum_gripper", "gazebo_ros_vacuum_gripper plugin error: Found links are: %s", found.c_str());
     return;
   }
 
   if (!_sdf->HasElement("topicName"))
   {
-    ROS_FATAL("vacuum_gripper plugin missing <serviceName>, cannot proceed");
+    ROS_FATAL_NAMED("vacuum_gripper", "vacuum_gripper plugin missing <serviceName>, cannot proceed");
     return;
   }
   else
@@ -105,7 +105,7 @@ void GazeboRosVacuumGripper::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("vacuum_gripper", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -141,17 +141,17 @@ void GazeboRosVacuumGripper::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   update_connection_ = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&GazeboRosVacuumGripper::UpdateChild, this));
 
-  ROS_INFO("Loaded gazebo_ros_vacuum_gripper");
+  ROS_INFO_NAMED("vacuum_gripper", "Loaded gazebo_ros_vacuum_gripper");
 }
 
 bool GazeboRosVacuumGripper::OnServiceCallback(std_srvs::Empty::Request &req,
                                      std_srvs::Empty::Response &res)
 {
   if (status_) {
-    ROS_WARN("gazebo_ros_vacuum_gripper: already status is 'on'");
+    ROS_WARN_NAMED("vacuum_gripper", "gazebo_ros_vacuum_gripper: already status is 'on'");
   } else {
     status_ = true;
-    ROS_INFO("gazebo_ros_vacuum_gripper: status: off -> on");
+    ROS_INFO_NAMED("vacuum_gripper", "gazebo_ros_vacuum_gripper: status: off -> on");
   }
   return true;
 }
@@ -160,9 +160,9 @@ bool GazeboRosVacuumGripper::OffServiceCallback(std_srvs::Empty::Request &req,
 {
   if (status_) {
     status_ = false;
-    ROS_INFO("gazebo_ros_vacuum_gripper: status: on -> off");
+    ROS_INFO_NAMED("vacuum_gripper", "gazebo_ros_vacuum_gripper: status: on -> off");
   } else {
-    ROS_WARN("gazebo_ros_vacuum_gripper: already status is 'off'");
+    ROS_WARN_NAMED("vacuum_gripper", "gazebo_ros_vacuum_gripper: already status is 'off'");
   }
   return true;
 }

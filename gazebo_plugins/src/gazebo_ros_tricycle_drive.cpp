@@ -127,13 +127,13 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
 
     if ( this->publishWheelJointState_ ) {
         joint_state_publisher_ = gazebo_ros_->node()->advertise<sensor_msgs::JointState> ( "joint_states", 1000 );
-        ROS_INFO ( "%s: Advertise joint_states!", gazebo_ros_->info() );
+        ROS_INFO_NAMED("tricycle_drive", "%s: Advertise joint_states!", gazebo_ros_->info() );
     }
 
     transform_broadcaster_ = boost::shared_ptr<tf::TransformBroadcaster> ( new tf::TransformBroadcaster() );
 
     // ROS: Subscribe to the velocity command topic (usually "cmd_vel")
-    ROS_INFO ( "%s: Try to subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
+    ROS_INFO_NAMED("tricycle_drive", "%s: Try to subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
 
     ros::SubscribeOptions so =
         ros::SubscribeOptions::create<geometry_msgs::Twist> ( command_topic_, 1,
@@ -141,10 +141,10 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
                 ros::VoidPtr(), &queue_ );
 
     cmd_vel_subscriber_ = gazebo_ros_->node()->subscribe ( so );
-    ROS_INFO ( "%s: Subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
+    ROS_INFO_NAMED("tricycle_drive", "%s: Subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
 
     odometry_publisher_ = gazebo_ros_->node()->advertise<nav_msgs::Odometry> ( odometry_topic_, 1 );
-    ROS_INFO ( "%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str() );
+    ROS_INFO_NAMED("tricycle_drive", "%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str() );
 
     // start custom queue for diff drive
     this->callback_queue_thread_ = boost::thread ( boost::bind ( &GazeboRosTricycleDrive::QueueThread, this ) );
@@ -216,7 +216,7 @@ void GazeboRosTricycleDrive::UpdateChild()
 
         motorController ( target_wheel_roation_speed, target_steering_angle, seconds_since_last_update );
 
-        //ROS_INFO("v = %f, w = %f !", target_wheel_roation_speed, target_steering_angle);
+        //ROS_INFO_NAMED("tricycle_drive", "v = %f, w = %f !", target_wheel_roation_speed, target_steering_angle);
 
         last_actuator_update_ += common::Time ( update_period_ );
     }
@@ -315,7 +315,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
       joint_steering_->SetAngle(0, math::Angle(applied_angle));
 #endif
     }
-    //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !",
+    //ROS_INFO_NAMED("tricycle_drive", "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !",
     //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
 }
 
@@ -458,4 +458,3 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
 
 GZ_REGISTER_MODEL_PLUGIN ( GazeboRosTricycleDrive )
 }
-

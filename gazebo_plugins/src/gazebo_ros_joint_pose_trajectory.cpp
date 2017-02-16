@@ -91,7 +91,7 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
 
   if (!this->sdf->HasElement("updateRate"))
   {
-    ROS_INFO("joint trajectory plugin missing <updateRate>, defaults"
+    ROS_INFO_NAMED("joint_pose_trajectory", "joint trajectory plugin missing <updateRate>, defaults"
              " to 0.0 (as fast as possible)");
     this->update_rate_ = 0;
   }
@@ -101,7 +101,7 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("joint_pose_trajectory", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -176,14 +176,14 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
       this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
     {
-      ROS_ERROR("ros_joint_trajectory plugin needs a reference link [%s] as"
+      ROS_ERROR_NAMED("joint_pose_trajectory", "ros_joint_trajectory plugin needs a reference link [%s] as"
                 " frame_id, aborting.\n", this->reference_link_name_.c_str());
       return;
     }
     else
     {
       this->model_ = this->reference_link_->GetParentModel();
-      ROS_DEBUG("test: update model pose by keeping link [%s] stationary"
+      ROS_DEBUG_NAMED("joint_pose_trajectory", "test: update model pose by keeping link [%s] stationary"
                 " inertially", this->reference_link_->GetName().c_str());
     }
   }
@@ -250,15 +250,15 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
       this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
     {
-      ROS_ERROR("ros_joint_trajectory plugin specified a reference link [%s]"
+      ROS_ERROR_NAMED("joint_pose_trajectory", "ros_joint_trajectory plugin specified a reference link [%s]"
                 " that does not exist, aborting.\n",
                 this->reference_link_name_.c_str());
-      ROS_DEBUG("will set model [%s] configuration, keeping model root link"
+      ROS_DEBUG_NAMED("joint_pose_trajectory", "will set model [%s] configuration, keeping model root link"
                 " stationary.", this->model_->GetName().c_str());
       return false;
     }
     else
-      ROS_DEBUG("test: update model pose by keeping link [%s] stationary"
+      ROS_DEBUG_NAMED("joint_pose_trajectory", "test: update model pose by keeping link [%s] stationary"
                 " inertially", this->reference_link_->GetName().c_str());
   }
 
@@ -268,13 +268,13 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
     this->model_ = this->reference_link_->GetParentModel();
     if (this->model_)
     {
-      ROS_INFO("found model[%s] by link name specified in frame_id[%s]",
+      ROS_INFO_NAMED("joint_pose_trajectory", "found model[%s] by link name specified in frame_id[%s]",
         this->model_->GetName().c_str(),
         req.joint_trajectory.header.frame_id.c_str());
     }
     else
     {
-      ROS_WARN("no model found by link name specified in frame_id[%s],"
+      ROS_WARN_NAMED("joint_pose_trajectory", "no model found by link name specified in frame_id[%s],"
                "  aborting.", req.joint_trajectory.header.frame_id.c_str());
       return false;
     }
@@ -321,7 +321,7 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
       // gzerr << trajectory_index << " : "  << this->points_.size() << "\n";
       if (this->trajectory_index < this->points_.size())
       {
-        ROS_INFO("time [%f] updating configuration [%d/%lu]",
+        ROS_INFO_NAMED("joint_pose_trajectory", "time [%f] updating configuration [%d/%lu]",
           cur_time.Double(), this->trajectory_index, this->points_.size());
 
         // get reference link pose before updates
@@ -360,7 +360,7 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
         }
         else
         {
-          ROS_ERROR("point[%u] in JointTrajectory has different number of"
+          ROS_ERROR_NAMED("joint_pose_trajectory", "point[%u] in JointTrajectory has different number of"
                     " joint names[%u] and positions[%lu].",
                     this->trajectory_index, chain_size,
                     this->points_[this->trajectory_index].positions.size());
