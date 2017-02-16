@@ -121,7 +121,7 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   if (!ros::isInitialized())
     ros::init(argc,argv,"gazebo",ros::init_options::NoSigintHandler);
   else
-    ROS_ERROR("Something other than this gazebo_ros_api plugin started ros::init(...), command line arguments may not be parsed properly.");
+    ROS_ERROR_NAMED("api_plugin", "Something other than this gazebo_ros_api plugin started ros::init(...), command line arguments may not be parsed properly.");
 
   // check if the ros master is available - required
   while(!ros::master::check())
@@ -153,7 +153,7 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::loadGazeboRosApiPlugin,this,_1));
 
   plugin_loaded_ = true;
-  ROS_INFO("Finished loading Gazebo ROS API Plugin.");
+  ROS_INFO_NAMED("api_plugin", "Finished loading Gazebo ROS API Plugin.");
 }
 
 void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
@@ -173,9 +173,9 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   world_ = gazebo::physics::get_world(world_name);
   if (!world_)
   {
-    //ROS_ERROR("world name: [%s]",world->GetName().c_str());
+    //ROS_ERROR_NAMED("api_plugin", "world name: [%s]",world->GetName().c_str());
     // connect helper function to signal for scheduling torque/forces, etc
-    ROS_FATAL("cannot load gazebo ros api server plugin, physics::get_world() fails to return world");
+    ROS_FATAL_NAMED("api_plugin", "cannot load gazebo ros api server plugin, physics::get_world() fails to return world");
     return;
   }
 
@@ -499,7 +499,7 @@ void GazeboRosApiPlugin::onLinkStatesDisconnect()
   {
     gazebo::event::Events::DisconnectWorldUpdateBegin(pub_link_states_event_);
     if (pub_link_states_connection_count_ < 0) // should not be possible
-      ROS_ERROR("one too mandy disconnect from pub_link_states_ in gazebo_ros.cpp? something weird");
+      ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_link_states_ in gazebo_ros.cpp? something weird");
   }
 }
 
@@ -510,7 +510,7 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
   {
     gazebo::event::Events::DisconnectWorldUpdateBegin(pub_model_states_event_);
     if (pub_model_states_connection_count_ < 0) // should not be possible
-      ROS_ERROR("one too mandy disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
+      ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
   }
 }
 
@@ -525,7 +525,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
 
   if (!isURDF(model_xml))
   {
-    ROS_ERROR("SpawnModel: Failure - model format is not URDF.");
+    ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model format is not URDF.");
     res.success = false;
     res.status_message = "SpawnModel: Failure - model format is not URDF.";
     return false;
@@ -550,30 +550,30 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
     while (pos1 != std::string::npos)
     {
       size_t pos2 = model_xml.find("/", pos1+10);
-      //ROS_DEBUG(" pos %d %d",(int)pos1, (int)pos2);
+      //ROS_DEBUG_NAMED("api_plugin", " pos %d %d",(int)pos1, (int)pos2);
       if (pos2 == std::string::npos || pos1 >= pos2)
       {
-        ROS_ERROR("malformed package name?");
+        ROS_ERROR_NAMED("api_plugin", "Malformed package name?");
         break;
       }
 
       std::string package_name = model_xml.substr(pos1+10,pos2-pos1-10);
-      //ROS_DEBUG("package name [%s]", package_name.c_str());
+      //ROS_DEBUG_NAMED("api_plugin", "package name [%s]", package_name.c_str());
       std::string package_path = ros::package::getPath(package_name);
       if (package_path.empty())
       {
-        ROS_FATAL("Package[%s] does not have a path",package_name.c_str());
+        ROS_FATAL_NAMED("api_plugin", "Package[%s] does not have a path",package_name.c_str());
         res.success = false;
         res.status_message = std::string("urdf reference package name does not exist: ")+package_name;
         return false;
       }
-      ROS_DEBUG_ONCE("Package name [%s] has path [%s]", package_name.c_str(), package_path.c_str());
+      ROS_DEBUG_ONCE_NAMED("api_plugin", "Package name [%s] has path [%s]", package_name.c_str(), package_path.c_str());
 
       model_xml.replace(pos1,(pos2-pos1),package_path);
       pos1 = model_xml.find(package_prefix, pos1);
     }
   }
-  // ROS_DEBUG("Model XML\n\n%s\n\n ",model_xml.c_str());
+  // ROS_DEBUG_NAMED("api_plugin", "Model XML\n\n%s\n\n ",model_xml.c_str());
 
   req.model_xml = model_xml;
 
@@ -609,7 +609,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   /// @todo: map is really wrong, need to use tf here somehow
   else if (req.reference_frame == "" || req.reference_frame == "world" || req.reference_frame == "map" || req.reference_frame == "/map")
   {
-    ROS_DEBUG("SpawnModel: reference_frame is empty/world/map, using inertial frame");
+    ROS_DEBUG_NAMED("api_plugin", "SpawnModel: reference_frame is empty/world/map, using inertial frame");
   }
   else
   {
@@ -649,7 +649,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
       }
       else
       {
-        ROS_WARN("Unable to add robot namespace to xml");
+        ROS_WARN_NAMED("api_plugin", "Unable to add robot namespace to xml");
       }
     }
   }
@@ -670,13 +670,13 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
       }
       else
       {
-        ROS_WARN("Unable to add robot namespace to xml");
+        ROS_WARN_NAMED("api_plugin", "Unable to add robot namespace to xml");
       }
     }
   }
   else
   {
-    ROS_ERROR("GazeboRosApiPlugin SpawnModel Failure: input xml format not recognized");
+    ROS_ERROR_NAMED("api_plugin", "GazeboRosApiPlugin SpawnModel Failure: input xml format not recognized");
     res.success = false;
     res.status_message = std::string("GazeboRosApiPlugin SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.");
     return true;
@@ -693,7 +693,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
   if (!model)
   {
-    ROS_ERROR("DeleteModel: model [%s] does not exist",req.model_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "DeleteModel: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "DeleteModel: model does not exist";
     return true;
@@ -737,7 +737,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
       if (!world_->GetModel(req.model_name)) break;
     }
-    ROS_DEBUG("Waiting for model deletion (%s)",req.model_name.c_str());
+    ROS_DEBUG_NAMED("api_plugin", "Waiting for model deletion (%s)",req.model_name.c_str());
     usleep(1000);
   }
 
@@ -754,7 +754,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.relative_entity_name));
   if (!model)
   {
-    ROS_ERROR("GetModelState: model [%s] does not exist",req.model_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "GetModelState: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "GetModelState: model does not exist";
     return true;
@@ -808,7 +808,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
     /// @todo: FIXME map is really wrong, need to use tf here somehow
     else if (req.relative_entity_name == "" || req.relative_entity_name == "world" || req.relative_entity_name == "map" || req.relative_entity_name == "/map")
     {
-      ROS_DEBUG("GetModelState: relative_entity_name is empty/world/map, using inertial frame");
+      ROS_DEBUG_NAMED("api_plugin", "GetModelState: relative_entity_name is empty/world/map, using inertial frame");
     }
     else
     {
@@ -846,7 +846,7 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
   if (!model)
   {
-    ROS_ERROR("GetModelProperties: model [%s] does not exist",req.model_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "GetModelProperties: model [%s] does not exist",req.model_name.c_str());
     res.success = false;
     res.status_message = "GetModelProperties: model does not exist";
     return true;
@@ -1028,7 +1028,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
   /// @todo: FIXME map is really wrong, need to use tf here somehow
   else if (req.reference_frame == "" || req.reference_frame == "world" || req.reference_frame == "map" || req.reference_frame == "/map")
   {
-    ROS_DEBUG("GetLinkState: reference_frame is empty/world/map, using inertial frame");
+    ROS_DEBUG_NAMED("api_plugin", "GetLinkState: reference_frame is empty/world/map, using inertial frame");
   }
   else
   {
@@ -1131,7 +1131,7 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   else
   {
     /// \TODO: add support for simbody, dart and bullet physics properties.
-    ROS_ERROR("ROS set_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    ROS_ERROR_NAMED("api_plugin", "ROS set_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
     res.success = false;
     res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: set_physics_properties not supported.";
   }
@@ -1189,7 +1189,7 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   else
   {
     /// \TODO: add support for simbody, dart and bullet physics properties.
-    ROS_ERROR("ROS get_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    ROS_ERROR_NAMED("api_plugin", "ROS get_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
     res.success = false;
     res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: get_physics_properties not supported.";
   }
@@ -1276,7 +1276,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_state.model_name);
   if (!model)
   {
-    ROS_ERROR("Updating ModelState: model [%s] does not exist",req.model_state.model_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "Updating ModelState: model [%s] does not exist",req.model_state.model_name.c_str());
     res.success = false;
     res.status_message = "SetModelState: model does not exist";
     return true;
@@ -1303,24 +1303,24 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     /// @todo: FIXME map is really wrong, need to use tf here somehow
     else if (req.model_state.reference_frame == "" || req.model_state.reference_frame == "world" || req.model_state.reference_frame == "map" || req.model_state.reference_frame == "/map" )
     {
-      ROS_DEBUG("Updating ModelState: reference frame is empty/world/map, usig inertial frame");
+      ROS_DEBUG_NAMED("api_plugin", "Updating ModelState: reference frame is empty/world/map, usig inertial frame");
     }
     else
     {
-      ROS_ERROR("Updating ModelState: for model[%s], specified reference frame entity [%s] does not exist",
+      ROS_ERROR_NAMED("api_plugin", "Updating ModelState: for model[%s], specified reference frame entity [%s] does not exist",
                 req.model_state.model_name.c_str(),req.model_state.reference_frame.c_str());
       res.success = false;
       res.status_message = "SetModelState: specified reference frame entity does not exist";
       return true;
     }
 
-    //ROS_ERROR("target state: %f %f %f",target_pose.pos.x,target_pose.pos.y,target_pose.pos.z);
+    //ROS_ERROR_NAMED("api_plugin", "target state: %f %f %f",target_pose.pos.x,target_pose.pos.y,target_pose.pos.z);
     bool is_paused = world_->IsPaused();
     world_->SetPaused(true);
     model->SetWorldPose(target_pose);
     world_->SetPaused(is_paused);
     //gazebo::math::Pose p3d = model->GetWorldPose();
-    //ROS_ERROR("model updated state: %f %f %f",p3d.pos.x,p3d.pos.y,p3d.pos.z);
+    //ROS_ERROR_NAMED("api_plugin", "model updated state: %f %f %f",p3d.pos.x,p3d.pos.y,p3d.pos.z);
 
     // set model velocity
     model->SetLinearVel(target_pos_dot);
@@ -1437,7 +1437,7 @@ bool GazeboRosApiPlugin::clearBodyWrenches(std::string body_name)
     search = false;
     for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();++iter)
     {
-      //ROS_ERROR("search %s %s",(*iter)->body->GetScopedName().c_str(), body_name.c_str());
+      //ROS_ERROR_NAMED("api_plugin", "search %s %s",(*iter)->body->GetScopedName().c_str(), body_name.c_str());
       if ((*iter)->body->GetScopedName() == body_name)
       {
         // found one, search through again
@@ -1461,7 +1461,7 @@ bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguratio
   gazebo::physics::ModelPtr gazebo_model = world_->GetModel(req.model_name);
   if (!gazebo_model)
   {
-    ROS_ERROR("SetModelConfiguration: model [%s] does not exist",gazebo_model_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "SetModelConfiguration: model [%s] does not exist",gazebo_model_name.c_str());
     res.success = false;
     res.status_message = "SetModelConfiguration: model does not exist";
     return true;
@@ -1503,7 +1503,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.reference_frame));
   if (!body)
   {
-    ROS_ERROR("Updating LinkState: link [%s] does not exist",req.link_state.link_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "Updating LinkState: link [%s] does not exist",req.link_state.link_name.c_str());
     res.success = false;
     res.status_message = "SetLinkState: link does not exist";
     return true;
@@ -1536,11 +1536,11 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
   }
   else if (req.link_state.reference_frame == "" || req.link_state.reference_frame == "world" || req.link_state.reference_frame == "map" || req.link_state.reference_frame == "/map")
   {
-    ROS_INFO("Updating LinkState: reference_frame is empty/world/map, using inertial frame");
+    ROS_INFO_NAMED("api_plugin", "Updating LinkState: reference_frame is empty/world/map, using inertial frame");
   }
   else
   {
-    ROS_ERROR("Updating LinkState: reference_frame is not a valid link name");
+    ROS_ERROR_NAMED("api_plugin", "Updating LinkState: reference_frame is not a valid link name");
     res.success = false;
     res.status_message = "SetLinkState: failed";
     return true;
@@ -1591,7 +1591,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
   if (!body)
   {
-    ROS_ERROR("ApplyBodyWrench: body [%s] does not exist",req.body_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "ApplyBodyWrench: body [%s] does not exist",req.body_name.c_str());
     res.success = false;
     res.status_message = "ApplyBodyWrench: body does not exist";
     return true;
@@ -1619,7 +1619,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
     //        into the reference frame of the body
     //        first, translate by reference point to the body frame
     gazebo::math::Pose target_to_reference = frame->GetWorldPose() - body->GetWorldPose();
-    ROS_DEBUG("reference frame for applied wrench: [%f %f %f, %f %f %f]-[%f %f %f, %f %f %f]=[%f %f %f, %f %f %f]",
+    ROS_DEBUG_NAMED("api_plugin", "reference frame for applied wrench: [%f %f %f, %f %f %f]-[%f %f %f, %f %f %f]=[%f %f %f, %f %f %f]",
               body->GetWorldPose().pos.x,
               body->GetWorldPose().pos.y,
               body->GetWorldPose().pos.z,
@@ -1640,7 +1640,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
               target_to_reference.rot.GetAsEuler().z
               );
     transformWrench(target_force, target_torque, reference_force, reference_torque, target_to_reference);
-    ROS_ERROR("wrench defined as [%s]:[%f %f %f, %f %f %f] --> applied as [%s]:[%f %f %f, %f %f %f]",
+    ROS_ERROR_NAMED("api_plugin", "wrench defined as [%s]:[%f %f %f, %f %f %f] --> applied as [%s]:[%f %f %f, %f %f %f]",
               frame->GetName().c_str(),
               reference_force.x,
               reference_force.y,
@@ -1660,7 +1660,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   }
   else if (req.reference_frame == "" || req.reference_frame == "world" || req.reference_frame == "map" || req.reference_frame == "/map")
   {
-    ROS_INFO("ApplyBodyWrench: reference_frame is empty/world/map, using inertial frame, transferring from body relative to inertial frame");
+    ROS_INFO_NAMED("api_plugin", "ApplyBodyWrench: reference_frame is empty/world/map, using inertial frame, transferring from body relative to inertial frame");
     // FIXME: transfer to inertial frame
     gazebo::math::Pose target_to_reference = body->GetWorldPose();
     target_force = reference_force;
@@ -1669,7 +1669,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   }
   else
   {
-    ROS_ERROR("ApplyBodyWrench: reference_frame is not a valid link name");
+    ROS_ERROR_NAMED("api_plugin", "ApplyBodyWrench: reference_frame is not a valid link name");
     res.success = false;
     res.status_message = "ApplyBodyWrench: reference_frame not found";
     return true;
@@ -1784,7 +1784,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
 
 void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
 {
-  ROS_ERROR("CLOCK2");
+  ROS_ERROR_NAMED("api_plugin", "CLOCK2");
   gazebo::common::Time sim_time = world_->GetSimTime();
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
@@ -1957,9 +1957,9 @@ void GazeboRosApiPlugin::physicsReconfigureCallback(gazebo_ros::PhysicsConfig &c
       srv.request.ode_config.erp                        = config.erp                         ;
       srv.request.ode_config.max_contacts               = config.max_contacts                ;
       physics_reconfigure_set_client_.call(srv);
-      ROS_INFO("physics dynamics reconfigure update complete");
+      ROS_INFO_NAMED("api_plugin", "physics dynamics reconfigure update complete");
     }
-    ROS_INFO("physics dynamics reconfigure complete");
+    ROS_INFO_NAMED("api_plugin", "physics dynamics reconfigure complete");
   }
 }
 
@@ -1977,7 +1977,7 @@ void GazeboRosApiPlugin::physicsReconfigureThread()
   physics_reconfigure_callback_ = boost::bind(&GazeboRosApiPlugin::physicsReconfigureCallback, this, _1, _2);
   physics_reconfigure_srv_->setCallback(physics_reconfigure_callback_);
 
-  ROS_INFO("Physics dynamic reconfigure ready.");
+  ROS_INFO_NAMED("api_plugin", "Physics dynamic reconfigure ready.");
 }
 
 void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
@@ -2006,7 +2006,7 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
   TiXmlElement* gazebo_tixml = gazebo_model_xml.FirstChildElement("sdf");
   if (!gazebo_tixml)
   {
-    ROS_WARN("Could not find <sdf> element in sdf, so name and initial position cannot be applied");
+    ROS_WARN_NAMED("api_plugin", "Could not find <sdf> element in sdf, so name and initial position cannot be applied");
     return;
   }
 
@@ -2029,14 +2029,14 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
     TiXmlElement* world_tixml = gazebo_tixml->FirstChildElement("world");
     if (!world_tixml)
     {
-      ROS_WARN("Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
+      ROS_WARN_NAMED("api_plugin", "Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
       return;
     }
     // If not <model> element, check SDF for required include element
     model_tixml = world_tixml->FirstChildElement("include");
     if (!model_tixml)
     {
-      ROS_WARN("Could not find <include> element in sdf, so name and initial position cannot be applied");
+      ROS_WARN_NAMED("api_plugin", "Could not find <include> element in sdf, so name and initial position cannot be applied");
       return;
     }
 
@@ -2115,7 +2115,7 @@ gazebo::math::Pose GazeboRosApiPlugin::parsePose(const std::string &str)
     return gazebo::math::Pose(vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]);
   else
   {
-    ROS_ERROR("Beware: failed to parse string [%s] as gazebo::math::Pose, returning zeros.", str.c_str());
+    ROS_ERROR_NAMED("api_plugin", "Beware: failed to parse string [%s] as gazebo::math::Pose, returning zeros.", str.c_str());
     return gazebo::math::Pose();
   }
 }
@@ -2148,7 +2148,7 @@ gazebo::math::Vector3 GazeboRosApiPlugin::parseVector3(const std::string &str)
     return gazebo::math::Vector3(vals[0], vals[1], vals[2]);
   else
   {
-    ROS_ERROR("Beware: failed to parse string [%s] as gazebo::math::Vector3, returning zeros.", str.c_str());
+    ROS_ERROR_NAMED("api_plugin", "Beware: failed to parse string [%s] as gazebo::math::Vector3, returning zeros.", str.c_str());
     return gazebo::math::Vector3();
   }
 }
@@ -2195,7 +2195,7 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ga
     origin_key->SetAttribute("rpy",rpy_stream.str());
   }
   else
-    ROS_WARN("could not find <model> element in sdf, so name and initial position is not applied");
+    ROS_WARN_NAMED("api_plugin", "Could not find <model> element in sdf, so name and initial position is not applied");
 }
 
 void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
@@ -2213,7 +2213,7 @@ void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::st
     model_tixml->SetAttribute("name",model_name);
   }
   else
-    ROS_WARN("could not find <robot> element in URDF, name not replaced");
+    ROS_WARN_NAMED("api_plugin", "Could not find <robot> element in URDF, name not replaced");
 }
 
 void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
@@ -2250,14 +2250,14 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   std::ostringstream stream;
   stream << gazebo_model_xml;
   std::string gazebo_model_xml_string = stream.str();
-  ROS_DEBUG("Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
+  ROS_DEBUG_NAMED("api_plugin.xml", "Gazebo Model XML\n\n%s\n\n ",gazebo_model_xml_string.c_str());
 
   // publish to factory topic
   gazebo::msgs::Factory msg;
   gazebo::msgs::Init(msg, "spawn_model");
   msg.set_sdf( gazebo_model_xml_string );
 
-  //ROS_ERROR("attempting to spawn model name [%s] [%s]", model_name.c_str(),gazebo_model_xml_string.c_str());
+  //ROS_ERROR_NAMED("api_plugin", "attempting to spawn model name [%s] [%s]", model_name.c_str(),gazebo_model_xml_string.c_str());
 
   // FIXME: should use entity_info or add lock to World::receiveMutex
   // looking for Model to see if it exists already
@@ -2268,7 +2268,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   gazebo::physics::ModelPtr model = world_->GetModel(model_name);
   if (model)
   {
-    ROS_ERROR("SpawnModel: Failure - model name %s already exist.",model_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model name %s already exist.",model_name.c_str());
     res.success = false;
     res.status_message = "SpawnModel: Failure - model already exists.";
     return true;
@@ -2315,4 +2315,3 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
 // Register this plugin with the simulator
 GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosApiPlugin)
 }
-

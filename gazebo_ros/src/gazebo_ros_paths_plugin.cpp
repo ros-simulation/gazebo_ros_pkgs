@@ -65,7 +65,7 @@ public:
     ros::package::getPlugins("gazebo_ros","gazebo_media_path",gazebo_media_paths);
     for (std::vector<std::string>::iterator iter=gazebo_media_paths.begin(); iter != gazebo_media_paths.end(); iter++)
     {
-      ROS_DEBUG("med path %s",iter->c_str());
+      ROS_DEBUG("Media path %s",iter->c_str());
       gazebo::common::SystemPaths::Instance()->AddGazeboPaths(iter->c_str());
     }
 
@@ -100,4 +100,3 @@ public:
 GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosPathsPlugin)
 
 }
-
