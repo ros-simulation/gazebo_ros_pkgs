@@ -215,7 +215,7 @@ class SpawnModel():
           sys.exit(0)
 
         if self.file_name != "":
-          rospy.loginfo("Loading model xml from file")
+          rospy.loginfo("Loading model XML from file")
           if os.path.exists(self.file_name):
             if os.path.isdir(self.file_name):
               rospy.logerror("Error: file name is a path?", self.file_name)
@@ -235,7 +235,7 @@ class SpawnModel():
 
         # ROS Parameter
         elif self.param_name != "":
-          rospy.loginfo( "Loading model xml from ros parameter")
+          rospy.loginfo( "Loading model XML from ros parameter")
           model_xml = rospy.get_param(self.param_name)
           if model_xml == "":
             rospy.logerror("Error: param does not exist or is empty")
@@ -243,7 +243,7 @@ class SpawnModel():
 
         # Gazebo Model Database
         elif self.database_name != "":
-          rospy.loginfo( "Loading model xml from Gazebo Model Database")
+          rospy.loginfo( "Loading model XML from Gazebo Model Database")
           model_xml = self.createDatabaseCode(self.database_name)
           if model_xml == "":
             rospy.logerror("Error: an error occured generating the SDF file")

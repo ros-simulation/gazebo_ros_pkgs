@@ -85,7 +85,7 @@ public:
     ros::package::getPlugins("gazebo_ros","gazebo_model_path",model_paths);
     for (std::vector<std::string>::iterator iter=model_paths.begin(); iter != model_paths.end(); iter++)
     {
-      ROS_DEBUG_NAMED("paths_plugin", "model path %s",(*iter).c_str());
+      ROS_DEBUG_NAMED("paths_plugin", "Model path %s",(*iter).c_str());
       gazebo::common::SystemPaths::Instance()->AddModelPaths(iter->c_str());
     }
 

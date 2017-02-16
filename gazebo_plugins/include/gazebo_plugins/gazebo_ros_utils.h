@@ -87,16 +87,16 @@ inline std::string GetRobotNamespace ( const sensors::SensorPtr &parent, const s
     if ( sdf->HasElement ( "robotNamespace" ) ) {
         name_space = sdf->Get<std::string> ( "robotNamespace" );
         if ( name_space.empty() ) {
-            ss << "the 'robotNamespace' param was empty";
+            ss << "The 'robotNamespace' param was empty";
             name_space = GetModelName ( parent );
         } else {
             ss << "Using the 'robotNamespace' param: '" <<  name_space << "'";
         }
     } else {
-        ss << "the 'robotNamespace' param did not exit";
+        ss << "The 'robotNamespace' param did not exit";
     }
     if ( pInfo != NULL ) {
-        ROS_INFO_NAMED("utils", "%s Plugin (robotNamespace = %s), Info: %s" , pInfo, name_space.c_str(), ss.str().c_str() );
+        ROS_INFO_NAMED("utils", "%s Plugin: %s" , pInfo, ss.str().c_str() );
     }
     return name_space;
 }
