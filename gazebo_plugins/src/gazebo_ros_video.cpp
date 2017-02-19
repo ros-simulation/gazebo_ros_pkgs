@@ -122,9 +122,18 @@ namespace gazebo
   {
 
     model_ = parent;
+    sdf::ElementPtr p_sdf;
+    if (sdf->HasElement("sdf"))
+    {
+      p_sdf = sdf->GetElement("sdf");
+    }
+    else
+    {
+      p_sdf = sdf;
+    }
 
     robot_namespace_ = "";
-    if (!sdf->HasElement("robotNamespace"))
+    if (!p_sdf->HasElement("robotNamespace"))
     {
       ROS_WARN_NAMED("video", "GazeboRosVideo plugin missing <robotNamespace>, "
           "defaults to \"%s\".", robot_namespace_.c_str());
@@ -132,38 +141,38 @@ namespace gazebo
     else
     {
       robot_namespace_ =
-        sdf->GetElement("robotNamespace")->Get<std::string>();
+        p_sdf->GetElement("robotNamespace")->Get<std::string>();
     }
 
     topic_name_ = "image_raw";
-    if (!sdf->HasElement("topicName"))
+    if (!p_sdf->HasElement("topicName"))
     {
       ROS_WARN_NAMED("video", "GazeboRosVideo Plugin (ns = %s) missing <topicName>, "
           "defaults to \"%s\".", robot_namespace_.c_str(), topic_name_.c_str());
     }
     else
     {
-      topic_name_ = sdf->GetElement("topicName")->Get<std::string>();
+      topic_name_ = p_sdf->GetElement("topicName")->Get<std::string>();
     }
 
     int height = 240;
-    if (!sdf->HasElement("height")) {
+    if (!p_sdf->HasElement("height")) {
       ROS_WARN_NAMED("video", "GazeboRosVideo Plugin (ns = %s) missing <height>, "
           "defaults to %i.", robot_namespace_.c_str(), height);
     }
     else
     {
-      height = sdf->GetElement("height")->Get<int>();
+      height = p_sdf->GetElement("height")->Get<int>();
     }
 
     int width = 320;
-    if (!sdf->HasElement("width")) {
+    if (!p_sdf->HasElement("width")) {
       ROS_WARN_NAMED("video", "GazeboRosVideo Plugin (ns = %s) missing <width>, "
           "defaults to %i", robot_namespace_.c_str(), width);
     }
     else
     {
-      width = sdf->GetElement("width")->Get<int>();
+      width = p_sdf->GetElement("width")->Get<int>();
     }
 
     std::string name = robot_namespace_ + "_visual";
