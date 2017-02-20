@@ -2,8 +2,8 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.9 (2017-02-20)
+------------------
 * Removed all trailing whitespace
 * Contributors: Dave Coleman
 
