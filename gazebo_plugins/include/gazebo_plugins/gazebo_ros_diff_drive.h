@@ -107,6 +107,7 @@ namespace gazebo {
       double wheel_speed_instr_[2];
 
       std::vector<physics::JointPtr> joints_;
+      double wheel_applied_vel[2];
 
       // ROS STUFF
       ros::Publisher odometry_publisher_;

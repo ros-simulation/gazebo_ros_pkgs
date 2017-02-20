@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <property name="M_PI" value="3.1415926535897931" />
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="M_PI" value="3.1415926535897931" />
 
   <xacro:macro name="pioneer_chassis" params="name parent xyz rpy meshes">   
         
@@ -14,7 +14,7 @@
     <visual name="chassis_visual">
       <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
       <geometry name="pioneer_geom">
-        <mesh filename="${meshes}/chassis.stl"/>
+        <mesh filename="${meshes}/chassis.dae"/>
       </geometry>
       <material name="ChassisRed">
         <color rgba="0.851 0.0 0.0 1.0"/>
@@ -23,7 +23,7 @@
     <collision>
       <origin xyz="-0.045 0 0.148" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="${meshes}/chassis.stl"/>
+        <mesh filename="${meshes}/chassis.dae"/>
       </geometry>
     </collision>
     <xacro:box_inertial x="0.36" y="0.26"  z="0.18" mass="9.0" />
@@ -42,7 +42,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry name="top_geom">
-        <mesh filename="${meshes}/top.stl"/>
+        <mesh filename="${meshes}/top.dae"/>
       </geometry>
       <material name="TopBlack">
         <color rgba="0.038 0.038 0.038 1.0"/>
@@ -51,7 +51,7 @@
     <collision>
     <origin xyz="0.0 0 0.0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="${meshes}/top.stl"/>
+        <mesh filename="${meshes}/top.dae"/>
       </geometry>
     </collision>
     <xacro:box_inertial x="0.445" y="0.38"  z="0.01" mass="1.0" />

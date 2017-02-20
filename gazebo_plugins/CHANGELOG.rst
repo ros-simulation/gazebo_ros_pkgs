@@ -252,7 +252,7 @@ Changelog for package gazebo_plugins
 * Remove unneeded dependency on pcl_ros
 * minor fixes on relative paths in xacro for pioneer robot
 * gazebo test model pionneer 3dx updated with xacro path variables
-* pioneer model update for the multi_robot_scenario
+* pioneer model update for the pioneer3dx
 * Merge remote-tracking branch 'upstream/hydro-devel' into hydro-devel
 * fixed camera to work with workspaces
 * fixed links related to changed name
