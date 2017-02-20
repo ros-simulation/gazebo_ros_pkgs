@@ -2,6 +2,15 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix gazebo catkin warning, cleanup CMakeLists (`#537 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/537>`_)
+* Namespace console output (`#543 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/543>`_)
+* Print name of joint with wrong interface
+* Removed all trailing whitespace
+* Change boost::shared_ptr to urdf::JointConstSharedPtr
+* Contributors: Bence Magyar, Dave Coleman, Jochen Sprickerhof
+
 2.5.8 (2016-12-06)
 ------------------
 
