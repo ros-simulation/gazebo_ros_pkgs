@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.6.2 (2017-02-20)
+------------------
 * Fix timestamp issues for rendering sensors (`#538 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/538>`_)
   It affects to gazebo_ros_comera_utils, gazebo_ros_openni_kinnect and gazebo_ros_prosilica.
 * Correct the timestamp used by the camera (`#410 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/410>`_)
