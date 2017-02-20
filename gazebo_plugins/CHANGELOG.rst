@@ -2,6 +2,15 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix timestamp issues for rendering sensors (`#538 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/538>`_)
+  It affects to gazebo_ros_comera_utils, gazebo_ros_openni_kinnect and gazebo_ros_prosilica.
+* Correct the timestamp used by the camera (`#410 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/410>`_)
+  Fix for issue `#408 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/408>`_. The last measurement time is the time that gazebo generated the sensor data, so ought to be used.  updateRate doesn't seem that useful.
+* fill in child_frame_id of odom topic
+* Contributors: Kei Okada, Lucas Walter, Ian Chen
+
 2.6.1 (2016-12-06)
 ------------------
 * Fix camera distortion coefficients order. Now {k1, k2, p1, p2, k3}
