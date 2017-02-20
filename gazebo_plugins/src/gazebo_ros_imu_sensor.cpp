@@ -181,14 +181,14 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   }
 
   //BODY NAME
-  if (sdf->HasElement("bodyName"))
+  if (sdf->HasElement("frameName"))
   {
-    body_name =  sdf->Get<std::string>("bodyName");
-    ROS_INFO_STREAM("<bodyName> set to: "<<body_name);
+    body_name =  sdf->Get<std::string>("frameName");
+    ROS_INFO_STREAM("<frameName> set to: "<<body_name);
   }
   else
   {
-    ROS_FATAL("missing <bodyName>, cannot proceed");
+    ROS_FATAL("missing <frameName>, cannot proceed");
     return false;
   }
 
