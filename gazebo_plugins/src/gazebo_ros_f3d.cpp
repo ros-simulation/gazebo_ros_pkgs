@@ -54,7 +54,7 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 {
   // Get the world name.
   this->world_ = _parent->GetWorld();
-  
+
   // load parameters
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace"))
@@ -62,7 +62,7 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
   if (!_sdf->HasElement("bodyName"))
   {
-    ROS_FATAL("f3d plugin missing <bodyName>, cannot proceed");
+    ROS_FATAL_NAMED("f3d", "f3d plugin missing <bodyName>, cannot proceed");
     return;
   }
   else
@@ -71,13 +71,13 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   this->link_ = _parent->GetLink(this->link_name_);
   if (!this->link_)
   {
-    ROS_FATAL("gazebo_ros_f3d plugin error: bodyName: %s does not exist\n",this->link_name_.c_str());
+    ROS_FATAL_NAMED("f3d", "gazebo_ros_f3d plugin error: bodyName: %s does not exist\n",this->link_name_.c_str());
     return;
   }
 
   if (!_sdf->HasElement("topicName"))
   {
-    ROS_FATAL("f3d plugin missing <topicName>, cannot proceed");
+    ROS_FATAL_NAMED("f3d", "f3d plugin missing <topicName>, cannot proceed");
     return;
   }
   else
@@ -85,27 +85,27 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
   if (!_sdf->HasElement("frameName"))
   {
-    ROS_INFO("f3d plugin missing <frameName>, defaults to world");
+    ROS_INFO_NAMED("f3d", "f3d plugin missing <frameName>, defaults to world");
     this->frame_name_ = "world";
   }
   else
   {
     this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
     // todo: frameName not used
-    ROS_INFO("f3d plugin specifies <frameName> [%s], not used, default to world",this->frame_name_.c_str());
+    ROS_INFO_NAMED("f3d", "f3d plugin specifies <frameName> [%s], not used, default to world",this->frame_name_.c_str());
   }
-  
+
 
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("f3d", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
 
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
-  
+
   // resolve tf prefix
   std::string prefix;
   this->rosnode_->getParam(std::string("tf_prefix"), prefix);
@@ -117,10 +117,10 @@ void GazeboRosF3D::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     boost::bind( &GazeboRosF3D::F3DConnect,this),
     boost::bind( &GazeboRosF3D::F3DDisconnect,this), ros::VoidPtr(), &this->queue_);
   this->pub_ = this->rosnode_->advertise(ao);
-  
+
   // Custom Callback Queue
   this->callback_queue_thread_ = boost::thread( boost::bind( &GazeboRosF3D::QueueThread,this ) );
-  
+
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
   // simulation iteration.

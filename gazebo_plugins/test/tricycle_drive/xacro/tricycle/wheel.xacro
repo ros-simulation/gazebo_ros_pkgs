@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<robot  
+<robot
   xmlns:xacro="http://ros.org/wiki/xacro">
   <property name="M_PI" value="3.1415926535897931" />
 
-  <xacro:macro name="wheel" params="name parent xyz rpy radius length meshes">   
+  <xacro:macro name="wheel" params="name parent xyz rpy radius length meshes">
 
   <!-- Wheel -->
   <joint name="${name}_wheel_joint" type="continuous">
@@ -35,7 +35,7 @@
     <material value="Gazebo/Wood"/>
   </gazebo>
 
-  
+
   </xacro:macro>
 
 </robot>

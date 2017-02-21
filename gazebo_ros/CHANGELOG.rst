@@ -2,6 +2,21 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.9 (2017-02-20)
+------------------
+* Fix gazebo catkin warning, cleanup CMakeLists (`#537 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/537>`_)
+* Namespace console output (`#543 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/543>`_)
+* Removed all trailing whitespace
+* Contributors: Dave Coleman
+
+2.5.8 (2016-12-06)
+------------------
+* Workaround to support gazebo and ROS arguments in the command line
+* Fix ROS remapping by reverting "Remove ROS remapping arguments from gazebo_ros launch scripts.
+* Fixed getlinkstate service's angular velocity return
+* Honor GAZEBO_MASTER_URI in gzserver and gzclient
+* Contributors: Jared, Jon Binney, Jordan Liviero, Jose Luis Rivero, Martin Pecka
+
 2.5.7 (2016-06-10)
 ------------------
 

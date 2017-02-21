@@ -41,7 +41,7 @@ int main(int argc, char **argv)
   VisionReconfigure vr;
 
   double spin_frequency = 100.0;
-  ROS_INFO("Starting to spin camera_synchronizer at %f Hz...",spin_frequency);
+  ROS_INFO_NAMED("camera_synchronizer", "Starting to spin camera_synchronizer at %f Hz...",spin_frequency);
   vr.spin(spin_frequency);
 
   return 0;

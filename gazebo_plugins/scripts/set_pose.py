@@ -177,7 +177,7 @@ class SimIfaceControl():
 
     if self.use_service:
       success = self.setPoseService(target_pose)
-      
+
     # publish topic if specified
     if self.use_topic:
       timeout_t = time.time() + self.timeout

@@ -61,7 +61,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("bodyName"))
   {
-    ROS_FATAL("p3d plugin missing <bodyName>, cannot proceed");
+    ROS_FATAL_NAMED("p3d", "p3d plugin missing <bodyName>, cannot proceed");
     return;
   }
   else
@@ -70,14 +70,14 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->link_ = _parent->GetLink(this->link_name_);
   if (!this->link_)
   {
-    ROS_FATAL("gazebo_ros_p3d plugin error: bodyName: %s does not exist\n",
+    ROS_FATAL_NAMED("p3d", "gazebo_ros_p3d plugin error: bodyName: %s does not exist\n",
       this->link_name_.c_str());
     return;
   }
 
   if (!_sdf->HasElement("topicName"))
   {
-    ROS_FATAL("p3d plugin missing <topicName>, cannot proceed");
+    ROS_FATAL_NAMED("p3d", "p3d plugin missing <topicName>, cannot proceed");
     return;
   }
   else
@@ -85,7 +85,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("frameName"))
   {
-    ROS_DEBUG("p3d plugin missing <frameName>, defaults to world");
+    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <frameName>, defaults to world");
     this->frame_name_ = "world";
   }
   else
@@ -93,7 +93,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("xyzOffset"))
   {
-    ROS_DEBUG("p3d plugin missing <xyzOffset>, defaults to 0s");
+    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <xyzOffset>, defaults to 0s");
     this->offset_.pos = math::Vector3(0, 0, 0);
   }
   else
@@ -101,7 +101,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("rpyOffset"))
   {
-    ROS_DEBUG("p3d plugin missing <rpyOffset>, defaults to 0s");
+    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <rpyOffset>, defaults to 0s");
     this->offset_.rot = math::Vector3(0, 0, 0);
   }
   else
@@ -109,7 +109,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("gaussianNoise"))
   {
-    ROS_DEBUG("p3d plugin missing <gaussianNoise>, defaults to 0.0");
+    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0;
   }
   else
@@ -117,7 +117,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   if (!_sdf->HasElement("updateRate"))
   {
-    ROS_DEBUG("p3d plugin missing <updateRate>, defaults to 0.0"
+    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <updateRate>, defaults to 0.0"
              " (as fast as possible)");
     this->update_rate_ = 0;
   }
@@ -127,7 +127,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("p3d", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -166,7 +166,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->reference_link_ = this->model_->GetLink(this->frame_name_);
     if (!this->reference_link_)
     {
-      ROS_ERROR("gazebo_ros_p3d plugin: frameName: %s does not exist, will"
+      ROS_ERROR_NAMED("p3d", "gazebo_ros_p3d plugin: frameName: %s does not exist, will"
                 " not publish pose\n", this->frame_name_.c_str());
       return;
     }
@@ -175,7 +175,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // init reference frame state
   if (this->reference_link_)
   {
-    ROS_DEBUG("got body %s", this->reference_link_->GetName().c_str());
+    ROS_DEBUG_NAMED("p3d", "got body %s", this->reference_link_->GetName().c_str());
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
     this->last_frame_vpos_ = this->reference_link_->GetWorldLinearVel();
@@ -223,6 +223,7 @@ void GazeboRosP3D::UpdateChild()
         this->pose_msg_.header.stamp.sec = cur_time.sec;
         this->pose_msg_.header.stamp.nsec = cur_time.nsec;
 
+        this->pose_msg_.child_frame_id = this->link_name_;
 
         math::Pose pose, frame_pose;
         math::Vector3 frame_vpos;

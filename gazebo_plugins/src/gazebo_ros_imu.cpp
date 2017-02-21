@@ -69,7 +69,7 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("serviceName"))
   {
-    ROS_INFO("imu plugin missing <serviceName>, defaults to /default_imu");
+    ROS_INFO_NAMED("imu", "imu plugin missing <serviceName>, defaults to /default_imu");
     this->service_name_ = "/default_imu";
   }
   else
@@ -77,7 +77,7 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("topicName"))
   {
-    ROS_INFO("imu plugin missing <topicName>, defaults to /default_imu");
+    ROS_INFO_NAMED("imu", "imu plugin missing <topicName>, defaults to /default_imu");
     this->topic_name_ = "/default_imu";
   }
   else
@@ -85,7 +85,7 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("gaussianNoise"))
   {
-    ROS_INFO("imu plugin missing <gaussianNoise>, defaults to 0.0");
+    ROS_INFO_NAMED("imu", "imu plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0.0;
   }
   else
@@ -93,7 +93,7 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("bodyName"))
   {
-    ROS_FATAL("imu plugin missing <bodyName>, cannot proceed");
+    ROS_FATAL_NAMED("imu", "imu plugin missing <bodyName>, cannot proceed");
     return;
   }
   else
@@ -101,7 +101,7 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("xyzOffset"))
   {
-    ROS_INFO("imu plugin missing <xyzOffset>, defaults to 0s");
+    ROS_INFO_NAMED("imu", "imu plugin missing <xyzOffset>, defaults to 0s");
     this->offset_.pos = math::Vector3(0, 0, 0);
   }
   else
@@ -109,15 +109,15 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("rpyOffset"))
   {
-    ROS_INFO("imu plugin missing <rpyOffset>, defaults to 0s");
+    ROS_INFO_NAMED("imu", "imu plugin missing <rpyOffset>, defaults to 0s");
     this->offset_.rot = math::Vector3(0, 0, 0);
   }
   else
     this->offset_.rot = this->sdf->Get<math::Vector3>("rpyOffset");
-  
+
   if (!this->sdf->HasElement("updateRate"))
   {
-    ROS_DEBUG("imu plugin missing <updateRate>, defaults to 0.0"
+    ROS_DEBUG_NAMED("imu", "imu plugin missing <updateRate>, defaults to 0.0"
              " (as fast as possible)");
     this->update_rate_ = 0.0;
   }
@@ -126,7 +126,7 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("frameName"))
   {
-    ROS_INFO("imu plugin missing <frameName>, defaults to <bodyName>");
+    ROS_INFO_NAMED("imu", "imu plugin missing <frameName>, defaults to <bodyName>");
     this->frame_name_ = link_name_;
   }
   else
@@ -135,7 +135,7 @@ void GazeboRosIMU::LoadThread()
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("imu", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -150,7 +150,7 @@ void GazeboRosIMU::LoadThread()
     this->world_->GetEntity(this->link_name_));
   if (!this->link)
   {
-    ROS_FATAL("gazebo_ros_imu plugin error: bodyName: %s does not exist\n",
+    ROS_FATAL_NAMED("imu", "gazebo_ros_imu plugin error: bodyName: %s does not exist\n",
       this->link_name_.c_str());
     return;
   }
@@ -204,12 +204,12 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 void GazeboRosIMU::UpdateChild()
 {
   common::Time cur_time = this->world_->GetSimTime();
-  
+
   // rate control
   if (this->update_rate_ > 0 &&
       (cur_time - this->last_time_).Double() < (1.0 / this->update_rate_))
     return;
-    
+
   if ((this->pub_.getNumSubscribers() > 0 && this->topic_name_ != ""))
   {
     math::Pose pose;

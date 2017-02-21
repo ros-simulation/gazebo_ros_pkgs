@@ -40,6 +40,7 @@
 
 
 #include <gazebo_ros_control/default_robot_hw_sim.h>
+#include <urdf/model.h>
 
 
 namespace
@@ -176,7 +177,7 @@ bool DefaultRobotHWSim::initSim(
     else
     {
       ROS_FATAL_STREAM_NAMED("default_robot_hw_sim","No matching hardware interface found for '"
-        << hardware_interface );
+        << hardware_interface << "' while loading interfaces for " << joint_names_[j] );
       return false;
     }
 
@@ -186,7 +187,7 @@ bool DefaultRobotHWSim::initSim(
     gazebo::physics::JointPtr joint = parent_model->GetJoint(joint_names_[j]);
     if (!joint)
     {
-      ROS_ERROR_STREAM("This robot has a joint named \"" << joint_names_[j]
+      ROS_ERROR_STREAM_NAMED("default_robot_hw", "This robot has a joint named \"" << joint_names_[j]
         << "\" which is not in the gazebo model.");
       return false;
     }
@@ -381,7 +382,7 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
 
   if (urdf_model != NULL)
   {
-    const boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model->getJoint(joint_name);
+    const urdf::JointConstSharedPtr urdf_joint = urdf_model->getJoint(joint_name);
     if (urdf_joint != NULL)
     {
       *joint_type = urdf_joint->type;

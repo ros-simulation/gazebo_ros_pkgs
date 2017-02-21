@@ -36,20 +36,20 @@ generate_dynamic_reconfigure_options(cfg/Physics.cfg)
 
 catkin_package(
   LIBRARIES
-  gazebo_ros_api_plugin
-  gazebo_ros_paths_plugin
+    gazebo_ros_api_plugin
+    gazebo_ros_paths_plugin
 
   CATKIN_DEPENDS
-  roslib
-  roscpp
-  geometry_msgs
-  std_srvs
-  tf
-  rosgraph_msgs
-  dynamic_reconfigure
-  message_generation
-  std_msgs
-  gazebo_msgs
+    roslib
+    roscpp
+    geometry_msgs
+    std_srvs
+    tf
+    rosgraph_msgs
+    dynamic_reconfigure
+    message_generation
+    std_msgs
+    gazebo_msgs
 
   DEPENDS
     TinyXML
@@ -61,7 +61,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${GAZEBO_INCLUDE_DIRS}
   ${SDFormat_INCLUDE_DIRS}
-  ${TinyXML_INCLUDE_DIRS})
+  ${TinyXML_INCLUDE_DIRS}
+)
 
 link_directories(${catkin_LIBRARY_DIRS})
 
@@ -93,15 +94,22 @@ target_link_libraries(gazebo_ros_paths_plugin ${GAZEBO_LIBRARIES} ${SDFormat_LIB
 # Install Gazebo System Plugins
 install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  )
+)
 
 # Install Gazebo Scripts
-install(PROGRAMS scripts/gazebo scripts/debug scripts/gzclient scripts/gzserver scripts/gdbrun scripts/perf scripts/spawn_model
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+install(PROGRAMS scripts/gazebo
+                 scripts/debug
+		 scripts/gzclient
+		 scripts/gzserver
+		 scripts/gdbrun
+		 scripts/perf
+		 scripts/spawn_model
+		 scripts/libcommon.sh
+        DESTINATION
+                 ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 # Install Gazebo launch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-  )
-
+)

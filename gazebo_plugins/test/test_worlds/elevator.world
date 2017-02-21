@@ -61,7 +61,7 @@
         <inertial>
           <mass>800</mass>
         </inertial>
-  
+
         <collision name="floor_collision">
           <geometry>
             <box>
@@ -76,11 +76,11 @@
             </box>
           </geometry>
         </visual>
-  
+
         <!-- wall1_collision is the wall to the right of the door, when
              facing the door -->
         <collision name="wall1_collision">
-          <pose>1.0745 0.5725 1.125 0 0 0</pose> 
+          <pose>1.0745 0.5725 1.125 0 0 0</pose>
           <geometry>
             <box>
               <size>0.1 1.15 2.25</size>
@@ -88,7 +88,7 @@
           </geometry>
         </collision>
         <visual name="wall1_visual">
-          <pose>1.0745 0.5725 1.125 0 0 0</pose> 
+          <pose>1.0745 0.5725 1.125 0 0 0</pose>
           <geometry>
             <box>
               <size>0.1 1.15 2.25</size>
@@ -100,11 +100,11 @@
             </script>
           </material>
         </visual>
-  
+
         <!-- wall2_collision is the wall to the left of the door, when
              facing the door -->
         <collision name="wall2_collision">
-          <pose>1.0745 -1.0625 1.125 0 0 0</pose> 
+          <pose>1.0745 -1.0625 1.125 0 0 0</pose>
           <geometry>
             <box>
               <size>0.1 0.125 2.25</size>
@@ -112,7 +112,7 @@
           </geometry>
         </collision>
         <visual name="wall2_visual">
-          <pose>1.0745 -1.0625 1.125 0 0 0</pose> 
+          <pose>1.0745 -1.0625 1.125 0 0 0</pose>
           <geometry>
             <box>
               <size>0.1 0.125 2.25</size>
@@ -125,9 +125,9 @@
           </material>
         </visual>
       </link>
-  
+
       <link name="door">
-        <pose>1.0745 -0.5 1.125 0 0 0</pose> 
+        <pose>1.0745 -0.5 1.125 0 0 0</pose>
         <collision name="collision">
           <geometry>
             <box>
@@ -143,7 +143,7 @@
           </geometry>
         </visual>
       </link>
-    
+
       <joint name="door" type="prismatic">
         <parent>link</parent>
         <child>door</child>
@@ -171,7 +171,7 @@
             <upper>10</upper>
             <effort>100000</effort>
           </limit>
-  
+
           <dynamics>
             <damping>50</damping>
           </dynamics>
@@ -217,7 +217,7 @@
             </box>
           </geometry>
         </visual>
-  
+
         <collision name="shaft_wall2_collision">
           <pose>0 -1.25 3 0 0 0</pose>
           <geometry>
@@ -234,7 +234,7 @@
             </box>
           </geometry>
         </visual>
-  
+
         <collision name="shaft_wall3_collision">
           <pose>-1.25 0 3 0 0 0</pose>
           <geometry>
@@ -251,7 +251,7 @@
             </box>
           </geometry>
         </visual>
-  
+
         <collision name="floor0_collision">
           <pose>1.19 0 0.075 0 0 0</pose>
           <geometry>
@@ -268,7 +268,7 @@
             </box>
           </geometry>
         </visual>
-  
+
         <collision name="floor1_collision">
           <pose>1.19 0 3.075 0 0 0</pose>
           <geometry>

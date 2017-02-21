@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<!-- Front Laser --> 
+<!-- Front Laser -->
 <xacro:macro name="laser_gpu" params="name parent xyz rpy meshes" >
-  
+
   <joint name="${parent}_${name}_joint" type="fixed">
       <axis xyz="0 0 1" />
       <origin xyz="${xyz}" rpy="${rpy}"/>
       <parent link="${parent}"/>
       <child link="${name}"/>
     </joint>
-    
+
     <link name="${name}">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -30,13 +30,13 @@
         <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
       </inertial>
     </link>
-    
+
     <gazebo reference="${name}">
     <sensor type="gpu_ray" name="head_hokuyo_sensor">
       <pose>0 0 0 0 0 0</pose>
       <always_on>1</always_on>
       <update_rate>30</update_rate>
-      <visualize>true</visualize>       
+      <visualize>true</visualize>
       <ray>
         <scan>
           <horizontal>

@@ -1,9 +1,10 @@
 #!/bin/sh
-final="$@"
+[ -L ${0} ] && SCRIPT_DIR=$(readlink ${0}) || SCRIPT_DIR=${0}
+SCRIPT_DIR=$(dirname ${SCRIPT_DIR})
 
-# remove ros remapping arguments like "__name:=node_name"; otherwise, they'd 
-# be interpreted as a world name by gzserver, and it'd crash while loading it
-final=`echo "$final" | sed 's/[^ ]*:=[^ ]* \?//g'`
+. ${SCRIPT_DIR}/libcommon.sh
+
+final="$@"
 
 EXT=so
 if [ $(uname) = "Darwin" ]; then
@@ -30,5 +31,7 @@ desired_master_uri="$GAZEBO_MASTER_URI"
 if [ "$desired_master_uri" = "" ]; then
 	desired_master_uri="$GAZEBO_MASTER_URI"
 fi
+
+final=$(relocate_remappings "${final}")
 
 GAZEBO_MASTER_URI="$desired_master_uri" gzserver $final

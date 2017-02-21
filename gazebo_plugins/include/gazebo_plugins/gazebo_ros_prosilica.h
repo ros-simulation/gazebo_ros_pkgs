@@ -93,8 +93,8 @@ class GazeboRosProsilica : public CameraPlugin, GazeboRosCameraUtils
   //public: void OnStats( const boost::shared_ptr<msgs::WorldStatistics const> &_msg);
 
   /// \brief Update the controller
-  protected: virtual void OnNewImageFrame(const unsigned char *_image, 
-                 unsigned int _width, unsigned int _height, 
+  protected: virtual void OnNewImageFrame(const unsigned char *_image,
+                 unsigned int _width, unsigned int _height,
                  unsigned int _depth, const std::string &_format);
 
 };

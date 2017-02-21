@@ -120,7 +120,7 @@ namespace gazebo
 
     /// \brief tf prefix
     private: std::string tf_prefix_;
-    
+
     /// \brief ROS image topic name
     protected: std::string image_topic_name_;
 

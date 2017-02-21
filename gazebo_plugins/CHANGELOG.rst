@@ -2,6 +2,28 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.9 (2017-02-20)
+------------------
+* Fix gazebo catkin warning, cleanup CMakeLists (`#537 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/537>`_)
+* Fix timestamp issues for rendering sensors (kinetic-devel)
+* Namespace console output (`#543 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/543>`_)
+* Adding depth camera world to use in test to make depth camera have right timestamp `#408 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/408>`_- appears to be working (though only looking at horizon) but getting these sdf errors:
+* `#408 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/408>`_ Make the multi camera timestamps current rather than outdated, also reuse the same update code
+* Fix merge with kinetic branch
+* `#408 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/408>`_ Making a test for multicamra that shows the timestamps are currently outdated, will fix them similar to how the regular camera was fixed.
+* Fix for issue `#408 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/408>`_. The last measurement time is the time that gazebo generated the sensor data, so ought to be used. updateRate doesn't seem that useful.
+  The other cameras need similar fixes to have the proper timestamps.
+* Bugfix: duplicated tf prefix resolution
+* fill in child_frame_id of odom topic
+* Fix gazebo and sdformat catkin warnings
+* Contributors: Dave Coleman, Jose Luis Rivero, Kei Okada, Lucas Walter, Yuki Furuta
+
+2.5.8 (2016-12-06)
+------------------
+* Fix camera distortion coefficients order. Now {k1, k2, p1, p2, k3}
+* Added an interface to gazebo's harness plugin
+* Contributors: Enrique Fernandez, Steven Peters, Nate Koenig
+
 2.5.7 (2016-06-10)
 ------------------
 
