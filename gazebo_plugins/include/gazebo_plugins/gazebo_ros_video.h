@@ -81,8 +81,10 @@ namespace gazebo
       boost::mutex m_image_;
       bool new_image_available_;
 
+      /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
+      ros::NodeHandle* rosnode_;
+
       // ROS Stuff
-      boost::shared_ptr<ros::NodeHandle> rosnode_;
       ros::Subscriber camera_subscriber_;
       std::string robot_namespace_;
       std::string topic_name_;
@@ -96,4 +98,3 @@ namespace gazebo
 }
 
 #endif
-

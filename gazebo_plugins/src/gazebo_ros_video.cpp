@@ -74,11 +74,11 @@ namespace gazebo
     mo.convertToMesh(name + "__VideoMesh__");
 
     Ogre::MovableObject *obj = (Ogre::MovableObject*)
-      this->GetSceneNode()->getCreator()->createEntity(
+      GetSceneNode()->getCreator()->createEntity(
           name + "__VideoEntity__",
           name + "__VideoMesh__");
     obj->setCastShadows(false);
-    this->AttachObject(obj);
+    AttachObject(obj);
   }
 
   VideoVisual::~VideoVisual() {}
@@ -97,7 +97,7 @@ namespace gazebo
 
     // Get the pixel buffer
     Ogre::HardwarePixelBufferSharedPtr pixelBuffer =
-      this->texture_->getBuffer();
+      texture_->getBuffer();
 
     // Lock the pixel buffer and get a pixel box
     pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
@@ -114,7 +114,17 @@ namespace gazebo
   GazeboRosVideo::GazeboRosVideo() {}
 
   // Destructor
-  GazeboRosVideo::~GazeboRosVideo() {}
+  GazeboRosVideo::~GazeboRosVideo() {
+    event::Events::DisconnectWorldUpdateBegin(update_connection_);
+
+    // Custom Callback Queue
+    queue_.clear();
+    queue_.disable();
+    rosnode_->shutdown();
+    callback_queue_thread_.join();
+
+    delete rosnode_;
+  }
 
   // Load the controller
   void GazeboRosVideo::Load(
@@ -189,25 +199,26 @@ namespace gazebo
     }
     std::string gazebo_source =
       (ros::this_node::getName() == "/gazebo_client") ? "gzclient" : "gzserver";
-    rosnode_.reset(new ros::NodeHandle(robot_namespace_));
+    rosnode_ = new ros::NodeHandle(robot_namespace_);
 
     // Subscribe to the image topic
     ros::SubscribeOptions so =
       ros::SubscribeOptions::create<sensor_msgs::Image>(topic_name_, 1,
           boost::bind(&GazeboRosVideo::processImage, this, _1),
           ros::VoidPtr(), &queue_);
-    camera_subscriber_ =
-      rosnode_->subscribe(so);
-    ROS_INFO_NAMED("video", "GazeboRosVideo (%s, ns = %s) has started",
-        gazebo_source.c_str(), robot_namespace_.c_str());
+    camera_subscriber_ = rosnode_->subscribe(so);
+
     new_image_available_ = false;
 
-    this->callback_queue_thread_ =
+    callback_queue_thread_ =
       boost::thread(boost::bind(&GazeboRosVideo::QueueThread, this));
 
-    this->update_connection_ =
+    update_connection_ =
       event::Events::ConnectPreRender(
           boost::bind(&GazeboRosVideo::UpdateChild, this));
+
+    ROS_INFO_NAMED("video", "GazeboRosVideo (%s, ns = %s) has started!",
+        gazebo_source.c_str(), robot_namespace_.c_str());
   }
 
   // Update the controller
