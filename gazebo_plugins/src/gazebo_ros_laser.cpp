@@ -108,7 +108,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     return;
   }
 
-  ROS_INFO_NAMED("laser", "Starting Laser Plugin (ns = %s)!", this->robot_namespace_.c_str() );
+  ROS_INFO_NAMED("laser", "Starting Laser Plugin (ns = %s)", this->robot_namespace_.c_str() );
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
     boost::bind(&GazeboRosLaser::LoadThread, this));

@@ -54,7 +54,7 @@ std::string GazeboRos ::resolveTF(const std::string &name) {
 }
 void GazeboRos ::readCommonParameter() {
 
-    ROS_INFO_NAMED("utils", "Starting plugin %s!", info());
+    ROS_INFO_NAMED("utils", "Starting plugin %s", info());
 
     std::string debugLevel;
     getParameter<std::string>(debugLevel, "rosDebugLevel", "na");

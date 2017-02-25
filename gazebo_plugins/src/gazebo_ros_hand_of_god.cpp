@@ -107,7 +107,7 @@ namespace gazebo
     // Disable gravity for the hog
     floating_link_->SetGravityMode(false);
     if(!floating_link_) {
-      ROS_ERROR_NAMED("hand_of_god", "Floating link not found!");
+      ROS_ERROR_NAMED("hand_of_god", "Floating link not found");
       const std::vector<physics::LinkPtr> &links = model_->GetLinks();
       for(unsigned i=0; i < links.size(); i++) {
         ROS_ERROR_STREAM_NAMED("hand_of_god", " -- Link "<<i<<": "<<links[i]->GetName());
