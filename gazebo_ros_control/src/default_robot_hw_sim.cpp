@@ -150,7 +150,7 @@ bool DefaultRobotHWSim::initSim(
 
     // Decide what kind of command interface this actuator/joint has
     hardware_interface::JointHandle joint_handle;
-    if(hardware_interface == "EffortJointInterface")
+    if(hardware_interface == "EffortJointInterface" || hardware_interface == "hardware_interface/EffortJointInterface")
     {
       // Create effort joint interface
       joint_control_methods_[j] = EFFORT;
@@ -158,7 +158,7 @@ bool DefaultRobotHWSim::initSim(
                                                      &joint_effort_command_[j]);
       ej_interface_.registerHandle(joint_handle);
     }
-    else if(hardware_interface == "PositionJointInterface")
+    else if(hardware_interface == "PositionJointInterface" || hardware_interface == "hardware_interface/PositionJointInterface")
     {
       // Create position joint interface
       joint_control_methods_[j] = POSITION;
@@ -166,7 +166,7 @@ bool DefaultRobotHWSim::initSim(
                                                      &joint_position_command_[j]);
       pj_interface_.registerHandle(joint_handle);
     }
-    else if(hardware_interface == "VelocityJointInterface")
+    else if(hardware_interface == "VelocityJointInterface" || hardware_interface == "hardware_interface/VelocityJointInterface")
     {
       // Create velocity joint interface
       joint_control_methods_[j] = VELOCITY;
