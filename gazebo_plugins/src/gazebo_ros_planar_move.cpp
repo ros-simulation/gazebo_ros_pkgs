@@ -130,7 +130,7 @@ namespace gazebo
     }
     rosnode_.reset(new ros::NodeHandle(robot_namespace_));
 
-    ROS_DEBUG_NAMED("planar_move", "OCPlugin (%s) has started!",
+    ROS_DEBUG_NAMED("planar_move", "OCPlugin (%s) has started",
         robot_namespace_.c_str());
 
     tf_prefix_ = tf::getPrefixParam(*rosnode_);
