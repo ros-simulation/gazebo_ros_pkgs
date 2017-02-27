@@ -198,7 +198,7 @@ namespace gazebo
           ros::VoidPtr(), &queue_);
     camera_subscriber_ =
       rosnode_->subscribe(so);
-    ROS_INFO_NAMED("video", "GazeboRosVideo (%s, ns = %s) has started!",
+    ROS_INFO_NAMED("video", "GazeboRosVideo (%s, ns = %s) has started",
         gazebo_source.c_str(), robot_namespace_.c_str());
     new_image_available_ = false;
 
