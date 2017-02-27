@@ -181,6 +181,10 @@ bool DefaultRobotHWSim::initSim(
       return false;
     }
 
+    if(hardware_interface == "EffortJointInterface" || hardware_interface == "PositionJointInterface" || hardware_interface == "VelocityJointInterface") {
+      ROS_WARN_STREAM("Please update old, now deprecated, hardware_interface syntax in joint '" << joint_names_[j] << "': " << hardware_interface);
+    }
+
     // Get the gazebo joint that corresponds to the robot joint.
     //ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim", "Getting pointer to gazebo joint: "
     //  << joint_names_[j]);
