@@ -102,28 +102,33 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
+    GazeboRosCameraUtils* util)
+{
+# if GAZEBO_MAJOR_VERSION >= 7
+  common::Time sensor_update_time = util->parentSensor_->LastMeasurementTime();
+# else
+  common::Time sensor_update_time = util->parentSensor_->GetLastMeasurementTime();
+# endif
+
+  if (util->parentSensor_->IsActive())
+  {
+    if (sensor_update_time - util->last_update_time_ >= util->update_period_)
+    {
+      util->PutCameraData(_image, sensor_update_time);
+      util->PublishCameraInfo(sensor_update_time);
+      util->last_update_time_ = sensor_update_time;
+    }
+  }
+}
+
 // Update the controller
 void GazeboRosMultiCamera::OnNewFrameLeft(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
-  GazeboRosCameraUtils* util = this->utils[0];
-# if GAZEBO_MAJOR_VERSION >= 7
-  util->sensor_update_time_ = util->parentSensor_->LastUpdateTime();
-# else
-  util->sensor_update_time_ = util->parentSensor_->GetLastUpdateTime();
-# endif
-
-  if (util->parentSensor_->IsActive())
-  {
-    common::Time cur_time = util->world_->GetSimTime();
-    if (cur_time - util->last_update_time_ >= util->update_period_)
-    {
-      util->PutCameraData(_image);
-      util->PublishCameraInfo();
-      util->last_update_time_ = cur_time;
-    }
-  }
+  OnNewFrame(_image, this->utils[0]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -132,22 +137,6 @@ void GazeboRosMultiCamera::OnNewFrameRight(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
-  GazeboRosCameraUtils* util = this->utils[1];
-# if GAZEBO_MAJOR_VERSION >= 7
-  util->sensor_update_time_ = util->parentSensor_->LastUpdateTime();
-# else
-  util->sensor_update_time_ = util->parentSensor_->GetLastUpdateTime();
-# endif
-
-  if (util->parentSensor_->IsActive())
-  {
-    common::Time cur_time = util->world_->GetSimTime();
-    if (cur_time - util->last_update_time_ >= util->update_period_)
-    {
-      util->PutCameraData(_image);
-      util->PublishCameraInfo();
-      util->last_update_time_ = cur_time;
-    }
-  }
+  OnNewFrame(_image, this->utils[1]);
 }
 }
