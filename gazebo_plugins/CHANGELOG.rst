@@ -2,6 +2,11 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix timestamp issues for rendering sensors (indigo-devel) (`#551 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/551>`_)
+* Contributors: Ian Chen, Jose Luis Rivero
+
 2.4.12 (2016-11-27)
 -------------------
 
