@@ -2,6 +2,20 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Revert catkin warnings to fix regressions (problems with catkin -lpthreads errors)
+  For reference and reasons, please check:
+  https://discourse.ros.org/t/need-to-sync-new-release-of-rqt-topic-indigo-jade-kinetic/1410/4
+  * Revert "Fix gazebo catkin warning, cleanup CMakeLists (`#537 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/537>`_)"
+  This reverts commit 5a0305fcb97864b66bc2e587fc0564435b4f2034.
+  * Revert "Fix gazebo and sdformat catkin warnings"
+  This reverts commit 11f95d25dcd32faccd2401d45c722f7794c7542c.
+* Fix destructor of GazeboRosVideo (`#547 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/547>`_)
+* Less exciting console output (`#549 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/549>`_)
+* Fix SDF namespacing for Video Plugin (`#546 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/546>`_)
+* Contributors: Dave Coleman, Jose Luis Rivero
+
 2.5.9 (2017-02-20)
 ------------------
 * Fix gazebo catkin warning, cleanup CMakeLists (`#537 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/537>`_)
