@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.10 (2017-03-03)
+-------------------
 * Revert catkin warnings to fix regressions (problems with catkin -lpthreads errors)
   For reference and reasons, please check:
   https://discourse.ros.org/t/need-to-sync-new-release-of-rqt-topic-indigo-jade-kinetic/1410/4
