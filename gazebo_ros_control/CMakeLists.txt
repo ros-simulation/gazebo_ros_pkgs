@@ -16,10 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 # Depend on system install of Gazebo
-find_package(GAZEBO REQUIRED)
+find_package(gazebo REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
-
-find_package(Boost REQUIRED COMPONENTS thread)
 
 catkin_package(
   CATKIN_DEPENDS
@@ -33,14 +31,9 @@ catkin_package(
     joint_limits_interface
     urdf
     angles
-  DEPENDS
-    #GAZEBO  # Re-enable after issue resolved:
-    # https://bitbucket.org/osrf/gazebo/issues/2198/gazebo7-linking-error-with-cmake-catkin
-  INCLUDE_DIRS
-    include
-  LIBRARIES
-    ${PROJECT_NAME}
-    default_robot_hw_sim
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME} default_robot_hw_sim
+  DEPENDS gazebo
 )
 
 link_directories(
@@ -53,6 +46,7 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${GAZEBO_INCLUDE_DIRS}
 )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
 ## Libraries
 add_library(${PROJECT_NAME} src/gazebo_ros_control_plugin.cpp)
@@ -64,12 +58,13 @@ target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES} ${GAZEBO_LIBRARIE
 ## Install
 install(TARGETS ${PROJECT_NAME} default_robot_hw_sim
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
+  )
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-)
+  )
 
 install(FILES robot_hw_sim_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+  )
+
