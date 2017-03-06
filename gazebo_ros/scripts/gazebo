@@ -7,7 +7,6 @@ SCRIPT_DIR=$(dirname ${SCRIPT_DIR})
 final="$@"
 
 EXT=so
-SIGNAL=SIGINT
 if [ $(uname) = "Darwin" ]; then
     EXT=dylib
     SIGNAL=INT
@@ -39,8 +38,16 @@ fi
 final=$(relocate_remappings "${final}")
 
 # Combine the commands
-GAZEBO_MASTER_URI="$desired_master_uri" gzserver $final & 
+GAZEBO_MASTER_URI="$desired_master_uri" setsid gzserver $final &
+pid=$!
 GAZEBO_MASTER_URI="$desired_master_uri" gzclient $client_final
 
 # Kill the server
-kill -s $SIGNAL $!
+echo -n Killing gzserver in 3...
+sleep 1
+echo -n 2...
+sleep 1
+echo -n 1...
+sleep 1
+echo Now!
+kill $pid

@@ -34,4 +34,19 @@ fi
 
 final=$(relocate_remappings "${final}")
 
-GAZEBO_MASTER_URI="$desired_master_uri" gzserver $final
+GAZEBO_MASTER_URI="$desired_master_uri" setsid gzserver $final &
+pid=$!
+
+terminate_handler() {
+  echo -n Killing gzserver in 3...
+  sleep 1
+  echo -n 2...
+  sleep 1
+  echo -n 1...
+  sleep 1
+  echo Now!
+  kill $pid
+  trap - INT TERM
+}
+trap terminate_handler INT TERM
+wait
