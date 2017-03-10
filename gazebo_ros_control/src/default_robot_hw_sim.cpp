@@ -250,6 +250,16 @@ void DefaultRobotHWSim::readSim(ros::Time time, ros::Duration period)
     {
       joint_position_[j] = sim_joints_[j]->GetAngle(0).Radian();
     }
+    else if(joint_types_[j] == urdf::Joint::REVOLUTE)
+    {
+      double delta;
+      angles::shortest_angular_distance_with_limits(joint_position_[j],
+        sim_joints_[j]->GetAngle(0).Radian(),
+        joint_lower_limits_[j], joint_upper_limits_[j],
+        delta
+      );
+      joint_position_[j] += delta;
+    }
     else
     {
       joint_position_[j] += angles::shortest_angular_distance(joint_position_[j],
