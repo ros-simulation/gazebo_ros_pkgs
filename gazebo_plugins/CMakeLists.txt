@@ -114,6 +114,7 @@ catkin_package(
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
   gazebo_ros_planar_move
+  gazebo_ros_range
   gazebo_ros_vacuum_gripper
   
   CATKIN_DEPENDS 
