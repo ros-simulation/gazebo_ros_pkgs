@@ -372,7 +372,7 @@ if (CATKIN_ENABLE_TESTING)
 
   add_rostest_gtest(distortion_test
                     test/camera/distortion.test
-                    test/camera/distortion2.cpp)
+                    test/camera/distortion.cpp)
   target_link_libraries(distortion_test ${catkin_LIBRARIES})
 
 endif()
