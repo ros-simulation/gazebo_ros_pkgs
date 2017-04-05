@@ -118,30 +118,24 @@ static void read(const FileNode& node, Settings& x, const Settings& default_valu
 
 enum { DETECTION = 0, CAPTURING = 1, CALIBRATED = 2 };
 
-bool tryCalibration(Settings& s, Size imageSize, Mat&  cameraMatrix, Mat& distCoeffs,
-                    std::vector<std::vector<Point2f> > imagePoints );
-
-std::vector<double> run(std::string inputSettingsFile, std::vector<Mat> images) {
+std::vector<double> runCalibration(std::string inputSettingsFile, std::vector<Mat> images) {
   std::vector<double> coeffs;
 
   Settings s;
   FileStorage fs(inputSettingsFile, FileStorage::READ); // Read the settings
   if (!fs.isOpened()) {
-    std::cout << "Could not open the configuration file: \"" << inputSettingsFile << "\"" << std::endl;
     return coeffs;
   }
   fs["Settings"] >> s;
   fs.release();                                         // close Settings file
 
   if (!s.goodInput) {
-    std::cout << "Invalid input detected. Application stopping. " << std::endl;
     return coeffs;
   }
 
   std::vector<std::vector<Point2f> > imagePoints;
   Mat cameraMatrix, distCoeffs;
   Size imageSize;
-  int mode = CAPTURING;
   clock_t prevTimestamp = 0;
   const Scalar RED(0, 0, 255), GREEN(0, 255, 0);
   const char ESC_KEY = 27;
@@ -174,7 +168,7 @@ std::vector<double> run(std::string inputSettingsFile, std::vector<Mat> images) 
       break;
     }
 
-    if ( found) {              // If done with success,
+    if ( found ) {              // If done with success,
       // improve the found corners' coordinate accuracy for chessboard
       if ( s.calibrationPattern == Settings::CHESSBOARD) {
         Mat viewGray;
@@ -190,42 +184,20 @@ std::vector<double> run(std::string inputSettingsFile, std::vector<Mat> images) 
     }
     else
     {
-      std::cerr << "corners not found!" << std::endl;
+      std::cerr << "corners not found in calibration pattern. Make sure the pattern is fully in view" << std::endl;
     }
 
-    //----------------------------- Output Text ------------------------------------------------
-    std::string msg = (mode == CAPTURING) ? "100/100" :
-                      mode == CALIBRATED ? "Calibrated" : "Press 'g' to start";
-    int baseLine = 0;
-    Size textSize = getTextSize(msg, 1, 1, 1, &baseLine);
-    Point textOrigin(view.cols - 2 * textSize.width - 10, view.rows - 2 * baseLine - 10);
+    //Debug: show the image and wait for user to press escape
+    // imshow("Image View", view);
+    // char key = waitKey(s.delay);
 
-    if ( mode == CAPTURING ) {
-      if (s.showUndistorted)
-        msg = format( "%d/%d Undist", (int)imagePoints.size(), images.size() );
-      else
-        msg = format( "%d/%d", (int)imagePoints.size(), images.size() );
-    }
-
-    putText( view, msg, textOrigin, 1, 1, mode == CALIBRATED ?  GREEN : RED);
-
-    //------------------------- Video capture  output  undistorted ------------------------------
-    if ( mode == CALIBRATED && s.showUndistorted ) {
-      Mat temp = view.clone();
-      undistort(temp, view, cameraMatrix, distCoeffs);
-    }
-
-    //------------------------------ Show image and check for input commands -------------------
-    imshow("Image View", view);
-    char key = waitKey(s.delay);
-
-    if ( key  == ESC_KEY )
-      break;
+    // if ( key == ESC_KEY )
+    //   break;
   }
   
   if ( imagePoints.size() > 0 )
   {
-    if (tryCalibration(s, imageSize, cameraMatrix, distCoeffs, imagePoints)){
+    if (calibrate(s, imageSize, cameraMatrix, distCoeffs, imagePoints)){
       std::cerr << "calibration complete" << std::endl;
     }
     else
@@ -236,28 +208,6 @@ std::vector<double> run(std::string inputSettingsFile, std::vector<Mat> images) 
     std::cerr << "error, images exhausted but no points in imagePoints" << std::endl;
   }
 
-  // -----------------------Show the undistorted image for the image list ------------------------
-  //FIXME: delete me! eventually
-  // if (s.showUndistorted ) {
-    
-  //   Mat view, rview, map1, map2;
-  //   initUndistortRectifyMap(cameraMatrix, distCoeffs, Mat(),
-  //       getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, 0),
-  //       imageSize, CV_16SC2, map1, map2);
-
-  //   for(int i = 0; i < images.size(); i++ )
-  //   {
-  //       view = images[i];
-  //       if(view.empty())
-  //           continue;
-  //       remap(view, rview, map1, map2, INTER_LINEAR);
-  //       imshow("Image View", rview);
-  //       char c = (char)waitKey();
-  //       if( c  == ESC_KEY || c == 'q' || c == 'Q' )
-  //           break;
-  //   }
-  // }
-  // END DELETE!
   for (int i=0; i < distCoeffs.rows; ++i)
   {
     coeffs.push_back(distCoeffs.at<double>(i,0));
@@ -312,9 +262,8 @@ static void calcBoardCornerPositions(Size boardSize, float squareSize, std::vect
   }
 }
 
-static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat& distCoeffs,
-                           std::vector<std::vector<Point2f> > imagePoints, std::vector<Mat>& rvecs, std::vector<Mat>& tvecs,
-                           std::vector<float>& reprojErrs,  double& totalAvgErr) {
+static bool calibrate(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat& distCoeffs,
+                           std::vector<std::vector<Point2f> > imagePoints) {
 
   cameraMatrix = Mat::eye(3, 3, CV_64F);
   if ( s.flag & CV_CALIB_FIX_ASPECT_RATIO )
@@ -331,31 +280,15 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
   double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
                                distCoeffs, rvecs, tvecs, s.flag | CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5);
 
-  std::cout << "Re-projection error reported by calibrateCamera: " << rms << std::endl;
-
   bool ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
 
-  totalAvgErr = computeReprojectionErrors(objectPoints, imagePoints,
-                                          rvecs, tvecs, cameraMatrix, distCoeffs, reprojErrs);
+  //currently unused
+  //std::vector<float> reprojErrs;
+  // double totalAvgErr = computeReprojectionErrors(objectPoints, imagePoints,
+  //                                         rvecs, tvecs, cameraMatrix, distCoeffs, reprojErrs);
 
   return ok;
 }
-
-
-bool tryCalibration(Settings& s, Size imageSize, Mat&  cameraMatrix, Mat& distCoeffs, std::vector<std::vector<Point2f> > imagePoints ) {
-  std::vector<Mat> rvecs, tvecs;
-  std::vector<float> reprojErrs;
-  double totalAvgErr = 0;
-
-  bool ok = runCalibration(s, imageSize, cameraMatrix, distCoeffs, imagePoints, rvecs, tvecs,
-                           reprojErrs, totalAvgErr);
-  std::cout << (ok ? "Calibration succeeded" : "Calibration failed")
-            << ". avg re projection error = "  << totalAvgErr ;
-
-  return ok;
-}
-
-
 
 struct XYZRPY {
   float x, y, z, roll, pitch, yaw;
@@ -372,27 +305,30 @@ struct XYZRPY {
 class DistortionTest : public testing::Test {
  protected:
   virtual void SetUp() {
-    num_images_ = 0;
     pose_index_ = 0;
   }
 
   ros::NodeHandle nh_;
+
+  // Used to listen for images
   image_transport::Subscriber cam_sub_;
-  // the boolean is whether or not that topic has received image information
-  std::map<std::string, bool> topics_acquired_;
+  // Stores found images
   std::vector<sensor_msgs::ImageConstPtr> images_;
+
+  // Poses to observe from
   std::vector<XYZRPY> poses_;
-  int pose_index_;
-  int num_images_;
+  // Used to modify the camera pose in Gazebo
   ros::ServiceClient set_model_state_client_;
+
+  // Which pose we are on currently
+  int pose_index_;
 
  public:
   void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     images_.push_back(msg);
-    std::cerr << "received image!" << std::endl;
-    num_images_++;
 
     pose_index_++;
+    // Loop around infinitely, just in case we skip a pose
     if(pose_index_ >= poses_.size())
     {
       pose_index_ = 0;
@@ -417,10 +353,8 @@ class DistortionTest : public testing::Test {
   }
 };
 
-
 TEST_F(DistortionTest, cameraDistortionTest) {
-
-// let's generate some poses!
+  // Generate a grid of poses from which to render the calibration object
   int res_x = 3;
   int res_y = 3;
   float min_x = -0.9;
@@ -433,6 +367,7 @@ TEST_F(DistortionTest, cameraDistortionTest) {
     for(int j=0; j < res_y; ++j) {
       float x_pos = min_x + i*step_x;
       float y_pos = min_y + j*step_y;
+      // poses pointing straight down
       poses_.push_back(XYZRPY(x_pos, y_pos, 4, 0, 1.5707, 0));
 
       // generate some rotated poses. Note that these are not "nice";
@@ -443,13 +378,13 @@ TEST_F(DistortionTest, cameraDistortionTest) {
     }
   }
 
-  int MAX_IMGS = poses_.size();
-
   ros::AsyncSpinner spinner(2);
   spinner.start();
 
+  // prepare to modify gazebo world
   set_model_state_client_ = nh_.serviceClient<gazebo_msgs::SetModelState>("/gazebo/set_model_state");
 
+  // listen for images
   image_transport::ImageTransport trans(nh_);
   cam_sub_ = trans.subscribe("/camera/image_raw",
                              1,
@@ -457,34 +392,34 @@ TEST_F(DistortionTest, cameraDistortionTest) {
                              dynamic_cast<DistortionTest*>(this)
                             );
 
-  while (num_images_ < MAX_IMGS) {
+  // keep going until we have one image per pose
+  while (images_.size() < poses_.size()) {
     ros::Duration(0.1).sleep();
   }
   cam_sub_.shutdown();
-  std::cerr << "got all images!" << std::endl;
 
+  // figure out what settings file to load, then load it
   ros::NodeHandle nh_private_("~");
   std::string settings_file;
   nh_private_.getParam("calibration_settings_file", settings_file);
-  std::cerr << "will load calibration settings from file path " << settings_file << std::endl;
-  // ensure that the calibration settings file exists
+  // ensure that the settings file exists
   std::ifstream f(settings_file.c_str());
   assert(f.good());
 
+  // run the calibration on OpenCV versions of the images
   std::vector<Mat> images;
   for (auto it = images_.begin(); it != images_.end(); ++it)
   {
     images.push_back(Mat(cv_bridge::toCvCopy(*it)->image));
   }
+  std::vector<double> coeffs = runCalibration(settings_file, images);
 
-  std::vector<double> coeffs = run(settings_file, images);
-  std::cerr << "coeffs: " << std::endl;
-  for(auto it = coeffs.begin(); it != coeffs.end(); ++it)
-  {
-    std::cerr << '\t' << *it << std::endl;
-  }
-
+  // Finally, we run the actual checks.
   EXPECT_EQ(coeffs.size(), 5);
+
+  // We can't expect exact convergence from the OpenCV calibration algorithm.
+  // We can make the results better by adding more camera angles, or increasing
+  // resolution.
   const double THRESHOLD = 0.001;
   EXPECT_NEAR(coeffs[0], 0, THRESHOLD);
   EXPECT_NEAR(coeffs[1], 0, THRESHOLD);
