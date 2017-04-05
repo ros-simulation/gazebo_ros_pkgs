@@ -362,9 +362,17 @@ install(DIRECTORY test
 # Tests
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
+
   add_rostest_gtest(set_model_state-test
-                    test/set_model_state_test/set_model_state_test.test 
+                    test/set_model_state_test/set_model_state_test.test
                     test/set_model_state_test/set_model_state_test.cpp)
-  add_rostest(test/range/range_plugin.test)
   target_link_libraries(set_model_state-test ${catkin_LIBRARIES})
+
+  add_rostest(test/range/range_plugin.test)
+
+  add_rostest_gtest(distortion_test
+                    test/camera/distortion.test
+                    test/camera/distortion2.cpp)
+  target_link_libraries(distortion_test ${catkin_LIBRARIES})
+
 endif()

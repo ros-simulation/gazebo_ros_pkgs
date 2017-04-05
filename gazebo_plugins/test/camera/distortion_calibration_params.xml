@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<Settings>
+  <!-- Number of inner corners per a item row and column. (square, circle). Checkerboard is 8x8, so there are 7 interior corners in each direction. -->
+  <BoardSize_Width>4</BoardSize_Width>
+  <BoardSize_Height>11</BoardSize_Height>
+  
+  <!-- The size of a square in mm-->
+  <Square_Size>125</Square_Size>
+  
+  <!-- The type of input used for camera calibration. One of: CHESSBOARD CIRCLES_GRID ASYMMETRIC_CIRCLES_GRID -->
+  <Calibrate_Pattern>"ASYMMETRIC_CIRCLES_GRID"</Calibrate_Pattern>
+  
+  <!--  If true (non-zero) we flip the input images around the horizontal axis.-->
+  <Input_FlipAroundHorizontalAxis>0</Input_FlipAroundHorizontalAxis>
+  
+  <!-- Time delay between frames in case of camera. -->
+  <Input_Delay>250</Input_Delay>	
+
+  <!-- Consider only fy as a free parameter, the ratio fx/fy stays the same as in the input cameraMatrix. 
+	   Use or not setting. 0 - False Non-Zero - True-->
+  <Calibrate_FixAspectRatio> 1 </Calibrate_FixAspectRatio>
+  <!-- If true (non-zero) tangential distortion coefficients  are set to zeros and stay zero.-->
+  <Calibrate_AssumeZeroTangentialDistortion>0</Calibrate_AssumeZeroTangentialDistortion>
+  <!-- If true (non-zero) the principal point is not changed during the global optimization.-->
+  <Calibrate_FixPrincipalPointAtTheCenter> 0 </Calibrate_FixPrincipalPointAtTheCenter>
+  
+  <!-- If true (non-zero) we write to the output file the feature points.-->
+  <Write_DetectedFeaturePoints>0</Write_DetectedFeaturePoints>
+  <!-- If true (non-zero) we write to the output file the extrinsic camera parameters.-->
+  <Write_extrinsicParameters>0</Write_extrinsicParameters>
+  <!-- If true (non-zero) we show after calibration the undistorted images.-->
+  <Show_UndistortedImage>1</Show_UndistortedImage>
+ 
+</Settings>
+</opencv_storage>
