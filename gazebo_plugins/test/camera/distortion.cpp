@@ -431,17 +431,17 @@ TEST_F(DistortionTest, cameraDistortionTest) {
   float step_y = (max_y-min_y)/(res_y-1);
   for(int i=0; i < res_x; ++i) {
     for(int j=0; j < res_y; ++j) {
-      poses_.push_back(XYZRPY(min_x + i*step_x, min_y + j*step_y, 4, 0, 1.5707, 0));
+      float x_pos = min_x + i*step_x;
+      float y_pos = min_y + j*step_y;
+      poses_.push_back(XYZRPY(x_pos, y_pos, 4, 0, 1.5707, 0));
+
+      // generate some rotated poses. Note that these are not "nice";
+      // they aren't perfectly pointed at the origin, etc. We actually
+      // want to generate a nice diverse set of poses.
+      float pitch_adj = atan2(x_pos, 4);
+      poses_.push_back(XYZRPY(x_pos, y_pos, 4, 0, 1.5707+pitch_adj, -0.1));
     }
   }
-
-  poses_.push_back(XYZRPY(-0.3, 0, 3.0, 0.2, 1.5, 0.0));
-  poses_.push_back(XYZRPY(-1.5, 0.45, 4.0, 0.1, 1.0, 0));
-  poses_.push_back(XYZRPY(-3.0, -0.3, 3.5, 1.9, 1, 0));
-  poses_.push_back(XYZRPY(-2, 1, 4, 0.1, 1.3, 0));
-  poses_.push_back(XYZRPY(1.02, -1.1, 5.09354, 0.06, 2.0, 0.1));
-  poses_.push_back(XYZRPY(-2.816845, 0.026981, 3.12, 0.124, 2.051, 3.14159));
-  poses_.push_back(XYZRPY(2.069, 2.19, 3.25, 0.515, 2.216, 1.044));
 
   int MAX_IMGS = poses_.size();
 
@@ -485,7 +485,7 @@ TEST_F(DistortionTest, cameraDistortionTest) {
   }
 
   EXPECT_EQ(coeffs.size(), 5);
-  const double THRESHOLD = 1e-1;
+  const double THRESHOLD = 0.001;
   EXPECT_NEAR(coeffs[0], 0, THRESHOLD);
   EXPECT_NEAR(coeffs[1], 0, THRESHOLD);
   EXPECT_NEAR(coeffs[2], 0, THRESHOLD);
