@@ -61,7 +61,7 @@ void GazeboRosMoveItPlanningScene::Load(physics::ModelPtr _model, sdf::ElementPt
   this->world_ = _model->GetWorld();
 
   this->model_name_ = _model->GetName();
-  
+
   // load parameters
   if (_sdf->HasElement("robotNamespace")) {
     this->robot_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
@@ -130,7 +130,7 @@ void GazeboRosMoveItPlanningScene::Load(physics::ModelPtr _model, sdf::ElementPt
   publish_planning_scene_service_ = this->rosnode_->advertiseService(aso);
 
   // Publish the full scene on the next update
-  publish_full_scene_ = false;
+  publish_full_scene_ = true;
 
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
@@ -168,9 +168,9 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
     } else {
       last_publish_time_ = ros::Time::now();
     }
-  } else {
-    publish_full_scene_ = false;
-  }
+  }// else {
+  //  publish_full_scene_ = false;
+  //}
 
   // Iterate through the tracked models and clear their dynamic information
   // This also sets objects to be removed if they currently aren't in the scene
@@ -205,16 +205,22 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
     const std::string model_name = model->GetName();
 
     // Don't declare the robot as a collision object
-    if(model_name == model_name_) { 
+    if(model_name == model_name_) {
       continue;
     }
 
     // Check if the gazebo model is already in the collision object map
-    std::map<std::string, moveit_msgs::CollisionObject>::iterator found_collision_object = 
+    std::map<std::string, moveit_msgs::CollisionObject>::iterator found_collision_object =
       collision_object_map_.find(model_name);
 
     // Create a new collision object representing this gazebo model if it's not in the map
-    if(found_collision_object == collision_object_map_.end()) {
+    if(found_collision_object == collision_object_map_.end() || publish_full_scene_){
+
+      ROS_INFO("Creating collision object model %s, this=%s, objects=%u",
+               model_name.c_str(),
+               model_name_.c_str(),
+               (unsigned int)collision_object_map_.size());
+
       moveit_msgs::CollisionObject new_object;
       new_object.id = model_name;
       new_object.header.frame_id = "world";
@@ -236,7 +242,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
     //  object.meshes,
     //  object.primitives, and
     //  object.planes
-    std::vector<LinkPtr> links = model->GetLinks(); 
+    std::vector<LinkPtr> links = model->GetLinks();
     for(std::vector<LinkPtr>::const_iterator link_it = links.begin();
         link_it != links.end();
         ++link_it)
@@ -264,7 +270,8 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
         const ShapePtr shape = collision->GetShape();
 
         // NOTE: In gazebo 2.2.2 Collision::GetWorldPose() does not work
-        gazebo::math::Pose collision_pose = collision->GetRelativePose()*link_pose;
+        //gazebo::math::Pose collision_pose = collision->GetRelativePose()*link_pose;
+        gazebo::math::Pose collision_pose = collision->GetInitialRelativePose() + link_pose;
         geometry_msgs::Pose collision_pose_msg;
         collision_pose_msg.position.x = collision_pose.pos.x;
         collision_pose_msg.position.y = collision_pose.pos.y;
@@ -274,20 +281,68 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
         collision_pose_msg.orientation.z = collision_pose.rot.z;
         collision_pose_msg.orientation.w = collision_pose.rot.w;
         //ROS_DEBUG_STREAM_NAMED("GazeboRosMoveItPlanningScene",model_name << " (collision): " <<collision_pose_msg);
-        
+
         // Always add pose information
         if(shape->HasType(Base::MESH_SHAPE)) {
-          object.mesh_poses.push_back(collision_pose_msg);
+          //object.mesh_poses.push_back(collision_pose_msg);
+          boost::shared_ptr<MeshShape> mesh_shape = boost::dynamic_pointer_cast<MeshShape>(shape);
+          std::string uri = mesh_shape->GetMeshURI();
+          const Mesh *mesh = MeshManager::Instance()->GetMesh(uri);
+          if(!mesh) {
+              gzwarn << "Shape has mesh type but mesh could not be retried from the MeshManager. Loading ad-hoc!" << std::endl;
+              gzwarn << " mesh uri: " <<uri<< std::endl;
+
+              // Load the mesh ad-hoc if the manager doesn't have it
+              // this happens with model:// uris
+              mesh = MeshManager::Instance()->Load(uri);
+
+              if(!mesh) {
+                gzwarn << "Mesh could not be loded: " << uri << std::endl;
+                continue;
+              }
+            } 
+
+          // Iterate over submeshes
+          unsigned n_submeshes = mesh->GetSubMeshCount();
+
+          for(unsigned m=0; m < n_submeshes; m++) {
+
+            const SubMesh *submesh = mesh->GetSubMesh(m);
+            unsigned n_vertices = submesh->GetVertexCount();
+
+            switch(submesh->GetPrimitiveType()) 
+            {
+              case SubMesh::POINTS:
+              case SubMesh::LINES:
+              case SubMesh::LINESTRIPS:
+                // These aren't supported
+                break;
+              case SubMesh::TRIANGLES:
+                {
+                  object.mesh_poses.push_back(collision_pose_msg);
+                  break;
+                }
+              case SubMesh::TRISTRIPS:
+                {
+                  object.mesh_poses.push_back(collision_pose_msg);
+                  break;
+                }
+              case SubMesh::TRIFANS:
+                // Unsupported
+                gzerr << "TRIFANS not supported yet." << std::endl;
+                break;
+            };
+          }
         } else if(shape->HasType(Base::PLANE_SHAPE)) {
           object.plane_poses.push_back(collision_pose_msg);
-        } else {
+        } else { //if (!shape->HasType(Base::MESH_SHAPE)) {
           object.primitive_poses.push_back(collision_pose_msg);
         }
 
         // Only add geometric info if we haven't published it before
-        if(object.operation == moveit_msgs::CollisionObject::ADD || object.operation == moveit_msgs::CollisionObject::APPEND) 
+        if(object.operation == moveit_msgs::CollisionObject::ADD || object.operation == moveit_msgs::CollisionObject::APPEND)
         {
-          if(shape->HasType(Base::MESH_SHAPE)) 
+          if(shape->HasType(Base::MESH_SHAPE))
           {
             // Get the mesh structure from the mesh shape
             boost::shared_ptr<MeshShape> mesh_shape = boost::dynamic_pointer_cast<MeshShape>(shape);
@@ -307,7 +362,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                 gzwarn << "Mesh could not be loded: " << uri << std::endl;
                 continue;
               }
-            } 
+            }
 
             // Iterate over submeshes
             unsigned n_submeshes = mesh->GetSubMeshCount();
@@ -317,7 +372,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
               const SubMesh *submesh = mesh->GetSubMesh(m);
               unsigned n_vertices = submesh->GetVertexCount();
 
-              switch(submesh->GetPrimitiveType()) 
+              switch(submesh->GetPrimitiveType())
               {
                 case SubMesh::POINTS:
                 case SubMesh::LINES:
@@ -344,6 +399,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                     }
 
                     object.meshes.push_back(mesh_msg);
+                    //object.mesh_poses.push_back(collision_pose_msg);
                     break;
                   }
                 case SubMesh::TRISTRIPS:
@@ -367,6 +423,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                     }
 
                     object.meshes.push_back(mesh_msg);
+                    //object.mesh_poses.push_back(collision_pose_msg);
                     break;
                   }
                 case SubMesh::TRIFANS:
@@ -375,8 +432,8 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                   break;
               };
             }
-          } 
-          else if(shape->HasType(Base::PLANE_SHAPE)) 
+          }
+          else if(shape->HasType(Base::PLANE_SHAPE))
           {
             // Plane
             boost::shared_ptr<PlaneShape> plane_shape = boost::dynamic_pointer_cast<PlaneShape>(shape);
@@ -389,7 +446,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
 
             object.planes.push_back(plane_msg);
           }
-          else 
+          else
           {
             // Solid primitive
             shape_msgs::SolidPrimitive primitive_msg;
@@ -422,18 +479,23 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
               primitive_msg.dimensions[0] = sphere_shape->GetRadius();
 
             } else {
-              // HEIGHTMAP_SHAPE, MAP_SHAPE, MULTIRAY_SHAPE, RAY_SHAPE   
+              // HEIGHTMAP_SHAPE, MAP_SHAPE, MULTIRAY_SHAPE, RAY_SHAPE
               // Unsupported
               continue;
             }
 
             object.primitives.push_back(primitive_msg);
           }
+          ROS_INFO("model %s has %u links",model_name.c_str(),links.size());
+          ROS_INFO("model %s has %u meshes, %u mesh poses",
+                   model_name.c_str(),
+                   (unsigned int)object.meshes.size(),
+                   (unsigned int)object.mesh_poses.size());
         }
       }
     }
   }
-  
+
   // Clear the list of collision objects
   planning_scene_msg_.name = scene_name_;
   planning_scene_msg_.robot_model_name = robot_name_;
@@ -446,7 +508,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
   {
     // Add the object to the planning scene message
     planning_scene_msg_.world.collision_objects.push_back(object_it->second);
-    
+
     // Actually remove objects from being tracked
     if(object_it->second.operation == moveit_msgs::CollisionObject::REMOVE) {
       // Actually remove the collision object from the map
@@ -459,6 +521,9 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
   }
 
   planning_scene_pub_.publish(planning_scene_msg_);
+
+  // no more full scene
+  publish_full_scene_ = false;
 }
 
 // Custom Callback Queue
