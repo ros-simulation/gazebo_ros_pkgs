@@ -40,6 +40,7 @@
 
 
 #include <gazebo_ros_control/default_robot_hw_sim.h>
+#include <urdf/model.h>
 
 
 namespace
@@ -149,7 +150,7 @@ bool DefaultRobotHWSim::initSim(
 
     // Decide what kind of command interface this actuator/joint has
     hardware_interface::JointHandle joint_handle;
-    if(hardware_interface == "EffortJointInterface")
+    if(hardware_interface == "EffortJointInterface" || hardware_interface == "hardware_interface/EffortJointInterface")
     {
       // Create effort joint interface
       joint_control_methods_[j] = EFFORT;
@@ -157,7 +158,7 @@ bool DefaultRobotHWSim::initSim(
                                                      &joint_effort_command_[j]);
       ej_interface_.registerHandle(joint_handle);
     }
-    else if(hardware_interface == "PositionJointInterface")
+    else if(hardware_interface == "PositionJointInterface" || hardware_interface == "hardware_interface/PositionJointInterface")
     {
       // Create position joint interface
       joint_control_methods_[j] = POSITION;
@@ -165,7 +166,7 @@ bool DefaultRobotHWSim::initSim(
                                                      &joint_position_command_[j]);
       pj_interface_.registerHandle(joint_handle);
     }
-    else if(hardware_interface == "VelocityJointInterface")
+    else if(hardware_interface == "VelocityJointInterface" || hardware_interface == "hardware_interface/VelocityJointInterface")
     {
       // Create velocity joint interface
       joint_control_methods_[j] = VELOCITY;
@@ -176,8 +177,12 @@ bool DefaultRobotHWSim::initSim(
     else
     {
       ROS_FATAL_STREAM_NAMED("default_robot_hw_sim","No matching hardware interface found for '"
-        << hardware_interface );
+        << hardware_interface << "' while loading interfaces for " << joint_names_[j] );
       return false;
+    }
+
+    if(hardware_interface == "EffortJointInterface" || hardware_interface == "PositionJointInterface" || hardware_interface == "VelocityJointInterface") {
+      ROS_WARN_STREAM("Deprecated syntax, please prepend 'hardware_interface/' to '" << hardware_interface << "' within the <hardwareInterface> tag in joint '" << joint_names_[j] << "'.");
     }
 
     // Get the gazebo joint that corresponds to the robot joint.
@@ -186,7 +191,7 @@ bool DefaultRobotHWSim::initSim(
     gazebo::physics::JointPtr joint = parent_model->GetJoint(joint_names_[j]);
     if (!joint)
     {
-      ROS_ERROR_STREAM("This robot has a joint named \"" << joint_names_[j]
+      ROS_ERROR_STREAM_NAMED("default_robot_hw", "This robot has a joint named \"" << joint_names_[j]
         << "\" which is not in the gazebo model.");
       return false;
     }
@@ -381,7 +386,7 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
 
   if (urdf_model != NULL)
   {
-    const boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model->getJoint(joint_name);
+    const urdf::JointConstSharedPtr urdf_joint = urdf_model->getJoint(joint_name);
     if (urdf_joint != NULL)
     {
       *joint_type = urdf_joint->type;

@@ -53,7 +53,7 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("multicamera", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -77,12 +77,12 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     util->image_connect_count_ = this->image_connect_count_;
     util->image_connect_count_lock_ = this->image_connect_count_lock_;
     util->was_active_ = this->was_active_;
-    if (this->camera[i]->GetName().find("left") != std::string::npos)
+    if (this->camera[i]->Name().find("left") != std::string::npos)
     {
       // FIXME: hardcoded, left hack_baseline_ 0
       util->Load(_parent, _sdf, "/left", 0.0);
     }
-    else if (this->camera[i]->GetName().find("right") != std::string::npos)
+    else if (this->camera[i]->Name().find("right") != std::string::npos)
     {
       double hackBaseline = 0.0;
       if (_sdf->HasElement("hackBaseline"))
@@ -94,24 +94,33 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
+    GazeboRosCameraUtils* util)
+{
+# if GAZEBO_MAJOR_VERSION >= 7
+  common::Time sensor_update_time = util->parentSensor_->LastMeasurementTime();
+# else
+  common::Time sensor_update_time = util->parentSensor_->GetLastMeasurementTime();
+# endif
+
+  if (util->parentSensor_->IsActive())
+  {
+    if (sensor_update_time - util->last_update_time_ >= util->update_period_)
+    {
+      util->PutCameraData(_image, sensor_update_time);
+      util->PublishCameraInfo(sensor_update_time);
+      util->last_update_time_ = sensor_update_time;
+    }
+  }
+}
+
 // Update the controller
 void GazeboRosMultiCamera::OnNewFrameLeft(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
-  GazeboRosCameraUtils* util = this->utils[0];
-  util->sensor_update_time_ = util->parentSensor_->GetLastUpdateTime();
-
-  if (util->parentSensor_->IsActive())
-  {
-    common::Time cur_time = util->world_->GetSimTime();
-    if (cur_time - util->last_update_time_ >= util->update_period_)
-    {
-      util->PutCameraData(_image);
-      util->PublishCameraInfo();
-      util->last_update_time_ = cur_time;
-    }
-  }
+  OnNewFrame(_image, this->utils[0]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,18 +129,6 @@ void GazeboRosMultiCamera::OnNewFrameRight(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
-  GazeboRosCameraUtils* util = this->utils[1];
-  util->sensor_update_time_ = util->parentSensor_->GetLastUpdateTime();
-
-  if (util->parentSensor_->IsActive())
-  {
-    common::Time cur_time = util->world_->GetSimTime();
-    if (cur_time - util->last_update_time_ >= util->update_period_)
-    {
-      util->PutCameraData(_image);
-      util->PublishCameraInfo();
-      util->last_update_time_ = cur_time;
-    }
-  }
+  OnNewFrame(_image, this->utils[1]);
 }
 }

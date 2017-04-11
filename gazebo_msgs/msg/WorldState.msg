@@ -24,7 +24,7 @@
 # This message is used to do the following:
 #   * reconstruct the world and objects for sensor generation
 #   * stop / start simulation - need pose, twist, wrench of each body
-#   * collision detection - need pose of each collision geometry.  velocity/acceleration if 
+#   * collision detection - need pose of each collision geometry.  velocity/acceleration if
 #
 # = Assumptions =
 # Assuming that each (physics) processor node locally already has

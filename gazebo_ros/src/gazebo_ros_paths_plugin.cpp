@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-/* 
+/*
  * Author: John Hsu, Nate Koenig, Dave Coleman
  * Desc: External interfaces for Gazebo
  */
@@ -54,7 +54,7 @@ public:
   }
 
   /**
-   * @brief Set Gazebo Path/Resources Configurations GAZEBO_MODEL_PATH, PLUGIN_PATH and 
+   * @brief Set Gazebo Path/Resources Configurations GAZEBO_MODEL_PATH, PLUGIN_PATH and
             GAZEBO_MEDIA_PATH by adding paths to GazeboConfig based on ros::package
    */
   void LoadPaths()
@@ -65,7 +65,7 @@ public:
     ros::package::getPlugins("gazebo_ros","gazebo_media_path",gazebo_media_paths);
     for (std::vector<std::string>::iterator iter=gazebo_media_paths.begin(); iter != gazebo_media_paths.end(); iter++)
     {
-      ROS_DEBUG("med path %s",iter->c_str());
+      ROS_DEBUG_NAMED("paths_plugin", "Media path %s",iter->c_str());
       gazebo::common::SystemPaths::Instance()->AddGazeboPaths(iter->c_str());
     }
 
@@ -75,7 +75,7 @@ public:
     ros::package::getPlugins("gazebo_ros","plugin_path",plugin_paths);
     for (std::vector<std::string>::iterator iter=plugin_paths.begin(); iter != plugin_paths.end(); iter++)
     {
-      ROS_DEBUG("plugin path %s",(*iter).c_str());
+      ROS_DEBUG_NAMED("paths_plugin", "plugin path %s",(*iter).c_str());
       gazebo::common::SystemPaths::Instance()->AddPluginPaths(iter->c_str());
     }
 
@@ -85,7 +85,7 @@ public:
     ros::package::getPlugins("gazebo_ros","gazebo_model_path",model_paths);
     for (std::vector<std::string>::iterator iter=model_paths.begin(); iter != model_paths.end(); iter++)
     {
-      ROS_DEBUG("model path %s",(*iter).c_str());
+      ROS_DEBUG_NAMED("paths_plugin", "Model path %s",(*iter).c_str());
       gazebo::common::SystemPaths::Instance()->AddModelPaths(iter->c_str());
     }
 
@@ -100,4 +100,3 @@ public:
 GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosPathsPlugin)
 
 }
-

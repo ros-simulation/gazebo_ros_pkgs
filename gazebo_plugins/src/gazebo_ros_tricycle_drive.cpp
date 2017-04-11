@@ -127,13 +127,13 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
 
     if ( this->publishWheelJointState_ ) {
         joint_state_publisher_ = gazebo_ros_->node()->advertise<sensor_msgs::JointState> ( "joint_states", 1000 );
-        ROS_INFO ( "%s: Advertise joint_states!", gazebo_ros_->info() );
+        ROS_INFO_NAMED("tricycle_drive", "%s: Advertise joint_states!", gazebo_ros_->info() );
     }
 
     transform_broadcaster_ = boost::shared_ptr<tf::TransformBroadcaster> ( new tf::TransformBroadcaster() );
 
     // ROS: Subscribe to the velocity command topic (usually "cmd_vel")
-    ROS_INFO ( "%s: Try to subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
+    ROS_INFO_NAMED("tricycle_drive", "%s: Try to subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
 
     ros::SubscribeOptions so =
         ros::SubscribeOptions::create<geometry_msgs::Twist> ( command_topic_, 1,
@@ -141,10 +141,10 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
                 ros::VoidPtr(), &queue_ );
 
     cmd_vel_subscriber_ = gazebo_ros_->node()->subscribe ( so );
-    ROS_INFO ( "%s: Subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
+    ROS_INFO_NAMED("tricycle_drive", "%s: Subscribe to %s!", gazebo_ros_->info(), command_topic_.c_str() );
 
     odometry_publisher_ = gazebo_ros_->node()->advertise<nav_msgs::Odometry> ( odometry_topic_, 1 );
-    ROS_INFO ( "%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str() );
+    ROS_INFO_NAMED("tricycle_drive", "%s: Advertise odom on %s !", gazebo_ros_->info(), odometry_topic_.c_str() );
 
     // start custom queue for diff drive
     this->callback_queue_thread_ = boost::thread ( boost::bind ( &GazeboRosTricycleDrive::QueueThread, this ) );
@@ -216,7 +216,7 @@ void GazeboRosTricycleDrive::UpdateChild()
 
         motorController ( target_wheel_roation_speed, target_steering_angle, seconds_since_last_update );
 
-        //ROS_INFO("v = %f, w = %f !", target_wheel_roation_speed, target_steering_angle);
+        //ROS_INFO_NAMED("tricycle_drive", "v = %f, w = %f !", target_wheel_roation_speed, target_steering_angle);
 
         last_actuator_update_ += common::Time ( update_period_ );
     }
@@ -227,52 +227,96 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
 {
     double applied_speed = target_speed;
     double applied_angle = target_angle;
-    double applied_steering_speed = 0;
 
     double current_speed = joint_wheel_actuated_->GetVelocity ( 0 );
-    if ( wheel_acceleration_ > 0 ) {
-        double diff_speed = current_speed - target_speed;
-        if ( fabs ( diff_speed ) < wheel_speed_tolerance_ ) {
-            applied_speed = target_speed;
-        } else if ( diff_speed < target_speed ) {
-            applied_speed = current_speed + wheel_acceleration_ * dt;
-        } else {
-            applied_speed = current_speed - wheel_deceleration_ * dt;
+    if (wheel_acceleration_ > 0)
+    {
+      double diff_speed = current_speed - target_speed;
+      if ( fabs ( diff_speed ) < wheel_speed_tolerance_ )
+      {
+        applied_speed = current_speed;
+      }
+      else if ( fabs(diff_speed) > wheel_acceleration_ * dt )
+      {
+        if(diff_speed > 0)
+        {
+          applied_speed = current_speed - wheel_acceleration_ * dt;
         }
+        else
+        {
+          applied_speed = current_speed + wheel_deceleration_ * dt;
+        }
+      }
     }
 #if GAZEBO_MAJOR_VERSION > 2
     joint_wheel_actuated_->SetParam ( "vel", 0, applied_speed );
 #else
     joint_wheel_actuated_->SetVelocity ( 0, applied_speed );
 #endif
-    
+
     double current_angle = joint_steering_->GetAngle ( 0 ).Radian();
-    if(target_angle > +M_PI / 2.0) target_angle =  +M_PI / 2.0;
-    if(target_angle < -M_PI / 2.0) target_angle =  -M_PI / 2.0;
+
+    // truncate target angle
+    if (target_angle > +M_PI / 2.0)
+    {
+      target_angle =  +M_PI / 2.0;
+    }
+    else if (target_angle < -M_PI / 2.0)
+    {
+      target_angle =  -M_PI / 2.0;
+    }
+
+    // if steering_speed_ is > 0, use speed control, otherwise use position control
+    // With position control, one cannot expect dynamics to work correctly.
+    double diff_angle = current_angle - target_angle;
     if ( steering_speed_ > 0 ) {
-        double diff_angle = current_angle - target_angle;
-        if ( fabs ( diff_angle ) < steering_angle_tolerance_ ) {
-          applied_steering_speed = 0;
-        } else if ( diff_angle < target_speed ) {
-            applied_steering_speed = steering_speed_;
-        } else {
-            applied_steering_speed = -steering_speed_;
-        }
+      // this means we will steer using steering speed
+      double applied_steering_speed = 0;
+      if (fabs(diff_angle) < steering_angle_tolerance_ ) {
+        // we're withing angle tolerance
+        applied_steering_speed = 0;
+      } else if ( diff_angle < target_speed ) {
+        // steer toward target angle
+        applied_steering_speed = steering_speed_;
+      } else {
+        // steer toward target angle
+        applied_steering_speed = -steering_speed_;
+      }
+
+      // use speed control, not recommended, for better dynamics use force control
 #if GAZEBO_MAJOR_VERSION > 2
       joint_steering_->SetParam ( "vel", 0, applied_steering_speed );
 #else
       joint_steering_->SetVelocity ( 0, applied_steering_speed );
 #endif
-    }else {
+    }
+    else {
+      // steering_speed_ is zero, use position control.
+      // This is not a good idea if we want dynamics to work.
+      if (fabs(diff_angle) < steering_speed_ * dt)
+      {
+        // we can take a step and still not overshoot target
+        if(diff_angle > 0)
+        {
+          applied_angle =  current_angle - steering_speed_ * dt;
+        }
+        else
+        {
+          applied_angle =  current_angle + steering_speed_ * dt;
+        }
+      }
+      else
+      {
+        applied_angle = target_angle;
+      }
 #if GAZEBO_MAJOR_VERSION >= 4
-      joint_steering_->SetPosition ( 0, applied_angle );
+      joint_steering_->SetPosition(0, applied_angle);
 #else
-      joint_steering_->SetAngle ( 0, math::Angle ( applied_angle ) );
+      joint_steering_->SetAngle(0, math::Angle(applied_angle));
 #endif
     }
-    //ROS_INFO ( "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !", 
+    //ROS_INFO_NAMED("tricycle_drive", "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] !",
     //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
-
 }
 
 // Finalize the controller
@@ -414,4 +458,3 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
 
 GZ_REGISTER_MODEL_PLUGIN ( GazeboRosTricycleDrive )
 }
-

@@ -70,14 +70,14 @@ TEST(SpawnTest, spawnSingleBox)
   }
   catch (boost::bad_lexical_cast &e)
   {
-    ROS_ERROR("first argument of check_model should be timeout");
+    ROS_ERROR_NAMED("check_model", "first argument of check_model should be timeout");
     return;
   }
   ros::Time timeout = ros::Time::now() + ros::Duration(test_duration);
 
   // model name to look for
   std::string model_name = std::string(g_argv[2]);
-  ROS_INFO("looking for model: %s",model_name.c_str());
+  ROS_INFO_NAMED("check_model", "looking for model: %s",model_name.c_str());
 
   while (!found && ros::Time::now() < timeout)
   {

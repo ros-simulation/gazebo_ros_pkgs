@@ -17,6 +17,7 @@
 #include <gazebo/sensors/DepthCameraSensor.hh>
 #include <gazebo/sensors/CameraSensor.hh>
 #include <gazebo_plugins/MultiCameraPlugin.h>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 using namespace gazebo;
 GZ_REGISTER_SENSOR_PLUGIN(MultiCameraPlugin)
@@ -40,15 +41,16 @@ void MultiCameraPlugin::Load(sensors::SensorPtr _sensor,
   if (!_sensor)
     gzerr << "Invalid sensor pointer.\n";
 
+  GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST;
   this->parentSensor =
-    boost::dynamic_pointer_cast<sensors::MultiCameraSensor>(_sensor);
+    dynamic_pointer_cast<sensors::MultiCameraSensor>(_sensor);
 
   if (!this->parentSensor)
   {
     gzerr << "MultiCameraPlugin requires a CameraSensor.\n";
-    if (boost::dynamic_pointer_cast<sensors::DepthCameraSensor>(_sensor))
+    if (dynamic_pointer_cast<sensors::DepthCameraSensor>(_sensor))
       gzmsg << "It is a depth camera sensor\n";
-    if (boost::dynamic_pointer_cast<sensors::CameraSensor>(_sensor))
+    if (dynamic_pointer_cast<sensors::CameraSensor>(_sensor))
       gzmsg << "It is a camera sensor\n";
   }
 
@@ -58,17 +60,17 @@ void MultiCameraPlugin::Load(sensors::SensorPtr _sensor,
     return;
   }
 
-  for (unsigned int i = 0; i < this->parentSensor->GetCameraCount(); ++i)
+  for (unsigned int i = 0; i < this->parentSensor->CameraCount(); ++i)
   {
-    this->camera.push_back(this->parentSensor->GetCamera(i));
+    this->camera.push_back(this->parentSensor->Camera(i));
 
     // save camera attributes
-    this->width.push_back(this->camera[i]->GetImageWidth());
-    this->height.push_back(this->camera[i]->GetImageHeight());
-    this->depth.push_back(this->camera[i]->GetImageDepth());
-    this->format.push_back(this->camera[i]->GetImageFormat());
+    this->width.push_back(this->camera[i]->ImageWidth());
+    this->height.push_back(this->camera[i]->ImageHeight());
+    this->depth.push_back(this->camera[i]->ImageDepth());
+    this->format.push_back(this->camera[i]->ImageFormat());
 
-    std::string cameraName = this->parentSensor->GetCamera(i)->GetName();
+    std::string cameraName = this->parentSensor->Camera(i)->Name();
     // gzdbg << "camera(" << i << ") name [" << cameraName << "]\n";
 
     // FIXME: hardcoded 2 camera support only

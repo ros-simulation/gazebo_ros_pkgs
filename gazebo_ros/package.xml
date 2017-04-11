@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <package>
   <name>gazebo_ros</name>
-  <version>2.4.9</version>
+  <version>2.5.10</version>
   <description>
     Provides ROS plugins that offer message and service publishers for interfacing with <a href="http://gazebosim.org">Gazebo</a> through ROS.
     Formally simulator_gazebo/gazebo
   </description>
 
-  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+  <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
 
   <license>Apache 2.0</license>
 
@@ -23,8 +22,8 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>cmake_modules</build_depend>
-  <build_depend>gazebo</build_depend>
   <build_depend>gazebo_msgs</build_depend>
+  <build_depend>libgazebo7-dev</build_depend>
   <build_depend>roslib</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>tf</build_depend>
@@ -37,8 +36,14 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>tinyxml</build_depend>
 
-  <run_depend>gazebo</run_depend>
   <run_depend>gazebo_msgs</run_depend>
+  <!-- Needed to pull in the setup.sh file for the tests -->
+  <run_depend>gazebo</run_depend>
+  <!--
+    Need to use libgazebo7-dev since run script needs pkg-config
+    See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
+  -->
+  <run_depend>libgazebo7-dev</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>tf</run_depend>
@@ -49,5 +54,6 @@
   <run_depend>message_generation</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tinyxml</run_depend>
+
 
 </package>

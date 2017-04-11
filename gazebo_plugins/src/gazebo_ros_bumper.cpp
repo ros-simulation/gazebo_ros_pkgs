@@ -39,6 +39,7 @@
 #include <tf/tf.h>
 
 #include <gazebo_plugins/gazebo_ros_bumper.h>
+#include <gazebo_plugins/gazebo_ros_utils.h>
 
 namespace gazebo
 {
@@ -65,10 +66,11 @@ GazeboRosBumper::~GazeboRosBumper()
 // Load the controller
 void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
-  this->parentSensor = boost::dynamic_pointer_cast<sensors::ContactSensor>(_parent);
+  GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST;
+  this->parentSensor = dynamic_pointer_cast<sensors::ContactSensor>(_parent);
   if (!this->parentSensor)
   {
-    ROS_ERROR("Contact sensor parent is not of type ContactSensor");
+    ROS_ERROR_NAMED("bumper", "Contact sensor parent is not of type ContactSensor");
     return;
   }
 
@@ -80,7 +82,7 @@ void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // "publishing contact/collisions to this topic name: "
   //   << this->bumper_topic_name_ << std::endl;
   this->bumper_topic_name_ = "bumper_states";
-  if (_sdf->GetElement("bumperTopicName"))
+  if (_sdf->HasElement("bumperTopicName"))
     this->bumper_topic_name_ =
       _sdf->GetElement("bumperTopicName")->Get<std::string>();
 
@@ -88,7 +90,7 @@ void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   //   << this->frame_name_ << std::endl;
   if (!_sdf->HasElement("frameName"))
   {
-    ROS_INFO("bumper plugin missing <frameName>, defaults to world");
+    ROS_INFO_NAMED("bumper", "bumper plugin missing <frameName>, defaults to world");
     this->frame_name_ = "world";
   }
   else
@@ -97,7 +99,7 @@ void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("bumper", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -134,7 +136,7 @@ void GazeboRosBumper::OnContact()
     return;
 
   msgs::Contacts contacts;
-  contacts = this->parentSensor->GetContacts();
+  contacts = this->parentSensor->Contacts();
   /// \TODO: need a time for each Contact in i-loop, they may differ
   this->contact_state_msg_.header.frame_id = this->frame_name_;
   this->contact_state_msg_.header.stamp = ros::Time(contacts.time().sec(),
@@ -167,7 +169,7 @@ void GazeboRosBumper::OnContact()
     // not found
     if (!myFrame)
     {
-      ROS_INFO("gazebo_ros_bumper plugin: frameName: %s does not exist"
+      ROS_INFO_NAMED("bumper", "gazebo_ros_bumper plugin: frameName: %s does not exist"
                 " yet, will not publish\n",this->frame_name_.c_str());
       return;
     }
@@ -208,7 +210,7 @@ void GazeboRosBumper::OnContact()
     // For each collision contact
     // Create a ContactState
     gazebo_msgs::ContactState state;
-    /// \TODO: 
+    /// \TODO:
     gazebo::msgs::Contact contact = contacts.contact(i);
 
     state.collision1_name = contact.collision1();

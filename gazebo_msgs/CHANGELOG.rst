@@ -2,6 +2,49 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2017-03-03)
+-------------------
+
+2.5.9 (2017-02-20)
+------------------
+* Removed all trailing whitespace
+* Contributors: Dave Coleman
+
+2.5.8 (2016-12-06)
+------------------
+
+2.5.7 (2016-06-10)
+------------------
+
+2.5.6 (2016-04-28)
+------------------
+
+2.5.5 (2016-04-27)
+------------------
+* merge indigo, jade to kinetic-devel
+* Update maintainer for Kinetic release
+* Contributors: Jose Luis Rivero, Steven Peters
+
+2.5.3 (2016-04-11)
+------------------
+
+2.5.2 (2016-02-25)
+------------------
+* merging from indigo-devel
+* 2.4.9
+* Generate changelog
+* GetModelState modification for jade
+* Contributors: John Hsu, Jose Luis Rivero, Markus Bader
+
+2.5.1 (2015-08-16)
+------------------
+
+2.5.0 (2015-04-30)
+------------------
+
+2.4.10 (2016-02-25)
+-------------------
+
 2.4.9 (2015-08-16)
 ------------------
 

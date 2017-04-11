@@ -2,8 +2,8 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <property name="M_PI" value="3.1415926535897931" />
 
-  <xacro:macro name="pioneer_sonar" params="name parent xyz rpy meshes">   
-  
+  <xacro:macro name="pioneer_sonar" params="name parent xyz rpy meshes">
+
   <!-- Front Sonar -->
   <joint name="${parent}_${name}_joint" type="fixed">
     <origin xyz="${xyz}" rpy="${rpy}"/>
@@ -35,7 +35,7 @@
   <gazebo reference="${name}">
     <material value="Gazebo/Yellow"/>
   </gazebo>
-  
+
   </xacro:macro>
 
 </robot>

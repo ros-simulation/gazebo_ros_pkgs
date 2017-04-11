@@ -62,14 +62,14 @@ TEST(SpawnTest, checkBoxStackDrift)
 
   // load urdf file
   std::string urdf_filename = std::string(g_argv[1]);
-  ROS_DEBUG("loading file: %s",urdf_filename.c_str());
+  ROS_DEBUG_NAMED("contact_tolerance", "loading file: %s",urdf_filename.c_str());
   // read urdf / gazebo model xml from file
   TiXmlDocument xml_in(urdf_filename);
   xml_in.LoadFile();
   std::ostringstream stream;
   stream << xml_in;
   spawn_model.request.model_xml = stream.str(); // load xml file
-  ROS_DEBUG("XML string: %s",stream.str().c_str());
+  ROS_DEBUG_NAMED("contact_tolerance", "XML string: %s",stream.str().c_str());
 
   spawn_model.request.robot_namespace = "";
   spawn_model.request.reference_frame = "";
@@ -108,9 +108,9 @@ TEST(SpawnTest, checkBoxStackDrift)
     double error_y = fabs(current_pose.position.y - initial_pose.position.y);
     double error_z = fabs(current_pose.position.z - initial_pose.position.z);
     double error_linear = sqrt(error_x*error_x+error_y*error_y+error_z*error_z);
-    ROS_INFO("error: %f",error_linear);
+    ROS_INFO_NAMED("contact_tolerance", "error: %f",error_linear);
     if (error_linear > LINEAR_DRIFT_TOLERANCE);
-      ROS_INFO("box stack teset failed with this linear error (%f):  this means the top box in the box stack is moving too much.  Check to see if surface contact layer has changed from 1mm, bounce parameter has changed, world time step, solver has changed.  You can reproduce this test by:\n\nroslaunch gazebo_tests empty.launch\nrosrun gazebo_tests contact_tolerance `rospack find gazebo_tests`/test/urdf/box.urdf\n",error_linear);
+      ROS_INFO_NAMED("contact_tolerance", "box stack teset failed with this linear error (%f):  this means the top box in the box stack is moving too much.  Check to see if surface contact layer has changed from 1mm, bounce parameter has changed, world time step, solver has changed.  You can reproduce this test by:\n\nroslaunch gazebo_tests empty.launch\nrosrun gazebo_tests contact_tolerance `rospack find gazebo_tests`/test/urdf/box.urdf\n",error_linear);
     ASSERT_TRUE(error_linear <= LINEAR_DRIFT_TOLERANCE);
 
     // FIXME: do something about orientation drift too

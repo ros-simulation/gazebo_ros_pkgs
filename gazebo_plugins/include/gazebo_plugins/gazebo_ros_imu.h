@@ -68,6 +68,9 @@ namespace gazebo
     /// \brief store link name
     private: std::string link_name_;
 
+    /// \brief store frame name
+    private: std::string frame_name_;
+
     /// \brief topic name
     private: std::string topic_name_;
 
@@ -84,7 +87,7 @@ namespace gazebo
     private: math::Vector3 last_veul_;
     private: math::Vector3 apos_;
     private: math::Vector3 aeul_;
-    
+
     // rate control
     private: double update_rate_;
 

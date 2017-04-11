@@ -1,11 +1,11 @@
 <package>
   <name>gazebo_plugins</name>
-  <version>2.4.9</version>
+  <version>2.5.10</version>
   <description>
     Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
 
-  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
+  <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
 
   <license>BSD, Apache 2.0</license>
 
@@ -17,9 +17,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>gazebo</build_depend>
   <build_depend>gazebo_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>libgazebo7-dev</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>trajectory_msgs</build_depend>
   <build_depend>std_srvs</build_depend>
@@ -32,7 +32,6 @@
   <build_depend>tf</build_depend>
   <build_depend>tf2_ros</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>driver_base</build_depend>
   <build_depend>rosgraph_msgs</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>rosconsole</build_depend>
@@ -43,10 +42,14 @@
   <build_depend>camera_info_manager</build_depend>
   <build_depend>std_msgs</build_depend>
 
-  <run_depend>gazebo</run_depend>
   <run_depend>gazebo_msgs</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <!--
+    Need to use libgazebo7-dev since run script needs pkg-config
+    See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
+  -->
+  <run_depend>libgazebo7-dev</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>trajectory_msgs</run_depend>
   <run_depend>std_srvs</run_depend>
@@ -59,7 +62,6 @@
   <run_depend>tf</run_depend>
   <run_depend>tf2_ros</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>driver_base</run_depend>
   <run_depend>rosgraph_msgs</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>rosconsole</run_depend>
@@ -68,5 +70,9 @@
   <run_depend>polled_camera</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>std_msgs</run_depend>
+
+  <!-- When moved to format 2, this can be turned test_depend -->
+  <build_depend>rostest</build_depend>
+  <run_depend>rostest</run_depend>
 
 </package>

@@ -35,6 +35,7 @@
 /** \author Jose Capriles, Bence Magyar. */
 
 #include "gazebo_plugins/gazebo_ros_range.h"
+#include "gazebo_plugins/gazebo_ros_utils.h"
 
 #include <algorithm>
 #include <string>
@@ -85,15 +86,16 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   // Get then name of the parent sensor
   this->parent_sensor_ = _parent;
   // Get the world name.
-  std::string worldName = _parent->GetWorldName();
+  std::string worldName = _parent->WorldName();
   this->world_ = physics::get_world(worldName);
   // save pointers
   this->sdf = _sdf;
 
   this->last_update_time_ = common::Time(0);
 
+  GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST;
   this->parent_ray_sensor_ =
-    boost::dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
+    dynamic_pointer_cast<sensors::RaySensor>(this->parent_sensor_);
 
   if (!this->parent_ray_sensor_)
     gzthrow("GazeboRosRange controller requires a Ray Sensor as its parent");
@@ -104,7 +106,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!this->sdf->HasElement("frameName"))
   {
-    ROS_INFO("Range plugin missing <frameName>, defaults to /world");
+    ROS_INFO_NAMED("range", "Range plugin missing <frameName>, defaults to /world");
     this->frame_name_ = "/world";
   }
   else
@@ -112,7 +114,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!this->sdf->HasElement("topicName"))
   {
-    ROS_INFO("Range plugin missing <topicName>, defaults to /range");
+    ROS_INFO_NAMED("range", "Range plugin missing <topicName>, defaults to /range");
     this->topic_name_ = "/range";
   }
   else
@@ -120,7 +122,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!this->sdf->HasElement("radiation"))
   {
-      ROS_WARN("Range plugin missing <radiation>, defaults to ultrasound");
+      ROS_WARN_NAMED("range", "Range plugin missing <radiation>, defaults to ultrasound");
       this->radiation_ = "ultrasound";
 
   }
@@ -129,22 +131,22 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   if (!this->sdf->HasElement("fov"))
   {
-      ROS_WARN("Range plugin missing <fov>, defaults to 0.05");
+      ROS_WARN_NAMED("range", "Range plugin missing <fov>, defaults to 0.05");
       this->fov_ = 0.05;
   }
   else
       this->fov_ = _sdf->GetElement("fov")->Get<double>();
   if (!this->sdf->HasElement("gaussianNoise"))
   {
-    ROS_INFO("Range plugin missing <gaussianNoise>, defaults to 0.0");
+    ROS_INFO_NAMED("range", "Range plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0;
   }
   else
     this->gaussian_noise_ = this->sdf->Get<double>("gaussianNoise");
 
-  if (!this->sdf->GetElement("updateRate"))
+  if (!this->sdf->HasElement("updateRate"))
   {
-    ROS_INFO("Range plugin missing <updateRate>, defaults to 0");
+    ROS_INFO_NAMED("range", "Range plugin missing <updateRate>, defaults to 0");
     this->update_rate_ = 0;
   }
   else
@@ -167,8 +169,8 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
       this->range_msg_.radiation_type = sensor_msgs::Range::INFRARED;
 
   this->range_msg_.field_of_view = fov_;
-  this->range_msg_.max_range = this->parent_ray_sensor_->GetRangeMax();
-  this->range_msg_.min_range = this->parent_ray_sensor_->GetRangeMin();
+  this->range_msg_.max_range = this->parent_ray_sensor_->RangeMax();
+  this->range_msg_.min_range = this->parent_ray_sensor_->RangeMin();
 
   // Init ROS
   if (ros::isInitialized())
@@ -245,14 +247,14 @@ void GazeboRosRange::OnNewLaserScans()
     if (cur_time - this->last_update_time_ >= this->update_period_)
     {
       common::Time sensor_update_time =
-        this->parent_sensor_->GetLastUpdateTime();
+        this->parent_sensor_->LastUpdateTime();
       this->PutRangeData(sensor_update_time);
       this->last_update_time_ = cur_time;
     }
   }
   else
   {
-    ROS_INFO("gazebo_ros_range topic name not set");
+    ROS_INFO_NAMED("range", "gazebo_ros_range topic name not set");
   }
 }
 
@@ -277,18 +279,18 @@ void GazeboRosRange::PutRangeData(common::Time &_updateTime)
     // find ray with minimal range
     range_msg_.range = std::numeric_limits<sensor_msgs::Range::_range_type>::max();
 
-    int num_ranges = parent_ray_sensor_->GetLaserShape()->GetSampleCount() * parent_ray_sensor_->GetLaserShape()->GetVerticalSampleCount();
+    int num_ranges = parent_ray_sensor_->LaserShape()->GetSampleCount() * parent_ray_sensor_->LaserShape()->GetVerticalSampleCount();
 
     for(int i = 0; i < num_ranges; ++i)
     {
-        double ray = parent_ray_sensor_->GetLaserShape()->GetRange(i);
+        double ray = parent_ray_sensor_->LaserShape()->GetRange(i);
         if (ray < range_msg_.range)
             range_msg_.range = ray;
     }
 
     // add Gaussian noise and limit to min/max range
     if (range_msg_.range < range_msg_.max_range)
-        range_msg_.range = std::min(range_msg_.range + this->GaussianKernel(0,gaussian_noise_), parent_ray_sensor_->GetRangeMax());
+        range_msg_.range = std::min(range_msg_.range + this->GaussianKernel(0,gaussian_noise_), parent_ray_sensor_->RangeMax());
 
     this->parent_ray_sensor_->SetActive(true);
 

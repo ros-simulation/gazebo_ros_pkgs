@@ -55,7 +55,7 @@ void GazeboRosFT::Load( physics::ModelPtr _model, sdf::ElementPtr _sdf )
   // Save pointers
   this->model_ = _model;
   this->world_ = this->model_->GetWorld();
-  
+
   // load parameters
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace"))
@@ -63,7 +63,7 @@ void GazeboRosFT::Load( physics::ModelPtr _model, sdf::ElementPtr _sdf )
 
   if (!_sdf->HasElement("jointName"))
   {
-    ROS_FATAL("ft_sensor plugin missing <jointName>, cannot proceed");
+    ROS_FATAL_NAMED("ft_sensor", "ft_sensor plugin missing <jointName>, cannot proceed");
     return;
   }
   else
@@ -72,35 +72,35 @@ void GazeboRosFT::Load( physics::ModelPtr _model, sdf::ElementPtr _sdf )
   this->joint_ = this->model_->GetJoint(this->joint_name_);
   if (!this->joint_)
   {
-    ROS_FATAL("gazebo_ros_ft_sensor plugin error: jointName: %s does not exist\n",this->joint_name_.c_str());
+    ROS_FATAL_NAMED("ft_sensor", "gazebo_ros_ft_sensor plugin error: jointName: %s does not exist\n",this->joint_name_.c_str());
     return;
   }
-  
+
   this->parent_link_ = this->joint_->GetParent();
   this->child_link_ = this->joint_->GetChild();
   this->frame_name_ = this->child_link_->GetName();
-  
-  ROS_INFO("ft_sensor plugin reporting wrench values to the frame [%s]", this->frame_name_.c_str());
+
+  ROS_INFO_NAMED("ft_sensor", "ft_sensor plugin reporting wrench values to the frame [%s]", this->frame_name_.c_str());
 
   if (!_sdf->HasElement("topicName"))
   {
-    ROS_FATAL("ft_sensor plugin missing <topicName>, cannot proceed");
+    ROS_FATAL_NAMED("ft_sensor", "ft_sensor plugin missing <topicName>, cannot proceed");
     return;
   }
   else
     this->topic_name_ = _sdf->GetElement("topicName")->Get<std::string>();
-  
+
   if (!_sdf->HasElement("gaussianNoise"))
   {
-    ROS_INFO("imu plugin missing <gaussianNoise>, defaults to 0.0");
+    ROS_INFO_NAMED("ft_sensor", "imu plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0.0;
   }
   else
     this->gaussian_noise_ = _sdf->Get<double>("gaussianNoise");
-  
+
   if (!_sdf->HasElement("updateRate"))
   {
-    ROS_DEBUG("ft_sensor plugin missing <updateRate>, defaults to 0.0"
+    ROS_DEBUG_NAMED("ft_sensor", "ft_sensor plugin missing <updateRate>, defaults to 0.0"
              " (as fast as possible)");
     this->update_rate_ = 0;
   }
@@ -110,13 +110,13 @@ void GazeboRosFT::Load( physics::ModelPtr _model, sdf::ElementPtr _sdf )
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("ft_sensor", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
 
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
-  
+
   // resolve tf prefix
   std::string prefix;
   this->rosnode_->getParam(std::string("tf_prefix"), prefix);
@@ -128,10 +128,10 @@ void GazeboRosFT::Load( physics::ModelPtr _model, sdf::ElementPtr _sdf )
     boost::bind( &GazeboRosFT::FTConnect,this),
     boost::bind( &GazeboRosFT::FTDisconnect,this), ros::VoidPtr(), &this->queue_);
   this->pub_ = this->rosnode_->advertise(ao);
-  
+
   // Custom Callback Queue
   this->callback_queue_thread_ = boost::thread( boost::bind( &GazeboRosFT::QueueThread,this ) );
-  
+
   // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -163,7 +163,7 @@ void GazeboRosFT::UpdateChild()
   if (this->update_rate_ > 0 &&
       (cur_time-this->last_time_).Double() < (1.0/this->update_rate_))
     return;
-    
+
   if (this->ft_connect_count_ == 0)
     return;
 
@@ -196,7 +196,7 @@ void GazeboRosFT::UpdateChild()
 
   this->pub_.publish(this->wrench_msg_);
   this->lock_.unlock();
-  
+
   // save last time stamp
   this->last_time_ = cur_time;
 }

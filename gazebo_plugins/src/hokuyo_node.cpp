@@ -37,13 +37,13 @@
 
 void callback(gazebo_plugins::HokuyoConfig &config, uint32_t level)
 {
-  ROS_INFO("Reconfigure request : %f %f %i %i %i %s %i %s %f %i",
+  ROS_INFO_NAMED("hokuyo_node", "Reconfigure request : %f %f %i %i %i %s %i %s %f %i",
            config.min_ang, config.max_ang, (int)config.intensity, config.cluster, config.skip,
            config.port.c_str(), (int)config.calibrate_time, config.frame_id.c_str(), config.time_offset, (int)config.allow_unsafe_settings);
-  
+
   // do nothing for now
 
-  ROS_INFO("Reconfigure to : %f %f %i %i %i %s %i %s %f %i",
+  ROS_INFO_NAMED("hokuyo_node", "Reconfigure to : %f %f %i %i %i %s %i %s %f %i",
            config.min_ang, config.max_ang, (int)config.intensity, config.cluster, config.skip,
            config.port.c_str(), (int)config.calibrate_time, config.frame_id.c_str(), config.time_offset, (int)config.allow_unsafe_settings);
 }
@@ -54,8 +54,7 @@ int main(int argc, char **argv)
   dynamic_reconfigure::Server<gazebo_plugins::HokuyoConfig> srv;
   dynamic_reconfigure::Server<gazebo_plugins::HokuyoConfig>::CallbackType f = boost::bind(&callback, _1, _2);
   srv.setCallback(f);
-  ROS_INFO("Starting to spin...");
+  ROS_INFO_NAMED("hokuyo_node", "Starting to spin...");
   ros::spin();
   return 0;
 }
-

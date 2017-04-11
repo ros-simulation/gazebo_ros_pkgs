@@ -5,14 +5,14 @@
   <property name="DY" value="0.60" />
   <property name="DZ" value="0.1" />
 
-  <xacro:macro name="tricycle_chassis" params="name parent xyz rpy meshes">   
-    
+  <xacro:macro name="tricycle_chassis" params="name parent xyz rpy meshes">
+
   <!-- Chassis -->
   <joint name="${parent}_${name}_joint" type="fixed">
     <origin xyz="${xyz}" rpy="${rpy}"/>
     <parent link="${parent}"/>
     <child link="${name}"/>
-  </joint>  
+  </joint>
   <link name="${name}">
     <visual name="${name}_visual">
       <geometry name="${name}_geometry">
@@ -27,7 +27,7 @@
     </collision>
     <xacro:box_inertial x="${DX}" y="${DY}"  z="${DZ}" mass="100.0"/>
   </link>
-  
+
   <gazebo reference="${name}">
     <material value="Gazebo/Grey"/>
   </gazebo>

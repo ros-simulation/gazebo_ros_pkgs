@@ -14,8 +14,8 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of the copyright holder nor the names of its 
- *     contributors may be used to endorse or promote products derived from 
+ *   * Neither the name of the copyright holder nor the names of its
+ *     contributors may be used to endorse or promote products derived from
  *     this software without specific prior written permission.
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -54,7 +54,7 @@ std::string GazeboRos ::resolveTF(const std::string &name) {
 }
 void GazeboRos ::readCommonParameter() {
 
-    ROS_INFO("Starting plugin %s!", info());
+    ROS_INFO_NAMED("utils", "Starting plugin %s!", info());
 
     std::string debugLevel;
     getParameter<std::string>(debugLevel, "rosDebugLevel", "na");
@@ -80,7 +80,7 @@ void GazeboRos ::readCommonParameter() {
         }
     }
     if (sdf_->HasElement("rosDebugLevel")) {
-        ROS_INFO("%s: <rosDebugLevel> = %s", info(), debugLevel.c_str());
+        ROS_INFO_NAMED("utils", "%s: <rosDebugLevel> = %s", info(), debugLevel.c_str());
     }
 
 
@@ -90,14 +90,14 @@ void GazeboRos ::readCommonParameter() {
         tf_prefix_ = namespace_;
         boost::trim_right_if(tf_prefix_,boost::is_any_of("/"));
     }
-    ROS_INFO("%s: <tf_prefix> = %s", info(), tf_prefix_.c_str());
+    ROS_INFO_NAMED("utils", "%s: <tf_prefix> = %s", info(), tf_prefix_.c_str());
 }
 
 
 void GazeboRos ::getParameterBoolean(bool &_value, const char *_tag_name, const bool &_default) {
     _value = _default;
     if (!sdf_->HasElement(_tag_name)) {
-        ROS_WARN("%s: missing <%s> default is %s",
+        ROS_WARN_NAMED("utils", "%s: missing <%s> default is %s",
                  info(), _tag_name,  (_default?"ture":"false"));
     } else {
         getParameterBoolean(_value, _tag_name);
@@ -118,11 +118,11 @@ void GazeboRos ::getParameterBoolean(bool &_value, const char *_tag_name) {
         }
         else
         {
-            ROS_WARN("%s: <%s> must be either true or false",
+            ROS_WARN_NAMED("utils", "%s: <%s> must be either true or false",
                      info(), _tag_name);
         }
     }
-    ROS_DEBUG("%s: <%s> = %s",
+    ROS_DEBUG_NAMED("utils", "%s: <%s> = %s",
               info(), _tag_name,  (_value?"ture":"false"));
 
 }
@@ -150,6 +150,3 @@ void GazeboRos::isInitialized() {
         return;
     }
 }
-
-
-

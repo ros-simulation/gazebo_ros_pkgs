@@ -2,8 +2,53 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.4.9 (2015-08-16)
+2.5.10 (2017-03-03)
+-------------------
+* Revert catkin warnings to fix regressions (problems with catkin -lpthreads errors)
+  For reference and reasons, please check:
+  https://discourse.ros.org/t/need-to-sync-new-release-of-rqt-topic-indigo-jade-kinetic/1410/4
+  * Revert "Fix gazebo catkin warning, cleanup CMakeLists (`#537 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/537>`_)"
+  This reverts commit 5a0305fcb97864b66bc2e587fc0564435b4f2034.
+  * Revert "Fix gazebo and sdformat catkin warnings"
+  This reverts commit 11f95d25dcd32faccd2401d45c722f7794c7542c.
+* Contributors: Jose Luis Rivero
+
+2.5.9 (2017-02-20)
 ------------------
+* Fix gazebo catkin warning, cleanup CMakeLists (`#537 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/537>`_)
+* Namespace console output (`#543 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/543>`_)
+* Print name of joint with wrong interface
+* Removed all trailing whitespace
+* Change boost::shared_ptr to urdf::JointConstSharedPtr
+* Contributors: Bence Magyar, Dave Coleman, Jochen Sprickerhof
+
+2.5.8 (2016-12-06)
+------------------
+
+2.5.7 (2016-06-10)
+------------------
+* delete CATKIN_IGNORE in gazebo_ros_control (`#456 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/456>`_)
+* Contributors: Jackie Kay, Jose Luis Rivero
+
+2.5.3 (2016-04-11)
+------------------
+
+2.5.2 (2016-02-25)
+------------------
+* clean up merge from indigo-devel
+* merging from indigo-devel
+* Use Joint::SetParam for joint velocity motors
+  Before gazebo5, Joint::SetVelocity and SetMaxForce
+  were used to set joint velocity motors.
+  The API has changed in gazebo5, to use Joint::SetParam
+  instead.
+  The functionality is still available through the SetParam API.
+  cherry-picked from indigo-devel
+  Add ifdefs to fix build with gazebo2
+  It was broken by `#315 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/315>`_.
+  Fixes `#321 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/321>`_.
+* 2.4.9
+* Generate changelog
 * Import changes from jade-branch
 * add missing dependencies
 * Fix DefaultRobotHWSim puts robotNamespace twice
@@ -17,6 +62,66 @@ Changelog for package gazebo_ros_control
   This commit change these names to:
   - /rrbot/gazebo_ros_control/pid_gains/*
   - /rrbot/joint_limits/*
+* Add ifdefs to fix build with gazebo2
+  It was broken by `#315 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/315>`_.
+  Fixes `#321 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/321>`_.
+* Use Joint::SetParam for joint velocity motors
+  Before gazebo5, Joint::SetVelocity and SetMaxForce
+  were used to set joint velocity motors.
+  The API has changed in gazebo5, to use Joint::SetParam
+  instead.
+  The functionality is still available through the SetParam API.
+* Set GAZEBO_CXX_FLAGS to fix c++11 compilation errors
+* Contributors: Akiyoshi Ochiai, John Hsu, Jose Luis Rivero, Steven Peters, ipa-fxm
+
+2.5.1 (2015-08-16)
+------------------
+* Fix DefaultRobotHWSim puts robotNamespace twice
+  DefaultRobotHWSim::initSim() member function uses both
+  namespaced NodeHandle and robot_namespace string to create
+  parameter names.
+  For example,  if a robotNamespace is "rrbot",
+  DefaultRobotHWSim tries to get parameters from following names:
+  - /rrbot/rrbot/gazebo_ros_control/pid_gains/*
+  - /rrbot/rrbot/joint_limits/*
+  This commit change these names to:
+  - /rrbot/gazebo_ros_control/pid_gains/*
+  - /rrbot/joint_limits/*
+* Added a comment about the need of libgazebo5-dev in runtime
+* Added elevator plugin
+* Use c++11
+* run_depend on libgazebo5-dev (`#323 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323>`_)
+  Declare the dependency.
+  It can be fixed later if we don't want it.
+* Contributors: Akiyoshi Ochiai, Jose Luis Rivero, Nate Koenig, Steven Peters
+
+* Fix DefaultRobotHWSim puts robotNamespace twice
+  DefaultRobotHWSim::initSim() member function uses both
+  namespaced NodeHandle and robot_namespace string to create
+  parameter names.
+  For example,  if a robotNamespace is "rrbot",
+  DefaultRobotHWSim tries to get parameters from following names:
+  - /rrbot/rrbot/gazebo_ros_control/pid_gains/*
+  - /rrbot/rrbot/joint_limits/*
+  This commit change these names to:
+  - /rrbot/gazebo_ros_control/pid_gains/*
+  - /rrbot/joint_limits/*
+* Added a comment about the need of libgazebo5-dev in runtime
+* Added elevator plugin
+* Use c++11
+* run_depend on libgazebo5-dev
+* Contributors: Akiyoshi Ochiai, Jose Luis Rivero, Nate Koenig, Steven Peters
+
+2.5.0 (2015-04-30)
+------------------
+* run_depend on libgazebo5-dev instead of gazebo5
+* Changed the rosdep key for gazebo to gazebo5, for Jade Gazebo5 will be used.
+* Contributors: Steven Peters, William Woodall
+
+2.4.9 (2015-08-16)
+------------------
+* Import changes from jade-branch
+* add missing dependencies
 * Add ifdefs to fix build with gazebo2
   It was broken by `#315 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/315>`_.
   Fixes `#321 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/321>`_.

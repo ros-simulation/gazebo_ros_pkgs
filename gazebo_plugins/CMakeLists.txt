@@ -1,25 +1,26 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gazebo_plugins)
 
+option(ENABLE_DISPLAY_TESTS "Enable the building of tests that requires a display" OFF)
+
 find_package(catkin REQUIRED COMPONENTS 
-  message_generation 
-  gazebo_msgs 
-  roscpp 
-  rospy 
-  nodelet 
-  angles 
-  std_srvs 
-  geometry_msgs 
-  sensor_msgs 
-  nav_msgs 
-  urdf 
-  tf 
-  tf2_ros 
-  dynamic_reconfigure 
-  driver_base 
-  rosgraph_msgs 
-  trajectory_msgs 
-  image_transport 
+  message_generation
+  gazebo_msgs
+  roscpp
+  rospy
+  nodelet
+  angles
+  std_srvs
+  geometry_msgs
+  sensor_msgs
+  nav_msgs
+  urdf
+  tf
+  tf2_ros
+  dynamic_reconfigure
+  rosgraph_msgs
+  trajectory_msgs
+  image_transport
   rosconsole
   cv_bridge
   polled_camera
@@ -39,7 +40,8 @@ else()
 endif()
 
 # Depend on system install of Gazebo and SDFormat
-find_package(gazebo REQUIRED)
+find_package(GAZEBO REQUIRED)
+find_package(SDFormat REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
@@ -72,11 +74,15 @@ link_directories(
   ${OGRE_LIBRARY_DIRS}
   ${OGRE-Terrain_LIBRARY_DIRS}
   ${OGRE-Paging_LIBRARY_DIRS}
+  ${catkin_LIBRARY_DIRS}
 )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
-if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
+if (NOT GAZEBO_VERSION VERSION_LESS 6.0)
   catkin_package(  INCLUDE_DIRS include LIBRARIES gazebo_ros_elevator)
+endif()
+
+if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
+  catkin_package(INCLUDE_DIRS include LIBRARIES gazebo_ros_harness)
 endif()
 
 catkin_package(
@@ -97,45 +103,46 @@ catkin_package(
   gazebo_ros_imu_sensor
   gazebo_ros_f3d 
   gazebo_ros_ft_sensor
-  gazebo_ros_bumper 
-  gazebo_ros_template 
-  gazebo_ros_projector 
-  gazebo_ros_prosilica 
-  gazebo_ros_force 
-  gazebo_ros_joint_trajectory 
-  gazebo_ros_joint_state_publisher 
+  gazebo_ros_bumper
+  gazebo_ros_template
+  gazebo_ros_projector
+  gazebo_ros_prosilica
+  gazebo_ros_force
+  gazebo_ros_joint_trajectory
+  gazebo_ros_joint_state_publisher
   gazebo_ros_joint_pose_trajectory
   gazebo_ros_diff_drive
   gazebo_ros_tricycle_drive
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
   gazebo_ros_planar_move
-  
-  CATKIN_DEPENDS 
-  message_generation 
-  gazebo_msgs 
-  roscpp 
-  rospy 
-  nodelet 
-  angles 
-  std_srvs 
-  geometry_msgs 
-  sensor_msgs 
-  nav_msgs 
-  urdf 
-  tf 
+  gazebo_ros_range
+  gazebo_ros_vacuum_gripper
+
+  CATKIN_DEPENDS
+  message_generation
+  gazebo_msgs
+  roscpp
+  rospy
+  nodelet
+  angles
+  std_srvs
+  geometry_msgs
+  sensor_msgs
+  nav_msgs
+  urdf
+  tf
   tf2_ros
-  dynamic_reconfigure 
-  driver_base 
-  rosgraph_msgs 
-  trajectory_msgs 
-  image_transport 
+  dynamic_reconfigure
+  rosgraph_msgs
+  trajectory_msgs
+  image_transport
   rosconsole
   camera_info_manager
   std_msgs
-  DEPENDS 
-    gazebo 
-    SDF
+  DEPENDS
+    GAZEBO
+    SDFormat
   )
 add_dependencies(${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
@@ -175,7 +182,7 @@ add_library(gazebo_ros_camera src/gazebo_ros_camera.cpp)
 add_dependencies(gazebo_ros_camera ${PROJECT_NAME}_gencfg)
 target_link_libraries(gazebo_ros_camera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
 
-if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
+if (NOT GAZEBO_VERSION VERSION_LESS 6.0)
   add_library(gazebo_ros_elevator src/gazebo_ros_elevator.cpp)
   add_dependencies(gazebo_ros_elevator ${PROJECT_NAME}_gencfg)
   target_link_libraries(gazebo_ros_elevator ${GAZEBO_LIBRARIES} ElevatorPlugin ${catkin_LIBRARIES})
@@ -196,6 +203,13 @@ target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_camera_utils ${GAZEBO_
 add_library(gazebo_ros_gpu_laser src/gazebo_ros_gpu_laser.cpp)
 target_link_libraries(gazebo_ros_gpu_laser ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} GpuRayPlugin)
 
+if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
+  add_library(gazebo_ros_harness src/gazebo_ros_harness.cpp)
+  add_dependencies(gazebo_ros_harness ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(gazebo_ros_harness ${GAZEBO_LIBRARIES}
+    ${Boost_LIBRARIES} HarnessPlugin ${catkin_LIBRARIES})
+endif()
+
 add_library(gazebo_ros_laser src/gazebo_ros_laser.cpp)
 target_link_libraries(gazebo_ros_laser ${GAZEBO_LIBRARIES} RayPlugin ${catkin_LIBRARIES})
 
@@ -215,7 +229,7 @@ add_library(gazebo_ros_f3d src/gazebo_ros_f3d.cpp)
 target_link_libraries(gazebo_ros_f3d ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_bumper src/gazebo_ros_bumper.cpp)
-add_dependencies(gazebo_ros_bumper gazebo_msgs_gencpp)
+add_dependencies(gazebo_ros_bumper ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_bumper ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ContactPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_projector src/gazebo_ros_projector.cpp)
@@ -229,18 +243,18 @@ add_library(gazebo_ros_force src/gazebo_ros_force.cpp)
 target_link_libraries(gazebo_ros_force ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_joint_trajectory src/gazebo_ros_joint_trajectory.cpp)
-add_dependencies(gazebo_ros_joint_trajectory gazebo_msgs_gencpp)
+add_dependencies(gazebo_ros_joint_trajectory ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_joint_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 
 add_library(gazebo_ros_joint_state_publisher src/gazebo_ros_joint_state_publisher.cpp)
 set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES LINK_FLAGS "${ld_flags}")
 set_target_properties(gazebo_ros_joint_state_publisher PROPERTIES COMPILE_FLAGS "${cxx_flags}")
-add_dependencies(gazebo_ros_joint_state_publisher gazebo_msgs_gencpp)
+add_dependencies(gazebo_ros_joint_state_publisher ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_joint_state_publisher ${GAZEBO_LIBRARIES} ${SDFormat_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_joint_pose_trajectory src/gazebo_ros_joint_pose_trajectory.cpp)
-add_dependencies(gazebo_ros_joint_pose_trajectory gazebo_msgs_gencpp)
+add_dependencies(gazebo_ros_joint_pose_trajectory ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_joint_pose_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_diff_drive src/gazebo_ros_diff_drive.cpp)
@@ -269,6 +283,9 @@ target_link_libraries(gazebo_ros_ft_sensor ${GAZEBO_LIBRARIES} ${catkin_LIBRARIE
 add_library(gazebo_ros_range src/gazebo_ros_range.cpp)
 target_link_libraries(gazebo_ros_range ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} RayPlugin)
 
+add_library(gazebo_ros_vacuum_gripper src/gazebo_ros_vacuum_gripper.cpp)
+target_link_libraries(gazebo_ros_vacuum_gripper ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 ##
 ## Add your new plugin here
 ##
@@ -277,9 +294,9 @@ target_link_libraries(gazebo_ros_range ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} $
 add_library(gazebo_ros_template src/gazebo_ros_template.cpp)
 target_link_libraries(gazebo_ros_template ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-install(TARGETS 
-  hokuyo_node 
-  vision_reconfigure 
+install(TARGETS
+  hokuyo_node
+  vision_reconfigure
   camera_synchronizer
   gazebo_ros_utils
   gazebo_ros_camera_utils
@@ -310,15 +327,23 @@ install(TARGETS
   gazebo_ros_skid_steer_drive
   gazebo_ros_video
   gazebo_ros_planar_move
-  pub_joint_trajectory_test  
+  gazebo_ros_vacuum_gripper
+  pub_joint_trajectory_test
   gazebo_ros_gpu_laser
   gazebo_ros_range
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
 
-if (GAZEBO_VERSION VERSION_GREATER 6.0 OR GAZEBO_VERSION VERSION_EQUAL 6.0)
+if (NOT GAZEBO_VERSION VERSION_LESS 6.0)
   install(TARGETS gazebo_ros_elevator
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    )
+endif()
+
+if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
+  install(TARGETS gazebo_ros_harness
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     )
@@ -342,10 +367,28 @@ install(DIRECTORY test
   )
 
 # Tests
+# These need to be run with -j1 flag because gazebo can't be run
+# in parallel.
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest_gtest(set_model_state-test
-                    test/set_model_state_test/set_model_state_test.test 
+                    test/set_model_state_test/set_model_state_test.test
                     test/set_model_state_test/set_model_state_test.cpp)
+  add_rostest(test/range/range_plugin.test)
   target_link_libraries(set_model_state-test ${catkin_LIBRARIES})
+
+  if (ENABLE_DISPLAY_TESTS)
+    add_rostest_gtest(depth_camera-test
+                      test/camera/depth_camera.test
+                      test/camera/depth_camera.cpp)
+    target_link_libraries(depth_camera-test ${catkin_LIBRARIES})
+    add_rostest_gtest(multicamera-test
+                      test/camera/multicamera.test
+                      test/camera/multicamera.cpp)
+    target_link_libraries(multicamera-test ${catkin_LIBRARIES})
+    add_rostest_gtest(camera-test
+                      test/camera/camera.test
+                      test/camera/camera.cpp)
+    target_link_libraries(camera-test ${catkin_LIBRARIES})
+  endif()
 endif()

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<robot  
+<robot
   xmlns:xacro="http://ros.org/wiki/xacro">
   <property name="M_PI" value="3.1415926535897931" />
 
-  <xacro:macro name="pioneer_wheel" params="side parent xyz rpy radius meshes">   
+  <xacro:macro name="pioneer_wheel" params="side parent xyz rpy radius meshes">
 
   <!-- Hubcap -->
   <joint name="${side}_hub_joint" type="continuous">
@@ -72,7 +72,7 @@
     <material value="Gazebo/Black"/>
   </gazebo>
 
-  
+
   </xacro:macro>
 
 </robot>

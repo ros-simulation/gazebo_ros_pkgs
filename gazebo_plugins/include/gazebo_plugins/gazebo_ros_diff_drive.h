@@ -29,7 +29,7 @@
 /*
  * \file  gazebo_ros_diff_drive.h
  *
- * \brief A differential drive plugin for gazebo. Based on the diffdrive plugin 
+ * \brief A differential drive plugin for gazebo. Based on the diffdrive plugin
  * developed for the erratic robot (see copyright notice above). The original
  * plugin can be found in the ROS package gazebo_erratic_plugins.
  *
@@ -113,7 +113,7 @@ namespace gazebo {
       ros::Subscriber cmd_vel_subscriber_;
       boost::shared_ptr<tf::TransformBroadcaster> transform_broadcaster_;
       sensor_msgs::JointState joint_state_;
-      ros::Publisher joint_state_publisher_;      
+      ros::Publisher joint_state_publisher_;
       nav_msgs::Odometry odom_;
       std::string tf_prefix_;
 
@@ -125,6 +125,7 @@ namespace gazebo {
       std::string odometry_frame_;
       std::string robot_base_frame_;
       bool publish_tf_;
+      bool legacy_mode_;
       // Custom Callback Queue
       ros::CallbackQueue queue_;
       boost::thread callback_queue_thread_;
@@ -141,11 +142,11 @@ namespace gazebo {
       double update_rate_;
       double update_period_;
       common::Time last_update_time_;
-      
+
       OdomSource odom_source_;
       geometry_msgs::Pose2D pose_encoder_;
       common::Time last_odom_update_;
-      
+
     // Flags
     bool publishWheelTF_;
     bool publishWheelJointState_;

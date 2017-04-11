@@ -139,7 +139,7 @@ class LinkPoseTest(unittest.TestCase):
           if self.link_error_rms < self.tolerance:
             if self.link_error_max < self.max_error:
               self.success = True
-        
+
 
     def test_link_pose(self):
         print "LNK\n"
@@ -167,7 +167,7 @@ class LinkPoseTest(unittest.TestCase):
             self.checkPose()
             time.sleep(0.1)
         self.assert_(self.success)
-        
+
 if __name__ == '__main__':
     print "Waiting for test to start at time "
     rostest.run(PKG, sys.argv[0], LinkPoseTest, sys.argv) #, text_mode=True)
