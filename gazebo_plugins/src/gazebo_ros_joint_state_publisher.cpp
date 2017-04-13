@@ -117,12 +117,14 @@ void GazeboRosJointStatePublisher::publishJointStates() {
     joint_state_.header.stamp = current_time;
     joint_state_.name.resize ( joints_.size() );
     joint_state_.position.resize ( joints_.size() );
+    joint_state_.velocity.resize ( joints_.size() );
 
     for ( int i = 0; i < joints_.size(); i++ ) {
         physics::JointPtr joint = joints_[i];
         math::Angle angle = joint->GetAngle ( 0 );
         joint_state_.name[i] = joint->GetName();
         joint_state_.position[i] = angle.Radian () ;
+        joint_state_.velocity[i] = joint->GetVelocity ( 0 );
     }
     joint_state_publisher_.publish ( joint_state_ );
 }
