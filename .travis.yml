@@ -1,11 +1,16 @@
 sudo: required
 dist: trusty
 language: generic
+cache: apt
 compiler:
   - gcc
+  - python
+
 env:
   global:
     - CI_ROS_DISTRO=jade
+virtualenv:
+    system_site_packages: true 
 
 before_install:
   - export CI_SOURCE_PATH=$(pwd)
@@ -28,10 +33,13 @@ before_install:
                                 python-catkin-pkg         
                                 python-rospkg             
                                 python-vcstools
+                                lcov
   - sudo `which rosdep` init
   - rosdep update
   # Use rosdep to install dependencies
   - rosdep install --default-yes --from-paths ./ --rosdistro $CI_ROS_DISTRO
+  # Coveralls for coverage
+  - pip install --user cpp-coveralls
 
 install:
   # Create workspace
@@ -48,12 +56,21 @@ before_script:
 
 script:
   - cd ~/ros/ws_$REPOSITORY_NAME
-  - catkin build -j4 --verbose --summary
+  - catkin build -j4 --verbose --summary -DCMAKE_CXX_FLAGS="-g -O0 --coverage"
   # Run tests
   - catkin run_tests -j1 # have to run only 1 test at a time to ensure no gazebo instances collide
   # catkin run_tests always returns 0, use catkin_test_results to check for errors
   # https://github.com/catkin/catkin_tools/issues/245
   - catkin_test_results
+
+after_success:
+
+after_success:
+  - cd ${TRAVIS_BUILD_DIR}
+  - lcov --directory . --capture --output-file coverage.info # capture coverage info
+  - lcov --remove coverage.info 'tests/*' '/usr/*' --output-file coverage.info # filter out system and test code
+  - lcov --list coverage.info # debug before upload
+  - coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info # uploads to coveralls
 
 notifications:
   email: false
