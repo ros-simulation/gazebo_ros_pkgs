@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.11 (2017-04-18)
+-------------------
 * Changed the spawn model methods to spawn also lights. (`#511 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/511>`_)
 * Change build system to set DEPEND on Gazebo/SDFormat (fix catkin warning)
   Added missing DEPEND clauses to catkin_package to fix gazebo catkin warning.

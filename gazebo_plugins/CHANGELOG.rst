@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.11 (2017-04-18)
+-------------------
 * Change build system to set DEPEND on Gazebo/SDFormat (fix catkin warning)
   Added missing DEPEND clauses to catkin_package to fix gazebo catkin warning.
   Note that after the change problems could appear related to -lpthreads
