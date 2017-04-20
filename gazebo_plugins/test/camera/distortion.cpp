@@ -1,10 +1,6 @@
-// Core includes
-#include <fstream>
-
 // OpenCV includes
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 // Test includes
@@ -14,21 +10,9 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include <tf/transform_datatypes.h>
 #include <gazebo_msgs/SetModelState.h>
 
 using namespace cv;
-
-
-// This test currently tests pincushion distortion only.
-// There is not a way to disable border cropping in Gazebo yet, so the
-// actual distortion parameters for barrel distortion do not match those
-// specified in the SDF file (and which are published by ROS).
-//
-// Once border crop can be disabled with an SDF flag, barrel distortion can
-// be added by duplicating the test case, but with a different .world file
-// that contains a barrel-distorted camera. The same program logic should work
-// once the crop border issue is resolved.
 
 void diffBetween(Mat& orig, Mat& diff, long& total_diff)
 {
@@ -49,7 +33,7 @@ void diffBetween(Mat& orig, Mat& diff, long& total_diff)
   }
 }
 
-class Distortion2Test : public testing::Test
+class DistortionTest : public testing::Test
 {
  protected:
   ros::NodeHandle nh_;
@@ -87,7 +71,7 @@ class Distortion2Test : public testing::Test
   }
 };
 
-TEST_F(Distortion2Test, cameraDistortion2Test)
+TEST_F(DistortionTest, cameraDistortionTest)
 {
   ros::AsyncSpinner spinner(2);
   spinner.start();
@@ -96,8 +80,8 @@ TEST_F(Distortion2Test, cameraDistortion2Test)
   cam_sub_undistorted_ =
       trans.subscribe("/camera_undistorted/image_raw",
                       1,
-                      boost::bind(&Distortion2Test::imageCallback,
-                      dynamic_cast<Distortion2Test*>(this), _1, 0)
+                      boost::bind(&DistortionTest::imageCallback,
+                      dynamic_cast<DistortionTest*>(this), _1, 0)
                      );
 
   cam_info_distorted_ = nullptr;
@@ -106,14 +90,14 @@ TEST_F(Distortion2Test, cameraDistortion2Test)
   cam_sub_distorted_ =
       trans.subscribe("/camera_distorted/image_raw",
                       1,
-                      boost::bind(&Distortion2Test::imageCallback,
-                      dynamic_cast<Distortion2Test*>(this), _1, 1)
+                      boost::bind(&DistortionTest::imageCallback,
+                      dynamic_cast<DistortionTest*>(this), _1, 1)
                      );
   cam_info_distorted_sub_ =
       nh_.subscribe("/camera_distorted/camera_info",
                     1,
-                    &Distortion2Test::camInfoCallback,
-                    dynamic_cast<Distortion2Test*>(this)
+                    &DistortionTest::camInfoCallback,
+                    dynamic_cast<DistortionTest*>(this)
                    );
 
   // keep waiting until we have an image
@@ -176,75 +160,26 @@ TEST_F(Distortion2Test, cameraDistortion2Test)
 
   const double OFFSET = 0.01;
 
-  // test k1
-  distortion_coeffs.at<double>(0,0) += OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(0,0) -= OFFSET;
+  // test each parameter, varying one at a time
+  for(size_t i = 0; i < 5; ++i)
+  {
+    distortion_coeffs.at<double>(i,0) += OFFSET;
+    undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
+    diffBetween(fixed_crop, undistorted_crop, diff2);
+    EXPECT_GE(diff2, diff1);
+    distortion_coeffs.at<double>(i,0) -= OFFSET;
 
-  distortion_coeffs.at<double>(0,0) -= OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(0,0) += OFFSET;
-
-  // test k2
-  distortion_coeffs.at<double>(1,0) += OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(1,0) -= OFFSET;
-
-  distortion_coeffs.at<double>(1,0) -= OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(1,0) += OFFSET;
-
-  // test k3
-  distortion_coeffs.at<double>(4,0) += OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(4,0) -= OFFSET;
-
-  distortion_coeffs.at<double>(4,0) -= OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(4,0) += OFFSET;
-
-  // test p1 (t1)
-  distortion_coeffs.at<double>(2,0) += OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(2,0) -= OFFSET;
-
-  distortion_coeffs.at<double>(2,0) -= OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(2,0) += OFFSET;
-
-  // test p2 (t2)
-  distortion_coeffs.at<double>(3,0) += OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(3,0) -= OFFSET;
-
-  distortion_coeffs.at<double>(3,0) -= OFFSET;
-  undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-  diffBetween(fixed_crop, undistorted_crop, diff2);
-  EXPECT_GE(diff2, diff1);
-  distortion_coeffs.at<double>(3,0) += OFFSET;
+    distortion_coeffs.at<double>(i,0) -= OFFSET;
+    undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
+    diffBetween(fixed_crop, undistorted_crop, diff2);
+    EXPECT_GE(diff2, diff1);
+    distortion_coeffs.at<double>(i,0) += OFFSET;
+  }
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "gazebo_camera_distortion2_test");
+  ros::init(argc, argv, "gazebo_camera_distortion_test");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
