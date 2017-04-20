@@ -183,6 +183,8 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   gazebonode_->Init(world_name);
   //stat_sub_ = gazebonode_->Subscribe("~/world_stats", &GazeboRosApiPlugin::publishSimTime, this); // TODO: does not work in server plugin?
   factory_pub_ = gazebonode_->Advertise<gazebo::msgs::Factory>("~/factory");
+  factory_light_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/factory/light");
+  light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
 
@@ -245,6 +247,15 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                    ros::VoidPtr(), &gazebo_queue_);
   delete_model_service_ = nh_->advertiseService(delete_aso);
 
+  // Advertise delete service for lights on the custom queue
+  std::string delete_light_service_name("delete_light");
+  ros::AdvertiseServiceOptions delete_light_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::DeleteLight>(
+                                                                   delete_light_service_name,
+                                                                   boost::bind(&GazeboRosApiPlugin::deleteLight,this,_1,_2),
+                                                                   ros::VoidPtr(), &gazebo_queue_);
+  delete_light_service_ = nh_->advertiseService(delete_light_aso);
+
   // Advertise more services on the custom queue
   std::string get_model_properties_service_name("get_model_properties");
   ros::AdvertiseServiceOptions get_model_properties_aso =
@@ -298,6 +309,24 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                     boost::bind(&GazeboRosApiPlugin::getLinkState,this,_1,_2),
                                                                     ros::VoidPtr(), &gazebo_queue_);
   get_link_state_service_ = nh_->advertiseService(get_link_state_aso);
+
+  // Advertise more services on the custom queue
+  std::string get_light_properties_service_name("get_light_properties");
+  ros::AdvertiseServiceOptions get_light_properties_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::GetLightProperties>(
+                                                                          get_light_properties_service_name,
+                                                                          boost::bind(&GazeboRosApiPlugin::getLightProperties,this,_1,_2),
+                                                                          ros::VoidPtr(), &gazebo_queue_);
+  get_light_properties_service_ = nh_->advertiseService(get_light_properties_aso);
+
+  // Advertise more services on the custom queue
+  std::string set_light_properties_service_name("set_light_properties");
+  ros::AdvertiseServiceOptions set_light_properties_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetLightProperties>(
+                                                                          set_light_properties_service_name,
+                                                                          boost::bind(&GazeboRosApiPlugin::setLightProperties,this,_1,_2),
+                                                                          ros::VoidPtr(), &gazebo_queue_);
+  set_light_properties_service_ = nh_->advertiseService(set_light_properties_aso);
 
   // Advertise more services on the custom queue
   std::string get_physics_properties_service_name("get_physics_properties");
@@ -517,17 +546,17 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
 bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
                                         gazebo_msgs::SpawnModel::Response &res)
 {
-  // get name space for the corresponding model plugins
+  // get namespace for the corresponding model plugins
   robot_namespace_ = req.robot_namespace;
 
-  // incoming robot model string
+  // incoming entity string
   std::string model_xml = req.model_xml;
 
   if (!isURDF(model_xml))
   {
-    ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model format is not URDF.");
+    ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - entity format is invalid.");
     res.success = false;
-    res.status_message = "SpawnModel: Failure - model format is not URDF.";
+    res.status_message = "SpawnModel: Failure - entity format is invalid.";
     return false;
   }
 
@@ -564,7 +593,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
       {
         ROS_FATAL_NAMED("api_plugin", "Package[%s] does not have a path",package_name.c_str());
         res.success = false;
-        res.status_message = std::string("urdf reference package name does not exist: ")+package_name;
+        res.status_message = "urdf reference package name does not exist: " + package_name;
         return false;
       }
       ROS_DEBUG_ONCE_NAMED("api_plugin", "Package name [%s] has path [%s]", package_name.c_str(), package_path.c_str());
@@ -584,10 +613,10 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
 bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
                                        gazebo_msgs::SpawnModel::Response &res)
 {
-  // incoming robot name
+  // incoming entity name
   std::string model_name = req.model_name;
 
-  // get name space for the corresponding model plugins
+  // get namespace for the corresponding model plugins
   robot_namespace_ = req.robot_namespace;
 
   // get initial pose of model
@@ -640,6 +669,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
     if (!this->robot_namespace_.empty())
     {
       // Get root element for SDF
+      // TODO: implement the spawning also with <light></light> and <model></model>
       TiXmlNode* model_tixml = gazebo_model_xml.FirstChild("sdf");
       model_tixml = (!model_tixml) ?
           gazebo_model_xml.FirstChild("gazebo") : model_tixml;
@@ -678,7 +708,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   {
     ROS_ERROR_NAMED("api_plugin", "GazeboRosApiPlugin SpawnModel Failure: input xml format not recognized");
     res.success = false;
-    res.status_message = std::string("GazeboRosApiPlugin SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.");
+    res.status_message = "GazeboRosApiPlugin SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.";
     return true;
   }
 
@@ -730,7 +760,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
     if (ros::Time::now() > timeout)
     {
       res.success = false;
-      res.status_message = std::string("DeleteModel: Model pushed to delete queue, but delete service timed out waiting for model to disappear from simulation");
+      res.status_message = "DeleteModel: Model pushed to delete queue, but delete service timed out waiting for model to disappear from simulation";
       return true;
     }
     {
@@ -743,7 +773,44 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
 
   // set result
   res.success = true;
-  res.status_message = std::string("DeleteModel: successfully deleted model");
+  res.status_message = "DeleteModel: successfully deleted model";
+  return true;
+}
+
+bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
+                                     gazebo_msgs::DeleteLight::Response &res)
+{
+  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+
+  if (phy_light == NULL)
+  {
+    res.success = false;
+    res.status_message = "DeleteLight: Requested light " + req.light_name + " not found!";
+  }
+  else
+  {
+    gazebo::msgs::Request* msg = gazebo::msgs::CreateRequest("entity_delete", req.light_name);
+    request_pub_->Publish(*msg, true);
+
+    res.success = false;
+
+    for (int i = 0; i < 100; i++)
+    {
+      phy_light = world_->Light(req.light_name);
+      if (phy_light == NULL)
+      {
+        res.success = true;
+        res.status_message = "DeleteLight: " + req.light_name + " successfully deleted";
+        return true;
+      }
+      // Check every 100ms
+      usleep(100000);
+    }
+  }
+
+  res.status_message = "DeleteLight: Timeout reached while removing light \"" + req.light_name
+                       + "\"";
+
   return true;
 }
 
@@ -1055,6 +1122,69 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
 
   res.success = true;
   res.status_message = "GetLinkState: got state";
+  return true;
+}
+
+bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Request &req,
+                                               gazebo_msgs::GetLightProperties::Response &res)
+{
+  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+
+  if (phy_light == NULL)
+  {
+      res.success = false;
+      res.status_message = "getLightProperties: Requested light " + req.light_name + " not found!";
+  }
+  else
+  {
+    gazebo::msgs::Light light;
+    phy_light->FillMsg(light);
+
+    res.diffuse.r = light.diffuse().r();
+    res.diffuse.g = light.diffuse().g();
+    res.diffuse.b = light.diffuse().b();
+    res.diffuse.a = light.diffuse().a();
+
+    res.attenuation_constant = light.attenuation_constant();
+    res.attenuation_linear = light.attenuation_linear();
+    res.attenuation_quadratic = light.attenuation_quadratic();
+
+    res.success = true;
+  }
+
+  return true;
+}
+
+bool GazeboRosApiPlugin::setLightProperties(gazebo_msgs::SetLightProperties::Request &req,
+                                               gazebo_msgs::SetLightProperties::Response &res)
+{
+  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+
+  if (phy_light == NULL)
+  {
+    res.success = false;
+    res.status_message = "setLightProperties: Requested light " + req.light_name + " not found!";
+  }
+  else
+  {
+    gazebo::msgs::Light light;
+
+    phy_light->FillMsg(light);
+
+    light.mutable_diffuse()->set_r(req.diffuse.r);
+    light.mutable_diffuse()->set_g(req.diffuse.g);
+    light.mutable_diffuse()->set_b(req.diffuse.b);
+    light.mutable_diffuse()->set_a(req.diffuse.a);
+
+    light.set_attenuation_constant(req.attenuation_constant);
+    light.set_attenuation_linear(req.attenuation_linear);
+    light.set_attenuation_quadratic(req.attenuation_quadratic);
+
+    light_modify_pub_->Publish(light, true);
+
+    res.success = true;
+  }
+
   return true;
 }
 
@@ -1994,8 +2124,10 @@ void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
     model_xml.replace(pos1,pos2-pos1+2,std::string(""));
 }
 
-void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
-                                             gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q)
+void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml,
+                                             std::string model_name,
+                                             gazebo::math::Vector3 initial_xyz,
+                                             gazebo::math::Quaternion initial_q)
 {
   // This function can handle both regular SDF files and <include> SDFs that are used with the
   // Gazebo Model Database
@@ -2014,10 +2146,10 @@ void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml, st
   TiXmlElement* model_tixml = gazebo_tixml->FirstChildElement("model");
   if (model_tixml)
   {
-    // Update model name
+    // Update entity name
     if (model_tixml->Attribute("name") != NULL)
     {
-      // removing old model name
+      // removing old entity name
       model_tixml->RemoveAttribute("name");
     }
     // replace with user specified name
@@ -2158,7 +2290,7 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ga
   TiXmlElement* model_tixml = (gazebo_model_xml.FirstChildElement("robot"));
   if (model_tixml)
   {
-    // replace initial pose of robot
+    // replace initial pose of model
     // find first instance of xyz and rpy, replace with initial pose
     TiXmlElement* origin_key = model_tixml->FirstChildElement("origin");
 
@@ -2216,10 +2348,10 @@ void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::st
     ROS_WARN_NAMED("api_plugin", "Could not find <robot> element in URDF, name not replaced");
 }
 
-void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
+void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* model_xml)
 {
   TiXmlNode* child = 0;
-  child = robot_xml->IterateChildren(child);
+  child = model_xml->IterateChildren(child);
   while (child != NULL)
   {
     if (child->ValueStr().find(std::string("plugin")) == 0)
@@ -2239,13 +2371,19 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* robot_xml)
       }
     }
     walkChildAddRobotNamespace(child);
-    child = robot_xml->IterateChildren(child);
+    child = model_xml->IterateChildren(child);
   }
 }
 
 bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
                                          gazebo_msgs::SpawnModel::Response &res)
 {
+  std::string entity_type = gazebo_model_xml.RootElement()->FirstChild()->Value();
+  // Convert the entity type to lower case
+  std::transform(entity_type.begin(), entity_type.end(), entity_type.begin(), ::tolower);
+
+  bool isLight = (entity_type == "light");
+
   // push to factory iface
   std::ostringstream stream;
   stream << gazebo_model_xml;
@@ -2266,16 +2404,30 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   // todo: should wait for response response_sub_, check to see that if _msg->response == "nonexistant"
 
   gazebo::physics::ModelPtr model = world_->GetModel(model_name);
-  if (model)
+  gazebo::physics::LightPtr light = world_->Light(model_name);
+  if ((isLight && light != NULL) || (model != NULL))
   {
     ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model name %s already exist.",model_name.c_str());
     res.success = false;
-    res.status_message = "SpawnModel: Failure - model already exists.";
+    res.status_message = "SpawnModel: Failure - entity already exists.";
     return true;
   }
 
-  // Publish the factory message
-  factory_pub_->Publish(msg);
+  // for Gazebo 7 and up, use a different method to spawn lights
+  if (isLight)
+  {
+    // Publish the light message to spawn the light (Gazebo 7 and up)
+    sdf::SDF sdf_light;
+    sdf_light.SetFromString(gazebo_model_xml_string);
+    gazebo::msgs::Light msg = gazebo::msgs::LightFromSDF(sdf_light.Root()->GetElement("light"));
+    msg.set_name(model_name);
+    factory_light_pub_->Publish(msg);
+  }
+  else
+  {
+    // Publish the factory message
+    factory_pub_->Publish(msg);
+  }
   /// FIXME: should change publish to direct invocation World::LoadModel() and/or
   ///        change the poll for Model existence to common::Events based check.
 
@@ -2288,27 +2440,26 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
     if (ros::Time::now() > timeout)
     {
       res.success = false;
-      res.status_message = std::string("SpawnModel: Model pushed to spawn queue, but spawn service")
-        + std::string(" timed out waiting for model to appear in simulation under the name ")
-        + model_name;
+      res.status_message = "SpawnModel: Entity pushed to spawn queue, but spawn service timed out waiting for entity to appear in simulation under the name " + model_name;
       return true;
     }
 
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if (world_->GetModel(model_name))
+      if ((isLight && world_->Light(model_name) != NULL)
+          || (world_->GetModel(model_name) != NULL))
         break;
     }
 
     ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now()
-      << " for model " << model_name << " to spawn");
+      << " for entity " << model_name << " to spawn");
 
     usleep(2000);
   }
 
   // set result
   res.success = true;
-  res.status_message = std::string("SpawnModel: Successfully spawned model");
+  res.status_message = "SpawnModel: Successfully spawned entity";
   return true;
 }
 
