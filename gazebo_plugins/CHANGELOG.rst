@@ -2,6 +2,12 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Revert catkin warning fix (`#567 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/567>`_)
+  Many regressions in third party software (see https://github.com/yujinrobot/kobuki_desktop/issues/50)
+* Contributors: Jose Luis Rivero
+
 2.5.11 (2017-04-18)
 -------------------
 * Change build system to set DEPEND on Gazebo/SDFormat (fix catkin warning)

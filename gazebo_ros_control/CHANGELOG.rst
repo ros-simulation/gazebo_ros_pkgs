@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed broken gazebo_ros_control tutorial link (`#566 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/566>`_)
+* Contributors: Ian McMahon
+
 2.5.11 (2017-04-18)
 -------------------
 * Change build system to set DEPEND on Gazebo/SDFormat (fix catkin warning)
