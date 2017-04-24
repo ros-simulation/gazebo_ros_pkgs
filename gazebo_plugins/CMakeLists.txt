@@ -140,8 +140,8 @@ catkin_package(
   camera_info_manager
   std_msgs
   DEPENDS
-    GAZEBO
-    SDFormat
+    gazebo
+    SDF
   )
 add_dependencies(${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
