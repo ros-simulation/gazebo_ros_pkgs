@@ -35,7 +35,6 @@
   <depend>tf</depend>
   <depend>tf2_ros</depend>
   <depend>dynamic_reconfigure</depend>
-  <depend>driver_base</depend>
   <depend>rosgraph_msgs</depend>
   <depend>image_transport</depend>
   <depend>rosconsole</depend>
