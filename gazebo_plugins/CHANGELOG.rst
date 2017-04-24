@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.12 (2017-04-25)
+-------------------
 * Revert catkin warning fix (`#567 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/567>`_)
   Many regressions in third party software (see https://github.com/yujinrobot/kobuki_desktop/issues/50)
 * Contributors: Jose Luis Rivero
