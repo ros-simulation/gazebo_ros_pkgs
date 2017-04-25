@@ -374,10 +374,15 @@ if (CATKIN_ENABLE_TESTING)
 
   add_rostest(test/range/range_plugin.test)
 
-  add_rostest_gtest(distortion_test
-                    test/camera/distortion.test
+  add_rostest_gtest(distortion_barrel_test
+                    test/camera/distortion_barrel.test
                     test/camera/distortion.cpp)
-  target_link_libraries(distortion_test ${catkin_LIBRARIES})
+  target_link_libraries(distortion_barrel_test ${catkin_LIBRARIES})
+
+  add_rostest_gtest(distortion_pincushion_test
+                    test/camera/distortion_pincushion.test
+                    test/camera/distortion.cpp)
+  target_link_libraries(distortion_pincushion_test ${catkin_LIBRARIES})
 
   if (ENABLE_DISPLAY_TESTS)
     add_rostest_gtest(depth_camera-test

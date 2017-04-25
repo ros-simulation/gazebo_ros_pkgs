@@ -1,7 +1,6 @@
 // OpenCV includes
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 // Test includes
 #include <gtest/gtest.h>
@@ -10,7 +9,6 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include <gazebo_msgs/SetModelState.h>
 
 using namespace cv;
 
