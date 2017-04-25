@@ -82,20 +82,21 @@ endif()
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES
-  vision_reconfigure
-  gazebo_ros_utils
-  gazebo_ros_camera_utils
-  gazebo_ros_camera
-  gazebo_ros_multicamera
-  gazebo_ros_depth_camera
-  gazebo_ros_openni_kinect
-  gazebo_ros_gpu_laser
-  gazebo_ros_laser
-  gazebo_ros_block_laser
-  gazebo_ros_p3d
-  gazebo_ros_imu
-  gazebo_ros_f3d
+  LIBRARIES 
+  vision_reconfigure 
+  gazebo_ros_utils 
+  gazebo_ros_camera_utils 
+  gazebo_ros_camera 
+  gazebo_ros_multicamera 
+  gazebo_ros_depth_camera 
+  gazebo_ros_openni_kinect 
+  gazebo_ros_gpu_laser 
+  gazebo_ros_laser 
+  gazebo_ros_block_laser 
+  gazebo_ros_p3d 
+  gazebo_ros_imu 
+  gazebo_ros_imu_sensor
+  gazebo_ros_f3d 
   gazebo_ros_ft_sensor
   gazebo_ros_bumper
   gazebo_ros_template
@@ -213,6 +214,9 @@ target_link_libraries(gazebo_ros_p3d ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_library(gazebo_ros_imu src/gazebo_ros_imu.cpp)
 target_link_libraries(gazebo_ros_imu ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_library(gazebo_ros_imu_sensor src/gazebo_ros_imu_sensor.cpp)
+target_link_libraries(gazebo_ros_imu_sensor ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 add_library(gazebo_ros_f3d src/gazebo_ros_f3d.cpp)
 target_link_libraries(gazebo_ros_f3d ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
@@ -298,6 +302,7 @@ install(TARGETS
   gazebo_ros_block_laser
   gazebo_ros_p3d
   gazebo_ros_imu
+  gazebo_ros_imu_sensor
   gazebo_ros_f3d
   gazebo_ros_ft_sensor
   gazebo_ros_bumper
