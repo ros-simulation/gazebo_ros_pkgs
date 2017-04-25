@@ -126,22 +126,17 @@ namespace gazebo
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;
 
-    private: void InfoConnect();
-    private: void InfoDisconnect();
-
-    using GazeboRosCameraUtils::PublishCameraInfo;
-    protected: virtual void PublishCameraInfo();
+    protected: virtual void PublishDepthCameraInfo();
 
     /// \brief image where each pixel contains the depth information
     private: std::string depth_image_topic_name_;
     private: std::string depth_image_camera_info_topic_name_;
-    private: int depth_info_connect_count_;
     private: void DepthInfoConnect();
     private: void DepthInfoDisconnect();
 
     // overload with our own
     private: common::Time depth_sensor_update_time_;
-    protected: ros::Publisher depth_image_camera_info_pub_;
+    protected: ros::Publisher depth_camera_info_pub_;
 
     private: event::ConnectionPtr load_connection_;
   };

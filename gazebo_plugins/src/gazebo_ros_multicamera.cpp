@@ -109,7 +109,7 @@ void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
     if (sensor_update_time - util->last_update_time_ >= util->update_period_)
     {
       util->PutCameraData(_image, sensor_update_time);
-      util->PublishCameraInfo(sensor_update_time);
+      util->PublishCameraInfo();
       util->last_update_time_ = sensor_update_time;
     }
   }
