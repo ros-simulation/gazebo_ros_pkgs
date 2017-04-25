@@ -19,7 +19,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_export_depend>libgazebo7-dev</build_export_depend>
+  <build_export_depend>libgazebo8-dev</build_export_depend>
   <exec_depend>gazebo</exec_depend>
 
 </package>
