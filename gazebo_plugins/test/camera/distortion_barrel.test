@@ -12,7 +12,7 @@
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" />
   </group>
 
-  <test test-name="distortion_test" pkg="gazebo_plugins"
-      type="distortion_test" clear_params="true" time-limit="30.0" >
+  <test test-name="distortion_barrel_test" pkg="gazebo_plugins"
+      type="distortion_barrel_test" clear_params="true" time-limit="30.0" >
   </test>
 </launch>
