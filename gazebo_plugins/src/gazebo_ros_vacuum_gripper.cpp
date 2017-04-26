@@ -193,15 +193,15 @@ void GazeboRosVacuumGripper::UpdateChild()
      ignition::math::Pose3d diff = parent_pose - link_pose;
       double norm = diff.Pos().Length();
       if (norm < 0.05) {
-        links[j]->SetLinearAccel(link_->GetWorldLinearAccel());
-        links[j]->SetAngularAccel(link_->GetWorldAngularAccel());
-        links[j]->SetLinearVel(link_->WorlLinearVel());
+        links[j]->SetLinearAccel(link_->WorldLinearAccel());
+        links[j]->SetAngularAccel(link_->WorldAngularAccel());
+        links[j]->SetLinearVel(link_->WorldLinearVel());
         links[j]->SetAngularVel(link_->WorldAngularVel());
         double norm_force = 1 / norm;
         if (norm < 0.01) {
           // apply friction like force
           // TODO(unknown): should apply friction actually
-          link_pose.Set(parent_pose.pos, link_pose.Rot());
+          link_pose.Set(parent_pose.Pos(), link_pose.Rot());
           links[j]->SetWorldPose(link_pose);
         }
         if (norm_force > 20) {
