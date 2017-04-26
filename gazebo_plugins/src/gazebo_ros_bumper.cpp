@@ -32,7 +32,7 @@
 #include <sdf/Param.hh>
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/SensorTypes.hh>
-#include <ignition/math/Pose.hh>
+#include <ignition/math/Pose3.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 
@@ -178,7 +178,7 @@ void GazeboRosBumper::OnContact()
   // get reference frame (body(link)) pose and subtract from it to get
   // relative force, torque, position and normal vectors
  ignition::math::Pose3d pose, frame_pose;
-  math::Quaterniond rot, frame_rot;
+ ignition::math::Quaterniond rot, frame_rot;
  ignition::math::Vector3d pos, frame_pos;
   /*
   if (myFrame)
@@ -192,9 +192,9 @@ void GazeboRosBumper::OnContact()
   {
     // no specific frames specified, use identity pose, keeping
     // relative frame at inertial origin
-    frame_pos =ignition::math::Vector3d(0, 0, 0);
-    frame_rot = math::Quaterniond(1, 0, 0, 0);  // gazebo u,x,y,z == identity
-    frame_pose =ignition::math::Pose3d(frame_pos, frame_rot);
+    frame_pos  = ignition::math::Vector3d(0, 0, 0);
+    frame_rot  = ignition::math::Quaterniond(1, 0, 0, 0);  // gazebo u,x,y,z == identity
+    frame_pose = ignition::math::Pose3d(frame_pos, frame_rot);
   }
 
 
@@ -254,22 +254,22 @@ void GazeboRosBumper::OnContact()
       // Get force, torque and rotate into user specified frame.
       // frame_rot is identity if world is used (default for now)
      ignition::math::Vector3d force = frame_rot.RotateVectorReverse(ignition::math::Vector3d(
-                              contact.wrench(j).body_1_wrench().force().X()(),
-                            contact.wrench(j).body_1_wrench().force().Y()(),
-                            contact.wrench(j).body_1_wrench().force().Z()()));
+                            contact.wrench(j).body_1_wrench().force().x(),
+                            contact.wrench(j).body_1_wrench().force().y(),
+                            contact.wrench(j).body_1_wrench().force().z()));
      ignition::math::Vector3d torque = frame_rot.RotateVectorReverse(ignition::math::Vector3d(
-                            contact.wrench(j).body_1_wrench().torque().X()(),
-                            contact.wrench(j).body_1_wrench().torque().Y()(),
-                            contact.wrench(j).body_1_wrench().torque().Z()()));
+                            contact.wrench(j).body_1_wrench().torque().x(),
+                            contact.wrench(j).body_1_wrench().torque().y(),
+                            contact.wrench(j).body_1_wrench().torque().z()));
 
       // set wrenches
       geometry_msgs::Wrench wrench;
-      wrench.force.x  = force.x;
-      wrench.force.y  = force.y;
-      wrench.force.z  = force.z;
-      wrench.torque.x = torque.x;
-      wrench.torque.y = torque.y;
-      wrench.torque.z = torque.z;
+      wrench.force.x  = force.X();
+      wrench.force.y  = force.Y();
+      wrench.force.z  = force.Z();
+      wrench.torque.x = torque.X();
+      wrench.torque.y = torque.Y();
+      wrench.torque.z = torque.Z();
       state.wrenches.push_back(wrench);
 
       total_wrench.force.x  += wrench.force.x;
@@ -282,26 +282,26 @@ void GazeboRosBumper::OnContact()
       // transform contact positions into relative frame
       // set contact positions
       ignition::math::Vector3d position = frame_rot.RotateVectorReverse(
-         ignition::math::Vector3d(contact.position(j).X()(),
-                        contact.position(j).Y()(),
-                        contact.position(j).Z()()) - frame_pos);
+         ignition::math::Vector3d(contact.position(j).x(),
+                                  contact.position(j).y(),
+                                  contact.position(j).z()) - frame_pos);
       geometry_msgs::Vector3 contact_position;
-      contact_position.x = position.x;
-      contact_position.y = position.y;
-      contact_position.z = position.z;
+      contact_position.x = position.X();
+      contact_position.y = position.Y();
+      contact_position.z = position.Z();
       state.contact_positions.push_back(contact_position);
 
       // rotate normal into user specified frame.
       // frame_rot is identity if world is used.
      ignition::math::Vector3d normal = frame_rot.RotateVectorReverse(
-         ignition::math::Vector3d(contact.normal(j).X()(),
-                        contact.normal(j).Y()(),
-                        contact.normal(j).Z()()));
+         ignition::math::Vector3d(contact.normal(j).x(),
+                                 contact.normal(j).y(),
+                                 contact.normal(j).z()));
       // set contact normals
       geometry_msgs::Vector3 contact_normal;
-      contact_normal.x = normal.x;
-      contact_normal.y = normal.y;
-      contact_normal.z = normal.z;
+      contact_normal.x = normal.X();
+      contact_normal.y = normal.Y();
+      contact_normal.z = normal.Z();
       state.contact_normals.push_back(contact_normal);
 
       // set contact depth, interpenetration

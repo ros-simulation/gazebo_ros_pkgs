@@ -247,7 +247,7 @@ gazebo::GazeboRosImuSensor::~GazeboRosImuSensor()
 {
   if (connection.get())
   {
-    gazebo::event::Events::DisconnectWorldUpdateBegin(connection);
+    connection.reset();
     connection = gazebo::event::ConnectionPtr();
   }
 
