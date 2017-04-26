@@ -52,7 +52,6 @@
 
 #include <gazebo_plugins/gazebo_ros_diff_drive.h>
 
-#include <ignition/math/gzmath.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -210,7 +209,7 @@ void GazeboRosDiffDrive::publishWheelJointState()
 
     for ( int i = 0; i < 2; i++ ) {
         physics::JointPtr joint = joints_[i];
-        math::Angle angle = joint->GetAngle ( 0 );
+       ignition::math::Angle angle = joint->Position ( 0 );
         joint_state_.name[i] = joint->GetName();
         joint_state_.position[i] = angle.Radian () ;
     }
@@ -451,8 +450,8 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
 
         // convert velocity to child_frame_id (aka base_footprint)
         float yaw = pose.Rot().Yaw();
-        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.x + sinf ( yaw ) * linear.y;
-        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.y - sinf ( yaw ) * linear.x;
+        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.X() + sinf ( yaw ) * linear.Y();
+        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.Y() - sinf ( yaw ) * linear.X();
     }
 
     tf::Transform base_footprint_to_odom ( qt, vt );

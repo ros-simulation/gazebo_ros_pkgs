@@ -42,7 +42,6 @@
 
 #include <gazebo_plugins/gazebo_ros_skid_steer_drive.h>
 
-#include <ignition/math/gzmath.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -440,8 +439,8 @@ namespace gazebo {
 
     // convert velocity to child_frame_id (aka base_footprint)
     float yaw = pose.Rot().Yaw();
-    odom_.twist.twist.linear.x = cosf(yaw) * linear.x + sinf(yaw) * linear.y;
-    odom_.twist.twist.linear.y = cosf(yaw) * linear.y - sinf(yaw) * linear.x;
+    odom_.twist.twist.linear.x = cosf(yaw) * linear.X() + sinf(yaw) * linear.Y();
+    odom_.twist.twist.linear.y = cosf(yaw) * linear.Y() - sinf(yaw) * linear.X();
     odom_.twist.covariance[0] = this->covariance_x_;
     odom_.twist.covariance[7] = this->covariance_y_;
     odom_.twist.covariance[14] = 1000000000000.0;

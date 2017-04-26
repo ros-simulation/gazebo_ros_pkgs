@@ -44,7 +44,6 @@
 
 #include <gazebo_plugins/gazebo_ros_tricycle_drive.h>
 
-#include <ignition/math/gzmath.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -170,7 +169,7 @@ void GazeboRosTricycleDrive::publishWheelJointState()
     joint_state_.effort.resize ( joints.size() );
     for ( std::size_t i = 0; i < joints.size(); i++ ) {
         joint_state_.name[i] = joints[i]->GetName();
-        joint_state_.position[i] = joints[i]->GetAngle ( 0 ).Radian();
+        joint_state_.position[i] = joints[i]->Position(0);
         joint_state_.velocity[i] = joints[i]->GetVelocity ( 0 );
         joint_state_.effort[i] = joints[i]->GetForce ( 0 );
     }
@@ -254,7 +253,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     joint_wheel_actuated_->SetVelocity ( 0, applied_speed );
 #endif
 
-    double current_angle = joint_steering_->GetAngle ( 0 ).Radian();
+    double current_angle = joint_steering_->Position(0);
 
     // truncate target angle
     if (target_angle > +M_PI / 2.0)
@@ -312,7 +311,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
 #if GAZEBO_MAJOR_VERSION >= 4
       joint_steering_->SetPosition(0, applied_angle);
 #else
-      joint_steering_->SetAngle(0, math::Angle(applied_angle));
+      joint_steering_->SetAngle(0,ignition::math::Angle(applied_angle));
 #endif
     }
     //ROS_INFO_NAMED("tricycle_drive", "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] ",
@@ -429,8 +428,8 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
 
         // convert velocity to child_frame_id (aka base_footprint)
         float yaw = pose.Rot().Yaw();
-        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.x + sinf ( yaw ) * linear.y;
-        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.y - sinf ( yaw ) * linear.x;
+        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.X() + sinf ( yaw ) * linear.Y();
+        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.Y() - sinf ( yaw ) * linear.X();
     }
 
     tf::Transform base_footprint_to_odom ( qt, vt );
