@@ -504,7 +504,7 @@ void GazeboRosApiPlugin::advertiseServices()
 
   // todo: contemplate setting environment variable ROBOT=sim here???
   nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
-  last_pub_clock_time_ = world_->GetSimTime();
+  last_pub_clock_time_ = world_->SimTime();
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
@@ -972,7 +972,7 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
 bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Request &req,
                                             gazebo_msgs::GetWorldProperties::Response &res)
 {
-  res.sim_time = world_->GetSimTime().Double();
+  res.sim_time = world_->SimTime().Double();
   res.model_names.clear();
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
     res.model_names.push_back(world_->GetModel(i)->GetName());
@@ -1483,8 +1483,8 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
       fjj->joint = joint;
       fjj->force = req.effort;
       fjj->start_time = req.start_time;
-      if (fjj->start_time < ros::Time(world_->GetSimTime().Double()))
-        fjj->start_time = ros::Time(world_->GetSimTime().Double());
+      if (fjj->start_time < ros::Time(world_->SimTime().Double()))
+        fjj->start_time = ros::Time(world_->SimTime().Double());
       fjj->duration = req.duration;
       lock_.lock();
       force_joint_jobs_.push_back(fjj);
@@ -1814,8 +1814,8 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   wej->force = target_force;
   wej->torque = target_torque;
   wej->start_time = req.start_time;
-  if (wej->start_time < ros::Time(world_->GetSimTime().Double()))
-    wej->start_time = ros::Time(world_->GetSimTime().Double());
+  if (wej->start_time < ros::Time(world_->SimTime().Double()))
+    wej->start_time = ros::Time(world_->SimTime().Double());
   wej->duration = req.duration;
   lock_.lock();
   wrench_body_jobs_.push_back(wej);
@@ -1856,8 +1856,8 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
   {
     // check times and apply wrench if necessary
-    if (ros::Time(world_->GetSimTime().Double()) >= (*iter)->start_time)
-      if (ros::Time(world_->GetSimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
+    if (ros::Time(world_->SimTime().Double()) >= (*iter)->start_time)
+      if (ros::Time(world_->SimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
           (*iter)->duration.toSec() < 0.0)
       {
         if ((*iter)->body) // if body exists
@@ -1869,7 +1869,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
           (*iter)->duration.fromSec(0.0); // mark for delete
       }
 
-    if (ros::Time(world_->GetSimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
+    if (ros::Time(world_->SimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
@@ -1890,8 +1890,8 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
   {
     // check times and apply force if necessary
-    if (ros::Time(world_->GetSimTime().Double()) >= (*iter)->start_time)
-      if (ros::Time(world_->GetSimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
+    if (ros::Time(world_->SimTime().Double()) >= (*iter)->start_time)
+      if (ros::Time(world_->SimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
           (*iter)->duration.toSec() < 0.0)
       {
         if ((*iter)->joint) // if joint exists
@@ -1900,7 +1900,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
           (*iter)->duration.fromSec(0.0); // mark for delete
       }
 
-    if (ros::Time(world_->GetSimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
+    if (ros::Time(world_->SimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
@@ -1915,7 +1915,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
 void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
 {
   ROS_ERROR_NAMED("api_plugin", "CLOCK2");
-  gazebo::common::Time sim_time = world_->GetSimTime();
+  gazebo::common::Time sim_time = world_->SimTime();
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
 
@@ -1928,11 +1928,11 @@ void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::Wo
 }
 void GazeboRosApiPlugin::publishSimTime()
 {
-  gazebo::common::Time sim_time = world_->GetSimTime();
+  gazebo::common::Time sim_time = world_->SimTime();
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
 
-  gazebo::common::Time currentTime = world_->GetSimTime();
+  gazebo::common::Time currentTime = world_->SimTime();
   rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros

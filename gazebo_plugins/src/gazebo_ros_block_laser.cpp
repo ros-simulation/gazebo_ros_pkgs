@@ -82,7 +82,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   std::string worldName = _parent->WorldName();
   this->world_ = physics::get_world(worldName);
 
-  last_update_time_ = this->world_->GetSimTime();
+  last_update_time_ = this->world_->SimTime();
 
   this->node_ = transport::NodePtr(new transport::Node());
   this->node_->Init(worldName);

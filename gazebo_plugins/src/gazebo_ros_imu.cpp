@@ -171,7 +171,7 @@ void GazeboRosIMU::LoadThread()
   }
 
   // Initialize the controller
-  this->last_time_ = this->world_->GetSimTime();
+  this->last_time_ = this->world_->SimTime();
 
   // this->initial_pose_ = this->link->GetPose();
   this->last_vpos_ = this->link->GetWorldLinearVel();
@@ -203,7 +203,7 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 // Update the controller
 void GazeboRosIMU::UpdateChild()
 {
-  common::Time cur_time = this->world_->GetSimTime();
+  common::Time cur_time = this->world_->SimTime();
 
   // rate control
   if (this->update_rate_ > 0 &&

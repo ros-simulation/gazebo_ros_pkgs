@@ -161,8 +161,8 @@ void GazeboRosF3D::UpdateChild()
   this->lock_.lock();
   // copy data into wrench message
   this->wrench_msg_.header.frame_id = this->frame_name_;
-  this->wrench_msg_.header.stamp.sec = (this->world_->GetSimTime()).sec;
-  this->wrench_msg_.header.stamp.nsec = (this->world_->GetSimTime()).nsec;
+  this->wrench_msg_.header.stamp.sec = (this->world_->SimTime()).sec;
+  this->wrench_msg_.header.stamp.nsec = (this->world_->SimTime()).nsec;
 
   this->wrench_msg_.wrench.force.x    = force.x;
   this->wrench_msg_.wrench.force.y    = force.y;

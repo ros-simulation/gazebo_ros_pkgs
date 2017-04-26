@@ -112,7 +112,7 @@ namespace gazebo
       odometry_rate_ = sdf->GetElement("odometryRate")->Get<double>();
     }
 
-    last_odom_publish_time_ = parent_->GetWorld()->GetSimTime();
+    last_odom_publish_time_ = parent_->GetWorld()->SimTime();
     last_odom_pose_ = parent_->GetWorldPose();
     x_ = 0;
     y_ = 0;
@@ -168,7 +168,7 @@ namespace gazebo
           0));
     parent_->SetAngularVel(math::Vector3(0, 0, rot_));
     if (odometry_rate_ > 0.0) {
-      common::Time current_time = parent_->GetWorld()->GetSimTime();
+      common::Time current_time = parent_->GetWorld()->SimTime();
       double seconds_since_last_update =
         (current_time - last_odom_publish_time_).Double();
       if (seconds_since_last_update > (1.0 / odometry_rate_)) {

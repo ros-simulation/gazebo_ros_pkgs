@@ -149,7 +149,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       this->rosnode_->advertise<nav_msgs::Odometry>(this->topic_name_, 1);
   }
 
-  this->last_time_ = this->world_->GetSimTime();
+  this->last_time_ = this->world_->SimTime();
   // initialize body
   this->last_vpos_ = this->link_->GetWorldLinearVel();
   this->last_veul_ = this->link_->GetWorldAngularVel();
@@ -201,7 +201,7 @@ void GazeboRosP3D::UpdateChild()
   if (!this->link_)
     return;
 
-  common::Time cur_time = this->world_->GetSimTime();
+  common::Time cur_time = this->world_->SimTime();
 
   // rate control
   if (this->update_rate_ > 0 &&
