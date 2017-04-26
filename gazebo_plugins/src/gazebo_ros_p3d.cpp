@@ -234,13 +234,13 @@ void GazeboRosP3D::UpdateChild()
        ignition::math::Vector3d veul = this->link_->GetWorldAngularVel();
 
         // Get Pose/Orientation
-        pose = this->link_->GetWorldPose();
+        pose = this->link_->WorldPose();
 
         // Apply Reference Frame
         if (this->reference_link_)
         {
           // convert to relative pose
-          frame_pose = this->reference_link_->GetWorldPose();
+          frame_pose = this->reference_link_->WorldPose();
           pose.pos = pose.pos - frame_pose.pos;
           pose.pos = frame_pose.Rot().RotateVectorReverse(pose.pos);
           pose.rot *= frame_pose.Rot().GetInverse();

@@ -217,7 +217,7 @@ void GazeboRosIMU::UpdateChild()
    ignition::math::Vector3d pos;
 
     // Get Pose/Orientation ///@todo: verify correctness
-    pose = this->link->GetWorldPose();
+    pose = this->link->WorldPose();
     // apply xyz offsets and get position and rotation components
     pos = pose.pos + this->offset_.pos;
     rot = pose.rot;

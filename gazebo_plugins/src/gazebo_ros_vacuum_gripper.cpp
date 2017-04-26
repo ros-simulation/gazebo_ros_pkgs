@@ -179,7 +179,7 @@ void GazeboRosVacuumGripper::UpdateChild()
   }
   // apply force
   lock_.lock();
- ignition::math::Pose3d parent_pose = link_->GetWorldPose();
+ ignition::math::Pose3d parent_pose = link_->WorldPose();
   physics::Model_V models = world_->GetModels();
   for (size_t i = 0; i < models.size(); i++) {
     if (models[i]->GetName() == link_->GetName() ||
@@ -189,7 +189,7 @@ void GazeboRosVacuumGripper::UpdateChild()
     }
     physics::Link_V links = models[i]->GetLinks();
     for (size_t j = 0; j < links.size(); j++) {
-     ignition::math::Pose3d link_pose = links[j]->GetWorldPose();
+     ignition::math::Pose3d link_pose = links[j]->WorldPose();
      ignition::math::Pose3d diff = parent_pose - link_pose;
       double norm = diff.Pos().GetLength();
       if (norm < 0.05) {

@@ -629,7 +629,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   if (frame)
   {
     // convert to relative pose
-    ignition::math::Pose3d frame_pose = frame->GetWorldPose();
+    ignition::math::Pose3d frame_pose = frame->WorldPose();
     initial_xyz = frame_pose.Rot().RotateVector(initial_xyz);
     initial_xyz += frame_pose.pos;
     initial_q *= frame_pose.rot;
@@ -849,7 +849,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
       res.header.frame_id = req.relative_entity_name; /// @brief this is a redundant information
     }
     // get model pose
-    ignition::math::Pose3d       model_pose = model->GetWorldPose();
+    ignition::math::Pose3d       model_pose = model->WorldPose();
     ignition::math::Vector3d    model_pos = model_pose.pos;
     ignition::math::Quaternion model_rot = model_pose.rot;
 
@@ -861,7 +861,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
     if (frame)
     {
       // convert to relative pose
-      ignition::math::Pose3d frame_pose = frame->GetWorldPose();
+      ignition::math::Pose3d frame_pose = frame->WorldPose();
       model_pos = model_pos - frame_pose.pos;
       model_pos = frame_pose.Rot().RotateVectorReverse(model_pos);
       model_rot *= frame_pose.Rot().GetInverse();
@@ -1073,7 +1073,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
   }
 
   // get body pose
-  ignition::math::Pose3d body_pose = body->GetWorldPose();
+  ignition::math::Pose3d body_pose = body->WorldPose();
   // Get inertial rates
   ignition::math::Vector3d body_vpos = body->GetWorldLinearVel(); // get velocity in gazebo frame
   ignition::math::Vector3d body_veul = body->GetWorldAngularVel(); // get velocity in gazebo frame
@@ -1081,7 +1081,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
   if (frame)
   {
     // convert to relative pose
-    ignition::math::Pose3d frame_pose = frame->GetWorldPose();
+    ignition::math::Pose3d frame_pose = frame->WorldPose();
     body_pose.pos = body_pose.pos - frame_pose.pos;
     body_pose.pos = frame_pose.Rot().RotateVectorReverse(body_pose.pos);
     body_pose.rot *= frame_pose.Rot().GetInverse();
@@ -1416,13 +1416,13 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     gazebo::physics::LinkPtr relative_entity = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.model_state.reference_frame));
     if (relative_entity)
     {
-      ignition::math::Pose3d  frame_pose = relative_entity->GetWorldPose(); // - myBody->GetCoMPose();
+      ignition::math::Pose3d  frame_pose = relative_entity->WorldPose(); // - myBody->GetCoMPose();
       ignition::math::Vector3d frame_pos = frame_pose.pos;
       ignition::math::Quaternion frame_rot = frame_pose.rot;
 
       //std::cout << " debug : " << relative_entity->GetName() << " : " << frame_pose << " : " << target_pose << std::endl;
       //target_pose = frame_pose + target_pose; // seems buggy, use my own
-      target_pose.pos = model->GetWorldPose().pos + frame_rot.RotateVector(target_pos);
+      target_pose.pos = model->WorldPose().pos + frame_rot.RotateVector(target_pos);
       target_pose.rot = frame_rot * target_pose.rot;
 
       // Velocities should be commanded in the requested reference
@@ -1449,7 +1449,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     world_->SetPaused(true);
     model->SetWorldPose(target_pose);
     world_->SetPaused(is_paused);
-    //ignition::math::Pose3d p3d = model->GetWorldPose();
+    //ignition::math::Pose3d p3d = model->WorldPose();
     //ROS_ERROR_NAMED("api_plugin", "model updated state: %f %f %f",p3d.Pos().X(),p3d.Pos().Y(),p3d.Pos().Z());
 
     // set model velocity
@@ -1650,7 +1650,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
 
   if (frame)
   {
-    ignition::math::Pose3d  frame_pose = frame->GetWorldPose(); // - myBody->GetCoMPose();
+    ignition::math::Pose3d  frame_pose = frame->WorldPose(); // - myBody->GetCoMPose();
     ignition::math::Vector3d frame_pos = frame_pose.pos;
     ignition::math::Quaternion frame_rot = frame_pose.rot;
 
@@ -1748,20 +1748,20 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
     //        transform wrench from reference_point in reference_frame
     //        into the reference frame of the body
     //        first, translate by reference point to the body frame
-    ignition::math::Pose3d target_to_reference = frame->GetWorldPose() - body->GetWorldPose();
+    ignition::math::Pose3d target_to_reference = frame->WorldPose() - body->WorldPose();
     ROS_DEBUG_NAMED("api_plugin", "reference frame for applied wrench: [%f %f %f, %f %f %f]-[%f %f %f, %f %f %f]=[%f %f %f, %f %f %f]",
-              body->GetWorldPose().Pos().X(),
-              body->GetWorldPose().Pos().Y(),
-              body->GetWorldPose().Pos().Z(),
-              body->GetWorldPose().Rot().GetAsEuler().X(),
-              body->GetWorldPose().Rot().GetAsEuler().Y(),
-              body->GetWorldPose().Rot().GetAsEuler().Z(),
-              frame->GetWorldPose().Pos().X(),
-              frame->GetWorldPose().Pos().Y(),
-              frame->GetWorldPose().Pos().Z(),
-              frame->GetWorldPose().Rot().GetAsEuler().X(),
-              frame->GetWorldPose().Rot().GetAsEuler().Y(),
-              frame->GetWorldPose().Rot().GetAsEuler().Z(),
+              body->WorldPose().Pos().X(),
+              body->WorldPose().Pos().Y(),
+              body->WorldPose().Pos().Z(),
+              body->WorldPose().Rot().GetAsEuler().X(),
+              body->WorldPose().Rot().GetAsEuler().Y(),
+              body->WorldPose().Rot().GetAsEuler().Z(),
+              frame->WorldPose().Pos().X(),
+              frame->WorldPose().Pos().Y(),
+              frame->WorldPose().Pos().Z(),
+              frame->WorldPose().Rot().GetAsEuler().X(),
+              frame->WorldPose().Rot().GetAsEuler().Y(),
+              frame->WorldPose().Rot().GetAsEuler().Z(),
               target_to_reference.Pos().X(),
               target_to_reference.Pos().Y(),
               target_to_reference.Pos().Z(),
@@ -1792,7 +1792,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   {
     ROS_INFO_NAMED("api_plugin", "ApplyBodyWrench: reference_frame is empty/world/map, using inertial frame, transferring from body relative to inertial frame");
     // FIXME: transfer to inertial frame
-    ignition::math::Pose3d target_to_reference = body->GetWorldPose();
+    ignition::math::Pose3d target_to_reference = body->WorldPose();
     target_force = reference_force;
     target_torque = reference_torque;
 
@@ -1957,7 +1957,7 @@ void GazeboRosApiPlugin::publishLinkStates()
       {
         link_states.name.push_back(body->GetScopedName());
         geometry_msgs::Pose pose;
-        ignition::math::Pose3d  body_pose = body->GetWorldPose(); // - myBody->GetCoMPose();
+        ignition::math::Pose3d  body_pose = body->WorldPose(); // - myBody->GetCoMPose();
         ignition::math::Vector3d pos = body_pose.pos;
         ignition::math::Quaternion rot = body_pose.rot;
         pose.position.x = pos.x;
@@ -1995,7 +1995,7 @@ void GazeboRosApiPlugin::publishModelStates()
     gazebo::physics::ModelPtr model = world_->GetModel(i);
     model_states.name.push_back(model->GetName());
     geometry_msgs::Pose pose;
-    ignition::math::Pose3d  model_pose = model->GetWorldPose(); // - myBody->GetCoMPose();
+    ignition::math::Pose3d  model_pose = model->WorldPose(); // - myBody->GetCoMPose();
     ignition::math::Vector3d pos = model_pose.pos;
     ignition::math::Quaternion rot = model_pose.rot;
     pose.position.x = pos.x;
