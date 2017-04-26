@@ -191,7 +191,7 @@ void GazeboRosVacuumGripper::UpdateChild()
     for (size_t j = 0; j < links.size(); j++) {
      ignition::math::Pose3d link_pose = links[j]->WorldPose();
      ignition::math::Pose3d diff = parent_pose - link_pose;
-      double norm = diff.Pos().GetLength();
+      double norm = diff.Pos().Length();
       if (norm < 0.05) {
         links[j]->SetLinearAccel(link_->GetWorldLinearAccel());
         links[j]->SetAngularAccel(link_->GetWorldAngularAccel());
