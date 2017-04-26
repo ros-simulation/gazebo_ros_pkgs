@@ -180,7 +180,7 @@ void GazeboRosVacuumGripper::UpdateChild()
   // apply force
   lock_.lock();
  ignition::math::Pose3d parent_pose = link_->WorldPose();
-  physics::Model_V models = world_->GetModels();
+  physics::Model_V models = world_->Models();
   for (size_t i = 0; i < models.size(); i++) {
     if (models[i]->GetName() == link_->GetName() ||
         models[i]->GetName() == parent_->GetName())
