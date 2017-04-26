@@ -355,7 +355,7 @@ void GazeboRosCameraUtils::SetHFOV(const std_msgs::Float64::ConstPtr& hfov)
 #if GAZEBO_MAJOR_VERSION >= 7
   this->camera_->SetHFOV(ignition::math::Angle(hfov->data));
 #else
-  this->camera_->SetHFOV(gazebo::math::Angle(hfov->data));
+  this->camera_->SetHFOV(ignition::math::Angle(hfov->data));
 #endif
 }
 
@@ -476,7 +476,7 @@ void GazeboRosCameraUtils::Init()
   else
   {
     // check against float precision
-    if (!gazebo::math::equal(this->focal_length_, computed_focal_length))
+    if (!ignition::math::equal(this->focal_length_, computed_focal_length))
     {
       ROS_WARN_NAMED("camera_utils", "The <focal_length>[%f] you have provided for camera_ [%s]"
                " is inconsistent with specified image_width [%d] and"

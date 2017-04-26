@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <gazebo_msgs/SetJointTrajectory.h>
-#include <gazebo/math/Quaternion.hh>
+#include <ignition/math/Quaternion.hh>
 #include <math.h>
 
 int main(int argc, char** argv)
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
   sjt.request.joint_trajectory = jt;
   sjt.request.disable_physics_updates = false;
 
-  gazebo::math::Quaternion r(0, 0, M_PI);
+  ignition::math::Quaternion r(0, 0, M_PI);
   geometry_msgs::Pose p;
   p.position.x = 0;
   p.position.y = 0;

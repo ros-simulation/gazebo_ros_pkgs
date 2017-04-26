@@ -149,8 +149,8 @@ void GazeboRosF3D::UpdateChild()
   if (this->f3d_connect_count_ == 0)
     return;
 
-  math::Vector3 torque;
-  math::Vector3 force;
+ ignition::math::Vector3d torque;
+ ignition::math::Vector3d force;
 
   // get force on body
   force = this->link_->GetWorldForce();

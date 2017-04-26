@@ -102,7 +102,7 @@ void GazeboRosIMU::LoadThread()
   if (!this->sdf->HasElement("xyzOffset"))
   {
     ROS_INFO_NAMED("imu", "imu plugin missing <xyzOffset>, defaults to 0s");
-    this->offset_.pos = math::Vector3(0, 0, 0);
+    this->offset_.pos =ignition::math::Vector3d(0, 0, 0);
   }
   else
     this->offset_.pos = this->sdf->Get<math::Vector3>("xyzOffset");
@@ -110,7 +110,7 @@ void GazeboRosIMU::LoadThread()
   if (!this->sdf->HasElement("rpyOffset"))
   {
     ROS_INFO_NAMED("imu", "imu plugin missing <rpyOffset>, defaults to 0s");
-    this->offset_.rot = math::Vector3(0, 0, 0);
+    this->offset_.rot =ignition::math::Vector3d(0, 0, 0);
   }
   else
     this->offset_.rot = this->sdf->Get<math::Vector3>("rpyOffset");
@@ -212,9 +212,9 @@ void GazeboRosIMU::UpdateChild()
 
   if ((this->pub_.getNumSubscribers() > 0 && this->topic_name_ != ""))
   {
-    math::Pose pose;
+   ignition::math::Pose3d pose;
     math::Quaternion rot;
-    math::Vector3 pos;
+   ignition::math::Vector3d pos;
 
     // Get Pose/Orientation ///@todo: verify correctness
     pose = this->link->GetWorldPose();
@@ -227,8 +227,8 @@ void GazeboRosIMU::UpdateChild()
     rot.Normalize();
 
     // get Rates
-    math::Vector3 vpos = this->link->GetWorldLinearVel();
-    math::Vector3 veul = this->link->GetWorldAngularVel();
+   ignition::math::Vector3d vpos = this->link->GetWorldLinearVel();
+   ignition::math::Vector3d veul = this->link->GetWorldAngularVel();
 
     // differentiate to get accelerations
     double tmp_dt = this->last_time_.Double() - cur_time.Double();
@@ -259,7 +259,7 @@ void GazeboRosIMU::UpdateChild()
     this->imu_msg_.orientation.w = rot.w;
 
     // pass euler angular rates
-    math::Vector3 linear_velocity(
+   ignition::math::Vector3d linear_velocity(
       veul.x + this->GaussianKernel(0, this->gaussian_noise_),
       veul.y + this->GaussianKernel(0, this->gaussian_noise_),
       veul.z + this->GaussianKernel(0, this->gaussian_noise_));
@@ -271,7 +271,7 @@ void GazeboRosIMU::UpdateChild()
     this->imu_msg_.angular_velocity.z    = linear_velocity.z;
 
     // pass accelerations
-    math::Vector3 linear_acceleration(
+   ignition::math::Vector3d linear_acceleration(
       apos_.x + this->GaussianKernel(0, this->gaussian_noise_),
       apos_.y + this->GaussianKernel(0, this->gaussian_noise_),
       apos_.z + this->GaussianKernel(0, this->gaussian_noise_));

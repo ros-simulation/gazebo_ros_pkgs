@@ -405,9 +405,9 @@ void GazeboRosBlockLaser::OnStats( const boost::shared_ptr<msgs::WorldStatistics
 {
   this->sim_time_  = msgs::Convert( _msg->sim_time() );
 
-  math::Pose pose;
-  pose.pos.x = 0.5*sin(0.01*this->sim_time_.Double());
-  gzdbg << "plugin simTime [" << this->sim_time_.Double() << "] update pose [" << pose.pos.x << "]\n";
+ ignition::math::Pose3d pose;
+  pose.Pos().X() = 0.5*sin(0.01*this->sim_time_.Double());
+  gzdbg << "plugin simTime [" << this->sim_time_.Double() << "] update pose [" << pose.Pos().X() << "]\n";
 }
 
 

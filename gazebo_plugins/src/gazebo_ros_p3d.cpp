@@ -94,7 +94,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (!_sdf->HasElement("xyzOffset"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <xyzOffset>, defaults to 0s");
-    this->offset_.pos = math::Vector3(0, 0, 0);
+    this->offset_.pos =ignition::math::Vector3d(0, 0, 0);
   }
   else
     this->offset_.pos = _sdf->GetElement("xyzOffset")->Get<math::Vector3>();
@@ -102,7 +102,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (!_sdf->HasElement("rpyOffset"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <rpyOffset>, defaults to 0s");
-    this->offset_.rot = math::Vector3(0, 0, 0);
+    this->offset_.rot =ignition::math::Vector3d(0, 0, 0);
   }
   else
     this->offset_.rot = _sdf->GetElement("rpyOffset")->Get<math::Vector3>();
@@ -225,13 +225,13 @@ void GazeboRosP3D::UpdateChild()
 
         this->pose_msg_.child_frame_id = this->link_name_;
 
-        math::Pose pose, frame_pose;
-        math::Vector3 frame_vpos;
-        math::Vector3 frame_veul;
+       ignition::math::Pose3d pose, frame_pose;
+       ignition::math::Vector3d frame_vpos;
+       ignition::math::Vector3d frame_veul;
 
         // get inertial Rates
-        math::Vector3 vpos = this->link_->GetWorldLinearVel();
-        math::Vector3 veul = this->link_->GetWorldAngularVel();
+       ignition::math::Vector3d vpos = this->link_->GetWorldLinearVel();
+       ignition::math::Vector3d veul = this->link_->GetWorldAngularVel();
 
         // Get Pose/Orientation
         pose = this->link_->GetWorldPose();
@@ -242,13 +242,13 @@ void GazeboRosP3D::UpdateChild()
           // convert to relative pose
           frame_pose = this->reference_link_->GetWorldPose();
           pose.pos = pose.pos - frame_pose.pos;
-          pose.pos = frame_pose.rot.RotateVectorReverse(pose.pos);
-          pose.rot *= frame_pose.rot.GetInverse();
+          pose.pos = frame_pose.Rot().RotateVectorReverse(pose.pos);
+          pose.rot *= frame_pose.Rot().GetInverse();
           // convert to relative rates
           frame_vpos = this->reference_link_->GetWorldLinearVel();
           frame_veul = this->reference_link_->GetWorldAngularVel();
-          vpos = frame_pose.rot.RotateVector(vpos - frame_vpos);
-          veul = frame_pose.rot.RotateVector(veul - frame_veul);
+          vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
+          veul = frame_pose.Rot().RotateVector(veul - frame_veul);
         }
 
         // Apply Constant Offsets
@@ -256,7 +256,7 @@ void GazeboRosP3D::UpdateChild()
         pose.pos = pose.pos + this->offset_.pos;
         // apply rpy offsets
         pose.rot = this->offset_.rot*pose.rot;
-        pose.rot.Normalize();
+        pose.Rot().Normalize();
 
         // compute accelerations (not used)
         this->apos_ = (this->last_vpos_ - vpos) / tmp_dt;
@@ -270,14 +270,14 @@ void GazeboRosP3D::UpdateChild()
         this->last_frame_veul_ = frame_veul;
 
         // Fill out messages
-        this->pose_msg_.pose.pose.position.x    = pose.pos.x;
-        this->pose_msg_.pose.pose.position.y    = pose.pos.y;
-        this->pose_msg_.pose.pose.position.z    = pose.pos.z;
+        this->pose_msg_.pose.pose.position.x    = pose.Pos().X();
+        this->pose_msg_.pose.pose.position.y    = pose.Pos().Y();
+        this->pose_msg_.pose.pose.position.z    = pose.Pos().Z();
 
-        this->pose_msg_.pose.pose.orientation.x = pose.rot.x;
-        this->pose_msg_.pose.pose.orientation.y = pose.rot.y;
-        this->pose_msg_.pose.pose.orientation.z = pose.rot.z;
-        this->pose_msg_.pose.pose.orientation.w = pose.rot.w;
+        this->pose_msg_.pose.pose.orientation.x = pose.Rot().X();
+        this->pose_msg_.pose.pose.orientation.y = pose.Rot().Y();
+        this->pose_msg_.pose.pose.orientation.z = pose.Rot().Z();
+        this->pose_msg_.pose.pose.orientation.w = pose.Rot().w;
 
         this->pose_msg_.twist.twist.linear.x  = vpos.x +
           this->GaussianKernel(0, this->gaussian_noise_);

@@ -168,8 +168,8 @@ void GazeboRosFT::UpdateChild()
     return;
 
   physics::JointWrench wrench;
-  math::Vector3 torque;
-  math::Vector3 force;
+ ignition::math::Vector3d torque;
+ ignition::math::Vector3d force;
 
   // FIXME: Should include options for diferent frames and measure directions
   // E.g: https://bitbucket.org/osrf/gazebo/raw/default/gazebo/sensors/ForceTorqueSensor.hh
