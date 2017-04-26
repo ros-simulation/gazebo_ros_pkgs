@@ -94,18 +94,18 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (!_sdf->HasElement("xyzOffset"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <xyzOffset>, defaults to 0s");
-    this->offset_.pos =ignition::math::Vector3d(0, 0, 0);
+    this->offset_.Pos() =ignition::math::Vector3d(0, 0, 0);
   }
   else
-    this->offset_.pos = _sdf->GetElement("xyzOffset")->Get<ignition::math::Vector3d>();
+    this->offset_.Pos() = _sdf->GetElement("xyzOffset")->Get<ignition::math::Vector3d>();
 
   if (!_sdf->HasElement("rpyOffset"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <rpyOffset>, defaults to 0s");
-    this->offset_.rot =ignition::math::Vector3d(0, 0, 0);
+    this->offset_.Rot() = ignition::math::Quaterniond(0, 0, 0);
   }
   else
-    this->offset_.rot = _sdf->GetElement("rpyOffset")->Get<ignition::math::Vector3d>();
+    this->offset_.Rot() = _sdf->GetElement("rpyOffset")->Get<ignition::math::Quaterniond>();
 
   if (!_sdf->HasElement("gaussianNoise"))
   {
@@ -225,13 +225,13 @@ void GazeboRosP3D::UpdateChild()
 
         this->pose_msg_.child_frame_id = this->link_name_;
 
-       ignition::math::Pose3d pose, frame_pose;
-       ignition::math::Vector3d frame_vpos;
-       ignition::math::Vector3d frame_veul;
+        ignition::math::Pose3d pose, frame_pose;
+        ignition::math::Vector3d frame_vpos;
+        ignition::math::Vector3d frame_veul;
 
         // get inertial Rates
-       ignition::math::Vector3d vpos = this->link_->WorldLinearVel();
-       ignition::math::Vector3d veul = this->link_->WorldAngularVel();
+        ignition::math::Vector3d vpos = this->link_->WorldLinearVel();
+        ignition::math::Vector3d veul = this->link_->WorldAngularVel();
 
         // Get Pose/Orientation
         pose = this->link_->WorldPose();
@@ -241,9 +241,9 @@ void GazeboRosP3D::UpdateChild()
         {
           // convert to relative pose
           frame_pose = this->reference_link_->WorldPose();
-          pose.pos = pose.pos - frame_pose.pos;
-          pose.pos = frame_pose.Rot().RotateVectorReverse(pose.Pos());
-          pose.rot *= frame_pose.Rot().GetInverse();
+          pose.Pos() = pose.Pos() - frame_pose.Pos();
+          pose.Pos() = frame_pose.Rot().RotateVectorReverse(pose.Pos());
+          pose.Rot() *= frame_pose.Rot().Inverse();
           // convert to relative rates
           frame_vpos = this->reference_link_->WorldLinearVel();
           frame_veul = this->reference_link_->WorldAngularVel();
@@ -253,9 +253,9 @@ void GazeboRosP3D::UpdateChild()
 
         // Apply Constant Offsets
         // apply xyz offsets and get position and rotation components
-        pose.pos = pose.pos + this->offset_.pos;
+        pose.Pos() = pose.Pos() + this->offset_.Pos();
         // apply rpy offsets
-        pose.rot = this->offset_.rot*pose.rot;
+        pose.Rot() = this->offset_.Rot() * pose.Rot();
         pose.Rot().Normalize();
 
         // compute accelerations (not used)
@@ -279,18 +279,18 @@ void GazeboRosP3D::UpdateChild()
         this->pose_msg_.pose.pose.orientation.z = pose.Rot().Z();
         this->pose_msg_.pose.pose.orientation.w = pose.Rot().W();
 
-        this->pose_msg_.twist.twist.linear.x  = vpos.x +
+        this->pose_msg_.twist.twist.linear.x  = vpos.X() +
           this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.linear.y  = vpos.y +
+        this->pose_msg_.twist.twist.linear.y  = vpos.Y() +
           this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.linear.z  = vpos.z +
+        this->pose_msg_.twist.twist.linear.z  = vpos.Z() +
           this->GaussianKernel(0, this->gaussian_noise_);
         // pass euler angular rates
-        this->pose_msg_.twist.twist.angular.x = veul.x +
+        this->pose_msg_.twist.twist.angular.x = veul.X() +
           this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.angular.y = veul.y +
+        this->pose_msg_.twist.twist.angular.y = veul.Y() +
           this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.angular.z = veul.z +
+        this->pose_msg_.twist.twist.angular.z = veul.Z() +
           this->GaussianKernel(0, this->gaussian_noise_);
 
         // fill in covariance matrix
