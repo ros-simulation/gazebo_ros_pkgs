@@ -424,7 +424,7 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
 
         // get velocity in /odom frame
        ignition::math::Vector3d linear;
-        linear = parent->GetWorldLinearVel();
+        linear = parent->WorlLinearVel();
         odom_.twist.twist.angular.z = parent->WorldAngularVel().Z();
 
         // convert velocity to child_frame_id (aka base_footprint)

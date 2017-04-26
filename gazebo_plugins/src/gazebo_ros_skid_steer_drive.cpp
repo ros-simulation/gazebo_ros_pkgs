@@ -435,7 +435,7 @@ namespace gazebo {
 
     // get velocity in /odom frame
    ignition::math::Vector3d linear;
-    linear = this->parent->GetWorldLinearVel();
+    linear = this->parent->WorlLinearVel();
     odom_.twist.twist.angular.z = this->parent->WorldAngularVel().Z();
 
     // convert velocity to child_frame_id (aka base_footprint)

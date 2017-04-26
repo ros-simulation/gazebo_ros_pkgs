@@ -854,7 +854,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
     ignition::math::Quaternion model_rot = model_pose.rot;
 
     // get model twist
-    ignition::math::Vector3d model_linear_vel  = model->GetWorldLinearVel();
+    ignition::math::Vector3d model_linear_vel  = model->WorlLinearVel();
     ignition::math::Vector3d model_angular_vel = model->WorldAngularVel();
 
 
@@ -867,7 +867,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
       model_rot *= frame_pose.Rot().GetInverse();
 
       // convert to relative rates
-      ignition::math::Vector3d frame_vpos = frame->GetWorldLinearVel(); // get velocity in gazebo frame
+      ignition::math::Vector3d frame_vpos = frame->WorlLinearVel(); // get velocity in gazebo frame
       ignition::math::Vector3d frame_veul = frame->WorldAngularVel(); // get velocity in gazebo frame
       model_linear_vel = frame_pose.Rot().RotateVector(model_linear_vel - frame_vpos);
       model_angular_vel = frame_pose.Rot().RotateVector(model_angular_vel - frame_veul);
@@ -1075,7 +1075,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
   // get body pose
   ignition::math::Pose3d body_pose = body->WorldPose();
   // Get inertial rates
-  ignition::math::Vector3d body_vpos = body->GetWorldLinearVel(); // get velocity in gazebo frame
+  ignition::math::Vector3d body_vpos = body->WorlLinearVel(); // get velocity in gazebo frame
   ignition::math::Vector3d body_veul = body->WorldAngularVel(); // get velocity in gazebo frame
 
   if (frame)
@@ -1087,7 +1087,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
     body_pose.rot *= frame_pose.Rot().GetInverse();
 
     // convert to relative rates
-    ignition::math::Vector3d frame_vpos = frame->GetWorldLinearVel(); // get velocity in gazebo frame
+    ignition::math::Vector3d frame_vpos = frame->WorlLinearVel(); // get velocity in gazebo frame
     ignition::math::Vector3d frame_veul = frame->WorldAngularVel(); // get velocity in gazebo frame
     body_vpos = frame_pose.Rot().RotateVector(body_vpos - frame_vpos);
     body_veul = frame_pose.Rot().RotateVector(body_veul - frame_veul);
@@ -1659,7 +1659,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
     target_pose.pos = frame_pos + frame_rot.RotateVector(target_pos);
     target_pose.rot = frame_rot * target_pose.rot;
 
-    ignition::math::Vector3d frame_linear_vel = frame->GetWorldLinearVel();
+    ignition::math::Vector3d frame_linear_vel = frame->WorlLinearVel();
     ignition::math::Vector3d frame_angular_vel = frame->WorldAngularVel();
     target_linear_vel -= frame_linear_vel;
     target_angular_vel -= frame_angular_vel;
@@ -1968,7 +1968,7 @@ void GazeboRosApiPlugin::publishLinkStates()
         pose.orientation.y = rot.y;
         pose.orientation.z = rot.z;
         link_states.pose.push_back(pose);
-        ignition::math::Vector3d linear_vel  = body->GetWorldLinearVel();
+        ignition::math::Vector3d linear_vel  = body->WorlLinearVel();
         ignition::math::Vector3d angular_vel = body->WorldAngularVel();
         geometry_msgs::Twist twist;
         twist.linear.x = linear_vel.x;
@@ -2006,7 +2006,7 @@ void GazeboRosApiPlugin::publishModelStates()
     pose.orientation.y = rot.y;
     pose.orientation.z = rot.z;
     model_states.pose.push_back(pose);
-    ignition::math::Vector3d linear_vel  = model->GetWorldLinearVel();
+    ignition::math::Vector3d linear_vel  = model->WorlLinearVel();
     ignition::math::Vector3d angular_vel = model->WorldAngularVel();
     geometry_msgs::Twist twist;
     twist.linear.x = linear_vel.x;

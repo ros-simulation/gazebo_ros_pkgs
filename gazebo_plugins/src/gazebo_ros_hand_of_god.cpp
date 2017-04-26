@@ -161,7 +161,7 @@ namespace gazebo
     ignition::math::Quaternion not_a_quaternion = err_rot.GetLog();
 
     floating_link_->AddForce(
-        kl_ * err_pos - cl_ * floating_link_->GetWorldLinearVel());
+        kl_ * err_pos - cl_ * floating_link_->WorlLinearVel());
 
     floating_link_->AddRelativeTorque(
         ka_ * ignition::math::Vector3d(not_a_quaternion.x, not_a_quaternion.y, not_a_quaternion.z) - ca_ * floating_link_->GetRelativeAngularVel());

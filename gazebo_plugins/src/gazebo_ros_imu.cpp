@@ -174,7 +174,7 @@ void GazeboRosIMU::LoadThread()
   this->last_time_ = this->world_->SimTime();
 
   // this->initial_pose_ = this->link->GetPose();
-  this->last_vpos_ = this->link->GetWorldLinearVel();
+  this->last_vpos_ = this->link->WorlLinearVel();
   this->last_veul_ = this->link->WorldAngularVel();
   this->apos_ = 0;
   this->aeul_ = 0;
@@ -227,7 +227,7 @@ void GazeboRosIMU::UpdateChild()
     rot.Normalize();
 
     // get Rates
-   ignition::math::Vector3d vpos = this->link->GetWorldLinearVel();
+   ignition::math::Vector3d vpos = this->link->WorlLinearVel();
    ignition::math::Vector3d veul = this->link->WorldAngularVel();
 
     // differentiate to get accelerations
