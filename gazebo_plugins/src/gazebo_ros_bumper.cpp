@@ -178,7 +178,7 @@ void GazeboRosBumper::OnContact()
   // get reference frame (body(link)) pose and subtract from it to get
   // relative force, torque, position and normal vectors
  ignition::math::Pose3d pose, frame_pose;
-  math::Quaternion rot, frame_rot;
+  math::Quaterniond rot, frame_rot;
  ignition::math::Vector3d pos, frame_pos;
   /*
   if (myFrame)
@@ -193,7 +193,7 @@ void GazeboRosBumper::OnContact()
     // no specific frames specified, use identity pose, keeping
     // relative frame at inertial origin
     frame_pos =ignition::math::Vector3d(0, 0, 0);
-    frame_rot = math::Quaternion(1, 0, 0, 0);  // gazebo u,x,y,z == identity
+    frame_rot = math::Quaterniond(1, 0, 0, 0);  // gazebo u,x,y,z == identity
     frame_pose =ignition::math::Pose3d(frame_pos, frame_rot);
   }
 
@@ -253,11 +253,11 @@ void GazeboRosBumper::OnContact()
 
       // Get force, torque and rotate into user specified frame.
       // frame_rot is identity if world is used (default for now)
-     ignition::math::Vector3d force = frame_rot.RotateVectorReverse(math::Vector3(
+     ignition::math::Vector3d force = frame_rot.RotateVectorReverse(ignition::math::Vector3d(
                               contact.wrench(j).body_1_wrench().force().X()(),
                             contact.wrench(j).body_1_wrench().force().Y()(),
                             contact.wrench(j).body_1_wrench().force().Z()()));
-     ignition::math::Vector3d torque = frame_rot.RotateVectorReverse(math::Vector3(
+     ignition::math::Vector3d torque = frame_rot.RotateVectorReverse(ignition::math::Vector3d(
                             contact.wrench(j).body_1_wrench().torque().X()(),
                             contact.wrench(j).body_1_wrench().torque().Y()(),
                             contact.wrench(j).body_1_wrench().torque().Z()()));

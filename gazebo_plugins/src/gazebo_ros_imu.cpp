@@ -105,7 +105,7 @@ void GazeboRosIMU::LoadThread()
     this->offset_.pos =ignition::math::Vector3d(0, 0, 0);
   }
   else
-    this->offset_.pos = this->sdf->Get<math::Vector3>("xyzOffset");
+    this->offset_.pos = this->sdf->Get<ignition::math::Vector3d>("xyzOffset");
 
   if (!this->sdf->HasElement("rpyOffset"))
   {
@@ -113,7 +113,7 @@ void GazeboRosIMU::LoadThread()
     this->offset_.rot =ignition::math::Vector3d(0, 0, 0);
   }
   else
-    this->offset_.rot = this->sdf->Get<math::Vector3>("rpyOffset");
+    this->offset_.rot = this->sdf->Get<ignition::math::Vector3d>("rpyOffset");
 
   if (!this->sdf->HasElement("updateRate"))
   {
@@ -174,7 +174,7 @@ void GazeboRosIMU::LoadThread()
   this->last_time_ = this->world_->SimTime();
 
   // this->initial_pose_ = this->link->GetPose();
-  this->last_vpos_ = this->link->WorlLinearVel();
+  this->last_vpos_ = this->link->WorldLinearVel();
   this->last_veul_ = this->link->WorldAngularVel();
   this->apos_ = 0;
   this->aeul_ = 0;
@@ -213,7 +213,7 @@ void GazeboRosIMU::UpdateChild()
   if ((this->pub_.getNumSubscribers() > 0 && this->topic_name_ != ""))
   {
    ignition::math::Pose3d pose;
-    math::Quaternion rot;
+    math::Quaterniond rot;
    ignition::math::Vector3d pos;
 
     // Get Pose/Orientation ///@todo: verify correctness
@@ -227,7 +227,7 @@ void GazeboRosIMU::UpdateChild()
     rot.Normalize();
 
     // get Rates
-   ignition::math::Vector3d vpos = this->link->WorlLinearVel();
+   ignition::math::Vector3d vpos = this->link->WorldLinearVel();
    ignition::math::Vector3d veul = this->link->WorldAngularVel();
 
     // differentiate to get accelerations

@@ -66,7 +66,7 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
   this->sdf = _sdf;
   this->world_ = this->model_->GetWorld();
 
-  // this->world_->Engine()->SetGravity(math::Vector3(0, 0, 0));
+  // this->world_->Engine()->SetGravity(ignition::math::Vector3d(0, 0, 0));
 
   // load parameters
   this->robot_namespace_ = "";

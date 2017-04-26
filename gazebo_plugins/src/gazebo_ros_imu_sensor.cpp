@@ -25,7 +25,7 @@ gazebo::GazeboRosImuSensor::GazeboRosImuSensor(): SensorPlugin()
 {
   accelerometer_data =ignition::math::Vector3d(0, 0, 0);
   gyroscope_data =ignition::math::Vector3d(0, 0, 0);
-  orientation = math::Quaternion(1,0,0,0);
+  orientation = math::Quaterniond(1,0,0,0);
   seed=0;
   sensor=NULL;
 }
@@ -219,7 +219,7 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   //POSITION OFFSET, UNUSED
   if (sdf->HasElement("xyzOffset"))
   {
-    offset.pos =  sdf->Get<math::Vector3>("xyzOffset");
+    offset.pos =  sdf->Get<ignition::math::Vector3d>("xyzOffset");
     ROS_INFO_STREAM("<xyzOffset> set to: " << offset.pos[0] << ' ' << offset.pos[1] << ' ' << offset.pos[2]);
   }
   else
@@ -231,7 +231,7 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   //ORIENTATION OFFSET
   if (sdf->HasElement("rpyOffset"))
   {
-    offset.rot =  sdf->Get<math::Vector3>("rpyOffset");
+    offset.rot =  sdf->Get<ignition::math::Vector3d>("rpyOffset");
     ROS_INFO_STREAM("<rpyOffset> set to: " << offset.Rot().GetRoll() << ' ' << offset.Rot().GetPitch() << ' ' << offset.Rot().Yaw());
   }
   else

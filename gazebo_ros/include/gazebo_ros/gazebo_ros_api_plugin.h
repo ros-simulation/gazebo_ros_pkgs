@@ -259,11 +259,11 @@ private:
 
   /// \brief Update the model name and pose of the SDF file before sending to Gazebo
   void updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
-                           ignition::math::Vector3d initial_xyz, ignition::math::Quaternion initial_q);
+                           ignition::math::Vector3d initial_xyz, ignition::math::Quaterniond initial_q);
 
   /// \brief Update the model pose of the URDF file before sending to Gazebo
   void updateURDFModelPose(TiXmlDocument &gazebo_model_xml,
-                           ignition::math::Vector3d initial_xyz, ignition::math::Quaternion initial_q);
+                           ignition::math::Vector3d initial_xyz, ignition::math::Quaterniond initial_q);
 
   /// \brief Update the model name of the URDF file before sending to Gazebo
   void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);

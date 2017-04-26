@@ -406,7 +406,7 @@ namespace gazebo {
     // getting data for base_footprint to odom transform
    ignition::math::Pose3d pose = this->parent->WorldPose();
 
-    tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().w);
+    tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
     tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
 
     tf::Transform base_footprint_to_odom(qt, vt);
@@ -425,7 +425,7 @@ namespace gazebo {
     odom_.pose.pose.orientation.x = pose.Rot().X();
     odom_.pose.pose.orientation.y = pose.Rot().Y();
     odom_.pose.pose.orientation.z = pose.Rot().Z();
-    odom_.pose.pose.orientation.w = pose.Rot().w;
+    odom_.pose.pose.orientation.w = pose.Rot().W();
     odom_.pose.covariance[0] = this->covariance_x_;
     odom_.pose.covariance[7] = this->covariance_y_;
     odom_.pose.covariance[14] = 1000000000000.0;
@@ -435,7 +435,7 @@ namespace gazebo {
 
     // get velocity in /odom frame
    ignition::math::Vector3d linear;
-    linear = this->parent->WorlLinearVel();
+    linear = this->parent->WorldLinearVel();
     odom_.twist.twist.angular.z = this->parent->WorldAngularVel().Z();
 
     // convert velocity to child_frame_id (aka base_footprint)

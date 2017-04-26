@@ -79,7 +79,7 @@ namespace gazebo
     /// \brief Pointer to the sdf config file.
     sdf::ElementPtr sdf;
     /// \brief Orientation data from the sensor.
-    ignition::math::Quaternion orientation;
+    ignition::math::Quaterniond orientation;
     /// \brief Linear acceleration data from the sensor.
    ignition::math::Vector3d accelerometer_data;
     /// \brief Angular velocity data from the sensor.

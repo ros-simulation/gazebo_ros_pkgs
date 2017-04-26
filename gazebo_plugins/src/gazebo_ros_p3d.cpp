@@ -97,7 +97,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->offset_.pos =ignition::math::Vector3d(0, 0, 0);
   }
   else
-    this->offset_.pos = _sdf->GetElement("xyzOffset")->Get<math::Vector3>();
+    this->offset_.pos = _sdf->GetElement("xyzOffset")->Get<ignition::math::Vector3d>();
 
   if (!_sdf->HasElement("rpyOffset"))
   {
@@ -105,7 +105,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->offset_.rot =ignition::math::Vector3d(0, 0, 0);
   }
   else
-    this->offset_.rot = _sdf->GetElement("rpyOffset")->Get<math::Vector3>();
+    this->offset_.rot = _sdf->GetElement("rpyOffset")->Get<ignition::math::Vector3d>();
 
   if (!_sdf->HasElement("gaussianNoise"))
   {
@@ -151,7 +151,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   this->last_time_ = this->world_->SimTime();
   // initialize body
-  this->last_vpos_ = this->link_->WorlLinearVel();
+  this->last_vpos_ = this->link_->WorldLinearVel();
   this->last_veul_ = this->link_->WorldAngularVel();
   this->apos_ = 0;
   this->aeul_ = 0;
@@ -178,7 +178,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ROS_DEBUG_NAMED("p3d", "got body %s", this->reference_link_->GetName().c_str());
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
-    this->last_frame_vpos_ = this->reference_link_->WorlLinearVel();
+    this->last_frame_vpos_ = this->reference_link_->WorldLinearVel();
     this->last_frame_veul_ = this->reference_link_->WorldAngularVel();
   }
 
@@ -230,7 +230,7 @@ void GazeboRosP3D::UpdateChild()
        ignition::math::Vector3d frame_veul;
 
         // get inertial Rates
-       ignition::math::Vector3d vpos = this->link_->WorlLinearVel();
+       ignition::math::Vector3d vpos = this->link_->WorldLinearVel();
        ignition::math::Vector3d veul = this->link_->WorldAngularVel();
 
         // Get Pose/Orientation
@@ -245,7 +245,7 @@ void GazeboRosP3D::UpdateChild()
           pose.pos = frame_pose.Rot().RotateVectorReverse(pose.Pos());
           pose.rot *= frame_pose.Rot().GetInverse();
           // convert to relative rates
-          frame_vpos = this->reference_link_->WorlLinearVel();
+          frame_vpos = this->reference_link_->WorldLinearVel();
           frame_veul = this->reference_link_->WorldAngularVel();
           vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
           veul = frame_pose.Rot().RotateVector(veul - frame_veul);
@@ -277,7 +277,7 @@ void GazeboRosP3D::UpdateChild()
         this->pose_msg_.pose.pose.orientation.x = pose.Rot().X();
         this->pose_msg_.pose.pose.orientation.y = pose.Rot().Y();
         this->pose_msg_.pose.pose.orientation.z = pose.Rot().Z();
-        this->pose_msg_.pose.pose.orientation.w = pose.Rot().w;
+        this->pose_msg_.pose.pose.orientation.w = pose.Rot().W();
 
         this->pose_msg_.twist.twist.linear.x  = vpos.x +
           this->GaussianKernel(0, this->gaussian_noise_);

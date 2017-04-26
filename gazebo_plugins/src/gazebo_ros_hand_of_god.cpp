@@ -115,8 +115,8 @@ namespace gazebo
       return;
     }
 
-    cl_ = 2.0 * sqrt(kl_*floating_link_->GetInertial()->GetMass());
-    ca_ = 2.0 * sqrt(ka_*floating_link_->GetInertial()->GetIXX());
+    cl_ = 2.0 * sqrt(kl_*floating_link_->GetInertial()->Mass());
+    ca_ = 2.0 * sqrt(ka_*floating_link_->GetInertial()->IXX());
 
     // Create the TF listener for the desired position of the hog
     tf_buffer_.reset(new tf2_ros::Buffer());
@@ -151,20 +151,22 @@ namespace gazebo
     const geometry_msgs::Quaternion &q = hog_desired_tform.transform.rotation;
     ignition::math::Pose3d hog_desired(
         ignition::math::Vector3d(p.x, p.y, p.z),
-        ignition::math::Quaternion(q.w, q.x, q.y, q.z));
+        ignition::math::Quaterniond(q.w, q.x, q.y, q.z));
 
     // Relative transform from actual to desired pose
-    ignition::math::Pose3d world_pose = floating_link_->GetDirtyPose();
-    ignition::math::Vector3d err_pos = hog_desired.pos - world_pose.pos;
+    ignition::math::Pose3d world_pose = floating_link_->DirtyPose();
+    ignition::math::Vector3d err_pos = hog_desired.Pos() - world_pose.Pos();
     // Get exponential coordinates for rotation
-    ignition::math::Quaternion err_rot =  (world_pose.Rot().GetAsMatrix4().Inverse() * hog_desired.Rot().GetAsMatrix4()).GetRotation();
-    ignition::math::Quaternion not_a_quaternion = err_rot.GetLog();
+    ignition::math::Quaterniond err_rot =  (ignition::math::Matrix4d(world_pose).Inverse() * 
+                                            ignition::math::Matrix4d(hog_desired)
+                                           ).Rotation();
+    ignition::math::Quaterniond not_a_quaternion = err_rot.Log();
 
     floating_link_->AddForce(
-        kl_ * err_pos - cl_ * floating_link_->WorlLinearVel());
+        kl_ * err_pos - cl_ * floating_link_->WorldLinearVel());
 
     floating_link_->AddRelativeTorque(
-        ka_ * ignition::math::Vector3d(not_a_quaternion.x, not_a_quaternion.y, not_a_quaternion.z) - ca_ * floating_link_->GetRelativeAngularVel());
+        ka_ * ignition::math::Vector3d(not_a_quaternion.X(), not_a_quaternion.Y(), not_a_quaternion.Z()) - ca_ * floating_link_->RelativeAngularVel());
 
     // Convert actual pose to TransformStamped message
     geometry_msgs::TransformStamped hog_actual_tform;
@@ -178,7 +180,7 @@ namespace gazebo
     hog_actual_tform.transform.translation.y = world_pose.Pos().Y();
     hog_actual_tform.transform.translation.z = world_pose.Pos().Z();
 
-    hog_actual_tform.transform.rotation.w = world_pose.Rot().w;
+    hog_actual_tform.transform.rotation.w = world_pose.Rot().W();
     hog_actual_tform.transform.rotation.x = world_pose.Rot().X();
     hog_actual_tform.transform.rotation.y = world_pose.Rot().Y();
     hog_actual_tform.transform.rotation.z = world_pose.Rot().Z();
