@@ -232,12 +232,12 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   if (sdf->HasElement("rpyOffset"))
   {
     offset.rot =  sdf->Get<math::Vector3>("rpyOffset");
-    ROS_INFO_STREAM("<rpyOffset> set to: " << offset.Rot().GetRoll() << ' ' << offset.Rot().GetPitch() << ' ' << offset.Rot().GetYaw());
+    ROS_INFO_STREAM("<rpyOffset> set to: " << offset.Rot().GetRoll() << ' ' << offset.Rot().GetPitch() << ' ' << offset.Rot().Yaw());
   }
   else
   {
     offset.rot =ignition::math::Vector3d(0, 0, 0);
-    ROS_WARN_STREAM("missing <rpyOffset>, set to default: " << offset.Rot().GetRoll() << ' ' << offset.Rot().GetPitch() << ' ' << offset.Rot().GetYaw());
+    ROS_WARN_STREAM("missing <rpyOffset>, set to default: " << offset.Rot().GetRoll() << ' ' << offset.Rot().GetPitch() << ' ' << offset.Rot().Yaw());
   }
 
   return true;

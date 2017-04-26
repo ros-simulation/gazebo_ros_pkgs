@@ -161,7 +161,7 @@ namespace gazebo
   {
     boost::mutex::scoped_lock scoped_lock(lock);
    ignition::math::Pose3d pose = parent_->WorldPose();
-    float yaw = pose.Rot().GetYaw();
+    float yaw = pose.Rot().Yaw();
     parent_->SetLinearVel(math::Vector3(
           x_ * cosf(yaw) - y_ * sinf(yaw),
           y_ * cosf(yaw) + x_ * sinf(yaw),
@@ -250,8 +250,8 @@ namespace gazebo
     }
     else
     {
-      float last_yaw = last_odom_pose_.Rot().GetYaw();
-      float current_yaw = pose.Rot().GetYaw();
+      float last_yaw = last_odom_pose_.Rot().Yaw();
+      float current_yaw = pose.Rot().Yaw();
       while (current_yaw < last_yaw - M_PI) current_yaw += 2 * M_PI;
       while (current_yaw > last_yaw + M_PI) current_yaw -= 2 * M_PI;
       float angular_diff = current_yaw - last_yaw;
@@ -260,7 +260,7 @@ namespace gazebo
     last_odom_pose_ = pose;
 
     // convert velocity to child_frame_id (aka base_footprint)
-    float yaw = pose.Rot().GetYaw();
+    float yaw = pose.Rot().Yaw();
     odom_.twist.twist.linear.x = cosf(yaw) * linear.x + sinf(yaw) * linear.y;
     odom_.twist.twist.linear.y = cosf(yaw) * linear.y - sinf(yaw) * linear.x;
 

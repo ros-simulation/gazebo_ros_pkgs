@@ -439,7 +439,7 @@ namespace gazebo {
     odom_.twist.twist.angular.z = this->parent->WorldAngularVel().Z();
 
     // convert velocity to child_frame_id (aka base_footprint)
-    float yaw = pose.Rot().GetYaw();
+    float yaw = pose.Rot().Yaw();
     odom_.twist.twist.linear.x = cosf(yaw) * linear.x + sinf(yaw) * linear.y;
     odom_.twist.twist.linear.y = cosf(yaw) * linear.y - sinf(yaw) * linear.x;
     odom_.twist.covariance[0] = this->covariance_x_;
