@@ -20,7 +20,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/UpdateInfo.hh>
 #include <ignition/math/Vector3.hh>
-#include <ignition/math/Pose.hh>
+#include <ignition/math/Pose3.hh>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <string>
@@ -81,9 +81,9 @@ namespace gazebo
     /// \brief Orientation data from the sensor.
     ignition::math::Quaterniond orientation;
     /// \brief Linear acceleration data from the sensor.
-   ignition::math::Vector3d accelerometer_data;
+    ignition::math::Vector3d accelerometer_data;
     /// \brief Angular velocity data from the sensor.
-   ignition::math::Vector3d gyroscope_data;
+    ignition::math::Vector3d gyroscope_data;
     
     /// \brief Seed for the Gaussian noise generator.
     unsigned int seed;
@@ -100,7 +100,7 @@ namespace gazebo
     /// \brief Gaussian noise.
     double gaussian_noise;
     /// \brief Offset parameter, position part is unused.
-   ignition::math::Pose3d offset;
+    ignition::math::Pose3d offset;
   };
 }
 
