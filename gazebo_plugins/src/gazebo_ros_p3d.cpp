@@ -152,7 +152,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->last_time_ = this->world_->SimTime();
   // initialize body
   this->last_vpos_ = this->link_->GetWorldLinearVel();
-  this->last_veul_ = this->link_->GetWorldAngularVel();
+  this->last_veul_ = this->link_->WorldAngularVel();
   this->apos_ = 0;
   this->aeul_ = 0;
 
@@ -179,7 +179,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
     this->last_frame_vpos_ = this->reference_link_->GetWorldLinearVel();
-    this->last_frame_veul_ = this->reference_link_->GetWorldAngularVel();
+    this->last_frame_veul_ = this->reference_link_->WorldAngularVel();
   }
 
 
@@ -231,7 +231,7 @@ void GazeboRosP3D::UpdateChild()
 
         // get inertial Rates
        ignition::math::Vector3d vpos = this->link_->GetWorldLinearVel();
-       ignition::math::Vector3d veul = this->link_->GetWorldAngularVel();
+       ignition::math::Vector3d veul = this->link_->WorldAngularVel();
 
         // Get Pose/Orientation
         pose = this->link_->WorldPose();
@@ -246,7 +246,7 @@ void GazeboRosP3D::UpdateChild()
           pose.rot *= frame_pose.Rot().GetInverse();
           // convert to relative rates
           frame_vpos = this->reference_link_->GetWorldLinearVel();
-          frame_veul = this->reference_link_->GetWorldAngularVel();
+          frame_veul = this->reference_link_->WorldAngularVel();
           vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
           veul = frame_pose.Rot().RotateVector(veul - frame_veul);
         }

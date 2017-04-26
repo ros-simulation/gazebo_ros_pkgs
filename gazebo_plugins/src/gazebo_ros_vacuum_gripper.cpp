@@ -196,7 +196,7 @@ void GazeboRosVacuumGripper::UpdateChild()
         links[j]->SetLinearAccel(link_->GetWorldLinearAccel());
         links[j]->SetAngularAccel(link_->GetWorldAngularAccel());
         links[j]->SetLinearVel(link_->GetWorldLinearVel());
-        links[j]->SetAngularVel(link_->GetWorldAngularVel());
+        links[j]->SetAngularVel(link_->WorldAngularVel());
         double norm_force = 1 / norm;
         if (norm < 0.01) {
           // apply friction like force
