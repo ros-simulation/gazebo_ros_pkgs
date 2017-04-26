@@ -201,7 +201,7 @@ void GazeboRosVacuumGripper::UpdateChild()
         if (norm < 0.01) {
           // apply friction like force
           // TODO(unknown): should apply friction actually
-          link_pose.Set(parent_pose.pos, link_pose.rot);
+          link_pose.Set(parent_pose.pos, link_pose.Rot());
           links[j]->SetWorldPose(link_pose);
         }
         if (norm_force > 20) {
