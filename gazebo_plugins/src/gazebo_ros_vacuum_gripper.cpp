@@ -44,7 +44,8 @@ GazeboRosVacuumGripper::GazeboRosVacuumGripper()
 // Destructor
 GazeboRosVacuumGripper::~GazeboRosVacuumGripper()
 {
-  event::Events::DisconnectWorldUpdateBegin(update_connection_);
+  // Conversion from DisconnectWorldUpdateBegin in migration from gazebo7
+  update_connection_.reset();
 
   // Custom Callback Queue
   queue_.clear();
