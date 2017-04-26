@@ -67,10 +67,10 @@ int main(int argc, char** argv)
   p.position.x = 0;
   p.position.y = 0;
   p.position.z = 0;
-  p.orientation.x = r.x;
-  p.orientation.y = r.y;
-  p.orientation.z = r.z;
-  p.orientation.w = r.w;
+  p.orientation.x = r.X();
+  p.orientation.y = r.Y();
+  p.orientation.z = r.Z();
+  p.orientation.w = r.W();
   sjt.request.model_pose = p;
   sjt.request.set_model_pose = true;
 
