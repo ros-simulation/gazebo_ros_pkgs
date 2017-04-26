@@ -1083,7 +1083,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
     // convert to relative pose
     ignition::math::Pose3d frame_pose = frame->WorldPose();
     body_pose.pos = body_pose.pos - frame_pose.pos;
-    body_pose.pos = frame_pose.Rot().RotateVectorReverse(body_pose.pos);
+    body_pose.pos = frame_pose.Rot().RotateVectorReverse(body_pose.Pos());
     body_pose.rot *= frame_pose.Rot().GetInverse();
 
     // convert to relative rates

@@ -242,7 +242,7 @@ void GazeboRosP3D::UpdateChild()
           // convert to relative pose
           frame_pose = this->reference_link_->WorldPose();
           pose.pos = pose.pos - frame_pose.pos;
-          pose.pos = frame_pose.Rot().RotateVectorReverse(pose.pos);
+          pose.pos = frame_pose.Rot().RotateVectorReverse(pose.Pos());
           pose.rot *= frame_pose.Rot().GetInverse();
           // convert to relative rates
           frame_vpos = this->reference_link_->GetWorldLinearVel();
