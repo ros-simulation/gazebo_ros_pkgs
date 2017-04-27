@@ -236,8 +236,8 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
   auto maxAngle = this->parent_ray_sensor_->AngleMax();
   auto minAngle = this->parent_ray_sensor_->AngleMin();
 #else
- ignition::math::Angle maxAngle = this->parent_ray_sensor_->PositionMax();
- ignition::math::Angle minAngle = this->parent_ray_sensor_->PositionMin();
+  math::Angle maxAngle = this->parent_ray_sensor_->GetAngleMax();
+  math::Angle minAngle = this->parent_ray_sensor_->GetAngleMin();
 #endif
 
   double maxRange = this->parent_ray_sensor_->RangeMax();
@@ -251,8 +251,8 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
   auto verticalMaxAngle = this->parent_ray_sensor_->VerticalAngleMax();
   auto verticalMinAngle = this->parent_ray_sensor_->VerticalAngleMin();
 #else
- ignition::math::Angle verticalMaxAngle = this->parent_ray_sensor_->GetVerticalAngleMax();
- ignition::math::Angle verticalMinAngle = this->parent_ray_sensor_->GetVerticalAngleMin();
+  math::Angle verticalMaxAngle = this->parent_ray_sensor_->GetVerticalAngleMax();
+  math::Angle verticalMinAngle = this->parent_ray_sensor_->GetVerticalAngleMin();
 #endif
 
   double yDiff = maxAngle.Radian() - minAngle.Radian();
@@ -405,7 +405,7 @@ void GazeboRosBlockLaser::OnStats( const boost::shared_ptr<msgs::WorldStatistics
 {
   this->sim_time_  = msgs::Convert( _msg->sim_time() );
 
- ignition::math::Pose3d pose;
+  ignition::math::Pose3d pose;
   pose.Pos().X() = 0.5*sin(0.01*this->sim_time_.Double());
   gzdbg << "plugin simTime [" << this->sim_time_.Double() << "] update pose [" << pose.Pos().X() << "]\n";
 }

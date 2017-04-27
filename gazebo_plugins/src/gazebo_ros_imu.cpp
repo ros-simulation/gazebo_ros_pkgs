@@ -102,7 +102,7 @@ void GazeboRosIMU::LoadThread()
   if (!this->sdf->HasElement("xyzOffset"))
   {
     ROS_INFO_NAMED("imu", "imu plugin missing <xyzOffset>, defaults to 0s");
-    this->offset_.Pos() =ignition::math::Vector3d(0, 0, 0);
+    this->offset_.Pos() = ignition::math::Vector3d(0, 0, 0);
   }
   else
     this->offset_.Pos() = this->sdf->Get<ignition::math::Vector3d>("xyzOffset");
@@ -110,7 +110,7 @@ void GazeboRosIMU::LoadThread()
   if (!this->sdf->HasElement("rpyOffset"))
   {
     ROS_INFO_NAMED("imu", "imu plugin missing <rpyOffset>, defaults to 0s");
-    this->offset_.Rot() =ignition::math::Quaterniond(0, 0, 0);
+    this->offset_.Rot() = ignition::math::Quaterniond(0, 0, 0);
   }
   else
     this->offset_.Rot() = this->sdf->Get<ignition::math::Quaterniond>("rpyOffset");
@@ -259,7 +259,7 @@ void GazeboRosIMU::UpdateChild()
     this->imu_msg_.orientation.w = rot.W();
 
     // pass euler angular rates
-   ignition::math::Vector3d linear_velocity(
+    ignition::math::Vector3d linear_velocity(
       veul.X() + this->GaussianKernel(0, this->gaussian_noise_),
       veul.Y() + this->GaussianKernel(0, this->gaussian_noise_),
       veul.Z() + this->GaussianKernel(0, this->gaussian_noise_));
@@ -271,7 +271,7 @@ void GazeboRosIMU::UpdateChild()
     this->imu_msg_.angular_velocity.z = linear_velocity.Z();
 
     // pass accelerations
-   ignition::math::Vector3d linear_acceleration(
+    ignition::math::Vector3d linear_acceleration(
       apos_.X() + this->GaussianKernel(0, this->gaussian_noise_),
       apos_.Y() + this->GaussianKernel(0, this->gaussian_noise_),
       apos_.Z() + this->GaussianKernel(0, this->gaussian_noise_));

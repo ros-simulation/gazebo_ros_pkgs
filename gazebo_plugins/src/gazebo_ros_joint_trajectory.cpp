@@ -297,8 +297,8 @@ bool GazeboRosJointTrajectory::SetTrajectory(
   this->disable_physics_updates_ = req.disable_physics_updates;
   if (this->disable_physics_updates_)
   {
-    this->physics_engine_enabled_ = this->world_->SetPhysicsEnabled();
     this->world_->SetPhysicsEnabled(false);
+    this->physics_engine_enabled_ = false;
   }
 
   return true;
@@ -327,7 +327,7 @@ void GazeboRosJointTrajectory::UpdateStates()
           cur_time.Double(), this->trajectory_index, this->points_.size());
 
         // get reference link pose before updates
-       ignition::math::Pose3d reference_pose = this->model_->WorldPose();
+        ignition::math::Pose3d reference_pose = this->model_->WorldPose();
         if (this->reference_link_)
         {
           reference_pose = this->reference_link_->WorldPose();

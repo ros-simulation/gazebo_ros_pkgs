@@ -160,7 +160,7 @@ namespace gazebo
   void GazeboRosPlanarMove::UpdateChild()
   {
     boost::mutex::scoped_lock scoped_lock(lock);
-   ignition::math::Pose3d pose = parent_->WorldPose();
+    ignition::math::Pose3d pose = parent_->WorldPose();
     float yaw = pose.Rot().Yaw();
     parent_->SetLinearVel(ignition::math::Vector3d(
           x_ * cosf(yaw) - y_ * sinf(yaw),
@@ -214,7 +214,7 @@ namespace gazebo
       tf::resolve(tf_prefix_, robot_base_frame_);
 
     // getting data for base_footprint to odom transform
-   ignition::math::Pose3d pose = this->parent_->WorldPose();
+    ignition::math::Pose3d pose = this->parent_->WorldPose();
 
     tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
     tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
@@ -240,7 +240,7 @@ namespace gazebo
     odom_.pose.covariance[35] = 0.001;
 
     // get velocity in /odom frame
-   ignition::math::Vector3d linear;
+    ignition::math::Vector3d linear;
     linear.X() = (pose.Pos().X() - last_odom_pose_.Pos().X()) / step_time;
     linear.Y() = (pose.Pos().Y() - last_odom_pose_.Pos().Y()) / step_time;
     if (rot_ > M_PI / step_time)
