@@ -44,7 +44,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   ROS_DEBUG_STREAM_NAMED("api_plugin","GazeboRosApiPlugin Deconstructor start");
 
   // Unload the sigint event
-  gazebo::event::Events::DisconnectSigInt(sigint_event_);
+  sigint_event_.reset();
   ROS_DEBUG_STREAM_NAMED("api_plugin","After sigint_event unload");
 
   // Don't attempt to unload this plugin if it was never loaded in the Load() function
@@ -55,7 +55,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   }
 
   // Disconnect slots
-  gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
+  load_gazebo_ros_api_plugin_event_.reset();
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
@@ -780,7 +780,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
 bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
                                      gazebo_msgs::DeleteLight::Response &res)
 {
-  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
 
   if (phy_light == NULL)
   {
@@ -796,7 +796,7 @@ bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
 
     for (int i = 0; i < 100; i++)
     {
-      phy_light = world_->Light(req.light_name);
+      phy_light = world_->LightByName(req.light_name);
       if (phy_light == NULL)
       {
         res.success = true;
@@ -1128,7 +1128,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
 bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Request &req,
                                                gazebo_msgs::GetLightProperties::Response &res)
 {
-  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
 
   if (phy_light == NULL)
   {
@@ -1158,7 +1158,7 @@ bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Req
 bool GazeboRosApiPlugin::setLightProperties(gazebo_msgs::SetLightProperties::Request &req,
                                                gazebo_msgs::SetLightProperties::Response &res)
 {
-  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
 
   if (phy_light == NULL)
   {
@@ -2404,7 +2404,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   // todo: should wait for response response_sub_, check to see that if _msg->response == "nonexistant"
 
   gazebo::physics::ModelPtr model = world_->GetModel(model_name);
-  gazebo::physics::LightPtr light = world_->Light(model_name);
+  gazebo::physics::LightPtr light = world_->LightByName(model_name);
   if ((isLight && light != NULL) || (model != NULL))
   {
     ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model name %s already exist.",model_name.c_str());
@@ -2446,7 +2446,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
 
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if ((isLight && world_->Light(model_name) != NULL)
+      if ((isLight && world_->LightByName(model_name) != NULL)
           || (world_->GetModel(model_name) != NULL))
         break;
     }
