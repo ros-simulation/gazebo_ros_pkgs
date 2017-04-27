@@ -295,8 +295,8 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
   this->disable_physics_updates_ = req.disable_physics_updates;
   if (this->disable_physics_updates_)
   {
-    this->physics_engine_enabled_ = this->world_->SetPhysicsEnabled();
     this->world_->SetPhysicsEnabled(false);
+    this->physics_engine_enabled_ = false;
   }
 
   return true;
