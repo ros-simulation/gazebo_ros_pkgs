@@ -94,7 +94,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (!_sdf->HasElement("xyzOffset"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <xyzOffset>, defaults to 0s");
-    this->offset_.Pos() =ignition::math::Vector3d(0, 0, 0);
+    this->offset_.Pos() = ignition::math::Vector3d(0, 0, 0);
   }
   else
     this->offset_.Pos() = _sdf->GetElement("xyzOffset")->Get<ignition::math::Vector3d>();

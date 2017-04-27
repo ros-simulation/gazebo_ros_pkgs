@@ -120,7 +120,7 @@ void GazeboRosJointStatePublisher::publishJointStates() {
 
     for ( int i = 0; i < joints_.size(); i++ ) {
         physics::JointPtr joint = joints_[i];
-       ignition::math::Angle angle = joint->Position ( 0 );
+        ignition::math::Angle angle = joint->Position ( 0 );
         joint_state_.name[i] = joint->GetName();
         joint_state_.position[i] = angle.Radian () ;
     }
