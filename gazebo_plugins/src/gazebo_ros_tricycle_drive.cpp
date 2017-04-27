@@ -311,7 +311,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
 #if GAZEBO_MAJOR_VERSION >= 4
       joint_steering_->SetPosition(0, applied_angle);
 #else
-      joint_steering_->SetAngle(0,ignition::math::Angle(applied_angle));
+      joint_steering_->SetAngle(0, math::Angle(applied_angle));
 #endif
     }
     //ROS_INFO_NAMED("tricycle_drive", "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] ",

@@ -86,7 +86,7 @@ void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/
     accelerometer_data = sensor->LinearAcceleration();
     gyroscope_data = sensor->AngularVelocity();
 #else
-    orientation = offset.Rot() * sensor->GetOrientation(); //applying offsets to the orientation measurement
+    orientation = offset.rot * sensor->GetOrientation(); //applying offsets to the orientation measurement
     accelerometer_data = sensor->GetLinearAcceleration();
     gyroscope_data = sensor->GetAngularVelocity();
 #endif
