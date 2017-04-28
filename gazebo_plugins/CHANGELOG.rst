@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.1 (2017-04-28)
+------------------
 * Fixes for compilation and warnings in Lunar-devel  (`#573 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/573>`_)
   Multiple fixes for compilation and warnings coming from Gazebo8 and ignition-math3
 * Add an IMU sensor plugin that inherits from SensorPlugin (`#363 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/363>`_)

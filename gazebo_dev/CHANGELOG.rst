@@ -2,8 +2,8 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.1 (2017-04-28)
+------------------
 * Use gazeob8 as exec_depend
 * Use 2.7.0 as starting version
 * Depend on gazebo8 instead of gazebo7
