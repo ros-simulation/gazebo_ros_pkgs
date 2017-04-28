@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixes for compilation and warnings in Lunar-devel  (`#573 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/573>`_)
+  Multiple fixes for compilation and warnings coming from Gazebo8 and ignition-math3
+* Add catkin package(s) to provide the default version of Gazebo - take II (kinetic-devel) (`#571 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/571>`_)
+* Contributors: Jose Luis Rivero
+
 2.5.12 (2017-04-25)
 -------------------
 
