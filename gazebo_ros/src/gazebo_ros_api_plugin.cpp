@@ -1156,9 +1156,9 @@ bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Req
 }
 
 bool GazeboRosApiPlugin::setLightProperties(gazebo_msgs::SetLightProperties::Request &req,
-                                               gazebo_msgs::SetLightProperties::Response &res)
+                                            gazebo_msgs::SetLightProperties::Response &res)
 {
-  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
 
   if (phy_light == NULL)
   {
