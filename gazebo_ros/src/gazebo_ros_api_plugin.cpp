@@ -44,7 +44,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   ROS_DEBUG_STREAM_NAMED("api_plugin","GazeboRosApiPlugin Deconstructor start");
 
   // Unload the sigint event
-  gazebo::event::Events::DisconnectSigInt(sigint_event_);
+  sigint_event_.reset();
   ROS_DEBUG_STREAM_NAMED("api_plugin","After sigint_event unload");
 
   // Don't attempt to unload this plugin if it was never loaded in the Load() function
@@ -55,10 +55,10 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   }
 
   // Disconnect slots
-  gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
-  wrench_update_event_.reset();
-  force_update_event_.reset();
-  time_update_event_.reset();
+  load_gazebo_ros_api_plugin_event_.reset();
+  gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
+  gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
+  gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
   ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
 
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
@@ -780,7 +780,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
 bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
                                      gazebo_msgs::DeleteLight::Response &res)
 {
-  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
 
   if (phy_light == NULL)
   {
@@ -796,7 +796,7 @@ bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
 
     for (int i = 0; i < 100; i++)
     {
-      phy_light = world_->Light(req.light_name);
+      phy_light = world_->LightByName(req.light_name);
       if (phy_light == NULL)
       {
         res.success = true;
@@ -1128,7 +1128,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
 bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Request &req,
                                                gazebo_msgs::GetLightProperties::Response &res)
 {
-  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
 
   if (phy_light == NULL)
   {
