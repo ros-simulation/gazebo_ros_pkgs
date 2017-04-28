@@ -56,9 +56,9 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
 
   // Disconnect slots
   load_gazebo_ros_api_plugin_event_.reset();
-  gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
-  gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
-  gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
+  wrench_update_event_.reset();
+  force_update_event_.reset();
+  time_update_event_.reset();
   ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
 
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
@@ -2404,7 +2404,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
   // todo: should wait for response response_sub_, check to see that if _msg->response == "nonexistant"
 
   gazebo::physics::ModelPtr model = world_->ModelByName(model_name);
-  gazebo::physics::LightPtr light = world_->Light(model_name);
+  gazebo::physics::LightPtr light = world_->LightByName(model_name);
   if ((isLight && light != NULL) || (model != NULL))
   {
     ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model name %s already exist.", model_name.c_str());
@@ -2446,7 +2446,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::s
 
     {
       // boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if ((isLight && world_->Light(model_name) != NULL)
+      if ((isLight && world_->LightByName(model_name) != NULL)
           || (world_->ModelByName(model_name) != NULL))
         break;
     }
