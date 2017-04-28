@@ -39,7 +39,8 @@ GazeboRosFT::GazeboRosFT()
 // Destructor
 GazeboRosFT::~GazeboRosFT()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+  // Conversion from DisconnectWorldUpdateBegin in migration from gazebo7
+  this->update_connection_.reset();
   // Custom Callback Queue
   this->queue_.clear();
   this->queue_.disable();
@@ -157,7 +158,7 @@ void GazeboRosFT::FTDisconnect()
 // Update the controller
 void GazeboRosFT::UpdateChild()
 {
-  common::Time cur_time = this->world_->GetSimTime();
+  common::Time cur_time = this->world_->SimTime();
 
   // rate control
   if (this->update_rate_ > 0 &&
@@ -168,8 +169,8 @@ void GazeboRosFT::UpdateChild()
     return;
 
   physics::JointWrench wrench;
-  math::Vector3 torque;
-  math::Vector3 force;
+  ignition::math::Vector3d torque;
+  ignition::math::Vector3d force;
 
   // FIXME: Should include options for diferent frames and measure directions
   // E.g: https://bitbucket.org/osrf/gazebo/raw/default/gazebo/sensors/ForceTorqueSensor.hh
@@ -184,15 +185,15 @@ void GazeboRosFT::UpdateChild()
   this->lock_.lock();
   // copy data into wrench message
   this->wrench_msg_.header.frame_id = this->frame_name_;
-  this->wrench_msg_.header.stamp.sec = (this->world_->GetSimTime()).sec;
-  this->wrench_msg_.header.stamp.nsec = (this->world_->GetSimTime()).nsec;
+  this->wrench_msg_.header.stamp.sec = (this->world_->SimTime()).sec;
+  this->wrench_msg_.header.stamp.nsec = (this->world_->SimTime()).nsec;
 
-  this->wrench_msg_.wrench.force.x = force.x + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.force.y = force.y + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.force.z = force.z + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.torque.x = torque.x + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.torque.y = torque.y + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.torque.z = torque.z + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.force.x = force.X() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.force.y = force.Y() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.force.z = force.Z() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.x = torque.X() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.y = torque.Y() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.z = torque.Z() + this->GaussianKernel(0, this->gaussian_noise_);
 
   this->pub_.publish(this->wrench_msg_);
   this->lock_.unlock();

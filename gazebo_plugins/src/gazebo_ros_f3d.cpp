@@ -39,7 +39,7 @@ GazeboRosF3D::GazeboRosF3D()
 // Destructor
 GazeboRosF3D::~GazeboRosF3D()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+  this->update_connection_.reset();
   // Custom Callback Queue
   this->queue_.clear();
   this->queue_.disable();
@@ -149,27 +149,27 @@ void GazeboRosF3D::UpdateChild()
   if (this->f3d_connect_count_ == 0)
     return;
 
-  math::Vector3 torque;
-  math::Vector3 force;
+  ignition::math::Vector3d torque;
+  ignition::math::Vector3d force;
 
   // get force on body
-  force = this->link_->GetWorldForce();
+  force = this->link_->WorldForce();
 
   // get torque on body
-  torque = this->link_->GetWorldTorque();
+  torque = this->link_->WorldTorque();
 
   this->lock_.lock();
   // copy data into wrench message
   this->wrench_msg_.header.frame_id = this->frame_name_;
-  this->wrench_msg_.header.stamp.sec = (this->world_->GetSimTime()).sec;
-  this->wrench_msg_.header.stamp.nsec = (this->world_->GetSimTime()).nsec;
+  this->wrench_msg_.header.stamp.sec = (this->world_->SimTime()).sec;
+  this->wrench_msg_.header.stamp.nsec = (this->world_->SimTime()).nsec;
 
-  this->wrench_msg_.wrench.force.x    = force.x;
-  this->wrench_msg_.wrench.force.y    = force.y;
-  this->wrench_msg_.wrench.force.z    = force.z;
-  this->wrench_msg_.wrench.torque.x   = torque.x;
-  this->wrench_msg_.wrench.torque.y   = torque.y;
-  this->wrench_msg_.wrench.torque.z   = torque.z;
+  this->wrench_msg_.wrench.force.x    = force.X();
+  this->wrench_msg_.wrench.force.y    = force.Y();
+  this->wrench_msg_.wrench.force.z    = force.Z();
+  this->wrench_msg_.wrench.torque.x   = torque.X();
+  this->wrench_msg_.wrench.torque.y   = torque.Y();
+  this->wrench_msg_.wrench.torque.z   = torque.Z();
 
   this->pub_.publish(this->wrench_msg_);
   this->lock_.unlock();

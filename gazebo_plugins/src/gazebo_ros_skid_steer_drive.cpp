@@ -42,7 +42,6 @@
 
 #include <gazebo_plugins/gazebo_ros_skid_steer_drive.h>
 
-#include <gazebo/math/gzmath.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -231,7 +230,7 @@ namespace gazebo {
     } else {
       this->update_period_ = 0.0;
     }
-    last_update_time_ = this->world->GetSimTime();
+    last_update_time_ = this->world->SimTime();
 
     // Initialize velocity stuff
     wheel_speed_[RIGHT_FRONT] = 0;
@@ -330,7 +329,7 @@ namespace gazebo {
 
   // Update the controller
   void GazeboRosSkidSteerDrive::UpdateChild() {
-    common::Time current_time = this->world->GetSimTime();
+    common::Time current_time = this->world->SimTime();
     double seconds_since_last_update =
       (current_time - last_update_time_).Double();
     if (seconds_since_last_update > update_period_) {
@@ -404,10 +403,10 @@ namespace gazebo {
 
     // TODO create some non-perfect odometry!
     // getting data for base_footprint to odom transform
-    math::Pose pose = this->parent->GetWorldPose();
+    ignition::math::Pose3d pose = this->parent->WorldPose();
 
-    tf::Quaternion qt(pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w);
-    tf::Vector3 vt(pose.pos.x, pose.pos.y, pose.pos.z);
+    tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
+    tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
 
     tf::Transform base_footprint_to_odom(qt, vt);
     if (this->broadcast_tf_) {
@@ -419,13 +418,13 @@ namespace gazebo {
     }
 
     // publish odom topic
-    odom_.pose.pose.position.x = pose.pos.x;
-    odom_.pose.pose.position.y = pose.pos.y;
+    odom_.pose.pose.position.x = pose.Pos().X();
+    odom_.pose.pose.position.y = pose.Pos().Y();
 
-    odom_.pose.pose.orientation.x = pose.rot.x;
-    odom_.pose.pose.orientation.y = pose.rot.y;
-    odom_.pose.pose.orientation.z = pose.rot.z;
-    odom_.pose.pose.orientation.w = pose.rot.w;
+    odom_.pose.pose.orientation.x = pose.Rot().X();
+    odom_.pose.pose.orientation.y = pose.Rot().Y();
+    odom_.pose.pose.orientation.z = pose.Rot().Z();
+    odom_.pose.pose.orientation.w = pose.Rot().W();
     odom_.pose.covariance[0] = this->covariance_x_;
     odom_.pose.covariance[7] = this->covariance_y_;
     odom_.pose.covariance[14] = 1000000000000.0;
@@ -434,14 +433,14 @@ namespace gazebo {
     odom_.pose.covariance[35] = this->covariance_yaw_;
 
     // get velocity in /odom frame
-    math::Vector3 linear;
-    linear = this->parent->GetWorldLinearVel();
-    odom_.twist.twist.angular.z = this->parent->GetWorldAngularVel().z;
+    ignition::math::Vector3d linear;
+    linear = this->parent->WorldLinearVel();
+    odom_.twist.twist.angular.z = this->parent->WorldAngularVel().Z();
 
     // convert velocity to child_frame_id (aka base_footprint)
-    float yaw = pose.rot.GetYaw();
-    odom_.twist.twist.linear.x = cosf(yaw) * linear.x + sinf(yaw) * linear.y;
-    odom_.twist.twist.linear.y = cosf(yaw) * linear.y - sinf(yaw) * linear.x;
+    float yaw = pose.Rot().Yaw();
+    odom_.twist.twist.linear.x = cosf(yaw) * linear.X() + sinf(yaw) * linear.Y();
+    odom_.twist.twist.linear.y = cosf(yaw) * linear.Y() - sinf(yaw) * linear.X();
     odom_.twist.covariance[0] = this->covariance_x_;
     odom_.twist.covariance[7] = this->covariance_y_;
     odom_.twist.covariance[14] = 1000000000000.0;
