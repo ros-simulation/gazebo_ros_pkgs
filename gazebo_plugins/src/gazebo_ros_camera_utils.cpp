@@ -506,7 +506,10 @@ void GazeboRosCameraUtils::Init()
   // Allow the user to disable automatic cropping (used to remove barrel
   // distortion black border. The crop can be useful, but also skewes
   // the lens distortion, making the supplied k and t values incorrect.
-  this->camera_->LensDistortion()->SetCrop(this->border_crop_);
+  if(this->camera_->LensDistortion())
+  {
+    this->camera_->LensDistortion()->SetCrop(this->border_crop_);
+  }
 
   // D = {k1, k2, t1, t2, k3}, as specified in:
   // - sensor_msgs/CameraInfo: http://docs.ros.org/api/sensor_msgs/html/msg/CameraInfo.html
