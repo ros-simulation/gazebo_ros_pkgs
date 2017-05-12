@@ -39,6 +39,7 @@
 #include <gazebo/sensors/CameraSensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/rendering/Camera.hh>
+#include <gazebo/rendering/Distortion.hh>
 
 #include "gazebo_plugins/gazebo_ros_camera_utils.h"
 
@@ -231,13 +232,13 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   else
     this->distortion_t2_ = this->sdf->Get<double>("distortionT2");
 
-  if ((this->distortion_k1_ != 0.0) || (this->distortion_k2_ != 0.0) ||
-      (this->distortion_k3_ != 0.0) || (this->distortion_t1_ != 0.0) ||
-      (this->distortion_t2_ != 0.0))
+  if (!this->sdf->HasElement("borderCrop"))
   {
-    ROS_WARN_NAMED("camera_utils", "gazebo_ros_camera_ simulation does not support non-zero"
-             " distortion parameters right now, your simulation maybe wrong.");
+    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <borderCrop>, defaults to true");
+    this->border_crop_ = true;
   }
+  else
+    this->border_crop_ = this->sdf->Get<bool>("borderCrop");
 
   // initialize shared_ptr members
   if (!this->image_connect_count_) this->image_connect_count_ = boost::shared_ptr<int>(new int(0));
@@ -502,6 +503,14 @@ void GazeboRosCameraUtils::Init()
   camera_info_msg.distortion_model = "plumb_bob";
   camera_info_msg.D.resize(5);
 #endif
+  // Allow the user to disable automatic cropping (used to remove barrel
+  // distortion black border. The crop can be useful, but also skewes
+  // the lens distortion, making the supplied k and t values incorrect.
+  if(this->camera_->LensDistortion())
+  {
+    this->camera_->LensDistortion()->SetCrop(this->border_crop_);
+  }
+
   // D = {k1, k2, t1, t2, k3}, as specified in:
   // - sensor_msgs/CameraInfo: http://docs.ros.org/api/sensor_msgs/html/msg/CameraInfo.html
   // - OpenCV: http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
