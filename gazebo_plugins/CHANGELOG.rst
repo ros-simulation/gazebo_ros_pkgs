@@ -2,6 +2,35 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.11 (2016-07-14)
+-------------------
+* Use NOT VERSION_LESS to simplify cmake logic
+* Added an interface to gazebo's harness plugin
+* Merge pull request `#460 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/460>`_ from furushchev/fix-camera-util
+  [gazebo_plugins] bugfix: duplicated tf prefix resolution in gazebo_ros_camera plugin
+* removed extra includes
+* Fix gazebo7 deprecation warnings
+* [gazebo_plugins] bugfix: duplicated tf prefix resolution
+* Revert change. AdvertiseOption API is nothing related to latched mode
+* Fix issue of passing a member class to Advertise instead of a boolean
+* Fix gazebo_ros_joint_trajectory, whitespace
+  Duplicate of `#405 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/405>`_ targeted to indigo-devel
+* gazebo_packges/gazebo_ros_joint_pose_trajectory.cpp BUG that caused simulated trajectories to run fast
+  The points in the class.points\_ member never had their time_from_start set.
+  This caused all the time_from_starts to be set to 0. This in turn caused all
+  the trajectory points to be played instantly one after the other in Gazebo.
+* use HasElement in if condition
+* Set GAZEBO_PLUGIN_PATH for test
+* Add rostest to accompany range plugin world
+* Follow ROS documentation and depend on catkin_EXPORTED_TARGETS
+* Remove all references to gazebo_msgs_gencpp (ghost)
+* Fix row_step of openni_kinect plugin
+* Publish organized point cloud from openni_kinect plugin
+* missing link_directories()
+* imu supports frameName
+* Also accept "/world" as frameName parameter in gazebo_ros_p3d plugin
+* Contributors: Bence Magyar, Benjamin Blumer, Jan Skoda, Jan Škoda, Johannes Meyer, John Hsu, Jose Luis Rivero, Kentaro Wada, Steven Peters, Yuki Furuta, nate koenig
+
 2.4.10 (2016-02-25)
 -------------------
 * gazebo_ros_utils.h: include gazebo_config.h

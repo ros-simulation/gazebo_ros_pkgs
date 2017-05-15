@@ -2,6 +2,23 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.11 (2016-07-14)
+-------------------
+* GAZEBO_MASTER_URI is loaded from setup.sh if empty in environment.
+* Honor GAZEBO_MASTER_URI for gzserver.
+* Honor GAZEBO_MASTER_URI for gzclient.
+* Fix string replacement to look for mesh filename surrounded by single or double quotes. Also do not replace unless there are two slashes after package
+* Merge pull request `#423 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/423>`_ from furushchev/fix-include
+  [gazebo_ros] fix include path
+* Include {PROJECT_NAME}_EXPORTED_TARGETS into dependencies for dynamic reconfiguration
+* [gazebo_ros] put header file to standard catkin include path
+* Add rostest to accompany range plugin world
+* Follow ROS documentation and depend on catkin_EXPORTED_TARGETS
+* Remove all references to gazebo_msgs_gencpp (ghost)
+* missing link_directories()
+* add option to change package:// to model:// when loading urdf file
+* Contributors: Bence Magyar, John Hsu, Jose Luis Rivero, Kei Okada, Martin Pecka, Steven Peters, Yuki Furuta
+
 2.4.10 (2016-02-25)
 -------------------
 * Fix invalid signal name on OS X

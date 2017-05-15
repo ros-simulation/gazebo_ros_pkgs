@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.11 (2016-07-14)
+-------------------
+* missing link_directories()
+* Contributors: John Hsu, Jose Luis Rivero
+
 2.4.10 (2016-02-25)
 -------------------
 
