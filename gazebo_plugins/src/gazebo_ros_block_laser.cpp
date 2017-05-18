@@ -345,7 +345,7 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         //pAngle is rotated by yAngle:
         point.x = r * cos(pAngle) * cos(yAngle);
         point.y = r * cos(pAngle) * sin(yAngle);
-        point.z = -r * sin(pAngle);
+        point.z = r * sin(pAngle);
 
         this->cloud_msg_.points.push_back(point);
       }
@@ -355,7 +355,7 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         //pAngle is rotated by yAngle:
         point.x = r * cos(pAngle) * cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         point.y = r * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        point.z = -r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.z = r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         this->cloud_msg_.points.push_back(point);
       } // only 1 channel
 
