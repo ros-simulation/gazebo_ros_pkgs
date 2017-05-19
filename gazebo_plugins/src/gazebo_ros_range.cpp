@@ -243,7 +243,7 @@ void GazeboRosRange::OnNewLaserScans()
 {
   if (this->topic_name_ != "")
   {
-    common::Time cur_time = this->world_->SimTime();
+    common::Time cur_time = this->world_->GetSimTime();
     if (cur_time - this->last_update_time_ >= this->update_period_)
     {
       common::Time sensor_update_time =

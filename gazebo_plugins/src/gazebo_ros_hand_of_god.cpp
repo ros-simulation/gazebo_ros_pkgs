@@ -115,8 +115,8 @@ namespace gazebo
       return;
     }
 
-    cl_ = 2.0 * sqrt(kl_*floating_link_->GetInertial()->Mass());
-    ca_ = 2.0 * sqrt(ka_*floating_link_->GetInertial()->IXX());
+    cl_ = 2.0 * sqrt(kl_*floating_link_->GetInertial()->GetMass());
+    ca_ = 2.0 * sqrt(ka_*floating_link_->GetInertial()->GetIXX());
 
     // Create the TF listener for the desired position of the hog
     tf_buffer_.reset(new tf2_ros::Buffer());
@@ -149,24 +149,22 @@ namespace gazebo
     // Convert TF transform to Gazebo Pose
     const geometry_msgs::Vector3 &p = hog_desired_tform.transform.translation;
     const geometry_msgs::Quaternion &q = hog_desired_tform.transform.rotation;
-    ignition::math::Pose3d hog_desired(
-        ignition::math::Vector3d(p.x, p.y, p.z),
-        ignition::math::Quaterniond(q.w, q.x, q.y, q.z));
+    gazebo::math::Pose hog_desired(
+        gazebo::math::Vector3(p.x, p.y, p.z),
+        gazebo::math::Quaternion(q.w, q.x, q.y, q.z));
 
     // Relative transform from actual to desired pose
-    ignition::math::Pose3d world_pose = floating_link_->DirtyPose();
-    ignition::math::Vector3d err_pos = hog_desired.Pos() - world_pose.Pos();
+    gazebo::math::Pose world_pose = floating_link_->GetDirtyPose();
+    gazebo::math::Vector3 err_pos = hog_desired.pos - world_pose.pos;
     // Get exponential coordinates for rotation
-    ignition::math::Quaterniond err_rot =  (ignition::math::Matrix4d(world_pose).Inverse() * 
-                                            ignition::math::Matrix4d(hog_desired)
-                                           ).Rotation();
-    ignition::math::Quaterniond not_a_quaternion = err_rot.Log();
+    gazebo::math::Quaternion err_rot =  (world_pose.rot.GetAsMatrix4().Inverse() * hog_desired.rot.GetAsMatrix4()).GetRotation();
+    gazebo::math::Quaternion not_a_quaternion = err_rot.GetLog();
 
     floating_link_->AddForce(
-        kl_ * err_pos - cl_ * floating_link_->WorldLinearVel());
+        kl_ * err_pos - cl_ * floating_link_->GetWorldLinearVel());
 
     floating_link_->AddRelativeTorque(
-        ka_ * ignition::math::Vector3d(not_a_quaternion.X(), not_a_quaternion.Y(), not_a_quaternion.Z()) - ca_ * floating_link_->RelativeAngularVel());
+        ka_ * gazebo::math::Vector3(not_a_quaternion.x, not_a_quaternion.y, not_a_quaternion.z) - ca_ * floating_link_->GetRelativeAngularVel());
 
     // Convert actual pose to TransformStamped message
     geometry_msgs::TransformStamped hog_actual_tform;
@@ -176,14 +174,14 @@ namespace gazebo
 
     hog_actual_tform.child_frame_id = frame_id_ + "_actual";
 
-    hog_actual_tform.transform.translation.x = world_pose.Pos().X();
-    hog_actual_tform.transform.translation.y = world_pose.Pos().Y();
-    hog_actual_tform.transform.translation.z = world_pose.Pos().Z();
+    hog_actual_tform.transform.translation.x = world_pose.pos.x;
+    hog_actual_tform.transform.translation.y = world_pose.pos.y;
+    hog_actual_tform.transform.translation.z = world_pose.pos.z;
 
-    hog_actual_tform.transform.rotation.w = world_pose.Rot().W();
-    hog_actual_tform.transform.rotation.x = world_pose.Rot().X();
-    hog_actual_tform.transform.rotation.y = world_pose.Rot().Y();
-    hog_actual_tform.transform.rotation.z = world_pose.Rot().Z();
+    hog_actual_tform.transform.rotation.w = world_pose.rot.w;
+    hog_actual_tform.transform.rotation.x = world_pose.rot.x;
+    hog_actual_tform.transform.rotation.y = world_pose.rot.y;
+    hog_actual_tform.transform.rotation.z = world_pose.rot.z;
 
     tf_broadcaster_->sendTransform(hog_actual_tform);
   }

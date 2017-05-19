@@ -89,21 +89,21 @@ namespace gazebo
     private: std::string tf_frame_name_;
 
     /// \brief allow specifying constant xyz and rpy offsets
-    private: ignition::math::Pose3d offset_;
+    private: math::Pose offset_;
 
     /// \brief mutex to lock access to fields used in message callbacks
     private: boost::mutex lock;
 
     /// \brief save last_time
     private: common::Time last_time_;
-    private: ignition::math::Vector3d last_vpos_;
-    private: ignition::math::Vector3d last_veul_;
-    private: ignition::math::Vector3d apos_;
-    private: ignition::math::Vector3d aeul_;
-    private: ignition::math::Vector3d last_frame_vpos_;
-    private: ignition::math::Vector3d last_frame_veul_;
-    private: ignition::math::Vector3d frame_apos_;
-    private: ignition::math::Vector3d frame_aeul_;
+    private: math::Vector3 last_vpos_;
+    private: math::Vector3 last_veul_;
+    private: math::Vector3 apos_;
+    private: math::Vector3 aeul_;
+    private: math::Vector3 last_frame_vpos_;
+    private: math::Vector3 last_frame_veul_;
+    private: math::Vector3 frame_apos_;
+    private: math::Vector3 frame_aeul_;
 
     // rate control
     private: double update_rate_;

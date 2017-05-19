@@ -155,6 +155,8 @@ namespace gazebo
     protected: double distortion_t1_;
     protected: double distortion_t2_;
 
+    protected: bool border_crop_;
+
     protected: boost::shared_ptr<camera_info_manager::CameraInfoManager> camera_info_manager_;
 
 
