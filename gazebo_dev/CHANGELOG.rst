@@ -2,6 +2,11 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Revert gazebo8 changes in Lunar and back to use gazebo7 (`#583 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/583>`_)
+* Contributors: Jose Luis Rivero
+
 2.7.1 (2017-04-28)
 ------------------
 * Use gazeob8 as exec_depend
