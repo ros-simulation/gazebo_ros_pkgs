@@ -115,7 +115,7 @@ namespace gazebo
 
   // Destructor
   GazeboRosVideo::~GazeboRosVideo() {
-    update_connection_.reset();
+    event::Events::DisconnectWorldUpdateBegin(update_connection_);
 
     // Custom Callback Queue
     queue_.clear();

@@ -44,8 +44,7 @@ GazeboRosVacuumGripper::GazeboRosVacuumGripper()
 // Destructor
 GazeboRosVacuumGripper::~GazeboRosVacuumGripper()
 {
-  // Conversion from DisconnectWorldUpdateBegin in migration from gazebo7
-  update_connection_.reset();
+  event::Events::DisconnectWorldUpdateBegin(update_connection_);
 
   // Custom Callback Queue
   queue_.clear();
@@ -180,8 +179,8 @@ void GazeboRosVacuumGripper::UpdateChild()
   }
   // apply force
   lock_.lock();
-  ignition::math::Pose3d parent_pose = link_->WorldPose();
-  physics::Model_V models = world_->Models();
+  math::Pose parent_pose = link_->GetWorldPose();
+  physics::Model_V models = world_->GetModels();
   for (size_t i = 0; i < models.size(); i++) {
     if (models[i]->GetName() == link_->GetName() ||
         models[i]->GetName() == parent_->GetName())
@@ -190,25 +189,25 @@ void GazeboRosVacuumGripper::UpdateChild()
     }
     physics::Link_V links = models[i]->GetLinks();
     for (size_t j = 0; j < links.size(); j++) {
-      ignition::math::Pose3d link_pose = links[j]->WorldPose();
-      ignition::math::Pose3d diff = parent_pose - link_pose;
-      double norm = diff.Pos().Length();
+      math::Pose link_pose = links[j]->GetWorldPose();
+      math::Pose diff = parent_pose - link_pose;
+      double norm = diff.pos.GetLength();
       if (norm < 0.05) {
-        links[j]->SetLinearAccel(link_->WorldLinearAccel());
-        links[j]->SetAngularAccel(link_->WorldAngularAccel());
-        links[j]->SetLinearVel(link_->WorldLinearVel());
-        links[j]->SetAngularVel(link_->WorldAngularVel());
+        links[j]->SetLinearAccel(link_->GetWorldLinearAccel());
+        links[j]->SetAngularAccel(link_->GetWorldAngularAccel());
+        links[j]->SetLinearVel(link_->GetWorldLinearVel());
+        links[j]->SetAngularVel(link_->GetWorldAngularVel());
         double norm_force = 1 / norm;
         if (norm < 0.01) {
           // apply friction like force
           // TODO(unknown): should apply friction actually
-          link_pose.Set(parent_pose.Pos(), link_pose.Rot());
+          link_pose.Set(parent_pose.pos, link_pose.rot);
           links[j]->SetWorldPose(link_pose);
         }
         if (norm_force > 20) {
           norm_force = 20;  // max_force
         }
-        ignition::math::Vector3d force = norm_force * diff.Pos().Normalize();
+        math::Vector3 force = norm_force * diff.pos.Normalize();
         links[j]->AddForce(force);
         grasping_msg.data = true;
       }

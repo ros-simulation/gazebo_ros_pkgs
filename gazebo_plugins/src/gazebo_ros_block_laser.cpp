@@ -82,7 +82,7 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   std::string worldName = _parent->WorldName();
   this->world_ = physics::get_world(worldName);
 
-  last_update_time_ = this->world_->SimTime();
+  last_update_time_ = this->world_->GetSimTime();
 
   this->node_ = transport::NodePtr(new transport::Node());
   this->node_->Init(worldName);
@@ -345,7 +345,7 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         //pAngle is rotated by yAngle:
         point.x = r * cos(pAngle) * cos(yAngle);
         point.y = r * cos(pAngle) * sin(yAngle);
-        point.z = -r * sin(pAngle);
+        point.z = r * sin(pAngle);
 
         this->cloud_msg_.points.push_back(point);
       }
@@ -355,7 +355,7 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         //pAngle is rotated by yAngle:
         point.x = r * cos(pAngle) * cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         point.y = r * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        point.z = -r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.z = r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         this->cloud_msg_.points.push_back(point);
       } // only 1 channel
 
@@ -405,9 +405,9 @@ void GazeboRosBlockLaser::OnStats( const boost::shared_ptr<msgs::WorldStatistics
 {
   this->sim_time_  = msgs::Convert( _msg->sim_time() );
 
-  ignition::math::Pose3d pose;
-  pose.Pos().X() = 0.5*sin(0.01*this->sim_time_.Double());
-  gzdbg << "plugin simTime [" << this->sim_time_.Double() << "] update pose [" << pose.Pos().X() << "]\n";
+  math::Pose pose;
+  pose.pos.x = 0.5*sin(0.01*this->sim_time_.Double());
+  gzdbg << "plugin simTime [" << this->sim_time_.Double() << "] update pose [" << pose.pos.x << "]\n";
 }
 
 
