@@ -34,7 +34,8 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   plugin_loaded_(false),
   pub_link_states_connection_count_(0),
   pub_model_states_connection_count_(0),
-  pub_clock_frequency_(0)
+  pub_clock_frequency_(0),
+  enable_ros_network_(true)
 {
   robot_namespace_.clear();
 }
@@ -58,7 +59,8 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
-  gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
+  if (enable_ros_network_)
+    gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
   ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
 
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
@@ -152,6 +154,9 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   // below needs the world to be created first
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::loadGazeboRosApiPlugin,this,_1));
 
+  if (! nh_->getParam("enable_ros_network", enable_ros_network_))
+      ROS_ERROR_NAMED("api_plugin", "can not get enable_ros_network_param");
+
   plugin_loaded_ = true;
   ROS_INFO_NAMED("api_plugin", "Finished loading Gazebo ROS API Plugin.");
 }
@@ -193,12 +198,15 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   pub_model_states_connection_count_ = 0;
 
   /// \brief advertise all services
-  advertiseServices();
+  if (enable_ros_network_)
+    advertiseServices();
 
   // hooks for applying forces, publishing simtime on /clock
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
   force_update_event_  = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::forceJointSchedulerSlot,this));
-  time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
+
+  if (enable_ros_network_)
+    time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
 }
 
 void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
@@ -217,6 +225,12 @@ void GazeboRosApiPlugin::gazeboQueueThread()
 
 void GazeboRosApiPlugin::advertiseServices()
 {
+  if (! enable_ros_network_)
+  {
+    ROS_INFO_NAMED("api_plugin", "ROS gazebo topics/services are disabled");
+    return;
+  }
+
   // publish clock for simulated ros time
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
 
