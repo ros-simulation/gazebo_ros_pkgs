@@ -153,8 +153,7 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   // below needs the world to be created first
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::loadGazeboRosApiPlugin,this,_1));
 
-  if (! nh_->getParam("enable_ros_network", enable_ros_network_))
-      ROS_ERROR_NAMED("api_plugin", "can not get enable_ros_network_param");
+  nh_->getParam("enable_ros_network", enable_ros_network_);
 
   plugin_loaded_ = true;
   ROS_INFO_NAMED("api_plugin", "Finished loading Gazebo ROS API Plugin.");
