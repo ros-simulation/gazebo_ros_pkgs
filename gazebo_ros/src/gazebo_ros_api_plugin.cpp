@@ -201,12 +201,17 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   if (enable_ros_network_)
     advertiseServices();
 
+  // Manage clock for simulated ros time
+  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
+  // set param for use_sim_time if not set by user already
+  nh_->setParam("/use_sim_time", true);
+  nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
+  last_pub_clock_time_ = world_->GetSimTime();
+
   // hooks for applying forces, publishing simtime on /clock
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
   force_update_event_  = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::forceJointSchedulerSlot,this));
-
-  if (enable_ros_network_)
-    time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
+  time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
 }
 
 void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
@@ -225,15 +230,6 @@ void GazeboRosApiPlugin::gazeboQueueThread()
 
 void GazeboRosApiPlugin::advertiseServices()
 {
-  if (! enable_ros_network_)
-  {
-    ROS_INFO_NAMED("api_plugin", "ROS gazebo topics/services are disabled");
-    return;
-  }
-
-  // publish clock for simulated ros time
-  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
-
   // Advertise spawn services on the custom queue
   std::string spawn_sdf_model_service_name("spawn_sdf_model");
   ros::AdvertiseServiceOptions spawn_sdf_model_aso =
@@ -511,14 +507,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                           boost::bind(&GazeboRosApiPlugin::resetWorld,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
   reset_world_service_ = nh_->advertiseService(reset_world_aso);
-
-
-  // set param for use_sim_time if not set by user already
-  nh_->setParam("/use_sim_time", true);
-
-  // todo: contemplate setting environment variable ROBOT=sim here???
-  nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
-  last_pub_clock_time_ = world_->GetSimTime();
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
