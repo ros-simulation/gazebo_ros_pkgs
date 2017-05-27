@@ -59,8 +59,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
-  if (enable_ros_network_)
-    gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
+  gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
   ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
 
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
