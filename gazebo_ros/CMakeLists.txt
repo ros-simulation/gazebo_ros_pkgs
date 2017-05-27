@@ -81,6 +81,10 @@ set_target_properties(gazebo_ros_paths_plugin PROPERTIES COMPILE_FLAGS "${cxx_fl
 set_target_properties(gazebo_ros_paths_plugin PROPERTIES LINK_FLAGS "${ld_flags}")
 target_link_libraries(gazebo_ros_paths_plugin ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+## Tests
+
+add_subdirectory(test)
+
 # Install Gazebo System Plugins
 install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
