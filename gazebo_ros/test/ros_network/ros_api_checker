@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# The script was originally written by Brian Gerkey under
+# the works of the Virtual Robotics Challenge
+#
+# Copyright Open Source Robotics Foundation
+#
+
 from __future__ import print_function
 import unittest
 import rostest
@@ -59,7 +65,7 @@ class Tester(unittest.TestCase):
         m = type_re.match(outsplit[0])
         self.assertEqual(len(m.groups()), 1)
         self.assertEqual(m.groups()[0], t['type'])
-       
+
         # Step 2: check num_publishers and num_subscribers
         state = None
         pubs = 0
@@ -104,7 +110,7 @@ class Tester(unittest.TestCase):
         m = type_re.match(outsplit[2])
         self.assertEqual(len(m.groups()), 1)
         self.assertEqual(m.groups()[0], s['type'])
-       
+
 def load_config(files):
     import yaml
     topics = []
