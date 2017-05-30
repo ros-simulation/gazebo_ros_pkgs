@@ -34,7 +34,7 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   plugin_loaded_(false),
   pub_link_states_connection_count_(0),
   pub_model_states_connection_count_(0),
-  enable_ros_network_
+  enable_ros_network_()
 {
   robot_namespace_.clear();
 }
