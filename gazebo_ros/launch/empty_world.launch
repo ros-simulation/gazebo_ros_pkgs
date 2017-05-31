@@ -17,7 +17,7 @@
   <arg name="respawn_gazebo" default="false"/>
   <arg name="use_clock_frequency" default="false"/>
   <arg name="pub_clock_frequency" default="100"/>
-  <arg name="enable_ros_network" default="true" />
+  <arg name="enable_ros_network" default="false" />
 
   <!-- set use_sim_time flag -->
   <group if="$(arg use_sim_time)">
