@@ -10,7 +10,7 @@
   <arg name="physics" default="ode"/>
   <arg name="verbose" default="false"/>
   <arg name="world_name" default="worlds/empty.world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
-  <arg name="enable_ros_network" default="true" />
+  <arg name="enable_ros_network" default="false" />
 
   <!-- set use_sim_time flag -->
   <group if="$(arg use_sim_time)">

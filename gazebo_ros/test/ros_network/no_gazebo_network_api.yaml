@@ -34,3 +34,12 @@ services:
 
   - service: /gazebo/get_loggers
     type: roscpp/GetLoggers
+
+  - service: /gazebo/unpause_physics
+    type: std_srvs/Empty
+
+  - service: /gazebo/spawn_urdf_model
+    type: gazebo_msgs/SpawnModel
+
+  - service: /gazebo/set_model_configuration
+    type: gazebo_msgs/SetModelConfiguration

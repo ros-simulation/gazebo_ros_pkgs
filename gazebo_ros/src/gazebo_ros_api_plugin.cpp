@@ -34,7 +34,7 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   plugin_loaded_(false),
   pub_link_states_connection_count_(0),
   pub_model_states_connection_count_(0),
-  enable_ros_network_()
+  enable_ros_network_(false) /* ariac default to false */
 {
   robot_namespace_.clear();
 }
@@ -195,8 +195,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   pub_model_states_connection_count_ = 0;
 
   /// \brief advertise all services
-  if (enable_ros_network_)
-    advertiseServices();
+  advertiseServices();
 
   // hooks for applying forces, publishing simtime on /clock
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
@@ -241,15 +240,6 @@ void GazeboRosApiPlugin::advertiseServices()
   spawn_gazebo_model_service_ = nh_->advertiseService(spawn_gazebo_model_aso);
 
   // Advertise spawn services on the custom queue
-  std::string spawn_sdf_model_service_name("spawn_sdf_model");
-  ros::AdvertiseServiceOptions spawn_sdf_model_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
-                                                                  spawn_sdf_model_service_name,
-                                                                  boost::bind(&GazeboRosApiPlugin::spawnSDFModel,this,_1,_2),
-                                                                  ros::VoidPtr(), &gazebo_queue_);
-  spawn_sdf_model_service_ = nh_->advertiseService(spawn_sdf_model_aso);
-
-  // Advertise spawn services on the custom queue
   std::string spawn_urdf_model_service_name("spawn_urdf_model");
   ros::AdvertiseServiceOptions spawn_urdf_model_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
@@ -257,6 +247,36 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                   boost::bind(&GazeboRosApiPlugin::spawnURDFModel,this,_1,_2),
                                                                   ros::VoidPtr(), &gazebo_queue_);
   spawn_urdf_model_service_ = nh_->advertiseService(spawn_urdf_model_aso);
+
+  // Advertise more services on the custom queue
+  std::string set_model_configuration_service_name("set_model_configuration");
+  ros::AdvertiseServiceOptions set_model_configuration_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetModelConfiguration>(
+                                                                             set_model_configuration_service_name,
+                                                                             boost::bind(&GazeboRosApiPlugin::setModelConfiguration,this,_1,_2),
+                                                                             ros::VoidPtr(), &gazebo_queue_);
+  set_model_configuration_service_ = nh_->advertiseService(set_model_configuration_aso);
+
+  // Advertise more services on the custom queue
+  std::string unpause_physics_service_name("unpause_physics");
+  ros::AdvertiseServiceOptions unpause_physics_aso =
+    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
+                                                          unpause_physics_service_name,
+                                                          boost::bind(&GazeboRosApiPlugin::unpausePhysics,this,_1,_2),
+                                                          ros::VoidPtr(), &gazebo_queue_);
+  unpause_physics_service_ = nh_->advertiseService(unpause_physics_aso);
+
+  if (! enable_ros_network_)
+    return;
+ 
+  // Advertise spawn services on the custom queue
+  std::string spawn_sdf_model_service_name("spawn_sdf_model");
+  ros::AdvertiseServiceOptions spawn_sdf_model_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
+                                                                  spawn_sdf_model_service_name,
+                                                                  boost::bind(&GazeboRosApiPlugin::spawnSDFModel,this,_1,_2),
+                                                                  ros::VoidPtr(), &gazebo_queue_);
+  spawn_sdf_model_service_ = nh_->advertiseService(spawn_sdf_model_aso);
 
   // Advertise delete services on the custom queue
   std::string delete_model_service_name("delete_model");
@@ -376,15 +396,6 @@ void GazeboRosApiPlugin::advertiseServices()
   set_model_state_service_ = nh_->advertiseService(set_model_state_aso);
 
   // Advertise more services on the custom queue
-  std::string set_model_configuration_service_name("set_model_configuration");
-  ros::AdvertiseServiceOptions set_model_configuration_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetModelConfiguration>(
-                                                                             set_model_configuration_service_name,
-                                                                             boost::bind(&GazeboRosApiPlugin::setModelConfiguration,this,_1,_2),
-                                                                             ros::VoidPtr(), &gazebo_queue_);
-  set_model_configuration_service_ = nh_->advertiseService(set_model_configuration_aso);
-
-  // Advertise more services on the custom queue
   std::string set_joint_properties_service_name("set_joint_properties");
   ros::AdvertiseServiceOptions set_joint_properties_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetJointProperties>(
@@ -427,15 +438,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                           boost::bind(&GazeboRosApiPlugin::pausePhysics,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
   pause_physics_service_ = nh_->advertiseService(pause_physics_aso);
-
-  // Advertise more services on the custom queue
-  std::string unpause_physics_service_name("unpause_physics");
-  ros::AdvertiseServiceOptions unpause_physics_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          unpause_physics_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::unpausePhysics,this,_1,_2),
-                                                          ros::VoidPtr(), &gazebo_queue_);
-  unpause_physics_service_ = nh_->advertiseService(unpause_physics_aso);
 
   // Advertise more services on the custom queue
   std::string apply_body_wrench_service_name("apply_body_wrench");
@@ -538,6 +540,8 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
 bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
                                         gazebo_msgs::SpawnModel::Response &res)
 {
+  ROS_WARN_NAMED("ariac", "spawnURDFModel service called");
+
   // get name space for the corresponding model plugins
   robot_namespace_ = req.robot_namespace;
 
@@ -1400,6 +1404,8 @@ bool GazeboRosApiPlugin::pausePhysics(std_srvs::Empty::Request &req,std_srvs::Em
 
 bool GazeboRosApiPlugin::unpausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
 {
+  ROS_WARN_NAMED("ariac", "unpausePhysics service called");
+
   world_->SetPaused(false);
   return true;
 }
@@ -1464,6 +1470,8 @@ bool GazeboRosApiPlugin::clearBodyWrenches(std::string body_name)
 bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguration::Request &req,
                                                gazebo_msgs::SetModelConfiguration::Response &res)
 {
+  ROS_WARN_NAMED("ariac", "setModelConfiguration service called");
+
   std::string gazebo_model_name = req.model_name;
 
   // search for model with name

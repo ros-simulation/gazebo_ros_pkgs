@@ -9,7 +9,7 @@
   </include>
 
   <!-- the long timeout is just in case that gazebo needs to download models -->
-  <test pkg="gazebo_ros" type="ros_api_checker" test-name="ros_network_by_default"
+  <test pkg="gazebo_ros" type="ros_api_checker" test-name="ros_network_disabled"
       args="$(find gazebo_ros)/test/ros_network/no_gazebo_network_api.yaml"
-      time-limit="100.0"/>
+      time-limit="30.0"/>
 </launch>
