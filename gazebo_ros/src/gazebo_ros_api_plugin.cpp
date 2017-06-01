@@ -1525,7 +1525,7 @@ bool GazeboRosApiPlugin::pausePhysics(std_srvs::Empty::Request &req,std_srvs::Em
 
 bool GazeboRosApiPlugin::unpausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
 {
-  ROS_WARN_NAMED("ariac", "spawnURDFModel service called");
+  ROS_WARN_NAMED("ariac", "unpausePhysics service called");
 
   world_->SetPaused(false);
   return true;
@@ -1591,7 +1591,7 @@ bool GazeboRosApiPlugin::clearBodyWrenches(std::string body_name)
 bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguration::Request &req,
                                                gazebo_msgs::SetModelConfiguration::Response &res)
 {
-  ROS_WARN_NAMED("ariac", "spawnURDFModel service called");
+  ROS_WARN_NAMED("ariac", "setModelConfiguration service called");
 
   std::string gazebo_model_name = req.model_name;
 
