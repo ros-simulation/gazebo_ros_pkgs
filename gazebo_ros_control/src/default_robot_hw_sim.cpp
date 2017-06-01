@@ -83,6 +83,7 @@ bool DefaultRobotHWSim::initSim(
   joint_effort_command_.resize(n_dof_);
   joint_position_command_.resize(n_dof_);
   joint_velocity_command_.resize(n_dof_);
+  last_joint_position_command_.resize(n_dof_);
 
   // Initialize values
   for(unsigned int j=0; j < n_dof_; j++)
@@ -137,7 +138,8 @@ bool DefaultRobotHWSim::initSim(
     joint_effort_command_[j] = 0.0;
     joint_position_command_[j] = 0.0;
     joint_velocity_command_[j] = 0.0;
-
+    last_joint_position_command_[j]=0.0;
+    
     const std::string& hardware_interface = joint_interfaces.front();
 
     // Debug
