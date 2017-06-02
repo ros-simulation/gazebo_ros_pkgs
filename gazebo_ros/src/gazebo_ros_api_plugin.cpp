@@ -34,7 +34,7 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   plugin_loaded_(false),
   pub_link_states_connection_count_(0),
   pub_model_states_connection_count_(0),
-  enable_ros_network_(false) /* ariac default to false */
+  enable_ros_network_(true)
 {
   robot_namespace_.clear();
 }
@@ -58,8 +58,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
-  if (enable_ros_network_)
-    gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
+  gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
   ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
 
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
@@ -197,12 +196,13 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   /// \brief advertise all services
   advertiseServices();
 
+  // publish clock for simulated ros time
+  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
+
   // hooks for applying forces, publishing simtime on /clock
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
   force_update_event_  = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::forceJointSchedulerSlot,this));
-
-  if (enable_ros_network_)
-    time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
+  time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
 }
 
 void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
@@ -221,24 +221,6 @@ void GazeboRosApiPlugin::gazeboQueueThread()
 
 void GazeboRosApiPlugin::advertiseServices()
 {
-  if (! enable_ros_network_)
-  {
-    ROS_INFO_NAMED("api_plugin", "ROS gazebo topics/services are disabled");
-    return;
-  }
-
-  // publish clock for simulated ros time
-  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
-
-  // Advertise spawn services on the custom queue - DEPRECATED IN HYDRO
-  std::string spawn_gazebo_model_service_name("spawn_gazebo_model");
-  ros::AdvertiseServiceOptions spawn_gazebo_model_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
-                                                                  spawn_gazebo_model_service_name,
-                                                                  boost::bind(&GazeboRosApiPlugin::spawnGazeboModel,this,_1,_2),
-                                                                  ros::VoidPtr(), &gazebo_queue_);
-  spawn_gazebo_model_service_ = nh_->advertiseService(spawn_gazebo_model_aso);
-
   // Advertise spawn services on the custom queue
   std::string spawn_urdf_model_service_name("spawn_urdf_model");
   ros::AdvertiseServiceOptions spawn_urdf_model_aso =
@@ -265,10 +247,19 @@ void GazeboRosApiPlugin::advertiseServices()
                                                           boost::bind(&GazeboRosApiPlugin::unpausePhysics,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
   unpause_physics_service_ = nh_->advertiseService(unpause_physics_aso);
-
+  
   if (! enable_ros_network_)
     return;
- 
+
+  // Advertise spawn services on the custom queue - DEPRECATED IN HYDRO
+  std::string spawn_gazebo_model_service_name("spawn_gazebo_model");
+  ros::AdvertiseServiceOptions spawn_gazebo_model_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SpawnModel>(
+                                                                  spawn_gazebo_model_service_name,
+                                                                  boost::bind(&GazeboRosApiPlugin::spawnGazeboModel,this,_1,_2),
+                                                                  ros::VoidPtr(), &gazebo_queue_);
+  spawn_gazebo_model_service_ = nh_->advertiseService(spawn_gazebo_model_aso);
+
   // Advertise spawn services on the custom queue
   std::string spawn_sdf_model_service_name("spawn_sdf_model");
   ros::AdvertiseServiceOptions spawn_sdf_model_aso =
