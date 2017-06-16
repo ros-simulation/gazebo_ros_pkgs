@@ -245,6 +245,9 @@ private:
   void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
   void publishSimTime();
 
+  /// \brief Republish the Gazebo real-time factor
+  void publishRealTimeFactor(ConstWorldStatisticsPtr &_msg);
+
   /// \brief
   void publishLinkStates();
 
@@ -318,6 +321,7 @@ private:
   gazebo::transport::PublisherPtr light_modify_pub_;
   gazebo::transport::PublisherPtr request_pub_;
   gazebo::transport::SubscriberPtr response_sub_;
+  gazebo::transport::SubscriberPtr rtf_sub_;    // Real-time factor republisher
 
   boost::shared_ptr<ros::NodeHandle> nh_;
   ros::CallbackQueue gazebo_queue_;
@@ -362,6 +366,7 @@ private:
   ros::Subscriber    set_model_state_topic_;
   ros::Publisher     pub_link_states_;
   ros::Publisher     pub_model_states_;
+  ros::Publisher     pub_real_time_factor_;
   int                pub_link_states_connection_count_;
   int                pub_model_states_connection_count_;
 
@@ -379,6 +384,12 @@ private:
   ros::Publisher     pub_clock_;
   int pub_clock_frequency_;
   gazebo::common::Time last_pub_clock_time_;
+
+  /// \brief Sim time buffer for real-time factor calculation
+  std::list<common::Time> simTimes;
+
+  /// \brief Real time buffer for real-time factor calculation
+  std::list<common::Time> realTimes;
 
   /// \brief A mutex to lock access to fields that are used in ROS message callbacks
   boost::mutex lock_;
