@@ -2,6 +2,11 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix distortion coefficients order (`#503 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/503>`_)
+* Contributors: Enrique Fernández Perdomo
+
 2.4.13 (2017-02-28)
 -------------------
 * Fix timestamp issues for rendering sensors (indigo-devel) (`#551 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/551>`_)
