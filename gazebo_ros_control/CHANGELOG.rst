@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Less exciting console output (`#561 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/561>`_)
+* Add catkin package(s) to provide the default version of Gazebo (`#571 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/571>`_)
+  * Added catkin package gazebo_dev which provides the cmake config of the installed Gazebo version
+* Contributors: Dave Coleman, Jose Luis Rivero
+
 2.5.12 (2017-04-25)
 -------------------
 * Fixed broken gazebo_ros_control tutorial link (`#566 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/566>`_)

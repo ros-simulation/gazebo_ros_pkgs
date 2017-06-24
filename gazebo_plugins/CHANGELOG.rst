@@ -2,6 +2,27 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix inverted height in block laser plugin (`#582 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/582>`_)
+* Allow disabling distorted camera border crop (and associated tests) (`#572 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/572>`_)
+* Add an IMU sensor plugin that inherits from SensorPlugin (`#363 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/363>`_)
+  * now the plugin works with multiple robots
+  * using GetParentName name instead of GetScopedName
+  * added comments to highlight the differents between GazeboRosImuSensor and GazeboRosIMU
+  * now the message header is properly handled, using bodyName parameter as frame_id
+  * added check on gazebo version
+  * added check for sensor null pointer
+  * changed deprecated functions for gazebo version >= 6
+  * fixed version check
+  * added missing sensor variable for LastUpdateTime() function call
+  * considering '/' included in the robotNamespace
+  * replaced "bodyFrame" with "frameName"
+* Less exciting console output (`#561 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/561>`_)
+* Add catkin package(s) to provide the default version of Gazebo (`#571 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/571>`_)
+  * gazebo_dev: added execution dependency gazebo
+* Contributors: Adam Allevato, Alessandro Settimi, Dave Coleman, Jose Luis Rivero, Shohei Fujii
+
 2.5.12 (2017-04-25)
 -------------------
 * Revert catkin warning fix (`#567 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/567>`_)
