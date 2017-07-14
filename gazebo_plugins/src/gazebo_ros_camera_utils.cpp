@@ -415,14 +415,19 @@ void GazeboRosCameraUtils::Init()
     this->type_ = sensor_msgs::image_encodings::MONO8;
     this->skip_ = 1;
   }
-  else if (this->format_ == "R8G8B8")
+  else if (this->format_ == "R8G8B8" || this->format_ == "RGB_INT8")
   {
     this->type_ = sensor_msgs::image_encodings::RGB8;
     this->skip_ = 3;
   }
-  else if (this->format_ == "B8G8R8")
+  else if (this->format_ == "B8G8R8" || this->format_ == "BGR_INT8")
   {
     this->type_ = sensor_msgs::image_encodings::BGR8;
+    this->skip_ = 3;
+  }
+  else if (this->format_ == "R16G16B16" ||  this->format_ == "RGB_INT16")
+  {
+    this->type_ = sensor_msgs::image_encodings::RGB16;
     this->skip_ = 3;
   }
   else if (this->format_ == "BAYER_RGGB8")
@@ -588,9 +593,11 @@ void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
     this->image_msg_.header.stamp.sec = this->sensor_update_time_.sec;
     this->image_msg_.header.stamp.nsec = this->sensor_update_time_.nsec;
 
+    unsigned int step = this->skip_* this->width_ *
+        sensor_msgs::image_encodings::bitDepth(this->type_)/8;
     // copy from src to image_msg_
     fillImage(this->image_msg_, this->type_, this->height_, this->width_,
-        this->skip_*this->width_, reinterpret_cast<const void*>(_src));
+        step, reinterpret_cast<const void*>(_src));
 
     // publish to ros
     this->image_pub_.publish(this->image_msg_);
