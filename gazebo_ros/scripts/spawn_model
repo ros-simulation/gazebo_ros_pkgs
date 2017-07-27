@@ -42,9 +42,9 @@ model_database_template = """<sdf version="1.4">
 def usage():
     print '''Commands:
     -[urdf|sdf|trimesh|gazebo] - specify incoming xml is urdf, sdf or trimesh format. gazebo arg is deprecated in ROS Hydro
-    -[file|param|database] [<file_name>|<param_name>|<model_name>] - source of the model xml or the trimesh file
+    -[file|param|database|stdin] [<file_name>|<param_name>|<model_name>|<xml>] - source of the model xml or the trimesh file
     -model <model_name> - name of the model to be spawned.
-    -reference_frame <entity_name> - optinal: name of the model/body where initial pose is defined.
+    -reference_frame <entity_name> - optional: name of the model/body where initial pose is defined.
                                      If left empty or specified as "world", gazebo world frame is used.
     -gazebo_namespace <gazebo ros_namespace> - optional: ROS namespace of gazebo offered ROS interfaces.  Defaults to /gazebo/ (e.g. /gazebo/spawn_model).
     -robot_namespace <robot ros_namespace> - optional: change ROS namespace of gazebo-plugins.
@@ -77,6 +77,7 @@ class SpawnModel():
         self.file_name               = ""
         self.param_name              = ""
         self.database_name           = ""
+	self.model_xml		     = ""
         self.model_name              = ""
         self.robot_namespace         = rospy.get_namespace()
         self.gazebo_namespace        = "/gazebo"
@@ -123,25 +124,33 @@ class SpawnModel():
               sys.exit(0)
           if sys.argv[i] == '-param':
             if len(sys.argv) > i+1:
-              if self.file_name != "" or self.database_name != "":
-                rospy.logerr("Error: you cannot specify file name if parameter or database name is given, must pick one source of model xml")
+              if self.file_name != "" or self.database_name != "" or self.model_xml != "":
+                rospy.logerr("Error: you cannot specify file name if parameter, database, or xml is given, must pick one source of model xml")
                 sys.exit(0)
               else:
                 self.param_name = sys.argv[i+1]
           if sys.argv[i] == '-file':
             if len(sys.argv) > i+1:
-              if self.param_name != "" or self.database_name != "":
-                rospy.logerr("Error: you cannot specify parameter if file or database name is given, must pick one source of model xml")
+              if self.param_name != "" or self.database_name != "" or self.model_xml != "":
+                rospy.logerr("Error: you cannot specify parameter if file, database, or xml is given, must pick one source of model xml")
                 sys.exit(0)
               else:
                 self.file_name = sys.argv[i+1]
           if sys.argv[i] == '-database':
             if len(sys.argv) > i+1:
-              if self.param_name != "" or self.file_name != "":
-                rospy.logerr("Error: you cannot specify parameter if file or parameter name is given, must pick one source of model xml")
+              if self.param_name != "" or self.file_name != "" or self.model_xml != "":
+                rospy.logerr("Error: you cannot specify database if file, parameter or xml is given, must pick one source of model xml")
                 sys.exit(0)
               else:
                 self.database_name = sys.argv[i+1]
+          if sys.argv[i] == '-stdin':
+            if len(sys.argv) > i+1:
+              if self.param_name != "" or self.file_name != "" or self.database_name != "":
+                rospy.logerr("Error: you cannot specify parameter if file, parameter, or database name is given, must pick one source of model xml")
+                sys.exit(0)
+              else:
+                self.model_xml = sys.argv[i+1]
+                print sys.argv[i+1]
           if sys.argv[i] == '-model':
             if len(sys.argv) > i+1:
               self.model_name = sys.argv[i+1]
@@ -248,6 +257,8 @@ class SpawnModel():
           if model_xml == "":
             rospy.logerr("Error: an error occured generating the SDF file")
             sys.exit(0)
+        elif self.model_xml != "":
+          model_xml = self.model_xml
         else:
           rospy.logerr("Error: user specified param or filename is an empty string")
           sys.exit(0)
