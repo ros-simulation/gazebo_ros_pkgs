@@ -150,7 +150,6 @@ class SpawnModel():
                 sys.exit(0)
               else:
                 self.model_xml = sys.argv[i+1]
-                print sys.argv[i+1]
           if sys.argv[i] == '-model':
             if len(sys.argv) > i+1:
               self.model_name = sys.argv[i+1]
