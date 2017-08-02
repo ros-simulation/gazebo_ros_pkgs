@@ -320,14 +320,14 @@ void GazeboRosTricycleDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstP
       double radius = cmd_msg->linear.x / cmd_msg->angular.z; 
       
       if (radius == 0)
-        radius = 0.001;
+        radius = 0.01;
 	radius = std::copysign(radius,cmd_msg->angular.z);
       
       cmd_.angle = std::atan(wheel_base_ / radius);
 
 // new code start
       if(std::fabs(cmd_.angle)>1.56)
-    	  cmd_.speed = max_velocity_;
+    	  cmd_.speed = max_velocity_ * 0.5;
       else
     	  cmd_.speed = cmd_msg->linear.x / std::cos(cmd_.angle);
 // new code stop
