@@ -625,7 +625,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   gazebo::math::Quaternion initial_q(req.initial_pose.orientation.w,req.initial_pose.orientation.x,req.initial_pose.orientation.y,req.initial_pose.orientation.z);
 
   // refernce frame for initial pose definition, modify initial pose if defined
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.reference_frame);
   if (frame)
   {
     // convert to relative pose
@@ -818,7 +818,7 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
                                        gazebo_msgs::GetModelState::Response &res)
 {
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.relative_entity_name));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.relative_entity_name);
   if (!model)
   {
     ROS_ERROR_NAMED("api_plugin", "GetModelState: model [%s] does not exist",req.model_name.c_str());
@@ -1063,7 +1063,7 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
                                       gazebo_msgs::GetLinkState::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.reference_frame);
 
   if (!body)
   {
@@ -1413,7 +1413,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
   }
   else
   {
-    gazebo::physics::LinkPtr relative_entity = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.model_state.reference_frame));
+    gazebo::physics::EntityPtr relative_entity = world_->GetEntity(req.model_state.reference_frame);
     if (relative_entity)
     {
       gazebo::math::Pose  frame_pose = relative_entity->GetWorldPose(); // - myBody->GetCoMPose();
@@ -1630,7 +1630,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
                                       gazebo_msgs::SetLinkState::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.link_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.link_state.reference_frame);
   if (!body)
   {
     ROS_ERROR_NAMED("api_plugin", "Updating LinkState: link [%s] does not exist",req.link_state.link_name.c_str());
@@ -1718,7 +1718,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
                                          gazebo_msgs::ApplyBodyWrench::Response &res)
 {
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.body_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.reference_frame);
   if (!body)
   {
     ROS_ERROR_NAMED("api_plugin", "ApplyBodyWrench: body [%s] does not exist",req.body_name.c_str());
