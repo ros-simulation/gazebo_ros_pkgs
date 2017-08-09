@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.15 (2017-08-09)
+-------------------
 * Fix build (`#600 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/600>`_)
   This reverts commit 3f12a2ec3c4e0d91541bd533a0d6290d9d4d0558.
 * Contributors: Jose Luis Rivero
