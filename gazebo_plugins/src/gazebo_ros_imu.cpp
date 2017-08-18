@@ -91,6 +91,14 @@ void GazeboRosIMU::LoadThread()
   else
     this->gaussian_noise_ = this->sdf->Get<double>("gaussianNoise");
 
+  if (!this->sdf->HasElement("yawGaussianNoise"))
+  {
+    ROS_INFO_NAMED("imu", "imu plugin missing <yawGaussianNoise>, defaults to 0.0");
+    this->yaw_gaussian_noise_ = 0.0;
+  }
+  else
+    this->yaw_gaussian_noise_ = this->sdf->Get<double>("yawGaussianNoise");
+
   if (!this->sdf->HasElement("bodyName"))
   {
     ROS_FATAL_NAMED("imu", "imu plugin missing <bodyName>, cannot proceed");
@@ -222,6 +230,15 @@ void GazeboRosIMU::UpdateChild()
     pos = pose.pos + this->offset_.pos;
     rot = pose.rot;
 
+    // apply yaw noise
+    math::Quaternion yaw_error;
+    yaw_error.SetFromEuler(math::Vector3(
+        0,
+        0,
+        this->GaussianKernel(0, this->yaw_gaussian_noise_)
+    ));
+    rot = yaw_error*rot;
+
     // apply rpy offsets
     rot = this->offset_.rot*rot;
     rot.Normalize();
@@ -286,9 +303,10 @@ void GazeboRosIMU::UpdateChild()
     /// @todo: let user set separate linear and angular covariance values.
     /// @todo: apply appropriate rotations from frame_pose
     double gn2 = this->gaussian_noise_*this->gaussian_noise_;
+    double ygn2 = this->yaw_gaussian_noise_*this->yaw_gaussian_noise_;
     this->imu_msg_.orientation_covariance[0] = gn2;
     this->imu_msg_.orientation_covariance[4] = gn2;
-    this->imu_msg_.orientation_covariance[8] = gn2;
+    this->imu_msg_.orientation_covariance[8] = ygn2;
     this->imu_msg_.angular_velocity_covariance[0] = gn2;
     this->imu_msg_.angular_velocity_covariance[4] = gn2;
     this->imu_msg_.angular_velocity_covariance[8] = gn2;
