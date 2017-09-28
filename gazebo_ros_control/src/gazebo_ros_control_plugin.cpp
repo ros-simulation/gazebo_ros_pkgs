@@ -48,11 +48,7 @@
 namespace gazebo_ros_control
 {
 
-GazeboRosControlPlugin::~GazeboRosControlPlugin()
-{
-  // Disconnect from gazebo events
-  gazebo::event::Events::DisconnectWorldUpdateBegin(update_connection_);
-}
+GazeboRosControlPlugin::~GazeboRosControlPlugin() {}
 
 // Overloaded Gazebo entry point
 void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::ElementPtr sdf)

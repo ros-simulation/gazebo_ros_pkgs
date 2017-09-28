@@ -43,29 +43,12 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
 {
   ROS_DEBUG_STREAM_NAMED("api_plugin","GazeboRosApiPlugin Deconstructor start");
 
-  // Unload the sigint event
-  gazebo::event::Events::DisconnectSigInt(sigint_event_);
-  ROS_DEBUG_STREAM_NAMED("api_plugin","After sigint_event unload");
-
   // Don't attempt to unload this plugin if it was never loaded in the Load() function
   if(!plugin_loaded_)
   {
     ROS_DEBUG_STREAM_NAMED("api_plugin","Deconstructor skipped because never loaded");
     return;
   }
-
-  // Disconnect slots
-  gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
-  gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
-  gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
-  gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
-  ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
-
-  if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
-    gazebo::event::Events::DisconnectWorldUpdateBegin(pub_link_states_event_);
-  if (pub_model_states_connection_count_ > 0) // disconnect if there are subscribers on exit
-    gazebo::event::Events::DisconnectWorldUpdateBegin(pub_model_states_event_);
-  ROS_DEBUG_STREAM_NAMED("api_plugin","Disconnected World Updates");
 
   // Stop the multi threaded ROS spinner
   async_ros_spin_->stop();
@@ -511,14 +494,14 @@ void GazeboRosApiPlugin::onLinkStatesConnect()
 {
   pub_link_states_connection_count_++;
   if (pub_link_states_connection_count_ == 1) // connect on first subscriber
-    pub_link_states_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishLinkStates,this));
+    pub_link_states_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishLinkStates,this));
 }
 
 void GazeboRosApiPlugin::onModelStatesConnect()
 {
   pub_model_states_connection_count_++;
   if (pub_model_states_connection_count_ == 1) // connect on first subscriber
-    pub_model_states_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishModelStates,this));
+    pub_model_states_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishModelStates,this));
 }
 
 void GazeboRosApiPlugin::onLinkStatesDisconnect()
@@ -526,9 +509,9 @@ void GazeboRosApiPlugin::onLinkStatesDisconnect()
   pub_link_states_connection_count_--;
   if (pub_link_states_connection_count_ <= 0) // disconnect with no subscribers
   {
-    gazebo::event::Events::DisconnectWorldUpdateBegin(pub_link_states_event_);
+    pub_link_states_event_.reset();
     if (pub_link_states_connection_count_ < 0) // should not be possible
-      ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_link_states_ in gazebo_ros.cpp? something weird");
+      ROS_ERROR_NAMED("api_plugin", "One too many disconnect from pub_link_states_ in gazebo_ros.cpp? something weird");
   }
 }
 
@@ -537,9 +520,9 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
   pub_model_states_connection_count_--;
   if (pub_model_states_connection_count_ <= 0) // disconnect with no subscribers
   {
-    gazebo::event::Events::DisconnectWorldUpdateBegin(pub_model_states_event_);
+    pub_model_states_event_.reset();
     if (pub_model_states_connection_count_ < 0) // should not be possible
-      ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
+      ROS_ERROR_NAMED("api_plugin", "One too many disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
   }
 }
 

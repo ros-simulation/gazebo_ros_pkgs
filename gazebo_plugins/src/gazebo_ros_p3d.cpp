@@ -36,7 +36,6 @@ GazeboRosP3D::GazeboRosP3D()
 // Destructor
 GazeboRosP3D::~GazeboRosP3D()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
   // Finalize the controller
   this->rosnode_->shutdown();
   this->p3d_queue_.clear();

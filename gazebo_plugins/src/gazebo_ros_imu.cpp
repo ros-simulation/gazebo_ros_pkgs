@@ -38,7 +38,6 @@ GazeboRosIMU::GazeboRosIMU()
 // Destructor
 GazeboRosIMU::~GazeboRosIMU()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
   // Finalize the controller
   this->rosnode_->shutdown();
   this->callback_queue_thread_.join();
