@@ -44,7 +44,7 @@
 
 #include <gazebo_plugins/gazebo_ros_tricycle_drive.h>
 
-#include <gazebo/math/gzmath.hh>
+#include <ignition/math.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -170,7 +170,7 @@ void GazeboRosTricycleDrive::publishWheelJointState()
     joint_state_.effort.resize ( joints.size() );
     for ( std::size_t i = 0; i < joints.size(); i++ ) {
         joint_state_.name[i] = joints[i]->GetName();
-        joint_state_.position[i] = joints[i]->Position ( 0 ).Radian();
+        joint_state_.position[i] = joints[i]->Position ( 0 );
         joint_state_.velocity[i] = joints[i]->GetVelocity ( 0 );
         joint_state_.effort[i] = joints[i]->GetForce ( 0 );
     }
@@ -191,8 +191,8 @@ void GazeboRosTricycleDrive::publishWheelTF()
 
         ignition::math::Pose3d pose = joints[i]->GetChild()->RelativePose();
 
-        tf::Quaternion qt ( pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w );
-        tf::Vector3 vt ( pose.pos.x, pose.pos.y, pose.pos.z );
+        tf::Quaternion qt ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
+        tf::Vector3 vt ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
 
         tf::Transform transform ( qt, vt );
         transform_broadcaster_->sendTransform ( tf::StampedTransform ( transform, current_time, parent_frame, frame ) );
@@ -254,7 +254,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     joint_wheel_actuated_->SetVelocity ( 0, applied_speed );
 #endif
 
-    double current_angle = joint_steering_->Position ( 0 ).Radian();
+    double current_angle = joint_steering_->Position ( 0 );
 
     // truncate target angle
     if (target_angle > +M_PI / 2.0)
@@ -410,8 +410,8 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
     if ( odom_source_ == WORLD ) {
         // getting data form gazebo world
         ignition::math::Pose3d pose = parent->WorldPose();
-        qt = tf::Quaternion ( pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w );
-        vt = tf::Vector3 ( pose.pos.x, pose.pos.y, pose.pos.z );
+        qt = tf::Quaternion ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
+        vt = tf::Vector3 ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
 
         odom_.pose.pose.position.x = vt.x();
         odom_.pose.pose.position.y = vt.y();
@@ -425,12 +425,12 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
         // get velocity in /odom frame
         ignition::math::Vector3d linear;
         linear = parent->WorldLinearVel();
-        odom_.twist.twist.angular.z = parent->WorldAngularVel().z;
+        odom_.twist.twist.angular.z = parent->WorldAngularVel().Z();
 
         // convert velocity to child_frame_id (aka base_footprint)
-        float yaw = pose.rot.GetYaw();
-        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.x + sinf ( yaw ) * linear.y;
-        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.y - sinf ( yaw ) * linear.x;
+        float yaw = pose.Rot().Yaw();
+        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.X() + sinf ( yaw ) * linear.Y();
+        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.Y() - sinf ( yaw ) * linear.X();
     }
 
     tf::Transform base_footprint_to_odom ( qt, vt );

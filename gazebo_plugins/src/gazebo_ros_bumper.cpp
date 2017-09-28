@@ -32,9 +32,9 @@
 #include <sdf/Param.hh>
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/SensorTypes.hh>
-#include <gazebo/math/Pose.hh>
-#include <gazebo/math/Quaternion.hh>
-#include <gazebo/math/Vector3.hh>
+#include <ignition/math/Pose3.hh>
+#include <ignition/math/Quaternion.hh>
+#include <ignition/math/Vector3.hh>
 
 #include <tf/tf.h>
 
@@ -264,12 +264,12 @@ void GazeboRosBumper::OnContact()
 
       // set wrenches
       geometry_msgs::Wrench wrench;
-      wrench.force.x  = force.x;
-      wrench.force.y  = force.y;
-      wrench.force.z  = force.z;
-      wrench.torque.x = torque.x;
-      wrench.torque.y = torque.y;
-      wrench.torque.z = torque.z;
+      wrench.force.x  = force.X();
+      wrench.force.y  = force.Y();
+      wrench.force.z  = force.Z();
+      wrench.torque.x = torque.X();
+      wrench.torque.y = torque.Y();
+      wrench.torque.z = torque.Z();
       state.wrenches.push_back(wrench);
 
       total_wrench.force.x  += wrench.force.x;
@@ -287,9 +287,9 @@ void GazeboRosBumper::OnContact()
                                    contact.position(j).z()) -
           frame_pos);
       geometry_msgs::Vector3 contact_position;
-      contact_position.x = position.x;
-      contact_position.y = position.y;
-      contact_position.z = position.z;
+      contact_position.x = position.X();
+      contact_position.y = position.Y();
+      contact_position.z = position.Z();
       state.contact_positions.push_back(contact_position);
 
       // rotate normal into user specified frame.
@@ -299,9 +299,9 @@ void GazeboRosBumper::OnContact()
                                    contact.normal(j).z()));
       // set contact normals
       geometry_msgs::Vector3 contact_normal;
-      contact_normal.x = normal.x;
-      contact_normal.y = normal.y;
-      contact_normal.z = normal.z;
+      contact_normal.x = normal.X();
+      contact_normal.y = normal.Y();
+      contact_normal.z = normal.Z();
       state.contact_normals.push_back(contact_normal);
 
       // set contact depth, interpenetration
