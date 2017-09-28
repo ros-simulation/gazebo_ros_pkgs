@@ -1,13 +1,13 @@
 /* Copyright [2015] [Alessandro Settimi]
- * 
+ *
  * email: ale.settimi@gmail.com
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,7 +62,7 @@ namespace gazebo
     /// \param mu offset value.
     /// \param sigma scaling value.
     double GuassianKernel(double mu, double sigma);
-    
+
     /// \brief Ros NodeHandle pointer.
     ros::NodeHandle* node;
     /// \brief Ros Publisher for imu data.
@@ -80,6 +80,7 @@ namespace gazebo
     sdf::ElementPtr sdf;
     /// \brief Orientation data from the sensor.
     ignition::math::Quaterniond orientation;
+
     /// \brief Linear acceleration data from the sensor.
     ignition::math::Vector3d accelerometer_data;
     /// \brief Angular velocity data from the sensor.
