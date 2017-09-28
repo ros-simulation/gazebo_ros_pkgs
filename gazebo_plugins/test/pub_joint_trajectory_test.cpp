@@ -62,7 +62,7 @@ int main(int argc, char** argv)
   sjt.request.joint_trajectory = jt;
   sjt.request.disable_physics_updates = false;
 
-  gazebo::math::Quaternion r(0, 0, M_PI);
+  ignition::math::Quaterniond r(0, 0, M_PI);
   geometry_msgs::Pose p;
   p.position.x = 0;
   p.position.y = 0;

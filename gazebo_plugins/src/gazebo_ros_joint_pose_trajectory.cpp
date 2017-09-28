@@ -325,7 +325,7 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
           cur_time.Double(), this->trajectory_index, this->points_.size());
 
         // get reference link pose before updates
-        math::Pose reference_pose = this->model_->GetWorldPose();
+        ignition::math::Pose3d reference_pose = this->model_->GetWorldPose();
         if (this->reference_link_)
         {
           reference_pose = this->reference_link_->GetWorldPose();

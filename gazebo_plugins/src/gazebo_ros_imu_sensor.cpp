@@ -23,9 +23,9 @@ GZ_REGISTER_SENSOR_PLUGIN(gazebo::GazeboRosImuSensor)
 
 gazebo::GazeboRosImuSensor::GazeboRosImuSensor(): SensorPlugin()
 {
-  accelerometer_data = math::Vector3(0, 0, 0);
-  gyroscope_data = math::Vector3(0, 0, 0);
-  orientation = math::Quaternion(1,0,0,0);
+  accelerometer_data = ignition::math::Vector3d(0, 0, 0);
+  gyroscope_data = ignition::math::Vector3d(0, 0, 0);
+  orientation = ignition::math::Quaterniond(1,0,0,0);
   seed=0;
   sensor=NULL;
 }
@@ -224,7 +224,7 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   }
   else
   {
-    offset.pos = math::Vector3(0, 0, 0);
+    offset.pos = ignition::math::Vector3d(0, 0, 0);
     ROS_WARN_STREAM("missing <xyzOffset>, set to default: " << offset.pos[0] << ' ' << offset.pos[1] << ' ' << offset.pos[2]);
   }
 
@@ -236,7 +236,7 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   }
   else
   {
-    offset.rot = math::Vector3(0, 0, 0);
+    offset.rot = ignition::math::Vector3d(0, 0, 0);
     ROS_WARN_STREAM("missing <rpyOffset>, set to default: " << offset.rot.GetRoll() << ' ' << offset.rot.GetPitch() << ' ' << offset.rot.GetYaw());
   }
 

@@ -149,22 +149,22 @@ namespace gazebo
     // Convert TF transform to Gazebo Pose
     const geometry_msgs::Vector3 &p = hog_desired_tform.transform.translation;
     const geometry_msgs::Quaternion &q = hog_desired_tform.transform.rotation;
-    gazebo::math::Pose hog_desired(
-        gazebo::math::Vector3(p.x, p.y, p.z),
-        gazebo::math::Quaternion(q.w, q.x, q.y, q.z));
+    ignition::math::Pose3d hog_desired(
+        ignition::math::Vector3d(p.x, p.y, p.z),
+        ignition::math::Quaterniond(q.w, q.x, q.y, q.z));
 
     // Relative transform from actual to desired pose
-    gazebo::math::Pose world_pose = floating_link_->GetDirtyPose();
-    gazebo::math::Vector3 err_pos = hog_desired.pos - world_pose.pos;
+    ignition::math::Pose3d world_pose = floating_link_->GetDirtyPose();
+    ignition::math::Vector3d err_pos = hog_desired.pos - world_pose.pos;
     // Get exponential coordinates for rotation
-    gazebo::math::Quaternion err_rot =  (world_pose.rot.GetAsMatrix4().Inverse() * hog_desired.rot.GetAsMatrix4()).GetRotation();
-    gazebo::math::Quaternion not_a_quaternion = err_rot.GetLog();
+    ignition::math::Quaterniond err_rot =  (world_pose.rot.GetAsMatrix4().Inverse() * hog_desired.rot.GetAsMatrix4()).GetRotation();
+    ignition::math::Quaterniond not_a_quaternion = err_rot.GetLog();
 
     floating_link_->AddForce(
         kl_ * err_pos - cl_ * floating_link_->GetWorldLinearVel());
 
     floating_link_->AddRelativeTorque(
-        ka_ * gazebo::math::Vector3(not_a_quaternion.x, not_a_quaternion.y, not_a_quaternion.z) - ca_ * floating_link_->GetRelativeAngularVel());
+        ka_ * ignition::math::Vector3d(not_a_quaternion.x, not_a_quaternion.y, not_a_quaternion.z) - ca_ * floating_link_->GetRelativeAngularVel());
 
     // Convert actual pose to TransformStamped message
     geometry_msgs::TransformStamped hog_actual_tform;

@@ -31,8 +31,9 @@
 
 #include <tinyxml.h>
 
-#include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
+#include <ignition/math.hh>
+#include <gazebo/physics/physics.hh>
 #include <gazebo/transport/transport.hh>
 
 // ROS
@@ -256,11 +257,11 @@ private:
 
   /// \brief Update the model name and pose of the SDF file before sending to Gazebo
   void updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
-                           gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
+                           ignition::math::Vector3d initial_xyz, ignition::math::Quaterniond initial_q);
 
   /// \brief Update the model pose of the URDF file before sending to Gazebo
   void updateURDFModelPose(TiXmlDocument &gazebo_model_xml,
-                           gazebo::math::Vector3 initial_xyz, gazebo::math::Quaternion initial_q);
+                           ignition::math::Vector3d initial_xyz, ignition::math::Quaterniond initial_q);
 
   /// \brief Update the model name of the URDF file before sending to Gazebo
   void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
@@ -274,9 +275,9 @@ private:
 
   /// \brief helper function for applyBodyWrench
   ///        shift wrench from reference frame to target frame
-  void transformWrench(gazebo::math::Vector3 &target_force, gazebo::math::Vector3 &target_torque,
-                       gazebo::math::Vector3 reference_force, gazebo::math::Vector3 reference_torque,
-                       gazebo::math::Pose target_to_reference );
+  void transformWrench(ignition::math::Vector3d &target_force, ignition::math::Vector3d &target_torque,
+                       ignition::math::Vector3d reference_force, ignition::math::Vector3d reference_torque,
+                       ignition::math::Pose3d target_to_reference );
 
   /// \brief Used for the dynamic reconfigure callback function template
   void physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level);
@@ -297,10 +298,10 @@ private:
   void loadGazeboRosApiPlugin(std::string world_name);
 
   /// \brief convert xml to Pose
-  gazebo::math::Pose parsePose(const std::string &str);
+  ignition::math::Pose3d parsePose(const std::string &str);
 
   /// \brief convert xml to Pose
-  gazebo::math::Vector3 parseVector3(const std::string &str);
+  ignition::math::Vector3d parseVector3(const std::string &str);
 
   // track if the desconstructor event needs to occur
   bool plugin_loaded_;
@@ -389,8 +390,8 @@ private:
   {
   public:
     gazebo::physics::LinkPtr body;
-    gazebo::math::Vector3 force;
-    gazebo::math::Vector3 torque;
+    ignition::math::Vector3d force;
+    ignition::math::Vector3d torque;
     ros::Time start_time;
     ros::Duration duration;
   };

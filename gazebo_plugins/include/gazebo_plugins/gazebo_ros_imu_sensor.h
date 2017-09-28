@@ -79,12 +79,12 @@ namespace gazebo
     /// \brief Pointer to the sdf config file.
     sdf::ElementPtr sdf;
     /// \brief Orientation data from the sensor.
-    gazebo::math::Quaternion orientation;
+    ignition::math::Quaterniond orientation;
     /// \brief Linear acceleration data from the sensor.
-    math::Vector3 accelerometer_data;
+    ignition::math::Vector3d accelerometer_data;
     /// \brief Angular velocity data from the sensor.
-    math::Vector3 gyroscope_data;
-    
+    ignition::math::Vector3d gyroscope_data;
+
     /// \brief Seed for the Gaussian noise generator.
     unsigned int seed;
 
@@ -100,7 +100,7 @@ namespace gazebo
     /// \brief Gaussian noise.
     double gaussian_noise;
     /// \brief Offset parameter, position part is unused.
-    math::Pose offset;
+    ignition::math::Pose3d offset;
   };
 }
 

@@ -404,7 +404,7 @@ namespace gazebo {
 
     // TODO create some non-perfect odometry!
     // getting data for base_footprint to odom transform
-    math::Pose pose = this->parent->GetWorldPose();
+    ignition::math::Pose3d pose = this->parent->GetWorldPose();
 
     tf::Quaternion qt(pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w);
     tf::Vector3 vt(pose.pos.x, pose.pos.y, pose.pos.z);
@@ -434,7 +434,7 @@ namespace gazebo {
     odom_.pose.covariance[35] = this->covariance_yaw_;
 
     // get velocity in /odom frame
-    math::Vector3 linear;
+    ignition::math::Vector3d linear;
     linear = this->parent->GetWorldLinearVel();
     odom_.twist.twist.angular.z = this->parent->GetWorldAngularVel().z;
 
