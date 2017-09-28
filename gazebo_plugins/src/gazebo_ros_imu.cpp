@@ -147,7 +147,7 @@ void GazeboRosIMU::LoadThread()
 
   // assert that the body by link_name_ exists
   this->link = boost::dynamic_pointer_cast<physics::Link>(
-    this->world_->GetEntity(this->link_name_));
+    this->world_->EntityByName(this->link_name_));
   if (!this->link)
   {
     ROS_FATAL_NAMED("imu", "gazebo_ros_imu plugin error: bodyName: %s does not exist\n",
@@ -171,11 +171,11 @@ void GazeboRosIMU::LoadThread()
   }
 
   // Initialize the controller
-  this->last_time_ = this->world_->GetSimTime();
+  this->last_time_ = this->world_->SimTime();
 
   // this->initial_pose_ = this->link->GetPose();
-  this->last_vpos_ = this->link->GetWorldLinearVel();
-  this->last_veul_ = this->link->GetWorldAngularVel();
+  this->last_vpos_ = this->link->WorldLinearVel();
+  this->last_veul_ = this->link->WorldAngularVel();
   this->apos_ = 0;
   this->aeul_ = 0;
 
@@ -203,7 +203,7 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 // Update the controller
 void GazeboRosIMU::UpdateChild()
 {
-  common::Time cur_time = this->world_->GetSimTime();
+  common::Time cur_time = this->world_->SimTime();
 
   // rate control
   if (this->update_rate_ > 0 &&
@@ -217,7 +217,7 @@ void GazeboRosIMU::UpdateChild()
     ignition::math::Vector3d pos;
 
     // Get Pose/Orientation ///@todo: verify correctness
-    pose = this->link->GetWorldPose();
+    pose = this->link->WorldPose();
     // apply xyz offsets and get position and rotation components
     pos = pose.Pos() + this->offset_.Pos();
     rot = pose.Rot();
@@ -227,8 +227,8 @@ void GazeboRosIMU::UpdateChild()
     rot.Normalize();
 
     // get Rates
-    ignition::math::Vector3d vpos = this->link->GetWorldLinearVel();
-    ignition::math::Vector3d veul = this->link->GetWorldAngularVel();
+    ignition::math::Vector3d vpos = this->link->WorldLinearVel();
+    ignition::math::Vector3d veul = this->link->WorldAngularVel();
 
     // differentiate to get accelerations
     double tmp_dt = this->last_time_.Double() - cur_time.Double();

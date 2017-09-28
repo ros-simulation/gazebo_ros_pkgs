@@ -144,7 +144,7 @@ void GazeboRosJointTrajectory::LoadThread()
   }
 #endif
 
-  this->last_time_ = this->world_->GetSimTime();
+  this->last_time_ = this->world_->SimTime();
 
   // start custom queue for joint trajectory plugin ros topics
   this->callback_queue_thread_ =
@@ -212,7 +212,7 @@ void GazeboRosJointTrajectory::SetTrajectory(
   // trajectory start time
   this->trajectory_start = gazebo::common::Time(trajectory->header.stamp.sec,
                                                 trajectory->header.stamp.nsec);
-  common::Time cur_time = this->world_->GetSimTime();
+  common::Time cur_time = this->world_->SimTime();
   if (this->trajectory_start < cur_time)
     this->trajectory_start = cur_time;
 
@@ -311,7 +311,7 @@ void GazeboRosJointTrajectory::UpdateStates()
   boost::mutex::scoped_lock lock(this->update_mutex);
   if (this->has_trajectory_)
   {
-    common::Time cur_time = this->world_->GetSimTime();
+    common::Time cur_time = this->world_->SimTime();
     // roll out trajectory via set model configuration
     // gzerr << "i[" << trajectory_index  << "] time "
     //       << trajectory_start << " now: " << cur_time << " : "<< "\n";
@@ -326,10 +326,10 @@ void GazeboRosJointTrajectory::UpdateStates()
           cur_time.Double(), this->trajectory_index, this->points_.size());
 
         // get reference link pose before updates
-        ignition::math::Pose3d reference_pose = this->model_->GetWorldPose();
+        ignition::math::Pose3d reference_pose = this->model_->WorldPose();
         if (this->reference_link_)
         {
-          reference_pose = this->reference_link_->GetWorldPose();
+          reference_pose = this->reference_link_->WorldPose();
         }
 
         // trajectory roll-out based on time:

@@ -82,7 +82,7 @@ void GazeboRosProjector::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   // Create a new transport node for talking to the projector
   this->node_.reset(new transport::Node());
   // Initialize the node with the world name
-  this->node_->Init(this->world_->GetName());
+  this->node_->Init(this->world_->Name());
   // Setting projector topic
   std::string name = std::string("~/") + _parent->GetName() + "/" +
                       _sdf->Get<std::string>("projector");

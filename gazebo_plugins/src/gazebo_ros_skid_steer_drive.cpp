@@ -231,7 +231,7 @@ namespace gazebo {
     } else {
       this->update_period_ = 0.0;
     }
-    last_update_time_ = this->world->GetSimTime();
+    last_update_time_ = this->world->SimTime();
 
     // Initialize velocity stuff
     wheel_speed_[RIGHT_FRONT] = 0;
@@ -330,7 +330,7 @@ namespace gazebo {
 
   // Update the controller
   void GazeboRosSkidSteerDrive::UpdateChild() {
-    common::Time current_time = this->world->GetSimTime();
+    common::Time current_time = this->world->SimTime();
     double seconds_since_last_update =
       (current_time - last_update_time_).Double();
     if (seconds_since_last_update > update_period_) {
@@ -404,7 +404,7 @@ namespace gazebo {
 
     // TODO create some non-perfect odometry!
     // getting data for base_footprint to odom transform
-    ignition::math::Pose3d pose = this->parent->GetWorldPose();
+    ignition::math::Pose3d pose = this->parent->WorldPose();
 
     tf::Quaternion qt(pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w);
     tf::Vector3 vt(pose.pos.x, pose.pos.y, pose.pos.z);
@@ -435,8 +435,8 @@ namespace gazebo {
 
     // get velocity in /odom frame
     ignition::math::Vector3d linear;
-    linear = this->parent->GetWorldLinearVel();
-    odom_.twist.twist.angular.z = this->parent->GetWorldAngularVel().z;
+    linear = this->parent->WorldLinearVel();
+    odom_.twist.twist.angular.z = this->parent->WorldAngularVel().z;
 
     // convert velocity to child_frame_id (aka base_footprint)
     float yaw = pose.rot.GetYaw();

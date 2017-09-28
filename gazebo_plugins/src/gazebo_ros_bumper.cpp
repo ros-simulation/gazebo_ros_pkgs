@@ -157,7 +157,7 @@ void GazeboRosBumper::OnContact()
       *Simulator::Instance()->GetMRMutex());
     // look through all models in the world, search for body
     // name that matches frameName
-    phyaics::Model_V all_models = World::Instance()->GetModels();
+    phyaics::Model_V all_models = World::Instance()->Models();
     for (physics::Model_V::iterator iter = all_models.begin();
       iter != all_models.end(); iter++)
     {
@@ -183,7 +183,7 @@ void GazeboRosBumper::OnContact()
   /*
   if (myFrame)
   {
-    frame_pose = myFrame->GetWorldPose();  //-this->myBody->GetCoMPose();
+    frame_pose = myFrame->WorldPose();  //-this->myBody->GetCoMPose();
     frame_pos = frame_pose.pos;
     frame_rot = frame_pose.rot;
   }

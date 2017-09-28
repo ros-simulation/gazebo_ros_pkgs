@@ -487,7 +487,7 @@ void GazeboRosApiPlugin::advertiseServices()
 
   // todo: contemplate setting environment variable ROBOT=sim here???
   nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
-  last_pub_clock_time_ = world_->GetSimTime();
+  last_pub_clock_time_ = world_->SimTime();
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
@@ -612,7 +612,7 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
   if (frame)
   {
     // convert to relative pose
-    ignition::math::Pose3d frame_pose = frame->GetWorldPose();
+    ignition::math::Pose3d frame_pose = frame->WorldPose();
     initial_xyz = frame_pose.Rot().RotateVector(initial_xyz);
     initial_xyz += frame_pose.Pos();
     initial_q *= frame_pose.Rot();
@@ -832,26 +832,26 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
       res.header.frame_id = req.relative_entity_name; /// @brief this is a redundant information
     }
     // get model pose
-    ignition::math::Pose3d       model_pose = model->GetWorldPose();
+    ignition::math::Pose3d       model_pose = model->WorldPose();
     ignition::math::Vector3d    model_pos = model_pose.Pos();
     ignition::math::Quaterniond model_rot = model_pose.Rot();
 
     // get model twist
-    ignition::math::Vector3d model_linear_vel  = model->GetWorldLinearVel();
-    ignition::math::Vector3d model_angular_vel = model->GetWorldAngularVel();
+    ignition::math::Vector3d model_linear_vel  = model->WorldLinearVel();
+    ignition::math::Vector3d model_angular_vel = model->WorldAngularVel();
 
 
     if (frame)
     {
       // convert to relative pose
-      ignition::math::Pose3d frame_pose = frame->GetWorldPose();
+      ignition::math::Pose3d frame_pose = frame->WorldPose();
       model_pos = model_pos - frame_pose.Pos();
       model_pos = frame_pose.Rot().RotateVectorReverse(model_pos);
       model_rot *= frame_pose.Rot().Inverse();
 
       // convert to relative rates
-      ignition::math::Vector3d frame_vpos = frame->GetWorldLinearVel(); // get velocity in gazebo frame
-      ignition::math::Vector3d frame_veul = frame->GetWorldAngularVel(); // get velocity in gazebo frame
+      ignition::math::Vector3d frame_vpos = frame->WorldLinearVel(); // get velocity in gazebo frame
+      ignition::math::Vector3d frame_veul = frame->WorldAngularVel(); // get velocity in gazebo frame
       model_linear_vel = frame_pose.Rot().RotateVector(model_linear_vel - frame_vpos);
       model_angular_vel = frame_pose.Rot().RotateVector(model_angular_vel - frame_veul);
     }
@@ -955,7 +955,7 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
 bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Request &req,
                                             gazebo_msgs::GetWorldProperties::Response &res)
 {
-  res.sim_time = world_->GetSimTime().Double();
+  res.sim_time = world_->SimTime().Double();
   res.model_names.clear();
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
     res.model_names.push_back(world_->GetModel(i)->GetName());
@@ -990,8 +990,8 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
     res.damping.clear(); // to be added to gazebo
     //res.damping.push_back(joint->GetDamping(0));
 
-    res.position.clear(); // use GetAngle(i)
-    res.position.push_back(joint->GetAngle(0).Radian());
+    res.position.clear(); // use Position(i)
+    res.position.push_back(joint->Position(0).Radian());
 
     res.rate.clear(); // use GetVelocity(i)
     res.rate.push_back(joint->GetVelocity(0));
@@ -1056,22 +1056,22 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
   }
 
   // get body pose
-  ignition::math::Pose3d body_pose = body->GetWorldPose();
+  ignition::math::Pose3d body_pose = body->WorldPose();
   // Get inertial rates
-  ignition::math::Vector3d body_vpos = body->GetWorldLinearVel(); // get velocity in gazebo frame
-  ignition::math::Vector3d body_veul = body->GetWorldAngularVel(); // get velocity in gazebo frame
+  ignition::math::Vector3d body_vpos = body->WorldLinearVel(); // get velocity in gazebo frame
+  ignition::math::Vector3d body_veul = body->WorldAngularVel(); // get velocity in gazebo frame
 
   if (frame)
   {
     // convert to relative pose
-    ignition::math::Pose3d frame_pose = frame->GetWorldPose();
+    ignition::math::Pose3d frame_pose = frame->WorldPose();
     body_pose.Pos() = body_pose.Pos() - frame_pose.Pos();
     body_pose.Pos() = frame_pose.Rot().RotateVectorReverse(body_pose.Pos());
     body_pose.Rot() *= frame_pose.Rot().Inverse();
 
     // convert to relative rates
-    ignition::math::Vector3d frame_vpos = frame->GetWorldLinearVel(); // get velocity in gazebo frame
-    ignition::math::Vector3d frame_veul = frame->GetWorldAngularVel(); // get velocity in gazebo frame
+    ignition::math::Vector3d frame_vpos = frame->WorldLinearVel(); // get velocity in gazebo frame
+    ignition::math::Vector3d frame_veul = frame->WorldAngularVel(); // get velocity in gazebo frame
     body_vpos = frame_pose.Rot().RotateVector(body_vpos - frame_vpos);
     body_veul = frame_pose.Rot().RotateVector(body_veul - frame_veul);
   }
@@ -1399,13 +1399,13 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     gazebo::physics::LinkPtr relative_entity = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.model_state.reference_frame));
     if (relative_entity)
     {
-      ignition::math::Pose3d  frame_pose = relative_entity->GetWorldPose(); // - myBody->GetCoMPose();
+      ignition::math::Pose3d  frame_pose = relative_entity->WorldPose(); // - myBody->GetCoMPose();
       ignition::math::Vector3d frame_pos = frame_pose.Pos();
       ignition::math::Quaterniond frame_rot = frame_pose.Rot();
 
       //std::cout << " debug : " << relative_entity->GetName() << " : " << frame_pose << " : " << target_pose << std::endl;
       //target_pose = frame_pose + target_pose; // seems buggy, use my own
-      target_pose.Pos() = model->GetWorldPose().Pos() + frame_rot.RotateVector(target_pos);
+      target_pose.Pos() = model->WorldPose().Pos() + frame_rot.RotateVector(target_pos);
       target_pose.Rot() = frame_rot * target_pose.Rot();
 
       // Velocities should be commanded in the requested reference
@@ -1432,7 +1432,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     world_->SetPaused(true);
     model->SetWorldPose(target_pose);
     world_->SetPaused(is_paused);
-    //ignition::math::Pose3d p3d = model->GetWorldPose();
+    //ignition::math::Pose3d p3d = model->WorldPose();
     //ROS_ERROR_NAMED("api_plugin", "model updated state: %f %f %f",p3d.pos.x,p3d.pos.y,p3d.pos.z);
 
     // set model velocity
@@ -1466,8 +1466,8 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
       fjj->joint = joint;
       fjj->force = req.effort;
       fjj->start_time = req.start_time;
-      if (fjj->start_time < ros::Time(world_->GetSimTime().Double()))
-        fjj->start_time = ros::Time(world_->GetSimTime().Double());
+      if (fjj->start_time < ros::Time(world_->SimTime().Double()))
+        fjj->start_time = ros::Time(world_->SimTime().Double());
       fjj->duration = req.duration;
       lock_.lock();
       force_joint_jobs_.push_back(fjj);
@@ -1633,7 +1633,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
 
   if (frame)
   {
-    ignition::math::Pose3d  frame_pose = frame->GetWorldPose(); // - myBody->GetCoMPose();
+    ignition::math::Pose3d  frame_pose = frame->WorldPose(); // - myBody->GetCoMPose();
     ignition::math::Vector3d frame_pos = frame_pose.Pos();
     ignition::math::Quaterniond frame_rot = frame_pose.Rot();
 
@@ -1642,8 +1642,8 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
     target_pose.Pos() = frame_pos + frame_rot.RotateVector(target_pos);
     target_pose.Rot() = frame_rot * target_pose.Rot();
 
-    ignition::math::Vector3d frame_linear_vel = frame->GetWorldLinearVel();
-    ignition::math::Vector3d frame_angular_vel = frame->GetWorldAngularVel();
+    ignition::math::Vector3d frame_linear_vel = frame->WorldLinearVel();
+    ignition::math::Vector3d frame_angular_vel = frame->WorldAngularVel();
     target_linear_vel -= frame_linear_vel;
     target_angular_vel -= frame_angular_vel;
   }
@@ -1731,20 +1731,20 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
     //        transform wrench from reference_point in reference_frame
     //        into the reference frame of the body
     //        first, translate by reference point to the body frame
-    ignition::math::Pose3d target_to_reference = frame->GetWorldPose() - body->GetWorldPose();
+    ignition::math::Pose3d target_to_reference = frame->WorldPose() - body->WorldPose();
     ROS_DEBUG_NAMED("api_plugin", "reference frame for applied wrench: [%f %f %f, %f %f %f]-[%f %f %f, %f %f %f]=[%f %f %f, %f %f %f]",
-              body->GetWorldPose().Pos().x,
-              body->GetWorldPose().Pos().y,
-              body->GetWorldPose().Pos().z,
-              body->GetWorldPose().Rot().GetAsEuler().x,
-              body->GetWorldPose().Rot().GetAsEuler().y,
-              body->GetWorldPose().Rot().GetAsEuler().z,
-              frame->GetWorldPose().Pos().x,
-              frame->GetWorldPose().Pos().y,
-              frame->GetWorldPose().Pos().z,
-              frame->GetWorldPose().Rot().GetAsEuler().x,
-              frame->GetWorldPose().Rot().GetAsEuler().y,
-              frame->GetWorldPose().Rot().GetAsEuler().z,
+              body->WorldPose().Pos().x,
+              body->WorldPose().Pos().y,
+              body->WorldPose().Pos().z,
+              body->WorldPose().Rot().GetAsEuler().x,
+              body->WorldPose().Rot().GetAsEuler().y,
+              body->WorldPose().Rot().GetAsEuler().z,
+              frame->WorldPose().Pos().x,
+              frame->WorldPose().Pos().y,
+              frame->WorldPose().Pos().z,
+              frame->WorldPose().Rot().GetAsEuler().x,
+              frame->WorldPose().Rot().GetAsEuler().y,
+              frame->WorldPose().Rot().GetAsEuler().z,
               target_to_reference.Pos().x,
               target_to_reference.Pos().y,
               target_to_reference.Pos().z,
@@ -1775,7 +1775,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   {
     ROS_INFO_NAMED("api_plugin", "ApplyBodyWrench: reference_frame is empty/world/map, using inertial frame, transferring from body relative to inertial frame");
     // FIXME: transfer to inertial frame
-    ignition::math::Pose3d target_to_reference = body->GetWorldPose();
+    ignition::math::Pose3d target_to_reference = body->WorldPose();
     target_force = reference_force;
     target_torque = reference_torque;
 
@@ -1797,8 +1797,8 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   wej->force = target_force;
   wej->torque = target_torque;
   wej->start_time = req.start_time;
-  if (wej->start_time < ros::Time(world_->GetSimTime().Double()))
-    wej->start_time = ros::Time(world_->GetSimTime().Double());
+  if (wej->start_time < ros::Time(world_->SimTime().Double()))
+    wej->start_time = ros::Time(world_->SimTime().Double());
   wej->duration = req.duration;
   lock_.lock();
   wrench_body_jobs_.push_back(wej);
@@ -1839,8 +1839,8 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
   {
     // check times and apply wrench if necessary
-    if (ros::Time(world_->GetSimTime().Double()) >= (*iter)->start_time)
-      if (ros::Time(world_->GetSimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
+    if (ros::Time(world_->SimTime().Double()) >= (*iter)->start_time)
+      if (ros::Time(world_->SimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
           (*iter)->duration.toSec() < 0.0)
       {
         if ((*iter)->body) // if body exists
@@ -1852,7 +1852,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
           (*iter)->duration.fromSec(0.0); // mark for delete
       }
 
-    if (ros::Time(world_->GetSimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
+    if (ros::Time(world_->SimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
@@ -1873,8 +1873,8 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
   {
     // check times and apply force if necessary
-    if (ros::Time(world_->GetSimTime().Double()) >= (*iter)->start_time)
-      if (ros::Time(world_->GetSimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
+    if (ros::Time(world_->SimTime().Double()) >= (*iter)->start_time)
+      if (ros::Time(world_->SimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
           (*iter)->duration.toSec() < 0.0)
       {
         if ((*iter)->joint) // if joint exists
@@ -1883,7 +1883,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
           (*iter)->duration.fromSec(0.0); // mark for delete
       }
 
-    if (ros::Time(world_->GetSimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
+    if (ros::Time(world_->SimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
@@ -1898,7 +1898,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
 void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
 {
   ROS_ERROR_NAMED("api_plugin", "CLOCK2");
-  gazebo::common::Time sim_time = world_->GetSimTime();
+  gazebo::common::Time sim_time = world_->SimTime();
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
 
@@ -1911,11 +1911,11 @@ void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::Wo
 }
 void GazeboRosApiPlugin::publishSimTime()
 {
-  gazebo::common::Time sim_time = world_->GetSimTime();
+  gazebo::common::Time sim_time = world_->SimTime();
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
 
-  gazebo::common::Time currentTime = world_->GetSimTime();
+  gazebo::common::Time currentTime = world_->SimTime();
   rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros
@@ -1940,7 +1940,7 @@ void GazeboRosApiPlugin::publishLinkStates()
       {
         link_states.name.push_back(body->GetScopedName());
         geometry_msgs::Pose pose;
-        ignition::math::Pose3d  body_pose = body->GetWorldPose(); // - myBody->GetCoMPose();
+        ignition::math::Pose3d  body_pose = body->WorldPose(); // - myBody->GetCoMPose();
         ignition::math::Vector3d pos = body_pose.Pos();
         ignition::math::Quaterniond rot = body_pose.Rot();
         pose.position.x = pos.x;
@@ -1951,8 +1951,8 @@ void GazeboRosApiPlugin::publishLinkStates()
         pose.orientation.y = rot.y;
         pose.orientation.z = rot.z;
         link_states.pose.push_back(pose);
-        ignition::math::Vector3d linear_vel  = body->GetWorldLinearVel();
-        ignition::math::Vector3d angular_vel = body->GetWorldAngularVel();
+        ignition::math::Vector3d linear_vel  = body->WorldLinearVel();
+        ignition::math::Vector3d angular_vel = body->WorldAngularVel();
         geometry_msgs::Twist twist;
         twist.linear.x = linear_vel.x;
         twist.linear.y = linear_vel.y;
@@ -1978,7 +1978,7 @@ void GazeboRosApiPlugin::publishModelStates()
     gazebo::physics::ModelPtr model = world_->GetModel(i);
     model_states.name.push_back(model->GetName());
     geometry_msgs::Pose pose;
-    ignition::math::Pose3d  model_pose = model->GetWorldPose(); // - myBody->GetCoMPose();
+    ignition::math::Pose3d  model_pose = model->WorldPose(); // - myBody->GetCoMPose();
     ignition::math::Vector3d pos = model_pose.Pos();
     ignition::math::Quaterniond rot = model_pose.Rot();
     pose.position.x = pos.x;
@@ -1989,8 +1989,8 @@ void GazeboRosApiPlugin::publishModelStates()
     pose.orientation.y = rot.y;
     pose.orientation.z = rot.z;
     model_states.pose.push_back(pose);
-    ignition::math::Vector3d linear_vel  = model->GetWorldLinearVel();
-    ignition::math::Vector3d angular_vel = model->GetWorldAngularVel();
+    ignition::math::Vector3d linear_vel  = model->WorldLinearVel();
+    ignition::math::Vector3d angular_vel = model->WorldAngularVel();
     geometry_msgs::Twist twist;
     twist.linear.x = linear_vel.x;
     twist.linear.y = linear_vel.y;

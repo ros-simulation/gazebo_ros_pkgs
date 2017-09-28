@@ -112,8 +112,8 @@ namespace gazebo
       odometry_rate_ = sdf->GetElement("odometryRate")->Get<double>();
     }
 
-    last_odom_publish_time_ = parent_->GetWorld()->GetSimTime();
-    last_odom_pose_ = parent_->GetWorldPose();
+    last_odom_publish_time_ = parent_->GetWorld()->SimTime();
+    last_odom_pose_ = parent_->WorldPose();
     x_ = 0;
     y_ = 0;
     rot_ = 0;
@@ -160,7 +160,7 @@ namespace gazebo
   void GazeboRosPlanarMove::UpdateChild()
   {
     boost::mutex::scoped_lock scoped_lock(lock);
-    ignition::math::Pose3d pose = parent_->GetWorldPose();
+    ignition::math::Pose3d pose = parent_->WorldPose();
     float yaw = pose.Rot().Yaw();
     parent_->SetLinearVel(ignition::math::Vector3d(
           x_ * cosf(yaw) - y_ * sinf(yaw),
@@ -168,7 +168,7 @@ namespace gazebo
           0.0));
     parent_->SetAngularVel(ignition::math::Vector3d(0.0, 0.0, rot_));
     if (odometry_rate_ > 0.0) {
-      common::Time current_time = parent_->GetWorld()->GetSimTime();
+      common::Time current_time = parent_->GetWorld()->SimTime();
       double seconds_since_last_update =
         (current_time - last_odom_publish_time_).Double();
       if (seconds_since_last_update > (1.0 / odometry_rate_)) {
@@ -214,7 +214,7 @@ namespace gazebo
       tf::resolve(tf_prefix_, robot_base_frame_);
 
     // getting data for base_footprint to odom transform
-    ignition::math::Pose3d pose = this->parent_->GetWorldPose();
+    ignition::math::Pose3d pose = this->parent_->WorldPose();
 
     tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
     tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());

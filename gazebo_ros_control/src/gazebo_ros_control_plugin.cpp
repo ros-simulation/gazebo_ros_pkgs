@@ -198,7 +198,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
 void GazeboRosControlPlugin::Update()
 {
   // Get the simulation time and period
-  gazebo::common::Time gz_time_now = parent_model_->GetWorld()->GetSimTime();
+  gazebo::common::Time gz_time_now = parent_model_->GetWorld()->SimTime();
   ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
   ros::Duration sim_period = sim_time_ros - last_update_sim_time_ros_;
 

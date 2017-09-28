@@ -149,10 +149,10 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       this->rosnode_->advertise<nav_msgs::Odometry>(this->topic_name_, 1);
   }
 
-  this->last_time_ = this->world_->GetSimTime();
+  this->last_time_ = this->world_->SimTime();
   // initialize body
-  this->last_vpos_ = this->link_->GetWorldLinearVel();
-  this->last_veul_ = this->link_->GetWorldAngularVel();
+  this->last_vpos_ = this->link_->WorldLinearVel();
+  this->last_veul_ = this->link_->WorldAngularVel();
   this->apos_ = 0;
   this->aeul_ = 0;
 
@@ -178,8 +178,8 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ROS_DEBUG_NAMED("p3d", "got body %s", this->reference_link_->GetName().c_str());
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
-    this->last_frame_vpos_ = this->reference_link_->GetWorldLinearVel();
-    this->last_frame_veul_ = this->reference_link_->GetWorldAngularVel();
+    this->last_frame_vpos_ = this->reference_link_->WorldLinearVel();
+    this->last_frame_veul_ = this->reference_link_->WorldAngularVel();
   }
 
 
@@ -201,7 +201,7 @@ void GazeboRosP3D::UpdateChild()
   if (!this->link_)
     return;
 
-  common::Time cur_time = this->world_->GetSimTime();
+  common::Time cur_time = this->world_->SimTime();
 
   // rate control
   if (this->update_rate_ > 0 &&
@@ -230,23 +230,23 @@ void GazeboRosP3D::UpdateChild()
         ignition::math::Vector3d frame_veul;
 
         // get inertial Rates
-        ignition::math::Vector3d vpos = this->link_->GetWorldLinearVel();
-        ignition::math::Vector3d veul = this->link_->GetWorldAngularVel();
+        ignition::math::Vector3d vpos = this->link_->WorldLinearVel();
+        ignition::math::Vector3d veul = this->link_->WorldAngularVel();
 
         // Get Pose/Orientation
-        pose = this->link_->GetWorldPose();
+        pose = this->link_->WorldPose();
 
         // Apply Reference Frame
         if (this->reference_link_)
         {
           // convert to relative pose
-          frame_pose = this->reference_link_->GetWorldPose();
+          frame_pose = this->reference_link_->WorldPose();
           pose.Pos() = pose.Pos() - frame_pose.Pos();
           pose.Pos() = frame_pose.Rot().RotateVectorReverse(pose.Pos());
           pose.Rot() *= frame_pose.Rot().Inverse();
           // convert to relative rates
-          frame_vpos = this->reference_link_->GetWorldLinearVel();
-          frame_veul = this->reference_link_->GetWorldAngularVel();
+          frame_vpos = this->reference_link_->WorldLinearVel();
+          frame_veul = this->reference_link_->WorldAngularVel();
           vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
           veul = frame_pose.Rot().RotateVector(veul - frame_veul);
         }
