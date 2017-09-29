@@ -1,13 +1,13 @@
 /* Copyright [2015] [Alessandro Settimi]
- * 
+ *
  * email: ale.settimi@gmail.com
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,8 @@
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/UpdateInfo.hh>
-#include <gazebo/math/Vector3.hh>
-#include <gazebo/math/Pose.hh>
+#include <ignition/math/Vector3.hh>
+#include <ignition/math/Pose3.hh>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <string>
@@ -62,7 +62,7 @@ namespace gazebo
     /// \param mu offset value.
     /// \param sigma scaling value.
     double GuassianKernel(double mu, double sigma);
-    
+
     /// \brief Ros NodeHandle pointer.
     ros::NodeHandle* node;
     /// \brief Ros Publisher for imu data.
@@ -79,12 +79,13 @@ namespace gazebo
     /// \brief Pointer to the sdf config file.
     sdf::ElementPtr sdf;
     /// \brief Orientation data from the sensor.
-    gazebo::math::Quaternion orientation;
+    ignition::math::Quaterniond orientation;
+
     /// \brief Linear acceleration data from the sensor.
-    math::Vector3 accelerometer_data;
+    ignition::math::Vector3d accelerometer_data;
     /// \brief Angular velocity data from the sensor.
-    math::Vector3 gyroscope_data;
-    
+    ignition::math::Vector3d gyroscope_data;
+
     /// \brief Seed for the Gaussian noise generator.
     unsigned int seed;
 
@@ -100,7 +101,7 @@ namespace gazebo
     /// \brief Gaussian noise.
     double gaussian_noise;
     /// \brief Offset parameter, position part is unused.
-    math::Pose offset;
+    ignition::math::Pose3d offset;
   };
 }
 

@@ -333,7 +333,7 @@ void GazeboRosProsilica::OnStats( const boost::shared_ptr<msgs::WorldStatistics 
 {
   this->simTime  = msgs::Convert( _msg->sim_time() );
 
-  math::Pose pose;
+  ignition::math::Pose3d pose;
   pose.pos.x = 0.5*sin(0.01*this->simTime.Double());
   gzdbg << "plugin simTime [" << this->simTime.Double() << "] update pose [" << pose.pos.x << "]\n";
 }

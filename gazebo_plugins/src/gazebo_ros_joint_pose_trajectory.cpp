@@ -47,7 +47,6 @@ ROS_DEPRECATED GazeboRosJointPoseTrajectory::GazeboRosJointPoseTrajectory()  // 
 // Destructor
 GazeboRosJointPoseTrajectory::~GazeboRosJointPoseTrajectory()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
   // Finalize the controller
   this->rosnode_->shutdown();
   this->queue_.clear();
@@ -66,7 +65,7 @@ void GazeboRosJointPoseTrajectory::Load(physics::ModelPtr _model,
   this->sdf = _sdf;
   this->world_ = this->model_->GetWorld();
 
-  // this->world_->GetPhysicsEngine()->SetGravity(math::Vector3(0, 0, 0));
+  // this->world_->Physics()->SetGravity(math::Vector3(0, 0, 0));
 
   // load parameters
   this->robot_namespace_ = "";
@@ -143,7 +142,7 @@ void GazeboRosJointPoseTrajectory::LoadThread()
   }
 #endif
 
-  this->last_time_ = this->world_->GetSimTime();
+  this->last_time_ = this->world_->SimTime();
 
   // start custom queue for joint trajectory plugin ros topics
   this->callback_queue_thread_ =
@@ -171,7 +170,7 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
       this->reference_link_name_ != "map")
   {
     physics::EntityPtr ent =
-      this->world_->GetEntity(this->reference_link_name_);
+      this->world_->EntityByName(this->reference_link_name_);
     if (ent)
       this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
@@ -211,7 +210,7 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
   // trajectory start time
   this->trajectory_start = gazebo::common::Time(trajectory->header.stamp.sec,
                                                 trajectory->header.stamp.nsec);
-  common::Time cur_time = this->world_->GetSimTime();
+  common::Time cur_time = this->world_->SimTime();
   if (this->trajectory_start < cur_time)
     this->trajectory_start = cur_time;
 
@@ -222,8 +221,8 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
 
   if (this->disable_physics_updates_)
   {
-    this->physics_engine_enabled_ = this->world_->GetEnablePhysicsEngine();
-    this->world_->EnablePhysicsEngine(false);
+    this->physics_engine_enabled_ = this->world_->PhysicsEnabled();
+    this->world_->SetPhysicsEnabled(false);
   }
 }
 
@@ -295,8 +294,8 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
   this->disable_physics_updates_ = req.disable_physics_updates;
   if (this->disable_physics_updates_)
   {
-    this->physics_engine_enabled_ = this->world_->GetEnablePhysicsEngine();
-    this->world_->EnablePhysicsEngine(false);
+    this->physics_engine_enabled_ = this->world_->PhysicsEnabled();
+    this->world_->SetPhysicsEnabled(false);
   }
 
   return true;
@@ -310,7 +309,7 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
   boost::mutex::scoped_lock lock(this->update_mutex);
   if (this->has_trajectory_)
   {
-    common::Time cur_time = this->world_->GetSimTime();
+    common::Time cur_time = this->world_->SimTime();
     // roll out trajectory via set model configuration
     // gzerr << "i[" << trajectory_index  << "] time "
     //       << trajectory_start << " now: " << cur_time << " : "<< "\n";
@@ -325,10 +324,10 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
           cur_time.Double(), this->trajectory_index, this->points_.size());
 
         // get reference link pose before updates
-        math::Pose reference_pose = this->model_->GetWorldPose();
+        ignition::math::Pose3d reference_pose = this->model_->WorldPose();
         if (this->reference_link_)
         {
-          reference_pose = this->reference_link_->GetWorldPose();
+          reference_pose = this->reference_link_->WorldPose();
         }
 
         // trajectory roll-out based on time:
@@ -384,7 +383,7 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
         this->reference_link_.reset();
         this->has_trajectory_ = false;
         if (this->disable_physics_updates_)
-          this->world_->EnablePhysicsEngine(this->physics_engine_enabled_);
+          this->world_->SetPhysicsEnabled(this->physics_engine_enabled_);
       }
     }
   }
