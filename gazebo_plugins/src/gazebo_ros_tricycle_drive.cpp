@@ -92,6 +92,8 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
     gazebo_ros_->getParameter<double> ( steering_speed_, "steeringSpeed", 0 );
     gazebo_ros_->getParameter<double> ( steering_angle_tolerance_, "steeringAngleTolerance", 0.01 );
     gazebo_ros_->getParameter<double> ( separation_encoder_wheel_, "encoderWheelSeparation", 0.5 );
+    gazebo_ros_->getParameter<double> ( wheel_base_, "wheelBase", 0.5 );
+    gazebo_ros_->getParameter<double> ( max_velocity_, "maxVelocity", 0.5 );
 
     gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
     gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
@@ -269,52 +271,28 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     // if steering_speed_ is > 0, use speed control, otherwise use position control
     // With position control, one cannot expect dynamics to work correctly.
     double diff_angle = current_angle - target_angle;
-    if ( steering_speed_ > 0 ) {
-      // this means we will steer using steering speed
-      double applied_steering_speed = 0;
-      if (fabs(diff_angle) < steering_angle_tolerance_ ) {
-        // we're withing angle tolerance
-        applied_steering_speed = 0;
-      } else if ( diff_angle < target_speed ) {
-        // steer toward target angle
-        applied_steering_speed = steering_speed_;
-      } else {
-        // steer toward target angle
-        applied_steering_speed = -steering_speed_;
-      }
-
-      // use speed control, not recommended, for better dynamics use force control
-#if GAZEBO_MAJOR_VERSION > 2
-      joint_steering_->SetParam ( "vel", 0, applied_steering_speed );
-#else
-      joint_steering_->SetVelocity ( 0, applied_steering_speed );
-#endif
+    if ( fabs (diff_angle) < steering_angle_tolerance_ )
+    {
+      applied_angle = current_angle;
     }
-    else {
-      // steering_speed_ is zero, use position control.
-      // This is not a good idea if we want dynamics to work.
-      if (fabs(diff_angle) < steering_speed_ * dt)
+    else if ( fabs(diff_angle) > steering_speed_ * dt )
+    {
+      if(current_angle < target_angle)
       {
-        // we can take a step and still not overshoot target
-        if(diff_angle > 0)
-        {
-          applied_angle =  current_angle - steering_speed_ * dt;
-        }
-        else
-        {
-          applied_angle =  current_angle + steering_speed_ * dt;
-        }
+        applied_angle = current_angle + steering_speed_ * dt;
       }
       else
       {
-        applied_angle = target_angle;
+        applied_angle = current_angle - steering_speed_ * dt;
       }
+    }
+
 #if GAZEBO_MAJOR_VERSION >= 4
       joint_steering_->SetPosition(0, applied_angle);
 #else
       joint_steering_->SetAngle(0, math::Angle(applied_angle));
 #endif
-    }
+//    }
     //ROS_INFO_NAMED("tricycle_drive", "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] ",
     //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
 }
@@ -332,8 +310,44 @@ void GazeboRosTricycleDrive::FiniChild()
 void GazeboRosTricycleDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg )
 {
     boost::mutex::scoped_lock scoped_lock ( lock );
-    cmd_.speed = cmd_msg->linear.x;
-    cmd_.angle = cmd_msg->angular.z;
+     
+    if (cmd_msg->angular.z == 0) {
+      cmd_.speed = cmd_msg->linear.x;
+      cmd_.angle = 0;
+    }
+    else {
+      
+      double radius = cmd_msg->linear.x / cmd_msg->angular.z; 
+      
+      if (radius == 0)
+        radius = 0.00001;
+      
+      radius = std::copysign(radius, cmd_msg->angular.z);
+      cmd_.angle = std::atan(wheel_base_ / radius);
+
+// new code start
+      if(std::fabs(cmd_.angle)>1.56)
+    	  cmd_.speed = std::copysign(wheel_base_ * cmd_msg->angular.z, cmd_msg->linear.x);
+      else
+    	  cmd_.speed = cmd_msg->linear.x / std::cos(cmd_.angle);
+// new code stop
+
+   
+    if (cmd_.speed < 0) {
+      cmd_.angle = -cmd_.angle;
+    }
+
+/* old code start
+      cmd_.speed = cmd_msg->linear.x / std::cos(cmd_.angle);
+      
+      if (std::fabs(cmd_.speed) > max_velocity_)
+        cmd_.speed = std::copysign(max_velocity_, cmd_.speed);
+*/
+      
+    }
+    ROS_INFO_NAMED("tricycle_drive", "X: [%3.5f], Z: [%3.5f], speed: [%3.5f], angle: [%3.5f]",
+                cmd_msg->linear.x, cmd_msg->angular.z,  cmd_.speed, cmd_.angle);
+  
 }
 
 void GazeboRosTricycleDrive::QueueThread()

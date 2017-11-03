@@ -112,10 +112,12 @@ private:
     double diameter_actuated_wheel_;
     double wheel_acceleration_;
     double wheel_deceleration_;
+    double wheel_base_;
     double wheel_speed_tolerance_;
     double steering_angle_tolerance_;
     double steering_speed_;
     double separation_encoder_wheel_;
+    double max_velocity_;
 
     OdomSource odom_source_;
     double wheel_torque_;
