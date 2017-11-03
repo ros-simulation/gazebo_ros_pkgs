@@ -71,6 +71,31 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
   this->format_ = this->format;
   this->camera_ = this->depthCamera;
 
+  // calculate frequently used constant values
+  tan_pAngle_.resize(this->height);
+  tan_yAngle_.resize(this->width);
+
+  double hfov = this->parentSensor->DepthCamera()->HFOV().Radian();
+  double fl = ((double)this->width) / (2.0 *tan(hfov/2.0));
+
+  for (uint32_t j=0; j<this->height; j++)
+  {
+    double pAngle;
+    if (this->height>1) pAngle = atan2( (double)j - 0.5*(double)(this->height-1), fl);
+    else            pAngle = 0.0;
+
+    tan_pAngle_[j] = tan(pAngle);
+  }
+
+  for (uint32_t i=0; i<this->width; i++)
+  {
+    double yAngle;
+    if (this->width>1) yAngle = atan2( (double)i - 0.5*(double)(this->width-1), fl);
+    else            yAngle = 0.0;
+
+    tan_yAngle_[i] = tan(yAngle);
+  }
+
   // using a different default
   if (!_sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = "ir/image_raw";
@@ -318,22 +343,11 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
   float* toCopyFrom = (float*)data_arg;
   int index = 0;
 
-  double hfov = this->parentSensor->DepthCamera()->HFOV().Radian();
-  double fl = ((double)this->width) / (2.0 *tan(hfov/2.0));
-
   // convert depth to point cloud
   for (uint32_t j=0; j<rows_arg; j++)
   {
-    double pAngle;
-    if (rows_arg>1) pAngle = atan2( (double)j - 0.5*(double)(rows_arg-1), fl);
-    else            pAngle = 0.0;
-
     for (uint32_t i=0; i<cols_arg; i++, ++iter_x, ++iter_y, ++iter_z, ++iter_rgb)
     {
-      double yAngle;
-      if (cols_arg>1) yAngle = atan2( (double)i - 0.5*(double)(cols_arg-1), fl);
-      else            yAngle = 0.0;
-
       double depth = toCopyFrom[index++]; // + 0.0*this->myParent->GetNearClip();
 
       if(depth > this->point_cloud_cutoff_ &&
@@ -343,8 +357,8 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
         // hardcoded rotation rpy(-M_PI/2, 0, -M_PI/2) is built-in
         // to urdf, where the *_optical_frame should have above relative
         // rotation from the physical camera *_frame
-        *iter_x = depth * tan(yAngle);
-        *iter_y = depth * tan(pAngle);
+        *iter_x = depth * tan_yAngle_[i];
+        *iter_y = depth * tan_pAngle_[j];
         *iter_z = depth;
       }
       else //point in the unseeable range

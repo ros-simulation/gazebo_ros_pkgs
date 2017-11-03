@@ -140,6 +140,7 @@ namespace gazebo
     protected: virtual void PublishCameraInfo();
 
     private: event::ConnectionPtr load_connection_;
+    private: std::vector<double > tan_pAngle_, tan_yAngle_;
   };
 
 }
