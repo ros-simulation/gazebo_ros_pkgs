@@ -93,10 +93,14 @@ install(PROGRAMS scripts/gazebo
 		 scripts/gzserver
 		 scripts/gdbrun
 		 scripts/perf
-		 scripts/spawn_model
 		 scripts/libcommon.sh
         DESTINATION
                  ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+# This one is a Python program, not a shell script, so install it separately
+catkin_install_python(PROGRAMS scripts/spawn_model
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 # Install Gazebo launch files
