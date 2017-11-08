@@ -20,8 +20,8 @@ def spawn_sdf_model_client(model_name, model_xml, robot_namespace, initial_pose,
       resp = spawn_sdf_model(model_name, model_xml, robot_namespace, initial_pose, reference_frame)
       rospy.loginfo("Spawn status: %s"%resp.status_message)
       return resp.success
-    except rospy.ServiceException, e:
-      print "Service call failed: %s"%e
+    except rospy.ServiceException as e:
+      print("Service call failed: %s" % e)
 
 def spawn_urdf_model_client(model_name, model_xml, robot_namespace, initial_pose, reference_frame, gazebo_namespace):
     rospy.loginfo("Waiting for service %s/spawn_urdf_model"%gazebo_namespace)
@@ -32,8 +32,8 @@ def spawn_urdf_model_client(model_name, model_xml, robot_namespace, initial_pose
       resp = spawn_urdf_model(model_name, model_xml, robot_namespace, initial_pose, reference_frame)
       rospy.loginfo("Spawn status: %s"%resp.status_message)
       return resp.success
-    except rospy.ServiceException, e:
-      print "Service call failed: %s"%e
+    except rospy.ServiceException as e:
+      print("Service call failed: %s" % e)
 
 def set_model_configuration_client(model_name, model_param_name, joint_names, joint_positions, gazebo_namespace):
     rospy.loginfo("Waiting for service %s/set_model_configuration"%gazebo_namespace)
@@ -47,6 +47,6 @@ def set_model_configuration_client(model_name, model_param_name, joint_names, jo
       rospy.loginfo("Set model configuration status: %s"%resp.status_message)
 
       return resp.success
-    except rospy.ServiceException, e:
-      print "Service call failed: %s"%e
+    except rospy.ServiceException as e:
+      print("Service call failed: %s" % e)
 
