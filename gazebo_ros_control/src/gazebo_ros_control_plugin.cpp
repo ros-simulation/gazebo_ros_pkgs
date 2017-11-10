@@ -51,7 +51,7 @@ namespace gazebo_ros_control
 GazeboRosControlPlugin::~GazeboRosControlPlugin()
 {
   // Disconnect from gazebo events
-  gazebo::event::Events::DisconnectWorldUpdateBegin(update_connection_);
+  update_connection_.reset();
 }
 
 // Overloaded Gazebo entry point

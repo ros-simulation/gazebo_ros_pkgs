@@ -47,7 +47,7 @@ ROS_DEPRECATED GazeboRosJointPoseTrajectory::GazeboRosJointPoseTrajectory()  // 
 // Destructor
 GazeboRosJointPoseTrajectory::~GazeboRosJointPoseTrajectory()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+  this->update_connection_.reset();
   // Finalize the controller
   this->rosnode_->shutdown();
   this->queue_.clear();
