@@ -61,35 +61,21 @@ void gazebo::GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr sensor_, sdf::E
 
   connection = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosImuSensor::UpdateChild, this, _1));
 
-#if GAZEBO_MAJOR_VERSION >= 7
   last_time = sensor->LastUpdateTime();
-#else
-  last_time = sensor->GetLastUpdateTime();
-#endif
 }
 
 void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/*_info*/)
 {
-#if GAZEBO_MAJOR_VERSION >= 7
   common::Time current_time = sensor->LastUpdateTime();
-#else
-  common::Time current_time = sensor->GetLastUpdateTime();
-#endif
 
   if(update_rate>0 && (current_time-last_time).Double() < 1.0/update_rate) //update rate check
     return;
 
   if(imu_data_publisher.getNumSubscribers() > 0)
   {
-#if GAZEBO_MAJOR_VERSION >= 6
     orientation = offset.rot*sensor->Orientation(); //applying offsets to the orientation measurement
     accelerometer_data = sensor->LinearAcceleration();
     gyroscope_data = sensor->AngularVelocity();
-#else
-    orientation = offset.rot*sensor->GetOrientation(); //applying offsets to the orientation measurement
-    accelerometer_data = sensor->GetLinearAcceleration();
-    gyroscope_data = sensor->GetAngularVelocity();
-#endif
 
     //Guassian noise is applied to all measurements
     imu_msg.orientation.x = orientation.x + GuassianKernel(0,gaussian_noise);
@@ -157,11 +143,7 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   }
   else
   {
-#if GAZEBO_MAJOR_VERSION >= 7
     std::string scoped_name = sensor->ParentName();
-#else
-    std::string scoped_name = sensor->GetParentName(); //HACK to find the model name
-#endif
     std::size_t it = scoped_name.find("::");
 
     robot_namespace = "/" +scoped_name.substr(0,it)+"/";
