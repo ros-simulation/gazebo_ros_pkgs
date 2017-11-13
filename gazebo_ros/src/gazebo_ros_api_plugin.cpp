@@ -2355,7 +2355,8 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* model_xml)
   child = model_xml->IterateChildren(child);
   while (child != NULL)
   {
-    if (child->ValueStr().find(std::string("plugin")) == 0)
+    if (child->Type() == TiXmlNode::TINYXML_ELEMENT &&
+        child->ValueStr().compare(std::string("plugin")) == 0)
     {
       if (child->FirstChildElement("robotNamespace") == NULL)
       {
