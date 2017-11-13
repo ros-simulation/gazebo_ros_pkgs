@@ -44,7 +44,7 @@ GazeboRosVacuumGripper::GazeboRosVacuumGripper()
 // Destructor
 GazeboRosVacuumGripper::~GazeboRosVacuumGripper()
 {
-  event::Events::DisconnectWorldUpdateBegin(update_connection_);
+  update_connection_.reset();
 
   // Custom Callback Queue
   queue_.clear();
