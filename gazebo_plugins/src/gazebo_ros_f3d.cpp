@@ -39,7 +39,7 @@ GazeboRosF3D::GazeboRosF3D()
 // Destructor
 GazeboRosF3D::~GazeboRosF3D()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+  this->update_connection_.reset();
   // Custom Callback Queue
   this->queue_.clear();
   this->queue_.disable();
