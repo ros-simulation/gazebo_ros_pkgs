@@ -19,8 +19,8 @@
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/UpdateInfo.hh>
-#include <gazebo/math/Vector3.hh>
-#include <gazebo/math/Pose.hh>
+#include <ignition/math/Vector3.hh>
+#include <ignition/math/Pose3.hh>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <string>

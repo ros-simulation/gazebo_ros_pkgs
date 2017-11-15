@@ -32,9 +32,9 @@
 #include <sdf/Param.hh>
 #include <gazebo/common/Exception.hh>
 #include <gazebo/sensors/SensorTypes.hh>
-#include <gazebo/math/Pose.hh>
-#include <gazebo/math/Quaternion.hh>
-#include <gazebo/math/Vector3.hh>
+#include <ignition/math/Pose3.hh>
+#include <ignition/math/Quaternion.hh>
+#include <ignition/math/Vector3.hh>
 
 #include <tf/tf.h>
 
