@@ -97,6 +97,9 @@ namespace gazebo
     /// \brief Gaussian noise
     private: double gaussian_noise_;
 
+    /// \brief Gaussian noise for yaw
+    private: double yaw_gaussian_noise_;
+
     /// \brief Gaussian noise generator
     private: double GaussianKernel(double mu, double sigma);
 
