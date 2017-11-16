@@ -168,8 +168,8 @@ void GazeboRosFT::UpdateChild()
     return;
 
   physics::JointWrench wrench;
-  math::Vector3 torque;
-  math::Vector3 force;
+  ignition::math::Vector3d torque;
+  ignition::math::Vector3d force;
 
   // FIXME: Should include options for diferent frames and measure directions
   // E.g: https://bitbucket.org/osrf/gazebo/raw/default/gazebo/sensors/ForceTorqueSensor.hh
@@ -177,8 +177,13 @@ void GazeboRosFT::UpdateChild()
   // The wrench is reported in the CHILD <frame>
   // The <measure_direction> is child_to_parent
   wrench = this->joint_->GetForceTorque(0);
+#if GAZEBO_MAJOR_VERSION >= 8
   force = wrench.body2Force;
   torque = wrench.body2Torque;
+#else
+  force = wrench.body2Force.Ign();
+  torque = wrench.body2Torque.Ign();
+#endif
 
 
   this->lock_.lock();
@@ -187,12 +192,12 @@ void GazeboRosFT::UpdateChild()
   this->wrench_msg_.header.stamp.sec = (this->world_->GetSimTime()).sec;
   this->wrench_msg_.header.stamp.nsec = (this->world_->GetSimTime()).nsec;
 
-  this->wrench_msg_.wrench.force.x = force.x + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.force.y = force.y + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.force.z = force.z + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.torque.x = torque.x + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.torque.y = torque.y + this->GaussianKernel(0, this->gaussian_noise_);
-  this->wrench_msg_.wrench.torque.z = torque.z + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.force.x = force.X() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.force.y = force.Y() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.force.z = force.Z() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.x = torque.X() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.y = torque.Y() + this->GaussianKernel(0, this->gaussian_noise_);
+  this->wrench_msg_.wrench.torque.z = torque.Z() + this->GaussianKernel(0, this->gaussian_noise_);
 
   this->pub_.publish(this->wrench_msg_);
   this->lock_.unlock();
