@@ -1266,9 +1266,9 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   res.pause = world_->IsPaused();
   res.max_update_rate = world_->GetPhysicsEngine()->GetRealTimeUpdateRate();
   ignition::math::Vector3d gravity = world_->Gravity();
-  res.gravity.x = gravity.x;
-  res.gravity.y = gravity.y;
-  res.gravity.z = gravity.z;
+  res.gravity.x = gravity.X();
+  res.gravity.y = gravity.Y();
+  res.gravity.z = gravity.Z();
 
   // stuff only works in ODE right now
   if (world_->GetPhysicsEngine()->GetType() == "ode")
