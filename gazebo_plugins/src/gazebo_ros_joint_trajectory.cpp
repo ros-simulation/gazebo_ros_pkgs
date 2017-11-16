@@ -67,7 +67,7 @@ void GazeboRosJointTrajectory::Load(physics::ModelPtr _model,
   this->sdf = _sdf;
   this->world_ = this->model_->GetWorld();
 
-  // this->world_->GetPhysicsEngine()->SetGravity(math::Vector3(0, 0, 0));
+  // this->world_->GetPhysicsEngine()->SetGravity(ignition::math::Vector3d(0, 0, 0));
 
   // load parameters
   this->robot_namespace_ = "";
@@ -327,10 +327,10 @@ void GazeboRosJointTrajectory::UpdateStates()
           cur_time.Double(), this->trajectory_index, this->points_.size());
 
         // get reference link pose before updates
-        math::Pose reference_pose = this->model_->GetWorldPose();
+        ignition::math::Pose3d reference_pose = this->model_->GetWorldPose().Ign();
         if (this->reference_link_)
         {
-          reference_pose = this->reference_link_->GetWorldPose();
+          reference_pose = this->reference_link_->GetWorldPose().Ign();
         }
 
         // trajectory roll-out based on time:
@@ -344,11 +344,7 @@ void GazeboRosJointTrajectory::UpdateStates()
             // this is not the most efficient way to set things
             if (this->joints_[i])
             {
-#if GAZEBO_MAJOR_VERSION >= 4
               this->joints_[i]->SetPosition(0,
-#else
-              this->joints_[i]->SetAngle(0,
-#endif
                 this->points_[this->trajectory_index].positions[i]);
             }
           }
