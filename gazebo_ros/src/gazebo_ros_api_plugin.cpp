@@ -1659,8 +1659,9 @@ void GazeboRosApiPlugin::updateLinkState(const gazebo_msgs::LinkState::ConstPtr&
 }
 
 void GazeboRosApiPlugin::transformWrench( ignition::math::Vector3d &target_force, ignition::math::Vector3d &target_torque,
-                                          ignition::math::Vector3d reference_force, ignition::math::Vector3d reference_torque,
-                                          ignition::math::Pose3d target_to_reference )
+                                          const ignition::math::Vector3d &reference_force,
+                                          const ignition::math::Vector3d &reference_torque,
+                                          const ignition::math::Pose3d &target_to_reference )
 {
   // rotate force into target frame
   target_force = target_to_reference.Rot().RotateVector(reference_force);
@@ -2082,9 +2083,9 @@ void GazeboRosApiPlugin::stripXmlDeclaration(std::string &model_xml)
 }
 
 void GazeboRosApiPlugin::updateSDFAttributes(TiXmlDocument &gazebo_model_xml,
-                                             std::string model_name,
-                                             ignition::math::Vector3d initial_xyz,
-                                             ignition::math::Quaterniond initial_q)
+                                             const std::string &model_name,
+                                             const ignition::math::Vector3d &initial_xyz,
+                                             const ignition::math::Quaterniond &initial_q)
 {
   // This function can handle both regular SDF files and <include> SDFs that are used with the
   // Gazebo Model Database
@@ -2242,7 +2243,9 @@ ignition::math::Vector3d GazeboRosApiPlugin::parseVector3(const std::string &str
   }
 }
 
-void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ignition::math::Vector3d initial_xyz, ignition::math::Quaterniond initial_q)
+void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml,
+                                             const ignition::math::Vector3d &initial_xyz,
+                                             const ignition::math::Quaterniond &initial_q)
 {
   TiXmlElement* model_tixml = (gazebo_model_xml.FirstChildElement("robot"));
   if (model_tixml)
@@ -2288,7 +2291,7 @@ void GazeboRosApiPlugin::updateURDFModelPose(TiXmlDocument &gazebo_model_xml, ig
     ROS_WARN_NAMED("api_plugin", "Could not find <model> element in sdf, so name and initial position is not applied");
 }
 
-void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name)
+void GazeboRosApiPlugin::updateURDFName(TiXmlDocument &gazebo_model_xml, const std::string &model_name)
 {
   TiXmlElement* model_tixml = gazebo_model_xml.FirstChildElement("robot");
   // replace model name if one is specified by the user
@@ -2333,7 +2336,7 @@ void GazeboRosApiPlugin::walkChildAddRobotNamespace(TiXmlNode* model_xml)
   }
 }
 
-bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
+bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, const std::string &model_name,
                                          gazebo_msgs::SpawnModel::Response &res)
 {
   std::string entity_type = gazebo_model_xml.RootElement()->FirstChild()->Value();

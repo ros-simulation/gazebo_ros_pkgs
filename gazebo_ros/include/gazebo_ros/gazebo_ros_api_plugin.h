@@ -255,28 +255,32 @@ private:
   void stripXmlDeclaration(std::string &model_xml);
 
   /// \brief Update the model name and pose of the SDF file before sending to Gazebo
-  void updateSDFAttributes(TiXmlDocument &gazebo_model_xml, std::string model_name,
-                           ignition::math::Vector3d initial_xyz, ignition::math::Quaterniond initial_q);
+  void updateSDFAttributes(TiXmlDocument &gazebo_model_xml,
+                           const std::string &model_name,
+                           const ignition::math::Vector3d &initial_xyz,
+                           const ignition::math::Quaterniond &initial_q);
 
   /// \brief Update the model pose of the URDF file before sending to Gazebo
   void updateURDFModelPose(TiXmlDocument &gazebo_model_xml,
-                           ignition::math::Vector3d initial_xyz, ignition::math::Quaterniond initial_q);
+                           const ignition::math::Vector3d &initial_xyz,
+                           const ignition::math::Quaterniond &initial_q);
 
   /// \brief Update the model name of the URDF file before sending to Gazebo
-  void updateURDFName(TiXmlDocument &gazebo_model_xml, std::string model_name);
+  void updateURDFName(TiXmlDocument &gazebo_model_xml, const std::string &model_name);
 
   /// \brief
   void walkChildAddRobotNamespace(TiXmlNode* model_xml);
 
   /// \brief
-  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, std::string model_name,
+  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, const std::string &model_name,
                        gazebo_msgs::SpawnModel::Response &res);
 
   /// \brief helper function for applyBodyWrench
   ///        shift wrench from reference frame to target frame
   void transformWrench(ignition::math::Vector3d &target_force, ignition::math::Vector3d &target_torque,
-                       ignition::math::Vector3d reference_force, ignition::math::Vector3d reference_torque,
-                       ignition::math::Pose3d target_to_reference );
+                       const ignition::math::Vector3d &reference_force,
+                       const ignition::math::Vector3d &reference_torque,
+                       const ignition::math::Pose3d &target_to_reference );
 
   /// \brief Used for the dynamic reconfigure callback function template
   void physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level);
