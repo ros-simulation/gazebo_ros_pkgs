@@ -177,8 +177,13 @@ void GazeboRosFT::UpdateChild()
   // The wrench is reported in the CHILD <frame>
   // The <measure_direction> is child_to_parent
   wrench = this->joint_->GetForceTorque(0);
+#if GAZEBO_MAJOR_VERSION >= 8
   force = wrench.body2Force;
   torque = wrench.body2Torque;
+#else
+  force = wrench.body2Force.Ign();
+  torque = wrench.body2Torque.Ign();
+#endif
 
 
   this->lock_.lock();
