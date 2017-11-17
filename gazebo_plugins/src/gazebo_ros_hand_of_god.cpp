@@ -115,8 +115,13 @@ namespace gazebo
       return;
     }
 
+#if GAZEBO_MAJOR_VERSION >= 8
+    cl_ = 2.0 * sqrt(kl_*floating_link_->GetInertial()->Mass());
+    ca_ = 2.0 * sqrt(ka_*floating_link_->GetInertial()->IXX());
+#else
     cl_ = 2.0 * sqrt(kl_*floating_link_->GetInertial()->GetMass());
     ca_ = 2.0 * sqrt(ka_*floating_link_->GetInertial()->GetIXX());
+#endif
 
     // Create the TF listener for the desired position of the hog
     tf_buffer_.reset(new tf2_ros::Buffer());
@@ -154,7 +159,13 @@ namespace gazebo
         ignition::math::Quaterniond(q.w, q.x, q.y, q.z));
 
     // Relative transform from actual to desired pose
+#if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Pose3d world_pose = floating_link_->DirtyPose();
+    ignition::math::Vector3d relativeAngularVel = floating_link_->RelativeAngularVel();
+#else
     ignition::math::Pose3d world_pose = floating_link_->GetDirtyPose().Ign();
+    ignition::math::Vector3d relativeAngularVel = floating_link_->GetRelativeAngularVel().Ign();
+#endif
     ignition::math::Vector3d err_pos = hog_desired.Pos() - world_pose.Pos();
     // Get exponential coordinates for rotation
     ignition::math::Quaterniond err_rot =  (ignition::math::Matrix4d(world_pose.Rot()).Inverse()
@@ -166,7 +177,7 @@ namespace gazebo
 
     floating_link_->AddRelativeTorque(
         ka_ * ignition::math::Vector3d(not_a_quaternion.X(), not_a_quaternion.Y(), not_a_quaternion.Z())
-      - ca_ * floating_link_->GetRelativeAngularVel().Ign());
+      - ca_ * relativeAngularVel);
 
     // Convert actual pose to TransformStamped message
     geometry_msgs::TransformStamped hog_actual_tform;

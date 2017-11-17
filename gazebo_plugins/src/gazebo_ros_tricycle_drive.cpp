@@ -185,7 +185,11 @@ void GazeboRosTricycleDrive::publishWheelTF()
         std::string frame = gazebo_ros_->resolveTF ( joints[i]->GetName() );
         std::string parent_frame = gazebo_ros_->resolveTF ( joints[i]->GetParent()->GetName() );
 
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d pose = joints[i]->GetChild()->RelativePose();
+#else
         ignition::math::Pose3d pose = joints[i]->GetChild()->GetRelativePose().Ign();
+#endif
 
         tf::Quaternion qt ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
         tf::Vector3 vt ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
