@@ -152,11 +152,14 @@ void GazeboRosF3D::UpdateChild()
   ignition::math::Vector3d torque;
   ignition::math::Vector3d force;
 
-  // get force on body
+  // get force and torque on body
+#if GAZEBO_MAJOR_VERSION >= 8
+  force = this->link_->WorldForce();
+  torque = this->link_->WorldTorque();
+#else
   force = this->link_->GetWorldForce().Ign();
-
-  // get torque on body
   torque = this->link_->GetWorldTorque().Ign();
+#endif
 
   this->lock_.lock();
   // copy data into wrench message
