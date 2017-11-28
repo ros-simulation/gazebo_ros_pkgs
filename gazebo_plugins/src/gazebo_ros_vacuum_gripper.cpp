@@ -194,7 +194,11 @@ void GazeboRosVacuumGripper::UpdateChild()
     }
     physics::Link_V links = models[i]->GetLinks();
     for (size_t j = 0; j < links.size(); j++) {
+#if GAZEBO_MAJOR_VERSION >= 8
+      ignition::math::Pose3d link_pose = links[j]->WorldPose();
+#else
       ignition::math::Pose3d link_pose = links[j]->GetWorldPose().Ign();
+#endif
       ignition::math::Pose3d diff = parent_pose - link_pose;
       double norm = diff.Pos().Length();
       if (norm < 0.05) {
