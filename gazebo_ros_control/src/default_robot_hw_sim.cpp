@@ -251,14 +251,19 @@ void DefaultRobotHWSim::readSim(ros::Time time, ros::Duration period)
   for(unsigned int j=0; j < n_dof_; j++)
   {
     // Gazebo has an interesting API...
+#if GAZEBO_MAJOR_VERSION >= 8
+    double position = sim_joints_[j]->Position(0);
+#else
+    double position = sim_joints_[j]->GetAngle(0).Radian();
+#endif
     if (joint_types_[j] == urdf::Joint::PRISMATIC)
     {
-      joint_position_[j] = sim_joints_[j]->GetAngle(0).Radian();
+      joint_position_[j] = position;
     }
     else
     {
       joint_position_[j] += angles::shortest_angular_distance(joint_position_[j],
-                            sim_joints_[j]->GetAngle(0).Radian());
+                            position);
     }
     joint_velocity_[j] = sim_joints_[j]->GetVelocity(0);
     joint_effort_[j] = sim_joints_[j]->GetForce((unsigned int)(0));
