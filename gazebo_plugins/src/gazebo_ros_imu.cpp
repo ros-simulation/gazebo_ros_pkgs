@@ -217,7 +217,11 @@ void GazeboRosIMU::UpdateChild()
     ignition::math::Vector3d pos;
 
     // Get Pose/Orientation ///@todo: verify correctness
+#if GAZEBO_MAJOR_VERSION >= 8
+    pose = this->link->WorldPose();
+#else
     pose = this->link->GetWorldPose().Ign();
+#endif
     // apply xyz offsets and get position and rotation components
     pos = pose.Pos() + this->offset_.Pos();
     rot = pose.Rot();

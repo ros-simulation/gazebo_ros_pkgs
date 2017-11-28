@@ -335,10 +335,18 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
           cur_time.Double(), this->trajectory_index, this->points_.size());
 
         // get reference link pose before updates
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d reference_pose = this->model_->WorldPose();
+#else
         ignition::math::Pose3d reference_pose = this->model_->GetWorldPose().Ign();
+#endif
         if (this->reference_link_)
         {
+#if GAZEBO_MAJOR_VERSION >= 8
+          reference_pose = this->reference_link_->WorldPose();
+#else
           reference_pose = this->reference_link_->GetWorldPose().Ign();
+#endif
         }
 
         // trajectory roll-out based on time:
