@@ -222,8 +222,13 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
 
   if (this->disable_physics_updates_)
   {
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->physics_engine_enabled_ = this->world_->PhysicsEnabled();
+    this->world_->SetPhysicsEnabled(false);
+#else
     this->physics_engine_enabled_ = this->world_->GetEnablePhysicsEngine();
     this->world_->EnablePhysicsEngine(false);
+#endif
   }
 }
 
@@ -295,8 +300,13 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
   this->disable_physics_updates_ = req.disable_physics_updates;
   if (this->disable_physics_updates_)
   {
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->physics_engine_enabled_ = this->world_->PhysicsEnabled();
+    this->world_->SetPhysicsEnabled(false);
+#else
     this->physics_engine_enabled_ = this->world_->GetEnablePhysicsEngine();
     this->world_->EnablePhysicsEngine(false);
+#endif
   }
 
   return true;
@@ -380,7 +390,13 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
         this->reference_link_.reset();
         this->has_trajectory_ = false;
         if (this->disable_physics_updates_)
+        {
+#if GAZEBO_MAJOR_VERSION >= 8
+          this->world_->SetPhysicsEnabled(this->physics_engine_enabled_);
+#else
           this->world_->EnablePhysicsEngine(this->physics_engine_enabled_);
+#endif
+        }
       }
     }
   }
