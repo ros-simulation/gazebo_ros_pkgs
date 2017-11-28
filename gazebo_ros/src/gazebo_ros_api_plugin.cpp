@@ -1453,11 +1453,7 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     world_->SetPaused(true);
     model->SetWorldPose(target_pose);
     world_->SetPaused(is_paused);
-#if GAZEBO_MAJOR_VERSION >= 8
     //ignition::math::Pose3d p3d = model->WorldPose();
-#else
-    //ignition::math::Pose3d p3d = model->GetWorldPose().Ign();
-#endif
     //ROS_ERROR_NAMED("api_plugin", "model updated state: %f %f %f",p3d.Pos().X(),p3d.Pos().Y(),p3d.Pos().Z());
 
     // set model velocity
