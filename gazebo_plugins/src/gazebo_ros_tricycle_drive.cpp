@@ -424,8 +424,13 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
 
         // get velocity in /odom frame
         ignition::math::Vector3d linear;
+#if GAZEBO_MAJOR_VERSION >= 8
+        linear = parent->WorldLinearVel();
+        odom_.twist.twist.angular.z = parent->WorldAngularVel().Z();
+#else
         linear = parent->GetWorldLinearVel().Ign();
         odom_.twist.twist.angular.z = parent->GetWorldAngularVel().Ign().Z();
+#endif
 
         // convert velocity to child_frame_id (aka base_footprint)
         float yaw = pose.Rot().Yaw();

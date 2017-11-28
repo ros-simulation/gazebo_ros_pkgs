@@ -416,7 +416,7 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
 
     }
     if ( odom_source_ == WORLD ) {
-        // getting data form gazebo world
+        // getting data from gazebo world
 #if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Pose3d pose = parent->WorldPose();
 #else
@@ -436,8 +436,13 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
 
         // get velocity in /odom frame
         ignition::math::Vector3d linear;
+#if GAZEBO_MAJOR_VERSION >= 8
+        linear = parent->WorldLinearVel();
+        odom_.twist.twist.angular.z = parent->WorldAngularVel().Z();
+#else
         linear = parent->GetWorldLinearVel().Ign();
         odom_.twist.twist.angular.z = parent->GetWorldAngularVel().Ign().Z();
+#endif
 
         // convert velocity to child_frame_id (aka base_footprint)
         float yaw = pose.Rot().Yaw();
