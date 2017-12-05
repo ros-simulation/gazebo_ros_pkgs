@@ -25,13 +25,17 @@ fi
 
 setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
 
-# source setup.sh, but keep local modifications to GAZEBO_MASTER_URI
+# source setup.sh, but keep local modifications to GAZEBO_MASTER_URI and GAZEBO_MODEL_DATABASE_URI
 desired_master_uri="$GAZEBO_MASTER_URI"
+desired_model_database_uri="$GAZEBO_MODEL_DATABASE_URI"
 . $setup_path/setup.sh
 if [ "$desired_master_uri" = "" ]; then
 	desired_master_uri="$GAZEBO_MASTER_URI"
 fi
+if [ "$desired_model_database_uri" = "" ]; then
+	desired_model_database_uri="$GAZEBO_MODEL_DATABASE_URI"
+fi
 
 final=$(relocate_remappings "${final}")
 
-GAZEBO_MASTER_URI="$desired_master_uri" gzserver $final
+GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" gzserver $final
