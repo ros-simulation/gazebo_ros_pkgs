@@ -2,6 +2,19 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* for gazebo8+, call functions without Get (`#639 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/639>`_)
+* Fix gazebo8 warnings part 5: ignition math in gazebo_ros (`#635 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/635>`_)
+* Fix gazebo8 warnings part 4: convert remaining local variables in plugins to ign-math (`#633 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/633>`_)
+* gazebo_ros: fix support for python3 (`#622 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/622>`_)
+* gazebo_ros_api_plugin: improve plugin xml parsing (`#625 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/625>`_)
+* Replace Events::Disconnect* with pointer reset (`#623 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/623>`_)
+* Install spawn_model using catkin_install_python (`#621 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/621>`_)
+* [gazebo_ros] don't overwrite parameter "use_sim_time" (`#606 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/606>`_)
+  * Parameter /use_sim_time is only set if not present on Parameter Server
+* Contributors: Jose Luis Rivero, Manuel Ilg, Mike Purvis, Nils Rokita, Steven Peters
+
 2.5.13 (2017-06-24)
 -------------------
 * Quote arguments to echo in libcommon.sh (`#590 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/590>`_)
