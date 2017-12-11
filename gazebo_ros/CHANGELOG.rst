@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.3 (2017-12-11)
+------------------
 * gazebo_ros_api_plugin: improve plugin xml parsing (`#627 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/627>`_)
 * Fix gazebo8 warnings part 5: ignition math in gazebo_ros (lunar-devel) (`#636 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/636>`_)
 * Fix gazebo8 warnings part 4: convert remaining local variables in plugins to ign-math (lunar-devel) (`#634 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/634>`_)
