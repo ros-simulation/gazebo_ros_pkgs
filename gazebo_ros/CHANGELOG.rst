@@ -2,6 +2,17 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_ros_api_plugin: improve plugin xml parsing (`#627 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/627>`_)
+* Fix gazebo8 warnings part 5: ignition math in gazebo_ros (lunar-devel) (`#636 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/636>`_)
+* Fix gazebo8 warnings part 4: convert remaining local variables in plugins to ign-math (lunar-devel) (`#634 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/634>`_)
+* gazebo_ros: fix support for python3 (`#629 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/629>`_)
+* Replace Events::Disconnect* with pointer reset (`#626 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/626>`_)
+* Install spawn_model using catkin_install_python (`#624 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/624>`_)
+* Quote arguments to echo in libcommon.sh (`#591 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/591>`_)
+* Contributors: Jose Luis Rivero
+
 2.7.2 (2017-05-21)
 ------------------
 * Revert gazebo8 changes in Lunar and back to use gazebo7 (`#583 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/583>`_)
@@ -177,7 +188,7 @@ Changelog for package gazebo_ros
   There were some errors in STL iterators.
   Initialized values of member variables in constructor.
   Removed an unused variable (model_name).
-* Contributors: Carlos Agüero, John Hsu, Jose Luis Rivero, Nate Koenig, Steven Peters, hsu, osrf
+* Contributors: Carlos Aguero, John Hsu, Jose Luis Rivero, Nate Koenig, Steven Peters, hsu, osrf
 
 2.4.5 (2014-08-18)
 ------------------
