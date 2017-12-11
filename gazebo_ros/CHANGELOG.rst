@@ -185,7 +185,7 @@ Forthcoming
   There were some errors in STL iterators.
   Initialized values of member variables in constructor.
   Removed an unused variable (model_name).
-* Contributors: Carlos Agüero, John Hsu, Jose Luis Rivero, Nate Koenig, Steven Peters, hsu, osrf
+* Contributors: Carlos Aguero, John Hsu, Jose Luis Rivero, Nate Koenig, Steven Peters, hsu, osrf
 
 2.4.5 (2014-08-18)
 ------------------
