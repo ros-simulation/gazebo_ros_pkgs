@@ -115,13 +115,8 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     joints_.resize ( 2 );
     joints_[LEFT] = gazebo_ros_->getJoint ( parent, "leftJoint", "left_joint" );
     joints_[RIGHT] = gazebo_ros_->getJoint ( parent, "rightJoint", "right_joint" );
-#if GAZEBO_MAJOR_VERSION > 2
     joints_[LEFT]->SetParam ( "fmax", 0, wheel_torque );
     joints_[RIGHT]->SetParam ( "fmax", 0, wheel_torque );
-#else
-    joints_[LEFT]->SetMaxForce ( 0, wheel_torque );
-    joints_[RIGHT]->SetMaxForce ( 0, wheel_torque );
-#endif
 
 
 
@@ -194,13 +189,8 @@ void GazeboRosDiffDrive::Reset()
   pose_encoder_.theta = 0;
   x_ = 0;
   rot_ = 0;
-#if GAZEBO_MAJOR_VERSION > 2
   joints_[LEFT]->SetParam ( "fmax", 0, wheel_torque );
   joints_[RIGHT]->SetParam ( "fmax", 0, wheel_torque );
-#else
-  joints_[LEFT]->SetMaxForce ( 0, wheel_torque );
-  joints_[RIGHT]->SetMaxForce ( 0, wheel_torque );
-#endif
 }
 
 void GazeboRosDiffDrive::publishWheelJointState()
@@ -228,7 +218,11 @@ void GazeboRosDiffDrive::publishWheelTF()
         std::string wheel_frame = gazebo_ros_->resolveTF(joints_[i]->GetChild()->GetName ());
         std::string wheel_parent_frame = gazebo_ros_->resolveTF(joints_[i]->GetParent()->GetName ());
 
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d poseWheel = joints_[i]->GetChild()->RelativePose();
+#else
         ignition::math::Pose3d poseWheel = joints_[i]->GetChild()->GetRelativePose().Ign();
+#endif
 
         tf::Quaternion qt ( poseWheel.Rot().X(), poseWheel.Rot().Y(), poseWheel.Rot().Z(), poseWheel.Rot().W() );
         tf::Vector3 vt ( poseWheel.Pos().X(), poseWheel.Pos().Y(), poseWheel.Pos().Z() );
@@ -250,13 +244,8 @@ void GazeboRosDiffDrive::UpdateChild()
        (this seems to be solved in https://bitbucket.org/osrf/gazebo/commits/ec8801d8683160eccae22c74bf865d59fac81f1e)
     */
     for ( int i = 0; i < 2; i++ ) {
-#if GAZEBO_MAJOR_VERSION > 2
       if ( fabs(wheel_torque -joints_[i]->GetParam ( "fmax", 0 )) > 1e-6 ) {
         joints_[i]->SetParam ( "fmax", 0, wheel_torque );
-#else
-      if ( fabs(wheel_torque -joints_[i]->GetMaxForce ( 0 )) > 1e-6 ) {
-        joints_[i]->SetMaxForce ( 0, wheel_torque );
-#endif
       }
     }
 
@@ -282,13 +271,8 @@ void GazeboRosDiffDrive::UpdateChild()
                 ( fabs ( wheel_speed_[LEFT] - current_speed[LEFT] ) < 0.01 ) ||
                 ( fabs ( wheel_speed_[RIGHT] - current_speed[RIGHT] ) < 0.01 ) ) {
             //if max_accel == 0, or target speed is reached
-#if GAZEBO_MAJOR_VERSION > 2
             joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
             joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
-#else
-            joints_[LEFT]->SetVelocity ( 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
-#endif
         } else {
             if ( wheel_speed_[LEFT]>=current_speed[LEFT] )
                 wheel_speed_instr_[LEFT]+=fmin ( wheel_speed_[LEFT]-current_speed[LEFT],  wheel_accel * seconds_since_last_update );
@@ -303,13 +287,8 @@ void GazeboRosDiffDrive::UpdateChild()
             // ROS_INFO_NAMED("diff_drive", "actual wheel speed = %lf, issued wheel speed= %lf", current_speed[LEFT], wheel_speed_[LEFT]);
             // ROS_INFO_NAMED("diff_drive", "actual wheel speed = %lf, issued wheel speed= %lf", current_speed[RIGHT],wheel_speed_[RIGHT]);
 
-#if GAZEBO_MAJOR_VERSION > 2
             joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
             joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
-#else
-            joints_[LEFT]->SetVelocity ( 0,wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetVelocity ( 0,wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
-#endif
         }
         last_update_time_+= common::Time ( update_period_ );
     }
