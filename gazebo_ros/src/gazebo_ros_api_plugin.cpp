@@ -1008,8 +1008,12 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
     res.damping.clear(); // to be added to gazebo
     //res.damping.push_back(joint->GetDamping(0));
 
-    res.position.clear(); // use GetAngle(i)
+    res.position.clear();
+#if GAZEBO_MAJOR_VERSION >= 8
+    res.position.push_back(joint->Position(0));
+#else
     res.position.push_back(joint->GetAngle(0).Radian());
+#endif
 
     res.rate.clear(); // use GetVelocity(i)
     res.rate.push_back(joint->GetVelocity(0));
@@ -1721,20 +1725,22 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
     //        transform wrench from reference_point in reference_frame
     //        into the reference frame of the body
     //        first, translate by reference point to the body frame
-    ignition::math::Pose3d target_to_reference = frame->GetWorldPose().Ign() - body->GetWorldPose().Ign();
+    ignition::math::Pose3d framePose = frame->GetWorldPose().Ign();
+    ignition::math::Pose3d bodyPose = body->GetWorldPose().Ign();
+    ignition::math::Pose3d target_to_reference = framePose - bodyPose;
     ROS_DEBUG_NAMED("api_plugin", "reference frame for applied wrench: [%f %f %f, %f %f %f]-[%f %f %f, %f %f %f]=[%f %f %f, %f %f %f]",
-              body->GetWorldPose().Ign().Pos().X(),
-              body->GetWorldPose().Ign().Pos().Y(),
-              body->GetWorldPose().Ign().Pos().Z(),
-              body->GetWorldPose().Ign().Rot().Euler().X(),
-              body->GetWorldPose().Ign().Rot().Euler().Y(),
-              body->GetWorldPose().Ign().Rot().Euler().Z(),
-              frame->GetWorldPose().Ign().Pos().X(),
-              frame->GetWorldPose().Ign().Pos().Y(),
-              frame->GetWorldPose().Ign().Pos().Z(),
-              frame->GetWorldPose().Ign().Rot().Euler().X(),
-              frame->GetWorldPose().Ign().Rot().Euler().Y(),
-              frame->GetWorldPose().Ign().Rot().Euler().Z(),
+              bodyPose.Pos().X(),
+              bodyPose.Pos().Y(),
+              bodyPose.Pos().Z(),
+              bodyPose.Rot().Euler().X(),
+              bodyPose.Rot().Euler().Y(),
+              bodyPose.Rot().Euler().Z(),
+              framePose.Pos().X(),
+              framePose.Pos().Y(),
+              framePose.Pos().Z(),
+              framePose.Rot().Euler().X(),
+              framePose.Rot().Euler().Y(),
+              framePose.Rot().Euler().Z(),
               target_to_reference.Pos().X(),
               target_to_reference.Pos().Y(),
               target_to_reference.Pos().Z(),

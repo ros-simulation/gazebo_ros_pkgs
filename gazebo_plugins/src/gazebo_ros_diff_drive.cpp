@@ -203,9 +203,13 @@ void GazeboRosDiffDrive::publishWheelJointState()
 
     for ( int i = 0; i < 2; i++ ) {
         physics::JointPtr joint = joints_[i];
-        ignition::math::Angle angle = joint->GetAngle ( 0 ).Ign();
+#if GAZEBO_MAJOR_VERSION >= 8
+        double position = joint->Position ( 0 );
+#else
+        double position = joint->GetAngle ( 0 ).Radian();
+#endif
         joint_state_.name[i] = joint->GetName();
-        joint_state_.position[i] = angle.Radian () ;
+        joint_state_.position[i] = position;
     }
     joint_state_publisher_.publish ( joint_state_ );
 }
@@ -218,7 +222,7 @@ void GazeboRosDiffDrive::publishWheelTF()
         std::string wheel_frame = gazebo_ros_->resolveTF(joints_[i]->GetChild()->GetName ());
         std::string wheel_parent_frame = gazebo_ros_->resolveTF(joints_[i]->GetParent()->GetName ());
 
-#if GAZEBO_MAJOR_VERSION > 8
+#if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Pose3d poseWheel = joints_[i]->GetChild()->RelativePose();
 #else
         ignition::math::Pose3d poseWheel = joints_[i]->GetChild()->GetRelativePose().Ign();
