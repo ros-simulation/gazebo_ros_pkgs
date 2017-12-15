@@ -113,7 +113,11 @@ namespace gazebo
     }
 
     last_odom_publish_time_ = parent_->GetWorld()->GetSimTime();
+#if GAZEBO_MAJOR_VERSION >= 8
+    last_odom_pose_ = parent_->WorldPose();
+#else
     last_odom_pose_ = parent_->GetWorldPose().Ign();
+#endif
     x_ = 0;
     y_ = 0;
     rot_ = 0;
@@ -160,7 +164,11 @@ namespace gazebo
   void GazeboRosPlanarMove::UpdateChild()
   {
     boost::mutex::scoped_lock scoped_lock(lock);
+#if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Pose3d pose = parent_->WorldPose();
+#else
     ignition::math::Pose3d pose = parent_->GetWorldPose().Ign();
+#endif
     float yaw = pose.Rot().Yaw();
     parent_->SetLinearVel(ignition::math::Vector3d(
           x_ * cosf(yaw) - y_ * sinf(yaw),
@@ -214,7 +222,11 @@ namespace gazebo
       tf::resolve(tf_prefix_, robot_base_frame_);
 
     // getting data for base_footprint to odom transform
+#if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Pose3d pose = this->parent_->WorldPose();
+#else
     ignition::math::Pose3d pose = this->parent_->GetWorldPose().Ign();
+#endif
 
     tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
     tf::Vector3    vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());

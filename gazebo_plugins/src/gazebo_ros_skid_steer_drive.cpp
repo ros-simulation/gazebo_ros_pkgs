@@ -405,7 +405,11 @@ namespace gazebo {
 
     // TODO create some non-perfect odometry!
     // getting data for base_footprint to odom transform
+#if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Pose3d pose = this->parent->WorldPose();
+#else
     ignition::math::Pose3d pose = this->parent->GetWorldPose().Ign();
+#endif
 
     tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
     tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
