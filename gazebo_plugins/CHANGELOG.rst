@@ -2,6 +2,15 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.3 (2017-12-11)
+------------------
+* Fix gazebo8 warnings part 4: convert remaining local variables in plugins to ign-math (lunar-devel) (`#634 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/634>`_)
+* Fix gazebo8 warnings part 3: more ign-math in plugins (lunar-devel) (`#632 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/632>`_)
+* Fix gazebo8 warnings part 2: replace private member gazebo::math types with ignition (lunar-devel) (`#630 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/630>`_)
+* Replace Events::Disconnect* with pointer reset (`#626 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/626>`_)
+* joint_state_publisher: error in case a joint is not found (`#609 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/609>`_)
+* Contributors: Jose Luis Rivero, Kenneth Blomqvist
+
 2.7.2 (2017-05-21)
 ------------------
 * Revert gazebo8 changes in Lunar and back to use gazebo7 (`#583 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/583>`_)
