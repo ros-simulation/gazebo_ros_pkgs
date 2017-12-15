@@ -161,9 +161,11 @@ namespace gazebo
     // Relative transform from actual to desired pose
 #if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Pose3d world_pose = floating_link_->DirtyPose();
+    ignition::math::Vector3d worldLinearVel = floating_link_->WorldLinearVel();
     ignition::math::Vector3d relativeAngularVel = floating_link_->RelativeAngularVel();
 #else
     ignition::math::Pose3d world_pose = floating_link_->GetDirtyPose().Ign();
+    ignition::math::Vector3d worldLinearVel = floating_link_->GetWorldLinearVel().Ign();
     ignition::math::Vector3d relativeAngularVel = floating_link_->GetRelativeAngularVel().Ign();
 #endif
     ignition::math::Vector3d err_pos = hog_desired.Pos() - world_pose.Pos();
@@ -173,7 +175,7 @@ namespace gazebo
     ignition::math::Quaterniond not_a_quaternion = err_rot.Log();
 
     floating_link_->AddForce(
-        kl_ * err_pos - cl_ * floating_link_->GetWorldLinearVel().Ign());
+        kl_ * err_pos - cl_ * worldLinearVel);
 
     floating_link_->AddRelativeTorque(
         ka_ * ignition::math::Vector3d(not_a_quaternion.X(), not_a_quaternion.Y(), not_a_quaternion.Z())

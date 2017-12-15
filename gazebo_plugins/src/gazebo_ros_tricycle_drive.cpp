@@ -166,7 +166,11 @@ void GazeboRosTricycleDrive::publishWheelJointState()
     joint_state_.effort.resize ( joints.size() );
     for ( std::size_t i = 0; i < joints.size(); i++ ) {
         joint_state_.name[i] = joints[i]->GetName();
+#if GAZEBO_MAJOR_VERSION >= 8
+        joint_state_.position[i] = joints[i]->Position ( 0 );
+#else
         joint_state_.position[i] = joints[i]->GetAngle ( 0 ).Radian();
+#endif
         joint_state_.velocity[i] = joints[i]->GetVelocity ( 0 );
         joint_state_.effort[i] = joints[i]->GetForce ( 0 );
     }
@@ -250,7 +254,11 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
     }
     joint_wheel_actuated_->SetParam ( "vel", 0, applied_speed );
 
+#if GAZEBO_MAJOR_VERSION >= 8
+    double current_angle = joint_steering_->Position ( 0 );
+#else
     double current_angle = joint_steering_->GetAngle ( 0 ).Radian();
+#endif
 
     // truncate target angle
     if (target_angle > +M_PI / 2.0)
