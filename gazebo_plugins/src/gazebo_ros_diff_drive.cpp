@@ -218,7 +218,7 @@ void GazeboRosDiffDrive::publishWheelTF()
         std::string wheel_frame = gazebo_ros_->resolveTF(joints_[i]->GetChild()->GetName ());
         std::string wheel_parent_frame = gazebo_ros_->resolveTF(joints_[i]->GetParent()->GetName ());
 
-#if GAZEBO_MAJOR_VERSION > 8
+#if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Pose3d poseWheel = joints_[i]->GetChild()->RelativePose();
 #else
         ignition::math::Pose3d poseWheel = joints_[i]->GetChild()->GetRelativePose().Ign();
