@@ -397,7 +397,11 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
     }
     if ( odom_source_ == WORLD ) {
         // getting data form gazebo world
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d pose = parent->WorldPose();
+#else
         ignition::math::Pose3d pose = parent->GetWorldPose().Ign();
+#endif
         qt = tf::Quaternion ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
         vt = tf::Vector3 ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
 
