@@ -500,7 +500,8 @@ void GazeboRosApiPlugin::advertiseServices()
 
 
   // set param for use_sim_time if not set by user already
-  nh_->setParam("/use_sim_time", true);
+  if(!(nh_->hasParam("/use_sim_time")))
+    nh_->setParam("/use_sim_time", true);
 
   // todo: contemplate setting environment variable ROBOT=sim here???
   nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
