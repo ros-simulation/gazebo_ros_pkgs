@@ -19,8 +19,8 @@
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/UpdateInfo.hh>
-#include <gazebo/math/Vector3.hh>
-#include <gazebo/math/Pose.hh>
+#include <ignition/math/Vector3.hh>
+#include <ignition/math/Pose3.hh>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <string>
@@ -79,11 +79,11 @@ namespace gazebo
     /// \brief Pointer to the sdf config file.
     sdf::ElementPtr sdf;
     /// \brief Orientation data from the sensor.
-    gazebo::math::Quaternion orientation;
+    ignition::math::Quaterniond orientation;
     /// \brief Linear acceleration data from the sensor.
-    math::Vector3 accelerometer_data;
+    ignition::math::Vector3d accelerometer_data;
     /// \brief Angular velocity data from the sensor.
-    math::Vector3 gyroscope_data;
+    ignition::math::Vector3d gyroscope_data;
     
     /// \brief Seed for the Gaussian noise generator.
     unsigned int seed;
@@ -100,7 +100,7 @@ namespace gazebo
     /// \brief Gaussian noise.
     double gaussian_noise;
     /// \brief Offset parameter, position part is unused.
-    math::Pose offset;
+    ignition::math::Pose3d offset;
   };
 }
 
