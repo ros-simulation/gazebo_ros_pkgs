@@ -406,9 +406,14 @@ void GazeboRosCameraUtils::Init()
     this->update_period_ = 0.0;
 
   // set buffer size
-  if (this->format_ == "L8")
+  if (this->format_ == "L8" || this->format_ == "L_INT8")
   {
     this->type_ = sensor_msgs::image_encodings::MONO8;
+    this->skip_ = 1;
+  }
+  else if (this->format_ == "L16" || this->format_ == "L_INT16")
+  {
+    this->type_ = sensor_msgs::image_encodings::MONO16;
     this->skip_ = 1;
   }
   else if (this->format_ == "R8G8B8" || this->format_ == "RGB_INT8")
