@@ -1067,7 +1067,6 @@ bool GazeboRosApiPlugin::getLinkProperties(gazebo_msgs::GetLinkProperties::Reque
 #else
     res.mass = body->GetInertial()->GetMass();
 
-    gazebo::physics::InertialPtr inertia = body->GetInertial();
     res.ixx = inertia->GetIXX();
     res.iyy = inertia->GetIYY();
     res.izz = inertia->GetIZZ();
