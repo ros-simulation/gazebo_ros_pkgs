@@ -785,7 +785,11 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
 bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
                                      gazebo_msgs::DeleteLight::Response &res)
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
+#else
   gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+#endif
 
   if (phy_light == NULL)
   {
@@ -801,7 +805,11 @@ bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
 
     for (int i = 0; i < 100; i++)
     {
+#if GAZEBO_MAJOR_VERSION >= 8
+      phy_light = world_->LightByName(req.light_name);
+#else
       phy_light = world_->Light(req.light_name);
+#endif
       if (phy_light == NULL)
       {
         res.success = true;
@@ -1173,7 +1181,11 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
 bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Request &req,
                                                gazebo_msgs::GetLightProperties::Response &res)
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
+#else
   gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+#endif
 
   if (phy_light == NULL)
   {
@@ -1203,7 +1215,11 @@ bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Req
 bool GazeboRosApiPlugin::setLightProperties(gazebo_msgs::SetLightProperties::Request &req,
                                                gazebo_msgs::SetLightProperties::Response &res)
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
+#else
   gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
+#endif
 
   if (phy_light == NULL)
   {
@@ -2451,7 +2467,11 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, const 
   // todo: should wait for response response_sub_, check to see that if _msg->response == "nonexistant"
 
   gazebo::physics::ModelPtr model = world_->GetModel(model_name);
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::LightPtr light = world_->LightByName(model_name);
+#else
   gazebo::physics::LightPtr light = world_->Light(model_name);
+#endif
   if ((isLight && light != NULL) || (model != NULL))
   {
     ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model name %s already exist.",model_name.c_str());
@@ -2493,7 +2513,11 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, const 
 
     {
       //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
+#if GAZEBO_MAJOR_VERSION >= 8
+      if ((isLight && world_->LightByName(model_name) != NULL)
+#else
       if ((isLight && world_->Light(model_name) != NULL)
+#endif
           || (world_->GetModel(model_name) != NULL))
         break;
     }
