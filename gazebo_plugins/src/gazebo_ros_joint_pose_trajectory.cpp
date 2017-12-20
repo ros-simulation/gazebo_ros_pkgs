@@ -267,7 +267,11 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
                 " inertially", this->reference_link_->GetName().c_str());
   }
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->model_ =  this->world_->ModelByName(req.model_name);
+#else
   this->model_ =  this->world_->GetModel(req.model_name);
+#endif
   if (!this->model_)  // look for it by frame_id name
   {
     this->model_ = this->reference_link_->GetParentModel();
