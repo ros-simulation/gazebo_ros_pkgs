@@ -998,8 +998,13 @@ bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Req
 {
   res.sim_time = world_->GetSimTime().Double();
   res.model_names.clear();
+#if GAZEBO_MAJOR_VERSION >= 8
+  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
+    res.model_names.push_back(world_->ModelByIndex(i)->GetName());
+#else
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
     res.model_names.push_back(world_->GetModel(i)->GetName());
+#endif
   gzerr << "disablign rendering has not been implemented, rendering is always enabled\n";
   res.rendering_enabled = true; //world->GetRenderEngineEnabled();
   res.success = true;
@@ -1011,9 +1016,15 @@ bool GazeboRosApiPlugin::getJointProperties(gazebo_msgs::GetJointProperties::Req
                                             gazebo_msgs::GetJointProperties::Response &res)
 {
   gazebo::physics::JointPtr joint;
+#if GAZEBO_MAJOR_VERSION >= 8
+  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
+  {
+    joint = world_->ModelByIndex(i)->GetJoint(req.joint_name);
+#else
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
   {
     joint = world_->GetModel(i)->GetJoint(req.joint_name);
+#endif
     if (joint) break;
   }
 
@@ -1370,9 +1381,15 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
 {
   /// @todo: current settings only allows for setting of 1DOF joints (e.g. HingeJoint and SliderJoint) correctly.
   gazebo::physics::JointPtr joint;
+#if GAZEBO_MAJOR_VERSION >= 8
+  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
+  {
+    joint = world_->ModelByIndex(i)->GetJoint(req.joint_name);
+#else
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
   {
     joint = world_->GetModel(i)->GetJoint(req.joint_name);
+#endif
     if (joint) break;
   }
 
@@ -1504,9 +1521,15 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
                                           gazebo_msgs::ApplyJointEffort::Response &res)
 {
   gazebo::physics::JointPtr joint;
+#if GAZEBO_MAJOR_VERSION >= 8
+  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
+  {
+    joint = world_->ModelByIndex(i)->GetJoint(req.joint_name);
+#else
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
   {
     joint = world_->GetModel(i)->GetJoint(req.joint_name);
+#endif
     if (joint)
     {
       GazeboRosApiPlugin::ForceJointJob* fjj = new GazeboRosApiPlugin::ForceJointJob;
@@ -1996,9 +2019,15 @@ void GazeboRosApiPlugin::publishLinkStates()
   gazebo_msgs::LinkStates link_states;
 
   // fill link_states
+#if GAZEBO_MAJOR_VERSION >= 8
+  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
+  {
+    gazebo::physics::ModelPtr model = world_->ModelByIndex(i);
+#else
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
   {
     gazebo::physics::ModelPtr model = world_->GetModel(i);
+#endif
 
     for (unsigned int j = 0 ; j < model->GetChildCount(); j ++)
     {
@@ -2047,22 +2076,24 @@ void GazeboRosApiPlugin::publishModelStates()
   gazebo_msgs::ModelStates model_states;
 
   // fill model_states
-  for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
-  {
-    gazebo::physics::ModelPtr model = world_->GetModel(i);
-    model_states.name.push_back(model->GetName());
-    geometry_msgs::Pose pose;
 #if GAZEBO_MAJOR_VERSION >= 8
+  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
+  {
+    gazebo::physics::ModelPtr model = world_->ModelByIndex(i);
     ignition::math::Pose3d  model_pose = model->WorldPose(); // - myBody->GetCoMPose();
     ignition::math::Vector3d linear_vel  = model->WorldLinearVel();
     ignition::math::Vector3d angular_vel = model->WorldAngularVel();
 #else
+  for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
+  {
+    gazebo::physics::ModelPtr model = world_->GetModel(i);
     ignition::math::Pose3d  model_pose = model->GetWorldPose().Ign(); // - myBody->GetCoMPose();
     ignition::math::Vector3d linear_vel  = model->GetWorldLinearVel().Ign();
     ignition::math::Vector3d angular_vel = model->GetWorldAngularVel().Ign();
 #endif
     ignition::math::Vector3d pos = model_pose.Pos();
     ignition::math::Quaterniond rot = model_pose.Rot();
+    geometry_msgs::Pose pose;
     pose.position.x = pos.X();
     pose.position.y = pos.Y();
     pose.position.z = pos.Z();
@@ -2071,6 +2102,7 @@ void GazeboRosApiPlugin::publishModelStates()
     pose.orientation.y = rot.Y();
     pose.orientation.z = rot.Z();
     model_states.pose.push_back(pose);
+    model_states.name.push_back(model->GetName());
     geometry_msgs::Twist twist;
     twist.linear.x = linear_vel.X();
     twist.linear.y = linear_vel.Y();
