@@ -844,12 +844,9 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::ModelPtr model = world_->ModelByName(req.model_name);
-#else
-  gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
-#endif
-#if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.relative_entity_name));
 #else
+  gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.relative_entity_name));
 #endif
   if (!model)
@@ -1145,12 +1142,9 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.link_name));
-#else
-  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
-#endif
-#if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.reference_frame));
 #else
+  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
 #endif
 
@@ -1736,12 +1730,9 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.link_state.link_name));
-#else
-  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.link_name));
-#endif
-#if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.link_state.reference_frame));
 #else
+  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.link_name));
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.reference_frame));
 #endif
   if (!body)
@@ -1839,12 +1830,9 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.body_name));
-#else
-  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.body_name));
-#endif
-#if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.reference_frame));
 #else
+  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.body_name));
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
 #endif
   if (!body)
