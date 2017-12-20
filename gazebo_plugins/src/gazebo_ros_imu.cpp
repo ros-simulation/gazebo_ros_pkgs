@@ -147,7 +147,11 @@ void GazeboRosIMU::LoadThread()
 
   // assert that the body by link_name_ exists
   this->link = boost::dynamic_pointer_cast<physics::Link>(
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->world_->EntityByName(this->link_name_));
+#else
     this->world_->GetEntity(this->link_name_));
+#endif
   if (!this->link)
   {
     ROS_FATAL_NAMED("imu", "gazebo_ros_imu plugin error: bodyName: %s does not exist\n",
