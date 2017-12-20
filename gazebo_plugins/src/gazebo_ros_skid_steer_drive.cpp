@@ -440,8 +440,13 @@ namespace gazebo {
 
     // get velocity in /odom frame
     ignition::math::Vector3d linear;
+#if GAZEBO_MAJOR_VERSION >= 8
+    linear = this->parent->WorldLinearVel();
+    odom_.twist.twist.angular.z = this->parent->WorldAngularVel().Z();
+#else
     linear = this->parent->GetWorldLinearVel().Ign();
     odom_.twist.twist.angular.z = this->parent->GetWorldAngularVel().Ign().Z();
+#endif
 
     // convert velocity to child_frame_id (aka base_footprint)
     float yaw = pose.Rot().Yaw();
