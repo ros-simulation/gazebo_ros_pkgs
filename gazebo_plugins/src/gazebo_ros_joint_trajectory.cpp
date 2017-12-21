@@ -173,7 +173,11 @@ void GazeboRosJointTrajectory::SetTrajectory(
       this->reference_link_name_ != "map")
   {
     physics::EntityPtr ent =
+#if GAZEBO_MAJOR_VERSION >= 8
+      this->world_->EntityByName(this->reference_link_name_);
+#else
       this->world_->GetEntity(this->reference_link_name_);
+#endif
     if (ent)
       this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
@@ -252,7 +256,11 @@ bool GazeboRosJointTrajectory::SetTrajectory(
       this->reference_link_name_ != "map")
   {
     physics::EntityPtr ent =
+#if GAZEBO_MAJOR_VERSION >= 8
+      this->world_->EntityByName(this->reference_link_name_);
+#else
       this->world_->GetEntity(this->reference_link_name_);
+#endif
     if (ent)
       this->reference_link_ = boost::shared_dynamic_cast<physics::Link>(ent);
     if (!this->reference_link_)
@@ -269,7 +277,11 @@ bool GazeboRosJointTrajectory::SetTrajectory(
                 " inertially", this->reference_link_->GetName().c_str());
   }
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->model_ =  this->world_->ModelByName(req.model_name);
+#else
   this->model_ =  this->world_->GetModel(req.model_name);
+#endif
   if (!this->model_)  // look for it by frame_id name
   {
     this->model_ = this->reference_link_->GetParentModel();
