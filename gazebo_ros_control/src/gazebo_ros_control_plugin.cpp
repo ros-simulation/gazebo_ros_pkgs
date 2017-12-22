@@ -111,7 +111,11 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
   }
 
   // Get the Gazebo simulation period
+#if GAZEBO_MAJOR_VERSION >= 8
+  ros::Duration gazebo_period(parent_model_->GetWorld()->Physics()->GetMaxStepSize());
+#else
   ros::Duration gazebo_period(parent_model_->GetWorld()->GetPhysicsEngine()->GetMaxStepSize());
+#endif
 
   // Decide the plugin control period
   if(sdf_->HasElement("controlPeriod"))
