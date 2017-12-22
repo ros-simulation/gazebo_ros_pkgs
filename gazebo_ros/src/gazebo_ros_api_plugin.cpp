@@ -505,7 +505,11 @@ void GazeboRosApiPlugin::advertiseServices()
 
   // todo: contemplate setting environment variable ROBOT=sim here???
   nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
+#if GAZEBO_MAJOR_VERSION >= 8
+  last_pub_clock_time_ = world_->SimTime();
+#else
   last_pub_clock_time_ = world_->GetSimTime();
+#endif
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
@@ -1017,7 +1021,11 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
 bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Request &req,
                                             gazebo_msgs::GetWorldProperties::Response &res)
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  res.sim_time = world_->SimTime().Double();
+#else
   res.sim_time = world_->GetSimTime().Double();
+#endif
   res.model_names.clear();
 #if GAZEBO_MAJOR_VERSION >= 8
   for (unsigned int i = 0; i < world_->ModelCount(); i ++)
@@ -1584,7 +1592,11 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
       fjj->force = req.effort;
       fjj->start_time = req.start_time;
       if (fjj->start_time < ros::Time(world_->GetSimTime().Double()))
+#if GAZEBO_MAJOR_VERSION >= 8
+        fjj->start_time = ros::Time(world_->SimTime().Double());
+#else
         fjj->start_time = ros::Time(world_->GetSimTime().Double());
+#endif
       fjj->duration = req.duration;
       lock_.lock();
       force_joint_jobs_.push_back(fjj);
@@ -1950,7 +1962,11 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   wej->torque = target_torque;
   wej->start_time = req.start_time;
   if (wej->start_time < ros::Time(world_->GetSimTime().Double()))
+#if GAZEBO_MAJOR_VERSION >= 8
+    wej->start_time = ros::Time(world_->SimTime().Double());
+#else
     wej->start_time = ros::Time(world_->GetSimTime().Double());
+#endif
   wej->duration = req.duration;
   lock_.lock();
   wrench_body_jobs_.push_back(wej);
@@ -2050,7 +2066,11 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
 void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
 {
   ROS_ERROR_NAMED("api_plugin", "CLOCK2");
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::common::Time sim_time = world_->SimTime();
+#else
   gazebo::common::Time sim_time = world_->GetSimTime();
+#endif
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
 
@@ -2063,11 +2083,19 @@ void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::Wo
 }
 void GazeboRosApiPlugin::publishSimTime()
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::common::Time sim_time = world_->SimTime();
+#else
   gazebo::common::Time sim_time = world_->GetSimTime();
+#endif
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::common::Time currentTime = world_->SimTime();
+#else
   gazebo::common::Time currentTime = world_->GetSimTime();
+#endif
   rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros

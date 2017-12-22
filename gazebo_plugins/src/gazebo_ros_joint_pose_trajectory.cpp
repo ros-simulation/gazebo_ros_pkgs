@@ -143,7 +143,11 @@ void GazeboRosJointPoseTrajectory::LoadThread()
   }
 #endif
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_time_ = this->world_->SimTime();
+#else
   this->last_time_ = this->world_->GetSimTime();
+#endif
 
   // start custom queue for joint trajectory plugin ros topics
   this->callback_queue_thread_ =
@@ -215,7 +219,11 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
   // trajectory start time
   this->trajectory_start = gazebo::common::Time(trajectory->header.stamp.sec,
                                                 trajectory->header.stamp.nsec);
+#if GAZEBO_MAJOR_VERSION >= 8
+  common::Time cur_time = this->world_->SimTime();
+#else
   common::Time cur_time = this->world_->GetSimTime();
+#endif
   if (this->trajectory_start < cur_time)
     this->trajectory_start = cur_time;
 
@@ -332,7 +340,11 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
   boost::mutex::scoped_lock lock(this->update_mutex);
   if (this->has_trajectory_)
   {
+#if GAZEBO_MAJOR_VERSION >= 8
+    common::Time cur_time = this->world_->SimTime();
+#else
     common::Time cur_time = this->world_->GetSimTime();
+#endif
     // roll out trajectory via set model configuration
     // gzerr << "i[" << trajectory_index  << "] time "
     //       << trajectory_start << " now: " << cur_time << " : "<< "\n";
