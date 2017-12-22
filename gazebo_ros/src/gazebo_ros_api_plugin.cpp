@@ -2006,8 +2006,13 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
   {
     // check times and apply wrench if necessary
-    if (ros::Time(world_->GetSimTime().Double()) >= (*iter)->start_time)
-      if (ros::Time(world_->GetSimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
+#if GAZEBO_MAJOR_VERSION >= 8
+    ros::Time simTime = ros::Time(world_->SimTime().Double());
+#else
+    ros::Time simTime = ros::Time(world_->GetSimTime().Double());
+#endif
+    if (simTime >= (*iter)->start_time)
+      if (simTime <= (*iter)->start_time+(*iter)->duration ||
           (*iter)->duration.toSec() < 0.0)
       {
         if ((*iter)->body) // if body exists
@@ -2019,7 +2024,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
           (*iter)->duration.fromSec(0.0); // mark for delete
       }
 
-    if (ros::Time(world_->GetSimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
+    if (simTime > (*iter)->start_time+(*iter)->duration &&
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
@@ -2040,8 +2045,13 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
   {
     // check times and apply force if necessary
-    if (ros::Time(world_->GetSimTime().Double()) >= (*iter)->start_time)
-      if (ros::Time(world_->GetSimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
+#if GAZEBO_MAJOR_VERSION >= 8
+    ros::Time simTime = ros::Time(world_->SimTime().Double());
+#else
+    ros::Time simTime = ros::Time(world_->GetSimTime().Double());
+#endif
+    if (simTime >= (*iter)->start_time)
+      if (simTime <= (*iter)->start_time+(*iter)->duration ||
           (*iter)->duration.toSec() < 0.0)
       {
         if ((*iter)->joint) // if joint exists
@@ -2050,7 +2060,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
           (*iter)->duration.fromSec(0.0); // mark for delete
       }
 
-    if (ros::Time(world_->GetSimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
+    if (simTime > (*iter)->start_time+(*iter)->duration &&
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
