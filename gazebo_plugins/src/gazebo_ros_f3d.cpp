@@ -166,12 +166,9 @@ void GazeboRosF3D::UpdateChild()
   this->wrench_msg_.header.frame_id = this->frame_name_;
 #if GAZEBO_MAJOR_VERSION >= 8
   this->wrench_msg_.header.stamp.sec = (this->world_->SimTime()).sec;
-#else
-  this->wrench_msg_.header.stamp.sec = (this->world_->GetSimTime()).sec;
-#endif
-#if GAZEBO_MAJOR_VERSION >= 8
   this->wrench_msg_.header.stamp.nsec = (this->world_->SimTime()).nsec;
 #else
+  this->wrench_msg_.header.stamp.sec = (this->world_->GetSimTime()).sec;
   this->wrench_msg_.header.stamp.nsec = (this->world_->GetSimTime()).nsec;
 #endif
 

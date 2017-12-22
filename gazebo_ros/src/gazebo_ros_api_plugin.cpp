@@ -1021,16 +1021,13 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
 bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Request &req,
                                             gazebo_msgs::GetWorldProperties::Response &res)
 {
-#if GAZEBO_MAJOR_VERSION >= 8
-  res.sim_time = world_->SimTime().Double();
-#else
-  res.sim_time = world_->GetSimTime().Double();
-#endif
   res.model_names.clear();
 #if GAZEBO_MAJOR_VERSION >= 8
+  res.sim_time = world_->SimTime().Double();
   for (unsigned int i = 0; i < world_->ModelCount(); i ++)
     res.model_names.push_back(world_->ModelByIndex(i)->GetName());
 #else
+  res.sim_time = world_->GetSimTime().Double();
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
     res.model_names.push_back(world_->GetModel(i)->GetName());
 #endif
@@ -1591,10 +1588,11 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
       fjj->joint = joint;
       fjj->force = req.effort;
       fjj->start_time = req.start_time;
-      if (fjj->start_time < ros::Time(world_->GetSimTime().Double()))
 #if GAZEBO_MAJOR_VERSION >= 8
+      if (fjj->start_time < ros::Time(world_->SimTime().Double()))
         fjj->start_time = ros::Time(world_->SimTime().Double());
 #else
+      if (fjj->start_time < ros::Time(world_->GetSimTime().Double()))
         fjj->start_time = ros::Time(world_->GetSimTime().Double());
 #endif
       fjj->duration = req.duration;
@@ -1961,10 +1959,11 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   wej->force = target_force;
   wej->torque = target_torque;
   wej->start_time = req.start_time;
-  if (wej->start_time < ros::Time(world_->GetSimTime().Double()))
 #if GAZEBO_MAJOR_VERSION >= 8
+  if (wej->start_time < ros::Time(world_->SimTime().Double()))
     wej->start_time = ros::Time(world_->SimTime().Double());
 #else
+  if (wej->start_time < ros::Time(world_->GetSimTime().Double()))
     wej->start_time = ros::Time(world_->GetSimTime().Double());
 #endif
   wej->duration = req.duration;
