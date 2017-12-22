@@ -1329,7 +1329,11 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   world_->SetGravity(ignition::math::Vector3d(req.gravity.x,req.gravity.y,req.gravity.z));
 
   // supported updates
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
+#else
   gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
+#endif
   pe->SetMaxStepSize(req.time_step);
   pe->SetRealTimeUpdateRate(req.max_update_rate);
 
@@ -1367,7 +1371,11 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
                                               gazebo_msgs::GetPhysicsProperties::Response &res)
 {
   // supported updates
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
+#else
   gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
+#endif
   res.time_step = pe->GetMaxStepSize();
   res.pause = world_->IsPaused();
   res.max_update_rate = pe->GetRealTimeUpdateRate();
