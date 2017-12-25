@@ -76,11 +76,7 @@ void GazeboRosCamera::OnNewFrame(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
-# if GAZEBO_MAJOR_VERSION >= 7
   common::Time sensor_update_time = this->parentSensor_->LastMeasurementTime();
-# else
-  common::Time sensor_update_time = this->parentSensor_->GetLastMeasurementTime();
-# endif
 
   if (!this->parentSensor->IsActive())
   {

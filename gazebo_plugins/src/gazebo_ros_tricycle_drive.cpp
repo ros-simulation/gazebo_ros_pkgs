@@ -44,7 +44,8 @@
 
 #include <gazebo_plugins/gazebo_ros_tricycle_drive.h>
 
-#include <gazebo/math/gzmath.hh>
+#include <ignition/math/Pose3.hh>
+#include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -108,13 +109,8 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
     odomOptions["world"] = WORLD;
     gazebo_ros_->getParameter<OdomSource> ( odom_source_, "odometrySource", odomOptions, WORLD );
 
-#if GAZEBO_MAJOR_VERSION > 2
     joint_wheel_actuated_->SetParam ( "fmax", 0, wheel_torque_ );
     joint_steering_->SetParam ( "fmax", 0, wheel_torque_ );
-#else
-    joint_wheel_actuated_->SetMaxForce ( 0, wheel_torque_ );
-    joint_steering_->SetMaxForce ( 0, wheel_torque_ );
-#endif
 
 
     // Initialize update rate stuff
@@ -170,7 +166,11 @@ void GazeboRosTricycleDrive::publishWheelJointState()
     joint_state_.effort.resize ( joints.size() );
     for ( std::size_t i = 0; i < joints.size(); i++ ) {
         joint_state_.name[i] = joints[i]->GetName();
+#if GAZEBO_MAJOR_VERSION >= 8
+        joint_state_.position[i] = joints[i]->Position ( 0 );
+#else
         joint_state_.position[i] = joints[i]->GetAngle ( 0 ).Radian();
+#endif
         joint_state_.velocity[i] = joints[i]->GetVelocity ( 0 );
         joint_state_.effort[i] = joints[i]->GetForce ( 0 );
     }
@@ -189,10 +189,14 @@ void GazeboRosTricycleDrive::publishWheelTF()
         std::string frame = gazebo_ros_->resolveTF ( joints[i]->GetName() );
         std::string parent_frame = gazebo_ros_->resolveTF ( joints[i]->GetParent()->GetName() );
 
-        math::Pose pose = joints[i]->GetChild()->GetRelativePose();
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d pose = joints[i]->GetChild()->RelativePose();
+#else
+        ignition::math::Pose3d pose = joints[i]->GetChild()->GetRelativePose().Ign();
+#endif
 
-        tf::Quaternion qt ( pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w );
-        tf::Vector3 vt ( pose.pos.x, pose.pos.y, pose.pos.z );
+        tf::Quaternion qt ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
+        tf::Vector3 vt ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
 
         tf::Transform transform ( qt, vt );
         transform_broadcaster_->sendTransform ( tf::StampedTransform ( transform, current_time, parent_frame, frame ) );
@@ -248,13 +252,13 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
         }
       }
     }
-#if GAZEBO_MAJOR_VERSION > 2
     joint_wheel_actuated_->SetParam ( "vel", 0, applied_speed );
-#else
-    joint_wheel_actuated_->SetVelocity ( 0, applied_speed );
-#endif
 
+#if GAZEBO_MAJOR_VERSION >= 8
+    double current_angle = joint_steering_->Position ( 0 );
+#else
     double current_angle = joint_steering_->GetAngle ( 0 ).Radian();
+#endif
 
     // truncate target angle
     if (target_angle > +M_PI / 2.0)
@@ -284,11 +288,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
       }
 
       // use speed control, not recommended, for better dynamics use force control
-#if GAZEBO_MAJOR_VERSION > 2
       joint_steering_->SetParam ( "vel", 0, applied_steering_speed );
-#else
-      joint_steering_->SetVelocity ( 0, applied_steering_speed );
-#endif
     }
     else {
       // steering_speed_ is zero, use position control.
@@ -309,11 +309,7 @@ void GazeboRosTricycleDrive::motorController ( double target_speed, double targe
       {
         applied_angle = target_angle;
       }
-#if GAZEBO_MAJOR_VERSION >= 4
       joint_steering_->SetPosition(0, applied_angle);
-#else
-      joint_steering_->SetAngle(0, math::Angle(applied_angle));
-#endif
     }
     //ROS_INFO_NAMED("tricycle_drive", "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] ",
     //            target_speed, target_angle, current_speed, current_angle, applied_speed, applied_angle, applied_steering_speed );
@@ -409,9 +405,13 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
     }
     if ( odom_source_ == WORLD ) {
         // getting data form gazebo world
-        math::Pose pose = parent->GetWorldPose();
-        qt = tf::Quaternion ( pose.rot.x, pose.rot.y, pose.rot.z, pose.rot.w );
-        vt = tf::Vector3 ( pose.pos.x, pose.pos.y, pose.pos.z );
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d pose = parent->WorldPose();
+#else
+        ignition::math::Pose3d pose = parent->GetWorldPose().Ign();
+#endif
+        qt = tf::Quaternion ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
+        vt = tf::Vector3 ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
 
         odom_.pose.pose.position.x = vt.x();
         odom_.pose.pose.position.y = vt.y();
@@ -423,14 +423,19 @@ void GazeboRosTricycleDrive::publishOdometry ( double step_time )
         odom_.pose.pose.orientation.w = qt.w();
 
         // get velocity in /odom frame
-        math::Vector3 linear;
-        linear = parent->GetWorldLinearVel();
-        odom_.twist.twist.angular.z = parent->GetWorldAngularVel().z;
+        ignition::math::Vector3d linear;
+#if GAZEBO_MAJOR_VERSION >= 8
+        linear = parent->WorldLinearVel();
+        odom_.twist.twist.angular.z = parent->WorldAngularVel().Z();
+#else
+        linear = parent->GetWorldLinearVel().Ign();
+        odom_.twist.twist.angular.z = parent->GetWorldAngularVel().Ign().Z();
+#endif
 
         // convert velocity to child_frame_id (aka base_footprint)
-        float yaw = pose.rot.GetYaw();
-        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.x + sinf ( yaw ) * linear.y;
-        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.y - sinf ( yaw ) * linear.x;
+        float yaw = pose.Rot().Yaw();
+        odom_.twist.twist.linear.x = cosf ( yaw ) * linear.X() + sinf ( yaw ) * linear.Y();
+        odom_.twist.twist.linear.y = cosf ( yaw ) * linear.Y() - sinf ( yaw ) * linear.X();
     }
 
     tf::Transform base_footprint_to_odom ( qt, vt );
