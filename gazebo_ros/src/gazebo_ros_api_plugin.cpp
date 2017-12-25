@@ -639,9 +639,8 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
 #else
     ignition::math::Pose3d frame_pose = frame->GetWorldPose().Ign();
 #endif
-    gazebo::math::Pose frame_pose = frame->GetWorldPose();
-    initial_xyz = frame_pose.pos + frame_pose.rot.RotateVector(initial_xyz);
-    initial_q = frame_pose.rot * initial_q;
+    initial_xyz = frame_pose.Pos() + frame_pose.Rot().RotateVector(initial_xyz);
+    initial_q = frame_pose.Rot() * initial_q;
   }
 
   /// @todo: map is really wrong, need to use tf here somehow
