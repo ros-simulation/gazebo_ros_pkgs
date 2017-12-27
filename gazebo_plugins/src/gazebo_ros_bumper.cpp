@@ -183,9 +183,9 @@ void GazeboRosBumper::OnContact()
   /*
   if (myFrame)
   {
-    frame_pose = myFrame->GetWorldPose();  //-this->myBody->GetCoMPose();
-    frame_pos = frame_pose.pos;
-    frame_rot = frame_pose.rot;
+    frame_pose = myFrame->WorldPose();  //-this->myBody->GetCoMPose();
+    frame_pos = frame_pose.Pos();
+    frame_rot = frame_pose.Rot();
   }
   else
   */
