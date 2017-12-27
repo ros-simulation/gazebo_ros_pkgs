@@ -627,9 +627,9 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
 
   // refernce frame for initial pose definition, modify initial pose if defined
 #if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->EntityByName(req.reference_frame);
 #else
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.reference_frame);
 #endif
   if (frame)
   {
@@ -639,9 +639,8 @@ bool GazeboRosApiPlugin::spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
 #else
     ignition::math::Pose3d frame_pose = frame->GetWorldPose().Ign();
 #endif
-    initial_xyz = frame_pose.Rot().RotateVector(initial_xyz);
-    initial_xyz += frame_pose.Pos();
-    initial_q *= frame_pose.Rot();
+    initial_xyz = frame_pose.Pos() + frame_pose.Rot().RotateVector(initial_xyz);
+    initial_q = frame_pose.Rot() * initial_q;
   }
 
   /// @todo: map is really wrong, need to use tf here somehow
@@ -844,10 +843,10 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::ModelPtr model = world_->ModelByName(req.model_name);
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.relative_entity_name));
+  gazebo::physics::EntityPtr frame = world_->EntityByName(req.relative_entity_name);
 #else
   gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.relative_entity_name));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.relative_entity_name);
 #endif
   if (!model)
   {
@@ -906,12 +905,12 @@ bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
       ignition::math::Vector3d frame_vpos = frame->GetWorldLinearVel().Ign(); // get velocity in gazebo frame
       ignition::math::Vector3d frame_veul = frame->GetWorldAngularVel().Ign(); // get velocity in gazebo frame
 #endif
-      model_pos = model_pos - frame_pose.Pos();
-      model_pos = frame_pose.Rot().RotateVectorReverse(model_pos);
-      model_rot *= frame_pose.Rot().Inverse();
+      ignition::math::Pose3d model_rel_pose = model_pose - frame_pose;
+      model_pos = model_rel_pose.Pos();
+      model_rot = model_rel_pose.Rot();
 
-      model_linear_vel = frame_pose.Rot().RotateVector(model_linear_vel - frame_vpos);
-      model_angular_vel = frame_pose.Rot().RotateVector(model_angular_vel - frame_veul);
+      model_linear_vel = frame_pose.Rot().RotateVectorReverse(model_linear_vel - frame_vpos);
+      model_angular_vel = frame_pose.Rot().RotateVectorReverse(model_angular_vel - frame_veul);
     }
     /// @todo: FIXME map is really wrong, need to use tf here somehow
     else if (req.relative_entity_name == "" || req.relative_entity_name == "world" || req.relative_entity_name == "map" || req.relative_entity_name == "/map")
@@ -1142,10 +1141,10 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.link_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->EntityByName(req.reference_frame);
 #else
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.reference_frame);
 #endif
 
   if (!body)
@@ -1179,12 +1178,10 @@ bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
     ignition::math::Vector3d frame_vpos = frame->GetWorldLinearVel().Ign(); // get velocity in gazebo frame
     ignition::math::Vector3d frame_veul = frame->GetWorldAngularVel().Ign(); // get velocity in gazebo frame
 #endif
-    body_pose.Pos() = body_pose.Pos() - frame_pose.Pos();
-    body_pose.Pos() = frame_pose.Rot().RotateVectorReverse(body_pose.Pos());
-    body_pose.Rot() *= frame_pose.Rot().Inverse();
+    body_pose = body_pose - frame_pose;
 
-    body_vpos = frame_pose.Rot().RotateVector(body_vpos - frame_vpos);
-    body_veul = frame_pose.Rot().RotateVector(body_veul - frame_veul);
+    body_vpos = frame_pose.Rot().RotateVectorReverse(body_vpos - frame_vpos);
+    body_veul = frame_pose.Rot().RotateVectorReverse(body_veul - frame_veul);
   }
   /// @todo: FIXME map is really wrong, need to use tf here somehow
   else if (req.reference_frame == "" || req.reference_frame == "world" || req.reference_frame == "map" || req.reference_frame == "/map")
@@ -1337,8 +1334,8 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   {
     // stuff only works in ODE right now
     pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
-    pe->SetParam("precon_iters", req.ode_config.sor_pgs_precon_iters);
-    pe->SetParam("iters", req.ode_config.sor_pgs_iters);
+    pe->SetParam("precon_iters", int(req.ode_config.sor_pgs_precon_iters));
+    pe->SetParam("iters", int(req.ode_config.sor_pgs_iters));
     pe->SetParam("sor", req.ode_config.sor_pgs_w);
     pe->SetParam("cfm", req.ode_config.cfm);
     pe->SetParam("erp", req.ode_config.erp);
@@ -1346,7 +1343,7 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
         req.ode_config.contact_surface_layer);
     pe->SetParam("contact_max_correcting_vel",
         req.ode_config.contact_max_correcting_vel);
-    pe->SetParam("max_contacts", req.ode_config.max_contacts);
+    pe->SetParam("max_contacts", int(req.ode_config.max_contacts));
 
     world_->SetPaused(is_paused);
 
@@ -1487,9 +1484,9 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
   else
   {
 #if GAZEBO_MAJOR_VERSION >= 8
-    gazebo::physics::LinkPtr relative_entity = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.model_state.reference_frame));
+    gazebo::physics::EntityPtr relative_entity = world_->EntityByName(req.model_state.reference_frame);
 #else
-    gazebo::physics::LinkPtr relative_entity = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.model_state.reference_frame));
+    gazebo::physics::EntityPtr relative_entity = world_->GetEntity(req.model_state.reference_frame);
 #endif
     if (relative_entity)
     {
@@ -1498,22 +1495,13 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
 #else
       ignition::math::Pose3d  frame_pose = relative_entity->GetWorldPose().Ign(); // - myBody->GetCoMPose();
 #endif
-      ignition::math::Vector3d frame_pos = frame_pose.Pos();
-      ignition::math::Quaterniond frame_rot = frame_pose.Rot();
 
-      //std::cout << " debug : " << relative_entity->GetName() << " : " << frame_pose << " : " << target_pose << std::endl;
-      //target_pose = frame_pose + target_pose; // seems buggy, use my own
-#if GAZEBO_MAJOR_VERSION >= 8
-      target_pose.Pos() = model->WorldPose().Pos() + frame_rot.RotateVector(target_pos);
-#else
-      target_pose.Pos() = model->GetWorldPose().Ign().Pos() + frame_rot.RotateVector(target_pos);
-#endif
-      target_pose.Rot() = frame_rot * target_pose.Rot();
+      target_pose = target_pose + frame_pose;
 
       // Velocities should be commanded in the requested reference
       // frame, so we need to translate them to the world frame
-      target_pos_dot = frame_rot.RotateVector(target_pos_dot);
-      target_rot_dot = frame_rot.RotateVector(target_rot_dot);
+      target_pos_dot = frame_pose.Rot().RotateVector(target_pos_dot);
+      target_rot_dot = frame_pose.Rot().RotateVector(target_rot_dot);
     }
     /// @todo: FIXME map is really wrong, need to use tf here somehow
     else if (req.model_state.reference_frame == "" || req.model_state.reference_frame == "world" || req.model_state.reference_frame == "map" || req.model_state.reference_frame == "/map" )
@@ -1733,7 +1721,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
   gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.link_state.reference_frame));
 #else
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.link_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.link_state.reference_frame);
 #endif
   if (!body)
   {
@@ -1767,9 +1755,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
     ignition::math::Quaterniond frame_rot = frame_pose.Rot();
 
     //std::cout << " debug : " << frame->GetName() << " : " << frame_pose << " : " << target_pose << std::endl;
-    //target_pose = frame_pose + target_pose; // seems buggy, use my own
-    target_pose.Pos() = frame_pos + frame_rot.RotateVector(target_pos);
-    target_pose.Rot() = frame_rot * target_pose.Rot();
+    target_pose = target_pose + frame_pose;
 
     target_linear_vel -= frame_linear_vel;
     target_angular_vel -= frame_angular_vel;
@@ -1780,7 +1766,7 @@ bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
   }
   else
   {
-    ROS_ERROR_NAMED("api_plugin", "Updating LinkState: reference_frame is not a valid link name");
+    ROS_ERROR_NAMED("api_plugin", "Updating LinkState: reference_frame is not a valid entity name");
     res.success = false;
     res.status_message = "SetLinkState: failed";
     return true;
@@ -1830,10 +1816,10 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.body_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->EntityByName(req.reference_frame);
 #else
   gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.body_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.reference_frame));
+  gazebo::physics::EntityPtr frame = world_->GetEntity(req.reference_frame);
 #endif
   if (!body)
   {
@@ -1926,7 +1912,7 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   }
   else
   {
-    ROS_ERROR_NAMED("api_plugin", "ApplyBodyWrench: reference_frame is not a valid link name");
+    ROS_ERROR_NAMED("api_plugin", "ApplyBodyWrench: reference_frame is not a valid entity name");
     res.success = false;
     res.status_message = "ApplyBodyWrench: reference_frame not found";
     return true;
