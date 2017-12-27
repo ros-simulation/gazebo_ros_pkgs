@@ -1329,11 +1329,15 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   world_->SetGravity(ignition::math::Vector3d(req.gravity.x,req.gravity.y,req.gravity.z));
 
   // supported updates
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
+#else
   gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
+#endif
   pe->SetMaxStepSize(req.time_step);
   pe->SetRealTimeUpdateRate(req.max_update_rate);
 
-  if (world_->GetPhysicsEngine()->GetType() == "ode")
+  if (pe->GetType() == "ode")
   {
     // stuff only works in ODE right now
     pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
@@ -1356,9 +1360,9 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   else
   {
     /// \TODO: add support for simbody, dart and bullet physics properties.
-    ROS_ERROR_NAMED("api_plugin", "ROS set_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    ROS_ERROR_NAMED("api_plugin", "ROS set_physics_properties service call does not yet support physics engine [%s].", pe->GetType().c_str());
     res.success = false;
-    res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: set_physics_properties not supported.";
+    res.status_message = "Physics engine [" + pe->GetType() + "]: set_physics_properties not supported.";
   }
   return res.success;
 }
@@ -1367,35 +1371,40 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
                                               gazebo_msgs::GetPhysicsProperties::Response &res)
 {
   // supported updates
-  res.time_step = world_->GetPhysicsEngine()->GetMaxStepSize();
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
+#else
+  gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
+#endif
+  res.time_step = pe->GetMaxStepSize();
   res.pause = world_->IsPaused();
-  res.max_update_rate = world_->GetPhysicsEngine()->GetRealTimeUpdateRate();
+  res.max_update_rate = pe->GetRealTimeUpdateRate();
   ignition::math::Vector3d gravity = world_->Gravity();
   res.gravity.x = gravity.X();
   res.gravity.y = gravity.Y();
   res.gravity.z = gravity.Z();
 
   // stuff only works in ODE right now
-  if (world_->GetPhysicsEngine()->GetType() == "ode")
+  if (pe->GetType() == "ode")
   {
     res.ode_config.auto_disable_bodies =
-      world_->GetPhysicsEngine()->GetAutoDisableFlag();
+      pe->GetAutoDisableFlag();
     res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
-      world_->GetPhysicsEngine()->GetParam("precon_iters"));
+      pe->GetParam("precon_iters"));
     res.ode_config.sor_pgs_iters = boost::any_cast<int>(
-        world_->GetPhysicsEngine()->GetParam("iters"));
+        pe->GetParam("iters"));
     res.ode_config.sor_pgs_w = boost::any_cast<double>(
-        world_->GetPhysicsEngine()->GetParam("sor"));
+        pe->GetParam("sor"));
     res.ode_config.contact_surface_layer = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("contact_surface_layer"));
+      pe->GetParam("contact_surface_layer"));
     res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("contact_max_correcting_vel"));
+      pe->GetParam("contact_max_correcting_vel"));
     res.ode_config.cfm = boost::any_cast<double>(
-        world_->GetPhysicsEngine()->GetParam("cfm"));
+        pe->GetParam("cfm"));
     res.ode_config.erp = boost::any_cast<double>(
-        world_->GetPhysicsEngine()->GetParam("erp"));
+        pe->GetParam("erp"));
     res.ode_config.max_contacts = boost::any_cast<int>(
-      world_->GetPhysicsEngine()->GetParam("max_contacts"));
+      pe->GetParam("max_contacts"));
 
     res.success = true;
     res.status_message = "GetPhysicsProperties: got properties";
@@ -1403,9 +1412,9 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   else
   {
     /// \TODO: add support for simbody, dart and bullet physics properties.
-    ROS_ERROR_NAMED("api_plugin", "ROS get_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    ROS_ERROR_NAMED("api_plugin", "ROS get_physics_properties service call does not yet support physics engine [%s].", pe->GetType().c_str());
     res.success = false;
-    res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: get_physics_properties not supported.";
+    res.status_message = "Physics engine [" + pe->GetType() + "]: get_physics_properties not supported.";
   }
   return res.success;
 }
