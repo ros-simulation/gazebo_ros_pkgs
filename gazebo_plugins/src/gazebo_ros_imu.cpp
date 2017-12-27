@@ -175,7 +175,11 @@ void GazeboRosIMU::LoadThread()
   }
 
   // Initialize the controller
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_time_ = this->world_->SimTime();
+#else
   this->last_time_ = this->world_->GetSimTime();
+#endif
 
   // this->initial_pose_ = this->link->GetPose();
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -212,7 +216,11 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 // Update the controller
 void GazeboRosIMU::UpdateChild()
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  common::Time cur_time = this->world_->SimTime();
+#else
   common::Time cur_time = this->world_->GetSimTime();
+#endif
 
   // rate control
   if (this->update_rate_ > 0 &&
