@@ -4,6 +4,7 @@ project(gazebo_ros)
 find_package(catkin REQUIRED COMPONENTS
   gazebo_dev
   cmake_modules
+  rosbag
   roslib
   roscpp
   geometry_msgs
@@ -34,6 +35,7 @@ catkin_package(
   LIBRARIES
     gazebo_ros_api_plugin
     gazebo_ros_paths_plugin
+    gazebo_rosbag_plugin
 
   CATKIN_DEPENDS
     roslib
@@ -81,8 +83,14 @@ set_target_properties(gazebo_ros_paths_plugin PROPERTIES COMPILE_FLAGS "${cxx_fl
 set_target_properties(gazebo_ros_paths_plugin PROPERTIES LINK_FLAGS "${ld_flags}")
 target_link_libraries(gazebo_ros_paths_plugin ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_library(gazebo_rosbag_plugin src/gazebo_rosbag_plugin.cpp)
+add_dependencies(gazebo_rosbag_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+set_target_properties(gazebo_rosbag_plugin PROPERTIES COMPILE_FLAGS "${cxx_flags}")
+set_target_properties(gazebo_rosbag_plugin PROPERTIES LINK_FLAGS "${ld_flags}")
+target_link_libraries(gazebo_rosbag_plugin ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 # Install Gazebo System Plugins
-install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
+install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin gazebo_rosbag_plugin
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
 
