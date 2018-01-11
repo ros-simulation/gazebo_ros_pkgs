@@ -435,7 +435,11 @@ void GazeboRosOpenniKinect::PublishCameraInfo()
   if (this->depth_info_connect_count_ > 0)
   {
     this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
+#if GAZEBO_MAJOR_VERSION >= 8
+    common::Time cur_time = this->world_->SimTime();
+#else
     common::Time cur_time = this->world_->GetSimTime();
+#endif
     if (this->sensor_update_time_ - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
     {
       this->PublishCameraInfo(this->depth_image_camera_info_pub_);
