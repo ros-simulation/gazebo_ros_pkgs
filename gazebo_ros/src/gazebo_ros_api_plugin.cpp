@@ -505,7 +505,11 @@ void GazeboRosApiPlugin::advertiseServices()
 
   // todo: contemplate setting environment variable ROBOT=sim here???
   nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
+#if GAZEBO_MAJOR_VERSION >= 8
+  last_pub_clock_time_ = world_->SimTime();
+#else
   last_pub_clock_time_ = world_->GetSimTime();
+#endif
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
@@ -1016,12 +1020,13 @@ bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Req
 bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Request &req,
                                             gazebo_msgs::GetWorldProperties::Response &res)
 {
-  res.sim_time = world_->GetSimTime().Double();
   res.model_names.clear();
 #if GAZEBO_MAJOR_VERSION >= 8
+  res.sim_time = world_->SimTime().Double();
   for (unsigned int i = 0; i < world_->ModelCount(); i ++)
     res.model_names.push_back(world_->ModelByIndex(i)->GetName());
 #else
+  res.sim_time = world_->GetSimTime().Double();
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
     res.model_names.push_back(world_->GetModel(i)->GetName());
 #endif
@@ -1326,11 +1331,15 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   world_->SetGravity(ignition::math::Vector3d(req.gravity.x,req.gravity.y,req.gravity.z));
 
   // supported updates
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
+#else
   gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
+#endif
   pe->SetMaxStepSize(req.time_step);
   pe->SetRealTimeUpdateRate(req.max_update_rate);
 
-  if (world_->GetPhysicsEngine()->GetType() == "ode")
+  if (pe->GetType() == "ode")
   {
     // stuff only works in ODE right now
     pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
@@ -1353,9 +1362,9 @@ bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties:
   else
   {
     /// \TODO: add support for simbody, dart and bullet physics properties.
-    ROS_ERROR_NAMED("api_plugin", "ROS set_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    ROS_ERROR_NAMED("api_plugin", "ROS set_physics_properties service call does not yet support physics engine [%s].", pe->GetType().c_str());
     res.success = false;
-    res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: set_physics_properties not supported.";
+    res.status_message = "Physics engine [" + pe->GetType() + "]: set_physics_properties not supported.";
   }
   return res.success;
 }
@@ -1364,35 +1373,40 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
                                               gazebo_msgs::GetPhysicsProperties::Response &res)
 {
   // supported updates
-  res.time_step = world_->GetPhysicsEngine()->GetMaxStepSize();
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
+#else
+  gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
+#endif
+  res.time_step = pe->GetMaxStepSize();
   res.pause = world_->IsPaused();
-  res.max_update_rate = world_->GetPhysicsEngine()->GetRealTimeUpdateRate();
+  res.max_update_rate = pe->GetRealTimeUpdateRate();
   ignition::math::Vector3d gravity = world_->Gravity();
   res.gravity.x = gravity.X();
   res.gravity.y = gravity.Y();
   res.gravity.z = gravity.Z();
 
   // stuff only works in ODE right now
-  if (world_->GetPhysicsEngine()->GetType() == "ode")
+  if (pe->GetType() == "ode")
   {
     res.ode_config.auto_disable_bodies =
-      world_->GetPhysicsEngine()->GetAutoDisableFlag();
+      pe->GetAutoDisableFlag();
     res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
-      world_->GetPhysicsEngine()->GetParam("precon_iters"));
+      pe->GetParam("precon_iters"));
     res.ode_config.sor_pgs_iters = boost::any_cast<int>(
-        world_->GetPhysicsEngine()->GetParam("iters"));
+        pe->GetParam("iters"));
     res.ode_config.sor_pgs_w = boost::any_cast<double>(
-        world_->GetPhysicsEngine()->GetParam("sor"));
+        pe->GetParam("sor"));
     res.ode_config.contact_surface_layer = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("contact_surface_layer"));
+      pe->GetParam("contact_surface_layer"));
     res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
-      world_->GetPhysicsEngine()->GetParam("contact_max_correcting_vel"));
+      pe->GetParam("contact_max_correcting_vel"));
     res.ode_config.cfm = boost::any_cast<double>(
-        world_->GetPhysicsEngine()->GetParam("cfm"));
+        pe->GetParam("cfm"));
     res.ode_config.erp = boost::any_cast<double>(
-        world_->GetPhysicsEngine()->GetParam("erp"));
+        pe->GetParam("erp"));
     res.ode_config.max_contacts = boost::any_cast<int>(
-      world_->GetPhysicsEngine()->GetParam("max_contacts"));
+      pe->GetParam("max_contacts"));
 
     res.success = true;
     res.status_message = "GetPhysicsProperties: got properties";
@@ -1400,9 +1414,9 @@ bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties:
   else
   {
     /// \TODO: add support for simbody, dart and bullet physics properties.
-    ROS_ERROR_NAMED("api_plugin", "ROS get_physics_properties service call does not yet support physics engine [%s].", world_->GetPhysicsEngine()->GetType().c_str());
+    ROS_ERROR_NAMED("api_plugin", "ROS get_physics_properties service call does not yet support physics engine [%s].", pe->GetType().c_str());
     res.success = false;
-    res.status_message = "Physics engine [" + world_->GetPhysicsEngine()->GetType() + "]: get_physics_properties not supported.";
+    res.status_message = "Physics engine [" + pe->GetType() + "]: get_physics_properties not supported.";
   }
   return res.success;
 }
@@ -1566,8 +1580,13 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
       fjj->joint = joint;
       fjj->force = req.effort;
       fjj->start_time = req.start_time;
+#if GAZEBO_MAJOR_VERSION >= 8
+      if (fjj->start_time < ros::Time(world_->SimTime().Double()))
+        fjj->start_time = ros::Time(world_->SimTime().Double());
+#else
       if (fjj->start_time < ros::Time(world_->GetSimTime().Double()))
         fjj->start_time = ros::Time(world_->GetSimTime().Double());
+#endif
       fjj->duration = req.duration;
       lock_.lock();
       force_joint_jobs_.push_back(fjj);
@@ -1927,8 +1946,13 @@ bool GazeboRosApiPlugin::applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &
   wej->force = target_force;
   wej->torque = target_torque;
   wej->start_time = req.start_time;
+#if GAZEBO_MAJOR_VERSION >= 8
+  if (wej->start_time < ros::Time(world_->SimTime().Double()))
+    wej->start_time = ros::Time(world_->SimTime().Double());
+#else
   if (wej->start_time < ros::Time(world_->GetSimTime().Double()))
     wej->start_time = ros::Time(world_->GetSimTime().Double());
+#endif
   wej->duration = req.duration;
   lock_.lock();
   wrench_body_jobs_.push_back(wej);
@@ -1969,8 +1993,13 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
   for (std::vector<GazeboRosApiPlugin::WrenchBodyJob*>::iterator iter=wrench_body_jobs_.begin();iter!=wrench_body_jobs_.end();)
   {
     // check times and apply wrench if necessary
-    if (ros::Time(world_->GetSimTime().Double()) >= (*iter)->start_time)
-      if (ros::Time(world_->GetSimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
+#if GAZEBO_MAJOR_VERSION >= 8
+    ros::Time simTime = ros::Time(world_->SimTime().Double());
+#else
+    ros::Time simTime = ros::Time(world_->GetSimTime().Double());
+#endif
+    if (simTime >= (*iter)->start_time)
+      if (simTime <= (*iter)->start_time+(*iter)->duration ||
           (*iter)->duration.toSec() < 0.0)
       {
         if ((*iter)->body) // if body exists
@@ -1982,7 +2011,7 @@ void GazeboRosApiPlugin::wrenchBodySchedulerSlot()
           (*iter)->duration.fromSec(0.0); // mark for delete
       }
 
-    if (ros::Time(world_->GetSimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
+    if (simTime > (*iter)->start_time+(*iter)->duration &&
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
@@ -2003,8 +2032,13 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
   for (std::vector<GazeboRosApiPlugin::ForceJointJob*>::iterator iter=force_joint_jobs_.begin();iter!=force_joint_jobs_.end();)
   {
     // check times and apply force if necessary
-    if (ros::Time(world_->GetSimTime().Double()) >= (*iter)->start_time)
-      if (ros::Time(world_->GetSimTime().Double()) <= (*iter)->start_time+(*iter)->duration ||
+#if GAZEBO_MAJOR_VERSION >= 8
+    ros::Time simTime = ros::Time(world_->SimTime().Double());
+#else
+    ros::Time simTime = ros::Time(world_->GetSimTime().Double());
+#endif
+    if (simTime >= (*iter)->start_time)
+      if (simTime <= (*iter)->start_time+(*iter)->duration ||
           (*iter)->duration.toSec() < 0.0)
       {
         if ((*iter)->joint) // if joint exists
@@ -2013,7 +2047,7 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
           (*iter)->duration.fromSec(0.0); // mark for delete
       }
 
-    if (ros::Time(world_->GetSimTime().Double()) > (*iter)->start_time+(*iter)->duration &&
+    if (simTime > (*iter)->start_time+(*iter)->duration &&
         (*iter)->duration.toSec() >= 0.0)
     {
       // remove from queue once expires
@@ -2028,7 +2062,11 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
 void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
 {
   ROS_ERROR_NAMED("api_plugin", "CLOCK2");
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::common::Time sim_time = world_->SimTime();
+#else
   gazebo::common::Time sim_time = world_->GetSimTime();
+#endif
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
 
@@ -2041,11 +2079,19 @@ void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::Wo
 }
 void GazeboRosApiPlugin::publishSimTime()
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::common::Time sim_time = world_->SimTime();
+#else
   gazebo::common::Time sim_time = world_->GetSimTime();
+#endif
   if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
     return;
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  gazebo::common::Time currentTime = world_->SimTime();
+#else
   gazebo::common::Time currentTime = world_->GetSimTime();
+#endif
   rosgraph_msgs::Clock ros_time_;
   ros_time_.clock.fromSec(currentTime.Double());
   //  publish time to ros

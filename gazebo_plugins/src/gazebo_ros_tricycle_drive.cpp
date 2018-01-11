@@ -116,7 +116,11 @@ void GazeboRosTricycleDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _
     // Initialize update rate stuff
     if ( this->update_rate_ > 0.0 ) this->update_period_ = 1.0 / this->update_rate_;
     else this->update_period_ = 0.0;
+#if GAZEBO_MAJOR_VERSION >= 8
+    last_actuator_update_ = parent->GetWorld()->SimTime();
+#else
     last_actuator_update_ = parent->GetWorld()->GetSimTime();
+#endif
 
     // Initialize velocity stuff
     alive_ = true;
@@ -207,7 +211,11 @@ void GazeboRosTricycleDrive::publishWheelTF()
 void GazeboRosTricycleDrive::UpdateChild()
 {
     if ( odom_source_ == ENCODER ) UpdateOdometryEncoder();
+#if GAZEBO_MAJOR_VERSION >= 8
+    common::Time current_time = parent->GetWorld()->SimTime();
+#else
     common::Time current_time = parent->GetWorld()->GetSimTime();
+#endif
     double seconds_since_last_update = ( current_time - last_actuator_update_ ).Double();
     if ( seconds_since_last_update > update_period_ ) {
 
@@ -345,7 +353,11 @@ void GazeboRosTricycleDrive::UpdateOdometryEncoder()
 {
     double vl = joint_wheel_encoder_left_->GetVelocity ( 0 );
     double vr = joint_wheel_encoder_right_->GetVelocity ( 0 );
+#if GAZEBO_MAJOR_VERSION >= 8
+    common::Time current_time = parent->GetWorld()->SimTime();
+#else
     common::Time current_time = parent->GetWorld()->GetSimTime();
+#endif
     double seconds_since_last_update = ( current_time - last_odom_update_ ).Double();
     last_odom_update_ = current_time;
 

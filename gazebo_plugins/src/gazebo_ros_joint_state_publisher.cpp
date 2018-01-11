@@ -78,7 +78,11 @@ void GazeboRosJointStatePublisher::Load ( physics::ModelPtr _parent, sdf::Elemen
     } else {
         this->update_period_ = 0.0;
     }
+#if GAZEBO_MAJOR_VERSION >= 8
+    last_update_time_ = this->world_->SimTime();
+#else
     last_update_time_ = this->world_->GetSimTime();
+#endif
 
     for ( unsigned int i = 0; i< joint_names_.size(); i++ ) {
         physics::JointPtr joint = this->parent_->GetJoint(joint_names_[i]);
@@ -94,7 +98,11 @@ void GazeboRosJointStatePublisher::Load ( physics::ModelPtr _parent, sdf::Elemen
     tf_prefix_ = tf::getPrefixParam ( *rosnode_ );
     joint_state_publisher_ = rosnode_->advertise<sensor_msgs::JointState> ( "joint_states",1000 );
 
+#if GAZEBO_MAJOR_VERSION >= 8
+    last_update_time_ = this->world_->SimTime();
+#else
     last_update_time_ = this->world_->GetSimTime();
+#endif
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     this->updateConnection = event::Events::ConnectWorldUpdateBegin (
@@ -103,7 +111,11 @@ void GazeboRosJointStatePublisher::Load ( physics::ModelPtr _parent, sdf::Elemen
 
 void GazeboRosJointStatePublisher::OnUpdate ( const common::UpdateInfo & _info ) {
     // Apply a small linear velocity to the model.
+#if GAZEBO_MAJOR_VERSION >= 8
+    common::Time current_time = this->world_->SimTime();
+#else
     common::Time current_time = this->world_->GetSimTime();
+#endif
     double seconds_since_last_update = ( current_time - last_update_time_ ).Double();
     if ( seconds_since_last_update > update_period_ ) {
 
