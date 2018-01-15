@@ -73,11 +73,21 @@ void MultiCameraPlugin::Load(sensors::SensorPtr _sensor,
     std::string cameraName = this->parentSensor->Camera(i)->Name();
     // gzdbg << "camera(" << i << ") name [" << cameraName << "]\n";
 
+    if ( this->parentSensor->CameraCount() <= 2 ) {
+      if (cameraName.find("left") == std::string::npos &&
+          cameraName.find("right") == std::string::npos   ) {
+        // legacy: if only two cameras, must have "left" or "right"
+        //  in name to be added; otherwise ignored
+        continue;
+      }
+    }
+    
     ROS_INFO_NAMED("MultiCameraPlugin", "%s loaded with index %d",
                    cameraName.c_str(), i);
-
-    this->newFrameConnection.push_back(this->camera[i]->ConnectNewImageFrame(
-        boost::bind(&MultiCameraPlugin::OnNewFrame,
+    
+    this->newFrameConnection.push_back
+      (this->camera[i]->ConnectNewImageFrame
+       (boost::bind(&MultiCameraPlugin::OnNewFrame,
                     this, i, _1, _2, _3, _4, _5)));
   }
 
@@ -93,4 +103,3 @@ void MultiCameraPlugin::OnNewFrame(const unsigned int camNumber,
                                    const std::string &/*_format*/)
 {
 }
-
