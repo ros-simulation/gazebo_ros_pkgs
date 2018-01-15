@@ -44,14 +44,12 @@ namespace gazebo
 
     protected: void OnNewFrame(const unsigned char *_image,
                    GazeboRosCameraUtils* util);
-    /// \brief Update the controller
-    /// FIXME: switch to function vectors
-    protected: virtual void OnNewFrameLeft(const unsigned char *_image,
-                   unsigned int _width, unsigned int _height,
-                   unsigned int _depth, const std::string &_format);
-    protected: virtual void OnNewFrameRight(const unsigned char *_image,
-                   unsigned int _width, unsigned int _height,
-                   unsigned int _depth, const std::string &_format);
+
+    public: virtual void OnNewFrame(const unsigned int camNumber,
+                                    const unsigned char *_image,
+                                    unsigned int _width, unsigned int _height,
+                                    unsigned int _depth,
+                                    const std::string &_format);
 
     /// Bookkeeping flags that will be passed into the underlying
     /// GazeboRosCameraUtils objects to let them share state about the parent

@@ -77,17 +77,22 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     util->image_connect_count_ = this->image_connect_count_;
     util->image_connect_count_lock_ = this->image_connect_count_lock_;
     util->was_active_ = this->was_active_;
-    if (this->camera[i]->Name().find("left") != std::string::npos)
-    {
-      // FIXME: hardcoded, left hack_baseline_ 0
-      util->Load(_parent, _sdf, "/left", 0.0);
-    }
-    else if (this->camera[i]->Name().find("right") != std::string::npos)
-    {
-      double hackBaseline = 0.0;
-      if (_sdf->HasElement("hackBaseline"))
-        hackBaseline = _sdf->Get<double>("hackBaseline");
-      util->Load(_parent, _sdf, "/right", hackBaseline);
+
+    if ( camera.size() <= 2 ) {
+      if (this->camera[i]->Name().find("left") != std::string::npos)
+        {
+          // FIXME: hardcoded, left hack_baseline_ 0
+          util->Load(_parent, _sdf, "/left", 0.0);
+        }
+      else if (this->camera[i]->Name().find("right") != std::string::npos)
+        {
+          double hackBaseline = 0.0;
+          if (_sdf->HasElement("hackBaseline"))
+            hackBaseline = _sdf->Get<double>("hackBaseline");
+          util->Load(_parent, _sdf, "/right", hackBaseline);
+        }
+    } else {
+      util->Load(_parent, _sdf, this->camera[i]->Name(), 0.0);
     }
     this->utils.push_back(util);
   }
@@ -111,20 +116,19 @@ void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
   }
 }
 
-// Update the controller
-void GazeboRosMultiCamera::OnNewFrameLeft(const unsigned char *_image,
-    unsigned int _width, unsigned int _height, unsigned int _depth,
-    const std::string &_format)
+void GazeboRosMultiCamera::OnNewFrame(const unsigned int camNumber,
+                                      const unsigned char *_image,
+                                      unsigned int _width, unsigned int _height,
+                                      unsigned int _depth,
+                                      const std::string &_format)
 {
-  OnNewFrame(_image, this->utils[0]);
+  if ( camNumber >= utils.size() ) {
+    gzerr << "could not find camera " << camNumber;
+    return;
+  }
+
+  return OnNewFrame(_image, this->utils[camNumber]);
+}
+  
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Update the controller
-void GazeboRosMultiCamera::OnNewFrameRight(const unsigned char *_image,
-    unsigned int _width, unsigned int _height, unsigned int _depth,
-    const std::string &_format)
-{
-  OnNewFrame(_image, this->utils[1]);
-}
-}
