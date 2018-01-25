@@ -133,9 +133,11 @@ void GazeboRosJointStatePublisher::publishJointStates() {
     joint_state_.header.stamp = current_time;
     joint_state_.name.resize ( joints_.size() );
     joint_state_.position.resize ( joints_.size() );
+    joint_state_.velocity.resize ( joints_.size() );
 
     for ( int i = 0; i < joints_.size(); i++ ) {
         physics::JointPtr joint = joints_[i];
+        double velocity = joint->GetVelocity( 0 );
 #if GAZEBO_MAJOR_VERSION >= 8
         double position = joint->Position ( 0 );
 #else
@@ -143,6 +145,7 @@ void GazeboRosJointStatePublisher::publishJointStates() {
 #endif
         joint_state_.name[i] = joint->GetName();
         joint_state_.position[i] = position;
+        joint_state_.velocity[i] = velocity;
     }
     joint_state_publisher_.publish ( joint_state_ );
 }
