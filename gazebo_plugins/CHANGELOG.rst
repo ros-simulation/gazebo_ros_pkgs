@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.4 (2018-02-12)
+------------------
 * Adding velocity to joint state publisher gazebo plugin (`#671 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/671>`_)
 * Fix last gazebo8 warnings! (lunar-devel) (`#664 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/664>`_)
 * Fix gazebo8 warnings part 7: retry `#642 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/642>`_ on lunar (`#660 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/660>`_)
