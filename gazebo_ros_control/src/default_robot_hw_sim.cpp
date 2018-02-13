@@ -205,7 +205,7 @@ bool DefaultRobotHWSim::initSim(
     {
       // Initialize the PID controller. If no PID gain values are found, use joint->SetAngle() or
       // joint->SetParam("vel") to control the joint.
-      const ros::NodeHandle nh(model_nh, "gazebo_ros_control/pid_gains/" +
+      const ros::NodeHandle nh(robot_namespace + "/gazebo_ros_control/pid_gains/" +
                                joint_names_[j]);
       if (pid_controllers_[j].init(nh, true))
       {
