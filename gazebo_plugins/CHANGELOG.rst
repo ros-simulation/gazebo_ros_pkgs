@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.15 (2018-02-12)
+-------------------
 * Merge pull request `#669 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/669>`_ from ahcorde/kinetic-devel
 * Adding velocity to joint state publisher gazebo plugin
 * Fix last gazebo8 warnings! (`#658 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/658>`_)
