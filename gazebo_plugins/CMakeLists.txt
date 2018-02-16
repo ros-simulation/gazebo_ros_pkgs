@@ -421,5 +421,9 @@ if (CATKIN_ENABLE_TESTING)
                       test/camera/distortion_pincushion.test
                       test/camera/distortion_pincushion.cpp)
     target_link_libraries(distortion_pincushion_test ${catkin_LIBRARIES})
+    add_rostest_gtest(triggered-camera-test
+                      test/camera/triggered_camera.test
+                      test/camera/triggered_camera.cpp)
+    target_link_libraries(triggered-camera-test ${catkin_LIBRARIES})
   endif()
 endif()
