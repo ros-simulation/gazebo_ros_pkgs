@@ -4,7 +4,7 @@
 
   <node name="gazebo" pkg="gazebo_ros" type="gzserver"
       respawn="false" output="screen"
-      args="-r $(find gazebo_plugins)/test/camera/multicamera.world" />
+      args="--verbose $(find gazebo_plugins)/test/camera/multicamera.world" />
 
   <test test-name="multicamera" pkg="gazebo_plugins" type="multicamera-test"
       clear_params="true" time-limit="15.0" />
