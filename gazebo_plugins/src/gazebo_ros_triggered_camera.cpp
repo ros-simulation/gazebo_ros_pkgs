@@ -107,6 +107,11 @@ void GazeboRosTriggeredCamera::TriggerCamera()
   this->triggered = true;
 }
 
+bool GazeboRosTriggeredCamera::CanTriggerCamera()
+{
+  return true;
+}
+
 void GazeboRosTriggeredCamera::PreRender()
 {
   std::lock_guard<std::mutex> lock(this->mutex);

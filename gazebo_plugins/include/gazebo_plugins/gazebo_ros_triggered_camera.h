@@ -58,6 +58,8 @@ namespace gazebo
 
     protected: virtual void TriggerCamera();
 
+    protected: virtual bool CanTriggerCamera();
+
     protected: event::ConnectionPtr preRenderConnection_;
 
     public: void SetCameraEnabled(const bool _enabled);
