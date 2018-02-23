@@ -91,6 +91,21 @@ TEST_F(MultiCameraTest, cameraSubscribeTest)
   ROS_INFO_STREAM(time_diff);
   EXPECT_LT(time_diff, 1.0);
   // cam_sub_.shutdown();
+
+  // make sure nothing is subscribing to image_trigger topic
+  // there is no easy API, so call getSystemState
+  XmlRpc::XmlRpcValue args, result, payload;
+  args[0] = ros::this_node::getName();
+  EXPECT_TRUE(ros::master::execute("getSystemState", args, result, payload, true));
+  // [publishers, subscribers, services]
+  // subscribers in index 1 of payload
+  for (int i = 0; i < payload[1].size(); ++i)
+  {
+    // [ [topic1, [topic1Subscriber1...topic1SubscriberN]] ... ]
+    // topic name i is in index 0
+    std::string topic = payload[1][i][0];
+    EXPECT_EQ(topic.find("image_trigger"), std::string::npos);
+  }
 }
 
 int main(int argc, char** argv)
