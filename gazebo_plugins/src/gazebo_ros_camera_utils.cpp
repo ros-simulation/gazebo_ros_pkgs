@@ -350,18 +350,26 @@ void GazeboRosCameraUtils::LoadThread()
   this->cameraUpdateRateSubscriber_ = this->rosnode_->subscribe(rate_so);
   */
 
-  ros::SubscribeOptions trigger_so =
-    ros::SubscribeOptions::create<std_msgs::Empty>(
-        this->trigger_topic_name_, 1,
-        boost::bind(&GazeboRosCameraUtils::TriggerCameraInternal, this, _1),
-        ros::VoidPtr(), &this->camera_queue_);
-  this->trigger_subscriber_ = this->rosnode_->subscribe(trigger_so);
+  if (this->CanTriggerCamera())
+  {
+    ros::SubscribeOptions trigger_so =
+      ros::SubscribeOptions::create<std_msgs::Empty>(
+          this->trigger_topic_name_, 1,
+          boost::bind(&GazeboRosCameraUtils::TriggerCameraInternal, this, _1),
+          ros::VoidPtr(), &this->camera_queue_);
+    this->trigger_subscriber_ = this->rosnode_->subscribe(trigger_so);
+  }
 
   this->Init();
 }
 
 void GazeboRosCameraUtils::TriggerCamera()
 {
+}
+
+bool GazeboRosCameraUtils::CanTriggerCamera()
+{
+  return false;
 }
 
 void GazeboRosCameraUtils::TriggerCameraInternal(

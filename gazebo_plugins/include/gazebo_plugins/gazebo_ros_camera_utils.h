@@ -210,7 +210,10 @@ namespace gazebo
     private: event::EventT<void()> load_event_;
 
     // make a trigger function that the child classes can override
+    // and a function that returns bool to indicate whether the trigger
+    // should be used
     protected: virtual void TriggerCamera();
+    protected: virtual bool CanTriggerCamera();
     private: void TriggerCameraInternal(const std_msgs::Empty::ConstPtr &dummy);
     private: ros::Subscriber trigger_subscriber_;
 
