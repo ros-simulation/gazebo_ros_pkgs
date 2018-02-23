@@ -5,7 +5,7 @@
   <node name="gazebo" pkg="gazebo_ros" type="gzserver"
       respawn="false"
       output="screen"
-      args="-r $(find gazebo_plugins)/test/camera/distortion_barrel.world" />
+      args="--verbose $(find gazebo_plugins)/test/camera/distortion_barrel.world" />
 
   <test test-name="distortion_barrel_test" pkg="gazebo_plugins"
       type="distortion_barrel_test" clear_params="true" time-limit="100.0" />
