@@ -386,7 +386,7 @@ if (CATKIN_ENABLE_TESTING)
     target_link_libraries(camera-test ${catkin_LIBRARIES})
     add_rostest_gtest(camera16bit-test
                       test/camera/camera16bit.test
-                      test/camera/camera.cpp)
+                      test/camera/camera16bit.cpp)
     target_link_libraries(camera16bit-test ${catkin_LIBRARIES})
     add_rostest_gtest(distortion_barrel_test
                       test/camera/distortion_barrel.test
