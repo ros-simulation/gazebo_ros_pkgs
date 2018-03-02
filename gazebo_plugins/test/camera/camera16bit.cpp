@@ -2,7 +2,7 @@
 
 // Test if the camera image is published at all, and that the timestamp
 // is not too long in the past.
-TEST_F(CameraTest, cameraSubscribeTest)
+TEST_F(CameraTest, camera16bitSubscribeTest)
 {
   subscribeTest();
 }
