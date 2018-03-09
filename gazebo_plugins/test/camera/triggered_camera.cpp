@@ -32,22 +32,13 @@ TEST_F(CameraTest, cameraSubscribeTest)
                           &CameraTest::imageCallback,
                           dynamic_cast<CameraTest*>(this));
 
-  // check for first image
-  while (!images_received_)
-  {
-    ros::spinOnce();
-    ros::Duration(0.1).sleep();
-  }
-
-  // then wait for 3 seconds to confirm that we don't receive any more images
-  images_received_ = 0;
+  // wait for 3 seconds to confirm that we don't receive any images
   for (unsigned int i = 0; i < 30; ++i)
   {
     ros::spinOnce();
     ros::Duration(0.1).sleep();
   }
   EXPECT_EQ(images_received_, 0);
-  images_received_ = 0;
 
   // make sure something is subscribing to image_trigger topic
   // there is no easy API, so call getSystemState

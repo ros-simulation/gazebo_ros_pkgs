@@ -64,6 +64,7 @@ void GazeboRosTriggeredCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr 
 
   GazeboRosCameraUtils::Load(_parent, _sdf);
 
+  this->SetCameraEnabled(false);
   this->preRenderConnection_ =
       event::Events::ConnectPreRender(
           std::bind(&GazeboRosTriggeredCamera::PreRender, this));
@@ -76,6 +77,7 @@ void GazeboRosTriggeredCamera::Load(sensors::SensorPtr _parent,
 {
   GazeboRosCameraUtils::Load(_parent, _sdf, _camera_name_suffix, _hack_baseline);
 
+  this->SetCameraEnabled(false);
   this->preRenderConnection_ =
       event::Events::ConnectPreRender(
       std::bind(&GazeboRosTriggeredCamera::PreRender, this));
