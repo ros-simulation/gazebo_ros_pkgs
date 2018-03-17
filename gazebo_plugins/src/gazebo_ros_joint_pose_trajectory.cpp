@@ -384,8 +384,13 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
             // this is not the most efficient way to set things
             if (this->joints_[i])
             {
+#if GAZEBO_MAJOR_VERSION >= 9
+              this->joints_[i]->SetPosition(0,
+                this->points_[this->trajectory_index].positions[i], true);
+#else
               this->joints_[i]->SetPosition(0,
                 this->points_[this->trajectory_index].positions[i]);
+#endif
             }
           }
 
