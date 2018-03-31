@@ -152,6 +152,10 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   else
     this->update_rate_ = this->sdf->Get<double>("updateRate");
 
+  this->always_on_ = false;
+  if (this->sdf->HasElement("alwaysOn"))
+    this->always_on_ = this->sdf->Get<bool>("alwaysOn");
+
   // prepare to throttle this plugin at the same rate
   // ideally, we should invoke a plugin update when the sensor updates,
   // have to think about how to do that properly later
@@ -212,8 +216,16 @@ void GazeboRosRange::LoadThread()
 
   // Initialize the controller
 
-  // sensor generation off by default
-  this->parent_ray_sensor_->SetActive(false);
+  if (this->always_on_)
+  {
+    // sensor generation on by default
+    this->parent_ray_sensor_->SetActive(true);
+  }
+  else
+  {
+    // sensor generation off by default
+    this->parent_ray_sensor_->SetActive(false);
+  }
   // start custom queue for range
   this->callback_queue_thread_ =
     boost::thread(boost::bind(&GazeboRosRange::RangeQueueThread, this));
@@ -224,7 +236,10 @@ void GazeboRosRange::LoadThread()
 void GazeboRosRange::RangeConnect()
 {
   this->range_connect_count_++;
-  this->parent_ray_sensor_->SetActive(true);
+  if (!this->always_on_)
+  {
+    this->parent_ray_sensor_->SetActive(true);
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
@@ -232,7 +247,7 @@ void GazeboRosRange::RangeDisconnect()
 {
   this->range_connect_count_--;
 
-  if (this->range_connect_count_ == 0)
+  if (!this->always_on_ && this->range_connect_count_ == 0)
     this->parent_ray_sensor_->SetActive(false);
 }
 

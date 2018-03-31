@@ -107,6 +107,9 @@ namespace gazebo
     /// update rate of this sensor
     private: double update_rate_;
 
+    /// \brief if false, sensor is only enabled if ROS subscribers are present
+    private: bool always_on_;
+
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
 

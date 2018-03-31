@@ -140,6 +140,10 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
   // FIXME:  update the update_rate_
 
+  this->always_on_ = false;
+  if (_sdf->HasElement("alwaysOn"))
+    this->always_on_ = _sdf->Get<bool>("alwaysOn");
+
 
   this->laser_connect_count_ = 0;
 
@@ -176,8 +180,16 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   // Initialize the controller
 
-  // sensor generation off by default
-  this->parent_ray_sensor_->SetActive(false);
+  if (this->always_on_)
+  {
+    // sensor generation on by default
+    this->parent_ray_sensor_->SetActive(true);
+  }
+  else
+  {
+    // sensor generation off by default
+    this->parent_ray_sensor_->SetActive(false);
+  }
   // start custom queue for laser
   this->callback_laser_queue_thread_ = boost::thread( boost::bind( &GazeboRosBlockLaser::LaserQueueThread,this ) );
 
@@ -188,7 +200,10 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 void GazeboRosBlockLaser::LaserConnect()
 {
   this->laser_connect_count_++;
-  this->parent_ray_sensor_->SetActive(true);
+  if (!this->always_on_)
+  {
+    this->parent_ray_sensor_->SetActive(true);
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
@@ -196,8 +211,10 @@ void GazeboRosBlockLaser::LaserDisconnect()
 {
   this->laser_connect_count_--;
 
-  if (this->laser_connect_count_ == 0)
+  if (!this->always_on_ && this->laser_connect_count_ == 0)
+  {
     this->parent_ray_sensor_->SetActive(false);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

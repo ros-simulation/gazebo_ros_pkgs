@@ -128,6 +128,9 @@ class GazeboRosRange : public RayPlugin
     private: double update_period_;
     private: common::Time last_update_time_;
 
+    /// \brief if false, sensor is only enabled if ROS subscribers are present
+    private: bool always_on_;
+
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
 
