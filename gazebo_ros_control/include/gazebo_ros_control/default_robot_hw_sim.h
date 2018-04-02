@@ -134,6 +134,8 @@ protected:
 
   std::vector<gazebo::physics::JointPtr> sim_joints_;
 
+  std::string physics_type_;
+
   // e_stop_active_ is true if the emergency stop is active.
   bool e_stop_active_, last_e_stop_active_;
 };
