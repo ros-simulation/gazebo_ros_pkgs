@@ -576,6 +576,18 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
     if (pos1 != std::string::npos && pos2 != std::string::npos)
       model_xml.replace(pos1,pos2-pos1+2,std::string(""));
   }
+  
+  // Remove comments from URDF
+  {
+    std::string open_comment("<!--");
+    std::string close_comment("-->");
+    size_t pos1;
+    while((pos1 = model_xml.find(open_comment,0)) != std::string::npos){
+      size_t pos2 = model_xml.find(close_comment,0);
+      if (pos2 != std::string::npos)
+        model_xml.replace(pos1,pos2-pos1+3,std::string(""));
+    }
+  }
 
   // Now, replace package://xxx with the full path to the package
   {
