@@ -12,11 +12,6 @@ topics:
   - topic: /rosout
     type: rosgraph_msgs/Log
     num_publishers: -1
-    num_subscribers: 1
-
-  - topic: /rosout_agg
-    type: rosgraph_msgs/Log
-    num_publishers: 1
     num_subscribers: -1
 
   # Gazebo
@@ -53,13 +48,6 @@ topics:
 ##########################################################
 # Published services
 services:
-  # System
-  - service: /rosout/get_loggers
-    type: roscpp/GetLoggers
-
-  - service: /rosout/set_logger_level
-    type: roscpp/SetLoggerLevel
-
   # Gazebo
   - service: /gazebo/apply_joint_effort
     type: gazebo_msgs/ApplyJointEffort

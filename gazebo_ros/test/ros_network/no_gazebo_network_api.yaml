@@ -12,23 +12,12 @@ topics:
   - topic: /rosout
     type: rosgraph_msgs/Log
     num_publishers: -1
-    num_subscribers: 1
-
-  - topic: /rosout_agg
-    type: rosgraph_msgs/Log
-    num_publishers: 1
     num_subscribers: -1
 
 ##########################################################
 # Published services
 services:
   # System
-  - service: /rosout/get_loggers
-    type: roscpp/GetLoggers
-
-  - service: /rosout/set_logger_level
-    type: roscpp/SetLoggerLevel
-
   - service: /gazebo/set_logger_level
     type: roscpp/SetLoggerLevel
 
