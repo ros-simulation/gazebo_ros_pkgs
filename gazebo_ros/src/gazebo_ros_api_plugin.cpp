@@ -205,7 +205,11 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   if(!(nh_->hasParam("/use_sim_time")))
     nh_->setParam("/use_sim_time", true);
   nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
+#if GAZEBO_MAJOR_VERSION >= 8
+  last_pub_clock_time_ = world_->SimTime();
+#else
   last_pub_clock_time_ = world_->GetSimTime();
+#endif
 
   // hooks for applying forces, publishing simtime on /clock
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
@@ -510,18 +514,7 @@ void GazeboRosApiPlugin::advertiseServices()
                                                           ros::VoidPtr(), &gazebo_queue_);
   reset_world_service_ = nh_->advertiseService(reset_world_aso);
 
-
-  // set param for use_sim_time if not set by user already
-  if(!(nh_->hasParam("/use_sim_time")))
-    nh_->setParam("/use_sim_time", true);
-
   // todo: contemplate setting environment variable ROBOT=sim here???
-  nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
-#if GAZEBO_MAJOR_VERSION >= 8
-  last_pub_clock_time_ = world_->SimTime();
-#else
-  last_pub_clock_time_ = world_->GetSimTime();
-#endif
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
