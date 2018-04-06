@@ -53,7 +53,7 @@ plugins in this repository should implement the ROS wrapper over a gazebo plugin
               gazebo_plugins/test/multi_robot_scenario/xacro/camera/camera.xacro:
 
  * ***gazebo_ros_f3d***
-   - ***description:*** controller that fake (emtpy publisher) a 6 dof force sensor
+   - ***description:*** controller that fake (empty publisher) a 6 dof force sensor
      Publishes geometry_msgs::WrenchStamped
    - ***status:*** stub
    - ***gazebo plugin:*** ModelPlugin (generic)
