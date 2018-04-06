@@ -28,7 +28,7 @@ public:
 TEST_F(CameraTest, cameraSubscribeTest)
 {
   image_transport::ImageTransport it(nh_);
-  cam_sub_ = it.subscribe("camera1/image_raw", 1,
+  cam_sub_ = it.subscribe("camera1/image_raw", 5,
                           &CameraTest::imageCallback,
                           dynamic_cast<CameraTest*>(this));
 
@@ -80,19 +80,20 @@ TEST_F(CameraTest, cameraSubscribeTest)
   }
   EXPECT_EQ(images_received_, 1);
 
-  // then send two trigger messages very close together, but only expect one image
+  // then send two trigger messages very close together, and expect two more
+  // images
   trigger_pub.publish(msg);
   ros::spinOnce();
   ros::Duration(0.01).sleep();
   trigger_pub.publish(msg);
   ros::spinOnce();
   ros::Duration(0.01).sleep();
-  for (unsigned int i = 0; i < 10 && 1 == images_received_; ++i)
+  for (unsigned int i = 0; i < 10 && images_received_ < 2; ++i)
   {
     ros::spinOnce();
     ros::Duration(0.1).sleep();
   }
-  EXPECT_EQ(images_received_, 2);
+  EXPECT_EQ(images_received_, 3);
 
   // then wait for 3 seconds to confirm that we don't receive any more images
   for (unsigned int i = 0; i < 30; ++i)
@@ -100,7 +101,7 @@ TEST_F(CameraTest, cameraSubscribeTest)
     ros::spinOnce();
     ros::Duration(0.1).sleep();
   }
-  EXPECT_EQ(images_received_, 2);
+  EXPECT_EQ(images_received_, 3);
 
   cam_sub_.shutdown();
 }
