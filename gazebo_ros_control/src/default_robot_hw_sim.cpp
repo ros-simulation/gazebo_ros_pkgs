@@ -197,6 +197,18 @@ bool DefaultRobotHWSim::initSim(
     }
     sim_joints_.push_back(joint);
 
+    // get physics engine type
+#if GAZEBO_MAJOR_VERSION >= 8
+    gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
+#else
+    gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->GetPhysicsEngine();
+#endif
+    physics_type_ = physics->GetType();
+    if (physics_type_.empty())
+    {
+      ROS_WARN_STREAM_NAMED("default_robot_hw_sim", "No physics type found.");
+    }
+
     registerJointLimits(joint_names_[j], joint_handle, joint_control_methods_[j],
                         joint_limit_nh, urdf_model,
                         &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
@@ -346,7 +358,14 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
 
       case VELOCITY:
 #if GAZEBO_MAJOR_VERSION > 2
-        sim_joints_[j]->SetParam("vel", 0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+        if (physics_type_.compare("dart") == 0)
+        {
+          sim_joints_[j]->SetVelocity(0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+        }
+        else 
+        {
+          sim_joints_[j]->SetParam("vel", 0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+        }
 #else
         sim_joints_[j]->SetVelocity(0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
 #endif
