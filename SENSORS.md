@@ -3,13 +3,25 @@
 ## Initial note
 
 As detailed in the CONTRIBUITON.md guide, Gazebo ROS packages are a wrapper that
-connects upstream Gazebo simulations with the ROS framework.
-   - ***description:***
-   - ***status:***
-   - ***gazebo plugin:***
-   - ***example:***
+connects upstream Gazebo simulations with the ROS framework. Ideally all the
+plugins in this repository should implement the ROS wrapper over a gazebo plugin
+(plugin code in the [upstream gazebo repository](https://bitbucket.org/osrf/gazebo/)).
 
 ## Sensors
+
+### Template
+
+   - ***description:*** short description of the wrapper.
+   - ***status:***
+       - **maintained**: no big issues, should work fine
+       - **autotest**: the wrapper has automatic tests
+       - **doxygen**: the wrapper implements doxygen comments
+       - **needs-cleanup**: the code of the wrapper should be improved
+       - **not-just-a-wrapper**: the code in this repo is not just a wrapper and
+         contains simulation code. The simulation code should be migrated to
+         the Gazebo repository.
+   - ***gazebo plugin:*** gazebo upstream plugin used by the wrapper
+   - ***example:*** example files that use the wrapper
 
 ### ROS wrappers for Gazebo upstream sensors
 
@@ -32,7 +44,7 @@ connects upstream Gazebo simulations with the ROS framework.
  * ***gazebo_ros_camera***
    gazebo_ros_camera_utils
    - ***description:*** implements a camera. Publishes: sensor_msgs::Image, sensor_msgs::CameraInfo
-   - ***status:*** maintained, dynamic-reconfigure
+   - ***status:*** maintained, dynamic-reconfigure, autotest
    - ***gazebo plugin:*** CameraPlugin, GazeboRosCameraUtils
    - ***example:*** gazebo_plugins/test/test_worlds/gazebo_ros_block_laser.world:
               gazebo_plugins/test/test_worlds/gazebo_ros_depth_camera.world:
@@ -82,7 +94,7 @@ connects upstream Gazebo simulations with the ROS framework.
    gazebo_ros_camera_utils
    - ***description:*** ROS wrapper for one or more synchronized cameras.
      Publishes: sensor_msgs::Image, sensor_msgs::CameraInfo
-   - ***status:*** maintained
+   - ***status:*** maintained, autotest
    - ***gazebo plugin:*** MultiCameraPlugin
    - ***example:*** --
 
@@ -119,7 +131,7 @@ details about which code should be submitted to this repository.
  * ***gazebo_ros_depth_camera***
    - ***description:*** implements depth camera based sensors. Publishes: sensor_msgs::Image,
      sensor_msgs::CameraInfo, sensors_msgs::PointCloud2
-   - ***status:*** maintained, not-just-a-wrapper, needs-cleanup
+   - ***status:*** maintained, not-just-a-wrapper, autotest, needs-cleanup
    - ***gazebo plugin:*** DepthCameraPlugin
    - ***example:*** gazebo_plugins/test/test_worlds/gazebo_ros_depth_camera.world
               gazebo_plugins/test/test_worlds/gazebo_ros_trimesh_collision.world
