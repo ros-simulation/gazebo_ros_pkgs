@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.15 (2018-02-12)
+-------------------
+* Fix last gazebo8 warnings! (`#658 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/658>`_)
+* Fix for relative frame errors (`#605 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/605>`_)
+* Fix gazebo8 warnings part 10: ifdefs for GetModel, GetEntity, Light (`#656 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/656>`_)
+* gazebo8 warnings: ifdefs for Get.*Vel() (`#653 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/653>`_)
+* Prevents GAZEBO_MODEL_DATABASE_URI from being overwritten (`#644 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/644>`_)
+* Fix gazebo8 warnings part 7: ifdef's for Joint::GetAngle and some cleanup (`#642 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/642>`_)
+* Contributors: Hamza Merzić, R, Steven Peters
+
 2.5.14 (2017-12-11)
 -------------------
 * for gazebo8+, call functions without Get (`#639 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/639>`_)

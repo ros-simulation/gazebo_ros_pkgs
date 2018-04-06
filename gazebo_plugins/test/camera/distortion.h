@@ -1,3 +1,6 @@
+#ifndef GAZEBO_PLUGINS_TEST_CAMERA_DISTORTION_H
+#define GAZEBO_PLUGINS_TEST_CAMERA_DISTORTION_H
+
 // OpenCV includes
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -50,6 +53,8 @@ class DistortionTest : public testing::Test
   sensor_msgs::CameraInfoConstPtr cam_info_distorted_;
 
  public:
+  void cameraDistortionTest();
+
   void imageCallback(const sensor_msgs::ImageConstPtr& msg, int cam_index)
   {
     // for now, only support 2 cameras
@@ -69,7 +74,7 @@ class DistortionTest : public testing::Test
   }
 };
 
-TEST_F(DistortionTest, cameraDistortionTest)
+void DistortionTest::cameraDistortionTest()
 {
   ros::AsyncSpinner spinner(2);
   spinner.start();
@@ -175,9 +180,4 @@ TEST_F(DistortionTest, cameraDistortionTest)
   }
 }
 
-int main(int argc, char** argv)
-{
-  ros::init(argc, argv, "gazebo_camera_distortion_test");
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+#endif

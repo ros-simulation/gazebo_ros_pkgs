@@ -149,10 +149,19 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       this->rosnode_->advertise<nav_msgs::Odometry>(this->topic_name_, 1);
   }
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_time_ = this->world_->SimTime();
+#else
   this->last_time_ = this->world_->GetSimTime();
+#endif
   // initialize body
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_vpos_ = this->link_->WorldLinearVel();
+  this->last_veul_ = this->link_->WorldAngularVel();
+#else
   this->last_vpos_ = this->link_->GetWorldLinearVel().Ign();
   this->last_veul_ = this->link_->GetWorldAngularVel().Ign();
+#endif
   this->apos_ = 0;
   this->aeul_ = 0;
 
@@ -178,8 +187,13 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ROS_DEBUG_NAMED("p3d", "got body %s", this->reference_link_->GetName().c_str());
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->last_frame_vpos_ = this->reference_link_->WorldLinearVel();
+    this->last_frame_veul_ = this->reference_link_->WorldAngularVel();
+#else
     this->last_frame_vpos_ = this->reference_link_->GetWorldLinearVel().Ign();
     this->last_frame_veul_ = this->reference_link_->GetWorldAngularVel().Ign();
+#endif
   }
 
 
@@ -201,7 +215,11 @@ void GazeboRosP3D::UpdateChild()
   if (!this->link_)
     return;
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  common::Time cur_time = this->world_->SimTime();
+#else
   common::Time cur_time = this->world_->GetSimTime();
+#endif
 
   // rate control
   if (this->update_rate_ > 0 &&
@@ -230,31 +248,36 @@ void GazeboRosP3D::UpdateChild()
         ignition::math::Vector3d frame_veul;
 
         // get inertial Rates
+        // Get Pose/Orientation
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Vector3d vpos = this->link_->WorldLinearVel();
+        ignition::math::Vector3d veul = this->link_->WorldAngularVel();
+
+        pose = this->link_->WorldPose();
+#else
         ignition::math::Vector3d vpos = this->link_->GetWorldLinearVel().Ign();
         ignition::math::Vector3d veul = this->link_->GetWorldAngularVel().Ign();
 
-        // Get Pose/Orientation
-#if GAZEBO_MAJOR_VERSION >= 8
-        pose = this->link_->WorldPose();
-#else
         pose = this->link_->GetWorldPose().Ign();
 #endif
 
         // Apply Reference Frame
         if (this->reference_link_)
         {
-          // convert to relative pose
+          // convert to relative pose, rates
 #if GAZEBO_MAJOR_VERSION >= 8
           frame_pose = this->reference_link_->WorldPose();
+          frame_vpos = this->reference_link_->WorldLinearVel();
+          frame_veul = this->reference_link_->WorldAngularVel();
 #else
           frame_pose = this->reference_link_->GetWorldPose().Ign();
+          frame_vpos = this->reference_link_->GetWorldLinearVel().Ign();
+          frame_veul = this->reference_link_->GetWorldAngularVel().Ign();
 #endif
           pose.Pos() = pose.Pos() - frame_pose.Pos();
           pose.Pos() = frame_pose.Rot().RotateVectorReverse(pose.Pos());
           pose.Rot() *= frame_pose.Rot().Inverse();
-          // convert to relative rates
-          frame_vpos = this->reference_link_->GetWorldLinearVel().Ign();
-          frame_veul = this->reference_link_->GetWorldAngularVel().Ign();
+
           vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
           veul = frame_pose.Rot().RotateVector(veul - frame_veul);
         }

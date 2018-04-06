@@ -306,10 +306,10 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
         break;
 
       case POSITION:
-#if GAZEBO_MAJOR_VERSION >= 4
-        sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
+#if GAZEBO_MAJOR_VERSION >= 9
+        sim_joints_[j]->SetPosition(0, joint_position_command_[j], true);
 #else
-        sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
+        sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
 #endif
         break;
 

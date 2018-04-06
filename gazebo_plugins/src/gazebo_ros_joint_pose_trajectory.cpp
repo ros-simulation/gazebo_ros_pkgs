@@ -143,7 +143,11 @@ void GazeboRosJointPoseTrajectory::LoadThread()
   }
 #endif
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_time_ = this->world_->SimTime();
+#else
   this->last_time_ = this->world_->GetSimTime();
+#endif
 
   // start custom queue for joint trajectory plugin ros topics
   this->callback_queue_thread_ =
@@ -171,7 +175,11 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
       this->reference_link_name_ != "map")
   {
     physics::EntityPtr ent =
+#if GAZEBO_MAJOR_VERSION >= 8
+      this->world_->EntityByName(this->reference_link_name_);
+#else
       this->world_->GetEntity(this->reference_link_name_);
+#endif
     if (ent)
       this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
@@ -211,7 +219,11 @@ void GazeboRosJointPoseTrajectory::SetTrajectory(
   // trajectory start time
   this->trajectory_start = gazebo::common::Time(trajectory->header.stamp.sec,
                                                 trajectory->header.stamp.nsec);
+#if GAZEBO_MAJOR_VERSION >= 8
+  common::Time cur_time = this->world_->SimTime();
+#else
   common::Time cur_time = this->world_->GetSimTime();
+#endif
   if (this->trajectory_start < cur_time)
     this->trajectory_start = cur_time;
 
@@ -250,7 +262,11 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
       this->reference_link_name_ != "map")
   {
     physics::EntityPtr ent =
+#if GAZEBO_MAJOR_VERSION >= 8
+      this->world_->EntityByName(this->reference_link_name_);
+#else
       this->world_->GetEntity(this->reference_link_name_);
+#endif
     if (ent)
       this->reference_link_ = boost::dynamic_pointer_cast<physics::Link>(ent);
     if (!this->reference_link_)
@@ -267,7 +283,11 @@ bool GazeboRosJointPoseTrajectory::SetTrajectory(
                 " inertially", this->reference_link_->GetName().c_str());
   }
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->model_ =  this->world_->ModelByName(req.model_name);
+#else
   this->model_ =  this->world_->GetModel(req.model_name);
+#endif
   if (!this->model_)  // look for it by frame_id name
   {
     this->model_ = this->reference_link_->GetParentModel();
@@ -320,7 +340,11 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
   boost::mutex::scoped_lock lock(this->update_mutex);
   if (this->has_trajectory_)
   {
+#if GAZEBO_MAJOR_VERSION >= 8
+    common::Time cur_time = this->world_->SimTime();
+#else
     common::Time cur_time = this->world_->GetSimTime();
+#endif
     // roll out trajectory via set model configuration
     // gzerr << "i[" << trajectory_index  << "] time "
     //       << trajectory_start << " now: " << cur_time << " : "<< "\n";
@@ -360,8 +384,13 @@ void GazeboRosJointPoseTrajectory::UpdateStates()
             // this is not the most efficient way to set things
             if (this->joints_[i])
             {
+#if GAZEBO_MAJOR_VERSION >= 9
+              this->joints_[i]->SetPosition(0,
+                this->points_[this->trajectory_index].positions[i], true);
+#else
               this->joints_[i]->SetPosition(0,
                 this->points_[this->trajectory_index].positions[i]);
+#endif
             }
           }
 

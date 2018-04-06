@@ -232,7 +232,11 @@ namespace gazebo {
     } else {
       this->update_period_ = 0.0;
     }
+#if GAZEBO_MAJOR_VERSION >= 8
+    last_update_time_ = this->world->SimTime();
+#else
     last_update_time_ = this->world->GetSimTime();
+#endif
 
     // Initialize velocity stuff
     wheel_speed_[RIGHT_FRONT] = 0;
@@ -331,7 +335,11 @@ namespace gazebo {
 
   // Update the controller
   void GazeboRosSkidSteerDrive::UpdateChild() {
+#if GAZEBO_MAJOR_VERSION >= 8
+    common::Time current_time = this->world->SimTime();
+#else
     common::Time current_time = this->world->GetSimTime();
+#endif
     double seconds_since_last_update =
       (current_time - last_update_time_).Double();
     if (seconds_since_last_update > update_period_) {
@@ -440,8 +448,13 @@ namespace gazebo {
 
     // get velocity in /odom frame
     ignition::math::Vector3d linear;
+#if GAZEBO_MAJOR_VERSION >= 8
+    linear = this->parent->WorldLinearVel();
+    odom_.twist.twist.angular.z = this->parent->WorldAngularVel().Z();
+#else
     linear = this->parent->GetWorldLinearVel().Ign();
     odom_.twist.twist.angular.z = this->parent->GetWorldAngularVel().Ign().Z();
+#endif
 
     // convert velocity to child_frame_id (aka base_footprint)
     float yaw = pose.Rot().Yaw();

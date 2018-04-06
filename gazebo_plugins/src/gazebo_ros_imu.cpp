@@ -147,7 +147,11 @@ void GazeboRosIMU::LoadThread()
 
   // assert that the body by link_name_ exists
   this->link = boost::dynamic_pointer_cast<physics::Link>(
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->world_->EntityByName(this->link_name_));
+#else
     this->world_->GetEntity(this->link_name_));
+#endif
   if (!this->link)
   {
     ROS_FATAL_NAMED("imu", "gazebo_ros_imu plugin error: bodyName: %s does not exist\n",
@@ -171,11 +175,20 @@ void GazeboRosIMU::LoadThread()
   }
 
   // Initialize the controller
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_time_ = this->world_->SimTime();
+#else
   this->last_time_ = this->world_->GetSimTime();
+#endif
 
   // this->initial_pose_ = this->link->GetPose();
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_vpos_ = this->link->WorldLinearVel();
+  this->last_veul_ = this->link->WorldAngularVel();
+#else
   this->last_vpos_ = this->link->GetWorldLinearVel().Ign();
   this->last_veul_ = this->link->GetWorldAngularVel().Ign();
+#endif
   this->apos_ = 0;
   this->aeul_ = 0;
 
@@ -203,7 +216,11 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 // Update the controller
 void GazeboRosIMU::UpdateChild()
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  common::Time cur_time = this->world_->SimTime();
+#else
   common::Time cur_time = this->world_->GetSimTime();
+#endif
 
   // rate control
   if (this->update_rate_ > 0 &&
@@ -231,8 +248,13 @@ void GazeboRosIMU::UpdateChild()
     rot.Normalize();
 
     // get Rates
+#if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Vector3d vpos = this->link->WorldLinearVel();
+    ignition::math::Vector3d veul = this->link->WorldAngularVel();
+#else
     ignition::math::Vector3d vpos = this->link->GetWorldLinearVel().Ign();
     ignition::math::Vector3d veul = this->link->GetWorldAngularVel().Ign();
+#endif
 
     // differentiate to get accelerations
     double tmp_dt = this->last_time_.Double() - cur_time.Double();

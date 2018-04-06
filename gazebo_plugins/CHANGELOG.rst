@@ -2,6 +2,17 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.15 (2018-02-12)
+-------------------
+* Merge pull request `#669 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/669>`_ from ahcorde/kinetic-devel
+* Adding velocity to joint state publisher gazebo plugin
+* Fix last gazebo8 warnings! (`#658 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/658>`_)
+* Fix gazebo8 warnings part 10: ifdefs for GetModel, GetEntity, Light (`#656 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/656>`_)
+* gazebo8 warnings: ifdefs for Get.*Vel() (`#653 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/653>`_)
+* Fix gazebo8 warnings part 8: ifdef's for GetWorldPose (`#650 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/650>`_)
+* Fix gazebo8 warnings part 7: ifdef's for Joint::GetAngle and some cleanup (`#642 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/642>`_)
+* Contributors: Alejandro Hernández Cordero, Steven Peters
+
 2.5.14 (2017-12-11)
 -------------------
 * for gazebo8+, call functions without Get (`#639 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/639>`_)
