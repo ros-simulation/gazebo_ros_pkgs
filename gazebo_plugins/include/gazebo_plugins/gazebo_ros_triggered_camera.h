@@ -66,7 +66,7 @@ namespace gazebo
 
     protected: void PreRender();
 
-    protected: bool triggered = false;
+    protected: int triggered = 0;
 
     protected: std::mutex mutex;
 

@@ -97,8 +97,9 @@ void GazeboRosTriggeredCamera::OnNewFrame(const unsigned char *_image,
     this->PublishCameraInfo();
   }
   this->SetCameraEnabled(false);
+
   std::lock_guard<std::mutex> lock(this->mutex);
-  this->triggered = false;
+  this->triggered = std::max(this->triggered-1, 0);
 }
 
 void GazeboRosTriggeredCamera::TriggerCamera()
@@ -106,7 +107,7 @@ void GazeboRosTriggeredCamera::TriggerCamera()
   std::lock_guard<std::mutex> lock(this->mutex);
   if (!this->parentSensor_)
     return;
-  this->triggered = true;
+  this->triggered++;
 }
 
 bool GazeboRosTriggeredCamera::CanTriggerCamera()
@@ -117,8 +118,10 @@ bool GazeboRosTriggeredCamera::CanTriggerCamera()
 void GazeboRosTriggeredCamera::PreRender()
 {
   std::lock_guard<std::mutex> lock(this->mutex);
-  if (this->triggered)
+  if (this->triggered > 0)
+  {
     this->SetCameraEnabled(true);
+  }
 }
 
 void GazeboRosTriggeredCamera::SetCameraEnabled(const bool _enabled)
