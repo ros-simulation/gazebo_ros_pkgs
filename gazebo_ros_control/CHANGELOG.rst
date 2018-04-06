@@ -2,6 +2,24 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.15 (2018-02-12)
+-------------------
+* Fix last gazebo8 warnings! (`#658 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/658>`_)
+* Fix gazebo8 warnings part 7: ifdef's for Joint::GetAngle and some cleanup (`#642 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/642>`_)
+* Contributors: Steven Peters
+
+2.5.14 (2017-12-11)
+-------------------
+* Replace Events::Disconnect* with pointer reset (`#623 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/623>`_)
+* Contributors: Steven Peters
+
+2.5.13 (2017-06-24)
+-------------------
+* Less exciting console output (`#561 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/561>`_)
+* Add catkin package(s) to provide the default version of Gazebo (`#571 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/571>`_)
+  * Added catkin package gazebo_dev which provides the cmake config of the installed Gazebo version
+* Contributors: Dave Coleman, Jose Luis Rivero
+
 2.5.12 (2017-04-25)
 -------------------
 * Fixed broken gazebo_ros_control tutorial link (`#566 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/566>`_)

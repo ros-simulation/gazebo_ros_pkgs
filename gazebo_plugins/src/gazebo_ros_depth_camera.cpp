@@ -191,11 +191,7 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-# if GAZEBO_MAJOR_VERSION >= 7
   this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
-# else
-  this->depth_sensor_update_time_ = this->parentSensor->GetLastMeasurementTime();
-# endif
 
   if (this->parentSensor->IsActive())
   {
@@ -232,11 +228,7 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-# if GAZEBO_MAJOR_VERSION >= 7
   this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
-# else
-  this->depth_sensor_update_time_ = this->parentSensor->GetLastMeasurementTime();
-# endif
 
   if (!this->parentSensor->IsActive())
   {
@@ -303,11 +295,7 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
     return;
 
   //ROS_ERROR_NAMED("depth_camera", "camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
-# if GAZEBO_MAJOR_VERSION >= 7
   this->sensor_update_time_ = this->parentSensor->LastMeasurementTime();
-# else
-  this->sensor_update_time_ = this->parentSensor->GetLastMeasurementTime();
-# endif
 
   if (!this->parentSensor->IsActive())
   {
@@ -503,11 +491,8 @@ void GazeboRosDepthCamera::PublishCameraInfo()
 
   if (this->depth_info_connect_count_ > 0)
   {
-# if GAZEBO_MAJOR_VERSION >= 7
     common::Time sensor_update_time = this->parentSensor_->LastMeasurementTime();
-# else
-    common::Time sensor_update_time = this->parentSensor_->GetLastMeasurementTime();
-# endif
+
     this->sensor_update_time_ = sensor_update_time;
     if (sensor_update_time - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
     {

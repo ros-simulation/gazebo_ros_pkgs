@@ -8,12 +8,12 @@ relocate_remappings()
   command_line=${1}
 
   for w in $command_line; do
-    if $(echo $w | grep -q ':='); then
+    if $(echo "$w" | grep -q ':='); then
       ros_remaps="$ros_remaps $w"
     else
       gazebo_args="$gazebo_args $w"
     fi
   done
 
-  echo $gazebo_args$ros_remaps | cut -c 1-
+  echo "$gazebo_args$ros_remaps" | cut -c 1-
 }

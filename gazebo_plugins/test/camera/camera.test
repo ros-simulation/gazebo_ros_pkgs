@@ -6,7 +6,7 @@
 
   <node name="gazebo" pkg="gazebo_ros" type="gzserver"
       respawn="false" output="screen"
-      args="-r $(find gazebo_plugins)/test/camera/camera.world" />
+      args="--verbose $(find gazebo_plugins)/test/camera/camera.world" />
 
   <group if="$(arg gui)">
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>

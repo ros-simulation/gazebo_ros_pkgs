@@ -43,11 +43,7 @@
 #include <ros/ros.h>
 
 #ifndef GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST
-# if GAZEBO_MAJOR_VERSION >= 7
 #define GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST using std::dynamic_pointer_cast
-# else
-#define GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST using boost::dynamic_pointer_cast
-# endif
 #endif
 
 namespace gazebo

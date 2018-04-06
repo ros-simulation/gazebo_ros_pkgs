@@ -82,7 +82,11 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   std::string worldName = _parent->WorldName();
   this->world_ = physics::get_world(worldName);
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  last_update_time_ = this->world_->SimTime();
+#else
   last_update_time_ = this->world_->GetSimTime();
+#endif
 
   this->node_ = transport::NodePtr(new transport::Node());
   this->node_->Init(worldName);
@@ -232,13 +236,8 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   this->parent_ray_sensor_->SetActive(false);
 
-#if GAZEBO_MAJOR_VERSION >= 6
   auto maxAngle = this->parent_ray_sensor_->AngleMax();
   auto minAngle = this->parent_ray_sensor_->AngleMin();
-#else
-  math::Angle maxAngle = this->parent_ray_sensor_->GetAngleMax();
-  math::Angle minAngle = this->parent_ray_sensor_->GetAngleMin();
-#endif
 
   double maxRange = this->parent_ray_sensor_->RangeMax();
   double minRange = this->parent_ray_sensor_->RangeMin();
@@ -247,13 +246,8 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
 
   int verticalRayCount = this->parent_ray_sensor_->VerticalRayCount();
   int verticalRangeCount = this->parent_ray_sensor_->VerticalRangeCount();
-#if GAZEBO_MAJOR_VERSION >= 6
   auto verticalMaxAngle = this->parent_ray_sensor_->VerticalAngleMax();
   auto verticalMinAngle = this->parent_ray_sensor_->VerticalAngleMin();
-#else
-  math::Angle verticalMaxAngle = this->parent_ray_sensor_->GetVerticalAngleMax();
-  math::Angle verticalMinAngle = this->parent_ray_sensor_->GetVerticalAngleMin();
-#endif
 
   double yDiff = maxAngle.Radian() - minAngle.Radian();
   double pDiff = verticalMaxAngle.Radian() - verticalMinAngle.Radian();
@@ -345,7 +339,7 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         //pAngle is rotated by yAngle:
         point.x = r * cos(pAngle) * cos(yAngle);
         point.y = r * cos(pAngle) * sin(yAngle);
-        point.z = -r * sin(pAngle);
+        point.z = r * sin(pAngle);
 
         this->cloud_msg_.points.push_back(point);
       }
@@ -355,7 +349,7 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
         //pAngle is rotated by yAngle:
         point.x = r * cos(pAngle) * cos(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         point.y = r * cos(pAngle) * sin(yAngle) + this->GaussianKernel(0,this->gaussian_noise_);
-        point.z = -r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
+        point.z = r * sin(pAngle) + this->GaussianKernel(0,this->gaussian_noise_);
         this->cloud_msg_.points.push_back(point);
       } // only 1 channel
 
@@ -405,9 +399,9 @@ void GazeboRosBlockLaser::OnStats( const boost::shared_ptr<msgs::WorldStatistics
 {
   this->sim_time_  = msgs::Convert( _msg->sim_time() );
 
-  math::Pose pose;
-  pose.pos.x = 0.5*sin(0.01*this->sim_time_.Double());
-  gzdbg << "plugin simTime [" << this->sim_time_.Double() << "] update pose [" << pose.pos.x << "]\n";
+  ignition::math::Pose3d pose;
+  pose.Pos().X() = 0.5*sin(0.01*this->sim_time_.Double());
+  gzdbg << "plugin simTime [" << this->sim_time_.Double() << "] update pose [" << pose.Pos().X() << "]\n";
 }
 
 
