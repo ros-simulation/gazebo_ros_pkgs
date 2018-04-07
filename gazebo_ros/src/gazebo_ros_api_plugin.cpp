@@ -153,8 +153,7 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   // below needs the world to be created first
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::loadGazeboRosApiPlugin,this,_1));
 
-  if (! nh_->getParam("enable_ros_network", enable_ros_network_))
-      ROS_ERROR_NAMED("api_plugin", "can not get enable_ros_network_param");
+  nh_->getParam("enable_ros_network", enable_ros_network_);
 
   plugin_loaded_ = true;
   ROS_INFO_NAMED("api_plugin", "Finished loading Gazebo ROS API Plugin.");
@@ -199,6 +198,19 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   /// \brief advertise all services
   if (enable_ros_network_)
     advertiseServices();
+
+  // Manage clock for simulated ros time
+  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
+  // set param for use_sim_time if not set by user already
+  if(!(nh_->hasParam("/use_sim_time")))
+    nh_->setParam("/use_sim_time", true);
+
+  nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
+#if GAZEBO_MAJOR_VERSION >= 8
+  last_pub_clock_time_ = world_->SimTime();
+#else
+  last_pub_clock_time_ = world_->GetSimTime();
+#endif
 
   // hooks for applying forces, publishing simtime on /clock
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
@@ -1143,7 +1155,6 @@ bool GazeboRosApiPlugin::getLinkProperties(gazebo_msgs::GetLinkProperties::Reque
 #else
     res.mass = body->GetInertial()->GetMass();
 
-    gazebo::physics::InertialPtr inertia = body->GetInertial();
     res.ixx = inertia->GetIXX();
     res.iyy = inertia->GetIYY();
     res.izz = inertia->GetIZZ();
