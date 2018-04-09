@@ -221,6 +221,12 @@ void GazeboRosP3D::UpdateChild()
   common::Time cur_time = this->world_->GetSimTime();
 #endif
 
+  if (cur_time < this->last_time_)
+  {
+      ROS_WARN_NAMED("p3d", "Negative update time difference detected.");
+      this->last_time_ = cur_time;
+  }
+
   // rate control
   if (this->update_rate_ > 0 &&
       (cur_time-this->last_time_).Double() < (1.0/this->update_rate_))
