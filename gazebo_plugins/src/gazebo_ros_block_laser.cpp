@@ -211,6 +211,12 @@ void GazeboRosBlockLaser::OnNewLaserScans()
   if (this->topic_name_ != "")
   {
     common::Time sensor_update_time = this->parent_sensor_->LastUpdateTime();
+    if (sensor_update_time < last_update_time_)
+    {
+        ROS_WARN_NAMED("block_laser", "Negative sensor update time difference detected.");
+        last_update_time_ = sensor_update_time;
+    }
+
     if (last_update_time_ < sensor_update_time)
     {
       this->PutLaserData(sensor_update_time);
