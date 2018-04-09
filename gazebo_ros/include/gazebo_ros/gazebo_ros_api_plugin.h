@@ -413,6 +413,9 @@ private:
 
   /// \brief index counters to count the accesses on models via GetModelState
   std::map<std::string, unsigned int> access_count_get_model_state_;
+
+  /// \brief enable the communication of gazebo information using ROS service/topics
+  bool enable_ros_network_;
 };
 }
 #endif
