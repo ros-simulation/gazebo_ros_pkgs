@@ -113,6 +113,7 @@ catkin_package(
   gazebo_ros_planar_move
   gazebo_ros_range
   gazebo_ros_vacuum_gripper
+  gazebo_ros_sonar
 
   CATKIN_DEPENDS
   message_runtime
