@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Empty.h>
 
-class CameraTest : public testing::Test
+class TriggeredCameraTest : public testing::Test
 {
 protected:
   virtual void SetUp()
@@ -25,7 +25,7 @@ public:
 
 // Test if the camera image is published at all, and that the timestamp
 // is not too long in the past.
-TEST_F(CameraTest, cameraSubscribeTest)
+TEST_F(TriggeredCameraTest, cameraSubscribeTest)
 {
   image_transport::ImageTransport it(nh_);
   cam_sub_ = it.subscribe("camera1/image_raw", 5,
