@@ -29,8 +29,8 @@ TEST_F(TriggeredCameraTest, cameraSubscribeTest)
 {
   image_transport::ImageTransport it(nh_);
   cam_sub_ = it.subscribe("camera1/image_raw", 5,
-                          &CameraTest::imageCallback,
-                          dynamic_cast<CameraTest*>(this));
+                          &TriggeredCameraTest::imageCallback,
+                          dynamic_cast<TriggeredCameraTest*>(this));
 
   // wait for 3 seconds to confirm that we don't receive any images
   for (unsigned int i = 0; i < 30; ++i)
