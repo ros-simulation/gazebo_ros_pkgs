@@ -12,6 +12,6 @@
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
   </group>
 
-  <test test-name="camera" pkg="gazebo_plugins" type="camera-test"
+  <test test-name="camera16bit" pkg="gazebo_plugins" type="camera-test"
       clear_params="true" time-limit="30.0" />
 </launch>
