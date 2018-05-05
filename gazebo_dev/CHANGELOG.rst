@@ -2,8 +2,8 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.1 (2018-05-05)
+------------------
 * Replace gazebo7 by gazebo9 in gazebo_dev. Gazebo9 is the official version supported in Melodic
 * Contributors: Jose Luis Rivero
 

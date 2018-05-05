@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.1 (2018-05-05)
+------------------
 * Don't ignore robotNamespace in gazebo_ros_control nodes (lunar-devel) (`#706 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/706>`_)
   This commit restores the intended behavior, i.e., the parameters will now read from <robot_name>/..., where <robot_name> is specified via the robotNamespace plugin parameter or the parent name.
 * add physics type for dart with joint velocity interface (`#701 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/701>`_)

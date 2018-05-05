@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.1 (2018-05-05)
+------------------
 * Parameter to disable ROS network interaction from/to Gazebo (lunar-devel) (`#704 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/704>`_)
 * Load the libgazebo_ros_api_plugin when starting gzclient so that the ROS event loop will turn over, which is required when you have a client-side Gazebo plugin that uses ROS. (`#676 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/676>`_)
 * Pass verbose argument to gzclient (`#677 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/677>`_)
