@@ -2,6 +2,31 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update version to 2.8.0
+* Fix sensors after time reset (lunar-devel) (`#705 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/705>`_)
+  * camera plugin keeps publishing after negative sensor update interval
+  World resets result in a negative time differences between current world
+  time and the last recorded sensor update time, preventing the plugin
+  from publishing new frames. This commit detects such events and resets
+  the internal sensor update timestamp.
+  * block_laser, range, and joint_state_publisher keep publishing after clock reset
+  * p3d keeps publishing after clock reset
+* Support 16-bit cameras (lunar-devel) (`#700 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/700>`_)
+  * extend camera util to support 16 bit rgb image encoding
+  * support 16 bit mono
+  * add test for 16-bit camera
+  * update skip\_
+  * move camera test to camera.h, add camera16bit.cpp
+* Fix `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_ for Gazebo9 (lunar-devel) (`#699 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/699>`_)
+  * Fix `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_ for Gazebo9
+  This commit fixes `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_, but only for Gazebo9. Fixing it for Gazebo7 (the version used in ROS Kinetic) requires the following PR to be backported to Gazebo 7 and 8:
+* gazebo_plugins: unique names for distortion tests (lunar-devel) (`#686 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/686>`_)
+  * gazebo_plugins: unique names for distortion tests
+  * Missing test files
+* Contributors: Jose Luis Rivero
+
 2.7.4 (2018-02-12)
 ------------------
 * Adding velocity to joint state publisher gazebo plugin (`#671 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/671>`_)
