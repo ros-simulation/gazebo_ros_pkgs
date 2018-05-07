@@ -125,6 +125,10 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   if (this->sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = this->sdf->Get<std::string>("imageTopicName");
 
+  this->trigger_topic_name_ = "image_trigger";
+  if (this->sdf->HasElement("triggerTopicName"))
+    this->trigger_topic_name_ = this->sdf->Get<std::string>("triggerTopicName");
+
   this->camera_info_topic_name_ = "camera_info";
   if (this->sdf->HasElement("cameraInfoTopicName"))
     this->camera_info_topic_name_ =
@@ -346,7 +350,32 @@ void GazeboRosCameraUtils::LoadThread()
   this->cameraUpdateRateSubscriber_ = this->rosnode_->subscribe(rate_so);
   */
 
+  if (this->CanTriggerCamera())
+  {
+    ros::SubscribeOptions trigger_so =
+      ros::SubscribeOptions::create<std_msgs::Empty>(
+          this->trigger_topic_name_, 1,
+          boost::bind(&GazeboRosCameraUtils::TriggerCameraInternal, this, _1),
+          ros::VoidPtr(), &this->camera_queue_);
+    this->trigger_subscriber_ = this->rosnode_->subscribe(trigger_so);
+  }
+
   this->Init();
+}
+
+void GazeboRosCameraUtils::TriggerCamera()
+{
+}
+
+bool GazeboRosCameraUtils::CanTriggerCamera()
+{
+  return false;
+}
+
+void GazeboRosCameraUtils::TriggerCameraInternal(
+    const std_msgs::Empty::ConstPtr &dummy)
+{
+  TriggerCamera();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

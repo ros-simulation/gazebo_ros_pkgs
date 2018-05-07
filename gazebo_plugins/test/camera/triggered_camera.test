@@ -6,12 +6,12 @@
 
   <node name="gazebo" pkg="gazebo_ros" type="gzserver"
       respawn="false" output="screen"
-      args="--verbose $(find gazebo_plugins)/test/camera/camera16bit.world" />
+      args="--verbose $(find gazebo_plugins)/test/camera/triggered_camera.world" />
 
   <group if="$(arg gui)">
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
   </group>
 
-  <test test-name="camera16bit" pkg="gazebo_plugins" type="camera-test"
+  <test test-name="triggered_camera" pkg="gazebo_plugins" type="triggered-camera-test"
       clear_params="true" time-limit="30.0" />
 </launch>
