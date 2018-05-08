@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.6.3)
 project(gazebo_ros_control)
 
 # Load catkin and all dependencies required for this package
@@ -15,6 +15,25 @@ find_package(catkin REQUIRED COMPONENTS
   urdf
   angles
 )
+
+# Through transitive dependencies in the packages above, gazebo_ros_control
+# depends on Simbody.  There is a bug in the Ubuntu Artful (17.10) version of
+# the Simbody package where it includes /usr/lib/libblas.so and
+# /usr/lib/liblapack.so in the CMake list of libraries even though neither of
+# those two paths exist (they both really live in /usr/lib/<arch>-linux-gnu).
+# We remove these two during build-time on artful below; this works because
+# they both will get resolved to the proper paths during runtime linking.
+find_program(LSB_RELEASE_EXEC lsb_release)
+if(NOT LSB_RELEASE_EXEC STREQUAL "LSB_RELEASE_EXEC-NOTFOUND")
+  execute_process(COMMAND ${LSB_RELEASE_EXEC} -cs
+    OUTPUT_VARIABLE OS_CODENAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(OS_CODENAME STREQUAL "artful")
+    list(FILTER catkin_LIBRARIES EXCLUDE REGEX "/usr/lib/libblas.so")
+    list(FILTER catkin_LIBRARIES EXCLUDE REGEX "/usr/lib/liblapack.so")
+  endif()
+endif()
 
 catkin_package(
   CATKIN_DEPENDS
