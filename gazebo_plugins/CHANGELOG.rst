@@ -2,6 +2,15 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix the build on Ubuntu Artful. (`#715 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/715>`_)
+  Artful has some bugs in its cmake files for Simbody that
+  cause it to fail the build.  If we are on artful, remove
+  the problematic entries.
+  Signed-off-by: Chris Lalancette <clalancette@openrobotics.org>
+* Contributors: Chris Lalancette
+
 2.8.1 (2018-05-05)
 ------------------
 * Update version to 2.8.0
