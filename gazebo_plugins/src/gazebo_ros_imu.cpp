@@ -231,8 +231,9 @@ void GazeboRosIMU::UpdateChild()
     rot = pose.rot;
 
     // apply yaw noise
-    math::Quaternion yaw_error;
-    yaw_error.SetFromEuler(math::Vector3(
+    
+    ignition::math::Quaterniond yaw_error;
+    yaw_error.Euler(ignition::math::Vector3d(
         0,
         0,
         this->GaussianKernel(0, this->yaw_gaussian_noise_)
