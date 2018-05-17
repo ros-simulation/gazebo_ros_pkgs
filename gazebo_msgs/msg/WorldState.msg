@@ -34,7 +34,7 @@
 #   * visual information - does not vary in time
 #
 
-Header header
+std_msgs/Header header
 
 string[] name
 geometry_msgs/Pose[] pose
