@@ -1,7 +1,7 @@
 # access to low level joint properties, change these at your own risk
 float64[] damping             # joint damping
-float64[] hiStop              # joint limit
-float64[] loStop              # joint limit
+float64[] hi_stop             # joint limit
+float64[] lo_stop             # joint limit
 float64[] erp                 # set joint erp
 float64[] cfm                 # set joint cfm
 float64[] stop_erp            # set joint erp for joint limit "contact" joint
