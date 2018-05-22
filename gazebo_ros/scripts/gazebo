@@ -44,12 +44,12 @@ final=$(relocate_remappings "${final}")
 GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" gzserver $final &
 gzserver_pid="$!"
 # Use kill -0 to check if the process is running
-if $(kill -0 $! > /dev/null); then
+if $(kill -0 $! 2> /dev/null); then
   GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" gzclient $client_final
 fi
 
 # Kill the server if it is alive
-if $(kill -0 $! > /dev/null); then
+if $(kill -0 $! 2> /dev/null); then
   # -2 SIGINT valid for Linux and Mac
   kill -2 $!
 fi
