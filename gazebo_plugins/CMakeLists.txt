@@ -211,7 +211,7 @@ add_library(gazebo_ros_block_laser src/gazebo_ros_block_laser.cpp)
 target_link_libraries(gazebo_ros_block_laser RayPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_moveit_planning_scene src/gazebo_ros_moveit_planning_scene.cpp)
-add_dependencies(gazebo_ros_moveit_planning_scene moveit_msgs_gencpp)
+add_dependencies(gazebo_ros_moveit_planning_scene ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gazebo_ros_moveit_planning_scene ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_p3d src/gazebo_ros_p3d.cpp)
