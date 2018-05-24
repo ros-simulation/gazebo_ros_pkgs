@@ -411,8 +411,8 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     odom_.pose.pose.orientation.w = qt.w();
 
     odom_.twist.twist.angular.z = w;
-    odom_.twist.twist.linear.x = dx/seconds_since_last_update;
-    odom_.twist.twist.linear.y = dy/seconds_since_last_update;
+    odom_.twist.twist.linear.x = v;
+    odom_.twist.twist.linear.y = 0;
 }
 
 void GazeboRosDiffDrive::publishOdometry ( double step_time )
