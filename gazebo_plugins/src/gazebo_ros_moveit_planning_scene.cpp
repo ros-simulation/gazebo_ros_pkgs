@@ -456,9 +456,15 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
             boost::shared_ptr<PlaneShape> plane_shape = boost::dynamic_pointer_cast<PlaneShape>(shape);
             shape_msgs::Plane plane_msg;
 
+#if GAZEBO_MAJOR_VERSION >= 8
             plane_msg.coef[0] = plane_shape->Normal().X();
             plane_msg.coef[1] = plane_shape->Normal().Y();
             plane_msg.coef[2] = plane_shape->Normal().Z();
+#else
+            plane_msg.coef[0] = plane_shape->GetNormal().Ign().X();
+            plane_msg.coef[1] = plane_shape->GetNormal().Ign().Y();
+            plane_msg.coef[2] = plane_shape->GetNormal().Ign().Z();
+#endif
             plane_msg.coef[3] = 0; // This should be handled by the position of the collision object
 
             object.planes.push_back(plane_msg);
@@ -474,10 +480,15 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
 
               primitive_msg.type = primitive_msg.BOX;
               primitive_msg.dimensions.resize(3);
+#if GAZEBO_MAJOR_VERSION >= 8
               primitive_msg.dimensions[0] = box_shape->Size().X();
               primitive_msg.dimensions[1] = box_shape->Size().Y();
               primitive_msg.dimensions[2] = box_shape->Size().Z();
-
+#else
+              primitive_msg.dimensions[0] = box_shape->GetSize().Ign().X();
+              primitive_msg.dimensions[1] = box_shape->GetSize().Ign().Y();
+              primitive_msg.dimensions[2] = box_shape->GetSize().Ign().Z();
+#endif
             } else if(shape->HasType(Base::CYLINDER_SHAPE)) {
 
               boost::shared_ptr<CylinderShape> cylinder_shape = boost::dynamic_pointer_cast<CylinderShape>(shape);
