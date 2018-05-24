@@ -49,7 +49,10 @@ GazeboRosMoveItPlanningScene::GazeboRosMoveItPlanningScene()
 // Destructor
 GazeboRosMoveItPlanningScene::~GazeboRosMoveItPlanningScene()
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+#else
   event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+#endif
 
   // Custom Callback Queue
   this->queue_.clear();
@@ -199,7 +202,11 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
   }
 
   // Iterate over all the models currently in the world
+#if GAZEBO_MAJOR_VERSION >= 8
+  std::vector<ModelPtr> models = this->world_->Models();
+#else
   std::vector<ModelPtr> models = this->world_->GetModels();
+#endif
   for(std::vector<ModelPtr>::const_iterator model_it = models.begin();
       model_it != models.end();
       ++model_it)
@@ -252,15 +259,19 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
       // Get a reference to the object from the map
       moveit_msgs::CollisionObject &object = collision_object_map_[id];
 
-      ignition::math::Pose3d link_pose = link->GetWorldPose();
+#if GAZEBO_MAJOR_VERSION >= 8
+      ignition::math::Pose3d link_pose = link->WorldPose();
+#else
+      ignition::math::Pose3d link_pose = link->GetWorldPose().Ign();
+#endif
       geometry_msgs::Pose link_pose_msg;
-      link_pose_msg.position.x = link_pose.pos.x;
-      link_pose_msg.position.y = link_pose.pos.y;
-      link_pose_msg.position.z = link_pose.pos.z;
-      link_pose_msg.orientation.x = link_pose.rot.x;
-      link_pose_msg.orientation.y = link_pose.rot.y;
-      link_pose_msg.orientation.z = link_pose.rot.z;
-      link_pose_msg.orientation.w = link_pose.rot.w;
+      link_pose_msg.position.x = link_pose.Pos().X();
+      link_pose_msg.position.y = link_pose.Pos().Y();
+      link_pose_msg.position.z = link_pose.Pos().Z();
+      link_pose_msg.orientation.x = link_pose.Rot().X();
+      link_pose_msg.orientation.y = link_pose.Rot().Y();
+      link_pose_msg.orientation.z = link_pose.Rot().Z();
+      link_pose_msg.orientation.w = link_pose.Rot().W();
       //ROS_DEBUG_STREAM_NAMED("GazeboRosMoveItPlanningScene",model_name << " (link): " <<link_pose_msg);
 
       // Get all the collision objects for this link
@@ -273,16 +284,19 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
         const ShapePtr shape = collision->GetShape();
 
         // NOTE: In gazebo 2.2.2 Collision::GetWorldPose() does not work
-        //ignition::math::Pose3d collision_pose = collision->GetRelativePose()*link_pose;
-        ignition::math::Pose3d collision_pose = collision->GetInitialRelativePose() + link_pose;
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d collision_pose = collision->InitialRelativePose() + link_pose;
+#else 
+        ignition::math::Pose3d collision_pose = collision->GetInitialRelativePose().Ign() + link_pose;
+#endif
         geometry_msgs::Pose collision_pose_msg;
-        collision_pose_msg.position.x = collision_pose.pos.x;
-        collision_pose_msg.position.y = collision_pose.pos.y;
-        collision_pose_msg.position.z = collision_pose.pos.z;
-        collision_pose_msg.orientation.x = collision_pose.rot.x;
-        collision_pose_msg.orientation.y = collision_pose.rot.y;
-        collision_pose_msg.orientation.z = collision_pose.rot.z;
-        collision_pose_msg.orientation.w = collision_pose.rot.w;
+        collision_pose_msg.position.x = collision_pose.Pos().X();
+        collision_pose_msg.position.y = collision_pose.Pos().Y();
+        collision_pose_msg.position.z = collision_pose.Pos().Z();
+        collision_pose_msg.orientation.x = collision_pose.Rot().X();
+        collision_pose_msg.orientation.y = collision_pose.Rot().Y();
+        collision_pose_msg.orientation.z = collision_pose.Rot().Z();
+        collision_pose_msg.orientation.w = collision_pose.Rot().W();
         //ROS_DEBUG_STREAM_NAMED("GazeboRosMoveItPlanningScene",model_name << " (collision): " <<collision_pose_msg);
 
         // Always add pose information
@@ -345,7 +359,11 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
             boost::shared_ptr<MeshShape> mesh_shape = boost::dynamic_pointer_cast<MeshShape>(shape);
             std::string name = mesh_shape->GetName();
             std::string uri = mesh_shape->GetMeshURI();
-            gazebo::math::Vector3 scale = mesh_shape->GetScale();
+#if GAZEBO_MAJOR_VERSION >= 8
+            ignition::math::Vector3d scale = mesh_shape->Scale();
+#else
+            ignition::math::Vector3d scale = mesh_shape->GetScale().Ign();
+#endif
             const Mesh *mesh = MeshManager::Instance()->GetMesh(uri);
 
             gzwarn << " mesh scale: " <<scale<< std::endl;
@@ -390,9 +408,9 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                       const int index = submesh->GetIndex(v);
                       const ignition::math::Vector3d vertex = submesh->Vertex(v);
 
-                      mesh_msg.vertices[index].x = vertex.X() * scale.x;
-                      mesh_msg.vertices[index].y = vertex.Y() * scale.y;
-                      mesh_msg.vertices[index].z = vertex.Z() * scale.z;
+                      mesh_msg.vertices[index].x = vertex.X() * scale.X();
+                      mesh_msg.vertices[index].y = vertex.Y() * scale.Y();
+                      mesh_msg.vertices[index].z = vertex.Z() * scale.Z();
 
                       mesh_msg.triangles[v/3].vertex_indices[v%3] = index;
                     }
@@ -412,9 +430,9 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                       const int index = submesh->GetIndex(v);
                       const ignition::math::Vector3d vertex = submesh->Vertex(v);
 
-                      mesh_msg.vertices[index].x = vertex.X() * scale.x;
-                      mesh_msg.vertices[index].y = vertex.Y() * scale.y;
-                      mesh_msg.vertices[index].z = vertex.Z() * scale.z;
+                      mesh_msg.vertices[index].x = vertex.X() * scale.X();
+                      mesh_msg.vertices[index].y = vertex.Y() * scale.Y();
+                      mesh_msg.vertices[index].z = vertex.Z() * scale.Z();
 
                       if(v < n_vertices-2) mesh_msg.triangles[v].vertex_indices[0] = index;
                       if(v > 0 && v < n_vertices-1) mesh_msg.triangles[v-1].vertex_indices[1] = index;
@@ -438,9 +456,9 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
             boost::shared_ptr<PlaneShape> plane_shape = boost::dynamic_pointer_cast<PlaneShape>(shape);
             shape_msgs::Plane plane_msg;
 
-            plane_msg.coef[0] = plane_shape->GetNormal().x;
-            plane_msg.coef[1] = plane_shape->GetNormal().y;
-            plane_msg.coef[2] = plane_shape->GetNormal().z;
+            plane_msg.coef[0] = plane_shape->Normal().X();
+            plane_msg.coef[1] = plane_shape->Normal().Y();
+            plane_msg.coef[2] = plane_shape->Normal().Z();
             plane_msg.coef[3] = 0; // This should be handled by the position of the collision object
 
             object.planes.push_back(plane_msg);
@@ -456,9 +474,9 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
 
               primitive_msg.type = primitive_msg.BOX;
               primitive_msg.dimensions.resize(3);
-              primitive_msg.dimensions[0] = box_shape->GetSize().x;
-              primitive_msg.dimensions[1] = box_shape->GetSize().y;
-              primitive_msg.dimensions[2] = box_shape->GetSize().z;
+              primitive_msg.dimensions[0] = box_shape->Size().X();
+              primitive_msg.dimensions[1] = box_shape->Size().Y();
+              primitive_msg.dimensions[2] = box_shape->Size().Z();
 
             } else if(shape->HasType(Base::CYLINDER_SHAPE)) {
 
