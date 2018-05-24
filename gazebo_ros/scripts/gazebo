@@ -7,10 +7,8 @@ SCRIPT_DIR=$(dirname ${SCRIPT_DIR})
 final="$@"
 
 EXT=so
-SIGNAL=SIGINT
 if [ $(uname) = "Darwin" ]; then
     EXT=dylib
-    SIGNAL=INT
 fi
 
 # add ros path plugin if it does not already exist in the passed in arguments
@@ -43,8 +41,15 @@ fi
 final=$(relocate_remappings "${final}")
 
 # Combine the commands
-GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" gzserver $final & 
-GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" gzclient $client_final
+GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" gzserver $final &
+gzserver_pid="$!"
+# Use kill -0 to check if the process is running
+if $(kill -0 $! 2> /dev/null); then
+  GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" gzclient $client_final
+fi
 
-# Kill the server
-kill -s $SIGNAL $!
+# Kill the server if it is alive
+if $(kill -0 $! 2> /dev/null); then
+  # -2 SIGINT valid for Linux and Mac
+  kill -2 $!
+fi
