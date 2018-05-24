@@ -252,7 +252,7 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
       // Get a reference to the object from the map
       moveit_msgs::CollisionObject &object = collision_object_map_[id];
 
-      gazebo::math::Pose link_pose = link->GetWorldPose();
+      ignition::math::Pose3d link_pose = link->GetWorldPose();
       geometry_msgs::Pose link_pose_msg;
       link_pose_msg.position.x = link_pose.pos.x;
       link_pose_msg.position.y = link_pose.pos.y;
@@ -273,8 +273,8 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
         const ShapePtr shape = collision->GetShape();
 
         // NOTE: In gazebo 2.2.2 Collision::GetWorldPose() does not work
-        //gazebo::math::Pose collision_pose = collision->GetRelativePose()*link_pose;
-        gazebo::math::Pose collision_pose = collision->GetInitialRelativePose() + link_pose;
+        //ignition::math::Pose3d collision_pose = collision->GetRelativePose()*link_pose;
+        ignition::math::Pose3d collision_pose = collision->GetInitialRelativePose() + link_pose;
         geometry_msgs::Pose collision_pose_msg;
         collision_pose_msg.position.x = collision_pose.pos.x;
         collision_pose_msg.position.y = collision_pose.pos.y;
