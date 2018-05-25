@@ -199,7 +199,6 @@ class SpawnModel():
     def callSpawnService(self):
 
         # wait for model to exist
-        rospy.init_node('spawn_model')
 
         if not self.wait_for_model == "":
           rospy.Subscriber("%s/model_states"%(self.gazebo_namespace), ModelStates, self.checkForModel)
@@ -291,6 +290,15 @@ class SpawnModel():
 
         return
 
+    def deleteSpawnedModel(self):
+        """
+        Remove the model spawned
+        """
+        delete_model_service_name = '/'.join([self.gazebo_namespace, 'delete_model'])
+        delete_model = rospy.ServiceProxy(delete_model_service_name, gazebo_interface.DeleteModel)
+        rospy.loginfo("Calling service %s" % delete_model_service_name)
+        resp = delete_model(model_name=self.model_name)
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print usage()
@@ -298,4 +306,8 @@ if __name__ == "__main__":
         print("spawn_model script started") # make this a print incase roscore has not been started
         sm = SpawnModel()
         sm.parseUserInputs()
+        rospy.init_node('spawn_model', anonymous=True)
         sm.callSpawnService()
+        rospy.on_shutdown(sm.deleteSpawnedModel)
+        rospy.spin()
+
