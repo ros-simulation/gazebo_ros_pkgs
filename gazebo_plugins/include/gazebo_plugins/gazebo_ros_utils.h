@@ -160,6 +160,7 @@ public:
         } else {
             ss << "the 'robotNamespace' param did not exit";
         }
+        rosnode_ = boost::shared_ptr<ros::NodeHandle> ( new ros::NodeHandle ( namespace_ ) );
         info_text = plugin_ + "(ns = " + namespace_ + ")";
         ROS_INFO_NAMED("utils", "%s: %s" , info_text.c_str(), ss.str().c_str() );
         readCommonParameter ();
