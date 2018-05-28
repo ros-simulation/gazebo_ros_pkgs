@@ -87,6 +87,7 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameter<std::string> ( odometry_frame_, "odometryFrame", "odom" );
     gazebo_ros_->getParameter<std::string> ( robot_base_frame_, "robotBaseFrame", "base_footprint" );
     gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
+    gazebo_ros_->getParameterBoolean ( publishOdomTF_, "publishOdomTF", true);
     gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
     gazebo_ros_->getParameterBoolean ( legacy_mode_, "legacyMode", true );
 
@@ -466,10 +467,12 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
         odom_.twist.twist.linear.y = cosf ( yaw ) * linear.Y() - sinf ( yaw ) * linear.X();
     }
 
-    tf::Transform base_footprint_to_odom ( qt, vt );
-    transform_broadcaster_->sendTransform (
-        tf::StampedTransform ( base_footprint_to_odom, current_time,
-                               odom_frame, base_footprint_frame ) );
+    if (publishOdomTF_ == true){
+        tf::Transform base_footprint_to_odom ( qt, vt );
+        transform_broadcaster_->sendTransform (
+            tf::StampedTransform ( base_footprint_to_odom, current_time,
+                                   odom_frame, base_footprint_frame ) );
+    }
 
 
     // set covariance
