@@ -89,19 +89,6 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameterBoolean ( publishWheelTF_, "publishWheelTF", false );
     gazebo_ros_->getParameterBoolean ( publishOdomTF_, "publishOdomTF", true);
     gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
-    gazebo_ros_->getParameterBoolean ( legacy_mode_, "legacyMode", true );
-
-    if (!_sdf->HasElement("legacyMode"))
-    {
-      ROS_ERROR_NAMED("diff_drive", "GazeboRosDiffDrive Plugin missing <legacyMode>, defaults to true\n"
-	       "This setting assumes you have a old package, where the right and left wheel are changed to fix a former code issue\n"
-	       "To get rid of this error just set <legacyMode> to false if you just created a new package.\n"
-	       "To fix an old package you have to exchange left wheel by the right wheel.\n"
-	       "If you do not want to fix this issue in an old package or your z axis points down instead of the ROS standard defined in REP 103\n"
-	       "just set <legacyMode> to true.\n"
-      );
-    }
-
     gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.34 );
     gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.15 );
     gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
@@ -328,16 +315,8 @@ void GazeboRosDiffDrive::getWheelVelocities()
     double vr = x_;
     double va = rot_;
 
-    if(legacy_mode_)
-    {
-      wheel_speed_[LEFT] = vr + va * wheel_separation_ / 2.0;
-      wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;
-    }
-    else
-    {
-      wheel_speed_[LEFT] = vr - va * wheel_separation_ / 2.0;
-      wheel_speed_[RIGHT] = vr + va * wheel_separation_ / 2.0;
-    }
+    wheel_speed_[LEFT] = vr - va * wheel_separation_ / 2.0;
+    wheel_speed_[RIGHT] = vr + va * wheel_separation_ / 2.0;
 }
 
 void GazeboRosDiffDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg )
@@ -375,16 +354,7 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     double sr = vr * ( wheel_diameter_ / 2.0 ) * seconds_since_last_update;
     double ssum = sl + sr;
 
-    double sdiff;
-    if(legacy_mode_)
-    {
-      sdiff = sl - sr;
-    }
-    else
-    {
-
-      sdiff = sr - sl;
-    }
+    double sdiff = sr - sl;
 
     double dx = ( ssum ) /2.0 * cos ( pose_encoder_.theta + ( sdiff ) / ( 2.0*b ) );
     double dy = ( ssum ) /2.0 * sin ( pose_encoder_.theta + ( sdiff ) / ( 2.0*b ) );
