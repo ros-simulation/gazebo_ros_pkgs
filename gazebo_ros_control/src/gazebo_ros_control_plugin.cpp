@@ -112,20 +112,6 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
 
   // temporary fix to bug regarding the robotNamespace in default_robot_hw_sim.cpp (see #637)
   std::string robot_ns = robot_namespace_;
-  if(robot_hw_sim_type_str_ == "gazebo_ros_control/DefaultRobotHWSim"){
-      if (sdf_->HasElement("legacyModeNS")) {
-          if( sdf_->GetElement("legacyModeNS")->Get<bool>() ){
-              robot_ns = "";
-          }
-      }else{
-          robot_ns = "";
-          ROS_ERROR("GazeboRosControlPlugin missing <legacyModeNS> while using DefaultRobotHWSim, defaults to true.\n"
-                    "This setting assumes you have an old package with an old implementation of DefaultRobotHWSim, "
-                    "where the robotNamespace is disregarded and absolute paths are used instead.\n"
-                    "If you do not want to fix this issue in an old package just set <legacyModeNS> to true.\n"
-                    );
-      }
-  }
 
   // Get the Gazebo simulation period
 #if GAZEBO_MAJOR_VERSION >= 8
