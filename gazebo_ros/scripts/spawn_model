@@ -53,6 +53,7 @@ class SpawnModelNode():
         source.add_argument('-param', type=str, metavar='PARAM_NAME', help='Load model xml from ROS parameter')
         source.add_argument('-database', type=str, metavar='MODEL_NAME',
                             help='Load model XML from specified model in Gazebo Model Database')
+        source.add_argument('-stdin', action='store_true', help='Load model from stdin')
         parser.add_argument('-model', required=True, type=str, metavar='MODEL_NAME', help='Name of model to spawn')
         parser.add_argument('-reference_frame', type=str, default='',
                             help='Name of the model/body where initial pose is defined.\
@@ -132,6 +133,12 @@ class SpawnModelNode():
         elif self.args.database:
             rospy.loginfo("Loading model XML from Gazebo Model Database")
             model_xml = self.MODEL_DATABASE_TEMPLATE.format(self.args.database)
+        elif self.args.stdin:
+            rospy.loginfo("Loading model XML from stdin")
+            model_xml = sys.stdin.read()
+            if model_xml == "":
+                rospy.logerr("Error: stdin buffer was empty")
+                return 1
 
         # Replace package with model if requested
         if self.args.package_to_model:
