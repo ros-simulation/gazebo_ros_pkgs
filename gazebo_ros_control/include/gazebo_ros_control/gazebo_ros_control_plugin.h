@@ -116,9 +116,11 @@ protected:
   // Controller manager
   boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
-  // Timing
+  // Period between calls to controller update
   ros::Duration control_period_;
+  // Last time that controllers were updated
   ros::Time last_update_sim_time_ros_;
+  // Last time that hardware readSim and writeSim were called
   ros::Time last_write_sim_time_ros_;
 
   // e_stop_active_ is true if the emergency stop is active.
