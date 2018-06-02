@@ -149,7 +149,7 @@ class SpawnModel():
                 rospy.logerr("Error: you cannot specify parameter if file, parameter, or database name is given, must pick one source of model xml")
                 sys.exit(0)
               else:
-                self.model_xml = sys.argv[i+1]
+                self.model_xml = ''.join(sys.stdin.readlines())
           if sys.argv[i] == '-model':
             if len(sys.argv) > i+1:
               self.model_name = sys.argv[i+1]
