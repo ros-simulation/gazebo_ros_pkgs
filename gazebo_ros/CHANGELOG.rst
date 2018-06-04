@@ -2,6 +2,21 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use generic SIGINT parameter in kill command for gazebo script (`#711 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/711>`_)
+  * Use generic SIGINT parameter in kill command for gazebo script
+  * redirect to kill command to std_err
+* Parameter to disable ROS network interaction from/to Gazebo (lunar-devel) (`#704 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/704>`_)
+  * Merge initial part of 585 PR
+  * Missing parts from the port to lunar
+  * Fix last remaining code from merge
+* Load the libgazebo_ros_api_plugin when starting gzclient so that the ROS event loop will turn over, which is required when you have a client-side Gazebo plugin that uses ROS. (`#676 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/676>`_)
+* Pass verbose argument to gzclient (`#677 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/677>`_)
+* strip comments from parsed urdf (`#698 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/698>`_)
+  Remove comments from urdf before trying to find packages. Otherwise non-existant packages will produce a fatal error, even though they are not used.
+* Contributors: Jose Luis Rivero
+
 2.7.4 (2018-02-12)
 ------------------
 * Fix last gazebo8 warnings! (lunar-devel) (`#664 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/664>`_)
