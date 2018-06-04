@@ -2,6 +2,19 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* End of legacy for diff drive plugin (`#707 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/707>`_)
+  This PR ends with the option to set legacy in a ROS parameter.
+  In old versions of the code the right and left wheel were changed
+  to fix a former code issue. To fix an old package you have to
+  exchange left wheel by the right wheel.
+* Remove gazebo_ros_joint_trajectory plugin (`#708 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/708>`_)
+* Add publishOdomTF flag (`#692 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/692>`_) (`#727 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/727>`_)
+* DIFF DRIVE: wheel odometry twist is child frame (`#719 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/719>`_)
+* ROS UTILS: initialize rosnode\_ in alternative constructor to avoid segfault `#478 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/478>`_ (`#718 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/718>`_)
+* Contributors: Jose Luis Rivero, Kevin Allen
+
 2.8.2 (2018-05-09)
 ------------------
 * Fix the build on Ubuntu Artful. (`#715 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/715>`_)

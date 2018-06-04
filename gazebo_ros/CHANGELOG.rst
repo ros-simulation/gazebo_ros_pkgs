@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use generic SIGINT parameter in kill command for gazebo script (melodic-devel) (`#724 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/724>`_)
+  * Use generic SIGINT parameter in kill command for gazebo script
+  * redirect to kill command to std_err
+* Contributors: Jose Luis Rivero
+
 2.8.2 (2018-05-09)
 ------------------
 * Fix the build on Ubuntu Artful. (`#715 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/715>`_)
