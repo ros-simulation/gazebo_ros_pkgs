@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.5 (2018-06-04)
+------------------
 * Triggered camera / multicamera plugins (lunar-devel) (`#714 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/714>`_)
   * adds triggered cameras and multicameras
 * fix gazebo9 warnings by removing Set.*Accel calls (`#728 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/728>`_)

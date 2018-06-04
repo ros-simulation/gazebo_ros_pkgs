@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.5 (2018-06-04)
+------------------
 * Don't ignore robotNamespace in gazebo_ros_control nodes (lunar-devel) (`#706 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/706>`_)
   * Don't ignore robotNamespace
   When creating the NodeHandle for reading the PID parameters, the model_nh was always ignored. Instead, all parameters were read from /gazebo_ros_control/pid_gains/<joint_name>/\* instead of /<robot_name>/gazebo_ros_control/pid_gains/<joint_name>/\*.
