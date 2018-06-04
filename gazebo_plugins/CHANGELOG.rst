@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.16 (2018-06-04)
+-------------------
 * ROS UTILS: initialize rosnode\_ in alternative constructor to avoid segfault `#478 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/478>`_ (`#722 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/722>`_)
 * Contributors: Jose Luis Rivero
 

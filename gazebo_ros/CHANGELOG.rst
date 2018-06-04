@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.16 (2018-06-04)
+-------------------
 * gazebo_ros_api_plugin: improve plugin xml parsing (`#731 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/731>`_)
   An xml comment that start with plugin causes a seg-fault:
   <!--plugin-->

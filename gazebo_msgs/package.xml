@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>gazebo_msgs</name>
-  <version>2.4.15</version>
+  <version>2.4.16</version>
   <description>
     Message and service data structures for interacting with Gazebo from ROS.
   </description>
