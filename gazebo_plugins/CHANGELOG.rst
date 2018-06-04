@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.16 (2018-06-04)
+-------------------
 * Add publishOdomTF flag (`#692 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/692>`_) (`#716 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/716>`_)
 * ROS UTILS: prevent segfault when using alternative GazeboRos constructor (kinetic-devel) (`#721 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/721>`_)
 * Triggered camera / multicamera plugins (`#687 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/687>`_)

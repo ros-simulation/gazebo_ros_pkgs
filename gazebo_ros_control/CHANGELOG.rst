@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.16 (2018-06-04)
+-------------------
 * add physics type for dart with joint velocity interface (`#693 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/693>`_)
 * Add warnings when the user is affected by gazebo not preserving world velocity when set positions (`#691 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/691>`_)
   Issue `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_. Workaround at https://github.com/mintar/mimic_joint_gazebo_tutorial
