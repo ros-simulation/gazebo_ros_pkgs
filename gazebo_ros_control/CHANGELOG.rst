@@ -2,6 +2,19 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add physics type for dart with joint velocity interface (`#693 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/693>`_)
+* Add warnings when the user is affected by gazebo not preserving world velocity when set positions (`#691 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/691>`_)
+  Issue `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_. Workaround at https://github.com/mintar/mimic_joint_gazebo_tutorial
+* Fix for preserving world velocity when set positions for Gazebo9: `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_
+  This commit fixes `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_, but only for Gazebo9.
+  Fixing it for Gazebo7 (the version used in ROS Kinetic) requires the
+  following PR to be backported to Gazebo 7 and 8:
+  https://bitbucket.org/osrf/gazebo/pull-requests/2814/fix-issue-2111-by-providing-options-to/diff
+
+* Contributors: Jack Liu, Martin Günther
+
 2.5.15 (2018-02-12)
 -------------------
 * Fix last gazebo8 warnings! (`#658 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/658>`_)

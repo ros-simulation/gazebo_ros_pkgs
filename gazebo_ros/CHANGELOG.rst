@@ -2,6 +2,21 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use generic SIGINT parameter in kill command for gazebo script (kinetic-devel) (`#723 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/723>`_)
+  * Use generic SIGINT parameter in kill command for gazebo script
+  * redirect to kill command to std_err
+* strip comments from parsed urdf (`#695 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/695>`_)
+  Remove comments from urdf before trying to find packages. Otherwise non-existant packages will produce a fatal error, even though they are not used.
+* Merge pull request `#672 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/672>`_ from ros-simulation/gzclient_verbose
+  Pass verbose argument to gzclient
+* Merge pull request `#670 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/670>`_ from ros-simulation/add_ros_api_plugin_to_gzclient
+  Load the libgazebo_ros_api_plugin when starting gzclient
+* Pass verbose argument to gzclient
+* Load the libgazebo_ros_api_plugin when starting gzclient so that the ROS event loop will turn over, which is required when you have a client-side Gazebo plugin that uses ROS.
+* Contributors: Brian Gerkey, Jose Luis Rivero, Steven Peters, azhural, chapulina
+
 2.5.15 (2018-02-12)
 -------------------
 * Fix last gazebo8 warnings! (`#658 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/658>`_)

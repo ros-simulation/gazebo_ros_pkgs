@@ -2,6 +2,33 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add publishOdomTF flag (`#692 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/692>`_) (`#716 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/716>`_)
+* ROS UTILS: prevent segfault when using alternative GazeboRos constructor (kinetic-devel) (`#721 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/721>`_)
+* Triggered camera / multicamera plugins (`#687 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/687>`_)
+* Fix sensors after time reset (`#683 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/683>`_)
+  World resets result in a negative time differences between current world
+  time and the last recorded sensor update time, preventing the plugin
+  from publishing new frames. This commit detects such events and resets
+  the internal sensor update timestamp.
+  * block_laser, range, and joint_state_publisher keep publishing after clock reset
+  * p3d keeps publishing after clock reset
+* Support 16-bit cameras (`#675 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/675>`_)
+  * extend camera util to support 16 bit rgb image encoding:  support 16 bit mono
+* Add warnings when the user is affected by gazebo not preserving world velocity when set positions (`#691 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/691>`_)
+  Issue `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_. Workaround at https://github.com/mintar/mimic_joint_gazebo_tutorial
+* Fix for preserving world velocity when set positions for Gazebo9: `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_
+  This commit fixes `#612 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612>`_, but only for Gazebo9.
+  Fixing it for Gazebo7 (the version used in ROS Kinetic) requires the
+  following PR to be backported to Gazebo 7 and 8:
+  https://bitbucket.org/osrf/gazebo/pull-requests/2814/fix-issue-2111-by-providing-options-to/diff
+* gazebo_plugins: unique names for distortion tests (`#685 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/685>`_)
+* Fix tests and compiler warnings on kinetic-devel `#678 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/678>`_
+* fix gazebo9 warnings by removing Set.*Accel calls
+* gazebo_plugins: don't use -r in tests
+* Contributors: Jose Luis Rivero, Julian Kooij, Kevin Allen, Martin Günther, Steven Peters, krzysztof-zurad
+
 2.5.15 (2018-02-12)
 -------------------
 * Merge pull request `#669 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/669>`_ from ahcorde/kinetic-devel
