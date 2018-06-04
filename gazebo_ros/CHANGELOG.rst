@@ -2,6 +2,17 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_ros_api_plugin: improve plugin xml parsing (`#731 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/731>`_)
+  An xml comment that start with plugin causes a seg-fault:
+  <!--plugin-->
+  or
+  <!--plugin filename="lib.so"/-->
+  This fixes the xml parsing to not try to add child elements
+  to xml comments.
+* Contributors: Jose Luis Rivero
+
 2.4.15 (2017-08-09)
 -------------------
 * Fix build (`#600 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/600>`_)
