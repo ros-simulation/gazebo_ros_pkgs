@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.3 (2018-06-04)
+------------------
 * Remove legacy in gazebo_ros_control for robotNamespace (`#709 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/709>`_)
   See pull request `#637 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/637>`_
 * Contributors: Jose Luis Rivero
