@@ -114,6 +114,8 @@ namespace gazebo_ros_control {
 
   };
 
+  typedef boost::shared_ptr<RobotHWSim> RobotHWSimSharedPtr;
+
 }
 
 #endif // ifndef __ROS_CONTROL_GAZEBO_ROBOT_HW_SIM_H
