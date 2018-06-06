@@ -304,8 +304,10 @@ install(TARGETS
   gazebo_ros_utils
   gazebo_ros_camera_utils
   gazebo_ros_camera
+  gazebo_ros_triggered_camera
   gazebo_ros_multicamera
   MultiCameraPlugin
+  gazebo_ros_triggered_multicamera
   gazebo_ros_depth_camera
   gazebo_ros_openni_kinect
   gazebo_ros_openni_kinect
