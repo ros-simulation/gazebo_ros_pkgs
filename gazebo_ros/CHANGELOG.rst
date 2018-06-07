@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.7.5 (2018-06-04)
 ------------------
 * Use generic SIGINT parameter in kill command for gazebo script (`#711 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/711>`_)
