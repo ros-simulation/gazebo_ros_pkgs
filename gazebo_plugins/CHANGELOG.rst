@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.6 (2018-06-07)
+------------------
 * gazebo_plugins: install triggered camera plugins (`#741 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/741>`_)
   Fixes `#739 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/739>`_.
 * Contributors: Jose Luis Rivero
