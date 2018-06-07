@@ -2,6 +2,12 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_plugins: install triggered camera plugins (`#740 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/740>`_)
+  Fixes `#739 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/739>`_.
+* Contributors: Steven Peters
+
 2.5.16 (2018-06-04)
 -------------------
 * Add publishOdomTF flag (`#692 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/692>`_) (`#716 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/716>`_)
