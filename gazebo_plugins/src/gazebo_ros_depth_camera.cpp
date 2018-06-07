@@ -45,7 +45,7 @@ GZ_REGISTER_SENSOR_PLUGIN(GazeboRosDepthCamera)
 GazeboRosDepthCamera::GazeboRosDepthCamera()
 {
   this->point_cloud_connect_count_ = 0;
-  this->depth_info_connect_count_ = 0;
+  this->depth_image_connect_count_ = 0;
   this->last_depth_image_camera_info_update_time_ = common::Time(0);
 }
 
@@ -133,7 +133,7 @@ void GazeboRosDepthCamera::Advertise()
         boost::bind( &GazeboRosDepthCamera::DepthInfoConnect,this),
         boost::bind( &GazeboRosDepthCamera::DepthInfoDisconnect,this),
         ros::VoidPtr(), &this->camera_queue_);
-  this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
+  this->depth_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
 }
 
 
@@ -141,24 +141,23 @@ void GazeboRosDepthCamera::Advertise()
 // Increment count
 void GazeboRosDepthCamera::PointCloudConnect()
 {
+  ROS_INFO("PointCloud subscriber connected.");
   this->point_cloud_connect_count_++;
-  (*this->image_connect_count_)++;
   this->parentSensor->SetActive(true);
 }
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
 void GazeboRosDepthCamera::PointCloudDisconnect()
 {
+  ROS_INFO("PointCloud subscriber disconnected.");
   this->point_cloud_connect_count_--;
-  (*this->image_connect_count_)--;
-  if (this->point_cloud_connect_count_ <= 0)
-    this->parentSensor->SetActive(false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Increment count
 void GazeboRosDepthCamera::DepthImageConnect()
 {
+  ROS_INFO("DepthImage subscriber connected.");
   this->depth_image_connect_count_++;
   this->parentSensor->SetActive(true);
 }
@@ -166,6 +165,7 @@ void GazeboRosDepthCamera::DepthImageConnect()
 // Decrement count
 void GazeboRosDepthCamera::DepthImageDisconnect()
 {
+  ROS_INFO("DepthImage subscriber disconnected.");
   this->depth_image_connect_count_--;
 }
 
@@ -173,13 +173,15 @@ void GazeboRosDepthCamera::DepthImageDisconnect()
 // Increment count
 void GazeboRosDepthCamera::DepthInfoConnect()
 {
-  this->depth_info_connect_count_++;
+  ROS_INFO("DepthInfo subscriber connected");
+  DepthImageConnect();
 }
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
 void GazeboRosDepthCamera::DepthInfoDisconnect()
 {
-  this->depth_info_connect_count_--;
+  ROS_INFO("DepthInfo subscriber disconnected");
+  DepthImageDisconnect();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -196,10 +198,10 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
   if (this->parentSensor->IsActive())
   {
     if (this->point_cloud_connect_count_ <= 0 &&
-        this->depth_image_connect_count_ <= 0 &&
-        (*this->image_connect_count_) <= 0)
+        this->depth_image_connect_count_ <= 0)
     {
       this->parentSensor->SetActive(false);
+      ROS_INFO("Setting parent sensor to inactive. No Subscribers.");
     }
     else
     {
@@ -308,8 +310,6 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
     if ((*this->image_connect_count_) > 0)
     {
       this->PutCameraData(_image);
-      // TODO(lucasw) publish camera info with depth image
-      // this->PublishCameraInfo(sensor_update_time);
     }
   }
 }
@@ -357,6 +357,7 @@ void GazeboRosDepthCamera::FillDepthImage(const float *_src)
                  (void*)_src );
 
   this->depth_image_pub_.publish(this->depth_image_msg_);
+  PublishDepthCameraInfo();
 
   this->lock_.unlock();
 }
@@ -484,19 +485,16 @@ bool GazeboRosDepthCamera::FillDepthImageHelper(
   return true;
 }
 
-void GazeboRosDepthCamera::PublishCameraInfo()
+void GazeboRosDepthCamera::PublishDepthCameraInfo()
 {
-  ROS_DEBUG_NAMED("depth_camera", "publishing default camera info, then depth camera info");
-  GazeboRosCameraUtils::PublishCameraInfo();
-
-  if (this->depth_info_connect_count_ > 0)
+  if (this->depth_camera_info_pub_.getNumSubscribers() > 0)
   {
     common::Time sensor_update_time = this->parentSensor_->LastMeasurementTime();
 
     this->sensor_update_time_ = sensor_update_time;
     if (sensor_update_time - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
     {
-      this->PublishCameraInfo(this->depth_image_camera_info_pub_);  // , sensor_update_time);
+      this->PublishCameraInfo(this->depth_camera_info_pub_);  // , sensor_update_time);
       this->last_depth_image_camera_info_update_time_ = sensor_update_time;
     }
   }

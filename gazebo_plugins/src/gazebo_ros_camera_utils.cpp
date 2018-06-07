@@ -629,20 +629,12 @@ void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
 
     // publish to ros
     this->image_pub_.publish(this->image_msg_);
+    this->PublishCameraInfo();
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Put camera_ data to the interface
-void GazeboRosCameraUtils::PublishCameraInfo(common::Time &last_update_time)
-{
-  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
-    return;
-
-  this->sensor_update_time_ = last_update_time;
-  this->PublishCameraInfo();
-}
-
 void GazeboRosCameraUtils::PublishCameraInfo()
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)

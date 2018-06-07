@@ -128,7 +128,6 @@ namespace gazebo
 
     /// \brief Publish CameraInfo to the ROS topic
     protected: void PublishCameraInfo(ros::Publisher camera_info_publisher);
-    protected: void PublishCameraInfo(common::Time &last_update_time);
     protected: void PublishCameraInfo();
     /// \brief Keep track of number of connctions for CameraInfo
     private: void InfoConnect();
