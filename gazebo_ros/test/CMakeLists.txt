@@ -1,6 +1,7 @@
 set (rostests_python
   ros_network/ros_network_default.test
   ros_network/ros_network_disabled.test
+  api_resubscribe/api_resubscribe.test
 )
 
 if(CATKIN_ENABLE_TESTING)
