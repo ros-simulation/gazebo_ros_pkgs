@@ -1065,7 +1065,7 @@ bool GazeboRosApiPlugin::getWorldProperties(gazebo_msgs::GetWorldProperties::Req
   for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
     res.model_names.push_back(world_->GetModel(i)->GetName());
 #endif
-  gzerr << "disablign rendering has not been implemented, rendering is always enabled\n";
+  // Note: currently rendering is always enabled in gazebo
   res.rendering_enabled = true; //world->GetRenderEngineEnabled();
   res.success = true;
   res.status_message = "GetWorldProperties: got properties";
