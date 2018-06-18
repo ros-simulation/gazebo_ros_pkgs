@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2013 Open Source Robotics Foundation
+# Copyright 2018 Open Source Robotics Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,14 +20,15 @@
 import rospy
 import sys
 import os
-import re
+import argparse
+import xml
+from urlparse import urlsplit, SplitResult
 from gazebo_ros import gazebo_interface
 from gazebo_msgs.msg import ModelStates
 from gazebo_msgs.srv import DeleteModel
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Pose, Quaternion
 from tf.transformations import quaternion_from_euler
-import argparse
 
 
 class SpawnModelNode():
@@ -140,10 +141,26 @@ class SpawnModelNode():
                 rospy.logerr("Error: stdin buffer was empty")
                 return 1
 
-        # Replace package with model if requested
+        # Parse xml to detect invalid xml before sending to gazebo
+        try:
+            xml_parsed = xml.etree.ElementTree.fromstring(model_xml)
+        except xml.etree.ElementTree.ParseError as e:
+            rospy.logerr('Invalid XML: {}'.format(e))
+            return 1
+
+        # Replace package:// with model:// for mesh tags if flag is set
         if self.args.package_to_model:
-            model_xml = re.sub("<\s*mesh\s+filename\s*=\s*([\"|'])package://", "<mesh filename=\g<1>model://",
-                               model_xml)
+            for element in xml_parsed.iterfind('.//mesh'):
+                filename_tag = element.get('filename')
+                if filename_tag is None:
+                    continue
+                url = urlsplit(filename_tag)
+                if url.scheme == 'package':
+                    url = SplitResult('model', *url[1:])
+                    element.set('filename', url.geturl())
+
+        # Encode xml object back into string for service call
+        model_xml = xml.etree.ElementTree.tostring(xml_parsed)
 
         # Form requested Pose from arguments
         initial_pose = Pose()
