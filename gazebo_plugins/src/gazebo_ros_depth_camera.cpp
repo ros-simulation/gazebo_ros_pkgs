@@ -45,6 +45,7 @@ GZ_REGISTER_SENSOR_PLUGIN(GazeboRosDepthCamera)
 GazeboRosDepthCamera::GazeboRosDepthCamera()
 {
   this->point_cloud_connect_count_ = 0;
+  this->depth_image_connect_count_ = 0;
   this->depth_info_connect_count_ = 0;
   this->last_depth_image_camera_info_update_time_ = common::Time(0);
 }
