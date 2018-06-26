@@ -310,7 +310,6 @@ install(TARGETS
   gazebo_ros_triggered_multicamera
   gazebo_ros_depth_camera
   gazebo_ros_openni_kinect
-  gazebo_ros_openni_kinect
   gazebo_ros_laser
   gazebo_ros_block_laser
   gazebo_ros_p3d
