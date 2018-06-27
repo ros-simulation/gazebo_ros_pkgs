@@ -108,7 +108,9 @@ catkin_package(
   gazebo_ros_utils 
   gazebo_ros_camera_utils 
   gazebo_ros_camera 
+  gazebo_ros_triggered_camera
   gazebo_ros_multicamera 
+  gazebo_ros_triggered_multicamera
   gazebo_ros_depth_camera 
   gazebo_ros_openni_kinect 
   gazebo_ros_gpu_laser 
@@ -194,6 +196,11 @@ add_library(gazebo_ros_camera src/gazebo_ros_camera.cpp)
 add_dependencies(gazebo_ros_camera ${PROJECT_NAME}_gencfg)
 target_link_libraries(gazebo_ros_camera gazebo_ros_camera_utils CameraPlugin ${catkin_LIBRARIES})
 
+add_library(gazebo_ros_triggered_camera src/gazebo_ros_triggered_camera.cpp)
+add_dependencies(gazebo_ros_triggered_camera ${PROJECT_NAME}_gencfg)
+target_link_libraries(gazebo_ros_triggered_camera gazebo_ros_camera_utils ${GAZEBO_LIBRARIES} CameraPlugin ${catkin_LIBRARIES})
+
+
 if (NOT GAZEBO_VERSION VERSION_LESS 6.0)
   add_library(gazebo_ros_elevator src/gazebo_ros_elevator.cpp)
   add_dependencies(gazebo_ros_elevator ${PROJECT_NAME}_gencfg)
@@ -203,6 +210,10 @@ endif()
 add_library(gazebo_ros_multicamera src/gazebo_ros_multicamera.cpp)
 add_dependencies(gazebo_ros_multicamera ${PROJECT_NAME}_gencfg)
 target_link_libraries(gazebo_ros_multicamera gazebo_ros_camera_utils MultiCameraPlugin ${catkin_LIBRARIES})
+
+add_library(gazebo_ros_triggered_multicamera src/gazebo_ros_triggered_multicamera.cpp)
+add_dependencies(gazebo_ros_triggered_multicamera ${PROJECT_NAME}_gencfg)
+target_link_libraries(gazebo_ros_triggered_multicamera gazebo_ros_camera_utils gazebo_ros_triggered_camera ${GAZEBO_LIBRARIES} MultiCameraPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_depth_camera src/gazebo_ros_depth_camera.cpp)
 add_dependencies(gazebo_ros_depth_camera ${PROJECT_NAME}_gencfg)
@@ -308,8 +319,10 @@ install(TARGETS
   gazebo_ros_utils
   gazebo_ros_camera_utils
   gazebo_ros_camera
+  gazebo_ros_triggered_camera
   gazebo_ros_multicamera
   MultiCameraPlugin
+  gazebo_ros_triggered_multicamera
   gazebo_ros_depth_camera
   gazebo_ros_openni_kinect
   gazebo_ros_laser
@@ -409,5 +422,9 @@ if (CATKIN_ENABLE_TESTING)
                       test/camera/distortion_pincushion.test
                       test/camera/distortion_pincushion.cpp)
     target_link_libraries(distortion_pincushion_test ${catkin_LIBRARIES})
+    add_rostest_gtest(triggered-camera-test
+                      test/camera/triggered_camera.test
+                      test/camera/triggered_camera.cpp)
+    target_link_libraries(triggered-camera-test ${catkin_LIBRARIES})
   endif()
 endif()
