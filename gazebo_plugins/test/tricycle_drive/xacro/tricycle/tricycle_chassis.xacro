@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <property name="M_PI" value="3.1415926535897931" />
-  <property name="DX" value="2.500" />
-  <property name="DY" value="0.60" />
-  <property name="DZ" value="0.1" />
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+  <xacro:property name="DX" value="2.500" />
+  <xacro:property name="DY" value="0.60" />
+  <xacro:property name="DZ" value="0.1" />
 
   <xacro:macro name="tricycle_chassis" params="name parent xyz rpy meshes">
 
