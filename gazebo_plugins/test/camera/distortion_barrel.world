@@ -57,11 +57,7 @@
     may result in large black borders on the generated images, or in the
     undistorted version of the images. This will likely skew and invalidate
     the results of camera distortion tests. -->
-            <distortionK1>-0.1</distortionK1>
-            <distortionK2>-0.1</distortionK2>
-            <distortionT1>0.0</distortionT1>
-            <distortionT2>0.0</distortionT2>
-            <distortionK3>-0.1</distortionK3>
+            <autoDistortion>true</autoDistortion>
             <borderCrop>false</borderCrop>
           </plugin>
         </sensor>
