@@ -93,8 +93,8 @@ void GazeboRosIMU::LoadThread()
 
   if (!this->sdf->HasElement("yawGaussianNoise"))
   {
-    ROS_INFO_NAMED("imu", "imu plugin missing <yawGaussianNoise>, defaults to 0.0");
-    this->yaw_gaussian_noise_ = 0.0;
+    ROS_INFO_NAMED("imu", "imu plugin missing <yawGaussianNoise>, defaults to <gaussianNoise>");
+    this->yaw_gaussian_noise_ = this->gaussian_noise_;
   }
   else
     this->yaw_gaussian_noise_ = this->sdf->Get<double>("yawGaussianNoise");
