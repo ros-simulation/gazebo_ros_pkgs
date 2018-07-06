@@ -38,5 +38,6 @@
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>tinyxml</depend>
+  <exec_depend>python-argparse</exec_depend>
 
 </package>

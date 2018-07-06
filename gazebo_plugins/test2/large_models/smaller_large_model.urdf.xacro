@@ -20,8 +20,8 @@
   -->
   <xacro:macro name="one_link" params="link_name parent *axis *origin material">
     <joint name="${link_name}_joint" type="continuous" >
-      <insert_block name="origin"/>
-      <insert_block name="axis"/>
+      <xacro:insert_block name="origin"/>
+      <xacro:insert_block name="axis"/>
       <parent link="${parent}" />
       <child link="${link_name}" />
       <dynamics damping="100.0" />

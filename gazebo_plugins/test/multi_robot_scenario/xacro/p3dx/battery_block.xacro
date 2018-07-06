@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <property name="M_PI" value="3.1415926535897931" />
+  <xacro:property name="M_PI" value="3.1415926535897931" />
 
   <xacro:macro name="battery_block" params="name parent x y z mass">
 
