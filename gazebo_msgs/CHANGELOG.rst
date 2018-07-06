@@ -2,6 +2,11 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.4 (2018-07-06)
+------------------
+* Correct documentation on SetModelConfiguration.srv
+* Contributors: Kevin Allen
+
 2.8.3 (2018-06-04)
 ------------------
 

@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.4 (2018-07-06)
+------------------
+* Refactor spawn_model script
+  * more robust -package_to_model implementation (issue #449)
+  * add stdin as source option
+  * parse arguments with argparse
+  * remove deprecated/unused -gazebo and -trimesh options
+* Fix physics reconfigure within namespace (issue #507)
+* Contributors: Kevin Allen, Steven Peters
+
 2.8.3 (2018-06-04)
 ------------------
 * Use generic SIGINT parameter in kill command for gazebo script (melodic-devel) (`#724 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/724>`_)

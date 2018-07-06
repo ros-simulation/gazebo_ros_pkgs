@@ -2,6 +2,28 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.8.4 (2018-07-06)
+------------------
+* Fix various xacro/xml issues with tests
+* Fix handling of boolean values since Gazebo API returns
+  'true'/'false' as '1'/'0' strings
+* Add auto_distortion parameter to camera utils
+* Corrected depth camera plugin initialization (#748)
+  * Initialize depth_image_connect_count\_ to 0
+  * Removed duplicate line in CMakeLists.txt
+* Fix melodic compiler warnings (#744)
+  * Fix model_state_test. -v means --version not --verbose
+  * fix gazebo9 warnings by removing Set.*Accel calls
+  * gazebo_plugins: don't use -r in tests
+* add missing distortion test worlds
+* fix 16bit test name
+* test for triggered_camera
+* update copyright dates and remove copied comments
+* remove compiler directives for old gazebo versions
+* use correct timestamp for images
+* adds triggered cameras and multicameras
+* Contributors: Jose Luis Rivero, Kevin Allen, Martin Ganeff, Morgan Quigley, Steven Peters, Timo Korthals, iche033
+
 2.8.3 (2018-06-04)
 ------------------
 * End of legacy for diff drive plugin (`#707 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/707>`_)
