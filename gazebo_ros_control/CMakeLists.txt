@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6.3)
+cmake_minimum_required(VERSION 3.5.1)
 project(gazebo_ros_control)
 
 # Load catkin and all dependencies required for this package
