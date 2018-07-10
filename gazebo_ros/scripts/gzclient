@@ -23,6 +23,13 @@ then
     final="$final -g `catkin_find --first-only libgazebo_ros_api_plugin.$EXT`"
 fi
 
+# Set node name to gzclient to not conflict with gazebo (gzserver) node if name is not set
+if [ `expr "$final" : ".*__name.*"` -eq 0 ]
+then
+    final="$final __name:=gzclient"
+fi
+
+
 setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
 
 # source setup.sh, but keep local modifications to GAZEBO_MASTER_URI and GAZEBO_MODEL_DATABASE_URI
