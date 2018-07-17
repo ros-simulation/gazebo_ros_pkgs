@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(gazebo_dev)
 
-find_package(catkin REQUIRED)
-
-catkin_package(
-  CFG_EXTRAS gazebo_dev-extras.cmake
-)
+find_package(ament_cmake REQUIRED)
+ament_package(CONFIG_EXTRAS "cmake/gazebo_dev-extras.cmake")

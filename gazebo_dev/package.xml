@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>gazebo_dev</name>
   <version>2.8.4</version>
   <description>
@@ -17,8 +18,12 @@
 
   <author>Johannes Meyer</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_export_depend>libgazebo9-dev</build_export_depend>
   <exec_depend>gazebo9</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
