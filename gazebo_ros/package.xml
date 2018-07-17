@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>gazebo_ros</name>
   <version>2.8.4</version>
   <description>
-    Provides ROS plugins that offer message and service publishers for interfacing with <a href="http://gazebosim.org">Gazebo</a> through ROS.
-    Formally simulator_gazebo/gazebo
+    Utilities to interface with <a href="http://gazebosim.org">Gazebo</a> through ROS.
   </description>
 
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
@@ -19,25 +19,15 @@
   <author>Nate Koenig</author>
   <author>Dave Coleman</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>cmake_modules</build_depend>
+  <build_depend>rclcpp</build_depend>
   <build_depend>gazebo_dev</build_depend>
-  <!--
-    Need to use gazebo_dev since run script needs pkg-config
-    See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
-  -->
-  <exec_depend>gazebo_dev</exec_depend>
-  <depend>gazebo_msgs</depend>
-  <depend>roslib</depend>
-  <depend>roscpp</depend>
-  <depend>tf</depend>
-  <depend>std_srvs</depend>
-  <depend>rosgraph_msgs</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>std_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>tinyxml</depend>
-  <exec_depend>python-argparse</exec_depend>
 
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>gazebo_dev</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
