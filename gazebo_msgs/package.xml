@@ -11,6 +11,10 @@
 
   <license>BSD</license>
 
+  <url type="website">http://gazebosim.org/tutorials?cat=connect_ros</url>
+  <url type="bugtracker">https://github.com/ros-simulation/gazebo_ros_pkgs/issues</url>
+  <url type="repository">https://github.com/ros-simulation/gazebo_ros_pkgs</url>
+
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>rosidl_default_generators</buildtool_depend>
 
