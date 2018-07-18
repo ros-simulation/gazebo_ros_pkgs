@@ -26,6 +26,11 @@ ament_export_libraries(gazebo_ros_node)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 ament_package()
 
 install(DIRECTORY include/
@@ -35,3 +40,4 @@ install(TARGETS gazebo_ros_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
+

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GAZEBO_ROS_EXECUTOR_HPP
-#define GAZEBO_ROS_EXECUTOR_HPP
+#ifndef GAZEBO_ROS__EXECUTOR_HPP_
+#define GAZEBO_ROS__EXECUTOR_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <gazebo/common/common.hh>
@@ -47,6 +47,5 @@ private:
   /// Connection to gazebo sigint event
   gazebo::event::ConnectionPtr sigint_handle_;
 };
-
-} // namespace gazebo_ros
-#endif
+}  // namespace gazebo_ros
+#endif  // GAZEBO_ROS__EXECUTOR_HPP_

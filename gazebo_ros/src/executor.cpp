@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
-
 #include <gazebo_ros/executor.hpp>
+
+#include <iostream>
 
 namespace gazebo_ros
 {
 
-Executor::Executor() :
-  spin_thread_(std::bind(&Executor::run, this))
+Executor::Executor()
+: spin_thread_(std::bind(&Executor::run, this))
 {
   sigint_handle_ = gazebo::event::Events::ConnectSigInt(std::bind(&Executor::shutdown, this));
 }
@@ -28,8 +28,9 @@ Executor::Executor() :
 Executor::~Executor()
 {
   // If ros was not already shutdown by SIGINT handler, do it now
-  if (rclcpp::ok())
+  if (rclcpp::ok()) {
     rclcpp::shutdown();
+  }
   spin_thread_.join();
 }
 
@@ -43,4 +44,4 @@ void Executor::shutdown()
   rclcpp::shutdown();
 }
 
-} // namespace gazebo_ros
+}  // namespace gazebo_ros
