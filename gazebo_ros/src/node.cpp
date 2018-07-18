@@ -14,6 +14,9 @@
 
 #include <gazebo_ros/node.hpp>
 
+#include <memory>
+#include <string>
+
 namespace gazebo_ros
 {
 
@@ -21,8 +24,8 @@ std::weak_ptr<Executor> Node::static_executor_;
 std::mutex Node::lock_;
 std::atomic_bool Node::initialized_(false);
 
-Node::NotInitializedException::NotInitializedException() :
-  std::runtime_error("Called LoadNode before InitROS. Be sure to load the ros_api plugin first")
+Node::NotInitializedException::NotInitializedException()
+: std::runtime_error("Called LoadNode before InitROS. Be sure to load the ros_api plugin first")
 {
 }
 
@@ -30,12 +33,12 @@ Node::~Node()
 {
 }
 
-void Node::InitROS(int argc, char** argv)
+void Node::InitROS(int argc, char ** argv)
 {
-  std::lock_guard<std::mutex> l(lock_); 
-  if (initialized_)
-  {
-    RCLCPP_WARN(rclcpp::get_logger("gazebo_ros_node"), "Called Node::InitROS twice, ignoring second call.");
+  std::lock_guard<std::mutex> l(lock_);
+  if (initialized_) {
+    RCLCPP_WARN(rclcpp::get_logger("gazebo_ros_node"),
+      "Called Node::InitROS twice, ignoring second call.");
     return;
   }
 
@@ -43,9 +46,9 @@ void Node::InitROS(int argc, char** argv)
   initialized_ = true;
 }
 
-Node::SharedPtr Node::Create(const std::string& node_name)
+Node::SharedPtr Node::Create(const std::string & node_name)
 {
-  return Create<const std::string&>(node_name);
+  return Create<const std::string &>(node_name);
 }
 
-} // namespace gazebo_ros
+}  // namespace gazebo_ros
