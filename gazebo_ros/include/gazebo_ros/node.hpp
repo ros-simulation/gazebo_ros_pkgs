@@ -59,38 +59,7 @@ public:
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
-   * \todo Implement
-   * \note Must NOT called until #InitROS has been called
-   * \details Sets namespace, remappings, and parameters from SDF.
-   * SDF is in the form:
-   * \code{.xml}
-   * <!-- Optional configurations for a plugin's Node -->
-   * <ros>
-   *  <!-- Name of node, only use if plugin is one node -->
-   *  <node_name></node_name>
-   *  <!-- Namespace of the node -->
-   *  <namespace></namespace>
-   *  <!-- Command line arguments sent to Node's constructor for remappings -->
-   *  <arguments>
-   *     <argument>my_topic:=new_topic</argument>
-   *     <argument>__name:=super_cool_node</argument>
-   *  </arguments>
-   *  <!-- Initial ROS params set for node -->
-   *  <parameters>
-   *     <parameter name="max_velocity">55</parameter>
-   *     <parameter name="publish_odom">True</parameter>
-   *  </parameters>
-   * </ros>
-   * \endcode
-   * \param[in] node_name Name of node to create
-   * \param[in] _sdf An SDF element which either is a <ros> element or contains a <ros> element
-   * \return A shared pointer to a new #gazebo_ros::Node
-   */
-  static SharedPtr Create(const std::string & node_name, sdf::ElementPtr _sdf);
-
-  /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
-  /**
-   * \note Must NOT called until #InitROS has been called
+   * \note Must NOT be called until #InitROS has been called
    * \details Forwards arguments to the constructor for rclcpp::Node
    * \param[in] args List of arguments to pass to <a href="http://docs.ros2.org/latest/api/rclcpp/classrclcpp_1_1_node.html">rclcpp::Node</a>
    * \return A shared pointer to a new #gazebo_ros::Node
