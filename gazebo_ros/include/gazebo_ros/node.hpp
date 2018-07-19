@@ -35,13 +35,6 @@ namespace gazebo_ros
  */
 class Node : public rclcpp::Node
 {
-  /// Exception thrown when a #Create is called for a Node before #InitROS has ever been called
-  class NotInitializedException : public std::runtime_error
-  {
-public:
-    NotInitializedException();
-  };
-
 public:
   /// Shared pointer to a #gazebo_ros::Node
   typedef std::shared_ptr<Node> SharedPtr;
@@ -51,60 +44,19 @@ public:
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
-   * \note Must NOT called until #InitROS has been called
    * \param[in] node_name Name for the new node to create
-   * \return A shared pointer to a new #gazebo_ros::Node
+   * \return A shared pointer to a new #gazebo_ros::Node, or nullptr if failed to create.
    */
   static SharedPtr Create(const std::string & node_name);
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
-   * \todo Implement
-   * \note Must NOT called until #InitROS has been called
-   * \details Sets namespace, remappings, and parameters from SDF.
-   * SDF is in the form:
-   * \code{.xml}
-   * <!-- Optional configurations for a plugin's Node -->
-   * <ros>
-   *  <!-- Name of node, only use if plugin is one node -->
-   *  <node_name></node_name>
-   *  <!-- Namespace of the node -->
-   *  <namespace></namespace>
-   *  <!-- Command line arguments sent to Node's constructor for remappings -->
-   *  <arguments>
-   *     <argument>my_topic:=new_topic</argument>
-   *     <argument>__name:=super_cool_node</argument>
-   *  </arguments>
-   *  <!-- Initial ROS params set for node -->
-   *  <parameters>
-   *     <parameter name="max_velocity">55</parameter>
-   *     <parameter name="publish_odom">True</parameter>
-   *  </parameters>
-   * </ros>
-   * \endcode
-   * \param[in] node_name Name of node to create
-   * \param[in] _sdf An SDF element which either is a <ros> element or contains a <ros> element
-   * \return A shared pointer to a new #gazebo_ros::Node
-   */
-  static SharedPtr Create(const std::string & node_name, sdf::ElementPtr _sdf);
-
-  /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
-  /**
-   * \note Must NOT called until #InitROS has been called
    * \details Forwards arguments to the constructor for rclcpp::Node
    * \param[in] args List of arguments to pass to <a href="http://docs.ros2.org/latest/api/rclcpp/classrclcpp_1_1_node.html">rclcpp::Node</a>
-   * \return A shared pointer to a new #gazebo_ros::Node
+   * \return A shared pointer to a new #gazebo_ros::Node, or nullptr if failed to create.
    */
   template<typename ... Args>
   static SharedPtr Create(Args && ... args);
-
-  /// Initialize ROS with the command line arguments.
-  /**
-   * \note Must be called ONCE before any #gazebo_ros::Node instances are created. Subsequent calls are ignored.
-   * \param[in] argc Number of arguments
-   * \param[in] argv Vector of c-strings of length \a argc
-   */
-  static void InitROS(int argc, char ** argv);
 
 private:
   /// Inherit constructor
@@ -113,9 +65,6 @@ private:
   /// Points to #static_executor_, so that when all #gazebo_ros::Node instances are destroyed, the
   /// executor thread is too
   std::shared_ptr<Executor> executor_;
-
-  /// True if #InitROS has been called and future calls will be ignored
-  static std::atomic_bool initialized_;
 
   /// Locks #initialized_ and #executor_
   static std::mutex lock_;
@@ -127,17 +76,26 @@ private:
 template<typename ... Args>
 Node::SharedPtr Node::Create(Args && ... args)
 {
-  // Throw exception is Node is created before ROS is initialized
-  if (!initialized_) {
-    throw NotInitializedException();
+  // Contruct Node by forwarding arguments
+  // TODO(chapulina): use rclcpp::isInitialized() once that's available, see
+  // https://github.com/ros2/rclcpp/issues/518
+  Node::SharedPtr node;
+  try
+  {
+    node = std::make_shared<Node>(std::forward<Args>(args) ...);
+  }
+  catch(rclcpp::exceptions::RCLError e)
+  {
+    RCLCPP_WARN(rclcpp::get_logger("gazebo_ros_node"),
+      "Called Node::Create before rclcpp::init, node not created.");
+    return nullptr;
   }
 
-  // Contruct Node by forwarding arguments
-  Node::SharedPtr node = std::make_shared<Node>(std::forward<Args>(args) ...);
-
   std::lock_guard<std::mutex> l(lock_);
+
   // Store shared pointer to static executor in this object
   node->executor_ = static_executor_.lock();
+
   // If executor has not been contructed yet, do so now
   if (!node->executor_) {
     node->executor_ = std::make_shared<Executor>();
@@ -146,6 +104,7 @@ Node::SharedPtr Node::Create(Args && ... args)
 
   // Add new node to the executor so its callbacks are called
   node->executor_->add_node(node);
+
   return node;
 }
 }  // namespace gazebo_ros
