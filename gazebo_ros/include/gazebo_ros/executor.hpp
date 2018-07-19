@@ -16,7 +16,7 @@
 #define GAZEBO_ROS__EXECUTOR_HPP_
 
 #include <rclcpp/rclcpp.hpp>
-#include <gazebo/common/common.hh>
+#include <gazebo/common/Events.hh>
 
 namespace gazebo_ros
 {
