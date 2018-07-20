@@ -1,0 +1,16 @@
+-
+  ros1_package_name: 'gazebo_msgs'
+  ros1_message_name: 'ODEJointProperties'
+  ros2_package_name: 'gazebo_msgs'
+  ros2_message_name: 'ODEJointProperties'
+  fields_1_to_2:
+    damping: 'damping'
+    hiStop: 'hi_stop'
+    loStop: 'lo_stop'
+    erp: 'erp'
+    cfm: 'cfm'
+    stop_erp: 'stop_erp'
+    stop_cfm: 'stop_cfm'
+    fudge_factor: 'fudge_factor'
+    fmax: 'fmax'
+    vel: 'vel'
