@@ -82,22 +82,30 @@ void TestPlugins::Run(TestParams params)
 
   // Subscribe to topics published by plugin
   using StringPtr = std_msgs::msg::String::SharedPtr;
-  std::vector<StringPtr> msgs;
+
+  // Track which topics we have received a message from
+  size_t topics_received_from = 0;
+  std::vector<bool> received(topics.size());
 
   std::vector<std::shared_ptr<rclcpp::Subscription<std_msgs::msg::String>>> subs;
-  for (auto topic : topics)
+  for (size_t i = 0; i < topics.size(); ++i)
   {
-    subs.push_back(node->create_subscription<std_msgs::msg::String>(topic,
-        [&msgs](const StringPtr msg) {
-          printf("message received!!\n");
-          msgs.push_back(msg);
+    subs.push_back(node->create_subscription<std_msgs::msg::String>(topics[i],
+        [&topics_received_from, &received, i](const StringPtr msg) {
+          (void) msg;
+          // If this is the first message from this topic, increment the counter
+          if (!received[i])
+          {
+            received[i] = true;
+            ++topics_received_from;
+          }
         }));
   }
 
   // Wait until message is received or timeout after 5 seconds
   using namespace std::literals::chrono_literals;
   auto timeout = node->now() + rclcpp::Duration(5s);
-  while (msgs.size() != topics.size() && node->now() < timeout) {
+  while (topics_received_from != topics.size() && node->now() < timeout) {
     executor.spin_once(50ms);
   }
 
@@ -105,7 +113,7 @@ void TestPlugins::Run(TestParams params)
   rclcpp::sleep_for(1s);
 
   // Assert a message was received
-  EXPECT_EQ(msgs.size(), topics.size());
+  EXPECT_EQ(topics_received_from, topics.size());
 }
 
 TEST_P(TestPlugins, Run)
@@ -117,7 +125,7 @@ INSTANTIATE_TEST_CASE_P(Plugins, TestPlugins, ::testing::Values(
    TestParams({"./libargs_init.so", {"test"}}),
    TestParams({"./libcreate_node_without_init.so", {"test"}}),
    TestParams({"./libmultiple_nodes.so", {"testA", "testB"}})
-));
+),);
 
 int main(int argc, char ** argv)
 {
