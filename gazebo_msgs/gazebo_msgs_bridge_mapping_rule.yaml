@@ -1,0 +1,11 @@
+# This file defines mappings between ROS 1 and ROS 2 interfaces.
+# It is used with the ros1_bridge to allow for communcation between ROS 1 and ROS 2.
+
+-
+  ros1_package_name: 'gazebo_msgs'
+  ros1_message_name: 'ODEJointProperties'
+  ros2_package_name: 'gazebo_msgs'
+  ros2_message_name: 'ODEJointProperties'
+  fields_1_to_2:
+   hiStop: hi_stop
+   loStop: lo_stop
