@@ -7,9 +7,9 @@ ament_lint_auto_find_test_dependencies()
 
 # Plugins
 set(plugins
-  create_before_init
+  args_init
+  create_node_without_init
   multiple_nodes
-  proper_init
 )
 
 foreach(plugin ${plugins})

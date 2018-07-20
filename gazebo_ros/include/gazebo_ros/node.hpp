@@ -44,6 +44,7 @@ public:
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
+   * \details This will call rclcpp::init if it hasn't been called yet.
    * \param[in] node_name Name for the new node to create
    * \return A shared pointer to a new #gazebo_ros::Node, or nullptr if failed to create.
    */
@@ -51,6 +52,7 @@ public:
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
+   * \details This will call rclcpp::init if it hasn't been called yet.
    * \details Forwards arguments to the constructor for rclcpp::Node
    * \param[in] args List of arguments to pass to <a href="http://docs.ros2.org/latest/api/rclcpp/classrclcpp_1_1_node.html">rclcpp::Node</a>
    * \return A shared pointer to a new #gazebo_ros::Node, or nullptr if failed to create.
@@ -76,8 +78,10 @@ private:
 template<typename ... Args>
 Node::SharedPtr Node::Create(Args && ... args)
 {
+  std::lock_guard<std::mutex> l(lock_);
+
   // Contruct Node by forwarding arguments
-  // TODO(chapulina): use rclcpp::isInitialized() once that's available, see
+  // TODO(chapulina): use rclcpp::is_initialized() once that's available, see
   // https://github.com/ros2/rclcpp/issues/518
   Node::SharedPtr node;
   try
@@ -86,12 +90,11 @@ Node::SharedPtr Node::Create(Args && ... args)
   }
   catch(rclcpp::exceptions::RCLError e)
   {
-    RCLCPP_WARN(rclcpp::get_logger("gazebo_ros_node"),
-      "Called Node::Create before rclcpp::init, node not created.");
-    return nullptr;
+    rclcpp::init(0, nullptr);
+    RCLCPP_INFO(rclcpp::get_logger("gazebo_ros_node"),
+      "ROS was initialized without arguments.");
+    node = std::make_shared<Node>(std::forward<Args>(args) ...);
   }
-
-  std::lock_guard<std::mutex> l(lock_);
 
   // Store shared pointer to static executor in this object
   node->executor_ = static_executor_.lock();
