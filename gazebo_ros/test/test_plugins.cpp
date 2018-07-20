@@ -114,8 +114,8 @@ TEST_P(TestPlugins, Run)
 }
 
 INSTANTIATE_TEST_CASE_P(Plugins, TestPlugins, ::testing::Values(
-   TestParams({"./libgazebo_ros_plugin_example.so", {"test"}}),
-   TestParams({"./libcreate_before_init.so", {"test"}}),
+   TestParams({"./libargs_init.so", {"test"}}),
+   TestParams({"./libcreate_node_without_init.so", {"test"}}),
    TestParams({"./libmultiple_nodes.so", {"testA", "testB"}})
 ));
 

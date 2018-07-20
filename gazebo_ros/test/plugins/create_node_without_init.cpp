@@ -33,17 +33,10 @@ private:
   std::shared_ptr<rclcpp::TimerBase> timer_;
 };
 
-void CreateBeforeInit::Load(int argc, char ** argv)
+void CreateBeforeInit::Load(int, char **)
 {
-  // Try creating before initializing
-  auto node = gazebo_ros::Node::Create("create_before_init");
-  assert(nullptr == node);
-
-  // Initialize ROS with arguments
-  rclcpp::init(argc, argv);
-
-  // Now it should be created
-  node = gazebo_ros::Node::Create("create_before_init");
+  // It should be ok to create a node without calling init first.
+  auto node = gazebo_ros::Node::Create("create_node_without_init");
   assert(nullptr != node);
 
   // Create a publisher
@@ -53,6 +46,7 @@ void CreateBeforeInit::Load(int argc, char ** argv)
   using namespace std::chrono_literals;
   timer_ = node->create_wall_timer(1s,
       [node, pub]() {
+
         // Create string message
         auto msg = std_msgs::msg::String();
         msg.data = "Hello world";
