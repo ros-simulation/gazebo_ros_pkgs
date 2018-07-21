@@ -16,6 +16,8 @@
 #include <stdlib.h>
 
 #include <gtest/gtest.h>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 
 #include <chrono>
 #include <memory>
@@ -46,6 +48,8 @@ void GazeboRosInitTest::TearDown()
   wait(nullptr);
 }
 
+// Check that the option to remap /test to /new_test passed from the command line
+// affects a world plugin loaded afterwards.
 TEST_F(GazeboRosInitTest, load)
 {
   // Fork process so gazebo can be run as child
@@ -57,21 +61,42 @@ TEST_F(GazeboRosInitTest, load)
   // Child process
   if (0 == pid_) {
 
-    // Check that Gazebo is loaded without any issues
     ASSERT_TRUE(execlp("gzserver", "/usr/bin/gzserver", "--verbose", "-s", "libgazebo_ros_init.so",
-        NULL));
+       "ros_world_plugin.world", "ros_world_plugin:/test:=/new_test",  NULL));
 
     exit(1);
   }
 
-  // Wait a bit so Gazebo is fully loaded
-  for (unsigned int i = 0; i < 100; ++i) {
-    std::this_thread::sleep_for(30ms);
+  // Create node and executor
+  rclcpp::executors::SingleThreadedExecutor executor;
+  auto node = std::make_shared<rclcpp::Node>("test_node");
+  executor.add_node(node);
+
+  bool received{false};
+
+  // Subscribe to /new_test topic
+  auto sub = node->create_subscription<std_msgs::msg::String>("new_test",
+      [&received](const std_msgs::msg::String::SharedPtr) {
+        received = true;
+      });
+
+  // Wait until message is received or timeout after 5 seconds
+  using namespace std::literals::chrono_literals;
+  auto timeout = node->now() + rclcpp::Duration(5s);
+  while (!received && node->now() < timeout) {
+    executor.spin_once(50ms);
   }
+
+  // Wait a little while so gazebo isn't torn down before created
+  rclcpp::sleep_for(1s);
+
+  // Assert a message was received
+  EXPECT_TRUE(received);
 }
 
 int main(int argc, char ** argv)
 {
+  rclcpp::init(argc, argv);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
