@@ -24,6 +24,7 @@ endforeach()
 
 # Tests
 set(tests
+  test_gazebo_ros_init
   test_plugins
 )
 
