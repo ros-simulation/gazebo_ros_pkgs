@@ -10,6 +10,7 @@ set(plugins
   args_init
   create_node_without_init
   multiple_nodes
+  ros_world_plugin
 )
 
 foreach(plugin ${plugins})
@@ -22,8 +23,18 @@ foreach(plugin ${plugins})
   )
 endforeach()
 
+# Worlds
+set(worlds
+  ros_world_plugin
+)
+
+foreach(world ${worlds})
+  configure_file(worlds/${world}.world ${world}.world COPYONLY)
+endforeach()
+
 # Tests
 set(tests
+  test_gazebo_ros_init
   test_plugins
 )
 

@@ -18,11 +18,26 @@ find_package(gazebo_dev REQUIRED)
 
 include_directories(include)
 
-add_library(gazebo_ros_node SHARED src/node.cpp src/executor.cpp)
-ament_target_dependencies(gazebo_ros_node "rclcpp" "gazebo_dev")
+add_library(gazebo_ros_node SHARED
+  src/node.cpp
+  src/executor.cpp
+)
+ament_target_dependencies(gazebo_ros_node
+  "rclcpp"
+  "gazebo_dev"
+)
+ament_export_libraries(gazebo_ros_node)
+
+add_library(gazebo_ros_init SHARED
+  src/gazebo_ros_init.cpp
+)
+ament_target_dependencies(gazebo_ros_init
+  "rclcpp"
+  "gazebo_dev"
+)
+ament_export_libraries(gazebo_ros_init)
 
 ament_export_include_directories(include)
-ament_export_libraries(gazebo_ros_node)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
 
@@ -40,3 +55,12 @@ install(TARGETS gazebo_ros_node
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
+install(TARGETS gazebo_ros_init
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
