@@ -15,21 +15,21 @@
  *
 */
 
-#ifndef GAZEBO_ROS_BLOCK_LASER_HH
-#define GAZEBO_ROS_BLOCK_LASER_HH
+#ifndef GAZEBO_ROS_LASER_HH
+#define GAZEBO_ROS_LASER_HH
 
 #include <gazebo_plugins/gazebo_ros_ray_sensor.h>
 
 namespace gazebo
 {
   /// Deprecated plugin, simply loads GazeboRosRaySensor with different configuration for backwards compatibility
-  class GazeboRosBlockLaser : public GazeboRosRaySensor
+  class GazeboRosLaser : public GazeboRosRaySensor
   {
     /// \brief Constructor
-    public: GazeboRosBlockLaser();
+    public: GazeboRosLaser();
 
     /// \brief Destructor
-    public: ~GazeboRosBlockLaser();
+    public: ~GazeboRosLaser();
 
     /// \brief Override the default behavior for resolving tf frame to provide backwards compatibility
     protected: virtual std::string resolveTF(const std::string& _frame, const std::string& _robot_namespace, ros::NodeHandle& _nh) override;

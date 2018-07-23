@@ -15,92 +15,122 @@
  *
 */
 
-/*
- * Desc: Ros Laser controller.
- * Author: Nathan Koenig
- * Date: 01 Feb 2007
- */
-
-#include <algorithm>
-#include <string>
-#include <assert.h>
-
-#include <gazebo/physics/World.hh>
-#include <gazebo/physics/HingeJoint.hh>
-#include <gazebo/sensors/Sensor.hh>
-#include <sdf/sdf.hh>
-#include <sdf/Param.hh>
-#include <gazebo/common/Exception.hh>
-#include <gazebo/sensors/RaySensor.hh>
-#include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/transport/transport.hh>
+#include <sensor_msgs/point_cloud2_iterator.h>
 
-#include <tf/tf.h>
-#include <tf/transform_listener.h>
-
-#include <gazebo_plugins/gazebo_ros_laser.h>
+#include <gazebo_plugins/gazebo_ros_ray_sensor.h>
 
 namespace gazebo
 {
+
 // Register this plugin with the simulator
-GZ_REGISTER_SENSOR_PLUGIN(GazeboRosLaser)
+GZ_REGISTER_SENSOR_PLUGIN(GazeboRosRaySensor)
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor
-GazeboRosLaser::GazeboRosLaser()
+GazeboRosRaySensor::GazeboRosRaySensor()
 {
-  this->seed = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
-GazeboRosLaser::~GazeboRosLaser()
+GazeboRosRaySensor::~GazeboRosRaySensor()
 {
-  this->rosnode_->shutdown();
-  delete this->rosnode_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
-void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
+void GazeboRosRaySensor::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
-  // load plugin
-  RayPlugin::Load(_parent, this->sdf);
-  // Get the world name.
-  std::string worldName = _parent->WorldName();
-  this->world_ = physics::get_world(worldName);
-  // save pointers
-  this->sdf = _sdf;
-
   GAZEBO_SENSORS_USING_DYNAMIC_POINTER_CAST;
-  this->parent_ray_sensor_ =
-    dynamic_pointer_cast<sensors::RaySensor>(_parent);
+  if (_parent->Type() == "ray")
+  {
+    sensors::RaySensorPtr ray_sensor = dynamic_pointer_cast<sensors::RaySensor>(_parent);
+    if (!ray_sensor)
+    {
+      ROS_ERROR_NAMED("laser", "Could not cast to ray sensor. Exiting.");
+      return;
+    }
+    SetParams<sensors::RaySensorPtr>(ray_sensor);
+  }
+  else if (_parent->Type() == "gpu_ray")
+  {
+    sensors::GpuRaySensorPtr gpu_ray_sensor = dynamic_pointer_cast<sensors::GpuRaySensor>(_parent);
+    if (!gpu_ray_sensor)
+    {
+      ROS_ERROR_NAMED("laser", "Could not cast to gpu_ray sensor. Exiting.");
+      return;
+    }
+    SetParams<sensors::GpuRaySensorPtr>(gpu_ray_sensor);
+  }
+  else
+  {
+    ROS_ERROR_NAMED("laser", "Plugin attached to a sensor that is neither ray or gpu_ray. Exiting.");
+    return;
+  }
 
-  if (!this->parent_ray_sensor_)
-    gzthrow("GazeboRosLaser controller requires a Ray Sensor as its parent");
+  this->parent_ray_sensor_ = _parent;
 
   this->robot_namespace_ =  GetRobotNamespace(_parent, _sdf, "Laser");
 
-  if (!this->sdf->HasElement("frameName"))
+  if (!_sdf->HasElement("frameName"))
   {
     ROS_INFO_NAMED("laser", "Laser plugin missing <frameName>, defaults to /world");
     this->frame_name_ = "/world";
   }
   else
-    this->frame_name_ = this->sdf->Get<std::string>("frameName");
+    this->frame_name_ = _sdf->Get<std::string>("frameName");
 
-
-  if (!this->sdf->HasElement("topicName"))
+  if (!_sdf->HasElement("topicName"))
   {
     ROS_INFO_NAMED("laser", "Laser plugin missing <topicName>, defaults to /world");
     this->topic_name_ = "/world";
   }
   else
-    this->topic_name_ = this->sdf->Get<std::string>("topicName");
+    this->topic_name_ = _sdf->Get<std::string>("topicName");
+
+  if (this->topic_name_.empty())
+  {
+    ROS_FATAL_STREAM_NAMED("laser", "<topicName> is empty. Exiting.");
+    return;
+  }
+
+  if(!_sdf->HasElement("outputType"))
+  {
+    ROS_WARN_NAMED("laser", "missing <outputType>, defaults to %s",
+        ros::message_traits::DataType<sensor_msgs::PointCloud2>::value());
+    this->output_type_ = POINTCLOUD2;
+  }
+  else
+  {
+    std::string output_type_string = _sdf->Get<std::string>("outputType");
+    if(output_type_string == ros::message_traits::DataType<sensor_msgs::LaserScan>::value())
+      this->output_type_ = LASERSCAN;
+    else if (output_type_string == ros::message_traits::DataType<sensor_msgs::PointCloud>::value())
+      this->output_type_ = POINTCLOUD;
+    else if (output_type_string == ros::message_traits::DataType<sensor_msgs::PointCloud2>::value())
+      this->output_type_ = POINTCLOUD2;
+    else
+    {
+      ROS_WARN_NAMED("laser", "Invalid value of output <outputType>, defaults to %s",
+          ros::message_traits::DataType<sensor_msgs::PointCloud2>::value());
+      this->output_type_ = POINTCLOUD2;
+    }
+  }
+
+  if(!_sdf->HasElement("minIntensity"))
+  {
+    this->min_intensity_ = 0.0;
+    ROS_INFO_NAMED("laser", "missing <minIntensity>, defaults to %f",
+        this->min_intensity_);
+  }
+  else
+    this->min_intensity_ = _sdf->Get<double>("minIntensity");
 
   this->laser_connect_count_ = 0;
 
-    // Make sure the ROS node for Gazebo has already been initialized
+  // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
     ROS_FATAL_STREAM_NAMED("laser", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
@@ -108,67 +138,67 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     return;
   }
 
-  ROS_INFO_NAMED("laser", "Starting Laser Plugin (ns = %s)", this->robot_namespace_.c_str() );
-  // ros callback queue for processing subscription
-  this->deferred_load_thread_ = boost::thread(
-    boost::bind(&GazeboRosLaser::LoadThread, this));
+  this->gazebo_node_ = boost::make_shared<gazebo::transport::Node>();
+  this->gazebo_node_->Init(_parent->WorldName());
 
+  this->rosnode_ = boost::make_shared<ros::NodeHandle>(this->robot_namespace_);
+
+  // Resolve TF frame for backwards compability, TODO: remove
+  this->frame_name_ = resolveTF(this->frame_name_, this->robot_namespace_, *this->rosnode_);
+
+  switch (this->output_type_)
+  {
+    case LASERSCAN:
+      this->AdvertiseOutput<sensor_msgs::LaserScan>();
+      break;
+    case POINTCLOUD:
+      this->AdvertiseOutput<sensor_msgs::PointCloud>();
+      break;
+    case POINTCLOUD2:
+      this->AdvertiseOutput<sensor_msgs::PointCloud2>();
+      break;
+  }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Load the controller
-void GazeboRosLaser::LoadThread()
+std::string GazeboRosRaySensor::resolveTF(const std::string& _frame, const std::string& _robot_namespace, ros::NodeHandle& _nh)
 {
-  this->gazebo_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
-  this->gazebo_node_->Init(this->world_name_);
+  return _frame;
+}
 
-  this->pmq.startServiceThread();
-
-  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
-
-  this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
-  if(this->tf_prefix_.empty()) {
-      this->tf_prefix_ = this->robot_namespace_;
-      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
-  }
-  ROS_INFO_NAMED("laser", "Laser Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
-             this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
-
-  // resolve tf prefix
-  this->frame_name_ = tf::resolve(this->tf_prefix_, this->frame_name_);
-
-  if (this->topic_name_ != "")
+void GazeboRosRaySensor::SubscribeGazeboLaserScan()
+{
+  switch (this->output_type_)
   {
-    ros::AdvertiseOptions ao =
-      ros::AdvertiseOptions::create<sensor_msgs::LaserScan>(
-      this->topic_name_, 1,
-      boost::bind(&GazeboRosLaser::LaserConnect, this),
-      boost::bind(&GazeboRosLaser::LaserDisconnect, this),
-      ros::VoidPtr(), NULL);
-    this->pub_ = this->rosnode_->advertise(ao);
-    this->pub_queue_ = this->pmq.addPub<sensor_msgs::LaserScan>();
+    case LASERSCAN:
+      this->laser_scan_sub_ =
+        this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
+                                      &GazeboRosRaySensor::PublishLaserScan, this);
+      break;
+    case POINTCLOUD:
+      this->laser_scan_sub_ =
+        this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
+                                      &GazeboRosRaySensor::PublishPointCloud, this);
+      break;
+    case POINTCLOUD2:
+      this->laser_scan_sub_ =
+        this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
+                                      &GazeboRosRaySensor::PublishPointCloud2, this);
+      break;
   }
-
-  // Initialize the controller
-
-  // sensor generation off by default
-  this->parent_ray_sensor_->SetActive(false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Increment count
-void GazeboRosLaser::LaserConnect()
+void GazeboRosRaySensor::LaserConnect()
 {
   this->laser_connect_count_++;
   if (this->laser_connect_count_ == 1)
-    this->laser_scan_sub_ =
-      this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
-                                    &GazeboRosLaser::OnScan, this);
+    this->SubscribeGazeboLaserScan();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
-void GazeboRosLaser::LaserDisconnect()
+void GazeboRosRaySensor::LaserDisconnect()
 {
   this->laser_connect_count_--;
   if (this->laser_connect_count_ == 0)
@@ -177,28 +207,162 @@ void GazeboRosLaser::LaserDisconnect()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Convert new Gazebo message to ROS message and publish it
-void GazeboRosLaser::OnScan(ConstLaserScanStampedPtr &_msg)
+void GazeboRosRaySensor::PublishLaserScan(ConstLaserScanStampedPtr &_msg)
 {
   // We got a new message from the Gazebo sensor.  Stuff a
   // corresponding ROS message and publish it.
-  sensor_msgs::LaserScan laser_msg;
-  laser_msg.header.stamp = ros::Time(_msg->time().sec(), _msg->time().nsec());
-  laser_msg.header.frame_id = this->frame_name_;
-  laser_msg.angle_min = _msg->scan().angle_min();
-  laser_msg.angle_max = _msg->scan().angle_max();
-  laser_msg.angle_increment = _msg->scan().angle_step();
-  laser_msg.time_increment = 0;  // instantaneous simulator scan
-  laser_msg.scan_time = 0;  // not sure whether this is correct
-  laser_msg.range_min = _msg->scan().range_min();
-  laser_msg.range_max = _msg->scan().range_max();
-  laser_msg.ranges.resize(_msg->scan().ranges_size());
-  std::copy(_msg->scan().ranges().begin(),
-            _msg->scan().ranges().end(),
-            laser_msg.ranges.begin());
-  laser_msg.intensities.resize(_msg->scan().intensities_size());
-  std::copy(_msg->scan().intensities().begin(),
-            _msg->scan().intensities().end(),
-            laser_msg.intensities.begin());
-  this->pub_queue_->push(laser_msg, this->pub_);
+  sensor_msgs::LaserScan ls;
+  ls.header.frame_id = this->frame_name_;
+  ls.header.stamp.sec = _msg->time().sec();
+  ls.header.stamp.nsec = _msg->time().nsec();
+  ls.angle_min = minAngle;
+  ls.angle_max = maxAngle;
+  ls.angle_increment = _msg->scan().angle_step();
+  ls.time_increment = 0;
+  ls.scan_time = 0;
+  ls.range_min = _msg->scan().range_min();
+  ls.range_max = _msg->scan().range_max();
+  // If there are multiple vertical beams, use the one in the middle
+  size_t start = (verticalRangeCount / 2) * rangeCount;
+
+  // Copy ranges and intensities over
+  ls.ranges.resize(rangeCount);
+  ls.intensities.resize(rangeCount);
+  std::copy(_msg->scan().ranges().begin() + start,
+            _msg->scan().ranges().begin() + start + rangeCount,
+            ls.ranges.begin());
+  std::copy(_msg->scan().intensities().begin() + start,
+            _msg->scan().intensities().begin() + start + rangeCount,
+            ls.intensities.begin());
+  this->pub_.publish(ls);
 }
+
+void GazeboRosRaySensor::PublishPointCloud(ConstLaserScanStampedPtr &_msg)
+{
+  // Create message to send
+  sensor_msgs::PointCloud pc;
+
+  // Fill header
+  pc.header.frame_id = frame_name_;
+  pc.header.stamp.sec = _msg->time().sec();
+  pc.header.stamp.nsec = _msg->time().nsec();
+
+  // Setup point cloud fields
+  pc.points.reserve(verticalRangeCount * rangeCount);
+  pc.channels.push_back(sensor_msgs::ChannelFloat32());
+  pc.channels[0].values.reserve(verticalRangeCount * rangeCount);
+  pc.channels[0].name = "intensity";
+
+  // Fill pointcloud with laser scan
+  for (int i = 0; i < rangeCount; i++) {
+    // Calculate azimuth (horizontal angle)
+    double azimuth;
+    if (rangeCount > 1) {
+      azimuth = i * yDiff / (rangeCount -1) + minAngle;
+    } else {
+      azimuth = minAngle;
+    }
+    double c_azimuth = cos(azimuth);
+    double s_azimuth = sin(azimuth);
+
+    for (int j = 0; j < verticalRangeCount; ++j) {
+      double inclination;
+      // Calculate inclination (vertical angle)
+      if (verticalRayCount > 1) {
+        inclination = j * pDiff / (verticalRangeCount -1) + verticalMinAngle;
+      } else {
+        inclination = verticalMinAngle;
+      }
+      double c_inclination = cos(inclination);
+      double s_inclination = sin(inclination);
+
+      // Get range and intensity at this scan
+      size_t index = i + j * rangeCount;
+      double r = _msg->scan().ranges(index);
+      double intensity = _msg->scan().intensities(index);
+      if (intensity < this->min_intensity_)
+        intensity = this->min_intensity_;
+
+      // Convert spherical coordinates to cartesian for pointcloud
+      // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
+      geometry_msgs::Point32 point;
+      point.x = r * c_inclination * c_azimuth;
+      point.y = r * c_inclination * s_azimuth;
+      point.z = r * s_inclination;
+      pc.points.push_back(point);
+      pc.channels[0].values.push_back(intensity);
+    }
+  }
+
+  // Publish output
+  pub_.publish(pc);
+}
+
+void GazeboRosRaySensor::PublishPointCloud2(ConstLaserScanStampedPtr &_msg)
+{
+  // Create message to send
+  sensor_msgs::PointCloud2 pc;
+
+  // Fill header
+  pc.header.frame_id = frame_name_;
+  pc.header.stamp.sec = _msg->time().sec();
+  pc.header.stamp.nsec = _msg->time().nsec();
+
+  // Create fields in pointcloud
+  sensor_msgs::PointCloud2Modifier pcd_modifier(pc);
+  pcd_modifier.setPointCloud2Fields(4,
+      "x", 1, sensor_msgs::PointField::FLOAT32,
+      "y", 1, sensor_msgs::PointField::FLOAT32,
+      "z", 1, sensor_msgs::PointField::FLOAT32,
+      "intensity", 1, sensor_msgs::PointField::FLOAT32);
+  pcd_modifier.resize(verticalRangeCount * rangeCount);
+  pc.is_dense = true;
+  sensor_msgs::PointCloud2Iterator<float> iter_x(pc, "x");
+  sensor_msgs::PointCloud2Iterator<float> iter_y(pc, "y");
+  sensor_msgs::PointCloud2Iterator<float> iter_z(pc, "z");
+  sensor_msgs::PointCloud2Iterator<float> iter_intensity(pc, "intensity");
+
+  // Fill pointcloud with laser scan
+  for (int i = 0; i < rangeCount; i++) {
+    // Calculate azimuth (horizontal angle)
+    double azimuth;
+    if (rangeCount > 1) {
+      azimuth = i * yDiff / (rangeCount -1) + minAngle;
+    } else {
+      azimuth = minAngle;
+    }
+    double c_azimuth = cos(azimuth);
+    double s_azimuth = sin(azimuth);
+
+    for (int j = 0; j < verticalRangeCount; ++j, ++iter_x, ++iter_y, ++iter_z, ++iter_intensity) {
+      double inclination;
+      // Calculate inclination (vertical angle)
+      if (verticalRayCount > 1) {
+        inclination = j * pDiff / (verticalRangeCount -1) + verticalMinAngle;
+      } else {
+        inclination = verticalMinAngle;
+      }
+      double c_inclination = cos(inclination);
+      double s_inclination = sin(inclination);
+
+      // Get range and intensity at this scan
+      size_t index = i + j * rangeCount;
+      double r = _msg->scan().ranges(index);
+      double intensity = _msg->scan().intensities(index);
+      if (intensity < this->min_intensity_)
+        intensity = this->min_intensity_;
+
+      // Convert spherical coordinates to cartesian for pointcloud
+      // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
+      *iter_x = r * c_inclination * c_azimuth;
+      *iter_y = r * c_inclination * s_azimuth;
+      *iter_z = r * s_inclination;
+      *iter_intensity = intensity;
+    }
+  }
+
+  // Publish output
+  pub_.publish(pc);
+}
+
 }

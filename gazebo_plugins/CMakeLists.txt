@@ -223,8 +223,20 @@ add_library(gazebo_ros_openni_kinect src/gazebo_ros_openni_kinect.cpp)
 add_dependencies(gazebo_ros_openni_kinect ${PROJECT_NAME}_gencfg)
 target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_camera_utils DepthCameraPlugin ${catkin_LIBRARIES})
 
+add_library(gazebo_ros_ray_sensor src/gazebo_ros_ray_sensor.cpp)
+target_link_libraries(gazebo_ros_ray_sensor ${catkin_LIBRARIES})
+
+# DEPRECATED instance of gazebo_ros_ray_sensor
+add_library(gazebo_ros_laser src/gazebo_ros_laser.cpp)
+target_link_libraries(gazebo_ros_laser gazebo_ros_ray_sensor ${catkin_LIBRARIES})
+
+# DEPRECATED instance of gazebo_ros_ray_sensor
 add_library(gazebo_ros_gpu_laser src/gazebo_ros_gpu_laser.cpp)
-target_link_libraries(gazebo_ros_gpu_laser ${catkin_LIBRARIES} GpuRayPlugin)
+target_link_libraries(gazebo_ros_gpu_laser gazebo_ros_laser ${catkin_LIBRARIES})
+
+# DEPRECATED instance of gazebo_ros_ray_sensor
+add_library(gazebo_ros_block_laser src/gazebo_ros_block_laser.cpp)
+target_link_libraries(gazebo_ros_block_laser gazebo_ros_ray_sensor ${catkin_LIBRARIES})
 
 if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
   add_library(gazebo_ros_harness src/gazebo_ros_harness.cpp)
@@ -232,12 +244,6 @@ if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
   target_link_libraries(gazebo_ros_harness
     ${Boost_LIBRARIES} HarnessPlugin ${catkin_LIBRARIES})
 endif()
-
-add_library(gazebo_ros_laser src/gazebo_ros_laser.cpp)
-target_link_libraries(gazebo_ros_laser RayPlugin ${catkin_LIBRARIES})
-
-add_library(gazebo_ros_block_laser src/gazebo_ros_block_laser.cpp)
-target_link_libraries(gazebo_ros_block_laser RayPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_p3d src/gazebo_ros_p3d.cpp)
 target_link_libraries(gazebo_ros_p3d ${catkin_LIBRARIES} ${Boost_LIBRARIES})

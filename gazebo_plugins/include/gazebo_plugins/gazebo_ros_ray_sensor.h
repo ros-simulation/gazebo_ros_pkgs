@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Open Source Robotics Foundation
+ * Copyright 2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,40 +15,39 @@
  *
 */
 
-#ifndef GAZEBO_ROS_LASER_HH
-#define GAZEBO_ROS_LASER_HH
+#ifndef GAZEBO_ROS_RAY_SENSOR_HH
+#define GAZEBO_ROS_RAY_SENSOR_HH
 
 #include <string>
 
 #include <boost/bind.hpp>
-#include <boost/thread.hpp>
 
 #include <ros/ros.h>
 #include <ros/advertise_options.h>
 #include <sensor_msgs/LaserScan.h>
+#include <sensor_msgs/PointCloud.h>
+#include <sensor_msgs/PointCloud2.h>
 
-#include <sdf/Param.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Events.hh>
-#include <gazebo/sensors/SensorTypes.hh>
-#include <gazebo/plugins/RayPlugin.hh>
+#include <gazebo/sensors/RaySensor.hh>
+#include <gazebo/sensors/GpuRaySensor.hh>
 #include <gazebo_plugins/gazebo_ros_utils.h>
-
 #include <gazebo_plugins/PubQueue.h>
 
 namespace gazebo
 {
-  class GazeboRosLaser : public RayPlugin
+  class GazeboRosRaySensor : public SensorPlugin
   {
     /// \brief Constructor
-    public: GazeboRosLaser();
+    public: GazeboRosRaySensor();
 
     /// \brief Destructor
-    public: ~GazeboRosLaser();
+    public: ~GazeboRosRaySensor();
 
     /// \brief Load the plugin
     /// \param take in SDF root element
@@ -59,17 +58,12 @@ namespace gazebo
     private: void LaserConnect();
     private: void LaserDisconnect();
 
-    // Pointer to the model
-    GazeboRosPtr gazebo_ros_;
-    private: std::string world_name_;
-    private: physics::WorldPtr world_;
     /// \brief The parent sensor
-    private: sensors::RaySensorPtr parent_ray_sensor_;
+    private: sensors::SensorPtr parent_ray_sensor_;
 
     /// \brief pointer to ros node
-    private: ros::NodeHandle* rosnode_;
+    private: ros::NodeHandlePtr rosnode_;
     private: ros::Publisher pub_;
-    private: PubQueue<sensor_msgs::LaserScan>::Ptr pub_queue_;
 
     /// \brief topic name
     private: std::string topic_name_;
@@ -77,24 +71,75 @@ namespace gazebo
     /// \brief frame transform name, should match link name
     private: std::string frame_name_;
 
-    /// \brief tf prefix
-    private: std::string tf_prefix_;
+    /// \brief Enum for type of message to output
+    private: enum OutputType
+    {
+      LASERSCAN,
+      POINTCLOUD,
+      POINTCLOUD2
+    };
+    /// \brief
+    private: OutputType output_type_;
+
+    private: template<typename T> void AdvertiseOutput();
+    private: template<typename T> void SetParams(T sensor);
+    private: void SubscribeGazeboLaserScan();
+
+    /// \brief Resolve the tf frame from the SDF specified frame, robot namespace, and node handle.
+    /// \detail DEPRECATED. In the future, the frame will simply by the frame specified in the SDF.
+    ///         Overriden by other plugins to provide backwards compatibility to the inconsistent ways
+    ///         of resolving the frame.
+    protected: virtual std::string resolveTF(const std::string& _frame, const std::string& _robot_namespace, ros::NodeHandle& _nh);
 
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
 
-    // deferred load in case ros is blocking
-    private: sdf::ElementPtr sdf;
-    private: void LoadThread();
-    private: boost::thread deferred_load_thread_;
-    private: unsigned int seed;
+    private: double min_intensity_;
 
     private: gazebo::transport::NodePtr gazebo_node_;
     private: gazebo::transport::SubscriberPtr laser_scan_sub_;
-    private: void OnScan(ConstLaserScanStampedPtr &_msg);
+    private: void PublishLaserScan(ConstLaserScanStampedPtr &_msg);
+    private: void PublishPointCloud(ConstLaserScanStampedPtr &_msg);
+    private: void PublishPointCloud2(ConstLaserScanStampedPtr &_msg);
 
-    /// \brief prevents blocking
-    private: PubMultiQueue pmq;
+    private:
+      int rayCount;
+      int rangeCount;
+      int verticalRayCount;
+      int verticalRangeCount;
+      double minAngle;
+      double maxAngle;
+      double verticalMinAngle;
+      double verticalMaxAngle;
+      double yDiff;
+      double pDiff;
   };
+
+  template<typename T>
+  void GazeboRosRaySensor::AdvertiseOutput()
+  {
+    ros::AdvertiseOptions ao =
+      ros::AdvertiseOptions::create<T>(this->topic_name_, 1,
+        boost::bind(&GazeboRosRaySensor::LaserConnect, this),
+        boost::bind(&GazeboRosRaySensor::LaserDisconnect, this),
+        ros::VoidPtr(), nullptr);
+    this->pub_ = this->rosnode_->advertise(ao);
+  }
+
+  template<typename T>
+  void GazeboRosRaySensor::SetParams(T sensor)
+  {
+    minAngle = sensor->AngleMin().Radian();
+    maxAngle = sensor->AngleMax().Radian();
+    verticalMaxAngle = sensor->VerticalAngleMax().Radian();
+    verticalMinAngle = sensor->VerticalAngleMin().Radian();
+    rayCount = sensor->RayCount();
+    rangeCount = sensor->RangeCount();
+    verticalRayCount = sensor->VerticalRayCount();
+    verticalRangeCount = sensor->VerticalRangeCount();
+    yDiff = maxAngle - minAngle;
+    pDiff = verticalMaxAngle - verticalMinAngle;
+  }
 }
+
 #endif
