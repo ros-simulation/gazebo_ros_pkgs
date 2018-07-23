@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>gazebo_ros_pkgs</name> <!-- This is a meta package! -->
+  <!-- TODO: Make this a metapackage, see
+       https://github.com/ros2/ros2/issues/408 -->
+  <name>gazebo_ros_pkgs</name>
   <version>2.8.4</version>
   <description>Interface for using ROS with the <a href="http://gazebosim.org/">Gazebo</a> simulator.</description>
 
@@ -12,16 +15,18 @@
   <url type="bugtracker">https://github.com/ros-simulation/gazebo_ros_pkgs/issues</url>
   <url type="repository">https://github.com/ros-simulation/gazebo_ros_pkgs</url>
 
-  <author>John Hsu, Nate Koenig, Dave Coleman</author>>
+  <author>John Hsu</author>
+  <author>Nate Koenig</author>
+  <author>Dave Coleman</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>gazebo_dev</exec_depend>
   <exec_depend>gazebo_msgs</exec_depend>
-  <exec_depend>gazebo_plugins</exec_depend>
-  <exec_depend>gazebo_ros</exec_depend>
+  <!--exec_depend>gazebo_plugins</exec_depend-->
+  <!--exec_depend>gazebo_ros</exec_depend-->
 
   <export>
-    <metapackage/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
