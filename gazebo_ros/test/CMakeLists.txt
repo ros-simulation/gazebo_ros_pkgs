@@ -24,17 +24,10 @@ foreach(plugin ${plugins})
 endforeach()
 
 # Worlds
-set(worlds
-  ros_world_plugin
-)
-
-foreach(world ${worlds})
-  configure_file(worlds/${world}.world ${world}.world COPYONLY)
-endforeach()
+file(COPY worlds DESTINATION .)
 
 # Tests
 set(tests
-  test_gazebo_ros_init
   test_plugins
 )
 
