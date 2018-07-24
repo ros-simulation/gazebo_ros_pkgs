@@ -28,6 +28,7 @@ struct TestParams
 {
   std::string plugin;
   std::vector<std::string> topics;
+  std::vector<std::string> extra_args;
 };
 
 class TestPlugins : public ::testing::TestWithParam<TestParams>
@@ -58,8 +59,21 @@ void TestPlugins::TearDown()
 
 void TestPlugins::Run(TestParams params)
 {
-  const char * plugin = params.plugin.c_str();
+  std::cout << "Testing plugin: " << params.plugin << std::endl;
+
   auto topics = params.topics;
+
+  unsigned int i = 0;
+  const char ** args = new const char *[params.extra_args.size() + 5];
+  args[i++] = "/user/bin/gzserver";
+  args[i++] = "--verbose";
+  args[i++] = "-s";
+  args[i++] = params.plugin.c_str();
+  for (unsigned int j = i; j < params.extra_args.size() + i; ++j)
+  {
+    args[j] = params.extra_args[j - i].c_str();
+  }
+  args[i + params.extra_args.size()] = NULL;
 
   // Fork process so gazebo can be run as child
   pid_ = fork();
@@ -69,8 +83,9 @@ void TestPlugins::Run(TestParams params)
 
   // Child process
   if (0 == pid_) {
+
     // Run gazebo with a plugin with publishes a string to /test
-    ASSERT_TRUE(execlp("gzserver", "/usr/bin/gzserver", "-s", plugin, NULL));
+    ASSERT_TRUE(execvp("gzserver", (char **)args));
 
     exit(1);
   }
@@ -122,9 +137,11 @@ TEST_P(TestPlugins, Run)
 }
 
 INSTANTIATE_TEST_CASE_P(Plugins, TestPlugins, ::testing::Values(
-   TestParams({"./libargs_init.so", {"test"}}),
-   TestParams({"./libcreate_node_without_init.so", {"test"}}),
-   TestParams({"./libmultiple_nodes.so", {"testA", "testB"}})
+   TestParams({"./libargs_init.so", {"test"}, {}}),
+   TestParams({"./libcreate_node_without_init.so", {"test"}, {}}),
+   TestParams({"./libmultiple_nodes.so", {"testA", "testB"}, {}}),
+   TestParams({"libgazebo_ros_init.so", {"new_test"}, {"worlds/ros_world_plugin.world",
+       "ros_world_plugin:/test:=/new_test"}})
 ),);
 
 int main(int argc, char ** argv)

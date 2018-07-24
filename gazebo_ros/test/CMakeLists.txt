@@ -10,6 +10,7 @@ set(plugins
   args_init
   create_node_without_init
   multiple_nodes
+  ros_world_plugin
 )
 
 foreach(plugin ${plugins})
@@ -21,6 +22,9 @@ foreach(plugin ${plugins})
     "std_msgs"
   )
 endforeach()
+
+# Worlds
+file(COPY worlds DESTINATION .)
 
 # Tests
 set(tests
