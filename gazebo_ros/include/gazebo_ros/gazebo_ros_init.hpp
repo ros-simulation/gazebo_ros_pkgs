@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef GAZEBO_ROS__GAZEBO_ROS_INIT_HPP_
+#define GAZEBO_ROS__GAZEBO_ROS_INIT_HPP_
+
+
 #include <gazebo/common/Plugin.hh>
 
 /// Initializes ROS with the system arguments passed to Gazebo (i.e. calls rclcpp::init).
@@ -29,4 +33,4 @@ public:
   /// \param[in] argv Argument values.
   void Load(int argc, char ** argv);
 };
-
+#endif  // GAZEBO_ROS__GAZEBO_ROS_INIT_HPP_
