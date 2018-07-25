@@ -1,9 +1,5 @@
 find_package(ament_cmake_gtest REQUIRED)
-find_package(ament_lint_auto REQUIRED)
 find_package(std_msgs REQUIRED)
-
-# Linters
-ament_lint_auto_find_test_dependencies()
 
 # Plugins
 set(plugins
@@ -11,6 +7,7 @@ set(plugins
   create_node_without_init
   multiple_nodes
   ros_world_plugin
+  sdf_node
 )
 
 foreach(plugin ${plugins})
@@ -36,6 +33,9 @@ foreach(test ${tests})
     ${test}.cpp
     WORKING_DIRECTORY
       ${CMAKE_CURRENT_BINARY_DIR}
+    # Long timeout because has to run gazebo several times
+    TIMEOUT
+      120
   )
   ament_target_dependencies(${test}
     "rclcpp"

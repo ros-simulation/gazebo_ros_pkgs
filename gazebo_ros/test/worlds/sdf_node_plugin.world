@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+    <plugin name="sdf_plugin" filename="./libsdf_node.so">
+      <ros>
+        <node_name>my_node</node_name>
+        <namespace>/foo</namespace>
+        <argument>test:=my_topic</argument>
+        <parameter name="my_string" type="string">str</parameter>
+        <parameter name="my_bool_true" type="bool">True</parameter>
+        <parameter name="my_bool_false" type="bool">false</parameter>
+        <parameter name="my_int" type="int">42</parameter>
+        <parameter name="my_double" type="double">13.37</parameter>
+
+        <!-- Missing 'name', should be rejected -->
+        <parameter type="int">52</parameter>
+        <!-- Invalid type, should be rejected -->
+        <parameter name="invalid_type" type="uint8">10</parameter>
+        <!-- Missing 'type', should be rejected -->
+        <parameter name="missing_type">Lorem Impsum</parameter>
+      </ros>
+    </plugin>
+  </world>
+</sdf>

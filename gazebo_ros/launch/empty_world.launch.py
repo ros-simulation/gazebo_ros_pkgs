@@ -15,7 +15,7 @@
 """Launch a Gazebo server with an empty world and initialize ROS with command line arguments."""
 
 import launch
-import launch_ros.actions
+
 
 def generate_launch_description():
     # TODO(anyone): Forward command line arguments once that's supported, see
@@ -28,4 +28,3 @@ def generate_launch_description():
     return launch.LaunchDescription([
         gzserver
     ])
-

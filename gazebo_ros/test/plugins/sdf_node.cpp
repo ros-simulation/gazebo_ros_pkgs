@@ -20,12 +20,12 @@
 #include <memory>
 
 /// Simple example of a gazebo world plugin which uses a ROS2 node with gazebo_ros::Node.
-class RosWorldPlugin : public gazebo::WorldPlugin
+class SDFNode : public gazebo::WorldPlugin
 {
 public:
   /// Called by gazebo to load plugin. Creates #node, #timer_, and #pub
-  /// \param[in] world Pointer to gazebo world this plugin is attached to
-  /// \param[in] sdf SDF of plugin
+  /// \param[in] world Pointer to the gazebo world this plugin is attached to
+  /// \param[in] sdf SDF of the plugin this is attached to
   void Load(gazebo::physics::WorldPtr world, sdf::ElementPtr sdf);
 
 private:
@@ -33,14 +33,51 @@ private:
   std::shared_ptr<rclcpp::TimerBase> timer_;
 };
 
-void RosWorldPlugin::Load(gazebo::physics::WorldPtr, sdf::ElementPtr)
+void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
 {
   // It should be ok to create a node without calling init first.
-  auto node = gazebo_ros::Node::Create("ros_world_plugin");
+  auto node = gazebo_ros::Node::Create("sdf_node", _sdf);
   assert(nullptr != node);
+
+  const char * node_name = node->get_name();
+  if (strcmp("my_node", node_name)) {
+    RCLCPP_ERROR(node->get_logger(), "Node name not remapped in SDF");
+    return;
+  }
 
   // Create a publisher
   auto pub = node->create_publisher<std_msgs::msg::String>("test");
+
+
+  // Attempt to get the parameters set by the SDF.
+  // If any of them fail, messages will not publish so test will fail
+  #define SDF_NODE_PARAM_CHECK(param, expected) \
+  if (expected != node->get_parameter(param).get_value<decltype(expected)>()) { \
+    RCLCPP_ERROR(node->get_logger(), "Wrong value for parameter."); \
+    return; \
+  }
+
+  SDF_NODE_PARAM_CHECK("my_string", "str");
+  SDF_NODE_PARAM_CHECK("my_bool_false", false);
+  SDF_NODE_PARAM_CHECK("my_bool_true", true);
+  SDF_NODE_PARAM_CHECK("my_int", 42);
+  SDF_NODE_PARAM_CHECK("my_double", 13.37);
+
+
+  // Return if the given parameter is set
+  #define SDF_NODE_PARAM_UNSET(param) \
+  { \
+    rclcpp::Parameter dummy; \
+    if (node->get_parameter(param, dummy)) { \
+      RCLCPP_ERROR(node->get_logger(), "Invalid parameter should not be set [%s]", \
+        param); \
+      return; \
+    } \
+  }
+
+  // Check that the invalid parameter sdfs don't get set
+  SDF_NODE_PARAM_UNSET("invalid_type")
+  SDF_NODE_PARAM_UNSET("missing_type")
 
   // Run lambda every 1 second
   using namespace std::chrono_literals;
@@ -58,4 +95,4 @@ void RosWorldPlugin::Load(gazebo::physics::WorldPtr, sdf::ElementPtr)
       });
 }
 
-GZ_REGISTER_WORLD_PLUGIN(RosWorldPlugin)
+GZ_REGISTER_WORLD_PLUGIN(SDFNode)

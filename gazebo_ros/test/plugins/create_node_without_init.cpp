@@ -46,7 +46,6 @@ void CreateBeforeInit::Load(int, char **)
   using namespace std::chrono_literals;
   timer_ = node->create_wall_timer(1s,
       [node, pub]() {
-
         // Create string message
         auto msg = std_msgs::msg::String();
         msg.data = "Hello world";
