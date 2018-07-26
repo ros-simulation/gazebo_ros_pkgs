@@ -27,6 +27,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/Range.h>
 
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/TransportTypes.hh>
@@ -76,7 +77,8 @@ namespace gazebo
     {
       LASERSCAN,
       POINTCLOUD,
-      POINTCLOUD2
+      POINTCLOUD2,
+      RANGE
     };
     /// \brief
     private: OutputType output_type_;
@@ -96,11 +98,15 @@ namespace gazebo
 
     private: double min_intensity_;
 
+    /// \brief Radiation type to report when output type is range
+    private: uint8_t range_radiation_type_;
+
     private: gazebo::transport::NodePtr gazebo_node_;
     private: gazebo::transport::SubscriberPtr laser_scan_sub_;
     private: void PublishLaserScan(ConstLaserScanStampedPtr &_msg);
     private: void PublishPointCloud(ConstLaserScanStampedPtr &_msg);
     private: void PublishPointCloud2(ConstLaserScanStampedPtr &_msg);
+    private: void PublishRange(ConstLaserScanStampedPtr &_msg);
 
     private:
       int rayCount;
@@ -113,6 +119,8 @@ namespace gazebo
       double verticalMaxAngle;
       double yDiff;
       double pDiff;
+      double rangeMin;
+      double rangeMax;
   };
 
   template<typename T>
@@ -139,6 +147,8 @@ namespace gazebo
     verticalRangeCount = sensor->VerticalRangeCount();
     yDiff = maxAngle - minAngle;
     pDiff = verticalMaxAngle - verticalMinAngle;
+    rangeMin = sensor->RangeMin();
+    rangeMax = sensor->RangeMax();
   }
 }
 

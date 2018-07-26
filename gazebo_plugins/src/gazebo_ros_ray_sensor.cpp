@@ -111,11 +111,30 @@ void GazeboRosRaySensor::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
       this->output_type_ = POINTCLOUD;
     else if (output_type_string == ros::message_traits::DataType<sensor_msgs::PointCloud2>::value())
       this->output_type_ = POINTCLOUD2;
+    else if (output_type_string == ros::message_traits::DataType<sensor_msgs::Range>::value())
+      this->output_type_ = RANGE;
     else
     {
       ROS_WARN_NAMED("laser", "Invalid value of output <outputType>, defaults to %s",
           ros::message_traits::DataType<sensor_msgs::PointCloud2>::value());
       this->output_type_ = POINTCLOUD2;
+    }
+  }
+
+  if (RANGE == this->output_type_)
+  {
+    if(!_sdf->HasElement("radiationType"))
+    {
+      ROS_INFO_NAMED("laser", "missing <radiationType>, defaulting to infared");
+      this->range_radiation_type_ = sensor_msgs::Range::INFRARED;
+    } else if ("ultrasound" == _sdf->Get<std::string>("radiationType")) {
+      this->range_radiation_type_ == sensor_msgs::Range::ULTRASOUND;
+    } else if ("infared" ==  _sdf->Get<std::string>("radiationType")) {
+      this->range_radiation_type_ == sensor_msgs::Range::INFRARED;
+    } else {
+      ROS_ERROR_NAMED("laser", "Invalid <radiationType> [%s]. Must be ultrasound or infared",
+        _sdf->Get<std::string>("radiationType").c_str());
+      return;
     }
   }
 
@@ -157,6 +176,9 @@ void GazeboRosRaySensor::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     case POINTCLOUD2:
       this->AdvertiseOutput<sensor_msgs::PointCloud2>();
       break;
+    case RANGE:
+      this->AdvertiseOutput<sensor_msgs::Range>();
+      break;
   }
 }
 
@@ -183,6 +205,11 @@ void GazeboRosRaySensor::SubscribeGazeboLaserScan()
       this->laser_scan_sub_ =
         this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
                                       &GazeboRosRaySensor::PublishPointCloud2, this);
+      break;
+    case RANGE:
+      this->laser_scan_sub_ =
+        this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
+                                     &GazeboRosRaySensor::PublishRange, this);
       break;
   }
 }
@@ -363,6 +390,28 @@ void GazeboRosRaySensor::PublishPointCloud2(ConstLaserScanStampedPtr &_msg)
 
   // Publish output
   pub_.publish(pc);
+}
+
+void GazeboRosRaySensor::PublishRange(ConstLaserScanStampedPtr &_msg)
+{
+  sensor_msgs::Range range_msg;
+  range_msg.header.frame_id = this->frame_name_;
+  range_msg.header.stamp.sec = _msg->time().sec();
+  range_msg.header.stamp.nsec = _msg->time().nsec();
+  range_msg.field_of_view = std::max(pDiff, yDiff);
+  range_msg.min_range = rangeMin;
+  range_msg.max_range = rangeMax;
+
+  // Set range to the minimum of the ray ranges
+  // For single rays, this will just be the range of the ray
+  range_msg.range = std::numeric_limits<sensor_msgs::Range::_range_type>::max();
+  for(double range : _msg->scan().ranges())
+  {
+      if (range < range_msg.range)
+          range_msg.range = range;
+  }
+
+  pub_.publish(range_msg);
 }
 
 }
