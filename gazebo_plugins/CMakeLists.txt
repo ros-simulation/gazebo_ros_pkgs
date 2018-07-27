@@ -24,9 +24,6 @@ include_directories(include
 add_library(gazebo_ros_template SHARED
   src/gazebo_ros_template.cpp
 )
-target_link_libraries(gazebo_ros_template
-  ${gazebo_ros_LIBRARIES}
-)
 ament_target_dependencies(gazebo_ros_template
   "rclcpp"
   "gazebo_dev"
