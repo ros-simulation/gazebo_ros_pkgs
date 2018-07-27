@@ -16,6 +16,7 @@
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo_plugins/gazebo_ros_force.hpp>
+#include <gazebo_ros/conversions.hpp>
 #include <gazebo_ros/node.hpp>
 #include <rclcpp/rclcpp.hpp>
 
@@ -46,12 +47,10 @@ public:
 GazeboRosForce::GazeboRosForce()
 : impl_(std::make_unique<GazeboRosForcePrivate>())
 {
-  impl_->wrench_msg_.force.x = 0.0;
-  impl_->wrench_msg_.force.y = 0.0;
-  impl_->wrench_msg_.force.z = 0.0;
-  impl_->wrench_msg_.torque.x = 0.0;
-  impl_->wrench_msg_.torque.y = 0.0;
-  impl_->wrench_msg_.torque.z = 0.0;
+  impl_->wrench_msg_.force =
+    gazebo_ros::Convert<geometry_msgs::msg::Vector3>(ignition::math::Vector3d::Zero);
+  impl_->wrench_msg_.torque =
+    gazebo_ros::Convert<geometry_msgs::msg::Vector3>(ignition::math::Vector3d::Zero);
 }
 
 GazeboRosForce::~GazeboRosForce()
@@ -100,14 +99,8 @@ void GazeboRosForce::OnRosWrenchMsg(const geometry_msgs::msg::Wrench::SharedPtr 
 
 void GazeboRosForce::OnUpdate()
 {
-  ignition::math::Vector3d force(impl_->wrench_msg_.force.x,
-    impl_->wrench_msg_.force.y,
-    impl_->wrench_msg_.force.z);
-  ignition::math::Vector3d torque(impl_->wrench_msg_.torque.x,
-    impl_->wrench_msg_.torque.y,
-    impl_->wrench_msg_.torque.z);
-  impl_->link_->AddForce(force);
-  impl_->link_->AddTorque(torque);
+  impl_->link_->AddForce(gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.force));
+  impl_->link_->AddTorque(gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.torque));
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosForce)
