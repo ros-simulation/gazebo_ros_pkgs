@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="box">
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+      <plugin name="gazebo_ros_force" filename="./libgazebo_ros_force.so">
+        <ros>
+          <node_name>force_test_node</node_name>
+          <namespace>/test</namespace>
+          <argument>gazebo_ros_force:=force_test</argument>
+        </ros>
+        <link_name>link</link_name>
+      </plugin>
+    </model>
+  </world>
+</sdf>

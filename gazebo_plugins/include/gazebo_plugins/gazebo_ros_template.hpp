@@ -42,7 +42,7 @@ public:
   /// such as `gazebo::sensors::SensorPtr`, `gazebo::physics::WorldPtr`,
   /// `gazebo::rendering::VisualPtr`, etc.
   /// \param[in] sdf SDF element containing user-defined parameters.
-  void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf);
+  void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
 
 protected:
   /// Optional callback to be called at every simulation iteration.

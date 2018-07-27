@@ -14,11 +14,29 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 
 include_directories(include
   ${gazebo_ros_INCLUDE_DIRS}
+  ${geometry_msgs_INCLUDE_DIRS}
 )
+
+# gazebo_ros_force
+add_library(gazebo_ros_force SHARED
+  src/gazebo_ros_force.cpp
+)
+target_link_libraries(gazebo_ros_force
+  ${gazebo_ros_LIBRARIES}
+  ${geometry_msgs_LIBRARIES}
+)
+ament_target_dependencies(gazebo_ros_force
+  "rclcpp"
+  "gazebo_dev"
+  "gazebo_ros"
+  "geometry_msgs"
+)
+ament_export_libraries(gazebo_ros_force)
 
 # gazebo_ros_template
 add_library(gazebo_ros_template SHARED
@@ -45,6 +63,11 @@ ament_package()
 
 install(DIRECTORY include/
         DESTINATION include)
+
+install(TARGETS gazebo_ros_force
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 install(TARGETS gazebo_ros_template
   ARCHIVE DESTINATION lib
