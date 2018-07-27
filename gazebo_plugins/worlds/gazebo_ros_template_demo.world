@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+  gazebo_ros_template plugin demo
+-->
+<sdf version="1.6">
+  <world name="default">
+    <model name="demo_model">
+      <static>true</static>
+      <plugin name="gazebo_ros_template" filename="libgazebo_ros_template.so">
+        <ros>
+          <node_name>demo_node</node_name>
+          <namespace>/demo</namespace>
+        </ros>
+      </plugin>
+    </model>
+  </world>
+</sdf>
