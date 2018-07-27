@@ -53,3 +53,8 @@ install(TARGETS gazebo_ros_template
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
+
+install(DIRECTORY
+  worlds
+  DESTINATION share/${PROJECT_NAME}/
+)

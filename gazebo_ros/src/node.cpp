@@ -53,21 +53,26 @@ Node::SharedPtr Node::Create(const std::string & node_name, sdf::ElementPtr sdf)
   }
 
   // Get list of arguments from SDF
-  sdf::ElementPtr argument_sdf = sdf->GetElement("argument");
-  while (argument_sdf) {
-    std::string argument = argument_sdf->Get<std::string>();
-    arguments.push_back(argument);
-    argument_sdf = argument_sdf->GetNextElement("argument");
+  if (sdf->HasElement("argument")) {
+    sdf::ElementPtr argument_sdf = sdf->GetElement("argument");
+
+    while (argument_sdf) {
+      std::string argument = argument_sdf->Get<std::string>();
+      arguments.push_back(argument);
+      argument_sdf = argument_sdf->GetNextElement("argument");
+    }
   }
 
   // Convert each parameter tag to a ROS parameter
-  sdf::ElementPtr parameter_sdf = sdf->GetElement("parameter");
-  while (parameter_sdf) {
-    auto param = sdf_to_ros_parameter(parameter_sdf);
-    if (rclcpp::ParameterType::PARAMETER_NOT_SET != param.get_type()) {
-      initial_parameters.push_back(param);
+  if (sdf->HasElement("parameter")) {
+    sdf::ElementPtr parameter_sdf = sdf->GetElement("parameter");
+    while (parameter_sdf) {
+      auto param = sdf_to_ros_parameter(parameter_sdf);
+      if (rclcpp::ParameterType::PARAMETER_NOT_SET != param.get_type()) {
+        initial_parameters.push_back(param);
+      }
+      parameter_sdf = parameter_sdf->GetNextElement("parameter");
     }
-    parameter_sdf = parameter_sdf->GetNextElement("parameter");
   }
 
   // Use default context
