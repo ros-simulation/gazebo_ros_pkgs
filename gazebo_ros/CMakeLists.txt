@@ -16,11 +16,14 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_dev REQUIRED)
 
-include_directories(include)
+include_directories(
+  include
+  ${gazebo_dev_INCLUDE_DIRS}
+)
 
 add_library(gazebo_ros_node SHARED
-  src/node.cpp
   src/executor.cpp
+  src/node.cpp
 )
 ament_target_dependencies(gazebo_ros_node
   "rclcpp"

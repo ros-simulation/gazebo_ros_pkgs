@@ -25,6 +25,7 @@ file(COPY worlds DESTINATION .)
 
 # Tests
 set(tests
+  test_conversions
   test_plugins
 )
 
