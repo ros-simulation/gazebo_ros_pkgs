@@ -12,11 +12,44 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(gazebo_ros REQUIRED)
 find_package(gazebo_dev REQUIRED)
+find_package(gazebo_ros REQUIRED)
+find_package(rclcpp REQUIRED)
 
-include_directories(include)
+include_directories(include
+  ${gazebo_ros_INCLUDE_DIRS}
+)
+
+# gazebo_ros_template
+add_library(gazebo_ros_template SHARED
+  src/gazebo_ros_template.cpp
+)
+target_link_libraries(gazebo_ros_template
+  ${gazebo_ros_LIBRARIES}
+)
+ament_target_dependencies(gazebo_ros_template
+  "rclcpp"
+  "gazebo_dev"
+  "gazebo_ros"
+)
+ament_export_libraries(gazebo_ros_template)
+
+ament_export_include_directories(include)
+ament_export_dependencies(rclcpp)
+ament_export_dependencies(gazebo_dev)
+ament_export_dependencies(gazebo_ros)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 ament_package()
 
 install(DIRECTORY include/
         DESTINATION include)
+
+install(TARGETS gazebo_ros_template
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
