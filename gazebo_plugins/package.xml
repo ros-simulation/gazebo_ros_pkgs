@@ -16,40 +16,10 @@
 
   <author>John Hsu</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>gazebo_dev</build_depend>
-  <!--
-    Need to use gazebo_dev since run script needs pkg-config
-    See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
-  -->
+  <build_depend>gazebo_ros</build_depend>
   <exec_depend>gazebo_dev</exec_depend>
-
-  <depend>gazebo_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>trajectory_msgs</depend>
-  <depend>std_srvs</depend>
-  <depend>roscpp</depend>
-  <depend>rospy</depend>
-  <depend>nodelet</depend>
-  <depend>angles</depend>
-  <depend>nav_msgs</depend>
-  <depend>urdf</depend>
-  <depend>tf</depend>
-  <depend>tf2_ros</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>rosgraph_msgs</depend>
-  <depend>image_transport</depend>
-  <depend>rosconsole</depend>
-  <build_depend>message_generation</build_depend>
-  <exec_depend>message_runtime</exec_depend>
-  <depend>cv_bridge</depend>
-  <depend>polled_camera</depend>
-  <depend>diagnostic_updater</depend>
-  <depend>camera_info_manager</depend>
-  <depend>std_msgs</depend>
-
-  <test_depend>rostest</test_depend>
-
+  <exec_depend>gazebo_ros</exec_depend>
 </package>
