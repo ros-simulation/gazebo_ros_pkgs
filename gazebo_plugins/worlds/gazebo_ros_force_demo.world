@@ -1,4 +1,11 @@
 <?xml version="1.0"?>
+<!--
+  Gazebo ROS force plugin demo
+
+  Try for example:
+
+  ros2 topic pub -1 /demo/force_demo geometry_msgs/Wrench "force: {x: 10.0}"
+-->
 <sdf version="1.6">
   <world name="default">
     <include>
@@ -27,9 +34,9 @@
       </link>
       <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
         <ros>
-          <node_name>force_test_node</node_name>
-          <namespace>/test</namespace>
-          <argument>gazebo_ros_force:=force_test</argument>
+          <node_name>force_demo_node</node_name>
+          <namespace>/demo</namespace>
+          <argument>gazebo_ros_force:=force_demo</argument>
         </ros>
         <link_name>link</link_name>
       </plugin>
