@@ -26,10 +26,6 @@ include_directories(include
 add_library(gazebo_ros_force SHARED
   src/gazebo_ros_force.cpp
 )
-target_link_libraries(gazebo_ros_force
-  ${gazebo_ros_LIBRARIES}
-  ${geometry_msgs_LIBRARIES}
-)
 ament_target_dependencies(gazebo_ros_force
   "rclcpp"
   "gazebo_dev"
@@ -65,12 +61,10 @@ ament_package()
 install(DIRECTORY include/
         DESTINATION include)
 
-install(TARGETS gazebo_ros_force
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-
-install(TARGETS gazebo_ros_template
+install(
+  TARGETS
+    gazebo_ros_force
+    gazebo_ros_template
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)

@@ -55,12 +55,10 @@ ament_package()
 install(DIRECTORY include/
         DESTINATION include)
 
-install(TARGETS gazebo_ros_node
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-
-install(TARGETS gazebo_ros_init
+install(
+  TARGETS
+    gazebo_ros_node
+    gazebo_ros_init
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)

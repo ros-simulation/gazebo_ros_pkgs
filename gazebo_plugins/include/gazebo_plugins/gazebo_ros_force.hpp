@@ -30,7 +30,7 @@ class GazeboRosForcePrivate;
   Send an empty / zero message to stop applying a force.
 
   Example Usage:
-  \verbatim
+  \code{.xml}
     <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
 
       <ros>
@@ -50,7 +50,7 @@ class GazeboRosForcePrivate;
       <link_name>link</link_name>
 
     </plugin>
-  \endverbatim
+  \endcode
 */
 
 class GazeboRosForce : public gazebo::ModelPlugin
