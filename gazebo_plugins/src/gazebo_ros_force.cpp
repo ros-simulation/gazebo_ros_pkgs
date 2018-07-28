@@ -47,10 +47,6 @@ public:
 GazeboRosForce::GazeboRosForce()
 : impl_(std::make_unique<GazeboRosForcePrivate>())
 {
-  impl_->wrench_msg_.force =
-    gazebo_ros::Convert<geometry_msgs::msg::Vector3>(ignition::math::Vector3d::Zero);
-  impl_->wrench_msg_.torque =
-    gazebo_ros::Convert<geometry_msgs::msg::Vector3>(ignition::math::Vector3d::Zero);
 }
 
 GazeboRosForce::~GazeboRosForce()

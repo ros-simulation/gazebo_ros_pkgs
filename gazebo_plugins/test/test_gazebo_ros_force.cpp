@@ -58,9 +58,10 @@ TEST_F(GazeboRosForceTest, ApplyForceTorque)
   pub->publish(msg);
 
   // Wait until box moves
+  double target_dist{0.1};
   unsigned int sleep = 0;
   unsigned int max_sleep = 30;
-  while (sleep < max_sleep && abs(box->WorldPose().Pos().X()) < tol) {
+  while (sleep < max_sleep && box->WorldPose().Pos().X() < target_dist) {
     world->Step(100);
     gazebo::common::Time::MSleep(100);
     sleep++;
@@ -68,8 +69,8 @@ TEST_F(GazeboRosForceTest, ApplyForceTorque)
 
   // Check box moved
   EXPECT_LT(sleep, max_sleep);
-  EXPECT_LT(0.0, box->WorldPose().Pos().X());
-  EXPECT_LT(0.0, box->WorldPose().Rot().Z());
+  EXPECT_LT(target_dist, box->WorldPose().Pos().X());
+  EXPECT_LT(target_dist, box->WorldPose().Rot().Z());
 }
 
 int main(int argc, char ** argv)
