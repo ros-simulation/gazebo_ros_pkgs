@@ -33,7 +33,7 @@ class TestGazeboRosRaySensor : public ::testing::Test
 public:
   TestGazeboRosRaySensor() {}
 
-  // Docmentation inherited
+  // Documentation inherited
   static void SetUpTestCase();
   // Documentation inherited
   static void TearDownTestCase();
@@ -68,7 +68,7 @@ void TestGazeboRosRaySensor::SetUpTestCase()
 {
   // Start gzserver in background
   gazebo_process_ = std::make_unique<gazebo_ros::GazeboProcess>(args);
-  ASSERT_GT(gazebo_process_->run(), 0);
+  ASSERT_GT(gazebo_process_->Run(), 0);
 
   // Create node and executor
   node_ = rclcpp::Node::make_shared("test_gazebo_ros_node");
@@ -79,7 +79,7 @@ void TestGazeboRosRaySensor::SetUpTestCase()
 void TestGazeboRosRaySensor::TearDownTestCase()
 {
   // Terminate gzserver
-  ASSERT_GE(gazebo_process_->terminate(), 0);
+  ASSERT_GE(gazebo_process_->Terminate(), 0);
   gazebo_process_.reset();
 
   node_.reset();
