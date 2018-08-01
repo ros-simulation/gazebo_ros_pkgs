@@ -22,6 +22,16 @@
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <rclcpp/time.hpp>
+#include <gazebo/msgs/laserscan_stamped.pb.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <sensor_msgs/msg/point_cloud.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
+#include <sensor_msgs/msg/range.hpp>
+#include <sensor_msgs/point_cloud2_iterator.hpp>
+
+#include <string>
+#include <algorithm>
+#include <limits>
 
 namespace gazebo_ros
 {
@@ -143,6 +153,235 @@ builtin_interfaces::msg::Time Convert(const gazebo::common::Time & in)
   time.sec = in.sec;
   time.nanosec = in.nsec;
   return time;
+}
+
+/// Generic conversion from an Gazebo Laser Scan message to another type.
+/// \param[in] in Input message;
+/// \param[in] min_intenstiy The minimum intensity value to clip the output intensities
+/// \return Conversion result
+/// \tparam OUT Output type
+template<class OUT>
+OUT Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity = 0.0)
+{
+  return OUT();
+}
+
+/// \brief Specialized conversion from an Gazebo Laser Scan to a ROS Laser Scan.
+/// \param[in] in Input message;
+/// \param[in] min_intenstiy The minimum intensity value to clip the output intensities
+/// \return A ROS Laser Scan message with the same data as the input message
+/// \note If multiple vertical rays are present, the LaserScan will be the
+///       horizontal scan in the center of the vertical range
+template<>
+sensor_msgs::msg::LaserScan Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity)
+{
+  sensor_msgs::msg::LaserScan ls;
+  ls.header.stamp.sec = in.time().sec();
+  ls.header.stamp.nanosec = in.time().nsec();
+  ls.angle_min = in.scan().angle_min();
+  ls.angle_max = in.scan().angle_max();
+  ls.angle_increment = in.scan().angle_step();
+  ls.time_increment = 0;
+  ls.scan_time = 0;
+  ls.range_min = in.scan().range_min();
+  ls.range_max = in.scan().range_max();
+
+  auto count = in.scan().count();
+  auto vertical_count = in.scan().vertical_count();
+
+  // If there are multiple vertical beams, use the one in the middle
+  size_t start = (vertical_count / 2) * count;
+
+  // Copy ranges and intensities over
+  ls.ranges.resize(count);
+  ls.intensities.resize(count);
+  std::copy(
+    in.scan().ranges().begin() + start,
+    in.scan().ranges().begin() + start + count,
+    ls.ranges.begin());
+  // TODO(ironmig): respect min_intensity
+  std::copy(
+    in.scan().intensities().begin() + start,
+    in.scan().intensities().begin() + start + count,
+    ls.intensities.begin());
+
+  return ls;
+}
+
+/// \brief Specialized conversion from an Gazebo Laser Scan to a ROS PointCloud.
+/// \param[in] in Input message;
+/// \param[in] min_intenstiy The minimum intensity value to clip the output intensities
+/// \return A ROS PointCloud message with the same data as the input message
+template<>
+sensor_msgs::msg::PointCloud Convert(
+  const gazebo::msgs::LaserScanStamped & in,
+  double min_intensity)
+{
+  // Create message to send
+  sensor_msgs::msg::PointCloud pc;
+
+  // Fill header
+  pc.header.stamp.sec = in.time().sec();
+  pc.header.stamp.nanosec = in.time().nsec();
+
+  // Cache values that are repeatedly used
+  auto count = in.scan().count();
+  auto vertical_count = in.scan().vertical_count();
+  auto angle_step = in.scan().angle_step();
+  auto vertical_angle_step = in.scan().vertical_angle_step();
+
+  // Setup point cloud fields
+  pc.points.reserve(count * vertical_count);
+  pc.channels.push_back(sensor_msgs::msg::ChannelFloat32());
+  pc.channels[0].values.reserve(count * vertical_count);
+  pc.channels[0].name = "intensity";
+
+  // Current index in range array
+  size_t range_index = 0;
+  // Angles of ray currently processing, azimuth is horizontal, inclination is vertical
+  double azimuth, inclination;
+  // Index in vertical and horizontal loops
+  size_t i, j;
+
+  // Fill pointcloud with laser scan data, converting spherical to cartesian
+  for (j = 0, inclination = in.scan().vertical_angle_min();
+    j < vertical_count;
+    ++j, inclination += vertical_angle_step)
+  {
+    double c_inclination = cos(inclination);
+    double s_inclination = sin(inclination);
+    for (i = 0, azimuth = in.scan().angle_min();
+      i < count;
+      ++i, azimuth += angle_step, ++range_index)
+    {
+      double c_azimuth = cos(azimuth);
+      double s_azimuth = sin(azimuth);
+
+      double r = in.scan().ranges(range_index);
+      double intensity = in.scan().intensities(range_index);
+      if (intensity < min_intensity) {
+        intensity = min_intensity;
+      }
+
+      // Convert spherical coordinates to cartesian for pointcloud
+      // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
+      geometry_msgs::msg::Point32 point;
+      point.x = r * c_inclination * c_azimuth;
+      point.y = r * c_inclination * s_azimuth;
+      point.z = r * s_inclination;
+      pc.points.push_back(point);
+      pc.channels[0].values.push_back(intensity);
+    }
+  }
+
+  return pc;
+}
+
+/// \brief Specialized conversion from an Gazebo Laser Scan to a ROS PointCloud2.
+/// \param[in] in Input message;
+/// \param[in] min_intenstiy The minimum intensity value to clip the output intensities
+/// \return A ROS PointCloud2 message with the same data as the input message
+template<>
+sensor_msgs::msg::PointCloud2 Convert(
+  const gazebo::msgs::LaserScanStamped & in,
+  double min_intensity)
+{
+  // Create message to send
+  sensor_msgs::msg::PointCloud2 pc;
+
+  // Fill header
+  pc.header.stamp.sec = in.time().sec();
+  pc.header.stamp.nanosec = in.time().nsec();
+
+  // Cache values that are repeatedly used
+  auto count = in.scan().count();
+  auto vertical_count = in.scan().vertical_count();
+  auto angle_step = in.scan().angle_step();
+  auto vertical_angle_step = in.scan().vertical_angle_step();
+
+  // Create fields in pointcloud
+  sensor_msgs::PointCloud2Modifier pcd_modifier(pc);
+  pcd_modifier.setPointCloud2Fields(4,
+    "x", 1, sensor_msgs::msg::PointField::FLOAT32,
+    "y", 1, sensor_msgs::msg::PointField::FLOAT32,
+    "z", 1, sensor_msgs::msg::PointField::FLOAT32,
+    "intensity", 1, sensor_msgs::msg::PointField::FLOAT32);
+  pcd_modifier.resize(vertical_count * count);
+  pc.is_dense = true;
+  sensor_msgs::PointCloud2Iterator<float> iter_x(pc, "x");
+  sensor_msgs::PointCloud2Iterator<float> iter_y(pc, "y");
+  sensor_msgs::PointCloud2Iterator<float> iter_z(pc, "z");
+  sensor_msgs::PointCloud2Iterator<float> iter_intensity(pc, "intensity");
+
+  // Current index in range array
+  size_t range_index = 0;
+  // Angles of ray currently processing, azimuth is horizontal, inclination is vertical
+  double azimuth, inclination;
+  // Index in vertical and horizontal loops
+  size_t i, j;
+
+  // Fill pointcloud with laser scan data, converting spherical to cartesian
+  for (j = 0, inclination = in.scan().vertical_angle_min();
+    j < vertical_count;
+    ++j, inclination += vertical_angle_step)
+  {
+    double c_inclination = cos(inclination);
+    double s_inclination = sin(inclination);
+    for (i = 0, azimuth = in.scan().angle_min();
+      i < count;
+      ++i, azimuth += angle_step, ++range_index,
+      ++iter_x, ++iter_y, ++iter_z, ++iter_intensity)
+    {
+      double c_azimuth = cos(azimuth);
+      double s_azimuth = sin(azimuth);
+
+      double r = in.scan().ranges(range_index);
+      double intensity = in.scan().intensities(range_index);
+      if (intensity < min_intensity) {
+        intensity = min_intensity;
+      }
+
+      // Convert spherical coordinates to cartesian for pointcloud
+      // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
+      *iter_x = r * c_inclination * c_azimuth;
+      *iter_y = r * c_inclination * s_azimuth;
+      *iter_z = r * s_inclination;
+      *iter_intensity = intensity;
+    }
+  }
+
+  return pc;
+}
+
+/// \brief Specialized conversion from an Gazebo Laser Scan to a ROS PointCloud2.
+/// \param[in] in Input message;
+/// \param[in] min_intenstiy Ignored.
+/// \return A ROS Range message with minimum range of the rays in the laser scan
+template<>
+sensor_msgs::msg::Range Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity)
+{
+  // Create message
+  sensor_msgs::msg::Range range_msg;
+
+  // Set stamp from header
+  range_msg.header.stamp.sec = in.time().sec();
+  range_msg.header.stamp.nanosec = in.time().nsec();
+
+  double horizontal_fov = in.scan().angle_max() - in.scan().angle_min();
+  double vertical_fov = in.scan().vertical_angle_max() - in.scan().vertical_angle_min();
+  range_msg.field_of_view = std::max(horizontal_fov, vertical_fov);
+  range_msg.min_range = in.scan().range_min();
+  range_msg.max_range = in.scan().range_max();
+
+  // Set range to the minimum of the ray ranges
+  // For single rays, this will just be the range of the ray
+  range_msg.range = std::numeric_limits<sensor_msgs::msg::Range::_range_type>::max();
+  for (double range : in.scan().ranges()) {
+    if (range < range_msg.range) {
+      range_msg.range = range;
+    }
+  }
+  return range_msg;
 }
 
 }  // namespace gazebo_ros
