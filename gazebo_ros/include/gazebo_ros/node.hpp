@@ -37,7 +37,7 @@ class Node : public rclcpp::Node
 {
 public:
   /// Shared pointer to a #gazebo_ros::Node
-  typedef std::shared_ptr<Node> SharedPtr;
+  using SharedPtr = std::shared_ptr<Node>;
 
   /// Destructor
   virtual ~Node();
