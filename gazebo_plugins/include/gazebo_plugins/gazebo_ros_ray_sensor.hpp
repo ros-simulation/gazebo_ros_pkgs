@@ -42,7 +42,7 @@ class GazeboRosRaySensorPrivate;
   \details
   SDF parameters:
   \verbatim
-  <outputType>: Optional. The message type of the plugin's output. Can be any of the following:
+  <output_type>: Optional. The message type of the plugin's output. Can be any of the following:
     * sensor_msgs/PointCloud2: 3D cloud of points, Default
     * sensor_msgs/PointCloud:  3D cloud of points
     * sensor_msgs/LaserScan:   2D scan, uses center vertical ray if there are multiple
@@ -50,17 +50,17 @@ class GazeboRosRaySensorPrivate;
   \endverbatim
 
   \verbatim
-  <frameName>: TF Frame id of output header.
+  <frame_name>: TF Frame id of output header.
                If not set, frame id will be name of sensor's parent link
   \endverbatim
 
   \verbatim
-  <minIntensity>: Clip intensity values for output to this value.
+  <min_intensity>: Clip intensity values for output to this value.
                   Default: 0.0
   \endverbatim
 
   \verbatim
-  <radiationType>: The radiation type to publish when the output type is sensor_msgs/Range.
+  <radiation_type>: The radiation type to publish when the output type is sensor_msgs/Range.
                    Can be either "infrared" or "ultrasonic".
                    Default: "infrared".
   \endverbatim
@@ -74,11 +74,11 @@ class GazeboRosRaySensorPrivate;
         <argument>~/out:=pointcloud2</argument>
       </ros>
       <!-- Output as a PointCloud2, see above for other types -->
-      <outputType>sensor_msgs/PointCloud2</outputType>
+      <output_type>sensor_msgs/PointCloud2</output_type>
       <!-- Clip intensity values so all are above 100, optional -->
-      <minIntensity>100.0</minIntensity>
+      <min_intensity>100.0</min_intensity>
       <!-- Frame id for header of output, defaults to sensor's parent link name -->
-      <frameName>ray_link</frameName>
+      <frame_name>ray_link</frame_name>
     </plugin>
   \endcode
 */

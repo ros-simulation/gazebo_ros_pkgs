@@ -157,7 +157,7 @@ builtin_interfaces::msg::Time Convert(const gazebo::common::Time & in)
 
 /// Generic conversion from an Gazebo Laser Scan message to another type.
 /// \param[in] in Input message;
-/// \param[in] min_intenstiy The minimum intensity value to clip the output intensities
+/// \param[in] min_intensity The minimum intensity value to clip the output intensities
 /// \return Conversion result
 /// \tparam OUT Output type
 template<class OUT>
@@ -168,7 +168,7 @@ OUT Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity = 0.
 
 /// \brief Specialized conversion from an Gazebo Laser Scan to a ROS Laser Scan.
 /// \param[in] in Input message;
-/// \param[in] min_intenstiy The minimum intensity value to clip the output intensities
+/// \param[in] min_intensity The minimum intensity value to clip the output intensities
 /// \return A ROS Laser Scan message with the same data as the input message
 /// \note If multiple vertical rays are present, the LaserScan will be the
 ///       horizontal scan in the center of the vertical range
@@ -192,25 +192,28 @@ sensor_msgs::msg::LaserScan Convert(const gazebo::msgs::LaserScanStamped & in, d
   // If there are multiple vertical beams, use the one in the middle
   size_t start = (vertical_count / 2) * count;
 
-  // Copy ranges and intensities over
-  ls.ranges.resize(count);
-  ls.intensities.resize(count);
+  // Copy ranges into ROS message
+  ls.ranges.reserve(count);
   std::copy(
     in.scan().ranges().begin() + start,
     in.scan().ranges().begin() + start + count,
     ls.ranges.begin());
-  // TODO(ironmig): respect min_intensity
-  std::copy(
+
+  // Copy intensities into ROS message, clipping at min_intensity
+  ls.intensities.reserve(count);
+  std::transform(
     in.scan().intensities().begin() + start,
     in.scan().intensities().begin() + start + count,
-    ls.intensities.begin());
+    ls.intensities.begin(), [min_intensity](double i) -> double {
+      return i ? i > min_intensity : min_intensity;
+    });
 
   return ls;
 }
 
 /// \brief Specialized conversion from an Gazebo Laser Scan to a ROS PointCloud.
 /// \param[in] in Input message;
-/// \param[in] min_intenstiy The minimum intensity value to clip the output intensities
+/// \param[in] min_intensity The minimum intensity value to clip the output intensities
 /// \return A ROS PointCloud message with the same data as the input message
 template<>
 sensor_msgs::msg::PointCloud Convert(
@@ -243,7 +246,7 @@ sensor_msgs::msg::PointCloud Convert(
   // Index in vertical and horizontal loops
   size_t i, j;
 
-  // Fill pointcloud with laser scan data, converting spherical to cartesian
+  // Fill pointcloud with laser scan data, converting spherical to Cartesian
   for (j = 0, inclination = in.scan().vertical_angle_min();
     j < vertical_count;
     ++j, inclination += vertical_angle_step)
@@ -263,7 +266,7 @@ sensor_msgs::msg::PointCloud Convert(
         intensity = min_intensity;
       }
 
-      // Convert spherical coordinates to cartesian for pointcloud
+      // Convert spherical coordinates to Cartesian for pointcloud
       // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
       geometry_msgs::msg::Point32 point;
       point.x = r * c_inclination * c_azimuth;
@@ -279,7 +282,7 @@ sensor_msgs::msg::PointCloud Convert(
 
 /// \brief Specialized conversion from an Gazebo Laser Scan to a ROS PointCloud2.
 /// \param[in] in Input message;
-/// \param[in] min_intenstiy The minimum intensity value to clip the output intensities
+/// \param[in] min_intensity The minimum intensity value to clip the output intensities
 /// \return A ROS PointCloud2 message with the same data as the input message
 template<>
 sensor_msgs::msg::PointCloud2 Convert(
@@ -320,7 +323,7 @@ sensor_msgs::msg::PointCloud2 Convert(
   // Index in vertical and horizontal loops
   size_t i, j;
 
-  // Fill pointcloud with laser scan data, converting spherical to cartesian
+  // Fill pointcloud with laser scan data, converting spherical to Cartesian
   for (j = 0, inclination = in.scan().vertical_angle_min();
     j < vertical_count;
     ++j, inclination += vertical_angle_step)
@@ -341,7 +344,7 @@ sensor_msgs::msg::PointCloud2 Convert(
         intensity = min_intensity;
       }
 
-      // Convert spherical coordinates to cartesian for pointcloud
+      // Convert spherical coordinates to Cartesian for pointcloud
       // See https://en.wikipedia.org/wiki/Spherical_coordinate_system
       *iter_x = r * c_inclination * c_azimuth;
       *iter_y = r * c_inclination * s_azimuth;
@@ -355,11 +358,13 @@ sensor_msgs::msg::PointCloud2 Convert(
 
 /// \brief Specialized conversion from an Gazebo Laser Scan to a ROS PointCloud2.
 /// \param[in] in Input message;
-/// \param[in] min_intenstiy Ignored.
+/// \param[in] min_intensity Ignored.
 /// \return A ROS Range message with minimum range of the rays in the laser scan
 template<>
 sensor_msgs::msg::Range Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity)
 {
+  (void) min_intensity;
+
   // Create message
   sensor_msgs::msg::Range range_msg;
 

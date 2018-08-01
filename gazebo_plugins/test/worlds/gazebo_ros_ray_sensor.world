@@ -2,6 +2,10 @@
 <sdf version="1.6">
   <world name="ray_sensor_test">
     <gravity>0 0 0</gravity>
+    <!-- Global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
     <model name="ray_sensor_box">
       <pose>-1.5 0.0 0.0 0.0 0.0 0.0</pose>
       <link name="ray_link">
@@ -26,13 +30,11 @@
             <scan>
               <horizontal>
                 <samples>300</samples>
-                <resolution>1.0</resolution>
                 <min_angle>-0.5236</min_angle>
                 <max_angle>0.5236</max_angle>
               </horizontal>
               <vertical>
                 <samples>100</samples>
-                <resolution>1.0</resolution>
                 <min_angle>-0.5236</min_angle>
                 <max_angle>0.5236</max_angle>
               </vertical>
@@ -51,7 +53,7 @@
               <namespace>/ray</namespace>
               <argument>~/out:=pointcloud2</argument>
             </ros>
-            <outputType>sensor_msgs/PointCloud2</outputType>
+            <output_type>sensor_msgs/PointCloud2</output_type>
           </plugin>
           <plugin name="pc" filename="libgazebo_ros_ray_sensor.so">
             <ros>
@@ -59,7 +61,7 @@
               <namespace>/ray</namespace>
               <argument>~/out:=pointcloud</argument>
             </ros>
-            <outputType>sensor_msgs/PointCloud</outputType>
+            <output_type>sensor_msgs/PointCloud</output_type>
           </plugin>
           <plugin name="ls" filename="libgazebo_ros_ray_sensor.so">
             <ros>
@@ -67,7 +69,7 @@
               <namespace>/ray</namespace>
               <argument>~/out:=laserscan</argument>
             </ros>
-            <outputType>sensor_msgs/LaserScan</outputType>
+            <output_type>sensor_msgs/LaserScan</output_type>
           </plugin>
           <plugin name="range" filename="libgazebo_ros_ray_sensor.so">
             <ros>
@@ -75,7 +77,7 @@
               <namespace>/ray</namespace>
               <argument>~/out:=range</argument>
             </ros>
-            <outputType>sensor_msgs/Range</outputType>
+            <output_type>sensor_msgs/Range</output_type>
           </plugin>
         </sensor>
 <!-- Disabled while gpu laser is broken in gazebo9, see https://bitbucket.org/osrf/gazebo/issues/2486/conflicts-between-vertical-gpu-rays-and
@@ -85,7 +87,7 @@
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=pointcloud2</argument>
             </ros>
-            <outputType>sensor_msgs/PointCloud2</outputType>
+            <output_type>sensor_msgs/PointCloud2</output_type>
           </plugin>
           <plugin name="pc_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
@@ -93,7 +95,7 @@
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=pointcloud</argument>
             </ros>
-            <outputType>sensor_msgs/PointCloud</outputType>
+            <output_type>sensor_msgs/PointCloud</output_type>
           </plugin>
           <plugin name="ls_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
@@ -101,7 +103,7 @@
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=laserscan</argument>
             </ros>
-            <outputType>sensor_msgs/LaserScan</outputType>
+            <output_type>sensor_msgs/LaserScan</output_type>
           </plugin>
           <plugin name="range_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
@@ -109,7 +111,7 @@
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=range</argument>
             </ros>
-            <outputType>sensor_msgs/Range</outputType>
+            <output_type>sensor_msgs/Range</output_type>
           </plugin>
         </sensor>
 -->
@@ -177,22 +179,6 @@
         </collision>
       </link>
     </model>
-    <light type="point" name="light_1">
-      <pose>0.0 0.0 10.0 0.0 0.0 0.0</pose>
-      <diffuse>0.5 0.5 0.5 0.5</diffuse>
-      <attenuation>
-        <range>1000.0</range>
-        <constant>0.01</constant>
-        <quadratic>0.0001</quadratic>
-      </attenuation>
-      <direction>0 0 -1</direction>
-      <spot>
-        <inner_angle>1.57</inner_angle>
-        <outer_angle>1.57</outer_angle>
-        <falloff>1.0</falloff>
-      </spot>
-      <cast_shadows>true</cast_shadows>
-    </light>
   </world>
 </sdf>
 
