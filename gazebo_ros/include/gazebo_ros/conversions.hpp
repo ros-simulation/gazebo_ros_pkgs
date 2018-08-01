@@ -16,7 +16,13 @@
 #define GAZEBO_ROS__CONVERSIONS_HPP_
 
 #include <geometry_msgs/msg/vector3.hpp>
+#include <geometry_msgs/msg/quaternion.hpp>
+#include <builtin_interfaces/msg/time.hpp>
 #include <ignition/math/Vector3.hh>
+#include <gazebo/common/common.hh>
+#include <rclcpp/time.hpp>
+
+#include <string>
 
 namespace gazebo_ros
 {
@@ -65,5 +71,61 @@ geometry_msgs::msg::Vector3 Convert(const ignition::math::Vector3d & vec)
   msg.z = vec.Z();
   return msg;
 }
+
+/// Generic conversion from an Ignition Math Quaternion to another type.
+/// \param[in] in Input vector.
+/// \return Conversion result
+/// \tparam OUT Output type
+template<class OUT>
+OUT Convert(const ignition::math::Quaterniond & in)
+{
+  return OUT();
+}
+
+/// \brief Specialized conversion from an Ignition Math Quaternion to a ROS message.
+/// \param[in] vec Ignition Quaternion to convert.
+/// \return ROS geometry quaternion message
+template<>
+geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
+{
+  geometry_msgs::msg::Quaternion msg;
+  msg.x = in.X();
+  msg.y = in.Y();
+  msg.z = in.Z();
+  msg.w = in.W();
+  return msg;
+}
+
+/// Generic conversion from an Gazebo Time object to another type.
+/// \param[in] in Input time;
+/// \return Conversion result
+/// \tparam OUT Output type
+template<class OUT>
+OUT Convert(const gazebo::common::Time & in)
+{
+  return OUT();
+}
+
+/// \brief Specialized conversion from an Gazebo Time to a RCLCPP Time.
+/// \param[in] in Gazebo Time to convert.
+/// \return A rclcpp::Time object with the same value as in
+template<>
+rclcpp::Time Convert(const gazebo::common::Time & in)
+{
+  return rclcpp::Time(in.sec, in.nsec, rcl_clock_type_t::RCL_ROS_TIME);
+}
+
+/// \brief Specialized conversion from an Gazebo Time to a ROS Time message.
+/// \param[in] in Gazebo Time to convert.
+/// \return A ROS Time message with the same value as in
+template<>
+builtin_interfaces::msg::Time Convert(const gazebo::common::Time & in)
+{
+  builtin_interfaces::msg::Time time;
+  time.sec = in.sec;
+  time.nanosec = in.nsec;
+  return time;
+}
+
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS_HPP_
