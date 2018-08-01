@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <unistd.h>
-#include <stdlib.h>
-
 #include <gtest/gtest.h>
+
+#include <gazebo_ros/testing_utils.hpp>
+
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
@@ -26,60 +26,31 @@
 
 struct TestParams
 {
-  std::string plugin;
+  std::vector<const char *> args;
   std::vector<std::string> topics;
-  std::vector<std::string> extra_args;
 };
 
 class TestPlugins : public ::testing::TestWithParam<TestParams>
 {
 public:
-  // Documentation inherited
+  TestPlugins() {}
+  void SetUp() override;
   void TearDown() override;
 
-  // Documentation inherited
-  void SetUp() override;
-
-private:
-  int pid_ = -1;
+protected:
+  std::unique_ptr<gazebo_ros::GazeboProcess> gazebo_process_;
 };
 
 void TestPlugins::SetUp()
 {
-  auto params = GetParam();
-
-  unsigned int i = 0;
-  std::vector<const char *> args(params.extra_args.size() + 5);
-  args[i++] = "/usr/bin/gzserver";
-  args[i++] = "--verbose";
-  args[i++] = "-s";
-  args[i++] = params.plugin.c_str();
-  for (unsigned int j = i; j < params.extra_args.size() + i; ++j) {
-    args[j] = params.extra_args[j - i].c_str();
-  }
-  args[i + params.extra_args.size()] = NULL;
-
-  // Fork process so gazebo can be run as child
-  pid_ = fork();
-
-  // Child process
-  if (0 == pid_) {
-    // Run gazebo with a plugin with publishes a string to /test
-    ASSERT_TRUE(execvp("gzserver", const_cast<char **>(args.data())));
-    exit(1);
-  } else {
-    // Parent process
-    ASSERT_GT(pid_, 0);
-  }
+  gazebo_process_ = std::make_unique<gazebo_ros::GazeboProcess>(GetParam().args);
+  ASSERT_GT(gazebo_process_->run(), 0);
 }
 
 void TestPlugins::TearDown()
 {
-  // Kill gazebo (simulating ^C command)
-  EXPECT_FALSE(kill(pid_, SIGINT));
-
-  // Wait for gazebo to terminate
-  wait(nullptr);
+  ASSERT_GE(gazebo_process_->terminate(), 0);
+  gazebo_process_.reset();
 }
 
 TEST_P(TestPlugins, TestTopicsReceived)
@@ -127,12 +98,12 @@ TEST_P(TestPlugins, TestTopicsReceived)
 }
 
 INSTANTIATE_TEST_CASE_P(Plugins, TestPlugins, ::testing::Values(
-    TestParams({"./libargs_init.so", {"test"}, {}}),
-    TestParams({"./libcreate_node_without_init.so", {"test"}, {}}),
-    TestParams({"./libmultiple_nodes.so", {"testA", "testB"}, {}}),
-    TestParams({"libgazebo_ros_init.so", {"new_test"}, {"worlds/ros_world_plugin.world",
-        "ros_world_plugin:/test:=/new_test"}}),
-    TestParams({"libgazebo_ros_init.so", {"/foo/my_topic"}, {"worlds/sdf_node_plugin.world"}})
+    TestParams({{"-s", "./libargs_init.so"}, {"test"}}),
+    TestParams({{"-s", "./libcreate_node_without_init.so"}, {"test"}}),
+    TestParams({{"-s", "./libmultiple_nodes.so"}, {"testA", "testB"}}),
+    TestParams({{"-s", "libgazebo_ros_init.so", "worlds/ros_world_plugin.world",
+        "ros_world_plugin:/test:=/new_test"}, {"new_test"}}),
+    TestParams({{"-s", "libgazebo_ros_init.so", "worlds/sdf_node_plugin.world"}, {"/foo/my_topic"}})
   ), );
 
 int main(int argc, char ** argv)
