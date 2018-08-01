@@ -26,6 +26,7 @@ file(COPY worlds DESTINATION .)
 # Tests
 set(tests
   test_conversions
+  test_utils
   test_plugins
 )
 
@@ -38,9 +39,11 @@ foreach(test ${tests})
     TIMEOUT
       120
   )
+  target_link_libraries(${test} gazebo_ros_utils)
   ament_target_dependencies(${test}
     "rclcpp"
     "std_msgs"
+    "gazebo_dev"
   )
 endforeach()
 
