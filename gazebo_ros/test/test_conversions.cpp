@@ -47,9 +47,8 @@ TEST(TestConversions, Time)
   // Gazebo to rclcpp
   gazebo::common::Time time(200, 100);
   auto rostime = gazebo_ros::Convert<rclcpp::Time>(time);
-  builtin_interfaces::msg::Time tmp(rostime);
-  EXPECT_EQ(200, tmp.sec);
-  EXPECT_EQ(100u, tmp.nanosec);
+  EXPECT_EQ(200E9 + 100u, rostime.nanoseconds());
+
   /// Gazebo to ros message
   auto time_msg = gazebo_ros::Convert<builtin_interfaces::msg::Time>(time);
   EXPECT_EQ(200, time_msg.sec);

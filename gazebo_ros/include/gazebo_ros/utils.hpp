@@ -24,7 +24,9 @@ namespace gazebo_ros
 
 /// Get the variance of a gazebo sensor noise model
 /// \param[in] _noise The gazebo noise model
-/// \return The square of the standard deviation if the model is gaussian, otherwise 0
+/// \return If the model is Gaussian, return the square of the standard deviation.
+///         If the model is no noise, return 0.
+///         If the model is custom, return -1
 double NoiseVariance(const gazebo::sensors::Noise & _noise);
 
 /// Gets the base name of a gazebo scoped name
