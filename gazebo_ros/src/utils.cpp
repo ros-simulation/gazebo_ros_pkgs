@@ -25,8 +25,10 @@ double NoiseVariance(const gazebo::sensors::Noise & _noise)
   if (gazebo::sensors::Noise::NoiseType::GAUSSIAN == _noise.GetNoiseType()) {
     auto gm = dynamic_cast<const gazebo::sensors::GaussianNoiseModel &>(_noise);
     return gm.GetStdDev() * gm.GetStdDev();
+  } else if (gazebo::sensors::Noise::NoiseType::NONE == _noise.GetNoiseType()) {
+    return 0.;
   }
-  return 0.;
+  return -1.;
 }
 
 std::string ScopedNameBase(const std::string & str)

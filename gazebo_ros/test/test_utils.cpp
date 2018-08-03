@@ -23,12 +23,18 @@ TEST(TestUtils, NoiseVariance)
   // Test no noise has 0 variance
   {
     auto noise = gazebo::sensors::Noise(gazebo::sensors::Noise::NoiseType::NONE);
-    EXPECT_EQ(0.0, gazebo_ros::NoiseVariance(noise));
+    EXPECT_EQ(0., gazebo_ros::NoiseVariance(noise));
   }
 
-  // Test gaussian noise type's variance is square of stddev
+  // Test custom noise errors with -1
   {
-    // SDF for gaussian noise model
+    auto noise = gazebo::sensors::Noise(gazebo::sensors::Noise::NoiseType::CUSTOM);
+    EXPECT_EQ(-1., gazebo_ros::NoiseVariance(noise));
+  }
+
+  // Test Gaussian noise type's variance is square of stddev
+  {
+    // SDF for Gaussian noise model
     auto stddev_description = std::make_shared<sdf::Element>();
     stddev_description->SetName("stddev");
     stddev_description->AddValue("double", "5.0", true);

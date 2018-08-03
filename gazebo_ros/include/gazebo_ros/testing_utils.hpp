@@ -29,23 +29,24 @@ namespace gazebo_ros
 {
 
 
-/// Helper class to run gzserver in a seperate process and later terminate that process
+/// Helper class to run gzserver in a separate process and later terminate that process
 class GazeboProcess
 {
 public:
-  /// Start gzserver with a list of arugments
-  /// \note The path and --verbose are automaticaly added
+  /// Start gzserver with a list of arguments
+  /// \note The path and --verbose are automatically added
   explicit GazeboProcess(const std::vector<const char *> & args);
 
+  /// Destructor
   ~GazeboProcess();
 
-  /// Start gzserver with the arguments passed to constructuor
+  /// Start gzserver with the arguments passed to constructor
   /// \return The result of fork(), either the pid of gazebo process or error if < 0
-  int run();
+  int Run();
 
-  /// Terminate the child gzserve process
+  /// Terminate the child gzserver process
   /// \return -1 if run() failed or has not been called,
-  int terminate();
+  int Terminate();
 
 private:
   /// Arguments to run gzserver with
@@ -64,10 +65,10 @@ GazeboProcess::GazeboProcess(const std::vector<const char *> & args)
 
 GazeboProcess::~GazeboProcess()
 {
-  terminate();
+  Terminate();
 }
 
-int GazeboProcess::run()
+int GazeboProcess::Run()
 {
   // Fork process so gazebo can be run as child
   pid_ = fork();
@@ -76,7 +77,7 @@ int GazeboProcess::run()
   if (0 == pid_) {
     // Run gazebo with arguments
     if (execvp("gzserver", const_cast<char **>(arguments.data()))) {
-      // Exec failed, cannot return (in seperate process), so just print errno
+      // Exec failed, cannot return (in separate process), so just print errno
       printf("gzserver failed with errno=%d", errno);
       exit(1);
     }
@@ -90,7 +91,7 @@ int GazeboProcess::run()
   return pid_;
 }
 
-int GazeboProcess::terminate()
+int GazeboProcess::Terminate()
 {
   // Return -1
   if (pid_ < 0) {
@@ -132,7 +133,6 @@ get_message_or_timeout(
 
   auto sub = node->create_subscription<T>(topic,
       [&msg_received, &msg](typename T::SharedPtr _msg) {
-        (void) msg;
         // If this is the first message from this topic, increment the counter
         if (!msg_received.exchange(true)) {
           msg = _msg;
@@ -142,6 +142,7 @@ get_message_or_timeout(
   // Wait until message is received or timeout occurs
   using namespace std::literals::chrono_literals; // NOLINT
   auto timeout_absolute = clock.now() + timeout;
+
   while (false == msg_received && clock.now() < timeout_absolute) {
     executor.spin_once(200ms);
   }

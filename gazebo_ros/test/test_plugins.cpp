@@ -44,57 +44,26 @@ protected:
 void TestPlugins::SetUp()
 {
   gazebo_process_ = std::make_unique<gazebo_ros::GazeboProcess>(GetParam().args);
-  ASSERT_GT(gazebo_process_->run(), 0);
+  ASSERT_GT(gazebo_process_->Run(), 0);
 }
 
 void TestPlugins::TearDown()
 {
-  ASSERT_GE(gazebo_process_->terminate(), 0);
+  ASSERT_GE(gazebo_process_->Terminate(), 0);
   gazebo_process_.reset();
 }
 
 TEST_P(TestPlugins, TestTopicsReceived)
 {
   auto topics = GetParam().topics;
-  // Create node and executor
-  rclcpp::executors::SingleThreadedExecutor executor;
   auto node = std::make_shared<rclcpp::Node>("my_node");
-  executor.add_node(node);
-
-
-  // Subscribe to topics published by plugin
-  using StringPtr = std_msgs::msg::String::SharedPtr;
-
-  // Track which topics we have received a message from
-  size_t topics_received_from = 0;
-  std::vector<bool> received(topics.size(), false);
-
-  std::vector<std::shared_ptr<rclcpp::Subscription<std_msgs::msg::String>>> subs;
-  for (size_t i = 0; i < topics.size(); ++i) {
-    subs.push_back(node->create_subscription<std_msgs::msg::String>(topics[i],
-      [&topics_received_from, &received, i](const StringPtr msg) {
-        (void) msg;
-        // If this is the first message from this topic, increment the counter
-        if (!received[i]) {
-          received[i] = true;
-          ++topics_received_from;
-        }
-      }));
+  for (auto topic : topics) {
+    auto msg = gazebo_ros::get_message_or_timeout<std_msgs::msg::String>(node, topic);
+    EXPECT_NE(msg, nullptr);
   }
 
-  // Wait until message is received or timeout occurs
   using namespace std::literals::chrono_literals;
-  auto timeout = node->now() + rclcpp::Duration(15s);
-
-  while (topics_received_from != topics.size() && node->now() < timeout) {
-    executor.spin_once(200ms);
-  }
-
-  // Wait a little while so gazebo isn't torn down before created
   rclcpp::sleep_for(1s);
-
-  // Assert a message was received
-  EXPECT_EQ(topics_received_from, topics.size());
 }
 
 INSTANTIATE_TEST_CASE_P(Plugins, TestPlugins, ::testing::Values(

@@ -72,7 +72,7 @@ geometry_msgs::msg::Vector3 Convert(const ignition::math::Vector3d & vec)
   return msg;
 }
 
-/// Generic conversion from an Ignition Math Quaternion to another type.
+/// Generic conversion from an Ignition Math quaternion to another type.
 /// \param[in] in Input vector.
 /// \return Conversion result
 /// \tparam OUT Output type
@@ -83,7 +83,7 @@ OUT Convert(const ignition::math::Quaterniond & in)
 }
 
 /// \brief Specialized conversion from an Ignition Math Quaternion to a ROS message.
-/// \param[in] vec Ignition Quaternion to convert.
+/// \param[in] in Ignition Quaternion to convert.
 /// \return ROS geometry quaternion message
 template<>
 geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
