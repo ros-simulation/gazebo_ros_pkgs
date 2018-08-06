@@ -125,6 +125,10 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   if (this->sdf->HasElement("imageTopicName"))
     this->image_topic_name_ = this->sdf->Get<std::string>("imageTopicName");
 
+  this->trigger_topic_name_ = "image_trigger";
+  if (this->sdf->HasElement("triggerTopicName"))
+    this->trigger_topic_name_ = this->sdf->Get<std::string>("triggerTopicName");
+
   this->camera_info_topic_name_ = "camera_info";
   if (this->sdf->HasElement("cameraInfoTopicName"))
     this->camera_info_topic_name_ =
@@ -346,7 +350,32 @@ void GazeboRosCameraUtils::LoadThread()
   this->cameraUpdateRateSubscriber_ = this->rosnode_->subscribe(rate_so);
   */
 
+  if (this->CanTriggerCamera())
+  {
+    ros::SubscribeOptions trigger_so =
+      ros::SubscribeOptions::create<std_msgs::Empty>(
+          this->trigger_topic_name_, 1,
+          boost::bind(&GazeboRosCameraUtils::TriggerCameraInternal, this, _1),
+          ros::VoidPtr(), &this->camera_queue_);
+    this->trigger_subscriber_ = this->rosnode_->subscribe(trigger_so);
+  }
+
   this->Init();
+}
+
+void GazeboRosCameraUtils::TriggerCamera()
+{
+}
+
+bool GazeboRosCameraUtils::CanTriggerCamera()
+{
+  return false;
+}
+
+void GazeboRosCameraUtils::TriggerCameraInternal(
+    const std_msgs::Empty::ConstPtr &dummy)
+{
+  TriggerCamera();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -406,20 +435,30 @@ void GazeboRosCameraUtils::Init()
     this->update_period_ = 0.0;
 
   // set buffer size
-  if (this->format_ == "L8")
+  if (this->format_ == "L8" || this->format_ == "L_INT8")
   {
     this->type_ = sensor_msgs::image_encodings::MONO8;
     this->skip_ = 1;
   }
-  else if (this->format_ == "R8G8B8")
+  else if (this->format_ == "L16" || this->format_ == "L_INT16")
+  {
+    this->type_ = sensor_msgs::image_encodings::MONO16;
+    this->skip_ = 2;
+  }
+  else if (this->format_ == "R8G8B8" || this->format_ == "RGB_INT8")
   {
     this->type_ = sensor_msgs::image_encodings::RGB8;
     this->skip_ = 3;
   }
-  else if (this->format_ == "B8G8R8")
+  else if (this->format_ == "B8G8R8" || this->format_ == "BGR_INT8")
   {
     this->type_ = sensor_msgs::image_encodings::BGR8;
     this->skip_ = 3;
+  }
+  else if (this->format_ == "R16G16B16" ||  this->format_ == "RGB_INT16")
+  {
+    this->type_ = sensor_msgs::image_encodings::RGB16;
+    this->skip_ = 6;
   }
   else if (this->format_ == "BAYER_RGGB8")
   {

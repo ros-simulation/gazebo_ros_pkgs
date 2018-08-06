@@ -390,6 +390,10 @@ void GazeboRosJointTrajectory::UpdateStates()
               this->joints_[i]->SetPosition(0,
                 this->points_[this->trajectory_index].positions[i], true);
 #else
+              ROS_WARN_ONCE("The joint_trajectory plugin is using the Joint::SetPosition method without preserving the link velocity.");
+              ROS_WARN_ONCE("As a result, gravity will not be simulated correctly for your model.");
+              ROS_WARN_ONCE("Please upgrade to Gazebo 9.");
+              ROS_WARN_ONCE("For details, see https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612");
               this->joints_[i]->SetPosition(0,
                 this->points_[this->trajectory_index].positions[i]);
 #endif

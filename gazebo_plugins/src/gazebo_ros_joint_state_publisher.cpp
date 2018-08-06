@@ -112,7 +112,14 @@ void GazeboRosJointStatePublisher::OnUpdate ( const common::UpdateInfo & _info )
 #else
     common::Time current_time = this->world_->GetSimTime();
 #endif
+    if (current_time < last_update_time_)
+    {
+        ROS_WARN_NAMED("joint_state_publisher", "Negative joint state update time difference detected.");
+        last_update_time_ = current_time;
+    }
+
     double seconds_since_last_update = ( current_time - last_update_time_ ).Double();
+
     if ( seconds_since_last_update > update_period_ ) {
 
         publishJointStates();
