@@ -22,14 +22,17 @@ TEST(TestUtils, NoiseVariance)
 {
   // Test no noise has 0 variance
   {
-    auto noise = gazebo::sensors::Noise(gazebo::sensors::Noise::NoiseType::NONE);
+    auto noise = std::make_shared<gazebo::sensors::Noise>(gazebo::sensors::Noise::NoiseType::NONE);
     EXPECT_EQ(0., gazebo_ros::NoiseVariance(noise));
+    EXPECT_EQ(0., gazebo_ros::NoiseVariance(*noise));
   }
 
   // Test custom noise errors with -1
   {
-    auto noise = gazebo::sensors::Noise(gazebo::sensors::Noise::NoiseType::CUSTOM);
+    auto noise =
+      std::make_shared<gazebo::sensors::Noise>(gazebo::sensors::Noise::NoiseType::CUSTOM);
     EXPECT_EQ(-1., gazebo_ros::NoiseVariance(noise));
+    EXPECT_EQ(-1., gazebo_ros::NoiseVariance(*noise));
   }
 
   // Test Gaussian noise type's variance is square of stddev
@@ -43,10 +46,17 @@ TEST(TestUtils, NoiseVariance)
     noise_element->AddElementDescription(stddev_description);
 
     // Create noise with sdf
-    auto noise = gazebo::sensors::GaussianNoiseModel();
-    noise.Load(noise_element);
+    auto noise = std::make_shared<gazebo::sensors::GaussianNoiseModel>();
+    noise->Load(noise_element);
 
     EXPECT_EQ(25.0, gazebo_ros::NoiseVariance(noise));
+    EXPECT_EQ(25.0, gazebo_ros::NoiseVariance(*noise));
+  }
+
+  {
+    // Test nullptr noise
+    gazebo::sensors::NoisePtr noise = nullptr;
+    EXPECT_EQ(0., gazebo_ros::NoiseVariance(noise));
   }
 }
 
