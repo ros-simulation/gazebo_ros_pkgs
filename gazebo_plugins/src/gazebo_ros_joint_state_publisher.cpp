@@ -151,7 +151,7 @@ void GazeboRosJointStatePublisher::OnUpdate(const gazebo::common::UpdateInfo & i
     return;
   }
 
-  // Pupolate message
+  // Populate message
   sensor_msgs::msg::JointState joint_state;
 
   joint_state.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);

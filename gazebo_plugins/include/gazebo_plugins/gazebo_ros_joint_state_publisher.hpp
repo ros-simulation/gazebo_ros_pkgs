@@ -43,6 +43,8 @@ class GazeboRosJointStatePublisherPrivate;
 
 /// Publish the state of joints in simulation to a given ROS topic.
 /**
+  \details If the joint contains more than one axis, only the state of the first axis is reported.
+
   Example Usage:
   \code{.xml}
     <plugin name="gazebo_ros_joint_state_publisher"

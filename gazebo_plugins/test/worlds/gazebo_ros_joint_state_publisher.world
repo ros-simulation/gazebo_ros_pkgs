@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name='revoluter'>
+      <pose>0.5 0.5 0.5 0 0 0</pose>
+
+      <link name='base'>
+        <pose>0 0 0 0 -0 0</pose>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>0.5 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.5 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+
+      <link name='needle'>
+        <pose>0.25 0 -0.2 0 -0 0</pose>
+        <visual name='visual'>
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </visual>
+
+        <collision name='collision'>
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </collision>
+      </link>
+
+      <joint name='hinge' type='revolute'>
+        <parent>base</parent>
+        <child>needle</child>
+
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>1 0 0</xyz>
+        </axis>
+      </joint>
+
+      <joint name ='fix' type='fixed'>
+        <parent>world</parent>
+        <child>base</child>
+      </joint>
+
+      <plugin name="gazebo_ros_joint_state_publisher"
+          filename="libgazebo_ros_joint_state_publisher.so">
+        <ros>
+          <node_name>joint_state_publisher_test_node</node_name>
+          <namespace>/test</namespace>
+          <argument>joint_states:=joint_states_test</argument>
+        </ros>
+        <update_rate>100</update_rate>
+        <joint_name>hinge</joint_name>
+      </plugin>
+
+    </model>
+  </world>
+</sdf>
