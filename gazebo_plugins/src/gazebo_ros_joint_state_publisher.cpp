@@ -1,0 +1,172 @@
+// Copyright (c) 2013, Markus Bader <markus.bader@tuwien.ac.at>
+//  All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//     // Redistributions of source code must retain the above copyright
+//      notice, this list of conditions and the following disclaimer.
+//     // Redistributions in binary form must reproduce the above copyright
+//      notice, this list of conditions and the following disclaimer in the
+//      documentation and/or other materials provided with the distribution.
+//     // Neither the name of the <organization> nor the
+//      names of its contributors may be used to endorse or promote products
+//      derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY Antons Rebguns <email> ''AS IS'' AND ANY
+//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+//  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//  DISCLAIMED. IN NO EVENT SHALL Antons Rebguns <email> BE LIABLE FOR ANY
+//  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+//  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+//  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#include <gazebo/common/Events.hh>
+#include <gazebo/common/Time.hh>
+#include <gazebo/physics/Joint.hh>
+#include <gazebo/physics/Model.hh>
+#include <gazebo/physics/World.hh>
+#include <gazebo_plugins/gazebo_ros_joint_state_publisher.hpp>
+#include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/node.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace gazebo_plugins
+{
+class GazeboRosJointStatePublisherPrivate
+{
+public:
+  /// A pointer to the GazeboROS node.
+  gazebo_ros::Node::SharedPtr ros_node_;
+
+  /// Joint state publisher.
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_;
+
+  /// Joints being tracked.
+  std::vector<gazebo::physics::JointPtr> joints_;
+
+  /// Period in seconds
+  double update_period_;
+
+  /// Keep last time an update was published
+  gazebo::common::Time last_update_time_;
+
+  /// Pointer to the update event connection.
+  gazebo::event::ConnectionPtr update_connection_;
+};
+
+GazeboRosJointStatePublisher::GazeboRosJointStatePublisher()
+: impl_(std::make_unique<GazeboRosJointStatePublisherPrivate>())
+{
+}
+
+GazeboRosJointStatePublisher::~GazeboRosJointStatePublisher()
+{
+}
+
+void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
+{
+  auto logger = rclcpp::get_logger("gazebo_ros_force");
+
+  // Joints
+  if (!sdf->HasElement("joint_name")) {
+    RCLCPP_ERROR(logger, "Plugin missing <joint_name>s");
+    return;
+  }
+
+  sdf::ElementPtr joint_elem = sdf->GetElement("joint_name");
+  while (joint_elem) {
+    auto joint_name = joint_elem->Get<std::string>();
+
+    auto joint = model->GetJoint(joint_name);
+    if (!joint) {
+      RCLCPP_ERROR(logger, "Joint %s does not exist!", joint_name.c_str());
+    } else {
+      impl_->joints_.push_back(joint);
+      RCLCPP_INFO(logger, "Going to publish joint [%s]", joint_name.c_str() );
+    }
+
+    joint_elem = joint_elem->GetNextElement("joint_name");
+  }
+
+  if (impl_->joints_.empty()) {
+    RCLCPP_ERROR(logger, "No joints found.");
+    return;
+  }
+
+  // Update rate
+  double update_rate = 100.0;
+  if (!sdf->HasElement("update_rate")) {
+    RCLCPP_INFO(logger, "Missing <update_rate>, defaults to %f", update_rate);
+  } else {
+    update_rate = sdf->GetElement("update_rate")->Get<double>();
+  }
+
+  if (update_rate > 0.0) {
+    impl_->update_period_ = 1.0 / update_rate;
+  } else {
+    impl_->update_period_ = 0.0;
+  }
+
+  impl_->last_update_time_ = model->GetWorld()->SimTime();
+
+  // Joint state publisher
+  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_joint_state_publisher", sdf);
+  impl_->joint_state_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>(
+    "joint_states", 1000);
+
+  // Callback on every iteration
+  impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+    std::bind(&GazeboRosJointStatePublisher::OnUpdate, this, std::placeholders::_1));
+}
+
+void GazeboRosJointStatePublisher::OnUpdate(const gazebo::common::UpdateInfo & info)
+{
+  gazebo::common::Time current_time = info.simTime;
+
+  // If the world is reset, for example
+  if (current_time < impl_->last_update_time_) {
+    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Negative sim time difference detected.");
+    impl_->last_update_time_ = current_time;
+  }
+
+  // Check period
+  double seconds_since_last_update = (current_time - impl_->last_update_time_).Double();
+
+  if (seconds_since_last_update < impl_->update_period_) {
+    return;
+  }
+
+  // Pupolate message
+  sensor_msgs::msg::JointState joint_state;
+
+  joint_state.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
+  joint_state.name.resize(impl_->joints_.size());
+  joint_state.position.resize(impl_->joints_.size());
+  joint_state.velocity.resize(impl_->joints_.size());
+
+  for (unsigned int i = 0; i < impl_->joints_.size(); ++i) {
+    auto joint = impl_->joints_[i];
+    double velocity = joint->GetVelocity(0);
+    double position = joint->Position(0);
+    joint_state.name[i] = joint->GetName();
+    joint_state.position[i] = position;
+    joint_state.velocity[i] = velocity;
+  }
+
+  // Publish
+  impl_->joint_state_pub_->publish(joint_state);
+
+  // Update time
+  impl_->last_update_time_ = current_time;
+}
+
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosJointStatePublisher)
+}  // namespace gazebo_plugins

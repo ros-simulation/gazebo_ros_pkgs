@@ -15,14 +15,13 @@
 #ifndef GAZEBO_ROS__CONVERSIONS_HPP_
 #define GAZEBO_ROS__CONVERSIONS_HPP_
 
-#include <geometry_msgs/msg/vector3.hpp>
-#include <geometry_msgs/msg/quaternion.hpp>
 #include <builtin_interfaces/msg/time.hpp>
+#include <gazebo/common/Time.hh>
+#include <geometry_msgs/msg/quaternion.hpp>
+#include <geometry_msgs/msg/vector3.hpp>
+#include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
-#include <gazebo/common/common.hh>
 #include <rclcpp/time.hpp>
-
-#include <string>
 
 namespace gazebo_ros
 {
