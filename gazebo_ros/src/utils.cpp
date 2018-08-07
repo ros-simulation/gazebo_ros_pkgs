@@ -31,6 +31,12 @@ double NoiseVariance(const gazebo::sensors::Noise & _noise)
   return -1.;
 }
 
+double NoiseVariance(const gazebo::sensors::NoisePtr & _noise_ptr)
+{
+  if (!_noise_ptr) {return 0.;}
+  return NoiseVariance(*_noise_ptr);
+}
+
 std::string ScopedNameBase(const std::string & str)
 {
   // Get index of last :: scope marker

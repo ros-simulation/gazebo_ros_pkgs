@@ -25,9 +25,15 @@ namespace gazebo_ros
 /// Get the variance of a gazebo sensor noise model
 /// \param[in] _noise The gazebo noise model
 /// \return If the model is Gaussian, return the square of the standard deviation.
-///         If the model is no noise, return 0.
-///         If the model is custom, return -1
+/// \return If the model is no noise, return 0.
+/// \return If the model is custom, return -1
 double NoiseVariance(const gazebo::sensors::Noise & _noise);
+
+/// Get the variance of a gazebo sensor noise model
+/// \param[in] _noise_ptr Shared pointer to the gazebo noise model
+/// \return If the pointer is nullptr, return 0.
+/// \return Otherwise, returns the same as @ref NoiseVariance(const gazebo::sensors::Noise &).
+double NoiseVariance(const gazebo::sensors::NoisePtr & _noise_ptr);
 
 /// Gets the base name of a gazebo scoped name
 /// \details Example: given "my_world::my_robot::my_link", returns "my_link"
