@@ -73,7 +73,7 @@ geometry_msgs::msg::Vector3 Convert(const ignition::math::Vector3d & vec)
 }
 
 /// Generic conversion from an Ignition Math quaternion to another type.
-/// \param[in] in Input vector.
+/// \param[in] in Input quaternion
 /// \return Conversion result
 /// \tparam OUT Output type
 template<class OUT>
@@ -94,6 +94,25 @@ geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
   msg.z = in.Z();
   msg.w = in.W();
   return msg;
+}
+
+/// Generic conversion from a ROS Quaternion message to another type
+/// \param[in] in Input quaternion
+/// \return Conversion result
+/// \tparam OUT Output type
+template<class OUT>
+OUT Convert(const geometry_msgs::msg::Quaternion & in)
+{
+  return OUT();
+}
+
+/// \brief Specialized conversion from a ROS quaternion message to ignition quaternion
+/// \param[in] in Input quaternion message
+/// \return Ignition math quaternion with same values as the input message
+template<>
+ignition::math::Quaterniond Convert(const geometry_msgs::msg::Quaternion & in)
+{
+  return ignition::math::Quaterniond(in.w, in.x, in.y, in.z);
 }
 
 /// Generic conversion from an Gazebo Time object to another type.

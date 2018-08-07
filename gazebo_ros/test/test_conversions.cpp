@@ -39,6 +39,12 @@ TEST(TestConversions, Quaternion)
   EXPECT_EQ(0.4, quat_msg.y);
   EXPECT_EQ(0.6, quat_msg.z);
   EXPECT_EQ(1.0, quat_msg.w);
+
+  auto ign_quat = gazebo_ros::Convert<ignition::math::Quaterniond>(quat_msg);
+  EXPECT_EQ(0.2, ign_quat.X());
+  EXPECT_EQ(0.4, ign_quat.Y());
+  EXPECT_EQ(0.6, ign_quat.Z());
+  EXPECT_EQ(1.0, ign_quat.W());
 }
 
 TEST(TestConversions, Time)
