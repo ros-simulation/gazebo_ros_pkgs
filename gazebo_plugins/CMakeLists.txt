@@ -59,6 +59,17 @@ ament_target_dependencies(gazebo_ros_template
 )
 ament_export_libraries(gazebo_ros_template)
 
+add_library(gazebo_ros_imu_sensor SHARED
+  src/gazebo_ros_imu_sensor.cpp
+)
+ament_target_dependencies(gazebo_ros_imu_sensor
+  "gazebo_ros"
+  "sensor_msgs"
+  "gazebo_dev"
+)
+ament_export_libraries(gazebo_ros_imu_sensor)
+
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
@@ -75,11 +86,11 @@ ament_package()
 install(DIRECTORY include/
         DESTINATION include)
 
-install(
-  TARGETS
+install(TARGETS
     gazebo_ros_force
     gazebo_ros_joint_state_publisher
     gazebo_ros_template
+    gazebo_ros_imu_sensor
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)

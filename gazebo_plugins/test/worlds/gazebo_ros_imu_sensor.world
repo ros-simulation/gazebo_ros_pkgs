@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="gazebo_ros_imu_sensor_world">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="box">
+      <pose>0 0 0.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+        <sensor name="my_imu" type="imu">
+          <always_on>true</always_on>
+          <update_rate>30</update_rate>
+          <imu>
+          </imu>
+          <plugin name="my_imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+            <ros>
+              <namespace>/imu</namespace>
+              <argument>~/out:=data</argument>
+            </ros>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>
