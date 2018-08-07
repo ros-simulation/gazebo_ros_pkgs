@@ -86,13 +86,10 @@ public:
 
 protected:
   // Documentation inherited
-  void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf);
+  void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
 
 private:
   /// Callback to be called at every simulation iteration.
-  /// \param[in] info Updated simulation info.
-  void OnUpdate(const gazebo::common::UpdateInfo & info);
-
   /// Private data pointer
   std::unique_ptr<GazeboRosJointStatePublisherPrivate> impl_;
 };

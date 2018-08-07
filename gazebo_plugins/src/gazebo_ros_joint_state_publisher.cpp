@@ -50,6 +50,10 @@ namespace gazebo_plugins
 class GazeboRosJointStatePublisherPrivate
 {
 public:
+  /// Callback to be called at every simulation iteration.
+  /// \param[in] info Updated simulation info.
+  void OnUpdate(const gazebo::common::UpdateInfo & info);
+
   /// A pointer to the GazeboROS node.
   gazebo_ros::Node::SharedPtr ros_node_;
 
@@ -131,23 +135,23 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
 
   // Callback on every iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboRosJointStatePublisher::OnUpdate, this, std::placeholders::_1));
+    std::bind(&GazeboRosJointStatePublisherPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
 }
 
-void GazeboRosJointStatePublisher::OnUpdate(const gazebo::common::UpdateInfo & info)
+void GazeboRosJointStatePublisherPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
 {
   gazebo::common::Time current_time = info.simTime;
 
   // If the world is reset, for example
-  if (current_time < impl_->last_update_time_) {
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Negative sim time difference detected.");
-    impl_->last_update_time_ = current_time;
+  if (current_time < last_update_time_) {
+    RCLCPP_INFO(ros_node_->get_logger(), "Negative sim time difference detected.");
+    last_update_time_ = current_time;
   }
 
   // Check period
-  double seconds_since_last_update = (current_time - impl_->last_update_time_).Double();
+  double seconds_since_last_update = (current_time - last_update_time_).Double();
 
-  if (seconds_since_last_update < impl_->update_period_) {
+  if (seconds_since_last_update < update_period_) {
     return;
   }
 
@@ -155,12 +159,12 @@ void GazeboRosJointStatePublisher::OnUpdate(const gazebo::common::UpdateInfo & i
   sensor_msgs::msg::JointState joint_state;
 
   joint_state.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
-  joint_state.name.resize(impl_->joints_.size());
-  joint_state.position.resize(impl_->joints_.size());
-  joint_state.velocity.resize(impl_->joints_.size());
+  joint_state.name.resize(joints_.size());
+  joint_state.position.resize(joints_.size());
+  joint_state.velocity.resize(joints_.size());
 
-  for (unsigned int i = 0; i < impl_->joints_.size(); ++i) {
-    auto joint = impl_->joints_[i];
+  for (unsigned int i = 0; i < joints_.size(); ++i) {
+    auto joint = joints_[i];
     double velocity = joint->GetVelocity(0);
     double position = joint->Position(0);
     joint_state.name[i] = joint->GetName();
@@ -169,10 +173,10 @@ void GazeboRosJointStatePublisher::OnUpdate(const gazebo::common::UpdateInfo & i
   }
 
   // Publish
-  impl_->joint_state_pub_->publish(joint_state);
+  joint_state_pub_->publish(joint_state);
 
   // Update time
-  impl_->last_update_time_ = current_time;
+  last_update_time_ = current_time;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosJointStatePublisher)
