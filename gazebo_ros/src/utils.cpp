@@ -49,4 +49,15 @@ std::string ScopedNameBase(const std::string & str)
   return str.substr(idx + 2);
 }
 
+std::string SensorFrameID(const gazebo::sensors::Sensor & _sensor, const sdf::Element & _sdf)
+{
+  // Return frame from sdf tag if present
+  if (_sdf.HasElement("frame_name")) {
+    return _sdf.Get<std::string>("frame_name");
+  }
+
+  // Otherwise return the unscoped parent link name
+  return gazebo_ros::ScopedNameBase(_sensor.ParentName());
+}
+
 }  // namespace gazebo_ros
