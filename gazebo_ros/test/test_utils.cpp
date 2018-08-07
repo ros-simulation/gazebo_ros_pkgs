@@ -14,9 +14,11 @@
 
 #include <gazebo_ros/utils.hpp>
 #include <gazebo/sensors/GaussianNoiseModel.hh>
+#include <gazebo/sensors/sensors.hh>
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <string>
 
 TEST(TestUtils, NoiseVariance)
 {
@@ -66,6 +68,28 @@ TEST(TestUtils, ScopedNameBase)
   EXPECT_EQ(gazebo_ros::ScopedNameBase("base"), "base");
   EXPECT_EQ(gazebo_ros::ScopedNameBase(""), "");
   EXPECT_EQ(gazebo_ros::ScopedNameBase("fdfd::"), "fdfd::");
+}
+
+TEST(TestUtils, SensorFrameID)
+{
+  {
+    auto stddev_description = std::make_shared<sdf::Element>();
+    stddev_description->SetName("frame_name");
+    stddev_description->AddValue("string", "", false);
+    auto noise_element = std::make_shared<sdf::Element>();
+    noise_element->SetName("noise");
+    noise_element->AddElementDescription(stddev_description);
+    noise_element->GetElement("frame_name")->Set<std::string>("foo");
+    gazebo::sensors::CameraSensor s;
+    EXPECT_EQ(gazebo_ros::SensorFrameID(s, *noise_element), "foo");
+  }
+
+  {
+    sdf::Element sdf;
+    gazebo::sensors::CameraSensor s;
+    s.SetParent("world::my_robot::link", 0);
+    EXPECT_EQ(gazebo_ros::SensorFrameID(s, sdf), "link");
+  }
 }
 
 int main(int argc, char ** argv)
