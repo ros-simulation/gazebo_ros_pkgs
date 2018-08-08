@@ -7,8 +7,7 @@
     Provides a cmake config for the default version of Gazebo for the ROS distribution.
   </description>
 
-  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+  <maintainer email="jrivero@openrobotics.org">Jose Luis Rivero</maintainer>
 
   <license>Apache 2.0</license>
 
