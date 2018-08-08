@@ -84,11 +84,13 @@ GazeboRosJointStatePublisher::~GazeboRosJointStatePublisher()
 
 void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
-  auto logger = rclcpp::get_logger("gazebo_ros_force");
+  // ROS node
+  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_joint_state_publisher", sdf);
 
   // Joints
   if (!sdf->HasElement("joint_name")) {
-    RCLCPP_ERROR(logger, "Plugin missing <joint_name>s");
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Plugin missing <joint_name>s");
+    impl_->ros_node_.reset();
     return;
   }
 
@@ -98,24 +100,27 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
 
     auto joint = model->GetJoint(joint_name);
     if (!joint) {
-      RCLCPP_ERROR(logger, "Joint %s does not exist!", joint_name.c_str());
+      RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Joint %s does not exist!", joint_name.c_str());
     } else {
       impl_->joints_.push_back(joint);
-      RCLCPP_INFO(logger, "Going to publish joint [%s]", joint_name.c_str() );
+      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Going to publish joint [%s]",
+        joint_name.c_str() );
     }
 
     joint_elem = joint_elem->GetNextElement("joint_name");
   }
 
   if (impl_->joints_.empty()) {
-    RCLCPP_ERROR(logger, "No joints found.");
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(), "No joints found.");
+    impl_->ros_node_.reset();
     return;
   }
 
   // Update rate
   double update_rate = 100.0;
   if (!sdf->HasElement("update_rate")) {
-    RCLCPP_INFO(logger, "Missing <update_rate>, defaults to %f", update_rate);
+    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Missing <update_rate>, defaults to %f",
+      update_rate);
   } else {
     update_rate = sdf->GetElement("update_rate")->Get<double>();
   }
@@ -129,7 +134,6 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
   impl_->last_update_time_ = model->GetWorld()->SimTime();
 
   // Joint state publisher
-  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_joint_state_publisher", sdf);
   impl_->joint_state_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>(
     "joint_states", 1000);
 
