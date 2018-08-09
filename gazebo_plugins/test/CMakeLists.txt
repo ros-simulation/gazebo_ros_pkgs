@@ -6,6 +6,7 @@ file(COPY worlds DESTINATION .)
 # Tests
 set(tests
   test_gazebo_ros_force
+  test_gazebo_ros_joint_state_publisher
 )
 
 foreach(test ${tests})
@@ -21,10 +22,11 @@ foreach(test ${tests})
     gazebo_test_fixture
   )
   ament_target_dependencies(${test}
-    "rclcpp"
     "gazebo_dev"
     "gazebo_ros"
     "geometry_msgs"
+    "rclcpp"
+    "sensor_msgs"
   )
 endforeach()
 

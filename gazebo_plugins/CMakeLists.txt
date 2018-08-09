@@ -16,21 +16,35 @@ find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 include_directories(include
   ${gazebo_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${sensor_msgs_INCLUDE_DIRS}
 )
+
+# gazebo_ros_joint_state_publisher
+add_library(gazebo_ros_joint_state_publisher SHARED
+  src/gazebo_ros_joint_state_publisher.cpp
+)
+ament_target_dependencies(gazebo_ros_joint_state_publisher
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "sensor_msgs"
+)
+ament_export_libraries(gazebo_ros_force)
 
 # gazebo_ros_force
 add_library(gazebo_ros_force SHARED
   src/gazebo_ros_force.cpp
 )
 ament_target_dependencies(gazebo_ros_force
-  "rclcpp"
   "gazebo_dev"
   "gazebo_ros"
   "geometry_msgs"
+  "rclcpp"
 )
 ament_export_libraries(gazebo_ros_force)
 
@@ -39,9 +53,9 @@ add_library(gazebo_ros_template SHARED
   src/gazebo_ros_template.cpp
 )
 ament_target_dependencies(gazebo_ros_template
-  "rclcpp"
   "gazebo_dev"
   "gazebo_ros"
+  "rclcpp"
 )
 ament_export_libraries(gazebo_ros_template)
 
@@ -64,6 +78,7 @@ install(DIRECTORY include/
 install(
   TARGETS
     gazebo_ros_force
+    gazebo_ros_joint_state_publisher
     gazebo_ros_template
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
