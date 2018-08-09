@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Gazebo ROS Ray Sensor plugin demo
+  To run:
+  gzserver gazebo_ros_ray_sensor_demo.world
+  Then open RVIZ:
+  ros2 run rviz2 rviz2
+  And add the topic /ray/pointcloud2
+-->
+<sdf version="1.6">
+  <world name="ray_sensor_demo">
+    <gravity>0 0 0</gravity>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="ray_sensor_box">
+      <pose>-1.5 0.0 0.0 0.0 0.0 0.0</pose>
+      <link name="ray_link">
+        <visual name="visual_box">
+          <geometry>
+            <box>
+              <size>0.05 0.05 0.05</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="collision_box">
+          <geometry>
+            <box>
+              <size>0.05 0.05 0.05</size>
+            </box>
+          </geometry>
+          <laser_retro>100.0</laser_retro>
+        </collision>
+        <sensor name="sensor_ray" type="ray">
+          <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>300</samples>
+                <resolution>1.0</resolution>
+                <min_angle>-0.5236</min_angle>
+                <max_angle>0.5236</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>100</samples>
+                <resolution>1.0</resolution>
+                <min_angle>-0.5236</min_angle>
+                <max_angle>0.5236</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>0.05</min>
+              <max>50.0</max>
+            </range>
+          </ray>
+          <always_on>true</always_on>
+          <update_rate>1.0</update_rate>
+          <plugin name="pc2" filename="libgazebo_ros_ray_sensor.so">
+            <ros>
+              <node_name>pc2</node_name>
+              <namespace>/ray</namespace>
+              <argument>~/out:=pointcloud2</argument>
+            </ros>
+            <output_type>sensor_msgs/PointCloud2</output_type>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+    <model name="box">
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.25 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.1 0.25 0.5</size>
+            </box>
+          </geometry>
+          <laser_retro>100.0</laser_retro>
+        </collision>
+      </link>
+    </model>
+    <model name="sphere">
+      <pose>0.5 0.5 0.0 0.0 0.0 0.0</pose>
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+          <laser_retro>80.0</laser_retro>
+        </collision>
+      </link>
+    </model>
+    <model name="cylinder">
+      <pose>0.5 -0.5 0.0 0.0 0.0 0.0</pose>
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <laser_retro>60.0</laser_retro>
+        </collision>
+      </link>
+    </model>
+  </world>
+</sdf>
+
+
+

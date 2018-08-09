@@ -89,13 +89,8 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   // Create rosnode configured from sdf
   impl_->rosnode_ = gazebo_ros::Node::Create("gazebo_ray_sensor", _sdf);
 
-  // Get tf frame form sdf if provided
-  if (!_sdf->HasElement("frame_name")) {
-    // Frame defaults to link of parent
-    impl_->frame_name_ = gazebo_ros::ScopedNameBase(_sensor->ParentName());
-  } else {
-    impl_->frame_name_ = _sdf->Get<std::string>("frame_name");
-  }
+  // Get tf frame for output
+  impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf)
 
   // Get output type from sdf if provided
   if (!_sdf->HasElement("output_type")) {
