@@ -67,7 +67,7 @@ class GazeboRosRaySensorPrivate;
 
   Example SDF:
   \code{.xml}
-    <plugin name="my_ray_senor_plugin" filename="libgazebo_ros_ray_sensor.so">
+    <plugin name="my_ray_sensor_plugin" filename="libgazebo_ros_ray_sensor.so">
       <ros>
         <!-- Configure namespace and remap to publish to /ray/pointcloud2 -->
         <namespace>/ray</namespace>
