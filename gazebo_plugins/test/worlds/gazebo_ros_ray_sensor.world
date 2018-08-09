@@ -7,7 +7,7 @@
       <uri>model://sun</uri>
     </include>
     <model name="ray_sensor_box">
-      <pose>-1.5 0.0 0.0 0.0 0.0 0.0</pose>
+      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
       <link name="ray_link">
         <visual name="visual_box">
           <geometry>
@@ -45,7 +45,7 @@
             </range>
           </ray>
           <always_on>true</always_on>
-          <update_rate>1.0</update_rate>
+          <update_rate>3.0</update_rate>
           <!-- Instance of ray plugin for each output type -->
           <plugin name="pc2" filename="libgazebo_ros_ray_sensor.so">
             <ros>
@@ -117,28 +117,8 @@
 -->
       </link>
     </model>
-    <model name="box">
-      <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
-      <link name="base_link">
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>0.1 0.25 0.5</size>
-            </box>
-          </geometry>
-        </visual>
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>0.1 0.25 0.5</size>
-            </box>
-          </geometry>
-          <laser_retro>100.0</laser_retro>
-        </collision>
-      </link>
-    </model>
     <model name="sphere">
-      <pose>0.5 0.5 0.0 0.0 0.0 0.0</pose>
+      <pose>1.0 0.0 0.0 0.0 0.0</pose>
       <link name="base_link">
         <visual name="visual">
           <geometry>
@@ -157,25 +137,83 @@
         </collision>
       </link>
     </model>
-    <model name="cylinder">
-      <pose>0.5 -0.5 0.0 0.0 0.0 0.0</pose>
+    <model name="sphere2">
+      <pose>5.0 0.9 0.0 0.0 0.0</pose>
       <link name="base_link">
         <visual name="visual">
           <geometry>
-            <cylinder>
+            <sphere>
               <radius>0.05</radius>
-              <length>0.5</length>
-            </cylinder>
+            </sphere>
           </geometry>
         </visual>
         <collision name="collision">
           <geometry>
-            <cylinder>
+            <sphere>
               <radius>0.05</radius>
-              <length>0.5</length>
-            </cylinder>
+            </sphere>
           </geometry>
-          <laser_retro>60.0</laser_retro>
+          <laser_retro>80.0</laser_retro>
+        </collision>
+      </link>
+    </model>
+    <model name="sphere3">
+      <pose>5.0 -1.2 0.0 0.0 0.0</pose>
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+          <laser_retro>80.0</laser_retro>
+        </collision>
+      </link>
+    </model>
+    <model name="sphere4">
+      <pose>3.0 -1.5 1.0 0.0 0.0</pose>
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+          <laser_retro>80.0</laser_retro>
+        </collision>
+      </link>
+    </model>
+    <model name="sphere5">
+      <pose>3.0 1.3 -0.8 0.0 0.0</pose>
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+          <laser_retro>80.0</laser_retro>
         </collision>
       </link>
     </model>

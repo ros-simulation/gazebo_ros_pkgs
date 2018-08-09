@@ -204,7 +204,7 @@ void GazeboRosRaySensorPrivate::PublishPointCloud2(ConstLaserScanStampedPtr & _m
 
 void GazeboRosRaySensorPrivate::PublishRange(ConstLaserScanStampedPtr & _msg)
 {
-  // Convert Laser scan to PointCloud2
+  // Convert Laser scan to range
   auto range_msg = gazebo_ros::Convert<sensor_msgs::msg::Range>(*_msg);
   // Set tf frame
   range_msg.header.frame_id = frame_name_;

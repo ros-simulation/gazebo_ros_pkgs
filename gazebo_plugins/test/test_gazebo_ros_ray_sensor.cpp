@@ -12,138 +12,164 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
-
-#include <gazebo_ros/testing_utils.hpp>
+#include <gazebo/common/Time.hh>
+#include <gazebo/common/Events.hh>
+#include <gazebo/test/ServerFixture.hh>
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/range.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
 #include <sensor_msgs/msg/point_cloud.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
-#include <sensor_msgs/msg/laser_scan.hpp>
+#include <sensor_msgs/msg/range.hpp>
+#include <gazebo_ros/conversions.hpp>
 
 #include <memory>
-#include <string>
-#include <utility>
 #include <vector>
-#include <atomic>
+#include <algorithm>
+
+#define tol 10e-3
+
+using namespace std::literals::chrono_literals; // NOLINT
 
 /// Tests the gazebo_ros_ray_sensor plugin
-class TestGazeboRosRaySensor : public ::testing::Test
+class GazeboRosRaySensorTest : public gazebo::ServerFixture
 {
-public:
-  TestGazeboRosRaySensor() {}
-
-  // Documentation inherited
-  static void SetUpTestCase();
-  // Documentation inherited
-  static void TearDownTestCase();
-
 protected:
-  /// command line arguments to pass to gzserver
-  static const std::vector<const char *> args;
-  /// Wrapper for gzserver run with plugin
-  static std::unique_ptr<gazebo_ros::GazeboProcess> gazebo_process_;
-  /// ROS node used to verify output of plugin
-  static rclcpp::Node::SharedPtr node_;
-  /// ROS executor to call node_'s callbacks
-  static rclcpp::executor::Executor::SharedPtr executor_;
-
-  /// Get a message from a topic or nullptr of none received before timeout
-  /// \return The first message received on that topic or nullptr
-  template<typename T>
-  static typename T::SharedPtr get_message(const std::string & topic, rclcpp::Duration timeout);
+  using position_t = ignition::math::Vector3d;
+  using positions_t = std::vector<position_t>;
+  static constexpr double POINT_DISTANCE_TOL = 0.06;
+  bool VerifyPoint(const positions_t & positions, const ignition::math::Vector3d & point)
+  {
+    for (auto real_point : positions) {
+      if (real_point.Distance(point) < POINT_DISTANCE_TOL) {return true;}
+    }
+    return false;
+  }
 };
 
-using namespace std::literals::chrono_literals;
-
-// Initialize statics
-const std::vector<const char *>
-TestGazeboRosRaySensor::args = {"worlds/gazebo_ros_ray_sensor.world"};
-
-std::unique_ptr<gazebo_ros::GazeboProcess> TestGazeboRosRaySensor::gazebo_process_ = nullptr;
-rclcpp::Node::SharedPtr TestGazeboRosRaySensor::node_ = nullptr;
-rclcpp::executor::Executor::SharedPtr TestGazeboRosRaySensor::executor_ = nullptr;
-
-void TestGazeboRosRaySensor::SetUpTestCase()
+TEST_F(GazeboRosRaySensorTest, CorrectOutput)
 {
-  // Start gzserver in background
-  gazebo_process_ = std::make_unique<gazebo_ros::GazeboProcess>(args);
-  ASSERT_GT(gazebo_process_->Run(), 0);
+  // Load test world and start paused
+  this->Load("worlds/gazebo_ros_ray_sensor.world", true);
 
-  // Create node and executor
-  node_ = rclcpp::Node::make_shared("test_gazebo_ros_node");
-  executor_ = rclcpp::executors::SingleThreadedExecutor::make_shared();
-  executor_->add_node(node_);
-}
+  // World
+  auto world = gazebo::physics::get_world();
+  ASSERT_NE(nullptr, world);
 
-void TestGazeboRosRaySensor::TearDownTestCase()
-{
-  // Terminate gzserver
-  ASSERT_GE(gazebo_process_->Terminate(), 0);
-  gazebo_process_.reset();
+  positions_t positions;
+  std::vector<double> angles;
+  std::vector<double> ranges;
+  // Store ground truth for verifying pointcloud / laserscan
+  for (auto model : world->Models()) {
+    // Only store the objects of interest (spheres)
+    if (model->GetName().find("sphere") != 0) {continue;}
 
-  node_.reset();
-  executor_.reset();
-}
+    // Push object position into vector for ground truth
+    auto position = model->WorldPose().Pos();
+    positions.push_back(position);
 
-template<typename T>
-typename T::SharedPtr
-TestGazeboRosRaySensor::get_message(const std::string & _topic, rclcpp::Duration _timeout)
-{
-  std::atomic_bool msg_received(false);
-
-  typename T::SharedPtr msg = nullptr;
-
-  auto sub = node_->create_subscription<T>(_topic,
-      [&msg_received, &msg](typename T::SharedPtr _msg) {
-        (void) msg;
-        // If this is the first message from this topic, increment the counter
-        if (!msg_received.exchange(true)) {
-          msg = _msg;
-        }
-      });
-
-  // Wait until message is received or timeout occurs
-  using namespace std::literals::chrono_literals;
-  auto timeout = node_->now() + _timeout;
-  while (false == msg_received && node_->now() < timeout) {
-    executor_->spin_once(200ms);
+    // If object is in ground plane, store it in ground truth for LaserScan type
+    if (position.Z() == 0.) {
+      double angle = atan2(position.Y(), position.X());
+      double range = position.Length();
+      angles.push_back(angle);
+      ranges.push_back(range);
+    }
   }
 
-  return msg;
-}
+  // Range message should return closest ray (minus radius of sphere)
+  double min_range = *std::min_element(ranges.begin(), ranges.end()) - 0.05;
 
-TEST_F(TestGazeboRosRaySensor, TestRange)
-{
-  auto range = get_message<sensor_msgs::msg::Range>("/ray/range", rclcpp::Duration(20s));
+  // Create node and executor
+  auto node = std::make_shared<rclcpp::Node>("gazebo_ros_joint_state_publisher_test");
+  ASSERT_NE(nullptr, node);
+
+
+  // Convienence function to subscribe to a topic and store it to a variable
+  #define SUBSCRIBE_SETTER(msg, topic) \
+  node->create_subscription<decltype(msg)::element_type>(topic, [&msg](decltype(msg) _msg) { \
+      msg = _msg; \
+    })
+
+  // Create subscribe setter for each output type
+  sensor_msgs::msg::LaserScan::SharedPtr ls = nullptr;
+  sensor_msgs::msg::PointCloud::SharedPtr pc = nullptr;
+  sensor_msgs::msg::PointCloud2::SharedPtr pc2 = nullptr;
+  sensor_msgs::msg::Range::SharedPtr range = nullptr;
+  auto ls_sub = SUBSCRIBE_SETTER(ls, "/ray/laserscan");
+  auto pc_sub = SUBSCRIBE_SETTER(pc, "/ray/pointcloud");
+  auto pc2_sub = SUBSCRIBE_SETTER(pc2, "/ray/pointcloud2");
+  auto range_sub = SUBSCRIBE_SETTER(range, "/ray/range");
+
+  #undef SUBSCRIBE_SETTER
+
+  // Step world enough for one message to be published
+  world->Step(400);
+
+  // Receive messages
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+  executor.spin_some();
+
+  // Ensure every message was received
+  ASSERT_NE(ls, nullptr);
+  ASSERT_NE(pc, nullptr);
+  ASSERT_NE(pc2, nullptr);
   ASSERT_NE(range, nullptr);
+
+  // Range message verification
   EXPECT_EQ(range->header.frame_id, "ray_link");
   EXPECT_EQ(range->radiation_type, sensor_msgs::msg::Range::INFRARED);
-  EXPECT_NEAR(range->field_of_view, 1.0472, 1E-4);
-  EXPECT_NEAR(range->min_range, 0.05, 1E-4);
-  EXPECT_NEAR(range->max_range, 50.0, 1E-4);
-  EXPECT_NEAR(range->range, 1.45, 1E-4);
-}
+  EXPECT_NEAR(range->field_of_view, 1.0472, tol);
+  EXPECT_NEAR(range->min_range, 0.05, tol);
+  EXPECT_NEAR(range->max_range, 50.0, tol);
+  EXPECT_NEAR(range->range, min_range, tol);
 
-TEST_F(TestGazeboRosRaySensor, TestPointCloud)
-{
-  // TODO(ironmig): verify content of message
-  auto pc = get_message<sensor_msgs::msg::PointCloud>("/ray/pointcloud", rclcpp::Duration(20s));
-  ASSERT_NE(pc, nullptr);
-}
+  // PointCloud verification
+  EXPECT_EQ(pc->header.frame_id, "ray_link");
+  EXPECT_EQ(pc->channels.size(), 1u);
+  for (auto point : pc->points) {
+    EXPECT_TRUE(VerifyPoint(positions, gazebo_ros::Convert<position_t>(point)));
+    // TODO(anyone): verify intensity
+  }
 
-TEST_F(TestGazeboRosRaySensor, TestPointCloud2)
-{
-  // TODO(ironmig): verify content of message
-  auto pc = get_message<sensor_msgs::msg::PointCloud2>("/ray/pointcloud2", rclcpp::Duration(20s));
-  ASSERT_NE(pc, nullptr);
-}
+  // PointCloud2 verification
+  EXPECT_EQ(pc2->header.frame_id, "ray_link");
+  auto pc2_iter_x = sensor_msgs::PointCloud2Iterator<float>(*pc2, "x");
+  auto pc2_iter_y = sensor_msgs::PointCloud2Iterator<float>(*pc2, "y");
+  auto pc2_iter_z = sensor_msgs::PointCloud2Iterator<float>(*pc2, "z");
+  for (; pc2_iter_x != pc2_iter_x.end(); ++pc2_iter_x, ++pc2_iter_y, ++pc2_iter_z) {
+    auto point = position_t(*pc2_iter_x, *pc2_iter_y, *pc2_iter_z);
+    EXPECT_TRUE(VerifyPoint(positions, point));
+    // TODO(anyone): verify intensity
+  }
 
-TEST_F(TestGazeboRosRaySensor, TestLaserScan)
-{
-  // TODO(ironmig): verify content of message
-  auto ls = get_message<sensor_msgs::msg::LaserScan>("/ray/laserscan", rclcpp::Duration(20s));
-  ASSERT_NE(ls, nullptr);
+  // LaserScan verification
+  EXPECT_EQ(ls->header.frame_id, "ray_link");
+  // Jump in angle for each new range
+  double angle_step = (ls->angle_max - ls->angle_min) / ls->ranges.size();
+  // Ensure each ground truth range is found in the laserscan at roughly the correct angle
+  for (size_t i = 0; i < ranges.size(); ++i) {
+    double range = ranges[i];
+    double angle = angles[i];
+    // Check for a correct range at roughly the ground truth angle
+    int idx = (angle - ls->angle_min) / angle_step;
+    int idx_start = idx - 2;
+    if (idx_start < 0) {idx_start = 0;}
+    int idx_stop = idx + 2;
+    if (idx_stop > ls->ranges.size()) {idx_stop = ls->ranges.size();}
+    bool found = false;
+    for (int j = idx_start; j < idx_stop; ++j) {
+      if (fabs(ls->ranges[j] - range) < POINT_DISTANCE_TOL) {
+        found = true;
+        break;
+      }
+    }
+    EXPECT_TRUE(found);
+  }
+
+  // Artificialy trigger sigInt
+  // TODO(anyone): investigate why this is needed to avoid deadlock at shutdown
+  gazebo::event::Events::sigInt();
 }
 
 int main(int argc, char ** argv)
