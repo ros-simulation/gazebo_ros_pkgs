@@ -17,6 +17,7 @@
 
 #include <builtin_interfaces/msg/time.hpp>
 #include <gazebo/common/Time.hh>
+#include <geometry_msgs/msg/point32.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <geometry_msgs/msg/vector3.hpp>
 #include <ignition/math/Quaternion.hh>
@@ -55,6 +56,29 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Vector3 & msg)
   vec.X(msg.x);
   vec.Y(msg.y);
   vec.Z(msg.z);
+  return vec;
+}
+
+/// Generic conversion from a ROS geometry point message to another type.
+/// \param[in] in Input message.
+/// \return Conversion result
+/// \tparam OUT Output type
+template<class OUT>
+OUT Convert(const geometry_msgs::msg::Point32 & in)
+{
+  return OUT();
+}
+
+/// \brief Specialized conversion from a ROS point message to an Ignition Math vector.
+/// \param[in] in ROS message to convert.
+/// \return An Ignition Math vector.
+template<>
+ignition::math::Vector3d Convert(const geometry_msgs::msg::Point32 & in)
+{
+  ignition::math::Vector3d vec;
+  vec.X(in.x);
+  vec.Y(in.y);
+  vec.Z(in.z);
   return vec;
 }
 
@@ -193,14 +217,14 @@ sensor_msgs::msg::LaserScan Convert(const gazebo::msgs::LaserScanStamped & in, d
   size_t start = (vertical_count / 2) * count;
 
   // Copy ranges into ROS message
-  ls.ranges.reserve(count);
+  ls.ranges.resize(count);
   std::copy(
     in.scan().ranges().begin() + start,
     in.scan().ranges().begin() + start + count,
     ls.ranges.begin());
 
   // Copy intensities into ROS message, clipping at min_intensity
-  ls.intensities.reserve(count);
+  ls.intensities.resize(count);
   std::transform(
     in.scan().intensities().begin() + start,
     in.scan().intensities().begin() + start + count,
@@ -239,8 +263,9 @@ sensor_msgs::msg::PointCloud Convert(
   pc.channels[0].values.reserve(count * vertical_count);
   pc.channels[0].name = "intensity";
 
-  // Current index in range array
-  size_t range_index = 0;
+  // Iterators to range and intensities
+  auto range_iter = in.scan().ranges().begin();
+  auto intensity_iter = in.scan().intensities().begin();
   // Angles of ray currently processing, azimuth is horizontal, inclination is vertical
   double azimuth, inclination;
   // Index in vertical and horizontal loops
@@ -255,13 +280,17 @@ sensor_msgs::msg::PointCloud Convert(
     double s_inclination = sin(inclination);
     for (i = 0, azimuth = in.scan().angle_min();
       i < count;
-      ++i, azimuth += angle_step, ++range_index)
+      ++i, azimuth += angle_step, ++range_iter, ++intensity_iter)
     {
       double c_azimuth = cos(azimuth);
       double s_azimuth = sin(azimuth);
 
-      double r = in.scan().ranges(range_index);
-      double intensity = in.scan().intensities(range_index);
+      double r = *range_iter;
+      // Skip NaN / inf points
+      if (!isfinite(r)) {continue;}
+
+      // Get intensity, clipping at min_intensity
+      double intensity = *intensity_iter;
       if (intensity < min_intensity) {
         intensity = min_intensity;
       }
@@ -292,6 +321,10 @@ sensor_msgs::msg::PointCloud2 Convert(
   // Create message to send
   sensor_msgs::msg::PointCloud2 pc;
 
+  // Pointcloud will be dense, unordered
+  pc.height = 1;
+  pc.is_dense = true;
+
   // Fill header
   pc.header.stamp.sec = in.time().sec();
   pc.header.stamp.nanosec = in.time().nsec();
@@ -310,14 +343,17 @@ sensor_msgs::msg::PointCloud2 Convert(
     "z", 1, sensor_msgs::msg::PointField::FLOAT32,
     "intensity", 1, sensor_msgs::msg::PointField::FLOAT32);
   pcd_modifier.resize(vertical_count * count);
-  pc.is_dense = true;
   sensor_msgs::PointCloud2Iterator<float> iter_x(pc, "x");
   sensor_msgs::PointCloud2Iterator<float> iter_y(pc, "y");
   sensor_msgs::PointCloud2Iterator<float> iter_z(pc, "z");
   sensor_msgs::PointCloud2Iterator<float> iter_intensity(pc, "intensity");
 
-  // Current index in range array
-  size_t range_index = 0;
+  // Iterators to range and intensities
+  auto range_iter = in.scan().ranges().begin();
+  auto intensity_iter = in.scan().intensities().begin();
+
+  // Number of points actually added
+  size_t points_added = 0;
   // Angles of ray currently processing, azimuth is horizontal, inclination is vertical
   double azimuth, inclination;
   // Index in vertical and horizontal loops
@@ -332,14 +368,17 @@ sensor_msgs::msg::PointCloud2 Convert(
     double s_inclination = sin(inclination);
     for (i = 0, azimuth = in.scan().angle_min();
       i < count;
-      ++i, azimuth += angle_step, ++range_index,
-      ++iter_x, ++iter_y, ++iter_z, ++iter_intensity)
+      ++i, azimuth += angle_step, ++range_iter, ++intensity_iter)
     {
       double c_azimuth = cos(azimuth);
       double s_azimuth = sin(azimuth);
 
-      double r = in.scan().ranges(range_index);
-      double intensity = in.scan().intensities(range_index);
+      double r = *range_iter;
+      // Skip NaN / inf points
+      if (!isfinite(r)) {continue;}
+
+      // Get intensity, clipping at min_intensity
+      double intensity = *intensity_iter;
       if (intensity < min_intensity) {
         intensity = min_intensity;
       }
@@ -350,8 +389,17 @@ sensor_msgs::msg::PointCloud2 Convert(
       *iter_y = r * c_inclination * s_azimuth;
       *iter_z = r * s_inclination;
       *iter_intensity = intensity;
+
+      // Increment ouput iterators
+      ++points_added;
+      ++iter_x;
+      ++iter_y;
+      ++iter_z;
+      ++iter_intensity;
     }
   }
+
+  pcd_modifier.resize(points_added);
 
   return pc;
 }
