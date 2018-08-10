@@ -46,46 +46,38 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
   // Create node / executor for receiving imu message
   auto node = std::make_shared<rclcpp::Node>("test_gazebo_ros_imu_sensor");
   ASSERT_NE(nullptr, node);
-  rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(node);
 
-  // Helper function to increment gazebo until a new imu message is received
-  // TODO(ironmig): make more generic and put in gazebo_ros testing_utils
-  auto step_for_msg =
-    [&executor, &world, &node](size_t max_iterations = 100,
-      size_t steps_per_iteration = 10) -> sensor_msgs::msg::Imu::SharedPtr {
-      sensor_msgs::msg::Imu::SharedPtr msg = nullptr;
-      auto sub =
-        node->create_subscription<sensor_msgs::msg::Imu>("/imu/data",
-          [&msg](sensor_msgs::msg::Imu::SharedPtr _msg) {
-            msg = _msg;
-          });
-      for (size_t i = 0; i < max_iterations && !msg; ++i) {
-        world->Step(steps_per_iteration);
-        using namespace std::literals::chrono_literals;
-        executor.spin_once(100ms);
-      }
-      return msg;
-    };
+  sensor_msgs::msg::Imu::SharedPtr msg = nullptr;
+  auto sub =
+    node->create_subscription<sensor_msgs::msg::Imu>("/imu/data",
+      [&msg](sensor_msgs::msg::Imu::SharedPtr _msg) {
+        msg = _msg;
+      });
 
-  // Get the initial imu output when the box is still
-  auto first_msg = step_for_msg(10, 100);
-  ASSERT_NE(nullptr, first_msg);
-  auto first_yaw =
-    gazebo_ros::Convert<ignition::math::Quaterniond>(first_msg->orientation).Euler().Z();
+  // Step until an imu message will have been published
+  world->Step(500);
+  rclcpp::spin_some(node);
+
+  // Get the initial imu output when the box is at rest
+  auto pre_movement_msg = std::make_shared<sensor_msgs::msg::Imu>(*msg);
+  ASSERT_NE(nullptr, pre_movement_msg);
+  auto pre_movement_yaw =
+    gazebo_ros::Convert<ignition::math::Quaterniond>(pre_movement_msg->orientation).Euler().Z();
 
   // Apply a force + torque and collect a new message
   link->SetForce({500.0, 0.0, 0.0});
   link->SetTorque({0.0, 0.0, 200.0});
-  auto second_msg = step_for_msg(100, 10);
-  ASSERT_NE(nullptr, second_msg);
-  auto second_yaw =
-    gazebo_ros::Convert<ignition::math::Quaterniond>(second_msg->orientation).Euler().Z();
+  world->Step(500);
+  rclcpp::spin_some(node);
+  auto post_movement_msg = std::make_shared<sensor_msgs::msg::Imu>(*msg);
+  ASSERT_NE(nullptr, post_movement_msg);
+  auto post_movement_yaw =
+    gazebo_ros::Convert<ignition::math::Quaterniond>(post_movement_msg->orientation).Euler().Z();
 
   // Check that IMU output reflects state changes due to applied force
-  EXPECT_GT(second_msg->linear_acceleration.x, first_msg->linear_acceleration.x);
-  EXPECT_GT(second_msg->angular_velocity.z, first_msg->angular_velocity.z);
-  EXPECT_GT(second_yaw, first_yaw);
+  EXPECT_GT(post_movement_msg->linear_acceleration.x, pre_movement_msg->linear_acceleration.x);
+  EXPECT_GT(post_movement_msg->angular_velocity.z, pre_movement_msg->angular_velocity.z);
+  EXPECT_GT(post_movement_yaw, pre_movement_yaw);
 }
 
 int main(int argc, char ** argv)
