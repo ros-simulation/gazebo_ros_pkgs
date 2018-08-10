@@ -12,7 +12,7 @@ geometry_msgs/Wrench wrench               # wrench applied to the origin of the 
 builtin_interfaces/Time start_time        # (optional) wrench application start time (seconds)
                                           # if start_time is not specified, or
                                           # start_time < current time, start as soon as possible
-builtin_interfaces/Duration duratio       # optional duration of wrench application time (seconds)
+builtin_interfaces/Duration duration      # optional duration of wrench application time (seconds)
                                           # if duration < 0, apply wrench continuously without end
                                           # if duration = 0, do nothing
                                           # if duration < step size, apply wrench
