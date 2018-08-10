@@ -29,11 +29,11 @@ class GazeboRosInitPrivate
 {
 public:
   GazeboRosInitPrivate();
-  gazebo_ros::Node::SharedPtr rosnode_;
+  gazebo_ros::Node::SharedPtr ros_node_;
   rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr clock_pub_;
   gazebo::event::ConnectionPtr world_update_event_;
   gazebo_ros::Throttler throttler_;
-  static const gazebo::common::Time DEFAULT_PUBLISH_PERIOD;
+  static constexpr double DEFAULT_PUBLISH_FREQUENCY = 10.;
 
   void PublishSimTime(const gazebo::common::UpdateInfo & _info);
 };
@@ -52,21 +52,21 @@ void GazeboRosInit::Load(int argc, char ** argv)
   // Initialize ROS with arguments
   rclcpp::init(argc, argv);
 
-  impl_->rosnode_ = gazebo_ros::Node::Create("gazebo_ros_clock");
-  impl_->clock_pub_ = impl_->rosnode_->create_publisher<rosgraph_msgs::msg::Clock>("/clock");
+  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_clock");
+  impl_->clock_pub_ = impl_->ros_node_->create_publisher<rosgraph_msgs::msg::Clock>("/clock");
 
   // Get publish rate from parameter if set
   rclcpp::Parameter rate_param;
-  if (impl_->rosnode_->get_parameter("publish_rate", rate_param)) {
+  if (impl_->ros_node_->get_parameter("publish_rate", rate_param)) {
     if (rclcpp::ParameterType::PARAMETER_DOUBLE == rate_param.get_type()) {
-      impl_->throttler_ = Throttler(gazebo::common::Time(1.0 / rate_param.as_double()));
-    } else if (rclcpp::ParameterType::PARAMETER_INTEGER != rate_param.get_type()) {
-      impl_->throttler_ = Throttler(gazebo::common::Time(1.0 / rate_param.as_int()));
+      impl_->throttler_ = Throttler(rate_param.as_double());
+    } else if (rclcpp::ParameterType::PARAMETER_INTEGER == rate_param.get_type()) {
+      impl_->throttler_ = Throttler(rate_param.as_int());
     } else {
-      RCLCPP_WARN(impl_->rosnode_->get_logger(),
+      RCLCPP_WARN(impl_->ros_node_->get_logger(),
         "Could not read value of param publish_rate [%s] as double/int, using default %ghz.",
         rate_param.value_to_string().c_str(),
-        1.0 / GazeboRosInitPrivate::DEFAULT_PUBLISH_PERIOD.Double());
+        GazeboRosInitPrivate::DEFAULT_PUBLISH_FREQUENCY);
     }
   }
 
@@ -74,12 +74,8 @@ void GazeboRosInit::Load(int argc, char ** argv)
     std::bind(&GazeboRosInitPrivate::PublishSimTime, impl_.get(), std::placeholders::_1));
 }
 
-// By default publish at 10 HZ (100 millisecond period)
-const gazebo::common::Time GazeboRosInitPrivate::DEFAULT_PUBLISH_PERIOD = gazebo::common::Time(0,
-    1E8);
-
 GazeboRosInitPrivate::GazeboRosInitPrivate()
-: throttler_(DEFAULT_PUBLISH_PERIOD)
+: throttler_(DEFAULT_PUBLISH_FREQUENCY)
 {
 }
 

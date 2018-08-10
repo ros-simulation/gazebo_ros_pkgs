@@ -19,7 +19,6 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 /// Tests the simtime published to /clock by gazebo_ros_init
@@ -49,22 +48,32 @@ void TestSimTime::TearDown()
 
 TEST_F(TestSimTime, TestClock)
 {
-  auto node = std::make_shared<rclcpp::Node>("my_node");
-  rclcpp::Clock clock;
+  // Create a node which will use sim time
+  auto context = rclcpp::contexts::default_context::get_global_default_context();
+  std::vector<std::string> args;
+  std::vector<rclcpp::Parameter> params = {rclcpp::Parameter("use_sim_time", true)};
+  auto node = std::make_shared<rclcpp::Node>("test_sim_time", "", context, args, params);
 
   using ClockMsg = rosgraph_msgs::msg::Clock;
 
+  // Get two clock messages, cachine the ROS time once each is received
   auto first_msg =
     gazebo_ros::get_message_or_timeout<ClockMsg>(node, "/clock", rclcpp::Duration(5, 0));
   ASSERT_NE(first_msg, nullptr);
-  auto first_msg_time = clock.now();
-
+  auto first_msg_time = node->now();
   auto second_msg =
-    gazebo_ros::get_message_or_timeout<ClockMsg>(node, "/clock", rclcpp::Duration(5, 0));
+    gazebo_ros::get_message_or_timeout<ClockMsg>(node, "/clock", rclcpp::Duration(1, 0));
   ASSERT_NE(second_msg, nullptr);
-  auto second_msg_time = clock.now();
+  auto second_msg_time = node->now();
 
-  ASSERT_GT(second_msg, first_msg);
+  // The SIM time should be close to zero (start of simulation)
+  EXPECT_LT(rclcpp::Time(first_msg->clock), rclcpp::Time(1, 0, RCL_ROS_TIME));
+  EXPECT_LT(rclcpp::Time(second_msg->clock), rclcpp::Time(1, 0, RCL_ROS_TIME));
+  // Time should go forward
+  EXPECT_GT(second_msg, first_msg);
+  // The message from the clock should be the node's time
+  EXPECT_EQ(first_msg_time, rclcpp::Time(first_msg->clock));
+  EXPECT_EQ(second_msg_time, rclcpp::Time(second_msg->clock));
 }
 
 int main(int argc, char ** argv)

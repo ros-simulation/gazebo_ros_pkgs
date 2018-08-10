@@ -36,7 +36,7 @@ public:
   virtual ~GazeboRosInit();
 
   // Documentation inherited
-  void Load(int argc, char ** argv);
+  void Load(int argc, char ** argv) override;
 
 private:
   std::unique_ptr<GazeboRosInitPrivate> impl_;
