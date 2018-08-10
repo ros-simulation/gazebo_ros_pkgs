@@ -29,7 +29,7 @@ class GazeboRosRaySensorPrivate
 {
 public:
   /// Node for ROS communication.
-  gazebo_ros::Node::SharedPtr rosnode_;
+  gazebo_ros::Node::SharedPtr ros_node_;
 
   // Aliases
   using LaserScan = sensor_msgs::msg::LaserScan;
@@ -86,29 +86,30 @@ GazeboRosRaySensor::~GazeboRosRaySensor()
 
 void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
-  // Create rosnode configured from sdf
-  impl_->rosnode_ = gazebo_ros::Node::Create("gazebo_ray_sensor", _sdf);
+  // Create ros_node configured from sdf
+  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ray_sensor", _sdf);
 
   // Get tf frame for output
-  impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf)
+  impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf);
 
   // Get output type from sdf if provided
   if (!_sdf->HasElement("output_type")) {
     RCLCPP_WARN(
-      impl_->rosnode_->get_logger(), "missing <output_type>, defaults to sensor_msgs/PointCloud2");
-    impl_->pub_ = impl_->rosnode_->create_publisher<sensor_msgs::msg::PointCloud2>("~/out");
+      impl_->ros_node_->get_logger(), "missing <output_type>, defaults to sensor_msgs/PointCloud2");
+    impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud2>("~/out");
   } else {
     std::string output_type_string = _sdf->Get<std::string>("output_type");
     if (output_type_string == "sensor_msgs/LaserScan") {
-      impl_->pub_ = impl_->rosnode_->create_publisher<sensor_msgs::msg::LaserScan>("~/out");
+      impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::LaserScan>("~/out");
     } else if (output_type_string == "sensor_msgs/PointCloud") {
-      impl_->pub_ = impl_->rosnode_->create_publisher<sensor_msgs::msg::PointCloud>("~/out");
+      impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud>("~/out");
     } else if (output_type_string == "sensor_msgs/PointCloud2") {
-      impl_->pub_ = impl_->rosnode_->create_publisher<sensor_msgs::msg::PointCloud2>("~/out");
+      impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud2>("~/out");
     } else if (output_type_string == "sensor_msgs/Range") {
-      impl_->pub_ = impl_->rosnode_->create_publisher<sensor_msgs::msg::Range>("~/out");
+      impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::Range>("~/out");
     } else {
-      RCLCPP_ERROR(impl_->rosnode_->get_logger(), "Invalid <output_type> [%s]", output_type_string);
+      RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Invalid <output_type> [%s]",
+        output_type_string);
       return;
     }
   }
@@ -116,7 +117,7 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   // Get parameters specific to Range output from sdf
   if (impl_->pub_.type() == typeid(GazeboRosRaySensorPrivate::RangePub)) {
     if (!_sdf->HasElement("radiation_type")) {
-      RCLCPP_INFO(impl_->rosnode_->get_logger(),
+      RCLCPP_INFO(impl_->ros_node_->get_logger(),
         "missing <radiation_type>, defaulting to infrared");
       impl_->range_radiation_type_ = sensor_msgs::msg::Range::INFRARED;
     } else if ("ultrasound" == _sdf->Get<std::string>("radiation_type")) {
@@ -125,7 +126,7 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
       impl_->range_radiation_type_ = sensor_msgs::msg::Range::INFRARED;
     } else {
       RCLCPP_ERROR(
-        impl_->rosnode_->get_logger(),
+        impl_->ros_node_->get_logger(),
         "Invalid <radiation_type> [%s]. Can be ultrasound or infrared",
         _sdf->Get<std::string>("radiation_type").c_str());
       return;
@@ -134,7 +135,7 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 
   if (!_sdf->HasElement("min_intensity")) {
     impl_->min_intensity_ = 0.0;
-    RCLCPP_DEBUG(impl_->rosnode_->get_logger(), "missing <min_intensity>, defaults to %f",
+    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "missing <min_intensity>, defaults to %f",
       impl_->min_intensity_);
   } else {
     impl_->min_intensity_ = _sdf->Get<double>("min_intensity");
@@ -163,7 +164,7 @@ void GazeboRosRaySensorPrivate::SubscribeGazeboLaserScan()
     laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_,
         &GazeboRosRaySensorPrivate::PublishRange, this);
   } else {
-    RCLCPP_ERROR(rosnode_->get_logger(), "Publisher is an invalid type. This is an internal bug.");
+    RCLCPP_ERROR(ros_node_->get_logger(), "Publisher is an invalid type. This is an internal bug.");
   }
 }
 

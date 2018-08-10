@@ -26,8 +26,6 @@
 #include <vector>
 #include <algorithm>
 
-#define tol 10e-3
-
 using namespace std::literals::chrono_literals; // NOLINT
 
 /// Tests the gazebo_ros_ray_sensor plugin
@@ -36,7 +34,11 @@ class GazeboRosRaySensorTest : public gazebo::ServerFixture
 protected:
   using position_t = ignition::math::Vector3d;
   using positions_t = std::vector<position_t>;
+  /// Maximum error distance a point and the ground truth
   static constexpr double POINT_DISTANCE_TOL = 0.06;
+  /// Tollerance for error in doubles vs ground truth
+  static constexpr double ROUNDING_ERROR_TOL = 1E-2;
+  /// Verify that a point is close to one of the ground truth points
   bool VerifyPoint(const positions_t & positions, const ignition::math::Vector3d & point)
   {
     for (auto real_point : positions) {
@@ -119,17 +121,22 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   // Range message verification
   EXPECT_EQ(range->header.frame_id, "ray_link");
   EXPECT_EQ(range->radiation_type, sensor_msgs::msg::Range::INFRARED);
-  EXPECT_NEAR(range->field_of_view, 1.0472, tol);
-  EXPECT_NEAR(range->min_range, 0.05, tol);
-  EXPECT_NEAR(range->max_range, 50.0, tol);
-  EXPECT_NEAR(range->range, min_range, tol);
+  EXPECT_NEAR(range->field_of_view, 1.0472, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(range->min_range, 0.05, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(range->max_range, 50.0, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(range->range, min_range, ROUNDING_ERROR_TOL);
 
   // PointCloud verification
   EXPECT_EQ(pc->header.frame_id, "ray_link");
-  EXPECT_EQ(pc->channels.size(), 1u);
-  for (auto point : pc->points) {
-    EXPECT_TRUE(VerifyPoint(positions, gazebo_ros::Convert<position_t>(point)));
-    // TODO(anyone): verify intensity
+  ASSERT_EQ(pc->channels.size(), 1u);
+  ASSERT_EQ(pc->points.size(), pc->channels[0].values.size());
+  auto point = pc->points.begin();
+  auto intensity = pc->channels[0].values.begin();
+  for (; point != pc->points.end();
+    ++point, ++intensity)
+  {
+    EXPECT_TRUE(VerifyPoint(positions, gazebo_ros::Convert<position_t>(*point)));
+    EXPECT_NEAR(*intensity, 80, ROUNDING_ERROR_TOL);
   }
 
   // PointCloud2 verification
@@ -137,34 +144,35 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   auto pc2_iter_x = sensor_msgs::PointCloud2Iterator<float>(*pc2, "x");
   auto pc2_iter_y = sensor_msgs::PointCloud2Iterator<float>(*pc2, "y");
   auto pc2_iter_z = sensor_msgs::PointCloud2Iterator<float>(*pc2, "z");
-  for (; pc2_iter_x != pc2_iter_x.end(); ++pc2_iter_x, ++pc2_iter_y, ++pc2_iter_z) {
+  auto pc2_iter_intensity = sensor_msgs::PointCloud2Iterator<float>(*pc2, "intensity");
+  for (; pc2_iter_x != pc2_iter_x.end();
+    ++pc2_iter_x, ++pc2_iter_y, ++pc2_iter_z, ++pc2_iter_intensity)
+  {
     auto point = position_t(*pc2_iter_x, *pc2_iter_y, *pc2_iter_z);
     EXPECT_TRUE(VerifyPoint(positions, point));
+    EXPECT_NEAR(*pc2_iter_intensity, 80, ROUNDING_ERROR_TOL);
     // TODO(anyone): verify intensity
   }
 
   // LaserScan verification
   EXPECT_EQ(ls->header.frame_id, "ray_link");
-  // Jump in angle for each new range
-  double angle_step = (ls->angle_max - ls->angle_min) / ls->ranges.size();
-  // Ensure each ground truth range is found in the laserscan at roughly the correct angle
+  EXPECT_NEAR(ls->angle_min, -0.5236, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(ls->angle_max, 0.5236, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(ls->range_min, 0.05, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(ls->range_max, 50.0, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(ls->angle_increment, (ls->angle_max - ls->angle_min) / ls->ranges.size(),
+    ROUNDING_ERROR_TOL);
+
+  // Ensure each ground truth range is found in the laserscan
   for (size_t i = 0; i < ranges.size(); ++i) {
     double range = ranges[i];
     double angle = angles[i];
     // Check for a correct range at roughly the ground truth angle
-    int idx = (angle - ls->angle_min) / angle_step;
-    int idx_start = idx - 2;
-    if (idx_start < 0) {idx_start = 0;}
-    int idx_stop = idx + 2;
-    if (idx_stop > ls->ranges.size()) {idx_stop = ls->ranges.size();}
-    bool found = false;
-    for (int j = idx_start; j < idx_stop; ++j) {
-      if (fabs(ls->ranges[j] - range) < POINT_DISTANCE_TOL) {
-        found = true;
-        break;
-      }
-    }
-    EXPECT_TRUE(found);
+    int idx = (angle - ls->angle_min) / ls->angle_increment;
+    if (idx < 0) {idx = 0;}
+    if (idx > static_cast<int>(ls->ranges.size())) {idx = ls->ranges.size() - 1;}
+    EXPECT_NEAR(ls->ranges[idx], range, POINT_DISTANCE_TOL);
+    EXPECT_NEAR(ls->intensities[idx], 80, ROUNDING_ERROR_TOL);
   }
 
   // Artificialy trigger sigInt
