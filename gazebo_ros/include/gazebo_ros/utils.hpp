@@ -60,9 +60,6 @@ std::string SensorFrameID(const gazebo::sensors::Sensor & _sensor, const sdf::El
 class Throttler
 {
 public:
-  /// Create a throttler with a period
-  /// \param[in] _period Period at which IsReady will return true
-  explicit Throttler(const gazebo::common::Time & _period);
   /// Create a throttler with a frequency
   /// \param[in] _hz Frequency at which IsReady will return true, in hertz
   explicit Throttler(const double _hz);
