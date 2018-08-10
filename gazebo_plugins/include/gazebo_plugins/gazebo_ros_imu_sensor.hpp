@@ -33,6 +33,7 @@ class GazeboRosImuSensorPrivate;
   Example Usage:
   \code{.xml}
     <sensor name="my_imu" type="imu">
+      <!-- ensure the sensor is active (required) -->
       <always_on>true</always_on>
       <update_rate>30</update_rate>
       <plugin name="my_imu_plugin" filename="libgazebo_ros_imu_sensor.so">
