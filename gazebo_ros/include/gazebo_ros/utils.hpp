@@ -17,6 +17,7 @@
 
 #include <gazebo/sensors/Noise.hh>
 #include <gazebo/sensors/Sensor.hh>
+#include <gazebo/common/Time.hh>
 
 #include <string>
 
@@ -54,6 +55,29 @@ std::string ScopedNameBase(const std::string & str);
 /// \param[in] _sdf SDF pointer which may contain a tag to override the frame id
 /// \return The string representing the tf frame of the sensor
 std::string SensorFrameID(const gazebo::sensors::Sensor & _sensor, const sdf::Element & _sdf);
+
+/// Helper class used to throttle something to a given rate
+class Throttler
+{
+public:
+  /// Create a throttler with a period
+  /// \param[in] _period Period at which IsReady will return true
+  explicit Throttler(const gazebo::common::Time & _period);
+  /// Create a throttler with a frequency
+  /// \param[in] _hz Frequency at which IsReady will return true, in hertz
+  explicit Throttler(const double _hz);
+  /// Check if the enough time has elapsed since the last time IsReady returned true
+  /// \param[in] _time The current time.
+  /// \return false if not enough time has elapsed from the last time IsReady was true
+  /// \return true if enough time has elapsed since the last success
+  bool IsReady(const gazebo::common::Time & _time);
+
+private:
+  /// The time between calls to @IsReady returning true
+  gazebo::common::Time period_;
+  /// The last time @IsReady returned true
+  gazebo::common::Time last_time_;
+};
 
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__UTILS_HPP_

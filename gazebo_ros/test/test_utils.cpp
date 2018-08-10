@@ -92,6 +92,40 @@ TEST(TestUtils, SensorFrameID)
   }
 }
 
+TEST(TestUtils, Throttler)
+{
+  using Time = gazebo::common::Time;
+  using Throttler = gazebo_ros::Throttler;
+  {
+    // Test negative period (always ready)
+    Throttler t(-1);
+    EXPECT_TRUE(t.IsReady(Time()));
+    EXPECT_TRUE(t.IsReady(Time(50, 0)));
+    EXPECT_TRUE(t.IsReady(Time(20, 0)));
+    EXPECT_TRUE(t.IsReady(Time(1E3, 0)));
+  }
+  {
+    // Test frequency
+    Throttler t(2.0);
+    EXPECT_FALSE(t.IsReady(Time(0, 4E8)));
+    EXPECT_TRUE(t.IsReady(Time(0, 6E8)));
+    EXPECT_TRUE(t.IsReady(Time(1E4, 0)));
+    EXPECT_FALSE(t.IsReady(Time(1E4, 4E8)));
+    EXPECT_TRUE(t.IsReady(Time(1E4, 6E8)));
+  }
+  {
+    // Test period
+    Time period(1, 1E3);
+    Throttler t(period);
+    EXPECT_FALSE(t.IsReady(Time()));
+    EXPECT_FALSE(t.IsReady(period - Time(0, 1)));
+    Time new_time = period;
+    EXPECT_TRUE(t.IsReady(new_time));
+    EXPECT_FALSE(t.IsReady(new_time + period - Time(0, 1)));
+    EXPECT_TRUE(t.IsReady(new_time + period));
+  }
+}
+
 int main(int argc, char ** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
