@@ -15,10 +15,17 @@
 #ifndef GAZEBO_ROS__GAZEBO_ROS_INIT_HPP_
 #define GAZEBO_ROS__GAZEBO_ROS_INIT_HPP_
 
-
 #include <gazebo/common/Plugin.hh>
 
+#include <memory>
+
+namespace gazebo_ros
+{
+
+class GazeboRosInitPrivate;
+
 /// Initializes ROS with the system arguments passed to Gazebo (i.e. calls rclcpp::init).
+/// Also publishes the latest simtime to /clock
 class GazeboRosInit : public gazebo::SystemPlugin
 {
 public:
@@ -28,9 +35,12 @@ public:
   /// Destructor
   virtual ~GazeboRosInit();
 
-  /// Called by Gazebo to load plugin.
-  /// \param[in] argc Argument count.
-  /// \param[in] argv Argument values.
+  // Documentation inherited
   void Load(int argc, char ** argv);
+
+private:
+  std::unique_ptr<GazeboRosInitPrivate> impl_;
 };
+
+}  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__GAZEBO_ROS_INIT_HPP_
