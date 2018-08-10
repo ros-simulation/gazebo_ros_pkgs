@@ -28,7 +28,7 @@ class GazeboRosImuSensorPrivate
 {
 public:
   /// Node for ros communication
-  gazebo_ros::Node::SharedPtr rosnode_;
+  gazebo_ros::Node::SharedPtr ros_node_;
   /// Publish for imu message
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_;
   /// IMU message modified each update
@@ -53,15 +53,15 @@ GazeboRosImuSensor::~GazeboRosImuSensor()
 
 void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
-  impl_->rosnode_ = gazebo_ros::Node::Create("gazebo_ros_imu_sensor", _sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_imu_sensor", _sdf);
 
   impl_->sensor_ = std::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(_sensor);
   if (!impl_->sensor_) {
-    RCLCPP_ERROR(impl_->rosnode_->get_logger(), "Parent is not an imu sensor. Exiting.");
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Parent is not an imu sensor. Exiting.");
     return;
   }
 
-  impl_->pub_ = impl_->rosnode_->create_publisher<sensor_msgs::msg::Imu>("~/out");
+  impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::Imu>("~/out");
 
   // Create message to be reused
   auto msg = std::make_shared<sensor_msgs::msg::Imu>();

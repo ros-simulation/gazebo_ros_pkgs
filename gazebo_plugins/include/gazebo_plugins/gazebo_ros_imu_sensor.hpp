@@ -54,7 +54,7 @@ public:
   virtual ~GazeboRosImuSensor();
 
   // Documentation Inherited
-  virtual void Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf);
+  void Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) override;
 
 private:
   /// Private data pointer
