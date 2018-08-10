@@ -229,7 +229,7 @@ sensor_msgs::msg::LaserScan Convert(const gazebo::msgs::LaserScanStamped & in, d
     in.scan().intensities().begin() + start,
     in.scan().intensities().begin() + start + count,
     ls.intensities.begin(), [min_intensity](double i) -> double {
-      return i ? i > min_intensity : min_intensity;
+      return i > min_intensity ? i : min_intensity;
     });
 
   return ls;
