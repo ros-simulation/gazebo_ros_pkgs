@@ -15,20 +15,26 @@
 #ifndef GAZEBO_ROS__CONVERSIONS_HPP_
 #define GAZEBO_ROS__CONVERSIONS_HPP_
 
+#include <math.h>
+
 #include <builtin_interfaces/msg/time.hpp>
 #include <gazebo/common/Time.hh>
+#include <gazebo/msgs/laserscan_stamped.pb.h>
 #include <geometry_msgs/msg/point32.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <geometry_msgs/msg/vector3.hpp>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <rclcpp/time.hpp>
-#include <gazebo/msgs/laserscan_stamped.pb.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/point_cloud.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <sensor_msgs/msg/range.hpp>
-#include <sensor_msgs/point_cloud2_iterator.hpp>
+
+// Remove sstream and NOLINTs after the following patch is released:
+// https://github.com/ros2/common_interfaces/pull/54
+#include <sstream>  // NOLINT
+#include <sensor_msgs/point_cloud2_iterator.hpp>  // NOLINT
 
 #include <string>
 #include <algorithm>
