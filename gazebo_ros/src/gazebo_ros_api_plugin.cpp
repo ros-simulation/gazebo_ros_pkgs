@@ -2124,8 +2124,13 @@ void GazeboRosApiPlugin::publishRealTimeFactor()
   // https://bitbucket.org/osrf/gazebo/src/a24b331f8ebfd712a226ba73b7f43d2d4c14fe15/tools/gz.cc?at=gazebo7&fileviewer=file-view-default#gz.cc-854
   // The goal is to make the real-time factor available in ROS bags, for use as an easy "system performance" metric
   // with post-run analysis.
+#if GAZEBO_MAJOR_VERSION >= 8
+  sim_times_.push_back(world_->SimTime());
+  real_times_.push_back(world_->RealTime());
+#else
   sim_times_.push_back(world_->GetSimTime());
   real_times_.push_back(world_->GetRealTime());
+#endif
 
   auto ss_lambda = [&](common::Time& a, common::Time& b){
     return a + (b - sim_times_.front());
