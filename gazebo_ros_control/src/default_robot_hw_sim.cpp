@@ -197,6 +197,18 @@ bool DefaultRobotHWSim::initSim(
     }
     sim_joints_.push_back(joint);
 
+    // get physics engine type
+#if GAZEBO_MAJOR_VERSION >= 8
+    gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
+#else
+    gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->GetPhysicsEngine();
+#endif
+    physics_type_ = physics->GetType();
+    if (physics_type_.empty())
+    {
+      ROS_WARN_STREAM_NAMED("default_robot_hw_sim", "No physics type found.");
+    }
+
     registerJointLimits(joint_names_[j], joint_handle, joint_control_methods_[j],
                         joint_limit_nh, urdf_model,
                         &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
@@ -205,9 +217,9 @@ bool DefaultRobotHWSim::initSim(
     {
       // Initialize the PID controller. If no PID gain values are found, use joint->SetAngle() or
       // joint->SetParam("vel") to control the joint.
-      const ros::NodeHandle nh(model_nh, "/gazebo_ros_control/pid_gains/" +
+      const ros::NodeHandle nh(robot_namespace + "/gazebo_ros_control/pid_gains/" +
                                joint_names_[j]);
-      if (pid_controllers_[j].init(nh, true))
+      if (pid_controllers_[j].init(nh))
       {
         switch (joint_control_methods_[j])
         {
@@ -251,14 +263,19 @@ void DefaultRobotHWSim::readSim(ros::Time time, ros::Duration period)
   for(unsigned int j=0; j < n_dof_; j++)
   {
     // Gazebo has an interesting API...
+#if GAZEBO_MAJOR_VERSION >= 8
+    double position = sim_joints_[j]->Position(0);
+#else
+    double position = sim_joints_[j]->GetAngle(0).Radian();
+#endif
     if (joint_types_[j] == urdf::Joint::PRISMATIC)
     {
-      joint_position_[j] = sim_joints_[j]->GetAngle(0).Radian();
+      joint_position_[j] = position;
     }
     else
     {
       joint_position_[j] += angles::shortest_angular_distance(joint_position_[j],
-                            sim_joints_[j]->GetAngle(0).Radian());
+                            position);
     }
     joint_velocity_[j] = sim_joints_[j]->GetVelocity(0);
     joint_effort_[j] = sim_joints_[j]->GetForce((unsigned int)(0));
@@ -301,10 +318,14 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
         break;
 
       case POSITION:
-#if GAZEBO_MAJOR_VERSION >= 4
-        sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
+#if GAZEBO_MAJOR_VERSION >= 9
+        sim_joints_[j]->SetPosition(0, joint_position_command_[j], true);
 #else
-        sim_joints_[j]->SetAngle(0, joint_position_command_[j]);
+        ROS_WARN_ONCE("The default_robot_hw_sim plugin is using the Joint::SetPosition method without preserving the link velocity.");
+        ROS_WARN_ONCE("As a result, gravity will not be simulated correctly for your model.");
+        ROS_WARN_ONCE("Please set gazebo_pid parameters, switch to the VelocityJointInterface or EffortJointInterface, or upgrade to Gazebo 9.");
+        ROS_WARN_ONCE("For details, see https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612");
+        sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
 #endif
         break;
 
@@ -337,7 +358,14 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
 
       case VELOCITY:
 #if GAZEBO_MAJOR_VERSION > 2
-        sim_joints_[j]->SetParam("vel", 0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+        if (physics_type_.compare("ode") == 0)
+        {
+          sim_joints_[j]->SetParam("vel", 0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+        }
+        else 
+        {
+          sim_joints_[j]->SetVelocity(0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
+        }
 #else
         sim_joints_[j]->SetVelocity(0, e_stop_active_ ? 0 : joint_velocity_command_[j]);
 #endif

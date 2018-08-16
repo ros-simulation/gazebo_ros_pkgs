@@ -36,7 +36,7 @@ GazeboRosP3D::GazeboRosP3D()
 // Destructor
 GazeboRosP3D::~GazeboRosP3D()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+  this->update_connection_.reset();
   // Finalize the controller
   this->rosnode_->shutdown();
   this->p3d_queue_.clear();
@@ -94,18 +94,18 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (!_sdf->HasElement("xyzOffset"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <xyzOffset>, defaults to 0s");
-    this->offset_.pos = math::Vector3(0, 0, 0);
+    this->offset_.Pos() = ignition::math::Vector3d(0, 0, 0);
   }
   else
-    this->offset_.pos = _sdf->GetElement("xyzOffset")->Get<math::Vector3>();
+    this->offset_.Pos() = _sdf->GetElement("xyzOffset")->Get<ignition::math::Vector3d>();
 
   if (!_sdf->HasElement("rpyOffset"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <rpyOffset>, defaults to 0s");
-    this->offset_.rot = math::Vector3(0, 0, 0);
+    this->offset_.Rot() = ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, 0));
   }
   else
-    this->offset_.rot = _sdf->GetElement("rpyOffset")->Get<math::Vector3>();
+    this->offset_.Rot() = ignition::math::Quaterniond(_sdf->GetElement("rpyOffset")->Get<ignition::math::Vector3d>());
 
   if (!_sdf->HasElement("gaussianNoise"))
   {
@@ -149,10 +149,19 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       this->rosnode_->advertise<nav_msgs::Odometry>(this->topic_name_, 1);
   }
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_time_ = this->world_->SimTime();
+#else
   this->last_time_ = this->world_->GetSimTime();
+#endif
   // initialize body
-  this->last_vpos_ = this->link_->GetWorldLinearVel();
-  this->last_veul_ = this->link_->GetWorldAngularVel();
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_vpos_ = this->link_->WorldLinearVel();
+  this->last_veul_ = this->link_->WorldAngularVel();
+#else
+  this->last_vpos_ = this->link_->GetWorldLinearVel().Ign();
+  this->last_veul_ = this->link_->GetWorldAngularVel().Ign();
+#endif
   this->apos_ = 0;
   this->aeul_ = 0;
 
@@ -178,8 +187,13 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ROS_DEBUG_NAMED("p3d", "got body %s", this->reference_link_->GetName().c_str());
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
-    this->last_frame_vpos_ = this->reference_link_->GetWorldLinearVel();
-    this->last_frame_veul_ = this->reference_link_->GetWorldAngularVel();
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->last_frame_vpos_ = this->reference_link_->WorldLinearVel();
+    this->last_frame_veul_ = this->reference_link_->WorldAngularVel();
+#else
+    this->last_frame_vpos_ = this->reference_link_->GetWorldLinearVel().Ign();
+    this->last_frame_veul_ = this->reference_link_->GetWorldAngularVel().Ign();
+#endif
   }
 
 
@@ -201,7 +215,17 @@ void GazeboRosP3D::UpdateChild()
   if (!this->link_)
     return;
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  common::Time cur_time = this->world_->SimTime();
+#else
   common::Time cur_time = this->world_->GetSimTime();
+#endif
+
+  if (cur_time < this->last_time_)
+  {
+      ROS_WARN_NAMED("p3d", "Negative update time difference detected.");
+      this->last_time_ = cur_time;
+  }
 
   // rate control
   if (this->update_rate_ > 0 &&
@@ -225,38 +249,51 @@ void GazeboRosP3D::UpdateChild()
 
         this->pose_msg_.child_frame_id = this->link_name_;
 
-        math::Pose pose, frame_pose;
-        math::Vector3 frame_vpos;
-        math::Vector3 frame_veul;
+        ignition::math::Pose3d pose, frame_pose;
+        ignition::math::Vector3d frame_vpos;
+        ignition::math::Vector3d frame_veul;
 
         // get inertial Rates
-        math::Vector3 vpos = this->link_->GetWorldLinearVel();
-        math::Vector3 veul = this->link_->GetWorldAngularVel();
-
         // Get Pose/Orientation
-        pose = this->link_->GetWorldPose();
+#if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Vector3d vpos = this->link_->WorldLinearVel();
+        ignition::math::Vector3d veul = this->link_->WorldAngularVel();
+
+        pose = this->link_->WorldPose();
+#else
+        ignition::math::Vector3d vpos = this->link_->GetWorldLinearVel().Ign();
+        ignition::math::Vector3d veul = this->link_->GetWorldAngularVel().Ign();
+
+        pose = this->link_->GetWorldPose().Ign();
+#endif
 
         // Apply Reference Frame
         if (this->reference_link_)
         {
-          // convert to relative pose
-          frame_pose = this->reference_link_->GetWorldPose();
-          pose.pos = pose.pos - frame_pose.pos;
-          pose.pos = frame_pose.rot.RotateVectorReverse(pose.pos);
-          pose.rot *= frame_pose.rot.GetInverse();
-          // convert to relative rates
-          frame_vpos = this->reference_link_->GetWorldLinearVel();
-          frame_veul = this->reference_link_->GetWorldAngularVel();
-          vpos = frame_pose.rot.RotateVector(vpos - frame_vpos);
-          veul = frame_pose.rot.RotateVector(veul - frame_veul);
+          // convert to relative pose, rates
+#if GAZEBO_MAJOR_VERSION >= 8
+          frame_pose = this->reference_link_->WorldPose();
+          frame_vpos = this->reference_link_->WorldLinearVel();
+          frame_veul = this->reference_link_->WorldAngularVel();
+#else
+          frame_pose = this->reference_link_->GetWorldPose().Ign();
+          frame_vpos = this->reference_link_->GetWorldLinearVel().Ign();
+          frame_veul = this->reference_link_->GetWorldAngularVel().Ign();
+#endif
+          pose.Pos() = pose.Pos() - frame_pose.Pos();
+          pose.Pos() = frame_pose.Rot().RotateVectorReverse(pose.Pos());
+          pose.Rot() *= frame_pose.Rot().Inverse();
+
+          vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
+          veul = frame_pose.Rot().RotateVector(veul - frame_veul);
         }
 
         // Apply Constant Offsets
         // apply xyz offsets and get position and rotation components
-        pose.pos = pose.pos + this->offset_.pos;
+        pose.Pos() = pose.Pos() + this->offset_.Pos();
         // apply rpy offsets
-        pose.rot = this->offset_.rot*pose.rot;
-        pose.rot.Normalize();
+        pose.Rot() = this->offset_.Rot()*pose.Rot();
+        pose.Rot().Normalize();
 
         // compute accelerations (not used)
         this->apos_ = (this->last_vpos_ - vpos) / tmp_dt;
@@ -270,27 +307,27 @@ void GazeboRosP3D::UpdateChild()
         this->last_frame_veul_ = frame_veul;
 
         // Fill out messages
-        this->pose_msg_.pose.pose.position.x    = pose.pos.x;
-        this->pose_msg_.pose.pose.position.y    = pose.pos.y;
-        this->pose_msg_.pose.pose.position.z    = pose.pos.z;
+        this->pose_msg_.pose.pose.position.x    = pose.Pos().X();
+        this->pose_msg_.pose.pose.position.y    = pose.Pos().Y();
+        this->pose_msg_.pose.pose.position.z    = pose.Pos().Z();
 
-        this->pose_msg_.pose.pose.orientation.x = pose.rot.x;
-        this->pose_msg_.pose.pose.orientation.y = pose.rot.y;
-        this->pose_msg_.pose.pose.orientation.z = pose.rot.z;
-        this->pose_msg_.pose.pose.orientation.w = pose.rot.w;
+        this->pose_msg_.pose.pose.orientation.x = pose.Rot().X();
+        this->pose_msg_.pose.pose.orientation.y = pose.Rot().Y();
+        this->pose_msg_.pose.pose.orientation.z = pose.Rot().Z();
+        this->pose_msg_.pose.pose.orientation.w = pose.Rot().W();
 
-        this->pose_msg_.twist.twist.linear.x  = vpos.x +
+        this->pose_msg_.twist.twist.linear.x  = vpos.X() +
           this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.linear.y  = vpos.y +
+        this->pose_msg_.twist.twist.linear.y  = vpos.Y() +
           this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.linear.z  = vpos.z +
+        this->pose_msg_.twist.twist.linear.z  = vpos.Z() +
           this->GaussianKernel(0, this->gaussian_noise_);
         // pass euler angular rates
-        this->pose_msg_.twist.twist.angular.x = veul.x +
+        this->pose_msg_.twist.twist.angular.x = veul.X() +
           this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.angular.y = veul.y +
+        this->pose_msg_.twist.twist.angular.y = veul.Y() +
           this->GaussianKernel(0, this->gaussian_noise_);
-        this->pose_msg_.twist.twist.angular.z = veul.z +
+        this->pose_msg_.twist.twist.angular.z = veul.Z() +
           this->GaussianKernel(0, this->gaussian_noise_);
 
         // fill in covariance matrix

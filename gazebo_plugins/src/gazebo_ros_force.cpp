@@ -46,7 +46,7 @@ GazeboRosForce::GazeboRosForce()
 // Destructor
 GazeboRosForce::~GazeboRosForce()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+  this->update_connection_.reset();
 
   // Custom Callback Queue
   this->queue_.clear();
@@ -137,8 +137,8 @@ void GazeboRosForce::UpdateObjectForce(const geometry_msgs::Wrench::ConstPtr& _m
 void GazeboRosForce::UpdateChild()
 {
   this->lock_.lock();
-  math::Vector3 force(this->wrench_msg_.force.x,this->wrench_msg_.force.y,this->wrench_msg_.force.z);
-  math::Vector3 torque(this->wrench_msg_.torque.x,this->wrench_msg_.torque.y,this->wrench_msg_.torque.z);
+  ignition::math::Vector3d force(this->wrench_msg_.force.x,this->wrench_msg_.force.y,this->wrench_msg_.force.z);
+  ignition::math::Vector3d torque(this->wrench_msg_.torque.x,this->wrench_msg_.torque.y,this->wrench_msg_.torque.z);
   this->link_->AddForce(force);
   this->link_->AddTorque(torque);
   this->lock_.unlock();

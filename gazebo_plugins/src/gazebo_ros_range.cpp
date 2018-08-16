@@ -243,7 +243,17 @@ void GazeboRosRange::OnNewLaserScans()
 {
   if (this->topic_name_ != "")
   {
+#if GAZEBO_MAJOR_VERSION >= 8
+    common::Time cur_time = this->world_->SimTime();
+#else
     common::Time cur_time = this->world_->GetSimTime();
+#endif
+    if (cur_time < this->last_update_time_)
+    {
+        ROS_WARN_NAMED("range", "Negative sensor update time difference detected.");
+        this->last_update_time_ = cur_time;
+    }
+
     if (cur_time - this->last_update_time_ >= this->update_period_)
     {
       common::Time sensor_update_time =

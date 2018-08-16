@@ -38,7 +38,7 @@ GazeboRosIMU::GazeboRosIMU()
 // Destructor
 GazeboRosIMU::~GazeboRosIMU()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+  this->update_connection_.reset();
   // Finalize the controller
   this->rosnode_->shutdown();
   this->callback_queue_thread_.join();
@@ -102,18 +102,18 @@ void GazeboRosIMU::LoadThread()
   if (!this->sdf->HasElement("xyzOffset"))
   {
     ROS_INFO_NAMED("imu", "imu plugin missing <xyzOffset>, defaults to 0s");
-    this->offset_.pos = math::Vector3(0, 0, 0);
+    this->offset_.Pos() = ignition::math::Vector3d(0, 0, 0);
   }
   else
-    this->offset_.pos = this->sdf->Get<math::Vector3>("xyzOffset");
+    this->offset_.Pos() = this->sdf->Get<ignition::math::Vector3d>("xyzOffset");
 
   if (!this->sdf->HasElement("rpyOffset"))
   {
     ROS_INFO_NAMED("imu", "imu plugin missing <rpyOffset>, defaults to 0s");
-    this->offset_.rot = math::Vector3(0, 0, 0);
+    this->offset_.Rot() = ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, 0));
   }
   else
-    this->offset_.rot = this->sdf->Get<math::Vector3>("rpyOffset");
+    this->offset_.Rot() = ignition::math::Quaterniond(this->sdf->Get<ignition::math::Vector3d>("rpyOffset"));
 
   if (!this->sdf->HasElement("updateRate"))
   {
@@ -147,7 +147,11 @@ void GazeboRosIMU::LoadThread()
 
   // assert that the body by link_name_ exists
   this->link = boost::dynamic_pointer_cast<physics::Link>(
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->world_->EntityByName(this->link_name_));
+#else
     this->world_->GetEntity(this->link_name_));
+#endif
   if (!this->link)
   {
     ROS_FATAL_NAMED("imu", "gazebo_ros_imu plugin error: bodyName: %s does not exist\n",
@@ -171,11 +175,20 @@ void GazeboRosIMU::LoadThread()
   }
 
   // Initialize the controller
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_time_ = this->world_->SimTime();
+#else
   this->last_time_ = this->world_->GetSimTime();
+#endif
 
   // this->initial_pose_ = this->link->GetPose();
-  this->last_vpos_ = this->link->GetWorldLinearVel();
-  this->last_veul_ = this->link->GetWorldAngularVel();
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->last_vpos_ = this->link->WorldLinearVel();
+  this->last_veul_ = this->link->WorldAngularVel();
+#else
+  this->last_vpos_ = this->link->GetWorldLinearVel().Ign();
+  this->last_veul_ = this->link->GetWorldAngularVel().Ign();
+#endif
   this->apos_ = 0;
   this->aeul_ = 0;
 
@@ -203,7 +216,11 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 // Update the controller
 void GazeboRosIMU::UpdateChild()
 {
+#if GAZEBO_MAJOR_VERSION >= 8
+  common::Time cur_time = this->world_->SimTime();
+#else
   common::Time cur_time = this->world_->GetSimTime();
+#endif
 
   // rate control
   if (this->update_rate_ > 0 &&
@@ -212,23 +229,32 @@ void GazeboRosIMU::UpdateChild()
 
   if ((this->pub_.getNumSubscribers() > 0 && this->topic_name_ != ""))
   {
-    math::Pose pose;
-    math::Quaternion rot;
-    math::Vector3 pos;
+    ignition::math::Pose3d pose;
+    ignition::math::Quaterniond rot;
+    ignition::math::Vector3d pos;
 
     // Get Pose/Orientation ///@todo: verify correctness
-    pose = this->link->GetWorldPose();
+#if GAZEBO_MAJOR_VERSION >= 8
+    pose = this->link->WorldPose();
+#else
+    pose = this->link->GetWorldPose().Ign();
+#endif
     // apply xyz offsets and get position and rotation components
-    pos = pose.pos + this->offset_.pos;
-    rot = pose.rot;
+    pos = pose.Pos() + this->offset_.Pos();
+    rot = pose.Rot();
 
     // apply rpy offsets
-    rot = this->offset_.rot*rot;
+    rot = this->offset_.Rot()*rot;
     rot.Normalize();
 
     // get Rates
-    math::Vector3 vpos = this->link->GetWorldLinearVel();
-    math::Vector3 veul = this->link->GetWorldAngularVel();
+#if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Vector3d vpos = this->link->WorldLinearVel();
+    ignition::math::Vector3d veul = this->link->WorldAngularVel();
+#else
+    ignition::math::Vector3d vpos = this->link->GetWorldLinearVel().Ign();
+    ignition::math::Vector3d veul = this->link->GetWorldAngularVel().Ign();
+#endif
 
     // differentiate to get accelerations
     double tmp_dt = this->last_time_.Double() - cur_time.Double();
@@ -250,37 +276,37 @@ void GazeboRosIMU::UpdateChild()
     // uncomment this if we are reporting orientation in the local frame
     // not the case for our imu definition
     // // apply fixed orientation offsets of initial pose
-    // rot = this->initial_pose_.rot*rot;
+    // rot = this->initial_pose_.Rot()*rot;
     // rot.Normalize();
 
-    this->imu_msg_.orientation.x = rot.x;
-    this->imu_msg_.orientation.y = rot.y;
-    this->imu_msg_.orientation.z = rot.z;
-    this->imu_msg_.orientation.w = rot.w;
+    this->imu_msg_.orientation.x = rot.X();
+    this->imu_msg_.orientation.y = rot.Y();
+    this->imu_msg_.orientation.z = rot.Z();
+    this->imu_msg_.orientation.w = rot.W();
 
     // pass euler angular rates
-    math::Vector3 linear_velocity(
-      veul.x + this->GaussianKernel(0, this->gaussian_noise_),
-      veul.y + this->GaussianKernel(0, this->gaussian_noise_),
-      veul.z + this->GaussianKernel(0, this->gaussian_noise_));
+    ignition::math::Vector3d linear_velocity(
+      veul.X() + this->GaussianKernel(0, this->gaussian_noise_),
+      veul.Y() + this->GaussianKernel(0, this->gaussian_noise_),
+      veul.Z() + this->GaussianKernel(0, this->gaussian_noise_));
     // rotate into local frame
     // @todo: deal with offsets!
     linear_velocity = rot.RotateVector(linear_velocity);
-    this->imu_msg_.angular_velocity.x    = linear_velocity.x;
-    this->imu_msg_.angular_velocity.y    = linear_velocity.y;
-    this->imu_msg_.angular_velocity.z    = linear_velocity.z;
+    this->imu_msg_.angular_velocity.x    = linear_velocity.X();
+    this->imu_msg_.angular_velocity.y    = linear_velocity.Y();
+    this->imu_msg_.angular_velocity.z    = linear_velocity.Z();
 
     // pass accelerations
-    math::Vector3 linear_acceleration(
-      apos_.x + this->GaussianKernel(0, this->gaussian_noise_),
-      apos_.y + this->GaussianKernel(0, this->gaussian_noise_),
-      apos_.z + this->GaussianKernel(0, this->gaussian_noise_));
+    ignition::math::Vector3d linear_acceleration(
+      apos_.X() + this->GaussianKernel(0, this->gaussian_noise_),
+      apos_.Y() + this->GaussianKernel(0, this->gaussian_noise_),
+      apos_.Z() + this->GaussianKernel(0, this->gaussian_noise_));
     // rotate into local frame
     // @todo: deal with offsets!
     linear_acceleration = rot.RotateVector(linear_acceleration);
-    this->imu_msg_.linear_acceleration.x    = linear_acceleration.x;
-    this->imu_msg_.linear_acceleration.y    = linear_acceleration.y;
-    this->imu_msg_.linear_acceleration.z    = linear_acceleration.z;
+    this->imu_msg_.linear_acceleration.x    = linear_acceleration.X();
+    this->imu_msg_.linear_acceleration.y    = linear_acceleration.Y();
+    this->imu_msg_.linear_acceleration.z    = linear_acceleration.Z();
 
     // fill in covariance matrix
     /// @todo: let user set separate linear and angular covariance values.

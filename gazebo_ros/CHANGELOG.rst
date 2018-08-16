@@ -2,6 +2,47 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.17 (2018-06-07)
+-------------------
+
+2.5.16 (2018-06-04)
+-------------------
+* Use generic SIGINT parameter in kill command for gazebo script (kinetic-devel) (`#723 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/723>`_)
+  * Use generic SIGINT parameter in kill command for gazebo script
+  * redirect to kill command to std_err
+* strip comments from parsed urdf (`#695 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/695>`_)
+  Remove comments from urdf before trying to find packages. Otherwise non-existant packages will produce a fatal error, even though they are not used.
+* Merge pull request `#672 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/672>`_ from ros-simulation/gzclient_verbose
+  Pass verbose argument to gzclient
+* Merge pull request `#670 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/670>`_ from ros-simulation/add_ros_api_plugin_to_gzclient
+  Load the libgazebo_ros_api_plugin when starting gzclient
+* Pass verbose argument to gzclient
+* Load the libgazebo_ros_api_plugin when starting gzclient so that the ROS event loop will turn over, which is required when you have a client-side Gazebo plugin that uses ROS.
+* Contributors: Brian Gerkey, Jose Luis Rivero, Steven Peters, azhural, chapulina
+
+2.5.15 (2018-02-12)
+-------------------
+* Fix last gazebo8 warnings! (`#658 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/658>`_)
+* Fix for relative frame errors (`#605 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/605>`_)
+* Fix gazebo8 warnings part 10: ifdefs for GetModel, GetEntity, Light (`#656 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/656>`_)
+* gazebo8 warnings: ifdefs for Get.*Vel() (`#653 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/653>`_)
+* Prevents GAZEBO_MODEL_DATABASE_URI from being overwritten (`#644 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/644>`_)
+* Fix gazebo8 warnings part 7: ifdef's for Joint::GetAngle and some cleanup (`#642 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/642>`_)
+* Contributors: Hamza Merzić, R, Steven Peters
+
+2.5.14 (2017-12-11)
+-------------------
+* for gazebo8+, call functions without Get (`#639 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/639>`_)
+* Fix gazebo8 warnings part 5: ignition math in gazebo_ros (`#635 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/635>`_)
+* Fix gazebo8 warnings part 4: convert remaining local variables in plugins to ign-math (`#633 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/633>`_)
+* gazebo_ros: fix support for python3 (`#622 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/622>`_)
+* gazebo_ros_api_plugin: improve plugin xml parsing (`#625 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/625>`_)
+* Replace Events::Disconnect* with pointer reset (`#623 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/623>`_)
+* Install spawn_model using catkin_install_python (`#621 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/621>`_)
+* [gazebo_ros] don't overwrite parameter "use_sim_time" (`#606 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/606>`_)
+  * Parameter /use_sim_time is only set if not present on Parameter Server
+* Contributors: Jose Luis Rivero, Manuel Ilg, Mike Purvis, Nils Rokita, Steven Peters
+
 2.5.13 (2017-06-24)
 -------------------
 * Quote arguments to echo in libcommon.sh (`#590 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/590>`_)
@@ -172,7 +213,7 @@ Changelog for package gazebo_ros
   There were some errors in STL iterators.
   Initialized values of member variables in constructor.
   Removed an unused variable (model_name).
-* Contributors: Carlos Agüero, John Hsu, Jose Luis Rivero, Nate Koenig, Steven Peters, hsu, osrf
+* Contributors: Carlos Aguero, John Hsu, Jose Luis Rivero, Nate Koenig, Steven Peters, hsu, osrf
 
 2.4.5 (2014-08-18)
 ------------------

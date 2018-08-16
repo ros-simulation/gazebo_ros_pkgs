@@ -76,11 +76,7 @@ void GazeboRosCamera::OnNewFrame(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
-# if GAZEBO_MAJOR_VERSION >= 7
   common::Time sensor_update_time = this->parentSensor_->LastMeasurementTime();
-# else
-  common::Time sensor_update_time = this->parentSensor_->GetLastMeasurementTime();
-# endif
 
   if (!this->parentSensor->IsActive())
   {
@@ -92,6 +88,12 @@ void GazeboRosCamera::OnNewFrame(const unsigned char *_image,
   {
     if ((*this->image_connect_count_) > 0)
     {
+      if (sensor_update_time < this->last_update_time_)
+      {
+          ROS_WARN_NAMED("camera", "Negative sensor update time difference detected.");
+          this->last_update_time_ = sensor_update_time;
+      }
+
       // OnNewFrame is triggered at the gazebo sensor <update_rate>
       // while there is also a plugin <updateRate> that can throttle the
       // rate down further (but then why not reduce the sensor rate?
