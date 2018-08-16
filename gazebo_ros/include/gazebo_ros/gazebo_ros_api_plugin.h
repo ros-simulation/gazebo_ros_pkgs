@@ -100,6 +100,9 @@
 
 #include <boost/algorithm/string.hpp>
 
+// For real-time factor calculations
+#include <boost/circular_buffer.hpp>
+
 namespace gazebo
 {
 
@@ -246,7 +249,7 @@ private:
   void publishSimTime();
 
   /// \brief Republish the Gazebo real-time factor
-  void publishRealTimeFactor(ConstWorldStatisticsPtr &_msg);
+  void publishRealTimeFactor();
 
   /// \brief
   void publishLinkStates();
@@ -321,7 +324,6 @@ private:
   gazebo::transport::PublisherPtr light_modify_pub_;
   gazebo::transport::PublisherPtr request_pub_;
   gazebo::transport::SubscriberPtr response_sub_;
-  gazebo::transport::SubscriberPtr rtf_sub_;    // Real-time factor republisher
 
   boost::shared_ptr<ros::NodeHandle> nh_;
   ros::CallbackQueue gazebo_queue_;
@@ -330,6 +332,7 @@ private:
   gazebo::physics::WorldPtr world_;
   gazebo::event::ConnectionPtr wrench_update_event_;
   gazebo::event::ConnectionPtr force_update_event_;
+  gazebo::event::ConnectionPtr rtf_update_event_;
   gazebo::event::ConnectionPtr time_update_event_;
   gazebo::event::ConnectionPtr pub_link_states_event_;
   gazebo::event::ConnectionPtr pub_model_states_event_;
@@ -386,10 +389,10 @@ private:
   gazebo::common::Time last_pub_clock_time_;
 
   /// \brief Sim time buffer for real-time factor calculation
-  std::list<common::Time> simTimes;
+  boost::circular_buffer<common::Time> sim_times_;
 
   /// \brief Real time buffer for real-time factor calculation
-  std::list<common::Time> realTimes;
+  boost::circular_buffer<common::Time> real_times_;
 
   /// \brief A mutex to lock access to fields that are used in ROS message callbacks
   boost::mutex lock_;

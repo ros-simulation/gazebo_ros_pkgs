@@ -35,7 +35,9 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   plugin_loaded_(false),
   pub_link_states_connection_count_(0),
   pub_model_states_connection_count_(0),
-  pub_clock_frequency_(0)
+  pub_clock_frequency_(0),
+  real_times_(20),
+  sim_times_(20)
 {
   robot_namespace_.clear();
 }
@@ -59,6 +61,7 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   gazebo::event::Events::DisconnectWorldCreated(load_gazebo_ros_api_plugin_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(wrench_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(force_update_event_);
+  gazebo::event::Events::DisconnectWorldUpdateBegin(rtf_update_event_);
   gazebo::event::Events::DisconnectWorldUpdateBegin(time_update_event_);
   ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
 
@@ -188,7 +191,6 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
-  rtf_sub_ = gazebonode_->Subscribe("~/world_stats", &GazeboRosApiPlugin::publishRealTimeFactor, this);
 
   // reset topic connection counts
   pub_link_states_connection_count_ = 0;
@@ -201,6 +203,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
   force_update_event_  = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::forceJointSchedulerSlot,this));
   time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
+  rtf_update_event_    = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishRealTimeFactor,this));
 }
 
 void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
@@ -1945,48 +1948,32 @@ void GazeboRosApiPlugin::publishSimTime()
   pub_clock_.publish(ros_time_);
 }
 
-void GazeboRosApiPlugin::publishRealTimeFactor(ConstWorldStatisticsPtr &_msg)
+void GazeboRosApiPlugin::publishRealTimeFactor()
 {
-  // Note that this is a reimplementation of the Gazebo method found here:
+  // Note that this based on the native Gazebo method found here:
   // https://bitbucket.org/osrf/gazebo/src/a24b331f8ebfd712a226ba73b7f43d2d4c14fe15/tools/gz.cc?at=gazebo7&fileviewer=file-view-default#gz.cc-854
   // The goal is to make the real-time factor available in ROS bags, for use as an easy "system performance" metric
   // with post-run analysis.
-  double percent = 0;
-  common::Time simTime  = msgs::Convert(_msg->sim_time());
-  common::Time realTime = msgs::Convert(_msg->real_time());
+  sim_times_.push_back(world_->GetSimTime());
+  real_times_.push_back(world_->GetRealTime());
 
-  this->simTimes.push_back(msgs::Convert(_msg->sim_time()));
-  if (this->simTimes.size() > 20)
-    this->simTimes.pop_front();
+  auto ss_lambda = [&](common::Time& a, common::Time& b){
+    return a + (b - sim_times_.front());
+  };
+  common::Time sim_sum = std::accumulate(++sim_times_.begin(), sim_times_.end(), common::Time(0), ss_lambda);
 
-  this->realTimes.push_back(msgs::Convert(_msg->real_time()));
-  if (this->realTimes.size() > 20)
-    this->realTimes.pop_front();
-
-  common::Time simAvg, realAvg;
-  std::list<common::Time>::iterator simIter, realIter;
-  simIter = ++(this->simTimes.begin());
-  realIter = ++(this->realTimes.begin());
-  while (simIter != this->simTimes.end() && realIter != this->realTimes.end())
-  {
-    simAvg += ((*simIter) - this->simTimes.front());
-    realAvg += ((*realIter) - this->realTimes.front());
-    ++simIter;
-    ++realIter;
-  }
+  auto rs_lambda = [&](common::Time& a, common::Time& b){
+    return a + (b - real_times_.front());
+  };
+  common::Time real_sum = std::accumulate(++real_times_.begin(), real_times_.end(), common::Time(0), rs_lambda);
 
   // Prevent divide by zero
-  if (realAvg <= 0)
+  if (real_sum.Double() <= 0)
     return;
 
-  simAvg = simAvg / realAvg;
+  double rtf = (sim_sum / real_sum).Double();
 
-  if (simAvg > 0)
-    percent = simAvg.Double();
-  else
-    percent = 0;
-
-  pub_real_time_factor_.publish(static_cast<float>(percent));
+  pub_real_time_factor_.publish(static_cast<float>(rtf));
 }
 
 void GazeboRosApiPlugin::publishLinkStates()
