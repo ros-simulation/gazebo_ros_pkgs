@@ -68,8 +68,7 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
   EXPECT_LT(pre_movement_msg->angular_velocity.z, 1e-9);
 
   // Apply a force + torque and collect a new message
-  for (unsigned int i = 0; i < 5; i++)
-  {
+  for (unsigned int i = 0; i < 5; i++) {
     // Small steps so the force is continually applied
     link->SetForce({500.0, 0.0, 0.0});
     link->SetTorque({0.0, 0.0, 500.0});
