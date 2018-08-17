@@ -1,4 +1,5 @@
 find_package(ament_cmake_gtest REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 # Plugins
@@ -39,10 +40,13 @@ foreach(test ${tests})
     TIMEOUT
       120
   )
-  target_link_libraries(${test} gazebo_ros_utils)
+  target_link_libraries(${test}
+    gazebo_ros_utils
+  )
   ament_target_dependencies(${test}
     "rclcpp"
     "std_msgs"
+    "geometry_msgs"
     "gazebo_dev"
   )
 endforeach()
