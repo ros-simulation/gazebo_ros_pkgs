@@ -55,7 +55,7 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
       });
 
   // Step until an imu message will have been published
-  world->Step(500);
+  world->Step(100);
   rclcpp::spin_some(node);
 
   // Get the initial imu output when the box is at rest
@@ -63,21 +63,29 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
   ASSERT_NE(nullptr, pre_movement_msg);
   auto pre_movement_yaw =
     gazebo_ros::Convert<ignition::math::Quaterniond>(pre_movement_msg->orientation).Euler().Z();
+  EXPECT_LT(pre_movement_yaw, 1e-9);
+  EXPECT_LT(pre_movement_msg->linear_acceleration.x, 1e-9);
+  EXPECT_LT(pre_movement_msg->angular_velocity.z, 1e-9);
 
   // Apply a force + torque and collect a new message
-  link->SetForce({500.0, 0.0, 0.0});
-  link->SetTorque({0.0, 0.0, 200.0});
-  world->Step(500);
+  for (unsigned int i = 0; i < 5; i++)
+  {
+    // Small steps so the force is continually applied
+    link->SetForce({500.0, 0.0, 0.0});
+    link->SetTorque({0.0, 0.0, 500.0});
+    world->Step(50);
+  }
   rclcpp::spin_some(node);
+
+  // Check that IMU output reflects state changes due to applied force
   auto post_movement_msg = std::make_shared<sensor_msgs::msg::Imu>(*msg);
   ASSERT_NE(nullptr, post_movement_msg);
   auto post_movement_yaw =
     gazebo_ros::Convert<ignition::math::Quaterniond>(post_movement_msg->orientation).Euler().Z();
-
-  // Check that IMU output reflects state changes due to applied force
-  EXPECT_GT(post_movement_msg->linear_acceleration.x, pre_movement_msg->linear_acceleration.x);
-  EXPECT_GT(post_movement_msg->angular_velocity.z, pre_movement_msg->angular_velocity.z);
-  EXPECT_GT(post_movement_yaw, pre_movement_yaw);
+  EXPECT_GT(post_movement_yaw, 0.1);
+  // The linear acceleration reported by Gazebo flips signs, so we take the absolute value
+  EXPECT_GT(std::abs(post_movement_msg->linear_acceleration.x), 0.1);
+  EXPECT_GT(post_movement_msg->angular_velocity.z, 0.1);
 }
 
 int main(int argc, char ** argv)
