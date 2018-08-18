@@ -53,7 +53,13 @@ void GazeboRosInit::Load(int argc, char ** argv)
   rclcpp::init(argc, argv);
 
   impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_clock");
-  impl_->clock_pub_ = impl_->ros_node_->create_publisher<rosgraph_msgs::msg::Clock>("/clock");
+
+  // Offer transient local durability on the clock topic so that if publishing is infrequent (e.g.
+  // the simulation is paused), late subscribers can receive the previously published message(s).
+  rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
+  qos_profile.durability = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL;
+  impl_->clock_pub_ = impl_->ros_node_->create_publisher<rosgraph_msgs::msg::Clock>("/clock",
+    qos_profile);
 
   // Get publish rate from parameter if set
   rclcpp::Parameter rate_param;
