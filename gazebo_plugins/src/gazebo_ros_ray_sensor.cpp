@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo_plugins/gazebo_ros_ray_sensor.hpp>
 #include <gazebo/transport/transport.hh>
-#include <gazebo_ros/utils.hpp>
+#include <gazebo_plugins/gazebo_ros_ray_sensor.hpp>
 #include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/node.hpp>
+#include <gazebo_ros/utils.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #include <string>
 #include <algorithm>
@@ -64,7 +66,7 @@ public:
   std::string sensor_topic_;
 
   /// Minimum intensity value to publish for laser scan / pointcloud messages
-  double min_intensity_;
+  double min_intensity_{0.0};
 
   /// brief Radiation type to report when output type is range
   uint8_t range_radiation_type_;
@@ -134,7 +136,6 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   }
 
   if (!_sdf->HasElement("min_intensity")) {
-    impl_->min_intensity_ = 0.0;
     RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "missing <min_intensity>, defaults to %f",
       impl_->min_intensity_);
   } else {
