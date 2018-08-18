@@ -15,22 +15,9 @@
 #ifndef GAZEBO_PLUGINS__GAZEBO_ROS_RAY_SENSOR_HPP_
 #define GAZEBO_PLUGINS__GAZEBO_ROS_RAY_SENSOR_HPP_
 
-#include <gazebo/physics/physics.hh>
 #include <gazebo/common/Plugin.hh>
-#include <gazebo/sensors/RaySensor.hh>
-#include <gazebo/sensors/GpuRaySensor.hh>
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/laser_scan.hpp>
-#include <sensor_msgs/msg/point_cloud.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
-#include <sensor_msgs/msg/range.hpp>
-#include <gazebo_ros/node.hpp>
-#include <boost/variant.hpp>
 
-
-#include <string>
 #include <memory>
-
 
 namespace gazebo_plugins
 {
