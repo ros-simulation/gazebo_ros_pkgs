@@ -15,6 +15,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_dev REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 include_directories(
   include
@@ -46,6 +47,7 @@ add_library(gazebo_ros_init SHARED
 ament_target_dependencies(gazebo_ros_init
   "rclcpp"
   "gazebo_dev"
+  "geometry_msgs"
 )
 target_link_libraries(gazebo_ros_init
   gazebo_ros_node
