@@ -61,21 +61,21 @@ std::string SensorFrameID(const gazebo::sensors::Sensor & _sensor, const sdf::El
 }
 
 Throttler::Throttler(const double _hz)
-: period_(gazebo::common::Time(1.0 / _hz)),
+: period_(1.0 / _hz),
   last_time_(0, 0)
 {
 }
 
 bool Throttler::IsReady(const gazebo::common::Time & _now)
 {
-  // If time went backwords, reset
+  // If time went backwards, reset
   if (_now < last_time_) {
     last_time_ = _now;
     return true;
   }
 
   // If not enough time has passed, return false
-  if (_now - last_time_ < period_) {
+  if (period_ > 0 && (_now - last_time_).Double() < period_) {
     return false;
   }
 

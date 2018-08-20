@@ -71,7 +71,7 @@ public:
 
 private:
   /// The time between calls to @IsReady returning true
-  gazebo::common::Time period_;
+  double period_;
   /// The last time @IsReady returned true
   gazebo::common::Time last_time_;
 };
