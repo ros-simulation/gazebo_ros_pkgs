@@ -15,9 +15,9 @@
 #ifndef GAZEBO_ROS__UTILS_HPP_
 #define GAZEBO_ROS__UTILS_HPP_
 
+#include <gazebo/common/Time.hh>
 #include <gazebo/sensors/Noise.hh>
 #include <gazebo/sensors/Sensor.hh>
-#include <gazebo/common/Time.hh>
 
 #include <string>
 
