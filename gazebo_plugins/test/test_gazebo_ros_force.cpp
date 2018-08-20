@@ -50,6 +50,8 @@ TEST_F(GazeboRosForceTest, ApplyForceTorque)
   ASSERT_NE(nullptr, node);
 
   auto pub = node->create_publisher<geometry_msgs::msg::Wrench>("test/force_test");
+  // Wait a bit for the force plugin to be initialized.
+  gazebo::common::Time::MSleep(1000);
 
   // Apply force on X
   auto msg = geometry_msgs::msg::Wrench();
