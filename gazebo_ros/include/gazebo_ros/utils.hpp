@@ -66,7 +66,7 @@ public:
   /// Check if the enough time has elapsed since the last time IsReady returned true
   /// \param[in] _time The current time.
   /// \return false if not enough time has elapsed from the last time IsReady was true
-  /// \return true if enough time has elapsed since the last success
+  /// \return true if enough time has elapsed since the last success, or it is the first time.
   bool IsReady(const gazebo::common::Time & _time);
 
 private:
