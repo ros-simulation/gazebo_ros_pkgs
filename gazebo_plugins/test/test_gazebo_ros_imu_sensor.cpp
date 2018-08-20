@@ -63,9 +63,9 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
   ASSERT_NE(nullptr, pre_movement_msg);
   auto pre_movement_yaw =
     gazebo_ros::Convert<ignition::math::Quaterniond>(pre_movement_msg->orientation).Euler().Z();
-  EXPECT_LT(pre_movement_yaw, 1e-9);
-  EXPECT_LT(pre_movement_msg->linear_acceleration.x, 1e-9);
-  EXPECT_LT(pre_movement_msg->angular_velocity.z, 1e-9);
+  EXPECT_LT(pre_movement_yaw, 0.1);
+  EXPECT_LT(pre_movement_msg->linear_acceleration.x, 0.5);
+  EXPECT_LT(pre_movement_msg->angular_velocity.z, 0.1);
 
   // Apply a force + torque and collect a new message
   for (unsigned int i = 0; i < 5; i++) {
@@ -83,8 +83,8 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
     gazebo_ros::Convert<ignition::math::Quaterniond>(post_movement_msg->orientation).Euler().Z();
   EXPECT_GT(post_movement_yaw, 0.1);
   // The linear acceleration reported by Gazebo flips signs, so we take the absolute value
-  EXPECT_GT(std::abs(post_movement_msg->linear_acceleration.x), 0.1);
-  EXPECT_GT(post_movement_msg->angular_velocity.z, 0.1);
+  EXPECT_GT(std::abs(post_movement_msg->linear_acceleration.x), 1.0);
+  EXPECT_GT(post_movement_msg->angular_velocity.z, 1.0);
 }
 
 int main(int argc, char ** argv)
