@@ -19,6 +19,8 @@
       * /gpu_ray/pointcloud
       * /gpu_ray/laserscan
 
+  (Note that the laser scans are not working on RViz due to https://github.com/ros2/rviz/issues/332)
+
   On RViz, change the "Fixed Frame" to `ray_link`
 
   Echo the range topics, i.e.
@@ -121,16 +123,15 @@
                 <min_angle>-0.5236</min_angle>
                 <max_angle>0.5236</max_angle>
               </horizontal>
+              <!--
+              gpu_ray currently only supports 1 vertical ray (no vertical tag)
+              See https://bitbucket.org/osrf/gazebo/issues/2486
               <vertical>
-                <!--
-                  gpu_ray currently only supports 1 vertical ray
-                  See https://bitbucket.org/osrf/gazebo/issues/2486
-                -->
-                <samples>1</samples>
+                <samples>100</samples>
                 <resolution>1.0</resolution>
                 <min_angle>-0.5236</min_angle>
                 <max_angle>0.5236</max_angle>
-              </vertical>
+              </vertical-->
             </scan>
             <range>
               <min>0.05</min>

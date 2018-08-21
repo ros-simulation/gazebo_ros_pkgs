@@ -34,10 +34,13 @@ class GazeboRosRaySensorTest : public gazebo::ServerFixture
 protected:
   using position_t = ignition::math::Vector3d;
   using positions_t = std::vector<position_t>;
+
   /// Maximum error distance a point and the ground truth
   static constexpr double POINT_DISTANCE_TOL = 0.06;
+
   /// Tollerance for error in doubles vs ground truth
   static constexpr double ROUNDING_ERROR_TOL = 1E-2;
+
   /// Verify that a point is close to one of the ground truth points
   bool VerifyPoint(const positions_t & positions, const ignition::math::Vector3d & point)
   {
@@ -60,10 +63,13 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   positions_t positions;
   std::vector<double> angles;
   std::vector<double> ranges;
+
   // Store ground truth for verifying pointcloud / laserscan
   for (auto model : world->Models()) {
     // Only store the objects of interest (spheres)
-    if (model->GetName().find("sphere") != 0) {continue;}
+    if (model->GetName().find("sphere") != 0) {
+      continue;
+    }
 
     // Push object position into vector for ground truth
     auto position = model->WorldPose().Pos();
@@ -84,7 +90,6 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   // Create node and executor
   auto node = std::make_shared<rclcpp::Node>("gazebo_ros_joint_state_publisher_test");
   ASSERT_NE(nullptr, node);
-
 
   // Convienence function to subscribe to a topic and store it to a variable
   #define SUBSCRIBE_SETTER(msg, topic) \

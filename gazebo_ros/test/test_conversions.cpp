@@ -49,16 +49,31 @@ TEST(TestConversions, Quaternion)
 
 TEST(TestConversions, Time)
 {
-  // Time conversions
-  // Gazebo to rclcpp
-  gazebo::common::Time time(200, 100);
-  auto rostime = gazebo_ros::Convert<rclcpp::Time>(time);
-  EXPECT_EQ(200E9 + 100u, rostime.nanoseconds());
+  // Gazebo time
+  {
+    gazebo::common::Time time(200, 100);
 
-  /// Gazebo to ros message
-  auto time_msg = gazebo_ros::Convert<builtin_interfaces::msg::Time>(time);
-  EXPECT_EQ(200, time_msg.sec);
-  EXPECT_EQ(100u, time_msg.nanosec);
+    // to rclcpp
+    auto rostime = gazebo_ros::Convert<rclcpp::Time>(time);
+    EXPECT_EQ(200E9 + 100u, rostime.nanoseconds());
+
+    // to ros message
+    auto time_msg = gazebo_ros::Convert<builtin_interfaces::msg::Time>(time);
+    EXPECT_EQ(200, time_msg.sec);
+    EXPECT_EQ(100u, time_msg.nanosec);
+  }
+
+  // Gazebo msg
+  {
+    gazebo::msgs::Time time;
+    time.set_sec(200);
+    time.set_nsec(100);
+
+    // to ros message
+    auto time_msg = gazebo_ros::Convert<builtin_interfaces::msg::Time>(time);
+    EXPECT_EQ(200, time_msg.sec);
+    EXPECT_EQ(100u, time_msg.nanosec);
+  }
 }
 
 int main(int argc, char ** argv)

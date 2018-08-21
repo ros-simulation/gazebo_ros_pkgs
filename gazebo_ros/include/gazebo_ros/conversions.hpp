@@ -25,6 +25,7 @@
 #include <geometry_msgs/msg/vector3.hpp>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
+#include <rclcpp/logging.hpp>
 #include <rclcpp/time.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/point_cloud.hpp>
@@ -42,6 +43,9 @@
 
 namespace gazebo_ros
 {
+/// \brief Common logger for all conversions
+static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conversions");
+
 /// Generic conversion from a ROS geometry vector message to another type.
 /// \param[in] in Input message.
 /// \return Conversion result
@@ -185,6 +189,28 @@ builtin_interfaces::msg::Time Convert(const gazebo::common::Time & in)
   return time;
 }
 
+/// Generic conversion from an Gazebo Time message to another type.
+/// \param[in] in Input time
+/// \return Conversion result
+/// \tparam OUT Output type
+template<class OUT>
+OUT Convert(const gazebo::msgs::Time & in)
+{
+  return OUT();
+}
+
+/// \brief Specialized conversion from an Gazebo Time message to a ROS Time message.
+/// \param[in] in Gazebo Time message to convert.
+/// \return A ROS Time message with the same value as in
+template<>
+builtin_interfaces::msg::Time Convert(const gazebo::msgs::Time & in)
+{
+  builtin_interfaces::msg::Time time;
+  time.sec = in.sec();
+  time.nanosec = in.nsec();
+  return time;
+}
+
 /// Generic conversion from an Gazebo Laser Scan message to another type.
 /// \param[in] in Input message;
 /// \param[in] min_intensity The minimum intensity value to clip the output intensities
@@ -206,8 +232,7 @@ template<>
 sensor_msgs::msg::LaserScan Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity)
 {
   sensor_msgs::msg::LaserScan ls;
-  ls.header.stamp.sec = in.time().sec();
-  ls.header.stamp.nanosec = in.time().nsec();
+  ls.header.stamp = Convert<builtin_interfaces::msg::Time>(in.time());
   ls.angle_min = in.scan().angle_min();
   ls.angle_max = in.scan().angle_max();
   ls.angle_increment = in.scan().angle_step();
@@ -254,14 +279,19 @@ sensor_msgs::msg::PointCloud Convert(
   sensor_msgs::msg::PointCloud pc;
 
   // Fill header
-  pc.header.stamp.sec = in.time().sec();
-  pc.header.stamp.nanosec = in.time().nsec();
+  pc.header.stamp = Convert<builtin_interfaces::msg::Time>(in.time());
 
   // Cache values that are repeatedly used
   auto count = in.scan().count();
   auto vertical_count = in.scan().vertical_count();
   auto angle_step = in.scan().angle_step();
   auto vertical_angle_step = in.scan().vertical_angle_step();
+
+  // Gazebo sends an infinite vertical step if the number of samples is 1
+  // Surprisingly, not setting the <vertical> tag results in nan instead of inf, which is ok
+  if (isinf(vertical_angle_step)) {
+    RCLCPP_WARN_ONCE(conversions_logger, "Infinite angle step results in wrong PointCloud");
+  }
 
   // Setup point cloud fields
   pc.points.reserve(count * vertical_count);
@@ -272,8 +302,10 @@ sensor_msgs::msg::PointCloud Convert(
   // Iterators to range and intensities
   auto range_iter = in.scan().ranges().begin();
   auto intensity_iter = in.scan().intensities().begin();
+
   // Angles of ray currently processing, azimuth is horizontal, inclination is vertical
   double azimuth, inclination;
+
   // Index in vertical and horizontal loops
   size_t i, j;
 
@@ -293,7 +325,9 @@ sensor_msgs::msg::PointCloud Convert(
 
       double r = *range_iter;
       // Skip NaN / inf points
-      if (!isfinite(r)) {continue;}
+      if (!isfinite(r)) {
+        continue;
+      }
 
       // Get intensity, clipping at min_intensity
       double intensity = *intensity_iter;
@@ -332,14 +366,19 @@ sensor_msgs::msg::PointCloud2 Convert(
   pc.is_dense = true;
 
   // Fill header
-  pc.header.stamp.sec = in.time().sec();
-  pc.header.stamp.nanosec = in.time().nsec();
+  pc.header.stamp = Convert<builtin_interfaces::msg::Time>(in.time());
 
   // Cache values that are repeatedly used
   auto count = in.scan().count();
   auto vertical_count = in.scan().vertical_count();
   auto angle_step = in.scan().angle_step();
   auto vertical_angle_step = in.scan().vertical_angle_step();
+
+  // Gazebo sends an infinite vertical step if the number of samples is 1
+  // Surprisingly, not setting the <vertical> tag results in nan instead of inf, which is ok
+  if (isinf(vertical_angle_step)) {
+    RCLCPP_WARN_ONCE(conversions_logger, "Infinite angle step results in wrong PointCloud2");
+  }
 
   // Create fields in pointcloud
   sensor_msgs::PointCloud2Modifier pcd_modifier(pc);
@@ -360,8 +399,10 @@ sensor_msgs::msg::PointCloud2 Convert(
 
   // Number of points actually added
   size_t points_added = 0;
+
   // Angles of ray currently processing, azimuth is horizontal, inclination is vertical
   double azimuth, inclination;
+
   // Index in vertical and horizontal loops
   size_t i, j;
 
@@ -381,7 +422,9 @@ sensor_msgs::msg::PointCloud2 Convert(
 
       double r = *range_iter;
       // Skip NaN / inf points
-      if (!isfinite(r)) {continue;}
+      if (!isfinite(r)) {
+        continue;
+      }
 
       // Get intensity, clipping at min_intensity
       double intensity = *intensity_iter;
@@ -423,8 +466,7 @@ sensor_msgs::msg::Range Convert(const gazebo::msgs::LaserScanStamped & in, doubl
   sensor_msgs::msg::Range range_msg;
 
   // Set stamp from header
-  range_msg.header.stamp.sec = in.time().sec();
-  range_msg.header.stamp.nanosec = in.time().nsec();
+  range_msg.header.stamp = Convert<builtin_interfaces::msg::Time>(in.time());
 
   double horizontal_fov = in.scan().angle_max() - in.scan().angle_min();
   double vertical_fov = in.scan().vertical_angle_max() - in.scan().vertical_angle_min();
