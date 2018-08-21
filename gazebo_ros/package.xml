@@ -23,6 +23,7 @@
 
   <build_depend>rclcpp</build_depend>
   <build_depend>gazebo_dev</build_depend>
+  <build_depend>geometry_msgs</build_depend>
 
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>gazebo_dev</exec_depend>
@@ -30,7 +31,6 @@
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-  <build_depend>geometry_msgs</build_depend>
   <test_depend>std_msgs</test_depend>
 
   <export>

@@ -60,4 +60,28 @@ std::string SensorFrameID(const gazebo::sensors::Sensor & _sensor, const sdf::El
   return gazebo_ros::ScopedNameBase(_sensor.ParentName());
 }
 
+Throttler::Throttler(const double _hz)
+: period_(1.0 / _hz),
+  last_time_(0, 0)
+{
+}
+
+bool Throttler::IsReady(const gazebo::common::Time & _now)
+{
+  // If time went backwards, reset
+  if (_now < last_time_) {
+    last_time_ = _now;
+    return true;
+  }
+
+  // If not enough time has passed, return false
+  if (period_ > 0 && (_now - last_time_).Double() < period_) {
+    return false;
+  }
+
+  // Enough time has passed, set last time to now and return true
+  last_time_ = _now;
+  return true;
+}
+
 }  // namespace gazebo_ros

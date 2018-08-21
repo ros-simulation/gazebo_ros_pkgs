@@ -29,6 +29,7 @@ set(tests
   test_conversions
   test_utils
   test_plugins
+  test_sim_time
 )
 
 foreach(test ${tests})
