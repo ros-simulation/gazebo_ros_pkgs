@@ -55,10 +55,13 @@ public:
 
   /// Publish a sensor_msgs/LaserScan message from a gazebo laser scan
   void PublishLaserScan(ConstLaserScanStampedPtr & _msg);
+
   /// Publish a sensor_msgs/PointCloud message from a gazebo laser scan
   void PublishPointCloud(ConstLaserScanStampedPtr & _msg);
+
   /// Publish a sensor_msgs/PointCloud2 message from a gazebo laser scan
   void PublishPointCloud2(ConstLaserScanStampedPtr & _msg);
+
   /// Publish a sensor_msgs/Range message from a gazebo laser scan
   void PublishRange(ConstLaserScanStampedPtr & _msg);
 
@@ -73,6 +76,7 @@ public:
 
   /// Gazebo node used to subscribe to laser scan
   gazebo::transport::NodePtr gazebo_node_;
+
   /// Gazebo subscribe to parent sensor's laser scan
   gazebo::transport::SubscriberPtr laser_scan_sub_;
 };
@@ -84,6 +88,12 @@ GazeboRosRaySensor::GazeboRosRaySensor()
 
 GazeboRosRaySensor::~GazeboRosRaySensor()
 {
+  // Must release subscriber and then call fini on node to remove it from topic manager.
+  impl_->laser_scan_sub_.reset();
+  if (impl_->gazebo_node_) {
+    impl_->gazebo_node_->Fini();
+  }
+  impl_->gazebo_node_.reset();
 }
 
 void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
@@ -145,6 +155,7 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   // Create gazebo transport node and subscribe to sensor's laser scan
   impl_->gazebo_node_ = boost::make_shared<gazebo::transport::Node>();
   impl_->gazebo_node_->Init(_sensor->WorldName());
+
   // TODO(ironmig): use lazy publisher to only process laser data when output has a subscriber
   impl_->sensor_topic_ = _sensor->Topic();
   impl_->SubscribeGazeboLaserScan();
