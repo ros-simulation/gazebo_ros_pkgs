@@ -57,8 +57,6 @@ public:
    * \code{.xml}
    * <!-- Optional configurations for a plugin's Node -->
    * <ros>
-   *  <!-- Name of node, only use if plugin is one node -->
-   *  <node_name>my_node</node_name>
    *  <!-- Namespace of the node -->
    *  <namespace>/my_ns</namespace>
    *  <!-- Command line arguments sent to Node's constructor for remappings -->

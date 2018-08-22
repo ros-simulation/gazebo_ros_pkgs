@@ -35,9 +35,6 @@ class GazeboRosForcePrivate;
 
       <ros>
 
-        <!-- Override default node name -->
-        <node_name>force_test_node</node_name>
-
         <!-- Add a namespace -->
         <namespace>/test</namespace>
 

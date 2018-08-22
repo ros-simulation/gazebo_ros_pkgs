@@ -20,7 +20,6 @@
       <plugin name="gazebo_ros_joint_state_publisher"
           filename="libgazebo_ros_joint_state_publisher.so">
         <ros>
-          <node_name>joint_state_publisher_demo_node</node_name>
           <namespace>/demo</namespace>
           <argument>joint_states:=joint_states_demo</argument>
         </ros>

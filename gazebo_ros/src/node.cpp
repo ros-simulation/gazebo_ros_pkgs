@@ -42,11 +42,6 @@ Node::SharedPtr Node::Get(const std::string & node_name, sdf::ElementPtr sdf)
   std::vector<std::string> arguments;
   std::vector<rclcpp::Parameter> initial_parameters;
 
-  // Override name if tag is present
-  if (sdf->HasElement("node_name")) {
-    name = sdf->GetElement("node_name")->Get<std::string>();
-  }
-
   // Set namespace if tag is present
   if (sdf->HasElement("namespace")) {
     ns = sdf->GetElement("namespace")->Get<std::string>();

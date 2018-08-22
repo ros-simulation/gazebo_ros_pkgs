@@ -8,7 +8,6 @@
       <static>true</static>
       <plugin name="gazebo_ros_template" filename="libgazebo_ros_template.so">
         <ros>
-          <node_name>demo_node</node_name>
           <namespace>/demo</namespace>
         </ros>
       </plugin>
