@@ -37,9 +37,6 @@
 
 namespace gazebo_ros
 {
-/// \brief Common logger for all conversions
-static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conversions");
-
 /// Generic conversion from an Gazebo Laser Scan message to another type.
 /// \param[in] in Input message;
 /// \param[in] min_intensity The minimum intensity value to clip the output intensities
@@ -118,7 +115,7 @@ sensor_msgs::msg::PointCloud Convert(
 
   // Gazebo sends an infinite vertical step if the number of samples is 1
   // Surprisingly, not setting the <vertical> tag results in nan instead of inf, which is ok
-  if (isinf(vertical_angle_step)) {
+  if (std::isinf(vertical_angle_step)) {
     RCLCPP_WARN_ONCE(conversions_logger, "Infinite angle step results in wrong PointCloud");
   }
 
@@ -154,7 +151,7 @@ sensor_msgs::msg::PointCloud Convert(
 
       double r = *range_iter;
       // Skip NaN / inf points
-      if (!isfinite(r)) {
+      if (!std::isfinite(r)) {
         continue;
       }
 
@@ -205,7 +202,7 @@ sensor_msgs::msg::PointCloud2 Convert(
 
   // Gazebo sends an infinite vertical step if the number of samples is 1
   // Surprisingly, not setting the <vertical> tag results in nan instead of inf, which is ok
-  if (isinf(vertical_angle_step)) {
+  if (std::isinf(vertical_angle_step)) {
     RCLCPP_WARN_ONCE(conversions_logger, "Infinite angle step results in wrong PointCloud2");
   }
 
@@ -251,7 +248,7 @@ sensor_msgs::msg::PointCloud2 Convert(
 
       double r = *range_iter;
       // Skip NaN / inf points
-      if (!isfinite(r)) {
+      if (!std::isfinite(r)) {
         continue;
       }
 

@@ -19,6 +19,7 @@
 
 #include <builtin_interfaces/msg/time.hpp>
 #include <gazebo/common/Time.hh>
+#include <gazebo/msgs/time.pb.h>
 
 namespace gazebo_ros
 {
