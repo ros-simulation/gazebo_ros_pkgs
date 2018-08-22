@@ -20,7 +20,8 @@
 #include <sensor_msgs/msg/point_cloud.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/range.hpp>
-#include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
+#include <gazebo_ros/conversions/sensor_msgs.hpp>
 
 #include <memory>
 #include <vector>

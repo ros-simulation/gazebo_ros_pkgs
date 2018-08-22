@@ -26,6 +26,16 @@
 namespace gazebo_ros
 {
 
+/// Generic conversion from a ROS geometry vector message to another type.
+/// \param[in] in Input message.
+/// \return Conversion result
+/// \tparam OUT Output type
+template<class OUT>
+OUT Convert(const geometry_msgs::msg::Vector3 & in)
+{
+  return OUT();
+}
+
 /// \brief Specialized conversion from a ROS vector message to an Ignition Math vector.
 /// \param[in] msg ROS message to convert.
 /// \return An Ignition Math vector.

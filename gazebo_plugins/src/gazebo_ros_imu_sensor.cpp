@@ -14,7 +14,8 @@
 
 
 #include <gazebo_plugins/gazebo_ros_imu_sensor.hpp>
-#include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/conversions/builtin_interfaces.hpp>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/utils.hpp>
 
 #include <iostream>

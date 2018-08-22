@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/conversions/builtin_interfaces.hpp>
+#include <gazebo_ros/conversions/sensor_msgs.hpp>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gtest/gtest.h>
 
 TEST(TestConversions, Vector3)

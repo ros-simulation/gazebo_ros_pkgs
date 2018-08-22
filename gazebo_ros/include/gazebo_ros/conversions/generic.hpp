@@ -18,6 +18,7 @@
 #include <math.h>
 
 #include <gazebo/common/Time.hh>
+#include <gazebo/msgs/time.pb.h>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <rclcpp/logging.hpp>
