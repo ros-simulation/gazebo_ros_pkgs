@@ -85,10 +85,10 @@ Node::SharedPtr Node::Get(const std::string & node_name, sdf::ElementPtr sdf)
     arguments, initial_parameters);
 }
 
-Node::SharedPtr Node::Get(const std::string & node_name)
+Node::SharedPtr Node::Get()
 {
   // TODO(dhood): don't create a new node each call.
-  return CreateWithArgs(node_name);
+  return CreateWithArgs("gazebo");
 }
 
 rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)

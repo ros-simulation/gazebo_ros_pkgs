@@ -52,7 +52,7 @@ void GazeboRosInit::Load(int argc, char ** argv)
   // Initialize ROS with arguments
   rclcpp::init(argc, argv);
 
-  impl_->ros_node_ = gazebo_ros::Node::Get("gazebo");
+  impl_->ros_node_ = gazebo_ros::Node::Get();
 
   // Offer transient local durability on the clock topic so that if publishing is infrequent (e.g.
   // the simulation is paused), late subscribers can receive the previously published message(s).

@@ -45,10 +45,9 @@ public:
   /// Get reference to a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
    * \details This will call rclcpp::init if it hasn't been called yet.
-   * \param[in] node_name Name for the new node to create
-   * \return A shared pointer to a new #gazebo_ros::Node
+   * \return A shared pointer to a #gazebo_ros::Node
    */
-  static SharedPtr Get(const std::string & node_name);
+  static SharedPtr Get();
 
   /// Get reference to a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
