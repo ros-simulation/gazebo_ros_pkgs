@@ -1,5 +1,4 @@
 find_package(ament_cmake_gtest REQUIRED)
-find_package(builtin_interfaces REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -47,10 +46,9 @@ foreach(test ${tests})
     gazebo_ros_utils
   )
   ament_target_dependencies(${test}
-    "builtin_interfaces"
+    "rclcpp"
     "geometry_msgs"
     "gazebo_dev"
-    "rclcpp"
     "sensor_msgs"
     "std_msgs"
   )
