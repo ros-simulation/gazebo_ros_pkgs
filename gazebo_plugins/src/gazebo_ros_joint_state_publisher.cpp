@@ -85,7 +85,7 @@ GazeboRosJointStatePublisher::~GazeboRosJointStatePublisher()
 void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
   // ROS node
-  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_joint_state_publisher", sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get("gazebo_ros_joint_state_publisher", sdf);
 
   // Joints
   if (!sdf->HasElement("joint_name")) {

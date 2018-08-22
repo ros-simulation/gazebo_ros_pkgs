@@ -42,15 +42,15 @@ public:
   /// Destructor
   virtual ~Node();
 
-  /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
+  /// Get reference to a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
    * \details This will call rclcpp::init if it hasn't been called yet.
    * \param[in] node_name Name for the new node to create
    * \return A shared pointer to a new #gazebo_ros::Node
    */
-  static SharedPtr Create(const std::string & node_name);
+  static SharedPtr Get(const std::string & node_name);
 
-  /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
+  /// Get reference to a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
    * \details This will call rclcpp::init if it hasn't been called yet.
    * \details Sets namespace, remappings, and parameters from SDF.
@@ -74,7 +74,7 @@ public:
    * \param[in] _sdf An SDF element in the style above or containing a <ros> tag in the style above
    * \return A shared pointer to a new #gazebo_ros::Node
    */
-  static SharedPtr Create(const std::string & node_name, sdf::ElementPtr _sdf);
+  static SharedPtr Get(const std::string & node_name, sdf::ElementPtr _sdf);
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**

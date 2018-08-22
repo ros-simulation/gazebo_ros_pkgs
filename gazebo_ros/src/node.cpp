@@ -29,7 +29,7 @@ Node::~Node()
 {
 }
 
-Node::SharedPtr Node::Create(const std::string & node_name, sdf::ElementPtr sdf)
+Node::SharedPtr Node::Get(const std::string & node_name, sdf::ElementPtr sdf)
 {
   // Get inner <ros> element if full plugin sdf was passed in
   if (sdf->HasElement("ros")) {
@@ -85,8 +85,9 @@ Node::SharedPtr Node::Create(const std::string & node_name, sdf::ElementPtr sdf)
     arguments, initial_parameters);
 }
 
-Node::SharedPtr Node::Create(const std::string & node_name)
+Node::SharedPtr Node::Get(const std::string & node_name)
 {
+  // TODO(dhood): don't create a new node each call.
   return CreateWithArgs(node_name);
 }
 

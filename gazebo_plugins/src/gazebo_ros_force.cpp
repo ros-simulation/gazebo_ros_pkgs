@@ -73,7 +73,7 @@ void GazeboRosForce::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   }
 
   // Subscribe to wrench messages
-  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_force", sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get("gazebo_ros_force", sdf);
 
   impl_->wrench_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Wrench>(
     "gazebo_ros_force", std::bind(&GazeboRosForce::OnRosWrenchMsg, this,

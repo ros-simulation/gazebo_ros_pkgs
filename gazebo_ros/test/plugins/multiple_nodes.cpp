@@ -39,10 +39,10 @@ void MultipleNodes::Load(int argc, char ** argv)
   rclcpp::init(argc, argv);
 
   // Create nodes
-  auto nodeA = gazebo_ros::Node::Create("multiple_nodes_A");
+  auto nodeA = gazebo_ros::Node::Get("multiple_nodes_A");
   assert(nullptr != nodeA);
 
-  auto nodeB = gazebo_ros::Node::Create("multiple_nodes_B");
+  auto nodeB = gazebo_ros::Node::Get("multiple_nodes_B");
   assert(nullptr != nodeB);
 
   // Create publishers

@@ -36,7 +36,7 @@ private:
 void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
 {
   // It should be ok to create a node without calling init first.
-  auto node = gazebo_ros::Node::Create("sdf_node", _sdf);
+  auto node = gazebo_ros::Node::Get("sdf_node", _sdf);
   assert(nullptr != node);
 
   const char * node_name = node->get_name();

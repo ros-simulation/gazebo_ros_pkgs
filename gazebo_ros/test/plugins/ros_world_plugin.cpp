@@ -36,7 +36,7 @@ private:
 void RosWorldPlugin::Load(gazebo::physics::WorldPtr, sdf::ElementPtr)
 {
   // It should be ok to create a node without calling init first.
-  auto node = gazebo_ros::Node::Create("ros_world_plugin");
+  auto node = gazebo_ros::Node::Get("ros_world_plugin");
   assert(nullptr != node);
 
   // Create a publisher

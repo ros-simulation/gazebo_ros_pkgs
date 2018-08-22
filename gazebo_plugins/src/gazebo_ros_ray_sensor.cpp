@@ -100,7 +100,7 @@ GazeboRosRaySensor::~GazeboRosRaySensor()
 void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
   // Create ros_node configured from sdf
-  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ray_sensor", _sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get("gazebo_ray_sensor", _sdf);
 
   // Get tf frame for output
   impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf);

@@ -53,7 +53,7 @@ void ProperInit::Load(int argc, char ** argv)
   rclcpp::init(argc, argv);
 
   // Create the ROS node
-  auto node = gazebo_ros::Node::Create("proper_init");
+  auto node = gazebo_ros::Node::Get("proper_init");
 
   // Create a publisher
   auto pub = node->create_publisher<std_msgs::msg::String>("test");
