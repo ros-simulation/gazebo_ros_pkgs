@@ -1,5 +1,6 @@
 find_package(ament_cmake_gtest REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 # Plugins
@@ -46,9 +47,10 @@ foreach(test ${tests})
   )
   ament_target_dependencies(${test}
     "rclcpp"
-    "std_msgs"
     "geometry_msgs"
     "gazebo_dev"
+    "sensor_msgs"
+    "std_msgs"
   )
 endforeach()
 
