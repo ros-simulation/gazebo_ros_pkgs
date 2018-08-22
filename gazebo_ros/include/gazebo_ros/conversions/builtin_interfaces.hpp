@@ -15,14 +15,14 @@
 #ifndef GAZEBO_ROS__CONVERSIONS__BUILTIN_INTERFACES_HPP_
 #define GAZEBO_ROS__CONVERSIONS__BUILTIN_INTERFACES_HPP_
 
-#include <gazebo/msgs/time.pb.h>
+#include "gazebo_ros/conversions/generic.hpp"
 
 #include <builtin_interfaces/msg/time.hpp>
 #include <gazebo/common/Time.hh>
 
-#include "gazebo_ros/conversions/generic.hpp"
-
 namespace gazebo_ros
+{
+namespace conversions
 {
 /// \brief Specialized conversion from an Gazebo Time to a ROS Time message.
 /// \param[in] in Gazebo Time to convert.
@@ -48,5 +48,6 @@ builtin_interfaces::msg::Time Convert(const gazebo::msgs::Time & in)
   return time;
 }
 
+}  // namespace conversions
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__BUILTIN_INTERFACES_HPP_

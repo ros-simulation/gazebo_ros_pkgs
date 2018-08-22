@@ -15,26 +15,18 @@
 #ifndef GAZEBO_ROS__CONVERSIONS__GEOMETRY_MSGS_HPP_
 #define GAZEBO_ROS__CONVERSIONS__GEOMETRY_MSGS_HPP_
 
+#include "gazebo_ros/conversions/generic.hpp"
+
 #include <geometry_msgs/msg/point32.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <geometry_msgs/msg/vector3.hpp>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 
-#include "gazebo_ros/conversions/generic.hpp"
-
 namespace gazebo_ros
 {
-
-/// Generic conversion from a ROS geometry vector message to another type.
-/// \param[in] in Input message.
-/// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const geometry_msgs::msg::Vector3 & in)
+namespace conversions
 {
-  return OUT();
-}
 
 /// \brief Specialized conversion from a ROS vector message to an Ignition Math vector.
 /// \param[in] msg ROS message to convert.
@@ -118,5 +110,6 @@ ignition::math::Quaterniond Convert(const geometry_msgs::msg::Quaternion & in)
   return ignition::math::Quaterniond(in.w, in.x, in.y, in.z);
 }
 
+}  // namespace conversions
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__GEOMETRY_MSGS_HPP_

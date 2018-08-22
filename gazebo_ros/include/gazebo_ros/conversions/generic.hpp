@@ -18,13 +18,14 @@
 #include <math.h>
 
 #include <gazebo/common/Time.hh>
-#include <gazebo/msgs/time.pb.h>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/time.hpp>
 
 namespace gazebo_ros
+{
+namespace conversions
 {
 /// \brief Common logger for all conversions
 static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conversions");
@@ -78,5 +79,6 @@ OUT Convert(const gazebo::msgs::Time & in)
   return OUT();
 }
 
+}  // namespace conversions
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__GENERIC_HPP_

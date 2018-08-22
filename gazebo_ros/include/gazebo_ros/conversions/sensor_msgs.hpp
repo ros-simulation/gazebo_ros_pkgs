@@ -16,6 +16,8 @@
 #define GAZEBO_ROS__CONVERSIONS__SENSOR_MSGS_HPP_
 
 #include <math.h>
+#include "gazebo_ros/conversions/builtin_interfaces.hpp"
+#include "gazebo_ros/conversions/generic.hpp"
 
 #include <gazebo/msgs/laserscan_stamped.pb.h>
 #include <geometry_msgs/msg/point32.hpp>
@@ -24,16 +26,22 @@
 #include <sensor_msgs/msg/point_cloud.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <sensor_msgs/msg/range.hpp>
-#include <sensor_msgs/point_cloud2_iterator.hpp>
+
+// Remove sstream and NOLINTs after the following patch is released:
+// https://github.com/ros2/common_interfaces/pull/54
+#include <sstream>  // NOLINT
+#include <sensor_msgs/point_cloud2_iterator.hpp>  // NOLINT
 
 #include <algorithm>
 #include <limits>
 
-#include "gazebo_ros/conversions/builtin_interfaces.hpp"
-#include "gazebo_ros/conversions/generic.hpp"
-
 namespace gazebo_ros
 {
+namespace conversions
+{
+/// \brief Common logger for all conversions
+static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conversions");
+
 /// Generic conversion from an Gazebo Laser Scan message to another type.
 /// \param[in] in Input message;
 /// \param[in] min_intensity The minimum intensity value to clip the output intensities
@@ -112,7 +120,7 @@ sensor_msgs::msg::PointCloud Convert(
 
   // Gazebo sends an infinite vertical step if the number of samples is 1
   // Surprisingly, not setting the <vertical> tag results in nan instead of inf, which is ok
-  if (std::isinf(vertical_angle_step)) {
+  if (isinf(vertical_angle_step)) {
     RCLCPP_WARN_ONCE(conversions_logger, "Infinite angle step results in wrong PointCloud");
   }
 
@@ -148,7 +156,7 @@ sensor_msgs::msg::PointCloud Convert(
 
       double r = *range_iter;
       // Skip NaN / inf points
-      if (!std::isfinite(r)) {
+      if (!isfinite(r)) {
         continue;
       }
 
@@ -199,7 +207,7 @@ sensor_msgs::msg::PointCloud2 Convert(
 
   // Gazebo sends an infinite vertical step if the number of samples is 1
   // Surprisingly, not setting the <vertical> tag results in nan instead of inf, which is ok
-  if (std::isinf(vertical_angle_step)) {
+  if (isinf(vertical_angle_step)) {
     RCLCPP_WARN_ONCE(conversions_logger, "Infinite angle step results in wrong PointCloud2");
   }
 
@@ -245,7 +253,7 @@ sensor_msgs::msg::PointCloud2 Convert(
 
       double r = *range_iter;
       // Skip NaN / inf points
-      if (!std::isfinite(r)) {
+      if (!isfinite(r)) {
         continue;
       }
 
@@ -308,5 +316,6 @@ sensor_msgs::msg::Range Convert(const gazebo::msgs::LaserScanStamped & in, doubl
   return range_msg;
 }
 
+}  // namespace conversions
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__SENSOR_MSGS_HPP_
