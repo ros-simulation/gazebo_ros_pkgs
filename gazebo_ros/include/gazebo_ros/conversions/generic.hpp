@@ -25,8 +25,6 @@
 
 namespace gazebo_ros
 {
-namespace conversions
-{
 /// \brief Common logger for all conversions
 static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conversions");
 
@@ -79,6 +77,5 @@ OUT Convert(const gazebo::msgs::Time & in)
   return OUT();
 }
 
-}  // namespace conversions
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__GENERIC_HPP_
