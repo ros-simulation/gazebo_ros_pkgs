@@ -22,8 +22,6 @@
 
 namespace gazebo_ros
 {
-namespace conversions
-{
 /// \brief Specialized conversion from an Gazebo Time to a ROS Time message.
 /// \param[in] in Gazebo Time to convert.
 /// \return A ROS Time message with the same value as in
@@ -48,6 +46,5 @@ builtin_interfaces::msg::Time Convert(const gazebo::msgs::Time & in)
   return time;
 }
 
-}  // namespace conversions
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__BUILTIN_INTERFACES_HPP_

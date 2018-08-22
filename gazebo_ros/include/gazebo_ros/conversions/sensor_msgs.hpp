@@ -37,8 +37,6 @@
 
 namespace gazebo_ros
 {
-namespace conversions
-{
 /// \brief Common logger for all conversions
 static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conversions");
 
@@ -316,6 +314,5 @@ sensor_msgs::msg::Range Convert(const gazebo::msgs::LaserScanStamped & in, doubl
   return range_msg;
 }
 
-}  // namespace conversions
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__SENSOR_MSGS_HPP_

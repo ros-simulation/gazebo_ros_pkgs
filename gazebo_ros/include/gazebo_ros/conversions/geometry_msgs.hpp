@@ -25,8 +25,6 @@
 
 namespace gazebo_ros
 {
-namespace conversions
-{
 
 /// \brief Specialized conversion from a ROS vector message to an Ignition Math vector.
 /// \param[in] msg ROS message to convert.
@@ -110,6 +108,5 @@ ignition::math::Quaterniond Convert(const geometry_msgs::msg::Quaternion & in)
   return ignition::math::Quaterniond(in.w, in.x, in.y, in.z);
 }
 
-}  // namespace conversions
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__GEOMETRY_MSGS_HPP_
