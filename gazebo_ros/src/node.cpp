@@ -31,13 +31,16 @@ Node::~Node()
 
 Node::SharedPtr Node::Get(const std::string & node_name, sdf::ElementPtr sdf)
 {
+  std::string name = "";
+  if (!name = sdf->Attribute("name")) {
+    ignerr << "Name not passed" << std::endl;
+  }
   // Get inner <ros> element if full plugin sdf was passed in
   if (sdf->HasElement("ros")) {
     sdf = sdf->GetElement("ros");
   }
 
   // Initialize arguments
-  std::string name = node_name;
   std::string ns = "";
   std::vector<std::string> arguments;
   std::vector<rclcpp::Parameter> initial_parameters;
