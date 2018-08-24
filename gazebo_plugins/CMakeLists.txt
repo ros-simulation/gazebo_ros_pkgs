@@ -34,7 +34,7 @@ ament_target_dependencies(gazebo_ros_joint_state_publisher
   "rclcpp"
   "sensor_msgs"
 )
-ament_export_libraries(gazebo_ros_force)
+ament_export_libraries(gazebo_ros_joint_state_publisher)
 
 # gazebo_ros_force
 add_library(gazebo_ros_force SHARED
@@ -95,6 +95,7 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(TARGETS
+    gazebo_ros_diff_drive
     gazebo_ros_force
     gazebo_ros_imu_sensor
     gazebo_ros_joint_state_publisher
