@@ -46,7 +46,7 @@ void GazeboRosTemplate::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sd
   // Create a GazeboRos node instead of a common ROS node.
   // Pass it SDF parameters so common options like namespace and remapping
   // can be handled.
-  impl_->ros_node_ = gazebo_ros::Node::Get("gazebo_ros_template", sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
   // The model pointer gives you direct access to the physics object,
   // for example:

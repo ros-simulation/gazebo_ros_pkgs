@@ -29,21 +29,23 @@ Node::~Node()
 {
 }
 
-Node::SharedPtr Node::Get(const std::string & node_name, sdf::ElementPtr sdf)
+Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
 {
+  // Initialize arguments
   std::string name = "";
-  if (!name = sdf->Attribute("name")) {
-    ignerr << "Name not passed" << std::endl;
+  std::string ns = "";
+  std::vector<std::string> arguments;
+  std::vector<rclcpp::Parameter> initial_parameters;
+
+  // Get the name of the plugin as the name for the node.
+  if (!sdf->HasAttribute("name")) {
+    RCLCPP_WARN(internal_logger(), "Name of plugin not found.");
   }
+  name = sdf->Get<std::string>("name");
   // Get inner <ros> element if full plugin sdf was passed in
   if (sdf->HasElement("ros")) {
     sdf = sdf->GetElement("ros");
   }
-
-  // Initialize arguments
-  std::string ns = "";
-  std::vector<std::string> arguments;
-  std::vector<rclcpp::Parameter> initial_parameters;
 
   // Set namespace if tag is present
   if (sdf->HasElement("namespace")) {

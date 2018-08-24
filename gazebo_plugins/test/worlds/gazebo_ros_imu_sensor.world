@@ -69,7 +69,7 @@
               </z>
             </linear_acceleration>
           </imu>
-          <plugin name="my_imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+          <plugin name="my_imuasdf_plugin" filename="libgazebo_ros_imu_sensor.so">
             <ros>
               <namespace>/imu</namespace>
               <argument>~/out:=data</argument>

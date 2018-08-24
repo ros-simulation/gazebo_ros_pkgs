@@ -67,11 +67,10 @@ public:
    *  <parameter name="publish_odom" type="bool">True</parameter>
    * </ros>
    * \endcode
-   * \param[in] node_name Name of node to create
    * \param[in] _sdf An SDF element in the style above or containing a <ros> tag in the style above
    * \return A shared pointer to a new #gazebo_ros::Node
    */
-  static SharedPtr Get(const std::string & node_name, sdf::ElementPtr _sdf);
+  static SharedPtr Get(sdf::ElementPtr _sdf);
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**

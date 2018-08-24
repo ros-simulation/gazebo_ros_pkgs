@@ -58,7 +58,7 @@ GazeboRosImuSensor::~GazeboRosImuSensor()
 
 void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
-  impl_->ros_node_ = gazebo_ros::Node::Get("gazebo_ros_imu_sensor", _sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   impl_->sensor_ = std::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(_sensor);
   if (!impl_->sensor_) {
