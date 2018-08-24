@@ -25,6 +25,10 @@
   <depend>gazebo_dev</depend>
   <depend>rclcpp</depend>
 
+  <build_export_depend>builtin_interfaces</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
