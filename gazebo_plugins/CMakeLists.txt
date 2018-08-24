@@ -36,6 +36,19 @@ ament_target_dependencies(gazebo_ros_joint_state_publisher
 )
 ament_export_libraries(gazebo_ros_joint_state_publisher)
 
+# gazebo_ros_diff_drive
+add_library(gazebo_ros_diff_drive SHARED
+  src/gazebo_ros_diff_drive.cpp
+)
+ament_target_dependencies(gazebo_ros_diff_drive
+  "gazebo_dev"
+  "gazebo_ros"
+  "geometry_msgs"
+  "rclcpp"
+)
+ament_export_libraries(gazebo_ros_diff_drive)
+
+
 # gazebo_ros_force
 add_library(gazebo_ros_force SHARED
   src/gazebo_ros_force.cpp
