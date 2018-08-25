@@ -27,7 +27,7 @@
  **/
 
 /*
- * \file  gazebo_ros_diff_drive.h
+ * \file  gazebo_ros_diff_drive.hpp
  *
  * \brief A differential drive plugin for gazebo. Based on the diffdrive plugin
  * developed for the erratic robot (see copyright notice above). The original
@@ -38,28 +38,28 @@
  * $ Id: 06/21/2013 11:23:40 AM piyushk $
  */
 
-#ifndef DIFFDRIVE_PLUGIN_HH
-#define DIFFDRIVE_PLUGIN_HH
+#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_
+#define GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_
 
 #include <map>
 
 // Gazebo
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo_plugins/gazebo_ros_utils.h>
+#include <gazebo_ros/utils.hpp>
 
 // ROS
-#include <ros/ros.h>
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Pose2D.h>
-#include <nav_msgs/Odometry.h>
-#include <sensor_msgs/JointState.h>
+// #include <ros/ros.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/msg/twist.hpp>
+#include <geometry_msgs/msg/pose2_d.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 
 // Custom Callback Queue
-#include <ros/callback_queue.h>
-#include <ros/advertise_options.h>
+// #include <ros/callback_queue.h>
+// #include <ros/advertise_options.h>
 
 // Boost
 #include <boost/thread.hpp>
@@ -155,4 +155,4 @@ namespace gazebo {
 
 }
 
-#endif
+#endif // GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_

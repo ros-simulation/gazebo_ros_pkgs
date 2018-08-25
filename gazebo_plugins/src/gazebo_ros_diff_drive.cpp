@@ -50,15 +50,13 @@
 #include <algorithm>
 #include <assert.h>
 
-#include <gazebo_plugins/gazebo_ros_diff_drive.h>
+#include <gazebo_plugins/gazebo_ros_diff_drive.hpp>
 
 #include <ignition/math/Angle.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
-
-#include <ros/ros.h>
 
 namespace gazebo
 {
