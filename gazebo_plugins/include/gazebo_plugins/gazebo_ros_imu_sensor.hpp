@@ -16,7 +16,6 @@
 #ifndef GAZEBO_PLUGINS__GAZEBO_ROS_IMU_SENSOR_HPP_
 #define GAZEBO_PLUGINS__GAZEBO_ROS_IMU_SENSOR_HPP_
 
-#include <gazebo_ros/node.hpp>
 #include <gazebo/plugins/ImuSensorPlugin.hh>
 #include <sensor_msgs/msg/imu.hpp>
 
