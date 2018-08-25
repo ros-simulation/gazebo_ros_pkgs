@@ -43,13 +43,16 @@
 
 #include <map>
 
+// TODO(tfoote) switch to pimpl
+
 // Gazebo
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo_ros/utils.hpp>
+#include <gazebo_ros/node.hpp>
 
 // ROS
-// #include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/msg/twist.hpp>
@@ -60,10 +63,6 @@
 // Custom Callback Queue
 // #include <ros/callback_queue.h>
 // #include <ros/advertise_options.h>
-
-// Boost
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
 
 namespace gazebo {
 
@@ -95,7 +94,7 @@ namespace gazebo {
       void UpdateOdometryEncoder();
 
 
-      GazeboRosPtr gazebo_ros_;
+      gazebo_ros::Node::SharedPtr gazebo_ros_;
       physics::ModelPtr parent;
       event::ConnectionPtr update_connection_;
 
@@ -103,21 +102,20 @@ namespace gazebo {
       double wheel_diameter_;
       double wheel_torque;
       double wheel_speed_[2];
-	  double wheel_accel;
+  	  double wheel_accel;
       double wheel_speed_instr_[2];
 
       std::vector<physics::JointPtr> joints_;
 
       // ROS STUFF
-      ros::Publisher odometry_publisher_;
-      ros::Subscriber cmd_vel_subscriber_;
-      boost::shared_ptr<tf::TransformBroadcaster> transform_broadcaster_;
-      sensor_msgs::JointState joint_state_;
-      ros::Publisher joint_state_publisher_;
-      nav_msgs::Odometry odom_;
-      std::string tf_prefix_;
+      rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_publisher_;
+      rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_subscriber_;
+      std::shared_ptr<tf2_ros::TransformBroadcaster> transform_broadcaster_;
+      sensor_msgs::msg::JointState joint_state_;
+      rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
+      nav_msgs::msg::Odometry odom_;
 
-      boost::mutex lock;
+      std::mutex lock;
 
       std::string robot_namespace_;
       std::string command_topic_;
@@ -125,13 +123,9 @@ namespace gazebo {
       std::string odometry_frame_;
       std::string robot_base_frame_;
       bool publish_tf_;
-      // Custom Callback Queue
-      ros::CallbackQueue queue_;
-      boost::thread callback_queue_thread_;
-      void QueueThread();
 
       // DiffDrive stuff
-      void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& cmd_msg);
+      void cmdVelCallback(const geometry_msgs::msg::Twist::SharedPtr cmd_msg);
 
       double x_;
       double rot_;
@@ -143,7 +137,7 @@ namespace gazebo {
       common::Time last_update_time_;
 
       OdomSource odom_source_;
-      geometry_msgs::Pose2D pose_encoder_;
+      geometry_msgs::msg::Pose2D pose_encoder_;
       common::Time last_odom_update_;
 
     // Flags
