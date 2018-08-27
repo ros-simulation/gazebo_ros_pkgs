@@ -15,13 +15,13 @@
 #ifndef GAZEBO_ROS__CONVERSIONS__GEOMETRY_MSGS_HPP_
 #define GAZEBO_ROS__CONVERSIONS__GEOMETRY_MSGS_HPP_
 
-#include "gazebo_ros/conversions/generic.hpp"
-
 #include <geometry_msgs/msg/point32.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <geometry_msgs/msg/vector3.hpp>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
+
+#include "gazebo_ros/conversions/generic.hpp"
 
 namespace gazebo_ros
 {
