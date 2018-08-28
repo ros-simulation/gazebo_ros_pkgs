@@ -18,7 +18,6 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/transport.hh>
 #include <gazebo_msgs/srv/spawn_model.hpp>
-#include <gazebo_ros/conversions.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
 #include <rosgraph_msgs/msg/clock.hpp>
