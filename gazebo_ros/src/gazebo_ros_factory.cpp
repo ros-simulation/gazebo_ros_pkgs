@@ -13,19 +13,21 @@
 // limitations under the License.
 
 #include "gazebo_ros/gazebo_ros_factory.hpp"
-#include "gazebo_msgs/srv/spawn_model.hpp"
 
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/transport/transport.hh>
+#include <gazebo_msgs/srv/spawn_model.hpp>
 #include <gazebo_ros/conversions.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
 #include <rosgraph_msgs/msg/clock.hpp>
 
-#include <memory>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/transport/transport.hh>
-
 #include <tinyxml.h>
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace gazebo_ros
 {
@@ -47,7 +49,7 @@ public:
 
   /// \brief service to handle requests/responses to spawn models
   rclcpp::Service<gazebo_msgs::srv::SpawnModel>::SharedPtr spawn_service_;
-  // TODO: implement the deprecated services with a message and redirection
+  // TODO(jrivero): implement the deprecated services with a message and redirection
   rclcpp::Service<gazebo_msgs::srv::SpawnModel>::SharedPtr
     spawn_deprecated_urdf_;
   rclcpp::Service<gazebo_msgs::srv::SpawnModel>::SharedPtr
@@ -165,18 +167,20 @@ void GazeboRosFactoryPrivate::spawnModel(
     ignition::math::Pose3d frame_pose = frame->WorldPose();
     initial_xyz = frame_pose.Pos() + frame_pose.Rot().RotateVector(initial_xyz);
     initial_q = frame_pose.Rot() * initial_q;
-  }
-  /// @todo: map is really wrong, need to use tf here somehow
-  else if (req->reference_frame == "" || req->reference_frame == "world" ||
-    req->reference_frame == "map" || req->reference_frame == "/map")
-  {
-    RCLCPP_DEBUG(ros_node_->get_logger(),
-      "SpawnModel: reference_frame is empty/world/map, using inertial frame");
+    /// @todo: map is really wrong, need to use tf here somehow
   } else {
-    res->success = false;
-    res->status_message =
-      "SpawnModel: reference reference_frame not found, did you forget to scope the link by model name?";
-    return;
+    if (req->reference_frame == "" || req->reference_frame == "world" ||
+      req->reference_frame == "map" || req->reference_frame == "/map")
+    {
+      RCLCPP_DEBUG(ros_node_->get_logger(),
+        "SpawnModel: reference_frame is empty/world/map, using inertial frame");
+    } else {
+      res->success = false;
+      res->status_message =
+        "SpawnModel: reference reference_frame not found, did you forget to scope "
+        "the link by model name?";
+      return;
+    }
   }
 
   // incoming robot model string
@@ -197,7 +201,7 @@ void GazeboRosFactoryPrivate::spawnModel(
     // add robotNamespace as a child with the correct namespace
     if (!robot_namespace_.empty()) {
       // Get root element for SDF
-      // TODO: implement the spawning also with <light></light> and <model></model>
+      // TODO(hsu): implement the spawning also with <light></light> and <model></model>
       TiXmlNode * model_tixml = gazebo_model_xml.FirstChild("sdf");
       model_tixml = (!model_tixml) ?
         gazebo_model_xml.FirstChild("gazebo") : model_tixml;
@@ -227,7 +231,8 @@ void GazeboRosFactoryPrivate::spawnModel(
     RCLCPP_ERROR(ros_node_->get_logger(), "SpawnModel Failure: input xml format not recognized");
     res->success = false;
     res->status_message =
-      "SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo compatible format.";
+      "SpawnModel Failure: input model_xml not SDF or URDF, or cannot be converted to Gazebo "
+      "compatible format.";
     return;
   }
 
@@ -241,7 +246,7 @@ void GazeboRosFactoryPrivate::updateSDFAttributes(
   const ignition::math::Vector3d & initial_xyz,
   const ignition::math::Quaterniond & initial_q)
 {
-  TiXmlElement * pose_element; // This is used by both reguar and database SDFs
+  TiXmlElement * pose_element;  // This is used by both reguar and database SDFs
 
   // Check SDF for requires SDF element
   TiXmlElement * gazebo_tixml = gazebo_model_xml.FirstChildElement("sdf");
@@ -267,14 +272,16 @@ void GazeboRosFactoryPrivate::updateSDFAttributes(
     if (!world_tixml) {
       RCLCPP_WARN(
         ros_node_->get_logger(),
-        "Could not find <model> or <world> element in sdf, so name and initial position cannot be applied");
+        "Could not find <model> or <world> element in sdf, so name and initial position "
+        "cannot be applied");
       return;
     }
     // If not <model> element, check SDF for required include element
     model_tixml = world_tixml->FirstChildElement("include");
     if (!model_tixml) {
       RCLCPP_WARN(ros_node_->get_logger(),
-        "Could not find <include> element in sdf, so name and initial position cannot be applied");
+        "Could not find <include> element in sdf, so name and initial position "
+        "cannot be applied");
       return;
     }
 
@@ -429,7 +436,8 @@ void GazeboRosFactoryPrivate::updateURDFModelPose(
       model_pose.Pos().Z();
 
     std::ostringstream rpy_stream;
-    ignition::math::Vector3d model_rpy = model_pose.Rot().Euler(); // convert to Euler angles for Gazebo XML
+    // convert to Euler angles for Gazebo XML
+    ignition::math::Vector3d model_rpy = model_pose.Rot().Euler();
     rpy_stream << model_rpy.X() << " " << model_rpy.Y() << " " << model_rpy.Z();
 
     origin_key->SetAttribute("xyz", xyz_stream.str());
@@ -485,10 +493,11 @@ void GazeboRosFactoryPrivate::spawnAndConform(
 
   // FIXME: should use entity_info or add lock to World::receiveMutex
   // looking for Model to see if it exists already
-  gazebo::msgs::Request * entity_info_msg = gazebo::msgs::CreateRequest("entity_info", model_name);
+  gazebo::msgs::Request * entity_info_msg =
+    gazebo::msgs::CreateRequest("entity_info", model_name);
   gz_request_pub_->Publish(*entity_info_msg, true);
-  // todo: should wait for response response_sub_, check to see that if _msg->response == "nonexistant"
-
+  // TODO(hsu) should wait for response response_sub_, check to see that
+  // if _msg->response == "nonexistant"
   gazebo::physics::ModelPtr model = world_->ModelByName(model_name);
   gazebo::physics::LightPtr light = world_->LightByName(model_name);
   if ((isLight && light != NULL) || (model != NULL)) {
@@ -521,15 +530,13 @@ void GazeboRosFactoryPrivate::spawnAndConform(
   while (rclcpp::ok()) {
     if (ros_node_->now() > timeout) {
       res->success = false;
-      res->status_message =
-        "SpawnModel: Entity pushed to spawn queue, but spawn service timed out waiting for entity to appear in simulation under the name "
-        +
-        model_name;
+      res->status_message = "SpawnModel: Entity pushed to spawn queue, but spawn service timed out"
+        "waiting for entity to appear in simulation under the name " + model_name;
       return;
     }
 
     {
-      //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
+      // boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
       if ((isLight && world_->LightByName(model_name) != NULL) ||
         (world_->ModelByName(model_name) != NULL))
       {
@@ -551,9 +558,10 @@ void GazeboRosFactoryPrivate::spawnAndConform(
   res->status_message = "SpawnModel: Successfully spawned entity";
 }
 
-std::vector<double> GazeboRosFactoryPrivate::convertValuesFromStringToDouble(const std::string & str)
+std::vector<double> GazeboRosFactoryPrivate::convertValuesFromStringToDouble(
+  const std::string & str)
 {
-  std::string buf; // buffer string
+  std::string buf;
   std::vector<std::string> char_values;
   std::vector<double> vals;
 
@@ -565,7 +573,7 @@ std::vector<double> GazeboRosFactoryPrivate::convertValuesFromStringToDouble(con
 
   for (auto v : char_values) {
     if (v.empty()) {
-      // TODO: assert
+      // TODO(jrivero): assert
       RCLCPP_FATAL(ros_node_->get_logger(),
         "Empty char value while parsing pose. This should never happen.");
     }
