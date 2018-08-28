@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include <gazebo/test/ServerFixture.hh>
-#include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/testing_utils.hpp>
 #include <rclcpp/rclcpp.hpp>

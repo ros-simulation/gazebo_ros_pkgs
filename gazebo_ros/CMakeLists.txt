@@ -13,9 +13,9 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_dev REQUIRED)
-find_package(geometry_msgs REQUIRED)
 
 include_directories(
   include
@@ -27,8 +27,8 @@ add_library(gazebo_ros_node SHARED
   src/node.cpp
 )
 ament_target_dependencies(gazebo_ros_node
-  "rclcpp"
   "gazebo_dev"
+  "rclcpp"
 )
 ament_export_libraries(gazebo_ros_node)
 
@@ -36,8 +36,8 @@ add_library(gazebo_ros_utils SHARED
   src/utils.cpp
 )
 ament_target_dependencies(gazebo_ros_utils
-  "rclcpp"
   "gazebo_dev"
+  "rclcpp"
 )
 ament_export_libraries(gazebo_ros_utils)
 
@@ -45,9 +45,9 @@ add_library(gazebo_ros_init SHARED
   src/gazebo_ros_init.cpp
 )
 ament_target_dependencies(gazebo_ros_init
-  "rclcpp"
+  "builtin_interfaces"
   "gazebo_dev"
-  "geometry_msgs"
+  "rclcpp"
 )
 target_link_libraries(gazebo_ros_init
   gazebo_ros_node

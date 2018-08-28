@@ -16,8 +16,9 @@
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo_plugins/gazebo_ros_force.hpp>
-#include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
+#include <geometry_msgs/msg/wrench.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <memory>

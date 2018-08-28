@@ -36,7 +36,7 @@
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
 #include <gazebo_plugins/gazebo_ros_joint_state_publisher.hpp>
-#include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>

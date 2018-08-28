@@ -15,7 +15,7 @@
 #include "gazebo_ros/gazebo_ros_init.hpp"
 
 #include <gazebo/common/Plugin.hh>
-#include <gazebo_ros/conversions.hpp>
+#include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
 #include <rosgraph_msgs/msg/clock.hpp>
