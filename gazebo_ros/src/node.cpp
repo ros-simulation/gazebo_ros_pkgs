@@ -23,6 +23,7 @@ namespace gazebo_ros
 {
 
 std::weak_ptr<Executor> Node::static_executor_;
+std::weak_ptr<Node> Node::static_node_;
 std::mutex Node::lock_;
 
 Node::~Node()
@@ -42,6 +43,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     RCLCPP_WARN(internal_logger(), "Name of plugin not found.");
   }
   name = sdf->Get<std::string>("name");
+
   // Get inner <ros> element if full plugin sdf was passed in
   if (sdf->HasElement("ros")) {
     sdf = sdf->GetElement("ros");
@@ -87,8 +89,14 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
 
 Node::SharedPtr Node::Get()
 {
-  // TODO(dhood): don't create a new node each call.
-  return CreateWithArgs("gazebo");
+  Node::SharedPtr node = static_node_.lock();
+
+  if (!node) {
+    node = CreateWithArgs("gazebo");
+    static_node_ = node;
+  }
+
+  return node;
 }
 
 rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)

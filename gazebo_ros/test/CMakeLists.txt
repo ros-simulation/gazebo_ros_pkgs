@@ -29,9 +29,10 @@ file(COPY worlds DESTINATION .)
 # Tests
 set(tests
   test_conversions
-  test_utils
+  test_node
   test_plugins
   test_sim_time
+  test_utils
 )
 
 foreach(test ${tests})
@@ -44,6 +45,7 @@ foreach(test ${tests})
       120
   )
   target_link_libraries(${test}
+    gazebo_ros_node
     gazebo_ros_utils
   )
   ament_target_dependencies(${test}
