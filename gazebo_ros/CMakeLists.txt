@@ -91,6 +91,7 @@ install(
   TARGETS
     gazebo_ros_node
     gazebo_ros_init
+    gazebo_ros_factory
     gazebo_ros_utils
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
