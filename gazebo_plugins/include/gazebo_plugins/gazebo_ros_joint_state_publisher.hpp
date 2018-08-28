@@ -52,9 +52,6 @@ class GazeboRosJointStatePublisherPrivate;
 
       <ros>
 
-        <!-- Override default node name -->
-        <node_name>my_joint_state_publisher</node_name>
-
         <!-- Add a namespace -->
         <namespace>/ny_namespace</namespace>
 

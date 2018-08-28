@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
 <sdf version="1.6">
   <world name="default">
-    <plugin name="sdf_plugin" filename="./libsdf_node.so">
+    <plugin name="sdf_node_name" filename="./libsdf_node.so">
       <ros>
-        <node_name>my_node</node_name>
         <namespace>/foo</namespace>
         <argument>test:=my_topic</argument>
         <parameter name="my_string" type="string">str</parameter>

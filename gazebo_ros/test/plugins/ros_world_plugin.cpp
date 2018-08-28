@@ -33,10 +33,10 @@ private:
   std::shared_ptr<rclcpp::TimerBase> timer_;
 };
 
-void RosWorldPlugin::Load(gazebo::physics::WorldPtr, sdf::ElementPtr)
+void RosWorldPlugin::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
 {
   // It should be ok to create a node without calling init first.
-  auto node = gazebo_ros::Node::Create("ros_world_plugin");
+  auto node = gazebo_ros::Node::Get(_sdf);
   assert(nullptr != node);
 
   // Create a publisher

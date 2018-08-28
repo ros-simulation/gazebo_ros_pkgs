@@ -81,7 +81,6 @@
           <update_rate>1.0</update_rate>
           <plugin name="pc2" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>pc2</node_name>
               <namespace>/ray</namespace>
               <argument>~/out:=pointcloud2</argument>
             </ros>
@@ -89,7 +88,6 @@
           </plugin>
           <plugin name="pc" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>pc</node_name>
               <namespace>/ray</namespace>
               <argument>~/out:=pointcloud</argument>
             </ros>
@@ -97,7 +95,6 @@
           </plugin>
           <plugin name="laserscan" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>laserscan</node_name>
               <namespace>/ray</namespace>
               <argument>~/out:=laserscan</argument>
             </ros>
@@ -105,7 +102,6 @@
           </plugin>
           <plugin name="range" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>range</node_name>
               <namespace>/ray</namespace>
               <argument>~/out:=range</argument>
             </ros>
@@ -140,33 +136,29 @@
           </ray>
           <always_on>true</always_on>
           <update_rate>1.0</update_rate>
-          <plugin name="pc2" filename="libgazebo_ros_ray_sensor.so">
+          <plugin name="pc2_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>pc2</node_name>
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=pointcloud2</argument>
             </ros>
             <output_type>sensor_msgs/PointCloud2</output_type>
           </plugin>
-          <plugin name="pc" filename="libgazebo_ros_ray_sensor.so">
+          <plugin name="pc_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>pc</node_name>
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=pointcloud</argument>
             </ros>
             <output_type>sensor_msgs/PointCloud</output_type>
           </plugin>
-          <plugin name="laserscan" filename="libgazebo_ros_ray_sensor.so">
+          <plugin name="laserscan_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>laserscan</node_name>
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=laserscan</argument>
             </ros>
             <output_type>sensor_msgs/LaserScan</output_type>
           </plugin>
-          <plugin name="range" filename="libgazebo_ros_ray_sensor.so">
+          <plugin name="range_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>range</node_name>
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=range</argument>
             </ros>

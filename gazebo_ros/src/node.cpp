@@ -23,28 +23,30 @@ namespace gazebo_ros
 {
 
 std::weak_ptr<Executor> Node::static_executor_;
+std::weak_ptr<Node> Node::static_node_;
 std::mutex Node::lock_;
 
 Node::~Node()
 {
 }
 
-Node::SharedPtr Node::Create(const std::string & node_name, sdf::ElementPtr sdf)
+Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
 {
-  // Get inner <ros> element if full plugin sdf was passed in
-  if (sdf->HasElement("ros")) {
-    sdf = sdf->GetElement("ros");
-  }
-
   // Initialize arguments
-  std::string name = node_name;
+  std::string name = "";
   std::string ns = "";
   std::vector<std::string> arguments;
   std::vector<rclcpp::Parameter> initial_parameters;
 
-  // Override name if tag is present
-  if (sdf->HasElement("node_name")) {
-    name = sdf->GetElement("node_name")->Get<std::string>();
+  // Get the name of the plugin as the name for the node.
+  if (!sdf->HasAttribute("name")) {
+    RCLCPP_WARN(internal_logger(), "Name of plugin not found.");
+  }
+  name = sdf->Get<std::string>("name");
+
+  // Get inner <ros> element if full plugin sdf was passed in
+  if (sdf->HasElement("ros")) {
+    sdf = sdf->GetElement("ros");
   }
 
   // Set namespace if tag is present
@@ -85,9 +87,16 @@ Node::SharedPtr Node::Create(const std::string & node_name, sdf::ElementPtr sdf)
     arguments, initial_parameters);
 }
 
-Node::SharedPtr Node::Create(const std::string & node_name)
+Node::SharedPtr Node::Get()
 {
-  return CreateWithArgs(node_name);
+  Node::SharedPtr node = static_node_.lock();
+
+  if (!node) {
+    node = CreateWithArgs("gazebo");
+    static_node_ = node;
+  }
+
+  return node;
 }
 
 rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)

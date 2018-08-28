@@ -36,7 +36,7 @@ private:
 void CreateBeforeInit::Load(int, char **)
 {
   // It should be ok to create a node without calling init first.
-  auto node = gazebo_ros::Node::Create("create_node_without_init");
+  auto node = gazebo_ros::Node::Get();
   assert(nullptr != node);
 
   // Create a publisher

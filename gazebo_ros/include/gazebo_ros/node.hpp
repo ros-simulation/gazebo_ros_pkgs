@@ -42,39 +42,41 @@ public:
   /// Destructor
   virtual ~Node();
 
-  /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
+  /// Get a static node called "gazebo" which can be shared by several plugins.
   /**
    * \details This will call rclcpp::init if it hasn't been called yet.
-   * \param[in] node_name Name for the new node to create
-   * \return A shared pointer to a new #gazebo_ros::Node
+   * \details The node is created the first time this is called.
+   * \return A shared pointer to a #gazebo_ros::Node
    */
-  static SharedPtr Create(const std::string & node_name);
+  static SharedPtr Get();
 
-  /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
+  /// Get reference to a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
+   * \details This will create a new node; the node's name will be the same as the name argument
+   * on the <plugin> tag.
    * \details This will call rclcpp::init if it hasn't been called yet.
-   * \details Sets namespace, remappings, and parameters from SDF.
+   * \details Sets node name, namespace, remappings, and parameters from SDF.
    * SDF is in the form:
    * \code{.xml}
-   * <!-- Optional configurations for a plugin's Node -->
-   * <ros>
-   *  <!-- Name of node, only use if plugin is one node -->
-   *  <node_name>my_node</node_name>
-   *  <!-- Namespace of the node -->
-   *  <namespace>/my_ns</namespace>
-   *  <!-- Command line arguments sent to Node's constructor for remappings -->
-   *  <argument>my_topic:=new_topic</argument>
-   *  <argument>__name:=super_cool_node</argument>
-   *  <!-- Initial ROS params set for node -->
-   *  <parameter name="max_velocity" type="int">55</parameter>
-   *  <parameter name="publish_odom" type="bool">True</parameter>
-   * </ros>
+   * <!-- Node name will be the same as the plugin name -->
+   * <plugin name="my_node_name" filename="my_library.so">
+   *   <!-- Optional configurations for a plugin's Node -->
+   *   <ros>
+   *    <!-- Namespace of the node -->
+   *    <namespace>/my_ns</namespace>
+   *    <!-- Command line arguments sent to Node's constructor for remappings -->
+   *    <argument>my_topic:=new_topic</argument>
+   *    <argument>__name:=super_cool_node</argument>
+   *    <!-- Initial ROS params set for node -->
+   *    <parameter name="max_velocity" type="int">55</parameter>
+   *    <parameter name="publish_odom" type="bool">True</parameter>
+   *   </ros>
+   * </plugin>
    * \endcode
-   * \param[in] node_name Name of node to create
    * \param[in] _sdf An SDF element in the style above or containing a <ros> tag in the style above
    * \return A shared pointer to a new #gazebo_ros::Node
    */
-  static SharedPtr Create(const std::string & node_name, sdf::ElementPtr _sdf);
+  static SharedPtr Get(sdf::ElementPtr _sdf);
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
@@ -117,6 +119,9 @@ private:
 
   /// Points to an #gazebo_ros::Executor shared between all #gazebo_ros::Node instances
   static std::weak_ptr<Executor> static_executor_;
+
+  /// Points to a #gazebo_ros::Node which can be shared among several plugins.
+  static std::weak_ptr<Node> static_node_;
 
   /// Gets a logger to log information internal to the node
   static rclcpp::Logger internal_logger();

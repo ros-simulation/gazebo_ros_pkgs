@@ -36,18 +36,17 @@ private:
 void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
 {
   // It should be ok to create a node without calling init first.
-  auto node = gazebo_ros::Node::Create("sdf_node", _sdf);
+  auto node = gazebo_ros::Node::Get(_sdf);
   assert(nullptr != node);
 
   const char * node_name = node->get_name();
-  if (strcmp("my_node", node_name)) {
-    RCLCPP_ERROR(node->get_logger(), "Node name not remapped in SDF");
+  if (strcmp("sdf_node_name", node_name)) {
+    RCLCPP_ERROR(node->get_logger(), "Node name not taken from SDF");
     return;
   }
 
   // Create a publisher
   auto pub = node->create_publisher<std_msgs::msg::String>("test");
-
 
   // Attempt to get the parameters set by the SDF.
   // If any of them fail, messages will not publish so test will fail
@@ -62,7 +61,6 @@ void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
   SDF_NODE_PARAM_CHECK("my_bool_true", true);
   SDF_NODE_PARAM_CHECK("my_int", 42);
   SDF_NODE_PARAM_CHECK("my_double", 13.37);
-
 
   // Return if the given parameter is set
   #define SDF_NODE_PARAM_UNSET(param) \

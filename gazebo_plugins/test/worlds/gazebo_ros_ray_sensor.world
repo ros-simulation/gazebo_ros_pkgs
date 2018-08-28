@@ -49,7 +49,6 @@
           <!-- Instance of ray plugin for each output type -->
           <plugin name="pc2" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>pc2</node_name>
               <namespace>/ray</namespace>
               <argument>~/out:=pointcloud2</argument>
             </ros>
@@ -57,7 +56,6 @@
           </plugin>
           <plugin name="pc" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>pc</node_name>
               <namespace>/ray</namespace>
               <argument>~/out:=pointcloud</argument>
             </ros>
@@ -65,7 +63,6 @@
           </plugin>
           <plugin name="ls" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>ls</node_name>
               <namespace>/ray</namespace>
               <argument>~/out:=laserscan</argument>
             </ros>
@@ -73,7 +70,6 @@
           </plugin>
           <plugin name="range" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>range</node_name>
               <namespace>/ray</namespace>
               <argument>~/out:=range</argument>
             </ros>
@@ -83,7 +79,6 @@
 <!-- Disabled while gpu laser is broken in gazebo9, see https://bitbucket.org/osrf/gazebo/issues/2486/conflicts-between-vertical-gpu-rays-and
           <plugin name="pc2_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>pc2</node_name>
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=pointcloud2</argument>
             </ros>
@@ -91,7 +86,6 @@
           </plugin>
           <plugin name="pc_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>pc</node_name>
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=pointcloud</argument>
             </ros>
@@ -99,7 +93,6 @@
           </plugin>
           <plugin name="ls_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>ls</node_name>
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=laserscan</argument>
             </ros>
@@ -107,7 +100,6 @@
           </plugin>
           <plugin name="range_gpu" filename="libgazebo_ros_ray_sensor.so">
             <ros>
-              <node_name>range</node_name>
               <namespace>/gpu_ray</namespace>
               <argument>~/out:=range</argument>
             </ros>
