@@ -16,8 +16,6 @@
 #define GAZEBO_ROS__CONVERSIONS__SENSOR_MSGS_HPP_
 
 #include <math.h>
-#include "gazebo_ros/conversions/builtin_interfaces.hpp"
-#include "gazebo_ros/conversions/generic.hpp"
 
 #include <gazebo/msgs/laserscan_stamped.pb.h>
 #include <geometry_msgs/msg/point32.hpp>
@@ -26,14 +24,13 @@
 #include <sensor_msgs/msg/point_cloud.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <sensor_msgs/msg/range.hpp>
-
-// Remove sstream and NOLINTs after the following patch is released:
-// https://github.com/ros2/common_interfaces/pull/54
-#include <sstream>  // NOLINT
-#include <sensor_msgs/point_cloud2_iterator.hpp>  // NOLINT
+#include <sensor_msgs/point_cloud2_iterator.hpp>
 
 #include <algorithm>
 #include <limits>
+
+#include "gazebo_ros/conversions/builtin_interfaces.hpp"
+#include "gazebo_ros/conversions/generic.hpp"
 
 namespace gazebo_ros
 {
