@@ -162,6 +162,10 @@ class SpawnModelNode():
         # Encode xml object back into string for service call
         model_xml = xml.etree.ElementTree.tostring(xml_parsed)
 
+        # For Python 3
+        if not isinstance(model_xml, str):
+            model_xml = model_xml.decode(encoding='ascii')
+
         # Form requested Pose from arguments
         initial_pose = Pose()
         initial_pose.position.x = self.args.x
