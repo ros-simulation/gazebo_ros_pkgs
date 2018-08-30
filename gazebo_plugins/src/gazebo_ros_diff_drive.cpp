@@ -1,30 +1,34 @@
-/*
-    Copyright (c) 2010, Daniel Hewlett, Antons Rebguns
-    All rights reserved.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are met:
-        * Redistributions of source code must retain the above copyright
-        notice, this list of conditions and the following disclaimer.
-        * Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
-        * Neither the name of the <organization> nor the
-        names of its contributors may be used to endorse or promote products
-        derived from this software without specific prior written permission.
-
-    THIS SOFTWARE IS PROVIDED BY Antons Rebguns <email> ''AS IS'' AND ANY
-    EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL Antons Rebguns <email> BE LIABLE FOR ANY
-    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*/
+// Copyright (c) 2010, Daniel Hewlett, Antons Rebguns
+// All rights reserved.
+//
+// Software License Agreement (BSD License 2.0)
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+//
+//  * Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above
+//    copyright notice, this list of conditions and the following
+//    disclaimer in the documentation and/or other materials provided
+//    with the distribution.
+//  * Neither the name of the company nor the names of its
+//    contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+// COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 
 /*
  * \file  gazebo_ros_diff_drive.cpp
@@ -37,7 +41,6 @@
  *
  * $ Id: 06/21/2013 11:23:40 AM piyushk $
  */
-
 
 /*
  *
@@ -60,9 +63,13 @@
 #include <geometry_msgs/msg/twist.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <sdf/sdf.hh>
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
+
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace gazebo_plugins
 {
@@ -80,7 +87,8 @@ public:
   };
 
   /// Indicates which wheel
-  enum {
+  enum
+  {
     /// Right wheel
     RIGHT = 0,
 
@@ -226,7 +234,8 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT] = _model->GetJoint(right_joint);
 
   if (!impl_->joints_[GazeboRosDiffDrivePrivate::LEFT] ||
-      !impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT]) {
+    !impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT])
+  {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
       "Joint [%s] or [%s] not found, plugin will not work.", left_joint, right_joint);
 
@@ -253,7 +262,7 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Update rate
   auto update_rate = _sdf->Get<double>("update_rate", 100.0).first;
   if (update_rate > 0.0) {
-     impl_->update_period_ = 1.0 / update_rate;
+    impl_->update_period_ = 1.0 / update_rate;
   } else {
     impl_->update_period_ = 0.0;
   }
@@ -274,19 +283,18 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]", command_topic.c_str());
 
   // Odometry
-  impl_->odometry_frame_ =  _sdf->Get<std::string>("odometry_frame", "odom").first;
+  impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
   impl_->robot_base_frame_ = _sdf->Get<std::string>("robot_base_frame", "base_footprint").first;
   impl_->odom_source_ = static_cast<GazeboRosDiffDrivePrivate::OdomSource>(
     _sdf->Get<int>("odometry_source", 1).first);
 
   // Advertise odometry topic
   impl_->publish_odom_ = _sdf->Get<bool>("publish_odom", false).first;
-  if (impl_->publish_odom_)
-  {
-    auto odometry_topic =  _sdf->Get<std::string>("odometry_topic", "odom").first;
-    //TODO(tfoote) mimic qos publisher queue size 1
+  if (impl_->publish_odom_) {
+    auto odometry_topic = _sdf->Get<std::string>("odometry_topic", "odom").first;
+    // TODO(tfoote) mimic qos publisher queue size 1
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
-        odometry_topic);
+      odometry_topic);
 
     RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise odom on [%s]", odometry_topic.c_str());
   }
@@ -294,10 +302,17 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Create TF broadcaster if needed
   impl_->publish_wheel_tf_ = _sdf->Get<bool>("publish_wheel_tf", false).first;
   impl_->publish_odom_tf_ = _sdf->Get<bool>("publish_odom_tf", false).first;
-  if (impl_->publish_wheel_tf_ || impl_->publish_odom_tf_)
-  {
+  if (impl_->publish_wheel_tf_ || impl_->publish_odom_tf_) {
     impl_->transform_broadcaster_ = std::shared_ptr<tf2_ros::TransformBroadcaster>(
       new tf2_ros::TransformBroadcaster(impl_->ros_node_));
+
+    if (impl_->publish_odom_tf_) {
+      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing odom transforms");
+    }
+
+    if (impl_->publish_wheel_tf_) {
+      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing wheel transforms");
+    }
   }
 
   // Listen to the update event (broadcast every simulation iteration)
@@ -308,7 +323,8 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 void GazeboRosDiffDrive::Reset()
 {
   if (impl_->joints_[GazeboRosDiffDrivePrivate::LEFT] &&
-     impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT]) {
+    impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT])
+  {
     impl_->last_update_time_ =
       impl_->joints_[GazeboRosDiffDrivePrivate::LEFT]->GetWorld()->SimTime();
     impl_->joints_[GazeboRosDiffDrivePrivate::LEFT]->SetParam("fmax", 0, impl_->max_wheel_torque_);
@@ -369,30 +385,31 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
 
   // Current speed
   double current_speed[2];
-  current_speed[LEFT] = joints_[LEFT]->GetVelocity(0)  * (wheel_diameter_ / 2.0);
+  current_speed[LEFT] = joints_[LEFT]->GetVelocity(0) * (wheel_diameter_ / 2.0);
   current_speed[RIGHT] = joints_[RIGHT]->GetVelocity(0) * (wheel_diameter_ / 2.0);
 
   // If max_accel == 0, or target speed is reached
   if (wheel_accel_ == 0 ||
-       (fabs(desired_wheel_speed_[LEFT] - current_speed[LEFT]) < 0.01) ||
-       (fabs(desired_wheel_speed_[RIGHT] - current_speed[RIGHT]) < 0.01)) {
-    joints_[LEFT]->SetParam("vel", 0, desired_wheel_speed_[LEFT]/(wheel_diameter_ / 2.0));
-    joints_[RIGHT]->SetParam("vel", 0, desired_wheel_speed_[RIGHT]/(wheel_diameter_ / 2.0));
+    (fabs(desired_wheel_speed_[LEFT] - current_speed[LEFT]) < 0.01) ||
+    (fabs(desired_wheel_speed_[RIGHT] - current_speed[RIGHT]) < 0.01))
+  {
+    joints_[LEFT]->SetParam("vel", 0, desired_wheel_speed_[LEFT] / (wheel_diameter_ / 2.0));
+    joints_[RIGHT]->SetParam("vel", 0, desired_wheel_speed_[RIGHT] / (wheel_diameter_ / 2.0));
   } else {
     if (desired_wheel_speed_[LEFT] >= current_speed[LEFT]) {
-      wheel_speed_instr_[LEFT] += fmin(desired_wheel_speed_[LEFT]-current_speed[LEFT],
-        wheel_accel_ * seconds_since_last_update);
+      wheel_speed_instr_[LEFT] += fmin(desired_wheel_speed_[LEFT] - current_speed[LEFT],
+          wheel_accel_ * seconds_since_last_update);
     } else {
-      wheel_speed_instr_[LEFT] += fmax(desired_wheel_speed_[LEFT]-current_speed[LEFT],
-        -wheel_accel_ * seconds_since_last_update);
+      wheel_speed_instr_[LEFT] += fmax(desired_wheel_speed_[LEFT] - current_speed[LEFT],
+          -wheel_accel_ * seconds_since_last_update);
     }
 
     if (desired_wheel_speed_[RIGHT] > current_speed[RIGHT]) {
-      wheel_speed_instr_[RIGHT] += fmin(desired_wheel_speed_[RIGHT]-current_speed[RIGHT],
-        wheel_accel_ * seconds_since_last_update);
+      wheel_speed_instr_[RIGHT] += fmin(desired_wheel_speed_[RIGHT] - current_speed[RIGHT],
+          wheel_accel_ * seconds_since_last_update);
     } else {
-      wheel_speed_instr_[RIGHT] += fmax(desired_wheel_speed_[RIGHT]-current_speed[RIGHT],
-        -wheel_accel_ * seconds_since_last_update);
+      wheel_speed_instr_[RIGHT] += fmax(desired_wheel_speed_[RIGHT] - current_speed[RIGHT],
+          -wheel_accel_ * seconds_since_last_update);
     }
 
     joints_[LEFT]->SetParam("vel", 0, wheel_speed_instr_[LEFT] / (wheel_diameter_ / 2.0));
@@ -437,20 +454,20 @@ void GazeboRosDiffDrivePrivate::UpdateOdometryEncoder(const gazebo::common::Time
 
   double sdiff = sr - sl;
 
-  double dx = (ssum) /2.0 * cos(pose_encoder_.theta + (sdiff) / (2.0*b));
-  double dy = (ssum) /2.0 * sin(pose_encoder_.theta + (sdiff) / (2.0*b));
-  double dtheta = (sdiff) /b;
+  double dx = (ssum) / 2.0 * cos(pose_encoder_.theta + (sdiff) / (2.0 * b));
+  double dy = (ssum) / 2.0 * sin(pose_encoder_.theta + (sdiff) / (2.0 * b));
+  double dtheta = (sdiff) / b;
 
   pose_encoder_.x += dx;
   pose_encoder_.y += dy;
   pose_encoder_.theta += dtheta;
 
-  double w = dtheta/seconds_since_last_update;
-  double v = sqrt(dx*dx+dy*dy) /seconds_since_last_update;
+  double w = dtheta / seconds_since_last_update;
+  double v = sqrt(dx * dx + dy * dy) / seconds_since_last_update;
 
   tf2::Quaternion qt;
   tf2::Vector3 vt;
-  qt.setRPY(0,0,pose_encoder_.theta);
+  qt.setRPY(0, 0, pose_encoder_.theta);
   vt = tf2::Vector3(pose_encoder_.x, pose_encoder_.y, 0);
 
   odom_.pose.pose.position.x = vt.x();
@@ -498,7 +515,7 @@ void GazeboRosDiffDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _
 
 void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _current_time)
 {
-  for (int i = 0; i < 2; i++) {
+  for (auto i : {LEFT, RIGHT}) {
     auto pose_wheel = joints_[i]->GetChild()->RelativePose();
 
     geometry_msgs::msg::TransformStamped msg;
@@ -507,6 +524,7 @@ void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _cu
     msg.child_frame_id = joints_[i]->GetChild()->GetName();
     msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose_wheel.Pos());
     msg.transform.rotation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose_wheel.Rot());
+
     transform_broadcaster_->sendTransform(msg);
   }
 }
@@ -529,6 +547,5 @@ void GazeboRosDiffDrivePrivate::PublishOdometryMsg(const gazebo::common::Time & 
   // Publish
   odometry_pub_->publish(odom_);
 }
-
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosDiffDrive)
-}
+}  // namespace gazebo_plugins

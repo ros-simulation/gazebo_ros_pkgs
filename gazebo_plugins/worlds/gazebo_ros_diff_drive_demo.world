@@ -4,7 +4,9 @@
 
   Try for example:
 
-  ros2 topic pub -1 /demo/force_demo geometry_msgs/Wrench "force: {x: 10.0}"
+    ros2 topic pub /cmd_vel geometry_msgs/Twist '{linear: {x: 0.5}}' -1
+
+    ros2 topic pub /cmd_vel geometry_msgs/Twist '{angular: {z: 0.1}}' -1
 -->
 <sdf version="1.6">
   <world name="default">
@@ -189,6 +191,7 @@
         <publish_odom>true</publish_odom>
         <publish_odom_tf>true</publish_odom_tf>
         <publish_wheel_tf>true</publish_wheel_tf>
+
         <odometry_topic>odom</odometry_topic>
         <odometry_frame>odom</odometry_frame>
         <robot_base_frame>chassis</robot_base_frame>
