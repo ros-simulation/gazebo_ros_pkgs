@@ -42,7 +42,6 @@
 #define GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_
 
 #include <gazebo/common/Plugin.hh>
-#include <geometry_msgs/msg/twist.hpp>
 
 #include <memory>
 
@@ -85,14 +84,7 @@ protected:
   // Documentation inherited
   void Reset() override;
 
-  /// Called at every simulation iteration.
-  virtual void OnUpdate();
-
 private:
-  /// Callback when a velocity command is received.
-  /// \param[in] _msg Twist command message.
-  void CmdVelCallback(const geometry_msgs::msg::Twist::SharedPtr _msg);
-
   /// Private data pointer
   std::unique_ptr<GazeboRosDiffDrivePrivate> impl_;
 };

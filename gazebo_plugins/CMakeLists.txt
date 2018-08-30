@@ -19,6 +19,7 @@ find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 include_directories(include
@@ -50,10 +51,13 @@ ament_target_dependencies(gazebo_ros_diff_drive
   "gazebo_dev"
   "gazebo_ros"
   "geometry_msgs"
+  "nav_msgs"
   "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
 )
 ament_export_libraries(gazebo_ros_diff_drive)
-
 
 # gazebo_ros_force
 add_library(gazebo_ros_force SHARED
