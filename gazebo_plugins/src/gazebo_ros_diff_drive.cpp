@@ -148,7 +148,7 @@ public:
   double max_wheel_torque_;
 
   /// Maximum wheel acceleration
-  double wheel_accel_;
+  double max_wheel_accel_;
 
   /// Desired wheel speed.
   double desired_wheel_speed_[2];
@@ -253,8 +253,8 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->wheel_speed_instr_[GazeboRosDiffDrivePrivate::LEFT] = 0;
 
   // Dynamic properties
-  impl_->wheel_accel_ = _sdf->Get<double>("wheel_acceleration", 0.0).first;
-  impl_->max_wheel_torque_ = _sdf->Get<double>("wheelTorque", 5.0).first;
+  impl_->max_wheel_accel_ = _sdf->Get<double>("max_wheel_acceleration", 0.0).first;
+  impl_->max_wheel_torque_ = _sdf->Get<double>("max_wheel_torque", 5.0).first;
 
   impl_->joints_[GazeboRosDiffDrivePrivate::LEFT]->SetParam("fmax", 0, impl_->max_wheel_torque_);
   impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT]->SetParam("fmax", 0, impl_->max_wheel_torque_);
@@ -269,7 +269,7 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->last_update_time_ = _model->GetWorld()->SimTime();
 
   // Subscribe to the velocity command topic
-  auto command_topic = _sdf->Get<std::string>("commandTopic", "cmd_vel").first;
+  auto command_topic = _sdf->Get<std::string>("command_topic", "cmd_vel").first;
 
   // TODO(tfoote) equivalent qos settings as below
   // ros::SubscribeOptions so =
@@ -339,19 +339,6 @@ void GazeboRosDiffDrive::Reset()
 
 void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
-  // \todo(louise) Check if this has been fixed
-  /* force reset SetParam("fmax") since Joint::Reset reset MaxForce to zero at
-     https://bitbucket.org/osrf/gazebo/src/8091da8b3c529a362f39b042095e12c94656a5d1/gazebo/physics/Joint.cc?at=gazebo2_2.2.5#cl-331
-     (this has been solved in https://bitbucket.org/osrf/gazebo/diff/gazebo/physics/Joint.cc?diff2=b64ff1b7b6ff&at=issue_964)
-     and Joint::Reset is called after ModelPlugin::Reset, so we need to set maxForce to max_wheel_torque other than GazeboRosDiffDrive::Reset
-     (this seems to be solved in https://bitbucket.org/osrf/gazebo/commits/ec8801d8683160eccae22c74bf865d59fac81f1e)
-  */
-  for (int i = 0; i < 2; ++i) {
-    if (fabs(max_wheel_torque_ - joints_[i]->GetParam("fmax", 0)) > 1e-6) {
-      joints_[i]->SetParam("fmax", 0, max_wheel_torque_);
-    }
-  }
-
   // Update encoder even if we're going to skip this update
   if (odom_source_ == ENCODER) {
     UpdateOdometryEncoder(_info.simTime);
@@ -389,7 +376,7 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
   current_speed[RIGHT] = joints_[RIGHT]->GetVelocity(0) * (wheel_diameter_ / 2.0);
 
   // If max_accel == 0, or target speed is reached
-  if (wheel_accel_ == 0 ||
+  if (max_wheel_accel_ == 0 ||
     (fabs(desired_wheel_speed_[LEFT] - current_speed[LEFT]) < 0.01) ||
     (fabs(desired_wheel_speed_[RIGHT] - current_speed[RIGHT]) < 0.01))
   {
@@ -398,18 +385,18 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
   } else {
     if (desired_wheel_speed_[LEFT] >= current_speed[LEFT]) {
       wheel_speed_instr_[LEFT] += fmin(desired_wheel_speed_[LEFT] - current_speed[LEFT],
-          wheel_accel_ * seconds_since_last_update);
+          max_wheel_accel_ * seconds_since_last_update);
     } else {
       wheel_speed_instr_[LEFT] += fmax(desired_wheel_speed_[LEFT] - current_speed[LEFT],
-          -wheel_accel_ * seconds_since_last_update);
+          -max_wheel_accel_ * seconds_since_last_update);
     }
 
     if (desired_wheel_speed_[RIGHT] > current_speed[RIGHT]) {
       wheel_speed_instr_[RIGHT] += fmin(desired_wheel_speed_[RIGHT] - current_speed[RIGHT],
-          wheel_accel_ * seconds_since_last_update);
+          max_wheel_accel_ * seconds_since_last_update);
     } else {
       wheel_speed_instr_[RIGHT] += fmax(desired_wheel_speed_[RIGHT] - current_speed[RIGHT],
-          -wheel_accel_ * seconds_since_last_update);
+          -max_wheel_accel_ * seconds_since_last_update);
     }
 
     joints_[LEFT]->SetParam("vel", 0, wheel_speed_instr_[LEFT] / (wheel_diameter_ / 2.0));
