@@ -269,8 +269,6 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->last_update_time_ = _model->GetWorld()->SimTime();
 
   // Subscribe to the velocity command topic
-  auto command_topic = _sdf->Get<std::string>("command_topic", "cmd_vel").first;
-
   // TODO(tfoote) equivalent qos settings as below
   // ros::SubscribeOptions so =
   //     ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
@@ -278,9 +276,10 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   //             ros::VoidPtr(), &queue_);
 
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
-    command_topic, std::bind(&GazeboRosDiffDrivePrivate::OnCmdVel, impl_.get(),
+    "cmd_vel", std::bind(&GazeboRosDiffDrivePrivate::OnCmdVel, impl_.get(),
     std::placeholders::_1));
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]", command_topic.c_str());
+  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
+    impl_->cmd_vel_sub_->get_topic_name());
 
   // Odometry
   impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
@@ -291,12 +290,12 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Advertise odometry topic
   impl_->publish_odom_ = _sdf->Get<bool>("publish_odom", false).first;
   if (impl_->publish_odom_) {
-    auto odometry_topic = _sdf->Get<std::string>("odometry_topic", "odom").first;
     // TODO(tfoote) mimic qos publisher queue size 1
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
-      odometry_topic);
+      "odom");
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise odom on [%s]", odometry_topic.c_str());
+    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
+      impl_->odometry_pub_->get_topic_name());
   }
 
   // Create TF broadcaster if needed
@@ -307,11 +306,16 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       new tf2_ros::TransformBroadcaster(impl_->ros_node_));
 
     if (impl_->publish_odom_tf_) {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing odom transforms");
+      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+        "Publishing odom transforms between [%s] and [%s]", impl_->odometry_frame_.c_str(),
+        impl_->robot_base_frame_.c_str());
     }
 
     if (impl_->publish_wheel_tf_) {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing wheel transforms");
+      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+        "Publishing wheel transforms between [%s], [%s] and [%s]", impl_->robot_base_frame_.c_str(),
+        impl_->joints_[GazeboRosDiffDrivePrivate::LEFT]->GetName().c_str(),
+        impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT]->GetName().c_str());
     }
   }
 
