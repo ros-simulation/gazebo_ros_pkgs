@@ -58,9 +58,6 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
-  // Create command publisher
-  auto pub = node->create_publisher<geometry_msgs::msg::Twist>("test/cmd_test");
-
   // Create subscriber
   nav_msgs::msg::Odometry::SharedPtr latestMsg;
   auto sub = node->create_subscription<nav_msgs::msg::Odometry>(
@@ -70,6 +67,8 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
     });
 
   // Send command
+  auto pub = node->create_publisher<geometry_msgs::msg::Twist>("test/cmd_test");
+
   auto msg = geometry_msgs::msg::Twist();
   msg.linear.x = 1.0;
   msg.angular.z = 0.1;
@@ -79,7 +78,7 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
   // Wait for it to be processed
   world->Step(1000);
   executor.spin_once(100ms);
-  gazebo::common::Time::MSleep(300);
+  gazebo::common::Time::MSleep(1000);
 
   // Check message
   ASSERT_NE(nullptr, latestMsg);
