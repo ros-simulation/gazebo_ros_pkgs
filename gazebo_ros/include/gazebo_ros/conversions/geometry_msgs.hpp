@@ -78,7 +78,7 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Point32 & in)
 /// \return Conversion result
 /// \tparam OUT Output type
 template<class OUT>
-OUT Convert(const geometry_msgs::msg::Point & in)
+OUT Convert(const geometry_msgs::msg::Point &)
 {
   return OUT();
 }

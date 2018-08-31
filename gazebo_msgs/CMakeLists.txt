@@ -54,6 +54,7 @@ set(srv_files
   "srv/SetModelConfiguration.srv"
   "srv/SetModelState.srv"
   "srv/SetPhysicsProperties.srv"
+  "srv/SpawnEntity.srv"
   "srv/SpawnModel.srv"
 )
 
