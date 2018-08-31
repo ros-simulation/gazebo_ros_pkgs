@@ -25,6 +25,7 @@ include_directories(
   ${gazebo_dev_INCLUDE_DIRS}
 )
 
+# gazebo_ros_node
 add_library(gazebo_ros_node SHARED
   src/executor.cpp
   src/node.cpp
@@ -35,6 +36,7 @@ ament_target_dependencies(gazebo_ros_node
 )
 ament_export_libraries(gazebo_ros_node)
 
+# gazebo_ros_utils
 add_library(gazebo_ros_utils SHARED
   src/utils.cpp
 )
@@ -44,6 +46,7 @@ ament_target_dependencies(gazebo_ros_utils
 )
 ament_export_libraries(gazebo_ros_utils)
 
+# gazebo_ros_init
 add_library(gazebo_ros_init SHARED
   src/gazebo_ros_init.cpp
 )
@@ -58,6 +61,7 @@ target_link_libraries(gazebo_ros_init
 )
 ament_export_libraries(gazebo_ros_init)
 
+# gazebo_ros_factory
 add_library(gazebo_ros_factory SHARED
   src/gazebo_ros_factory.cpp
 )
@@ -89,9 +93,9 @@ install(DIRECTORY include/
 
 install(
   TARGETS
-    gazebo_ros_node
-    gazebo_ros_init
     gazebo_ros_factory
+    gazebo_ros_init
+    gazebo_ros_node
     gazebo_ros_utils
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
