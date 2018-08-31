@@ -122,7 +122,7 @@ void GazeboRosFactory::Load(int argc, char ** argv)
 {
   // Factoryialize ROS with arguments
   rclcpp::init(argc, argv);
-  impl_->ros_node_ = gazebo_ros::Node::Create("gazebo_ros_factory");
+  impl_->ros_node_ = gazebo_ros::Node::Get();
   impl_->spawn_service_ = impl_->ros_node_->create_service<gazebo_msgs::srv::SpawnModel>(
     "spawn_model",
     std::bind(&GazeboRosFactoryPrivate::spawnModel,
