@@ -79,7 +79,9 @@ public:
     TiXmlDocument & xml_doc,
     const std::string & name);
 
-  void walkChildAddRobotNamespace(TiXmlNode * xml);
+  /// Iterate over all child nodes and add <ros><namespace> tags to the <plugin> tags
+  /// \param[in/out] xml XML node.
+  void WalkChildAddRobotNamespace(TiXmlNode * xml);
 
   /// \brief convert xml to Pose
   ignition::math::Pose3d parsePose(const std::string & str);
@@ -148,9 +150,9 @@ void GazeboRosFactoryPrivate::OnWorldCreated(const std::string & _world_name)
   // ROS transport
   ros_node_ = gazebo_ros::Node::Get();
 
-  spawn_service_ = ros_node_->create_service<gazebo_msgs::srv::SpawnEntity>( "spawn_entity",
-    std::bind(&GazeboRosFactoryPrivate::SpawnEntity, this,
-    std::placeholders::_1, std::placeholders::_2));
+  spawn_service_ = ros_node_->create_service<gazebo_msgs::srv::SpawnEntity>("spawn_entity",
+      std::bind(&GazeboRosFactoryPrivate::SpawnEntity, this,
+      std::placeholders::_1, std::placeholders::_2));
 
   // Gazebo transport
   gazebo_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
@@ -185,17 +187,19 @@ void GazeboRosFactoryPrivate::SpawnEntity(
     initial_xyz = frame_pose.Pos() + frame_pose.Rot().RotateVector(initial_xyz);
     initial_q = frame_pose.Rot() * initial_q;
     /// @todo: map is really wrong, need to use tf here somehow
-  } else if (req->reference_frame == "" || req->reference_frame == "world" ||
-    req->reference_frame == "map" || req->reference_frame == "/map")
-  {
-    RCLCPP_DEBUG(ros_node_->get_logger(),
-      "SpawnEntity: reference_frame is empty/world/map, using inertial frame");
   } else {
-    res->success = false;
-    res->status_message =
-      "SpawnEntity: reference reference_frame not found, did you forget to scope "
-      "the link by model name?";
-    return;
+    if (req->reference_frame == "" || req->reference_frame == "world" ||
+      req->reference_frame == "map" || req->reference_frame == "/map")
+    {
+      RCLCPP_DEBUG(ros_node_->get_logger(),
+        "SpawnEntity: reference_frame is empty/world/map, using inertial frame");
+    } else {
+      res->success = false;
+      res->status_message =
+        "SpawnEntity: reference reference_frame not found, did you forget to scope "
+        "the link by model name?";
+      return;
+    }
   }
 
   // incoming robot model string
@@ -206,39 +210,16 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   xml_doc.Parse(xml.c_str());
 
   // optional model manipulations: update initial pose && replace model name
+  TiXmlNode * root_xml;
   if (IsSDF(xml_doc)) {
     updateSDFAttributes(xml_doc, name, initial_xyz, initial_q);
 
-    // Walk recursively through the entire SDF, locate plugin tags and
-    // add robotNamespace as a child with the correct namespace
-    if (!robot_namespace_.empty()) {
-      // Get root element for SDF
-      // TODO(hsu): implement the spawning also with <light></light> and <model></model>
-      TiXmlNode * model_tixml = xml_doc.FirstChild("sdf");
-      model_tixml = (!model_tixml) ?
-        xml_doc.FirstChild("gazebo") : model_tixml;
-      if (model_tixml) {
-        walkChildAddRobotNamespace(model_tixml);
-      } else {
-        RCLCPP_WARN(ros_node_->get_logger(),
-          "Unable to add robot namespace to xml");
-      }
-    }
+    root_xml = xml_doc.FirstChild("sdf");
   } else if (IsURDF(xml_doc)) {
     updateURDFModelPose(xml_doc, initial_xyz, initial_q);
     updateURDFName(xml_doc, name);
 
-    // Walk recursively through the entire URDF, locate plugin tags and
-    // add robotNamespace as a child with the correct namespace
-    if (!this->robot_namespace_.empty()) {
-      // Get root element for URDF
-      TiXmlNode * model_tixml = xml_doc.FirstChild("robot");
-      if (model_tixml) {
-        walkChildAddRobotNamespace(model_tixml);
-      } else {
-        RCLCPP_WARN(ros_node_->get_logger(), "Unable to add robot namespace to xml");
-      }
-    }
+    root_xml = xml_doc.FirstChild("robot");
   } else {
     RCLCPP_ERROR(ros_node_->get_logger(), "SpawnEntity Failure: input xml format not recognized");
     res->success = false;
@@ -246,6 +227,15 @@ void GazeboRosFactoryPrivate::SpawnEntity(
       "SpawnEntity Failure: input xml not SDF or URDF, or cannot be converted to Gazebo "
       "compatible format.";
     return;
+  }
+
+  // Walk recursively through the entire file, and add <ros><namespace> tags to all plugins
+  if (!robot_namespace_.empty()) {
+    if (root_xml) {
+      WalkChildAddRobotNamespace(root_xml);
+    } else {
+      RCLCPP_WARN(ros_node_->get_logger(), "Unable to add robot namespace to xml");
+    }
   }
 
   // do spawning check if spawn worked, return response
@@ -347,28 +337,35 @@ void GazeboRosFactoryPrivate::updateSDFAttributes(
   }
 }
 
-void GazeboRosFactoryPrivate::walkChildAddRobotNamespace(TiXmlNode * xml)
+void GazeboRosFactoryPrivate::WalkChildAddRobotNamespace(TiXmlNode * xml)
 {
-  TiXmlNode * child = 0;
-  child = xml->IterateChildren(child);
-  while (child != NULL) {
+  TiXmlNode * child = nullptr;
+  while ((child = xml->IterateChildren(child))) {
+    // <plugin>
     if (child->Type() == TiXmlNode::TINYXML_ELEMENT &&
       child->ValueStr().compare(std::string("plugin")) == 0)
     {
-      if (child->FirstChildElement("robotNamespace") == NULL) {
-        TiXmlElement * child_elem = child->ToElement()->FirstChildElement("robotNamespace");
-        while (child_elem) {
-          child->ToElement()->RemoveChild(child_elem);
-          child_elem = child->ToElement()->FirstChildElement("robotNamespace");
-        }
-        TiXmlElement * key = new TiXmlElement("robotNamespace");
-        TiXmlText * val = new TiXmlText(robot_namespace_);
-        key->LinkEndChild(val);
-        child->ToElement()->LinkEndChild(key);
+      // <ros>
+      auto ros_elem = child->ToElement()->FirstChildElement("ros");
+      if (!ros_elem) {
+        ros_elem = new TiXmlElement("ros");
+        child->ToElement()->LinkEndChild(ros_elem);
       }
+
+      // <namespace>
+      auto ns_elem = ros_elem->FirstChildElement("namespace");
+      while (ns_elem) {
+        ros_elem->RemoveChild(ns_elem);
+        ns_elem = ros_elem->FirstChildElement("namespace");
+      }
+
+      ns_elem = new TiXmlElement("namespace");
+      auto ns_val = new TiXmlText(robot_namespace_);
+      ns_elem->LinkEndChild(ns_val);
+
+      ros_elem->ToElement()->LinkEndChild(ns_elem);
     }
-    walkChildAddRobotNamespace(child);
-    child = xml->IterateChildren(child);
+    WalkChildAddRobotNamespace(child);
   }
 }
 

@@ -16,7 +16,6 @@
 #define GAZEBO_ROS__GAZEBO_ROS_FACTORY_HPP_
 
 #include <gazebo/common/Plugin.hh>
-#include <gazebo_msgs/srv/spawn_model.hpp>
 
 #include <memory>
 
@@ -25,8 +24,8 @@ namespace gazebo_ros
 
 class GazeboRosFactoryPrivate;
 
-/// Factoryializes ROS with the system arguments passed to Gazebo (i.e. calls rclcpp::init).
-/// Also publishes the latest simtime to /clock
+/// Factoryializes ROS with the system arguments passed to Gazebo (i.e. calls rclcpp::init) and
+/// provides services to spawn and delete entities from the world.
 class GazeboRosFactory : public gazebo::SystemPlugin
 {
 public:
