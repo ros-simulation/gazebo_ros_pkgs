@@ -52,6 +52,17 @@ namespace gazebo
         sdf->GetElement("robotNamespace")->Get<std::string>();
     }
 
+    enable_horizontal_movement_ = true;
+    if (!sdf->HasElement ("enableHolizontalMovement"))
+    {
+      ROS_INFO_NAMED("planar_move", "PlanarMovePlugin missing <enableHolizontalMovement>, "
+          "defaults to \"%d\"", enable_horizontal_movement_);
+    }
+    else
+    {
+      enable_horizontal_movement_ = sdf->GetElement("enableHolizontalMovement")->Get<bool>();
+    }
+
     command_topic_ = "cmd_vel";
     if (!sdf->HasElement("commandTopic"))
     {
@@ -208,7 +219,10 @@ namespace gazebo
   {
     boost::mutex::scoped_lock scoped_lock(lock);
     x_ = cmd_msg->linear.x;
-    y_ = cmd_msg->linear.y;
+    if (enable_horizontal_movement_)
+    {
+      y_ = cmd_msg->linear.y;
+    }
     rot_ = cmd_msg->angular.z;
   }
 
