@@ -80,8 +80,9 @@ public:
     const std::string & name);
 
   /// Iterate over all child nodes and add <ros><namespace> tags to the <plugin> tags
-  /// \param[in/out] xml XML node.
-  void WalkChildAddRobotNamespace(TiXmlNode * xml);
+  /// \param[out] xml XML node.
+  /// \param[in] robot_namespace Namespace to be added
+  void WalkChildAddRobotNamespace(TiXmlNode * xml, const std::string & robot_namespace);
 
   /// \brief convert xml to Pose
   ignition::math::Pose3d parsePose(const std::string & str);
@@ -98,7 +99,6 @@ public:
 
   GazeboRosFactoryPrivate();
   gazebo_ros::Node::SharedPtr ros_node_;
-  std::string robot_namespace_;
 
   gazebo::transport::NodePtr gazebo_node_;
   gazebo::transport::PublisherPtr gz_request_pub_;
@@ -159,19 +159,15 @@ void GazeboRosFactoryPrivate::OnWorldCreated(const std::string & _world_name)
   gazebo_node_->Init(_world_name);
   gz_request_pub_ = gazebo_node_->Advertise<gazebo::msgs::Request>("~/request");
   gz_factory_pub_ = gazebo_node_->Advertise<gazebo::msgs::Factory>("~/factory");
-  gz_factory_light_pub_ = gazebo_node_->Advertise<gazebo::msgs::Light>(
-    "~/factory/light");
+  gz_factory_light_pub_ = gazebo_node_->Advertise<gazebo::msgs::Light>("~/factory/light");
 }
 
 void GazeboRosFactoryPrivate::SpawnEntity(
   gazebo_msgs::srv::SpawnEntity::Request::SharedPtr req,
   gazebo_msgs::srv::SpawnEntity::Response::SharedPtr res)
 {
-  // incoming entity name
+  // If entity name is given
   std::string name = req->name;
-
-  // get namespace for the corresponding model plugins
-  robot_namespace_ = req->robot_namespace;
 
   // get initial pose of model
   auto initial_xyz = Convert<ignition::math::Vector3d>(req->initial_pose.position);
@@ -180,13 +176,12 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   auto initial_q = Convert<ignition::math::Quaterniond>(req->initial_pose.orientation);
 
   // reference frame for initial pose definition, modify initial pose if defined
-  gazebo::physics::EntityPtr frame = world_->EntityByName(req->reference_frame);
+  auto frame = world_->EntityByName(req->reference_frame);
   if (frame) {
     // convert to relative pose
     ignition::math::Pose3d frame_pose = frame->WorldPose();
     initial_xyz = frame_pose.Pos() + frame_pose.Rot().RotateVector(initial_xyz);
     initial_q = frame_pose.Rot() * initial_q;
-    /// @todo: map is really wrong, need to use tf here somehow
   } else {
     if (req->reference_frame == "" || req->reference_frame == "world" ||
       req->reference_frame == "map" || req->reference_frame == "/map")
@@ -196,7 +191,7 @@ void GazeboRosFactoryPrivate::SpawnEntity(
     } else {
       res->success = false;
       res->status_message =
-        "SpawnEntity: reference reference_frame not found, did you forget to scope "
+        "Reference frame [" + req->reference_frame + "] not found, did you forget to scope "
         "the link by model name?";
       return;
     }
@@ -210,6 +205,7 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   xml_doc.Parse(xml.c_str());
 
   // optional model manipulations: update initial pose && replace model name
+  // TODO(louise) Use libsdformat to convert URDF to SDF then handle only the SDF
   TiXmlNode * root_xml;
   if (IsSDF(xml_doc)) {
     updateSDFAttributes(xml_doc, name, initial_xyz, initial_q);
@@ -230,9 +226,10 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   }
 
   // Walk recursively through the entire file, and add <ros><namespace> tags to all plugins
-  if (!robot_namespace_.empty()) {
+  auto robot_namespace = req->robot_namespace;
+  if (!robot_namespace.empty()) {
     if (root_xml) {
-      WalkChildAddRobotNamespace(root_xml);
+      WalkChildAddRobotNamespace(root_xml, robot_namespace);
     } else {
       RCLCPP_WARN(ros_node_->get_logger(), "Unable to add robot namespace to xml");
     }
@@ -263,7 +260,7 @@ void GazeboRosFactoryPrivate::updateSDFAttributes(
   TiXmlElement * model_tixml = gazebo_tixml->FirstChildElement("model");
   if (model_tixml) {
     // Update entity name
-    if (model_tixml->Attribute("name") != NULL) {
+    if (model_tixml->Attribute("name") != nullptr) {
       // removing old entity name
       model_tixml->RemoveAttribute("name");
     }
@@ -337,7 +334,8 @@ void GazeboRosFactoryPrivate::updateSDFAttributes(
   }
 }
 
-void GazeboRosFactoryPrivate::WalkChildAddRobotNamespace(TiXmlNode * xml)
+void GazeboRosFactoryPrivate::WalkChildAddRobotNamespace(TiXmlNode * xml,
+    const std::string & robot_namespace)
 {
   TiXmlNode * child = nullptr;
   while ((child = xml->IterateChildren(child))) {
@@ -360,12 +358,12 @@ void GazeboRosFactoryPrivate::WalkChildAddRobotNamespace(TiXmlNode * xml)
       }
 
       ns_elem = new TiXmlElement("namespace");
-      auto ns_val = new TiXmlText(robot_namespace_);
+      auto ns_val = new TiXmlText(robot_namespace);
       ns_elem->LinkEndChild(ns_val);
 
       ros_elem->ToElement()->LinkEndChild(ns_elem);
     }
-    WalkChildAddRobotNamespace(child);
+    WalkChildAddRobotNamespace(child, robot_namespace);
   }
 }
 
@@ -387,47 +385,49 @@ void GazeboRosFactoryPrivate::updateURDFModelPose(
   const ignition::math::Quaterniond & initial_q)
 {
   TiXmlElement * model_tixml = (xml_doc.FirstChildElement("robot"));
-  if (model_tixml) {
-    // replace initial pose of model
-    // find first instance of xyz and rpy, replace with initial pose
-    TiXmlElement * origin_key = model_tixml->FirstChildElement("origin");
 
-    if (!origin_key) {
-      origin_key = new TiXmlElement("origin");
-      model_tixml->LinkEndChild(origin_key);
-    }
-
-    ignition::math::Vector3d xyz;
-    ignition::math::Vector3d rpy;
-    if (origin_key->Attribute("xyz")) {
-      xyz = this->parseVector3(origin_key->Attribute("xyz"));
-      origin_key->RemoveAttribute("xyz");
-    }
-    if (origin_key->Attribute("rpy")) {
-      rpy = this->parseVector3(origin_key->Attribute("rpy"));
-      origin_key->RemoveAttribute("rpy");
-    }
-
-    // add xyz, rpy to initial pose
-    ignition::math::Pose3d model_pose =
-      ignition::math::Pose3d(xyz, ignition::math::Quaterniond(rpy)) +
-      ignition::math::Pose3d(initial_xyz, initial_q);
-
-    std::ostringstream xyz_stream;
-    xyz_stream << model_pose.Pos().X() << " " << model_pose.Pos().Y() << " " <<
-      model_pose.Pos().Z();
-
-    std::ostringstream rpy_stream;
-    // convert to Euler angles for Gazebo XML
-    ignition::math::Vector3d model_rpy = model_pose.Rot().Euler();
-    rpy_stream << model_rpy.X() << " " << model_rpy.Y() << " " << model_rpy.Z();
-
-    origin_key->SetAttribute("xyz", xyz_stream.str());
-    origin_key->SetAttribute("rpy", rpy_stream.str());
-  } else {
+  if (!model_tixml) {
     RCLCPP_WARN(ros_node_->get_logger(),
-      "Could not find <model> element in sdf, so name and initial position is not applied");
+      "Could not find <robot> element in URDF, so initial position is not applied");
+    return;
   }
+
+  // replace initial pose of model
+  // find first instance of xyz and rpy, replace with initial pose
+  TiXmlElement * origin_key = model_tixml->FirstChildElement("origin");
+
+  if (!origin_key) {
+    origin_key = new TiXmlElement("origin");
+    model_tixml->LinkEndChild(origin_key);
+  }
+
+  ignition::math::Vector3d xyz;
+  ignition::math::Vector3d rpy;
+  if (origin_key->Attribute("xyz")) {
+    xyz = this->parseVector3(origin_key->Attribute("xyz"));
+    origin_key->RemoveAttribute("xyz");
+  }
+  if (origin_key->Attribute("rpy")) {
+    rpy = this->parseVector3(origin_key->Attribute("rpy"));
+    origin_key->RemoveAttribute("rpy");
+  }
+
+  // add xyz, rpy to initial pose
+  ignition::math::Pose3d model_pose =
+    ignition::math::Pose3d(xyz, ignition::math::Quaterniond(rpy)) +
+    ignition::math::Pose3d(initial_xyz, initial_q);
+
+  std::ostringstream xyz_stream;
+  xyz_stream << model_pose.Pos().X() << " " << model_pose.Pos().Y() << " " <<
+    model_pose.Pos().Z();
+
+  std::ostringstream rpy_stream;
+  // convert to Euler angles for Gazebo XML
+  ignition::math::Vector3d model_rpy = model_pose.Rot().Euler();
+  rpy_stream << model_rpy.X() << " " << model_rpy.Y() << " " << model_rpy.Z();
+
+  origin_key->SetAttribute("xyz", xyz_stream.str());
+  origin_key->SetAttribute("rpy", rpy_stream.str());
 }
 
 void GazeboRosFactoryPrivate::updateURDFName(
@@ -437,7 +437,7 @@ void GazeboRosFactoryPrivate::updateURDFName(
   TiXmlElement * model_tixml = xml_doc.FirstChildElement("robot");
   // replace model name if one is specified by the user
   if (model_tixml) {
-    if (model_tixml->Attribute("name") != NULL) {
+    if (model_tixml->Attribute("name") != nullptr) {
       // removing old model name
       model_tixml->RemoveAttribute("name");
     }
@@ -455,40 +455,35 @@ void GazeboRosFactoryPrivate::spawnAndConform(
   gazebo_msgs::srv::SpawnEntity::Response::SharedPtr res)
 {
   std::string entity_type = xml_doc.RootElement()->FirstChild()->Value();
+
   // Convert the entity type to lower case
   std::transform(entity_type.begin(), entity_type.end(), entity_type.begin(), ::tolower);
 
   bool isLight = (entity_type == "light");
 
-  // push to factory iface
-  std::ostringstream stream;
-  stream << xml_doc;
-  std::string xml_doc_string = stream.str();
-
-  RCLCPP_DEBUG(ros_node_->get_logger(),
-    "Gazebo Model XML\n\n%s\n\n ", xml_doc_string.c_str());
-
-  // publish to factory topic
-  gazebo::msgs::Factory msg;
-  gazebo::msgs::Init(msg, "spawn_model");
-  msg.set_sdf(xml_doc_string);
-
   // FIXME: should use entity_info or add lock to World::receiveMutex
   // looking for Model to see if it exists already
-  gazebo::msgs::Request * entity_info_msg =
-    gazebo::msgs::CreateRequest("entity_info", name);
+  auto entity_info_msg = gazebo::msgs::CreateRequest("entity_info", name);
   gz_request_pub_->Publish(*entity_info_msg, true);
+
   // TODO(hsu) should wait for response response_sub_, check to see that
   // if _msg->response == "nonexistant"
-  gazebo::physics::ModelPtr model = world_->ModelByName(name);
-  gazebo::physics::LightPtr light = world_->LightByName(name);
-  if ((isLight && light != NULL) || (model != NULL)) {
+  auto model = world_->ModelByName(name);
+  auto light = world_->LightByName(name);
+  if ((isLight && light != nullptr) || (model != nullptr)) {
     RCLCPP_ERROR(ros_node_->get_logger(),
       "SpawnEntity: Failure - model name %s already exist.", name.c_str());
     res->success = false;
     res->status_message = "SpawnEntity: Failure - entity already exists.";
     return;
   }
+
+  // push to factory iface
+  std::ostringstream stream;
+  stream << xml_doc;
+  std::string xml_doc_string = stream.str();
+
+  RCLCPP_DEBUG(ros_node_->get_logger(), "Gazebo Model XML\n\n%s\n\n ", xml_doc_string.c_str());
 
   // for Gazebo 7 and up, use a different method to spawn lights
   if (isLight) {
@@ -500,6 +495,9 @@ void GazeboRosFactoryPrivate::spawnAndConform(
     gz_factory_light_pub_->Publish(msg);
   } else {
     // Publish the factory message
+    gazebo::msgs::Factory msg;
+    gazebo::msgs::Init(msg, "spawn_model");
+    msg.set_sdf(xml_doc_string);
     gz_factory_pub_->Publish(msg);
   }
   /// FIXME: should change publish to direct invocation World::LoadModel() and/or
@@ -519,8 +517,8 @@ void GazeboRosFactoryPrivate::spawnAndConform(
 
     {
       // boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-      if ((isLight && world_->LightByName(name) != NULL) ||
-        (world_->ModelByName(name) != NULL))
+      if ((isLight && world_->LightByName(name) != nullptr) ||
+        (world_->ModelByName(name) != nullptr))
       {
         break;
       }
