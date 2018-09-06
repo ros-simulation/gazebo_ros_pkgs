@@ -268,16 +268,11 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   }
   impl_->last_update_time_ = _model->GetWorld()->SimTime();
 
-  // Subscribe to the velocity command topic
-  // TODO(tfoote) equivalent qos settings as below
-  // ros::SubscribeOptions so =
-  //     ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
-  //             boost::bind(&GazeboRosDiffDrive::cmdVelCallback, this, _1),
-  //             ros::VoidPtr(), &queue_);
-
+  rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", std::bind(&GazeboRosDiffDrivePrivate::OnCmdVel, impl_.get(),
-    std::placeholders::_1));
+    std::placeholders::_1),
+    qos_profile);
   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
     impl_->cmd_vel_sub_->get_topic_name());
 
@@ -290,9 +285,8 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Advertise odometry topic
   impl_->publish_odom_ = _sdf->Get<bool>("publish_odom", false).first;
   if (impl_->publish_odom_) {
-    // TODO(tfoote) mimic qos publisher queue size 1
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
-      "odom");
+      "odom", qos_profile);
 
     RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
       impl_->odometry_pub_->get_topic_name());
