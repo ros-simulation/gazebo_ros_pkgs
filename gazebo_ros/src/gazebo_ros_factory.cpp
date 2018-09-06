@@ -54,8 +54,9 @@ public:
   /// Iterate over all child elements and add <ros><namespace> tags to the <plugin> tags.
   /// \param[out] _elem SDF element.
   /// \param[in] _robot_namespace Namespace to be added.
-  void WalkChildAddRobotNamespace(const sdf::ElementPtr & _elem,
-      const std::string & _robot_namespace);
+  void WalkChildAddRobotNamespace(
+    const sdf::ElementPtr & _elem,
+    const std::string & _robot_namespace);
 
   /// \brief World pointer from Gazebo.
   gazebo::physics::WorldPtr world_;
@@ -157,14 +158,13 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   }
 
   // Update name if set, otherwise keep name from XML
-  if (!req->name.empty())
-  {
+  if (!req->name.empty()) {
     entity_elem->GetAttribute("name")->SetFromString(req->name);
 
     // When name is given and the entity exists, we assume it's an error and don't spawn
     // When name is not given, spawn anyway, and Gazebo will append a number to the name as needed
     if ((isLight && world_->LightByName(req->name) != nullptr) ||
-        world_->ModelByName(req->name) != nullptr)
+      world_->ModelByName(req->name) != nullptr)
     {
       res->success = false;
       res->status_message = "Entity [" + req->name + "] already exists.";
@@ -216,9 +216,7 @@ void GazeboRosFactoryPrivate::SpawnEntity(
     gz_factory_light_pub_->Publish(msg);
   } else {
     std::ostringstream sdfStr;
-    sdfStr << "<sdf version='" << SDF_VERSION << "'>"
-           << entity_elem->ToString("")
-           << "</sdf>";
+    sdfStr << "<sdf version='" << SDF_VERSION << "'>" << entity_elem->ToString("") << "</sdf>";
     gazebo::msgs::Factory msg;
     msg.set_sdf(sdfStr.str());
     gz_factory_pub_->Publish(msg);
@@ -264,15 +262,15 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   res->status_message = "SpawnEntity: Successfully spawned entity [" + req->name + "]";
 }
 
-void GazeboRosFactoryPrivate::WalkChildAddRobotNamespace(const sdf::ElementPtr & _elem,
-    const std::string & _robot_namespace)
+void GazeboRosFactoryPrivate::WalkChildAddRobotNamespace(
+  const sdf::ElementPtr & _elem,
+  const std::string & _robot_namespace)
 {
   for (sdf::ElementPtr child_elem = _elem->GetFirstElement(); child_elem;
-      child_elem = child_elem->GetNextElement())
+    child_elem = child_elem->GetNextElement())
   {
     // <plugin>
-    if (child_elem->GetName() == "plugin")
-    {
+    if (child_elem->GetName() == "plugin") {
       // Get / create <ros>
       auto ros_elem = child_elem->GetElement("ros");
 
