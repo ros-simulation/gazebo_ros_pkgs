@@ -293,13 +293,12 @@ void GazeboRosFactoryPrivate::DeleteEntity(
 
   // send delete request
   auto msg = gazebo::msgs::CreateRequest("entity_delete", req->name);
-  gz_request_pub_->Publish(*msg,true);
+  gz_request_pub_->Publish(*msg, true);
 
   // Wait and verify that entity is deleted
   rclcpp::Time timeout = ros_node_->now() + rclcpp::Duration(10, 0);
   while (rclcpp::ok()) {
-    if (ros_node_->now() > timeout)
-    {
+    if (ros_node_->now() > timeout) {
       res->success = false;
       res->status_message =
         "Delete service timed out waiting for entity to disappear from simulation";
@@ -314,7 +313,6 @@ void GazeboRosFactoryPrivate::DeleteEntity(
 
   res->success = true;
   res->status_message = "Successfully deleted entity [" + req->name + "]";
-  return;
 }
 
 void GazeboRosFactoryPrivate::AddNamespace(
