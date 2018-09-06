@@ -20,6 +20,7 @@
 #include <gazebo/physics/PhysicsIface.hh>
 #include <gazebo/physics/World.hh>
 #include <gazebo/transport/Node.hh>
+#include <gazebo_msgs/srv/delete_entity.hpp>
 #include <gazebo_msgs/srv/spawn_entity.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
@@ -43,18 +44,25 @@ public:
   /// \param[in] _world_name The world's name
   void OnWorldCreated(const std::string & _world_name);
 
-  /// \brief Function for inserting a model into Gazebo from ROS Service Call.
-  /// Supported formats are SDF and URDF
+  /// \brief Function for inserting an entity into Gazebo from ROS Service Call.
+  /// Supported formats are SDF and URDF and works with both models and lights.
   /// \param[in] req Request
   /// \param[out] res Response
   void SpawnEntity(
     gazebo_msgs::srv::SpawnEntity::Request::SharedPtr req,
     gazebo_msgs::srv::SpawnEntity::Response::SharedPtr res);
 
+  /// \brief Function for removing an entity from Gazebo from ROS Service Call.
+  /// \param[in] req Request
+  /// \param[out] res Response
+  void DeleteEntity(
+    gazebo_msgs::srv::DeleteEntity::Request::SharedPtr req,
+    gazebo_msgs::srv::DeleteEntity::Response::SharedPtr res);
+
   /// Iterate over all child elements and add <ros><namespace> tags to the <plugin> tags.
   /// \param[out] _elem SDF element.
   /// \param[in] _robot_namespace Namespace to be added.
-  void WalkChildAddRobotNamespace(
+  void AddNamespace(
     const sdf::ElementPtr & _elem,
     const std::string & _robot_namespace);
 
@@ -67,8 +75,11 @@ public:
   /// ROS node for communication, managed by gazebo_ros.
   gazebo_ros::Node::SharedPtr ros_node_;
 
-  /// \brief ROS service to handle requests/responses to spawn models.
+  /// \brief ROS service to handle requests/responses to spawn entities.
   rclcpp::Service<gazebo_msgs::srv::SpawnEntity>::SharedPtr spawn_service_;
+
+  /// \brief ROS service to handle requests/responses to delete entities.
+  rclcpp::Service<gazebo_msgs::srv::DeleteEntity>::SharedPtr delete_service_;
 
   /// Gazebo node for communication.
   gazebo::transport::NodePtr gz_node_;
@@ -78,6 +89,9 @@ public:
 
   /// Publishes light factory messages.
   gazebo::transport::PublisherPtr gz_factory_light_pub_;
+
+  /// Publishes request messages.
+  gazebo::transport::PublisherPtr gz_request_pub_;
 
   /// To be notified once the world is created.
   gazebo::event::ConnectionPtr world_created_connection_;
@@ -118,11 +132,16 @@ void GazeboRosFactoryPrivate::OnWorldCreated(const std::string & _world_name)
       std::bind(&GazeboRosFactoryPrivate::SpawnEntity, this,
       std::placeholders::_1, std::placeholders::_2));
 
+  delete_service_ = ros_node_->create_service<gazebo_msgs::srv::DeleteEntity>("delete_entity",
+      std::bind(&GazeboRosFactoryPrivate::DeleteEntity, this,
+      std::placeholders::_1, std::placeholders::_2));
+
   // Gazebo transport
   gz_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   gz_node_->Init(_world_name);
   gz_factory_pub_ = gz_node_->Advertise<gazebo::msgs::Factory>("~/factory");
   gz_factory_light_pub_ = gz_node_->Advertise<gazebo::msgs::Light>("~/factory/light");
+  gz_request_pub_ = gz_node_->Advertise<gazebo::msgs::Request>("~/request");
 }
 
 void GazeboRosFactoryPrivate::SpawnEntity(
@@ -207,7 +226,7 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   // Walk recursively through the entire file, and add <ros><namespace> tags to all plugins
   auto robot_namespace = req->robot_namespace;
   if (!robot_namespace.empty()) {
-    WalkChildAddRobotNamespace(entity_elem, robot_namespace);
+    AddNamespace(entity_elem, robot_namespace);
   }
 
   // Publish factory message
@@ -231,8 +250,7 @@ void GazeboRosFactoryPrivate::SpawnEntity(
     return;
   }
 
-  rclcpp::Duration model_spawn_timeout(10, 0);
-  rclcpp::Time timeout = ros_node_->now() + model_spawn_timeout;
+  rclcpp::Time timeout = ros_node_->now() + rclcpp::Duration(10, 0);
 
   while (rclcpp::ok()) {
     if (ros_node_->now() > timeout) {
@@ -262,7 +280,44 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   res->status_message = "SpawnEntity: Successfully spawned entity [" + req->name + "]";
 }
 
-void GazeboRosFactoryPrivate::WalkChildAddRobotNamespace(
+void GazeboRosFactoryPrivate::DeleteEntity(
+  gazebo_msgs::srv::DeleteEntity::Request::SharedPtr req,
+  gazebo_msgs::srv::DeleteEntity::Response::SharedPtr res)
+{
+  auto entity = world_->EntityByName(req->name);
+  if (!entity) {
+    res->success = false;
+    res->status_message = "Entity [" + req->name + "] does not exist";
+    return;
+  }
+
+  // send delete request
+  auto msg = gazebo::msgs::CreateRequest("entity_delete", req->name);
+  gz_request_pub_->Publish(*msg,true);
+
+  // Wait and verify that entity is deleted
+  rclcpp::Time timeout = ros_node_->now() + rclcpp::Duration(10, 0);
+  while (rclcpp::ok()) {
+    if (ros_node_->now() > timeout)
+    {
+      res->success = false;
+      res->status_message =
+        "Delete service timed out waiting for entity to disappear from simulation";
+      return;
+    }
+
+    if (!world_->EntityByName(req->name)) {
+      break;
+    }
+    usleep(1000);
+  }
+
+  res->success = true;
+  res->status_message = "Successfully deleted entity [" + req->name + "]";
+  return;
+}
+
+void GazeboRosFactoryPrivate::AddNamespace(
   const sdf::ElementPtr & _elem,
   const std::string & _robot_namespace)
 {
@@ -292,7 +347,7 @@ void GazeboRosFactoryPrivate::WalkChildAddRobotNamespace(
       // Set namespace
       ns_elem->Set<std::string>(_robot_namespace);
     }
-    WalkChildAddRobotNamespace(child_elem, _robot_namespace);
+    AddNamespace(child_elem, _robot_namespace);
   }
 }
 

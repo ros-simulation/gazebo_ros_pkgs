@@ -48,10 +48,6 @@
 #include "gazebo_msgs/JointRequest.h"
 #include "gazebo_msgs/BodyRequest.h"
 
-#include "gazebo_msgs/SpawnModel.h"
-#include "gazebo_msgs/DeleteModel.h"
-#include "gazebo_msgs/DeleteLight.h"
-
 #include "gazebo_msgs/ApplyBodyWrench.h"
 
 #include "gazebo_msgs/SetPhysicsProperties.h"
@@ -141,12 +137,6 @@ public:
 
   /// \brief
   void onModelStatesDisconnect();
-
-  /// \brief delete model given name
-  bool deleteModel(gazebo_msgs::DeleteModel::Request &req,gazebo_msgs::DeleteModel::Response &res);
-
-  /// \brief delete a given light by name
-  bool deleteLight(gazebo_msgs::DeleteLight::Request &req,gazebo_msgs::DeleteLight::Response &res);
 
   /// \brief
   bool getModelState(gazebo_msgs::GetModelState::Request &req,gazebo_msgs::GetModelState::Response &res);
@@ -256,9 +246,6 @@ private:
   /// \brief waits for the rest of Gazebo to be ready before initializing the dynamic reconfigure services
   void physicsReconfigureThread();
 
-  /// \brief Unused
-  void onResponse(ConstResponsePtr &response);
-
   /// \brief Connect to Gazebo via its plugin interface, get a pointer to the world, start events
   void loadGazeboRosApiPlugin(std::string world_name);
 
@@ -273,11 +260,7 @@ private:
 
   gazebo::transport::NodePtr gazebonode_;
   gazebo::transport::SubscriberPtr stat_sub_;
-  gazebo::transport::PublisherPtr factory_pub_;
-  gazebo::transport::PublisherPtr factory_light_pub_;
   gazebo::transport::PublisherPtr light_modify_pub_;
-  gazebo::transport::PublisherPtr request_pub_;
-  gazebo::transport::SubscriberPtr response_sub_;
 
   boost::shared_ptr<ros::NodeHandle> nh_;
   ros::CallbackQueue gazebo_queue_;
@@ -291,8 +274,6 @@ private:
   gazebo::event::ConnectionPtr pub_model_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
-  ros::ServiceServer delete_model_service_;
-  ros::ServiceServer delete_light_service_;
   ros::ServiceServer get_model_state_service_;
   ros::ServiceServer get_model_properties_service_;
   ros::ServiceServer get_world_properties_service_;

@@ -185,11 +185,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   gazebonode_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   gazebonode_->Init(world_name);
   //stat_sub_ = gazebonode_->Subscribe("~/world_stats", &GazeboRosApiPlugin::publishSimTime, this); // TODO: does not work in server plugin?
-  factory_pub_ = gazebonode_->Advertise<gazebo::msgs::Factory>("~/factory");
-  factory_light_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/factory/light");
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
-  request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
-  response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
 
   // reset topic connection counts
   pub_link_states_connection_count_ = 0;
@@ -218,11 +214,6 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   time_update_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishSimTime,this));
 }
 
-void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
-{
-
-}
-
 void GazeboRosApiPlugin::gazeboQueueThread()
 {
   static const double timeout = 0.001;
@@ -240,26 +231,7 @@ void GazeboRosApiPlugin::advertiseServices()
     return;
   }
 
-  // publish clock for simulated ros time
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
-
-  // Advertise delete services on the custom queue
-  std::string delete_model_service_name("delete_model");
-  ros::AdvertiseServiceOptions delete_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::DeleteModel>(
-                                                                   delete_model_service_name,
-                                                                   boost::bind(&GazeboRosApiPlugin::deleteModel,this,_1,_2),
-                                                                   ros::VoidPtr(), &gazebo_queue_);
-  delete_model_service_ = nh_->advertiseService(delete_aso);
-
-  // Advertise delete service for lights on the custom queue
-  std::string delete_light_service_name("delete_light");
-  ros::AdvertiseServiceOptions delete_light_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::DeleteLight>(
-                                                                   delete_light_service_name,
-                                                                   boost::bind(&GazeboRosApiPlugin::deleteLight,this,_1,_2),
-                                                                   ros::VoidPtr(), &gazebo_queue_);
-  delete_light_service_ = nh_->advertiseService(delete_light_aso);
 
   // Advertise more services on the custom queue
   std::string get_model_properties_service_name("get_model_properties");
@@ -551,120 +523,6 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
     if (pub_model_states_connection_count_ < 0) // should not be possible
       ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
   }
-}
-
-bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
-                                     gazebo_msgs::DeleteModel::Response &res)
-{
-  // clear forces, etc for the body in question
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::ModelPtr model = world_->ModelByName(req.model_name);
-#else
-  gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
-#endif
-  if (!model)
-  {
-    ROS_ERROR_NAMED("api_plugin", "DeleteModel: model [%s] does not exist",req.model_name.c_str());
-    res.success = false;
-    res.status_message = "DeleteModel: model does not exist";
-    return true;
-  }
-
-  // delete wrench jobs on bodies
-  for (unsigned int i = 0 ; i < model->GetChildCount(); i ++)
-  {
-    gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(i));
-    if (body)
-    {
-      // look for it in jobs, delete body wrench jobs
-      clearBodyWrenches(body->GetScopedName());
-    }
-  }
-
-  // delete force jobs on joints
-  gazebo::physics::Joint_V joints = model->GetJoints();
-  for (unsigned int i=0;i< joints.size(); i++)
-  {
-    // look for it in jobs, delete joint force jobs
-    clearJointForces(joints[i]->GetName());
-  }
-
-  // send delete model request
-  gazebo::msgs::Request *msg = gazebo::msgs::CreateRequest("entity_delete",req.model_name);
-  request_pub_->Publish(*msg,true);
-
-  ros::Duration model_spawn_timeout(60.0);
-  ros::Time timeout = ros::Time::now() + model_spawn_timeout;
-  // wait and verify that model is deleted
-  while (true)
-  {
-    if (ros::Time::now() > timeout)
-    {
-      res.success = false;
-      res.status_message = "DeleteModel: Model pushed to delete queue, but delete service timed out waiting for model to disappear from simulation";
-      return true;
-    }
-    {
-      //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-#if GAZEBO_MAJOR_VERSION >= 8
-      if (!world_->ModelByName(req.model_name)) break;
-#else
-      if (!world_->GetModel(req.model_name)) break;
-#endif
-    }
-    ROS_DEBUG_NAMED("api_plugin", "Waiting for model deletion (%s)",req.model_name.c_str());
-    usleep(1000);
-  }
-
-  // set result
-  res.success = true;
-  res.status_message = "DeleteModel: successfully deleted model";
-  return true;
-}
-
-bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
-                                     gazebo_msgs::DeleteLight::Response &res)
-{
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::LightPtr phy_light = world_->LightByName(req.light_name);
-#else
-  gazebo::physics::LightPtr phy_light = world_->Light(req.light_name);
-#endif
-
-  if (phy_light == NULL)
-  {
-    res.success = false;
-    res.status_message = "DeleteLight: Requested light " + req.light_name + " not found!";
-  }
-  else
-  {
-    gazebo::msgs::Request* msg = gazebo::msgs::CreateRequest("entity_delete", req.light_name);
-    request_pub_->Publish(*msg, true);
-
-    res.success = false;
-
-    for (int i = 0; i < 100; i++)
-    {
-#if GAZEBO_MAJOR_VERSION >= 8
-      phy_light = world_->LightByName(req.light_name);
-#else
-      phy_light = world_->Light(req.light_name);
-#endif
-      if (phy_light == NULL)
-      {
-        res.success = true;
-        res.status_message = "DeleteLight: " + req.light_name + " successfully deleted";
-        return true;
-      }
-      // Check every 100ms
-      usleep(100000);
-    }
-  }
-
-  res.status_message = "DeleteLight: Timeout reached while removing light \"" + req.light_name
-                       + "\"";
-
-  return true;
 }
 
 bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,

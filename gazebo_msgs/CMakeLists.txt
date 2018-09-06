@@ -35,6 +35,7 @@ set(srv_files
   "srv/ApplyBodyWrench.srv"
   "srv/ApplyJointEffort.srv"
   "srv/BodyRequest.srv"
+  "srv/DeleteEntity.srv"
   "srv/DeleteLight.srv"
   "srv/DeleteModel.srv"
   "srv/GetJointProperties.srv"
