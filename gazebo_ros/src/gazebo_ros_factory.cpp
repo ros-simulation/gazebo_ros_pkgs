@@ -265,13 +265,6 @@ void GazeboRosFactoryPrivate::SpawnEntity(
     {
       break;
     }
-
-    auto wait_time = timeout - ros_node_->now();
-    double wait_time_d =
-      std::chrono::duration<double>(std::chrono::nanoseconds(wait_time.nanoseconds())).count();
-
-    RCLCPP_DEBUG(ros_node_->get_logger(),
-      "Waiting for %s for entity %s to spawn", std::to_string(wait_time_d).c_str(), req->name);
     usleep(2000);
   }
 
