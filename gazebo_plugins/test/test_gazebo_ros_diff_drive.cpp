@@ -60,11 +60,12 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
 
   // Create subscriber
   nav_msgs::msg::Odometry::SharedPtr latestMsg;
+  rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
   auto sub = node->create_subscription<nav_msgs::msg::Odometry>(
     "test/odom_test",
     [&latestMsg](const nav_msgs::msg::Odometry::SharedPtr _msg) {
       latestMsg = _msg;
-    });
+    }, qos_profile);
 
   // Send command
   auto pub = node->create_publisher<geometry_msgs::msg::Twist>("test/cmd_test");
@@ -84,7 +85,6 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
   ASSERT_NE(nullptr, latestMsg);
   EXPECT_EQ("odom_frame_test", latestMsg->header.frame_id);
   EXPECT_LT(0.0, latestMsg->pose.pose.position.x);
-  EXPECT_LT(0.0, latestMsg->pose.pose.position.y);
   EXPECT_LT(0.0, latestMsg->pose.pose.orientation.z);
 
   // Check movement
