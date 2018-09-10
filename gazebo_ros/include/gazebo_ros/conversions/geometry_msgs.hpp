@@ -15,6 +15,7 @@
 #ifndef GAZEBO_ROS__CONVERSIONS__GEOMETRY_MSGS_HPP_
 #define GAZEBO_ROS__CONVERSIONS__GEOMETRY_MSGS_HPP_
 
+#include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/point32.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <geometry_msgs/msg/vector3.hpp>
@@ -49,7 +50,7 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Vector3 & msg)
   return vec;
 }
 
-/// Generic conversion from a ROS geometry point message to another type.
+/// Generic conversion from a ROS geometry point32 message to another type.
 /// \param[in] in Input message.
 /// \return Conversion result
 /// \tparam OUT Output type
@@ -59,7 +60,7 @@ OUT Convert(const geometry_msgs::msg::Point32 & in)
   return OUT();
 }
 
-/// \brief Specialized conversion from a ROS point message to an Ignition Math vector.
+/// \brief Specialized conversion from a ROS point32 message to an Ignition Math vector.
 /// \param[in] in ROS message to convert.
 /// \return An Ignition Math vector.
 template<>
@@ -72,6 +73,30 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Point32 & in)
   return vec;
 }
 
+/// Generic conversion from a ROS geometry point message to another type.
+/// \param[in] in Input message.
+/// \return Conversion result
+/// \tparam OUT Output type
+template<class OUT>
+OUT Convert(const geometry_msgs::msg::Point & in)
+{
+  return OUT();
+}
+
+/// TODO(louise) This may already exist somewhere else, since it's within the same lib
+/// \brief Specialized conversion from a ROS point message to a ROS vector message.
+/// \param[in] in ROS message to convert.
+/// \return A ROS vector message.
+template<>
+geometry_msgs::msg::Vector3 Convert(const geometry_msgs::msg::Point & in)
+{
+  geometry_msgs::msg::Vector3 msg;
+  msg.x = in.x;
+  msg.y = in.y;
+  msg.z = in.z;
+  return msg;
+}
+
 /// \brief Specialized conversion from an Ignition Math vector to a ROS message.
 /// \param[in] vec Ignition vector to convert.
 /// \return ROS geometry vector message
@@ -79,6 +104,19 @@ template<>
 geometry_msgs::msg::Vector3 Convert(const ignition::math::Vector3d & vec)
 {
   geometry_msgs::msg::Vector3 msg;
+  msg.x = vec.X();
+  msg.y = vec.Y();
+  msg.z = vec.Z();
+  return msg;
+}
+
+/// \brief Specialized conversion from an Ignition Math vector to a ROS message.
+/// \param[in] vec Ignition vector to convert.
+/// \return ROS geometry point message
+template<>
+geometry_msgs::msg::Point Convert(const ignition::math::Vector3d & vec)
+{
+  geometry_msgs::msg::Point msg;
   msg.x = vec.X();
   msg.y = vec.Y();
   msg.z = vec.Z();

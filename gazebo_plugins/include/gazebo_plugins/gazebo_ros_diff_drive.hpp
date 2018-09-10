@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Markus Bader <markus.bader@tuwien.ac.at>
+// Copyright (c) 2010, Daniel Hewlett, Antons Rebguns
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_JOINT_STATE_PUBLISHER_HPP_
-#define GAZEBO_PLUGINS__GAZEBO_ROS_JOINT_STATE_PUBLISHER_HPP_
+#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_
+#define GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_
 
 #include <gazebo/common/Plugin.hh>
 
@@ -39,56 +39,79 @@
 
 namespace gazebo_plugins
 {
-class GazeboRosJointStatePublisherPrivate;
+class GazeboRosDiffDrivePrivate;
 
-/// Publish the state of joints in simulation to a given ROS topic.
+/// A differential drive plugin for gazebo. Based on the diffdrive plugin
+/*
+ * developed for the erratic robot (see copyright notice above). The original
+ * plugin can be found in the ROS package gazebo_erratic_plugins.
+ *
+ * \author  Piyush Khandelwal (piyushk@gmail.com)
+ *
+ * $ Id: 06/21/2013 11:23:40 AM piyushk $
+ */
 /**
-  \details If the joint contains more than one axis, only the state of the first axis is reported.
-
   Example Usage:
   \code{.xml}
-    <plugin name="gazebo_ros_joint_state_publisher"
-        filename="libgazebo_ros_joint_state_publisher.so">
+    <plugin name="gazebo_ros_diff_drive" filename="libgazebo_ros_diff_drive.so">
 
       <ros>
 
         <!-- Add a namespace -->
-        <namespace>/ny_namespace</namespace>
-
-        <!-- Remap the default topic -->
-        <argument>joint_states:=my_joint_states</argument>
+        <namespace>/test</namespace>
 
       </ros>
 
-      <!-- Update rate in Hertz -->
-      <update_rate>2</update_rate>
+      <!-- Update rate in Hz -->
+      <update_rate>50</update_rate>
 
-      <!-- Name of joints in the model whose states will be published. -->
-      <joint_name>left_wheel</joint_name>
-      <joint_name>right_wheel</joint_name>
-      <joint_name>elbow</joint_name>
-      <joint_name>shoulder</joint_name>
+      <!-- wheels -->
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+
+      <!-- kinematics -->
+      <wheel_separation>1.25</wheel_separation>
+      <wheel_diameter>0.6</wheel_diameter>
+
+      <!-- limits -->
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+
+      <!-- input -->
+      <command_topic>cmd_vel</command_topic>
+
+      <!-- output -->
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+
+      <odometry_topic>odom</odometry_topic>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>chassis</robot_base_frame>
 
     </plugin>
   \endcode
 */
-class GazeboRosJointStatePublisher : public gazebo::ModelPlugin
+class GazeboRosDiffDrive : public gazebo::ModelPlugin
 {
 public:
   /// Constructor
-  GazeboRosJointStatePublisher();
+  GazeboRosDiffDrive();
 
   /// Destructor
-  ~GazeboRosJointStatePublisher();
+  ~GazeboRosDiffDrive();
 
 protected:
   // Documentation inherited
-  void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf) override;
+  void Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) override;
+
+  // Documentation inherited
+  void Reset() override;
 
 private:
-  /// Callback to be called at every simulation iteration.
   /// Private data pointer
-  std::unique_ptr<GazeboRosJointStatePublisherPrivate> impl_;
+  std::unique_ptr<GazeboRosDiffDrivePrivate> impl_;
 };
 }  // namespace gazebo_plugins
-#endif  // GAZEBO_PLUGINS__GAZEBO_ROS_JOINT_STATE_PUBLISHER_HPP_
+
+#endif  // GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_

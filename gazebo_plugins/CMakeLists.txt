@@ -16,12 +16,19 @@ find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 include_directories(include
   ${gazebo_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${nav_msgs_INCLUDE_DIRS}
   ${sensor_msgs_INCLUDE_DIRS}
+  ${tf2_ros_INCLUDE_DIRS}
+  ${tf2_INCLUDE_DIRS}
 )
 
 # gazebo_ros_joint_state_publisher
@@ -34,7 +41,23 @@ ament_target_dependencies(gazebo_ros_joint_state_publisher
   "rclcpp"
   "sensor_msgs"
 )
-ament_export_libraries(gazebo_ros_force)
+ament_export_libraries(gazebo_ros_joint_state_publisher)
+
+# gazebo_ros_diff_drive
+add_library(gazebo_ros_diff_drive SHARED
+  src/gazebo_ros_diff_drive.cpp
+)
+ament_target_dependencies(gazebo_ros_diff_drive
+  "gazebo_dev"
+  "gazebo_ros"
+  "geometry_msgs"
+  "nav_msgs"
+  "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+)
+ament_export_libraries(gazebo_ros_diff_drive)
 
 # gazebo_ros_force
 add_library(gazebo_ros_force SHARED
@@ -95,6 +118,7 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(TARGETS
+    gazebo_ros_diff_drive
     gazebo_ros_force
     gazebo_ros_imu_sensor
     gazebo_ros_joint_state_publisher
