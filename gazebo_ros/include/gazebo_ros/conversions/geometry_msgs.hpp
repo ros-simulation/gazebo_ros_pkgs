@@ -34,9 +34,7 @@ namespace gazebo_ros
 template<class OUT>
 OUT Convert(const geometry_msgs::msg::Vector3 & in)
 {
-  std::cerr << "Conversion from [geometry_msgs::msg::Vector3] not implemented." <<
-               " Returning default value." << std::endl;
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS vector message to an Ignition Math vector.
@@ -59,9 +57,7 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Vector3 & msg)
 template<class OUT>
 OUT Convert(const geometry_msgs::msg::Point32 & in)
 {
-  std::cerr << "Conversion from [geometry_msgs::msg::Point32] not implemented." <<
-               " Returning default value." << std::endl;
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS point32 message to an Ignition Math vector.
@@ -84,9 +80,7 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Point32 & in)
 template<class OUT>
 OUT Convert(const geometry_msgs::msg::Point &)
 {
-  std::cerr << "Conversion from [geometry_msgs::msg::Point] not implemented." <<
-               " Returning default value." << std::endl;
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// TODO(louise) This may already exist somewhere else, since it's within the same lib
@@ -163,9 +157,7 @@ geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
 template<class OUT>
 OUT Convert(const geometry_msgs::msg::Quaternion & in)
 {
-  std::cerr << "Conversion from [geometry_msgs::msg::Vector3] not implemented." <<
-               " Returning default value." << std::endl;
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS quaternion message to ignition quaternion

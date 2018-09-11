@@ -164,8 +164,10 @@ void GazeboRosFactoryPrivate::SpawnEntity(
 
   // Get entity SDF
   bool isLight{false};
-  auto entity_elem = root->GetElement("model");
-  if (!entity_elem) {
+  sdf::ElementPtr entity_elem{nullptr};
+  if (root->HasElement("model")) {
+    entity_elem = root->GetElement("model");
+  } else if (root->HasElement("light")) {
     entity_elem = root->GetElement("light");
     isLight = true;
   }

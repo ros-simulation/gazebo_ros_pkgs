@@ -16,6 +16,7 @@
 #include <gazebo_msgs/srv/delete_entity.hpp>
 #include <gazebo_msgs/srv/spawn_entity.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <memory>
 
 class GazeboRosFactoryTest : public gazebo::ServerFixture
 {
@@ -55,19 +56,19 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
     request->initial_pose.position.y = 2.0;
     request->initial_pose.position.z = 3.0;
     request->xml =
-      "<?xml version='1.0' ?>\
-        <sdf version='1.5'>\
-          <model name='ignored'>\
-            <static>true</static>\
-            <link name='link'>\
-              <visual name='visual'>\
-                <geometry>\
-                  <sphere><radius>1.0</radius></sphere>\
-                </geometry>\
-              </visual>\
-            </link>\
-          </model>\
-        </sdf>";
+      "<?xml version='1.0' ?>"
+      "<sdf version='1.5'>"
+      "<model name='ignored'>"
+      "<static>true</static>"
+      "<link name='link'>"
+      "<visual name='visual'>"
+      "<geometry>"
+      "<sphere><radius>1.0</radius></sphere>"
+      "</geometry>"
+      "</visual>"
+      "</link>"
+      "</model>"
+      "</sdf>";
 
     auto response_future = spawn_client->async_send_request(request);
     EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
@@ -94,20 +95,20 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
     request->initial_pose.position.z = 3.0;
     request->reference_frame = "sdf_box";
     request->xml =
-      "<?xml version='1.0' ?>\
-        <robot name='urdf_box'>\
-          <link name='link'>\
-            <visual>\
-              <geometry>\
-                <sphere radius='1.0'/>\
-              </geometry>\
-            </visual>\
-            <inertial>\
-              <mass value='1'/>\
-              <inertia ixx='1' ixy='0.0' ixz='0.0' iyy='1' iyz='0.0' izz='1'/>\
-            </inertial>\
-          </link>\
-        </robot>";
+      "<?xml version='1.0' ?>"
+      "<robot name='urdf_box'>"
+      "<link name='link'>"
+      "<visual>"
+      "<geometry>"
+      "<sphere radius='1.0'/>"
+      "</geometry>"
+      "</visual>"
+      "<inertial>"
+      "<mass value='1'/>"
+      "<inertia ixx='1' ixy='0.0' ixz='0.0' iyy='1' iyz='0.0' izz='1'/>"
+      "</inertial>"
+      "</link>"
+      "</robot>";
 
     auto response_future = spawn_client->async_send_request(request);
     EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
@@ -141,10 +142,10 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
     request->initial_pose.position.z = 10.0;
     request->reference_frame = "world";
     request->xml =
-      "<?xml version='1.0' ?>\
-       <sdf version='1.5'>\
-         <light name='ignored' type='directional'/>\
-       </sdf>";
+      "<?xml version='1.0' ?>"
+      "<sdf version='1.5'>"
+      "<light name='ignored' type='directional'/>"
+      "</sdf>";
 
     auto response_future = spawn_client->async_send_request(request);
     EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
@@ -155,9 +156,9 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
     EXPECT_TRUE(response->success);
 
     // Check it was spawned with the correct name
-// TODO(louise) Check why this is failing
-//    ASSERT_NE(nullptr, world->LightByName("dir"));
-//    EXPECT_EQ(world->LightByName("dir")->WorldPose(), ignition::math::Pose3d(0, 0, 10, 0, 0, 0));
+    ASSERT_NE(nullptr, world->LightByName("dir"));
+    EXPECT_EQ(world->LightByName("dir")->WorldPose(),
+      ignition::math::Pose3d(0, 0, 10, 0, 0, 0));
   }
 
   // Delete model

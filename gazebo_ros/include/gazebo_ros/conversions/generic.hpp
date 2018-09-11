@@ -36,9 +36,7 @@ static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conver
 template<class OUT>
 OUT Convert(const ignition::math::Vector3d & in)
 {
-  std::cerr << "Conversion from [ignition::math::Vector3d] not implemented." <<
-               " Returning default value." << std::endl;
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// Generic conversion from an Ignition Math quaternion to another type.
@@ -48,9 +46,7 @@ OUT Convert(const ignition::math::Vector3d & in)
 template<class OUT>
 OUT Convert(const ignition::math::Quaterniond & in)
 {
-  std::cerr << "Conversion from [ignition::math::Quaterniond] not implemented." <<
-               " Returning default value." << std::endl;
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// Generic conversion from an Gazebo Time object to another type.
@@ -60,9 +56,7 @@ OUT Convert(const ignition::math::Quaterniond & in)
 template<class OUT>
 OUT Convert(const gazebo::common::Time & in)
 {
-  std::cerr << "Conversion from [gazebo::common::Time] not implemented." <<
-               " Returning default value." << std::endl;
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from an Gazebo Time to a RCLCPP Time.
@@ -81,9 +75,7 @@ rclcpp::Time Convert(const gazebo::common::Time & in)
 template<class OUT>
 OUT Convert(const gazebo::msgs::Time & in)
 {
-  std::cerr << "Conversion from [gazebo::msgs::Time] not implemented." <<
-               " Returning default value." << std::endl;
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 }  // namespace gazebo_ros
