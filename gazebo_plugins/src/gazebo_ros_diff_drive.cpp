@@ -268,7 +268,8 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   }
   impl_->last_update_time_ = _model->GetWorld()->SimTime();
 
-  rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
+  rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
+  qos_profile.depth = 1;
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", std::bind(&GazeboRosDiffDrivePrivate::OnCmdVel, impl_.get(),
     std::placeholders::_1),
