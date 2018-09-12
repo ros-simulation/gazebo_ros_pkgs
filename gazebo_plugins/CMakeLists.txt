@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6.3)
+cmake_minimum_required(VERSION 3.5.1)
 project(gazebo_plugins)
 
 option(ENABLE_DISPLAY_TESTS "Enable the building of tests that requires a display" OFF)
