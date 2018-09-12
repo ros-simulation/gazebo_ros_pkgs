@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <sdf/sdf.hh>
+#include <sdf/Element.hh>
 #include <gazebo/rendering/Distortion.hh>
 
 #include <gazebo_plugins/gazebo_ros_camera.hpp>
+#include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <image_transport/image_transport.h>
+#include <sensor_msgs/fill_image.hpp>
+#include <sensor_msgs/image_encodings.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 
 namespace gazebo_plugins
@@ -36,6 +39,12 @@ public:
 
   ///
   rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_pub_;
+
+  /// Image encoding
+  std::string type_;
+
+  /// Step size
+  int skip_;
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -91,42 +100,15 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // Image publisher
   auto image_topic_name = _sdf->Get<std::string>("image_topic_name", "image_raw").first;
-  // TODO(louise) SubscriberStatusCallback has not been ported yet
-
-  // Sensor generation off by default.  Must do this before advertising the
-  // associated ROS topics.
-//  this->parentSensor->SetActive(false);
-//  if (!this->image_connect_count_)
-//    this->image_connect_count_ = boost::shared_ptr<int>(new int(0));
-//  if (!this->image_connect_count_lock_)
-//    this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
-//  if (!this->was_active_)
-//    this->was_active_ = boost::shared_ptr<bool>(new bool(false));
-//  impl_->image_pub_ = it_->advertise(
-//    image_topic_name, 2,
-//    boost::bind(&GazeboRosCameraUtils::ImageConnect, this),
-//    boost::bind(&GazeboRosCameraUtils::ImageDisconnect, this),
-//    ros::VoidPtr(), true);
+  // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
 
   impl_->image_pub_ = it_->advertise(image_topic_name, 2);
 
   // Camera info publisher
   auto camera_info_topic_name =
     _sdf->Get<std::string>("camera_info_topic_name", "camera_info").first;
-//  // camera info publish rate will be synchronized to image sensor
-//  // publish rates.
-//  // If someone connects to camera_info, sensor will be activated
-//  // and camera_info will be published alongside image_raw with the
-//  // same timestamps.  This incurrs additional computational cost when
-//  // there are subscribers to camera_info, but better mimics behavior
-//  // of image_pipeline.
-//  ros::AdvertiseOptions cio =
-//    ros::AdvertiseOptions::create<sensor_msgs::CameraInfo>(
-//    this->camera_info_topic_name_, 2,
-//    boost::bind(&GazeboRosCameraUtils::ImageConnect, this),
-//    boost::bind(&GazeboRosCameraUtils::ImageDisconnect, this),
-//    ros::VoidPtr(), &this->camera_queue_);
- impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
+  // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
+  impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
     camera_info_topic_name);
 
   // Trigger
@@ -143,61 +125,65 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 //
 
   // set buffer size
-//  if (this->format_ == "L8" || this->format_ == "L_INT8")
-//  {
-//    this->type_ = sensor_msgs::image_encodings::MONO8;
-//    this->skip_ = 1;
-//  }
-//  else if (this->format_ == "L16" || this->format_ == "L_INT16")
-//  {
-//    this->type_ = sensor_msgs::image_encodings::MONO16;
-//    this->skip_ = 2;
-//  }
-//  else if (this->format_ == "R8G8B8" || this->format_ == "RGB_INT8")
-//  {
-//    this->type_ = sensor_msgs::image_encodings::RGB8;
-//    this->skip_ = 3;
-//  }
-//  else if (this->format_ == "B8G8R8" || this->format_ == "BGR_INT8")
-//  {
-//    this->type_ = sensor_msgs::image_encodings::BGR8;
-//    this->skip_ = 3;
-//  }
-//  else if (this->format_ == "R16G16B16" ||  this->format_ == "RGB_INT16")
-//  {
-//    this->type_ = sensor_msgs::image_encodings::RGB16;
-//    this->skip_ = 6;
-//  }
-//  else if (this->format_ == "BAYER_RGGB8")
-//  {
-//    ROS_INFO_NAMED("camera_utils", "bayer simulation maybe computationally expensive.");
-//    this->type_ = sensor_msgs::image_encodings::BAYER_RGGB8;
-//    this->skip_ = 1;
-//  }
-//  else if (this->format_ == "BAYER_BGGR8")
-//  {
-//    ROS_INFO_NAMED("camera_utils", "bayer simulation maybe computationally expensive.");
-//    this->type_ = sensor_msgs::image_encodings::BAYER_BGGR8;
-//    this->skip_ = 1;
-//  }
-//  else if (this->format_ == "BAYER_GBRG8")
-//  {
-//    ROS_INFO_NAMED("camera_utils", "bayer simulation maybe computationally expensive.");
-//    this->type_ = sensor_msgs::image_encodings::BAYER_GBRG8;
-//    this->skip_ = 1;
-//  }
-//  else if (this->format_ == "BAYER_GRBG8")
-//  {
-//    ROS_INFO_NAMED("camera_utils", "bayer simulation maybe computationally expensive.");
-//    this->type_ = sensor_msgs::image_encodings::BAYER_GRBG8;
-//    this->skip_ = 1;
-//  }
-//  else
-//  {
-//    ROS_ERROR_NAMED("camera_utils", "Unsupported Gazebo ImageFormat\n");
-//    this->type_ = sensor_msgs::image_encodings::BGR8;
-//    this->skip_ = 3;
-//  }
+  if (this->format == "L8" || this->format == "L_INT8")
+  {
+    impl_->type_ = sensor_msgs::image_encodings::MONO8;
+    impl_->skip_ = 1;
+  }
+  else if (this->format == "L16" || this->format == "L_INT16")
+  {
+    impl_->type_ = sensor_msgs::image_encodings::MONO16;
+    impl_->skip_ = 2;
+  }
+  else if (this->format == "R8G8B8" || this->format == "RGB_INT8")
+  {
+    impl_->type_ = sensor_msgs::image_encodings::RGB8;
+    impl_->skip_ = 3;
+  }
+  else if (this->format == "B8G8R8" || this->format == "BGR_INT8")
+  {
+    impl_->type_ = sensor_msgs::image_encodings::BGR8;
+    impl_->skip_ = 3;
+  }
+  else if (this->format == "R16G16B16" ||  this->format == "RGB_INT16")
+  {
+    impl_->type_ = sensor_msgs::image_encodings::RGB16;
+    impl_->skip_ = 6;
+  }
+  else if (this->format == "BAYER_RGGB8")
+  {
+    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      "bayer simulation may be computationally expensive.");
+    impl_->type_ = sensor_msgs::image_encodings::BAYER_RGGB8;
+    impl_->skip_ = 1;
+  }
+  else if (this->format == "BAYER_BGGR8")
+  {
+    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      "bayer simulation may be computationally expensive.");
+    impl_->type_ = sensor_msgs::image_encodings::BAYER_BGGR8;
+    impl_->skip_ = 1;
+  }
+  else if (this->format == "BAYER_GBRG8")
+  {
+    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      "bayer simulation may be computationally expensive.");
+    impl_->type_ = sensor_msgs::image_encodings::BAYER_GBRG8;
+    impl_->skip_ = 1;
+  }
+  else if (this->format == "BAYER_GRBG8")
+  {
+    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      "bayer simulation may be computationally expensive.");
+    impl_->type_ = sensor_msgs::image_encodings::BAYER_GRBG8;
+    impl_->skip_ = 1;
+  }
+  else
+  {
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Unsupported Gazebo ImageFormat, using BGR8\n");
+    impl_->type_ = sensor_msgs::image_encodings::BGR8;
+    impl_->skip_ = 3;
+  }
 
   // C parameters
   auto default_cx = (static_cast<double>(this->width) + 1.0) /2.0;
@@ -326,41 +312,25 @@ void GazeboRosCamera::OnNewFrame(
     const unsigned char *_image,
     unsigned int _width,
     unsigned int _height,
-    unsigned int _depth,
-    const std::string &_format)
+    unsigned int /*_depth*/,
+    const std::string & /*_format*/)
 {
+  // TODO(louise) Enable / disable sensor once SubscriberStatusCallback has been ported to ROS2
+
   auto sensor_update_time = this->parentSensor->LastMeasurementTime();
 
-  if (!this->parentSensor->IsActive())
-  {
-//    if ((*this->image_connect_count_) > 0)
-//      // do this first so there's chance for sensor to run once after activated
-//      this->parentSensor->SetActive(true);
-//    return;
-  }
+  // Publish image
+  sensor_msgs::msg::Image image_msg;
+//  image_msg.header.frame_id = this->frame_name_;
+  image_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(sensor_update_time);
 
-//    if ((*this->image_connect_count_) > 0)
-//    {
-//      if (sensor_update_time < this->last_update_time_)
-//      {
-//          ROS_WARN_NAMED("camera", "Negative sensor update time difference detected.");
-//          this->last_update_time_ = sensor_update_time;
-//      }
-//
-//      // OnNewFrame is triggered at the gazebo sensor <update_rate>
-//      // while there is also a plugin <updateRate> that can throttle the
-//      // rate down further (but then why not reduce the sensor rate?
-//      // what is the use case?).
-//      // Setting the <updateRate> to zero will make this plugin
-//      // update at the gazebo sensor <update_rate>, update_period_ will be
-//      // zero and the conditional always will be true.
-//      if (sensor_update_time - this->last_update_time_ >= this->update_period_)
-//      {
-//        this->PutCameraData(_image, sensor_update_time);
-//        this->PublishCameraInfo(sensor_update_time);
-//        this->last_update_time_ = sensor_update_time;
-//      }
-//    }
+  // Copy from src to image_msg
+  sensor_msgs::fillImage(image_msg, impl_->type_, _height, _width,
+      impl_->skip_ * _width, reinterpret_cast<const void*>(_image));
+
+  impl_->image_pub_.publish(image_msg);
+
+//  this->PublishCameraInfo(sensor_update_time);
 }
 GZ_REGISTER_SENSOR_PLUGIN(GazeboRosCamera)
 }  // namespace gazebo_plugins

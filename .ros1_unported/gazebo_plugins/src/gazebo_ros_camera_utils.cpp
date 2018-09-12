@@ -164,39 +164,6 @@ void GazeboRosCameraUtils::Init()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Put camera_ data to the interface
-void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src,
-  common::Time &last_update_time)
-{
-  this->sensor_update_time_ = last_update_time;
-  this->PutCameraData(_src);
-}
-
-void GazeboRosCameraUtils::PutCameraData(const unsigned char *_src)
-{
-  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
-    return;
-
-  /// don't bother if there are no subscribers
-  if ((*this->image_connect_count_) > 0)
-  {
-    boost::mutex::scoped_lock lock(this->lock_);
-
-    // copy data into image
-    this->image_msg_.header.frame_id = this->frame_name_;
-    this->image_msg_.header.stamp.sec = this->sensor_update_time_.sec;
-    this->image_msg_.header.stamp.nsec = this->sensor_update_time_.nsec;
-
-    // copy from src to image_msg_
-    fillImage(this->image_msg_, this->type_, this->height_, this->width_,
-        this->skip_*this->width_, reinterpret_cast<const void*>(_src));
-
-    // publish to ros
-    this->image_pub_.publish(this->image_msg_);
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Put camera_ data to the interface
 void GazeboRosCameraUtils::PublishCameraInfo(common::Time &last_update_time)
 {
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)

@@ -84,11 +84,6 @@ namespace gazebo
 
     private: void Init();
 
-    /// \brief Put camera data to the ROS topic
-    protected: void PutCameraData(const unsigned char *_src);
-    protected: void PutCameraData(const unsigned char *_src,
-      common::Time &last_update_time);
-
     /// \brief Keep track of number of image connections
     protected: boost::shared_ptr<int> image_connect_count_;
     /// \brief A mutex to lock access to image_connect_count_
