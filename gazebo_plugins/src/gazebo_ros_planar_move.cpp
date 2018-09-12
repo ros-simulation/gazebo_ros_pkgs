@@ -52,6 +52,17 @@ namespace gazebo
         sdf->GetElement("robotNamespace")->Get<std::string>();
     }
 
+    enable_y_axis_ = true;
+    if (!sdf->HasElement ("enableYAxis"))
+    {
+      ROS_INFO_NAMED("planar_move", "PlanarMovePlugin missing <enableYAxis>, "
+          "defaults to \"%d\"", enable_y_axis_);
+    }
+    else
+    {
+      enable_y_axis_ = sdf->GetElement("enableYAxis")->Get<bool>();
+    }
+
     command_topic_ = "cmd_vel";
     if (!sdf->HasElement("commandTopic"))
     {
@@ -208,7 +219,10 @@ namespace gazebo
   {
     boost::mutex::scoped_lock scoped_lock(lock);
     x_ = cmd_msg->linear.x;
-    y_ = cmd_msg->linear.y;
+    if (enable_y_axis_)
+    {
+      y_ = cmd_msg->linear.y;
+    }
     rot_ = cmd_msg->angular.z;
   }
 
