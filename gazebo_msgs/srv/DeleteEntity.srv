@@ -1,0 +1,5 @@
+string name                       # Name of the Gazebo entity to be deleted. This can be either
+                                  # a model or a light.
+---
+bool success                      # Return true if deletion is successful.
+string status_message             # Comments if available.

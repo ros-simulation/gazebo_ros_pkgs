@@ -42,7 +42,7 @@ namespace gazebo_ros
 template<class OUT>
 OUT Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity = 0.0)
 {
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from an Gazebo Laser Scan to a ROS Laser Scan.

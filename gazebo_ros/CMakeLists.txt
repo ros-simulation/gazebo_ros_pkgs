@@ -16,12 +16,16 @@ find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_dev REQUIRED)
+find_package(gazebo_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tinyxml_vendor REQUIRED)
 
 include_directories(
   include
   ${gazebo_dev_INCLUDE_DIRS}
 )
 
+# gazebo_ros_node
 add_library(gazebo_ros_node SHARED
   src/executor.cpp
   src/node.cpp
@@ -32,6 +36,7 @@ ament_target_dependencies(gazebo_ros_node
 )
 ament_export_libraries(gazebo_ros_node)
 
+# gazebo_ros_utils
 add_library(gazebo_ros_utils SHARED
   src/utils.cpp
 )
@@ -41,6 +46,7 @@ ament_target_dependencies(gazebo_ros_utils
 )
 ament_export_libraries(gazebo_ros_utils)
 
+# gazebo_ros_init
 add_library(gazebo_ros_init SHARED
   src/gazebo_ros_init.cpp
 )
@@ -54,6 +60,21 @@ target_link_libraries(gazebo_ros_init
   gazebo_ros_utils
 )
 ament_export_libraries(gazebo_ros_init)
+
+# gazebo_ros_factory
+add_library(gazebo_ros_factory SHARED
+  src/gazebo_ros_factory.cpp
+)
+ament_target_dependencies(gazebo_ros_factory
+  "rclcpp"
+  "gazebo_dev"
+  "gazebo_msgs"
+)
+target_link_libraries(gazebo_ros_factory
+  gazebo_ros_node
+  gazebo_ros_utils
+)
+ament_export_libraries(gazebo_ros_factory)
 
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
@@ -72,8 +93,9 @@ install(DIRECTORY include/
 
 install(
   TARGETS
-    gazebo_ros_node
+    gazebo_ros_factory
     gazebo_ros_init
+    gazebo_ros_node
     gazebo_ros_utils
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

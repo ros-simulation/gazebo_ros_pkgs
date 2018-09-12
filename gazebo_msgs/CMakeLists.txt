@@ -35,6 +35,7 @@ set(srv_files
   "srv/ApplyBodyWrench.srv"
   "srv/ApplyJointEffort.srv"
   "srv/BodyRequest.srv"
+  "srv/DeleteEntity.srv"
   "srv/DeleteLight.srv"
   "srv/DeleteModel.srv"
   "srv/GetJointProperties.srv"
@@ -54,6 +55,7 @@ set(srv_files
   "srv/SetModelConfiguration.srv"
   "srv/SetModelState.srv"
   "srv/SetPhysicsProperties.srv"
+  "srv/SpawnEntity.srv"
   "srv/SpawnModel.srv"
 )
 

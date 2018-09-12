@@ -48,10 +48,6 @@
 #include "gazebo_msgs/JointRequest.h"
 #include "gazebo_msgs/BodyRequest.h"
 
-#include "gazebo_msgs/SpawnModel.h"
-#include "gazebo_msgs/DeleteModel.h"
-#include "gazebo_msgs/DeleteLight.h"
-
 #include "gazebo_msgs/ApplyBodyWrench.h"
 
 #include "gazebo_msgs/SetPhysicsProperties.h"
@@ -141,20 +137,6 @@ public:
 
   /// \brief
   void onModelStatesDisconnect();
-
-  /// \brief Function for inserting a URDF into Gazebo from ROS Service Call
-  bool spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
-                      gazebo_msgs::SpawnModel::Response &res);
-
-  /// \brief Both SDFs and converted URDFs get sent to this function for further manipulation from a ROS Service call
-  bool spawnSDFModel(gazebo_msgs::SpawnModel::Request &req,
-                     gazebo_msgs::SpawnModel::Response &res);
-
-  /// \brief delete model given name
-  bool deleteModel(gazebo_msgs::DeleteModel::Request &req,gazebo_msgs::DeleteModel::Response &res);
-
-  /// \brief delete a given light by name
-  bool deleteLight(gazebo_msgs::DeleteLight::Request &req,gazebo_msgs::DeleteLight::Response &res);
 
   /// \brief
   bool getModelState(gazebo_msgs::GetModelState::Request &req,gazebo_msgs::GetModelState::Response &res);
@@ -251,30 +233,6 @@ private:
   /// \brief
   void publishModelStates();
 
-  /// \brief
-  void stripXmlDeclaration(std::string &model_xml);
-
-  /// \brief Update the model name and pose of the SDF file before sending to Gazebo
-  void updateSDFAttributes(TiXmlDocument &gazebo_model_xml,
-                           const std::string &model_name,
-                           const ignition::math::Vector3d &initial_xyz,
-                           const ignition::math::Quaterniond &initial_q);
-
-  /// \brief Update the model pose of the URDF file before sending to Gazebo
-  void updateURDFModelPose(TiXmlDocument &gazebo_model_xml,
-                           const ignition::math::Vector3d &initial_xyz,
-                           const ignition::math::Quaterniond &initial_q);
-
-  /// \brief Update the model name of the URDF file before sending to Gazebo
-  void updateURDFName(TiXmlDocument &gazebo_model_xml, const std::string &model_name);
-
-  /// \brief
-  void walkChildAddRobotNamespace(TiXmlNode* model_xml);
-
-  /// \brief
-  bool spawnAndConform(TiXmlDocument &gazebo_model_xml, const std::string &model_name,
-                       gazebo_msgs::SpawnModel::Response &res);
-
   /// \brief helper function for applyBodyWrench
   ///        shift wrench from reference frame to target frame
   void transformWrench(ignition::math::Vector3d &target_force, ignition::math::Vector3d &target_torque,
@@ -288,23 +246,8 @@ private:
   /// \brief waits for the rest of Gazebo to be ready before initializing the dynamic reconfigure services
   void physicsReconfigureThread();
 
-  /// \brief Unused
-  void onResponse(ConstResponsePtr &response);
-
-  /// \brief utility for checking if string is in URDF format
-  bool isURDF(std::string model_xml);
-
-  /// \brief utility for checking if string is in SDF format
-  bool isSDF(std::string model_xml);
-
   /// \brief Connect to Gazebo via its plugin interface, get a pointer to the world, start events
   void loadGazeboRosApiPlugin(std::string world_name);
-
-  /// \brief convert xml to Pose
-  ignition::math::Pose3d parsePose(const std::string &str);
-
-  /// \brief convert xml to Pose
-  ignition::math::Vector3d parseVector3(const std::string &str);
 
   // track if the desconstructor event needs to occur
   bool plugin_loaded_;
@@ -317,11 +260,7 @@ private:
 
   gazebo::transport::NodePtr gazebonode_;
   gazebo::transport::SubscriberPtr stat_sub_;
-  gazebo::transport::PublisherPtr factory_pub_;
-  gazebo::transport::PublisherPtr factory_light_pub_;
   gazebo::transport::PublisherPtr light_modify_pub_;
-  gazebo::transport::PublisherPtr request_pub_;
-  gazebo::transport::SubscriberPtr response_sub_;
 
   boost::shared_ptr<ros::NodeHandle> nh_;
   ros::CallbackQueue gazebo_queue_;
@@ -335,10 +274,6 @@ private:
   gazebo::event::ConnectionPtr pub_model_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
-  ros::ServiceServer spawn_sdf_model_service_;
-  ros::ServiceServer spawn_urdf_model_service_;
-  ros::ServiceServer delete_model_service_;
-  ros::ServiceServer delete_light_service_;
   ros::ServiceServer get_model_state_service_;
   ros::ServiceServer get_model_properties_service_;
   ros::ServiceServer get_world_properties_service_;

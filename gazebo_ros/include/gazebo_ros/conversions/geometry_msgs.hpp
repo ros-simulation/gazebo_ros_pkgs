@@ -34,7 +34,7 @@ namespace gazebo_ros
 template<class OUT>
 OUT Convert(const geometry_msgs::msg::Vector3 & in)
 {
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS vector message to an Ignition Math vector.
@@ -57,7 +57,7 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Vector3 & msg)
 template<class OUT>
 OUT Convert(const geometry_msgs::msg::Point32 & in)
 {
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS point32 message to an Ignition Math vector.
@@ -78,9 +78,9 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Point32 & in)
 /// \return Conversion result
 /// \tparam OUT Output type
 template<class OUT>
-OUT Convert(const geometry_msgs::msg::Point & in)
+OUT Convert(const geometry_msgs::msg::Point &)
 {
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// TODO(louise) This may already exist somewhere else, since it's within the same lib
@@ -95,6 +95,19 @@ geometry_msgs::msg::Vector3 Convert(const geometry_msgs::msg::Point & in)
   msg.y = in.y;
   msg.z = in.z;
   return msg;
+}
+
+/// \brief Specialized conversion from a ROS point message to an Ignition math vector.
+/// \param[in] in ROS message to convert.
+/// \return A ROS vector message.
+template<>
+ignition::math::Vector3d Convert(const geometry_msgs::msg::Point & in)
+{
+  ignition::math::Vector3d out;
+  out.X(in.x);
+  out.Y(in.y);
+  out.Z(in.z);
+  return out;
 }
 
 /// \brief Specialized conversion from an Ignition Math vector to a ROS message.
@@ -144,7 +157,7 @@ geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
 template<class OUT>
 OUT Convert(const geometry_msgs::msg::Quaternion & in)
 {
-  return OUT();
+  OUT::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS quaternion message to ignition quaternion

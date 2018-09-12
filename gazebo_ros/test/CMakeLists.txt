@@ -1,5 +1,6 @@
 find_package(ament_cmake_gtest REQUIRED)
 find_package(builtin_interfaces REQUIRED)
+find_package(gazebo_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -29,6 +30,7 @@ file(COPY worlds DESTINATION .)
 # Tests
 set(tests
   test_conversions
+  test_gazebo_ros_factory
   test_node
   test_plugins
   test_sim_time
@@ -47,11 +49,13 @@ foreach(test ${tests})
   target_link_libraries(${test}
     gazebo_ros_node
     gazebo_ros_utils
+    gazebo_test_fixture
   )
   ament_target_dependencies(${test}
     "builtin_interfaces"
-    "geometry_msgs"
     "gazebo_dev"
+    "gazebo_msgs"
+    "geometry_msgs"
     "rclcpp"
     "sensor_msgs"
     "std_msgs"
