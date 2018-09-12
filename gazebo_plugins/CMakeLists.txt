@@ -24,6 +24,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 include_directories(include
+  ${gazebo_dev_INCLUDE_DIRS}
   ${gazebo_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
   ${image_transport_INCLUDE_DIRS}
@@ -32,6 +33,7 @@ include_directories(include
   ${tf2_ros_INCLUDE_DIRS}
   ${tf2_INCLUDE_DIRS}
 )
+link_directories(${gazebo_dev_LIBRARY_DIRS})
 
 # gazebo_ros_joint_state_publisher
 add_library(gazebo_ros_joint_state_publisher SHARED
@@ -91,8 +93,12 @@ add_library(gazebo_ros_camera SHARED
 ament_target_dependencies(gazebo_ros_camera
   "gazebo_dev"
   "gazebo_ros"
+  "image_transport"
   "rclcpp"
   "sensor_msgs"
+)
+target_link_libraries(gazebo_ros_camera
+  CameraPlugin
 )
 ament_export_libraries(gazebo_ros_camera)
 
@@ -134,6 +140,7 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(TARGETS
+    gazebo_ros_camera
     gazebo_ros_diff_drive
     gazebo_ros_force
     gazebo_ros_imu_sensor

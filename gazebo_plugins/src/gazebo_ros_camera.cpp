@@ -228,11 +228,6 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   // distortion black border. The crop can be useful, but also skewes
   // the lens distortion, making the supplied k and t values incorrect.
   auto border_crop = _sdf->Get<bool>("border_crop", true).first;
-  if (this->camera->LensDistortion())
-  {
-    this->camera->LensDistortion()->SetCrop(border_crop);
-  }
-
   // Get distortion parameters from gazebo sensor if auto_distortion is true
   auto auto_distortion = _sdf->Get<bool>("auto_distortion", true).first;
   auto distortion_k1 = _sdf->Get<double>("distortion_k1", 0.0).first;
@@ -241,15 +236,20 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   auto distortion_t1 = _sdf->Get<double>("distortion_t1", 0.0).first;
   auto distortion_t2 = _sdf->Get<double>("distortion_t2", 0.0).first;
   auto hack_baseline = _sdf->Get<double>("hack_baseline", 0.0).first;
-  if (auto_distortion)
+  if (this->camera->LensDistortion())
   {
-    RCLCPP_INFO(impl_->ros_node_->get_logger(),
-      "Auto-distortion is true, <distortion> parameters will be ignored.");
-    distortion_k1 = this->camera->LensDistortion()->K1();
-    distortion_k2 = this->camera->LensDistortion()->K2();
-    distortion_k3 = this->camera->LensDistortion()->K3();
-    distortion_t1 = this->camera->LensDistortion()->P1();
-    distortion_t2 = this->camera->LensDistortion()->P2();
+    this->camera->LensDistortion()->SetCrop(border_crop);
+
+    if (auto_distortion)
+    {
+      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+        "Auto-distortion is true, <distortion> parameters will be ignored.");
+      distortion_k1 = this->camera->LensDistortion()->K1();
+      distortion_k2 = this->camera->LensDistortion()->K2();
+      distortion_k3 = this->camera->LensDistortion()->K3();
+      distortion_t1 = this->camera->LensDistortion()->P1();
+      distortion_t2 = this->camera->LensDistortion()->P2();
+    }
   }
 
   // D = {k1, k2, t1, t2, k3}, as specified in:
