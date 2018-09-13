@@ -31,13 +31,10 @@ public:
   /// A pointer to the GazeboROS node.
   gazebo_ros::Node::SharedPtr ros_node_;
 
-  ///
-//  image_transport::ImageTransport it_;
-
-  ///
+  /// Image publisher.
   image_transport::Publisher image_pub_;
 
-  ///
+  /// Camera info publisher.
   rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_pub_;
 
   /// Image encoding
@@ -54,6 +51,9 @@ GazeboRosCamera::GazeboRosCamera()
 
 GazeboRosCamera::~GazeboRosCamera()
 {
+  impl_->image_pub_.shutdown();
+  impl_->camera_info_pub_.reset();
+  impl_->ros_node_.reset();
 }
 
 void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
@@ -73,34 +73,13 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 //    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <frameName>, defaults to /world");
 //  else
 //    this->frame_name_ = this->sdf->Get<std::string>("frameName");
-//
 
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
-  // TODO(louise) Doesn't have a default constructor, figure out how to keep as member variable
-  auto it_ = new image_transport::ImageTransport(impl_->ros_node_);
-
-//  if (!this->camera_name_.empty())
-//  {
-//    dyn_srv_ =
-//      new dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
-//      (*this->rosnode_);
-//    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
-//      ::CallbackType f =
-//      boost::bind(&GazeboRosCameraUtils::configCallback, this, _1, _2);
-//    dyn_srv_->setCallback(f);
-//  }
-//  else
-//  {
-//    ROS_WARN_NAMED("camera_utils", "dynamic reconfigure is not enabled for this image topic [%s]"
-//             " because <camera_name> is not specified",
-//             this->image_topic_name_.c_str());
-//  }
-
   // Image publisher
   // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
-  impl_->image_pub_ = it_->advertise("image_raw", 2);
+  impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_, "image_raw");
 
   // Camera info publisher
   // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
@@ -118,7 +97,24 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 //          ros::VoidPtr(), &this->camera_queue_);
 //    this->trigger_subscriber_ = this->rosnode_->subscribe(trigger_so);
 //  }
-//
+
+  // Dynamic reconfigure
+//  if (!this->camera_name_.empty())
+//  {
+//    dyn_srv_ =
+//      new dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
+//      (*this->rosnode_);
+//    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
+//      ::CallbackType f =
+//      boost::bind(&GazeboRosCameraUtils::configCallback, this, _1, _2);
+//    dyn_srv_->setCallback(f);
+//  }
+//  else
+//  {
+//    ROS_WARN_NAMED("camera_utils", "dynamic reconfigure is not enabled for this image topic [%s]"
+//             " because <camera_name> is not specified",
+//             this->image_topic_name_.c_str());
+//  }
 
   // set buffer size
   if (this->format == "L8" || this->format == "L_INT8")

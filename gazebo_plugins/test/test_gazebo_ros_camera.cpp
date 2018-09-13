@@ -62,10 +62,6 @@ TEST_F(GazeboRosCameraTest, CameraSubscribeTest)
 
   // Clean up
   sub.shutdown();
-
-  // Artificialy trigger sigInt
-  // TODO(louise) Why doesn't the test end?
-  gazebo::event::Events::sigInt();
 }
 
 int main(int argc, char** argv)
@@ -74,8 +70,5 @@ int main(int argc, char** argv)
   testing::InitGoogleTest(&argc, argv);
   int ret = RUN_ALL_TESTS();
   rclcpp::shutdown();
-
-std::cout << ret << std::endl;
-
   return ret;
 }
