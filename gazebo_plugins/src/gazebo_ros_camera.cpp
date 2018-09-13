@@ -60,10 +60,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 {
   gazebo::CameraPlugin::Load(_sensor, _sdf);
 
-//  if (!this->sdf->HasElement("cameraName"))
-//    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <cameraName>, default to empty");
+//  if (!this->sdf->HasElement("camera_name"))
+//    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <camera_name>, default to empty");
 //  else
-//    this->camera_name_ = this->sdf->Get<std::string>("cameraName");
+//    this->camera_name_ = this->sdf->Get<std::string>("camera_name");
 //
 //  // overwrite camera suffix
 //  // example usage in gazebo_ros_multicamera
@@ -94,22 +94,18 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 //  else
 //  {
 //    ROS_WARN_NAMED("camera_utils", "dynamic reconfigure is not enabled for this image topic [%s]"
-//             " becuase <cameraName> is not specified",
+//             " because <camera_name> is not specified",
 //             this->image_topic_name_.c_str());
 //  }
 
   // Image publisher
-  auto image_topic_name = _sdf->Get<std::string>("image_topic_name", "image_raw").first;
   // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
-
-  impl_->image_pub_ = it_->advertise(image_topic_name, 2);
+  impl_->image_pub_ = it_->advertise("image_raw", 2);
 
   // Camera info publisher
-  auto camera_info_topic_name =
-    _sdf->Get<std::string>("camera_info_topic_name", "camera_info").first;
   // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
   impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-    camera_info_topic_name);
+    "camera_info");
 
   // Trigger
   auto trigger_topic_name = _sdf->Get<std::string>("trigger_topic_name", "image_trigger").first;

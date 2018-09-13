@@ -5,6 +5,7 @@ file(COPY worlds DESTINATION .)
 
 # Tests
 set(tests
+  test_gazebo_ros_camera
   test_gazebo_ros_diff_drive
   test_gazebo_ros_force
   test_gazebo_ros_imu_sensor
@@ -28,6 +29,7 @@ foreach(test ${tests})
     "gazebo_dev"
     "gazebo_ros"
     "geometry_msgs"
+    "image_transport"
     "nav_msgs"
     "rclcpp"
     "sensor_msgs"
