@@ -16,53 +16,70 @@
 #include <image_transport/image_transport.h>
 #include <rclcpp/rclcpp.hpp>
 
+#include <string>
+
 using namespace std::literals::chrono_literals; // NOLINT
 
-class GazeboRosCameraTest : public gazebo::ServerFixture
+/// Test parameters
+struct TestParams
+{
+  /// Path to world file
+  std::string world;
+
+  /// Raw image topic to subscribe to
+  std::string topic;
+};
+
+class GazeboRosCameraTest : public gazebo::ServerFixture,
+                            public ::testing::WithParamInterface<TestParams>
 {
 };
 
-// Test if the camera image is published at all, and that the timestamp
-// is not too long in the past.
-TEST_F(GazeboRosCameraTest, CameraSubscribeTest)
+// Test that the camera image is published and has correct timestamp
+TEST_P(GazeboRosCameraTest, CameraSubscribeTest)
 {
   // Load test world and start paused
-  this->Load("worlds/gazebo_ros_camera.world", true);
+  this->Load(GetParam().world, true);
 
   // World
   auto world = gazebo::physics::get_world();
   ASSERT_NE(nullptr, world);
 
   // Create node and executor
-  auto node = std::make_shared<rclcpp::Node>("gazebo_ros_joint_state_publisher_test");
+  auto node = std::make_shared<rclcpp::Node>("gazebo_ros_camera_test");
   ASSERT_NE(nullptr, node);
 
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
   // Subscribe
-  bool has_new_image{false};
+  unsigned int msg_count{0};
   builtin_interfaces::msg::Time image_stamp;
 
-  auto sub = image_transport::create_subscription(node, "test_cam/image_raw",
+  auto sub = image_transport::create_subscription(node, GetParam().topic,
     [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
       image_stamp = msg->header.stamp;
-      has_new_image = true;
+      ++msg_count;
     },
     "raw");
 
-  // Update rate is 0.5 Hz, so we step 3s sim time to be sure we get 1 image at 2s
+  // Update rate is 0.5 Hz, so we step 3s sim time to be sure we get exactly 1 image at 2s
   world->Step(3000);
   executor.spin_once(100ms);
-  gazebo::common::Time::MSleep(100);
-  EXPECT_TRUE(has_new_image);
 
+  EXPECT_EQ(1u, msg_count);
   EXPECT_EQ(2.0, image_stamp.sec);
-  EXPECT_EQ(0.0, image_stamp.nanosec);
 
   // Clean up
   sub.shutdown();
 }
+
+INSTANTIATE_TEST_CASE_P(GazeboRosCamera, GazeboRosCameraTest, ::testing::Values(
+  // TODO(louise) Use mapped topics once this issue is solved:
+  // https://github.com/ros-perception/image_common/issues/93
+  TestParams({"worlds/gazebo_ros_camera.world", "test_cam/image_raw"}),
+  TestParams({"worlds/gazebo_ros_camera_16bit.world", "test_cam_16bit/image_raw"})
+), );
 
 int main(int argc, char** argv)
 {

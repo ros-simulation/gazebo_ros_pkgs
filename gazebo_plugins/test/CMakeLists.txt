@@ -1,7 +1,11 @@
 find_package(ament_cmake_gtest REQUIRED)
 
 # Worlds
-file(COPY worlds DESTINATION .)
+file(GLOB worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "worlds/*.world")
+foreach(world ${worlds})
+  # Use configure_file so this is rerun each time make is invoked (as opposed to just cmake)
+  configure_file(${world} ${world} COPYONLY)
+endforeach()
 
 # Tests
 set(tests
