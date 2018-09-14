@@ -18,6 +18,7 @@
 #include <gazebo_plugins/gazebo_ros_camera.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
+#include <gazebo_ros/utils.hpp>
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/fill_image.hpp>
 #include <sensor_msgs/image_encodings.hpp>
@@ -40,6 +41,12 @@ public:
   /// Image encoding
   std::string type_;
 
+  /// Camera name, to be used on topics.
+  std::string camera_name_;
+
+  /// Frame name, to be used by TF.
+  std::string frame_name_;
+
   /// Step size
   int skip_;
 };
@@ -60,31 +67,24 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 {
   gazebo::CameraPlugin::Load(_sensor, _sdf);
 
-//  if (!this->sdf->HasElement("camera_name"))
-//    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <camera_name>, default to empty");
-//  else
-//    this->camera_name_ = this->sdf->Get<std::string>("camera_name");
-//
-//  // overwrite camera suffix
-//  // example usage in gazebo_ros_multicamera
-//  this->camera_name_ += _camera_name_suffix;
-//
-//  if (!this->sdf->HasElement("frameName"))
-//    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <frameName>, defaults to /world");
-//  else
-//    this->frame_name_ = this->sdf->Get<std::string>("frameName");
+  // Camera name
+  impl_->camera_name_ = _sdf->Get<std::string>("camera_name", _sensor->Name()).first;
+
+  // Get tf frame for output
+  impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf);
 
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   // Image publisher
   // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
-  impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_, "image_raw");
+  impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_,
+    impl_->camera_name_ + "/image_raw");
 
   // Camera info publisher
   // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
   impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-    "camera_info");
+    impl_->camera_name_ + "/camera_info");
 
   // Trigger
   auto trigger_topic_name = _sdf->Get<std::string>("trigger_topic_name", "image_trigger").first;
@@ -99,8 +99,6 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 //  }
 
   // Dynamic reconfigure
-//  if (!this->camera_name_.empty())
-//  {
 //    dyn_srv_ =
 //      new dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
 //      (*this->rosnode_);
@@ -109,14 +107,8 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 //      boost::bind(&GazeboRosCameraUtils::configCallback, this, _1, _2);
 //    dyn_srv_->setCallback(f);
 //  }
-//  else
-//  {
-//    ROS_WARN_NAMED("camera_utils", "dynamic reconfigure is not enabled for this image topic [%s]"
-//             " because <camera_name> is not specified",
-//             this->image_topic_name_.c_str());
-//  }
 
-  // set buffer size
+  // Buffer size
   if (this->format == "L8" || this->format == "L_INT8")
   {
     impl_->type_ = sensor_msgs::image_encodings::MONO8;
@@ -210,7 +202,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // CameraInfo
   sensor_msgs::msg::CameraInfo camera_info_msg;
-//  camera_info_msg.header.frame_id = this->frame_name_;
+  camera_info_msg.header.frame_id = impl_->frame_name_;
   camera_info_msg.height = this->height;
   camera_info_msg.width  = this->width;
   camera_info_msg.distortion_model = "plumb_bob";
@@ -308,7 +300,7 @@ void GazeboRosCamera::OnNewFrame(
 
   // Publish image
   sensor_msgs::msg::Image image_msg;
-//  image_msg.header.frame_id = this->frame_name_;
+  image_msg.header.frame_id = impl_->frame_name_;
   image_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(sensor_update_time);
 
   // Copy from src to image_msg
@@ -317,7 +309,12 @@ void GazeboRosCamera::OnNewFrame(
 
   impl_->image_pub_.publish(image_msg);
 
-//  this->PublishCameraInfo(sensor_update_time);
+  // Publish camera info
+//  auto camera_info_msg = camera_info_manager_->getCameraInfo();
+//  camera_info_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
+//      sensor_update_time);
+//
+//  camera_info_pub_.publish(camera_info_msg);
 }
 GZ_REGISTER_SENSOR_PLUGIN(GazeboRosCamera)
 }  // namespace gazebo_plugins

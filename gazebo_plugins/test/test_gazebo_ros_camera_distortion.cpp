@@ -199,8 +199,8 @@ INSTANTIATE_TEST_CASE_P(GazeboRosCameraDistortion, GazeboRosCameraDistortionTest
   // TODO(louise) Use mapped topics once this issue is solved:
   // https://github.com/ros-perception/image_common/issues/93
   TestParams({"worlds/gazebo_ros_camera_distortion_barrel.world",
-              "test_cam_undistorted/image_raw",
-              "test_cam_distorted/image_raw",
+              "undistorted_camera/image_raw",
+              "distorted_camera/image_raw",
               "test_cam_distorted/camera_info"}),
   TestParams({"worlds/gazebo_ros_camera_distortion_pincushion.world",
               "test_cam_undistorted/image_raw",

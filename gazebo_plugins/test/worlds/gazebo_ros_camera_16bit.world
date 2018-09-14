@@ -32,8 +32,8 @@
               <argument>image_raw:=image_test_16bit</argument>
               <argument>camera_info:=camera_info_test_16bit</argument>
             </ros>
-            <camera_name>test_cam</camera_name>
-            <frameName>camera_link</frameName>
+            <camera_name>test_camera_name</camera_name>
+            <!-- frame_name>omit so it defaults to link name</frameName-->
             <hack_baseline>0.07</hack_baseline>
             <distortion_k1>0.0</distortion_k1>
             <distortion_k2>0.0</distortion_k2>

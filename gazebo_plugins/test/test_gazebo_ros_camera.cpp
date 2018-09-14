@@ -77,8 +77,8 @@ TEST_P(GazeboRosCameraTest, CameraSubscribeTest)
 INSTANTIATE_TEST_CASE_P(GazeboRosCamera, GazeboRosCameraTest, ::testing::Values(
   // TODO(louise) Use mapped topics once this issue is solved:
   // https://github.com/ros-perception/image_common/issues/93
-  TestParams({"worlds/gazebo_ros_camera.world", "test_cam/image_raw"}),
-  TestParams({"worlds/gazebo_ros_camera_16bit.world", "test_cam_16bit/image_raw"})
+  TestParams({"worlds/gazebo_ros_camera.world", "test_cam/camera1/image_raw"}),
+  TestParams({"worlds/gazebo_ros_camera_16bit.world", "test_cam_16bit/test_camera_name/image_raw"})
 ), );
 
 int main(int argc, char** argv)
