@@ -11,7 +11,6 @@
       <static>true</static>
       <pose>0.0 0.0 2.5 0.0 1.5707 0.0</pose>
       <link name="camera_link">
-        <pose>0 0 0 0 0 0</pose>
         <visual name="camera_visual">
           <geometry>
             <box>
@@ -46,19 +45,16 @@
             </distortion>
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-            <alwaysOn>true</alwaysOn>
-            <updateRate>0.0</updateRate>
-            <cameraName>camera_distorted</cameraName>
-            <imageTopicName>image_raw</imageTopicName>
-            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-            <frameName>camera_distorted_link</frameName>
-            <hackBaseline>0.07</hackBaseline>
-    <!-- CAUTION: Changing the distortion parameters for this test camera
-    may result in large black borders on the generated images, or in the
-    undistorted version of the images. This will likely skew and invalidate
-    the results of camera distortion tests. -->
-            <autoDistortion>true</autoDistortion>
-            <borderCrop>false</borderCrop>
+            <ros>
+              <namespace>test_cam_distorted</namespace>
+              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
+              <argument>image_raw:=image_test</argument>
+              <argument>camera_info:=camera_info_test</argument>
+            </ros>
+            <camera_name>camera_distorted</camera_name>
+            <frame_name>camera_distorted_link</frame_name>
+            <hack_baseline>0.07</hack_baseline>
+            <border_crop>false</border_crop>
           </plugin>
         </sensor>
       </link>
@@ -68,7 +64,6 @@
       <static>true</static>
       <pose>0.0 0.0 2.5 0.0 1.5707 0.0</pose>
       <link name="camera_link">
-        <pose>0 0 0 0 0 0</pose>
         <visual name="camera_visual">
           <geometry>
             <box>
@@ -99,18 +94,15 @@
             </distortion>
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-            <alwaysOn>true</alwaysOn>
-            <updateRate>0.0</updateRate>
-            <cameraName>camera_undistorted</cameraName>
-            <imageTopicName>image_raw</imageTopicName>
-            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-            <frameName>camera_undistorted_link</frameName>
-            <hackBaseline>0.0</hackBaseline>
-            <distortionK1>0.0</distortionK1>
-            <distortionK2>0.0</distortionK2>
-            <distortionT1>0.0</distortionT1>
-            <distortionT2>0.0</distortionT2>
-            <distortionK3>0.0</distortionK3>
+            <ros>
+              <namespace>test_cam_undistorted</namespace>
+              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
+              <argument>image_raw:=image_test</argument>
+              <argument>camera_info:=camera_info_test</argument>
+            </ros>
+            <camera_name>camera_undistorted</camera_name>
+            <frame_name>camera_undistorted_link</frame_name>
+            <hack_baseline>0.0</hack_baseline>
           </plugin>
         </sensor>
       </link>

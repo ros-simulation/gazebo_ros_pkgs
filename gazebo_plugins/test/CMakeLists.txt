@@ -10,6 +10,7 @@ endforeach()
 # Tests
 set(tests
   test_gazebo_ros_camera
+  test_gazebo_ros_camera_distortion
   test_gazebo_ros_diff_drive
   test_gazebo_ros_force
   test_gazebo_ros_imu_sensor
