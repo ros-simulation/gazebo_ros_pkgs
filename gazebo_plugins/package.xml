@@ -19,6 +19,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>camera_info_manager</depend>
   <depend>geometry_msgs</depend>
   <depend>image_transport</depend>
   <depend>nav_msgs</depend>
@@ -38,6 +39,7 @@
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+  <test_depend>cv_bridge</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

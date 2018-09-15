@@ -1,4 +1,5 @@
 find_package(ament_cmake_gtest REQUIRED)
+find_package(cv_bridge REQUIRED)
 
 # Worlds
 file(GLOB worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "worlds/*.world")
@@ -32,6 +33,7 @@ foreach(test ${tests})
     gazebo_test_fixture
   )
   ament_target_dependencies(${test}
+    "cv_bridge"
     "gazebo_dev"
     "gazebo_ros"
     "geometry_msgs"

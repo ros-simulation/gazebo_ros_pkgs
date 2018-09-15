@@ -17,6 +17,7 @@
 #include <gazebo/rendering/Distortion.hh>
 #include <ignition/math/Helpers.hh>
 
+#include <camera_info_manager/camera_info_manager.h>
 #include <gazebo_plugins/gazebo_ros_camera.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
@@ -44,6 +45,9 @@ public:
 
   /// Trigger subscriber, in case it's a triggered camera
   rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr trigger_sub_{nullptr};
+
+  /// Camera info manager
+  std::shared_ptr<camera_info_manager::CameraInfoManager> camera_info_manager_;
 
   /// Image encoding
   std::string type_;
@@ -308,13 +312,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   camera_info_msg.p[10] = 1.0;
   camera_info_msg.p[11] = 0.0;
 
-//  // Initialize camera_info_manager
-//  // TODO(louise) Not ported to ROS2 yet
-//  this->camera_info_manager_.reset(new camera_info_manager::CameraInfoManager(
-//          *this->rosnode_, this->camera_name_));
-//  this->camera_info_manager_->setCameraInfo(camera_info_msg);
-
-//  load_event_();
+  // Initialize camera_info_manager
+  impl_->camera_info_manager_ = std::make_shared<camera_info_manager::CameraInfoManager>(
+          impl_->ros_node_, impl_->camera_name_);
+  impl_->camera_info_manager_->setCameraInfo(camera_info_msg);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -341,11 +342,11 @@ void GazeboRosCamera::OnNewFrame(
   impl_->image_pub_.publish(image_msg);
 
   // Publish camera info
-//  auto camera_info_msg = camera_info_manager_->getCameraInfo();
-//  camera_info_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
-//      sensor_update_time);
-//
-//  camera_info_pub_.publish(camera_info_msg);
+  auto camera_info_msg = impl_->camera_info_manager_->getCameraInfo();
+  camera_info_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
+      sensor_update_time);
+
+  impl_->camera_info_pub_->publish(camera_info_msg);
 
   // Disable camera if it's a triggered camera
   if (nullptr != impl_->trigger_sub_) {

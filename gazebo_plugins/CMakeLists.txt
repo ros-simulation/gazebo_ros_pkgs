@@ -12,6 +12,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(camera_info_manager REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -92,6 +93,7 @@ add_library(gazebo_ros_camera SHARED
   src/gazebo_ros_camera.cpp
 )
 ament_target_dependencies(gazebo_ros_camera
+  "camera_info_manager"
   "gazebo_dev"
   "gazebo_ros"
   "image_transport"
