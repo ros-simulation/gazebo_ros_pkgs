@@ -1,11 +1,18 @@
 <?xml version="1.0" ?>
-<sdf version="1.6">
+<sdf version="1.4">
+
   <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
     <model name="camera_model">
       <static>true</static>
+      <pose>0.0 0.0 0.5 0.0 0.0 0.0</pose>
       <link name="camera_link">
         <sensor type="camera" name="camera1">
-          <update_rate>0.5</update_rate>
+          <always_on>0</always_on>
+          <update_rate>1</update_rate>
           <camera name="head">
             <horizontal_fov>1.3962634</horizontal_fov>
             <image>
@@ -28,13 +35,14 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
-              <namespace>test_cam</namespace>
-              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
+              <namespace>test_triggered_cam</namespace>
+              <!-- TODO(louise) Remapping not working due to
+                   https://github.com/ros-perception/image_common/issues/93 -->
               <argument>image_raw:=image_test</argument>
               <argument>camera_info:=camera_info_test</argument>
+              <argument>image_trigger:=image_trigger_test</argument>
             </ros>
-            <!-- camera_name>omit so it defaults to sensor name</camera_name-->
-            <!-- frame_name>omit so it defaults to link name</frameName-->
+            <triggered>true</triggered>
             <hack_baseline>0.07</hack_baseline>
           </plugin>
         </sensor>

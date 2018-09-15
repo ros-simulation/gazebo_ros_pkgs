@@ -66,46 +66,11 @@ void GazeboRosCameraUtils::configCallback(
 // Destructor
 GazeboRosCameraUtils::~GazeboRosCameraUtils()
 {
-  this->parentSensor_->SetActive(false);
-  this->rosnode_->shutdown();
-  this->camera_queue_.clear();
-  this->camera_queue_.disable();
-  this->callback_queue_thread_.join();
-  delete this->rosnode_;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Load the controller
-void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
-  sdf::ElementPtr _sdf,
-  const std::string &_camera_name_suffix,
-  double _hack_baseline)
-{
-  // default Load:
-  // provide _camera_name_suffix to prevent LoadThread() creating the ros::NodeHandle with
-  //an incomplete this->camera_name_ namespace. There was a race condition when the _camera_name_suffix
-  //was appended in this function.
-  this->Load(_parent, _sdf, _camera_name_suffix);
-
-  // overwrite hack baseline if specified at load
-  // example usage in gazebo_ros_multicamera
-  this->hack_baseline_ = _hack_baseline;
 }
 
 event::ConnectionPtr GazeboRosCameraUtils::OnLoad(const boost::function<void()>& load_function)
 {
   return load_event_.Connect(load_function);
-}
-
-bool GazeboRosCameraUtils::CanTriggerCamera()
-{
-  return false;
-}
-
-void GazeboRosCameraUtils::TriggerCameraInternal(
-    const std_msgs::Empty::ConstPtr &dummy)
-{
-  TriggerCamera();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,14 +82,6 @@ void GazeboRosCameraUtils::SetHFOV(const std_msgs::Float64::ConstPtr& hfov)
 #else
   this->camera_->SetHFOV(gazebo::math::Angle(hfov->data));
 #endif
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Set Update Rate
-void GazeboRosCameraUtils::SetUpdateRate(
-  const std_msgs::Float64::ConstPtr& update_rate)
-{
-  this->parentSensor_->SetUpdateRate(update_rate->data);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -154,12 +111,6 @@ void GazeboRosCameraUtils::ImageDisconnect()
   // each camera shares the same parentSensor_.
   if ((*this->image_connect_count_) <= 0 && !*this->was_active_)
     this->parentSensor_->SetActive(false);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Initialize the controller
-void GazeboRosCameraUtils::Init()
-{
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -198,19 +149,5 @@ void GazeboRosCameraUtils::PublishCameraInfo(
   camera_info_msg.header.stamp.nsec = this->sensor_update_time_.nsec;
 
   camera_info_publisher.publish(camera_info_msg);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-// Put camera_ data to the interface
-void GazeboRosCameraUtils::CameraQueueThread()
-{
-  static const double timeout = 0.001;
-
-  while (this->rosnode_->ok())
-  {
-    /// take care of callback queue
-    this->camera_queue_.callAvailable(ros::WallDuration(timeout));
-  }
 }
 }

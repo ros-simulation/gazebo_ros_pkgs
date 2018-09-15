@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include <sdf/Element.hh>
+#include <gazebo/common/Events.hh>
 #include <gazebo/rendering/Distortion.hh>
+#include <ignition/math/Helpers.hh>
 
 #include <gazebo_plugins/gazebo_ros_camera.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
@@ -24,19 +26,24 @@
 #include <sensor_msgs/image_encodings.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 
+#include <mutex>
+
 namespace gazebo_plugins
 {
 class GazeboRosCameraPrivate
 {
 public:
   /// A pointer to the GazeboROS node.
-  gazebo_ros::Node::SharedPtr ros_node_;
+  gazebo_ros::Node::SharedPtr ros_node_{nullptr};
 
   /// Image publisher.
   image_transport::Publisher image_pub_;
 
   /// Camera info publisher.
-  rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_pub_{nullptr};
+
+  /// Trigger subscriber, in case it's a triggered camera
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr trigger_sub_{nullptr};
 
   /// Image encoding
   std::string type_;
@@ -49,6 +56,16 @@ public:
 
   /// Step size
   int skip_;
+
+  /// Connects to pre-render events.
+  gazebo::event::ConnectionPtr pre_render_connection_;
+
+  /// Keeps track of how many times the camera has been triggered since it last published an
+  /// image.
+  int triggered{0};
+
+  /// Protects trigger.
+  std::mutex trigger_mutex_;
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -81,22 +98,36 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_,
     impl_->camera_name_ + "/image_raw");
 
+  // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
+  // full topic.
+  // RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing images to [%s]",
+  //  impl_->image_pub_.getTopic());
+
   // Camera info publisher
   // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
   impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
     impl_->camera_name_ + "/camera_info");
 
+  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
+    impl_->camera_info_pub_->get_topic_name());
+
   // Trigger
-  auto trigger_topic_name = _sdf->Get<std::string>("trigger_topic_name", "image_trigger").first;
-//  if (this->CanTriggerCamera())
-//  {
-//    ros::SubscribeOptions trigger_so =
-//      ros::SubscribeOptions::create<std_msgs::Empty>(
-//          this->trigger_topic_name_, 1,
-//          boost::bind(&GazeboRosCameraUtils::TriggerCameraInternal, this, _1),
-//          ros::VoidPtr(), &this->camera_queue_);
-//    this->trigger_subscriber_ = this->rosnode_->subscribe(trigger_so);
-//  }
+  if (_sdf->Get<bool>("triggered", false).first) {
+   rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
+   qos_profile.depth = 1;
+
+   impl_->trigger_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
+     impl_->camera_name_ + "/image_trigger",
+     std::bind(&GazeboRosCamera::OnTrigger, this, std::placeholders::_1),
+     qos_profile);
+
+   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
+     impl_->trigger_sub_->get_topic_name());
+
+   SetCameraEnabled(false);
+   impl_->pre_render_connection_ = gazebo::event::Events::ConnectPreRender(
+     std::bind(&GazeboRosCamera::PreRender, this));
+ }
 
   // Dynamic reconfigure
 //    dyn_srv_ =
@@ -315,6 +346,35 @@ void GazeboRosCamera::OnNewFrame(
 //      sensor_update_time);
 //
 //  camera_info_pub_.publish(camera_info_msg);
+
+  // Disable camera if it's a triggered camera
+  if (nullptr != impl_->trigger_sub_) {
+    SetCameraEnabled(false);
+
+    std::lock_guard<std::mutex> lock(impl_->trigger_mutex_);
+    impl_->triggered = std::max(impl_->triggered-1, 0);
+  }
 }
+
+void GazeboRosCamera::SetCameraEnabled(const bool _enabled)
+{
+  this->parentSensor->SetActive(_enabled);
+  this->parentSensor->SetUpdateRate(_enabled ? 0.0 : ignition::math::MIN_D);
+}
+
+void GazeboRosCamera::PreRender()
+{
+  std::lock_guard<std::mutex> lock(impl_->trigger_mutex_);
+  if (impl_->triggered > 0) {
+    SetCameraEnabled(true);
+  }
+}
+
+void GazeboRosCamera::OnTrigger(const std_msgs::msg::Empty::SharedPtr)
+{
+  std::lock_guard<std::mutex> lock(impl_->trigger_mutex_);
+  impl_->triggered++;
+}
+
 GZ_REGISTER_SENSOR_PLUGIN(GazeboRosCamera)
 }  // namespace gazebo_plugins

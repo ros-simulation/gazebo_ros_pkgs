@@ -82,8 +82,6 @@ namespace gazebo
 
     public: event::ConnectionPtr OnLoad(const boost::function<void()>&);
 
-    private: void Init();
-
     /// \brief Keep track of number of image connections
     protected: boost::shared_ptr<int> image_connect_count_;
     /// \brief A mutex to lock access to image_connect_count_
@@ -100,27 +98,6 @@ namespace gazebo
     private: void SetHFOV(const std_msgs::Float64::ConstPtr& hfov);
     private: void SetUpdateRate(const std_msgs::Float64::ConstPtr& update_rate);
 
-    /// \brief A pointer to the ROS node.
-    ///  A node will be instantiated if it does not exist.
-    protected: ros::NodeHandle* rosnode_;
-    protected: image_transport::Publisher image_pub_;
-    private: image_transport::ImageTransport* itnode_;
-
-    /// \brief ROS image message
-    protected: sensor_msgs::Image image_msg_;
-
-    /// \brief for setting ROS name space
-    private: std::string robot_namespace_;
-
-    /// \brief ROS camera name
-    private: std::string camera_name_;
-
-    /// \brief tf prefix
-    private: std::string tf_prefix_;
-
-    /// \brief ROS image topic name
-    protected: std::string image_topic_name_;
-
     /// \brief Publish CameraInfo to the ROS topic
     protected: void PublishCameraInfo(ros::Publisher camera_info_publisher);
     protected: void PublishCameraInfo(common::Time &last_update_time);
@@ -133,38 +110,12 @@ namespace gazebo
     protected: std::string camera_info_topic_name_;
     protected: common::Time last_info_update_time_;
 
-    /// \brief ROS frame transform name to use in the image message header.
-    ///        This should typically match the link name the sensor is attached.
-    protected: std::string frame_name_;
     /// update rate of this sensor
-    protected: double update_rate_;
-    protected: double update_period_;
-    protected: common::Time last_update_time_;
-
-    protected: double cx_prime_;
-    protected: double cx_;
-    protected: double cy_;
-    protected: double focal_length_;
-    protected: double hack_baseline_;
-    protected: double distortion_k1_;
-    protected: double distortion_k2_;
-    protected: double distortion_k3_;
-    protected: double distortion_t1_;
-    protected: double distortion_t2_;
-
-    protected: bool auto_distortion_;
-    protected: bool border_crop_;
-
     protected: boost::shared_ptr<camera_info_manager::CameraInfoManager> camera_info_manager_;
-
 
     /// \brief A mutex to lock access to fields
     /// that are used in ROS message callbacks
     protected: boost::mutex lock_;
-
-    /// \brief size of image buffer
-    protected: std::string type_;
-    protected: int skip_;
 
     private: ros::Subscriber cameraHFOVSubscriber_;
     private: ros::Subscriber cameraUpdateRateSubscriber_;
@@ -181,43 +132,10 @@ namespace gazebo
     protected: void CameraQueueThread();
     protected: boost::thread callback_queue_thread_;
 
-
-    // copied from CameraPlugin
-    protected: unsigned int width_, height_, depth_;
-    protected: std::string format_;
-
-    protected: sensors::SensorPtr parentSensor_;
-    protected: rendering::CameraPtr camera_;
-
-    // Pointer to the world
-    protected: physics::WorldPtr world_;
-
-    private: event::ConnectionPtr newFrameConnection_;
-
-    protected: common::Time sensor_update_time_;
-
-    // maintain for one more release for backwards compatibility
-    protected: physics::WorldPtr world;
-
     // deferred load in case ros is blocking
-    private: sdf::ElementPtr sdf;
     private: void LoadThread();
     private: boost::thread deferred_load_thread_;
     private: event::EventT<void()> load_event_;
-
-    // make a trigger function that the child classes can override
-    // and a function that returns bool to indicate whether the trigger
-    // should be used
-    protected: virtual void TriggerCamera();
-    protected: virtual bool CanTriggerCamera();
-    private: void TriggerCameraInternal(const std_msgs::Empty::ConstPtr &dummy);
-    private: ros::Subscriber trigger_subscriber_;
-
-    /// \brief ROS trigger topic name
-    protected: std::string trigger_topic_name_;
-
-    /// \brief True if camera util is initialized
-    protected: bool initialized_;
 
     friend class GazeboRosMultiCamera;
     friend class GazeboRosTriggeredMultiCamera;

@@ -19,6 +19,7 @@ find_package(image_transport REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -96,6 +97,7 @@ ament_target_dependencies(gazebo_ros_camera
   "image_transport"
   "rclcpp"
   "sensor_msgs"
+  "std_msgs"
 )
 target_link_libraries(gazebo_ros_camera
   CameraPlugin
