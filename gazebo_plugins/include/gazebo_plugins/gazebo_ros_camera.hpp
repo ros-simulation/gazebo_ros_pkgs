@@ -44,15 +44,16 @@ protected:
    * \details This is called at the camera's update rate.
    * \details Not called when the camera isn't active. For a triggered camera, it will only be
    * called after triggered.
-   * \param[in] _image
-   * \param[in] _width
-   * \param[in] _height
-   * \param[in] _depth
-   * \param[in] _format
+   * \param[in] _image Image
+   * \param[in] _width Image width
+   * \param[in] _height Image height
+   * \param[in] _depth Image depth
+   * \param[in] _format Image format
    */
-  virtual void OnNewFrame(const unsigned char *_image,
-                          unsigned int _width, unsigned int _height,
-                          unsigned int _depth, const std::string &_format) override;
+  void OnNewFrame(
+    const unsigned char * _image,
+    unsigned int _width, unsigned int _height,
+    unsigned int _depth, const std::string & _format) override;
 
   /// Callback when camera is triggered.
   void OnTrigger(const std_msgs::msg::Empty::SharedPtr _dummy);
@@ -71,4 +72,3 @@ private:
 }  // namespace gazebo_plugins
 
 #endif  // GAZEBO_PLUGINS__GAZEBO_ROS_CAMERA_HPP_
-

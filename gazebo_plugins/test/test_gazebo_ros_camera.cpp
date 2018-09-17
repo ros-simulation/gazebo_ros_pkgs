@@ -16,6 +16,7 @@
 #include <image_transport/image_transport.h>
 #include <rclcpp/rclcpp.hpp>
 
+#include <memory>
 #include <string>
 
 using namespace std::literals::chrono_literals; // NOLINT
@@ -30,8 +31,8 @@ struct TestParams
   std::string topic;
 };
 
-class GazeboRosCameraTest : public gazebo::ServerFixture,
-                            public ::testing::WithParamInterface<TestParams>
+class GazeboRosCameraTest
+  : public gazebo::ServerFixture, public ::testing::WithParamInterface<TestParams>
 {
 };
 
@@ -57,11 +58,11 @@ TEST_P(GazeboRosCameraTest, CameraSubscribeTest)
   builtin_interfaces::msg::Time image_stamp;
 
   auto sub = image_transport::create_subscription(node, GetParam().topic,
-    [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
-      image_stamp = msg->header.stamp;
-      ++msg_count;
-    },
-    "raw");
+      [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
+        image_stamp = msg->header.stamp;
+        ++msg_count;
+      },
+      "raw");
 
   // Update rate is 0.5 Hz, so we step 3s sim time to be sure we get exactly 1 image at 2s
   world->Step(3000);
@@ -75,15 +76,15 @@ TEST_P(GazeboRosCameraTest, CameraSubscribeTest)
 }
 
 INSTANTIATE_TEST_CASE_P(GazeboRosCamera, GazeboRosCameraTest, ::testing::Values(
-  // TODO(louise) Use mapped topics once this issue is solved:
-  // https://github.com/ros-perception/image_common/issues/93
-  TestParams({"worlds/gazebo_ros_camera.world",
-              "test_cam/camera1/image_raw"}),
-  TestParams({"worlds/gazebo_ros_camera_16bit.world",
-              "test_cam_16bit/test_camera_name/image_raw"})
-), );
+    // TODO(louise) Use mapped topics once this issue is solved:
+    // https://github.com/ros-perception/image_common/issues/93
+    TestParams({"worlds/gazebo_ros_camera.world",
+      "test_cam/camera1/image_raw"}),
+    TestParams({"worlds/gazebo_ros_camera_16bit.world",
+      "test_cam_16bit/test_camera_name/image_raw"})
+  ), );
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);

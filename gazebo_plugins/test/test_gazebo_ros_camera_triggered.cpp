@@ -17,6 +17,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/empty.hpp>
 
+#include <memory>
+
 using namespace std::literals::chrono_literals; // NOLINT
 
 class GazeboRosTriggeredCameraTest : public gazebo::ServerFixture
@@ -46,12 +48,12 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
   builtin_interfaces::msg::Time image_stamp;
 
   auto sub = image_transport::create_subscription(node,
-    "test_triggered_cam/camera1/image_raw",
-    [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
-      image_stamp = msg->header.stamp;
-      ++msg_count;
-    },
-    "raw");
+      "test_triggered_cam/camera1/image_raw",
+      [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
+        image_stamp = msg->header.stamp;
+        ++msg_count;
+      },
+      "raw");
 
   // Step a bit and check that we do not get any messages
   world->Step(100);
@@ -87,7 +89,7 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
   sub.shutdown();
 }
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);

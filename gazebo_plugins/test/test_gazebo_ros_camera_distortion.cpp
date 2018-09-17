@@ -19,6 +19,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <memory>
+#include <string>
+
 using namespace std::literals::chrono_literals; // NOLINT
 
 /// Test parameters
@@ -37,27 +40,26 @@ struct TestParams
   std::string distorted_cam_topic;
 };
 
-void diffBetween(cv::Mat & orig, cv::Mat & diff, long & total_diff)
+void DiffBetween(cv::Mat & orig, cv::Mat & diff, int64 & total_diff)
 {
   cv::MatIterator_<cv::Vec3b> it, end;
   cv::Vec3b orig_pixel, diff_pixel;
   total_diff = 0;
 
-  for (int i = 0; i < orig.rows; ++i)
-  {
-    for (int j = 0; j < orig.cols; ++j)
-    {
-      orig_pixel = orig.at<cv::Vec3b>(i,j);
-      diff_pixel = diff.at<cv::Vec3b>(i,j);
-      total_diff += abs(orig_pixel[0] - diff_pixel[0]) +
-                    abs(orig_pixel[1] - diff_pixel[1]) +
-                    abs(orig_pixel[2] - diff_pixel[2]);
+  for (int i = 0; i < orig.rows; ++i) {
+    for (int j = 0; j < orig.cols; ++j) {
+      orig_pixel = orig.at<cv::Vec3b>(i, j);
+      diff_pixel = diff.at<cv::Vec3b>(i, j);
+      total_diff +=
+        abs(orig_pixel[0] - diff_pixel[0]) +
+        abs(orig_pixel[1] - diff_pixel[1]) +
+        abs(orig_pixel[2] - diff_pixel[2]);
     }
   }
 }
 
-class GazeboRosCameraDistortionTest : public gazebo::ServerFixture,
-                                      public ::testing::WithParamInterface<TestParams>
+class GazeboRosCameraDistortionTest
+  : public gazebo::ServerFixture, public ::testing::WithParamInterface<TestParams>
 {
 public:
   void TearDown() override
@@ -97,20 +99,20 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
   // Subscribe to undistorted image
   sensor_msgs::msg::Image::ConstSharedPtr cam_image_undistorted;
   cam_sub_undistorted_ = image_transport::create_subscription(node,
-    GetParam().undistorted_topic,
-    [&cam_image_undistorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
-      cam_image_undistorted = _msg;
-    },
-    "raw");
+      GetParam().undistorted_topic,
+      [&cam_image_undistorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
+        cam_image_undistorted = _msg;
+      },
+      "raw");
 
   // Subscribe to distorted image
   sensor_msgs::msg::Image::ConstSharedPtr cam_image_distorted;
   cam_sub_distorted_ = image_transport::create_subscription(node,
-    GetParam().distorted_topic,
-    [&cam_image_distorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
-      cam_image_distorted = _msg;
-    },
-    "raw");
+      GetParam().distorted_topic,
+      [&cam_image_distorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
+        cam_image_distorted = _msg;
+      },
+      "raw");
 
   // Subscribe to distorted camera info
   sensor_msgs::msg::CameraInfo::SharedPtr cam_info_distorted;
@@ -139,17 +141,15 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
 
   // Load camera coefficients from published ROS information
   auto intrinsic_distorted_matrix = cv::Mat(3, 3, CV_64F);
-  if (cam_info_distorted->k.size() == 9)
-  {
+  if (cam_info_distorted->k.size() == 9) {
     memcpy(intrinsic_distorted_matrix.data, cam_info_distorted->k.data(),
-      cam_info_distorted->k.size()*sizeof(double));
+      cam_info_distorted->k.size() * sizeof(double));
   }
 
   auto distortion_coeffs = cv::Mat(5, 1, CV_64F);
-  if (cam_info_distorted->d.size() == 5)
-  {
+  if (cam_info_distorted->d.size() == 5) {
     memcpy(distortion_coeffs.data, cam_info_distorted->d.data(),
-      cam_info_distorted->d.size()*sizeof(double));
+      cam_info_distorted->d.size() * sizeof(double));
   }
 
   // Information acquired, now test the quality of the undistortion
@@ -166,7 +166,7 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
 
   undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
 
-  //Ensure that we didn't crop away everything
+  // Ensure that we didn't crop away everything
   ASSERT_GT(distorted.rows, 0);
   ASSERT_GT(distorted.cols, 0);
   ASSERT_GT(undistorted.rows, 0);
@@ -176,42 +176,44 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
 
   // The difference between the undistorted image and the no-distortion camera
   // image should be the lowest when we use the correct distortion parameters.
-  long diff1 = 0, diff2 = 0;
-  diffBetween(fixed_crop, undistorted_crop, diff1);
+  int64 diff1 = 0, diff2 = 0;
+  DiffBetween(fixed_crop, undistorted_crop, diff1);
 
   const double OFFSET = 0.01;
 
   // test each parameter, varying one at a time
-  for(size_t i = 0; i < 5; ++i)
-  {
-    distortion_coeffs.at<double>(i,0) += OFFSET;
+  for (size_t i = 0; i < 5; ++i) {
+    distortion_coeffs.at<double>(i, 0) += OFFSET;
     undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-    diffBetween(fixed_crop, undistorted_crop, diff2);
+    DiffBetween(fixed_crop, undistorted_crop, diff2);
     EXPECT_GE(diff2, diff1);
-    distortion_coeffs.at<double>(i,0) -= OFFSET;
+    distortion_coeffs.at<double>(i, 0) -= OFFSET;
 
-    distortion_coeffs.at<double>(i,0) -= OFFSET;
+    distortion_coeffs.at<double>(i, 0) -= OFFSET;
     undistort(distorted, fixed, intrinsic_distorted_matrix, distortion_coeffs);
-    diffBetween(fixed_crop, undistorted_crop, diff2);
+    DiffBetween(fixed_crop, undistorted_crop, diff2);
     EXPECT_GE(diff2, diff1);
-    distortion_coeffs.at<double>(i,0) += OFFSET;
+    distortion_coeffs.at<double>(i, 0) += OFFSET;
   }
 }
 
-INSTANTIATE_TEST_CASE_P(GazeboRosCameraDistortion, GazeboRosCameraDistortionTest, ::testing::Values(
-  // TODO(louise) Use mapped topics once this issue is solved:
-  // https://github.com/ros-perception/image_common/issues/93
-  TestParams({"worlds/gazebo_ros_camera_distortion_barrel.world",
-              "undistorted_camera/image_raw",
-              "distorted_camera/image_raw",
-              "distorted_camera/camera_info"})
+INSTANTIATE_TEST_CASE_P(GazeboRosCameraDistortion, GazeboRosCameraDistortionTest,
+  ::testing::Values(
+    // TODO(louise) Use mapped topics once this issue is solved:
+    // https://github.com/ros-perception/image_common/issues/93
+    TestParams({
+  "worlds/gazebo_ros_camera_distortion_barrel.world",
+  "undistorted_camera/image_raw",
+  "distorted_camera/image_raw",
+  "distorted_camera/camera_info"
+})
 //  TestParams({"worlds/gazebo_ros_camera_distortion_pincushion.world",
 //              "undistorted_camera/image_raw",
 //              "distorted_camera/image_raw",
 //              "distorted_camera/camera_info"})
-), );
+  ), );
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);

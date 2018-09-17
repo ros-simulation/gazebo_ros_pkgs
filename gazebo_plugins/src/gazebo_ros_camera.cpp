@@ -27,7 +27,10 @@
 #include <sensor_msgs/image_encodings.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 
+#include <algorithm>
+#include <memory>
 #include <mutex>
+#include <string>
 
 namespace gazebo_plugins
 {
@@ -64,8 +67,7 @@ public:
   /// Connects to pre-render events.
   gazebo::event::ConnectionPtr pre_render_connection_;
 
-  /// Keeps track of how many times the camera has been triggered since it last published an
-  /// image.
+  /// Keeps track of how many times the camera has been triggered since it last published an image.
   int triggered{0};
 
   /// Protects trigger.
@@ -80,8 +82,10 @@ GazeboRosCamera::GazeboRosCamera()
 GazeboRosCamera::~GazeboRosCamera()
 {
   impl_->image_pub_.shutdown();
-  impl_->camera_info_pub_.reset();
-  impl_->ros_node_.reset();
+
+  // TODO(louise) Why does this hang for the 2nd camera plugin?
+  // Commenting it out here just pushes the problem somewhere else.
+  // impl_->ros_node_.reset();
 }
 
 void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
@@ -100,7 +104,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   // Image publisher
   // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
   impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_,
-    impl_->camera_name_ + "/image_raw");
+      impl_->camera_name_ + "/image_raw");
 
   // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
   // full topic.
@@ -117,21 +121,21 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // Trigger
   if (_sdf->Get<bool>("triggered", false).first) {
-   rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
-   qos_profile.depth = 1;
+    rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
+    qos_profile.depth = 1;
 
-   impl_->trigger_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
-     impl_->camera_name_ + "/image_trigger",
-     std::bind(&GazeboRosCamera::OnTrigger, this, std::placeholders::_1),
-     qos_profile);
+    impl_->trigger_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
+      impl_->camera_name_ + "/image_trigger",
+      std::bind(&GazeboRosCamera::OnTrigger, this, std::placeholders::_1),
+      qos_profile);
 
-   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
-     impl_->trigger_sub_->get_topic_name());
+    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
+      impl_->trigger_sub_->get_topic_name());
 
-   SetCameraEnabled(false);
-   impl_->pre_render_connection_ = gazebo::event::Events::ConnectPreRender(
-     std::bind(&GazeboRosCamera::PreRender, this));
- }
+    SetCameraEnabled(false);
+    impl_->pre_render_connection_ = gazebo::event::Events::ConnectPreRender(
+      std::bind(&GazeboRosCamera::PreRender, this));
+  }
 
   // Dynamic reconfigure
 //    dyn_srv_ =
@@ -144,71 +148,52 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 //  }
 
   // Buffer size
-  if (this->format == "L8" || this->format == "L_INT8")
-  {
+  if (this->format == "L8" || this->format == "L_INT8") {
     impl_->type_ = sensor_msgs::image_encodings::MONO8;
     impl_->skip_ = 1;
-  }
-  else if (this->format == "L16" || this->format == "L_INT16")
-  {
+  } else if (this->format == "L16" || this->format == "L_INT16") {
     impl_->type_ = sensor_msgs::image_encodings::MONO16;
     impl_->skip_ = 2;
-  }
-  else if (this->format == "R8G8B8" || this->format == "RGB_INT8")
-  {
+  } else if (this->format == "R8G8B8" || this->format == "RGB_INT8") {
     impl_->type_ = sensor_msgs::image_encodings::RGB8;
     impl_->skip_ = 3;
-  }
-  else if (this->format == "B8G8R8" || this->format == "BGR_INT8")
-  {
+  } else if (this->format == "B8G8R8" || this->format == "BGR_INT8") {
     impl_->type_ = sensor_msgs::image_encodings::BGR8;
     impl_->skip_ = 3;
-  }
-  else if (this->format == "R16G16B16" ||  this->format == "RGB_INT16")
-  {
+  } else if (this->format == "R16G16B16" || this->format == "RGB_INT16") {
     impl_->type_ = sensor_msgs::image_encodings::RGB16;
     impl_->skip_ = 6;
-  }
-  else if (this->format == "BAYER_RGGB8")
-  {
+  } else if (this->format == "BAYER_RGGB8") {
     RCLCPP_INFO(impl_->ros_node_->get_logger(),
       "bayer simulation may be computationally expensive.");
     impl_->type_ = sensor_msgs::image_encodings::BAYER_RGGB8;
     impl_->skip_ = 1;
-  }
-  else if (this->format == "BAYER_BGGR8")
-  {
+  } else if (this->format == "BAYER_BGGR8") {
     RCLCPP_INFO(impl_->ros_node_->get_logger(),
       "bayer simulation may be computationally expensive.");
     impl_->type_ = sensor_msgs::image_encodings::BAYER_BGGR8;
     impl_->skip_ = 1;
-  }
-  else if (this->format == "BAYER_GBRG8")
-  {
+  } else if (this->format == "BAYER_GBRG8") {
     RCLCPP_INFO(impl_->ros_node_->get_logger(),
       "bayer simulation may be computationally expensive.");
     impl_->type_ = sensor_msgs::image_encodings::BAYER_GBRG8;
     impl_->skip_ = 1;
-  }
-  else if (this->format == "BAYER_GRBG8")
-  {
+  } else if (this->format == "BAYER_GRBG8") {
     RCLCPP_INFO(impl_->ros_node_->get_logger(),
       "bayer simulation may be computationally expensive.");
     impl_->type_ = sensor_msgs::image_encodings::BAYER_GRBG8;
     impl_->skip_ = 1;
-  }
-  else
-  {
+  } else {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Unsupported Gazebo ImageFormat, using BGR8\n");
     impl_->type_ = sensor_msgs::image_encodings::BGR8;
     impl_->skip_ = 3;
   }
 
   // C parameters
-  auto default_cx = (static_cast<double>(this->width) + 1.0) /2.0;
+  auto default_cx = (static_cast<double>(this->width) + 1.0) / 2.0;
   auto cx = _sdf->Get<double>("cx", default_cx).first;
 
-  auto default_cy = (static_cast<double>(this->height) + 1.0) /2.0;
+  auto default_cy = (static_cast<double>(this->height) + 1.0) / 2.0;
   auto cy = _sdf->Get<double>("cy", default_cy).first;
 
   double hfov = this->camera->HFOV().Radian();
@@ -216,30 +201,24 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // Focal length
   auto focal_length = _sdf->Get<double>("focal_length", 0.0).first;
-  if (focal_length == 0)
-  {
+  if (focal_length == 0) {
     focal_length = computed_focal_length;
-  }
-  else
-  {
-    if (!ignition::math::equal(focal_length, computed_focal_length))
-    {
-      RCLCPP_WARN(impl_->ros_node_->get_logger(),
-        "The <focal_length> [%f] you have provided for camera [%s]"
-        " is inconsistent with specified <image_width> [%d] and"
-        " HFOV [%f]. Please double check to see that"
-        " focal_length = width / (2.0 * tan(HFOV/2.0))."
-        " The expected focal_length value is [%f],"
-        " please update your camera model description accordingly.",
-         focal_length, _sensor->Name().c_str(), this->width, hfov, computed_focal_length);
-    }
+  } else if (!ignition::math::equal(focal_length, computed_focal_length)) {
+    RCLCPP_WARN(impl_->ros_node_->get_logger(),
+      "The <focal_length> [%f] you have provided for camera [%s]"
+      " is inconsistent with specified <image_width> [%d] and"
+      " HFOV [%f]. Please double check to see that"
+      " focal_length = width / (2.0 * tan(HFOV/2.0))."
+      " The expected focal_length value is [%f],"
+      " please update your camera model description accordingly.",
+      focal_length, _sensor->Name().c_str(), this->width, hfov, computed_focal_length);
   }
 
   // CameraInfo
   sensor_msgs::msg::CameraInfo camera_info_msg;
   camera_info_msg.header.frame_id = impl_->frame_name_;
   camera_info_msg.height = this->height;
-  camera_info_msg.width  = this->width;
+  camera_info_msg.width = this->width;
   camera_info_msg.distortion_model = "plumb_bob";
   camera_info_msg.d.resize(5);
 
@@ -255,8 +234,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   double distortion_k3{0.0};
   double distortion_t1{0.0};
   double distortion_t2{0.0};
-  if (this->camera->LensDistortion())
-  {
+  if (this->camera->LensDistortion()) {
     this->camera->LensDistortion()->SetCrop(border_crop);
 
     distortion_k1 = this->camera->LensDistortion()->K1();
@@ -314,17 +292,17 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // Initialize camera_info_manager
   impl_->camera_info_manager_ = std::make_shared<camera_info_manager::CameraInfoManager>(
-          impl_->ros_node_, impl_->camera_name_);
+    impl_->ros_node_, impl_->camera_name_);
   impl_->camera_info_manager_->setCameraInfo(camera_info_msg);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 void GazeboRosCamera::OnNewFrame(
-    const unsigned char *_image,
-    unsigned int _width,
-    unsigned int _height,
-    unsigned int /*_depth*/,
-    const std::string & /*_format*/)
+  const unsigned char * _image,
+  unsigned int _width,
+  unsigned int _height,
+  unsigned int /*_depth*/,
+  const std::string & /*_format*/)
 {
   // TODO(louise) Enable / disable sensor once SubscriberStatusCallback has been ported to ROS2
 
@@ -337,14 +315,14 @@ void GazeboRosCamera::OnNewFrame(
 
   // Copy from src to image_msg
   sensor_msgs::fillImage(image_msg, impl_->type_, _height, _width,
-      impl_->skip_ * _width, reinterpret_cast<const void*>(_image));
+    impl_->skip_ * _width, reinterpret_cast<const void *>(_image));
 
   impl_->image_pub_.publish(image_msg);
 
   // Publish camera info
   auto camera_info_msg = impl_->camera_info_manager_->getCameraInfo();
   camera_info_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
-      sensor_update_time);
+    sensor_update_time);
 
   impl_->camera_info_pub_->publish(camera_info_msg);
 
@@ -353,7 +331,7 @@ void GazeboRosCamera::OnNewFrame(
     SetCameraEnabled(false);
 
     std::lock_guard<std::mutex> lock(impl_->trigger_mutex_);
-    impl_->triggered = std::max(impl_->triggered-1, 0);
+    impl_->triggered = std::max(impl_->triggered - 1, 0);
   }
 }
 
