@@ -11,7 +11,7 @@ endforeach()
 # Tests
 set(tests
   test_gazebo_ros_camera
-  # TODO(louise) Test passes but crashes on teardown, bt points to ~GLRenderBuffer
+  # TODO(louise) Test hangs on teardown while destroying 2nd node
   # test_gazebo_ros_camera_distortion
   test_gazebo_ros_camera_triggered
   test_gazebo_ros_diff_drive

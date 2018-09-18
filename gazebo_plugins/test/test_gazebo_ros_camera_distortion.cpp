@@ -68,6 +68,7 @@ public:
     cam_sub_undistorted_.shutdown();
     cam_sub_distorted_.shutdown();
     cam_info_distorted_sub_.reset();
+    ServerFixture::TearDown();
   }
 
   /// Subscribe to distorted images.

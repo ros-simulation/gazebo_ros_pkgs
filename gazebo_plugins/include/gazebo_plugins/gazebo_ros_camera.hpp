@@ -26,6 +26,35 @@ namespace gazebo_plugins
 class GazeboRosCameraPrivate;
 
 /// A plugin that publishes raw images and camera info for generic camera sensors.
+/**
+  Example Usage:
+  \code{.xml}
+    <plugin name="plugin_name" filename="libgazebo_ros_camera.so">
+      <!-- Change namespace, camera name and topics so:
+           * Images are published to: /custom_ns/custom_camera/custom_image
+           * Camera info is published to: /custom_ns/custom_camera/custom_info
+           * Trigger is received on: /custom_ns/custom_camera/custom_trigger
+      -->
+      <ros>
+        <namespace>custom_ns</namespace>
+        <argument>image_raw:=custom_img</argument>
+        <argument>camera_info:=custom_info</argument>
+        <argument>image_trigger:=custom_trigger</argument>
+      </ros>
+
+      <!-- Set camera name. If empty, defaults to sensor name -->
+      <camera_name>custom_camera</camera_name>
+
+      <!-- Set TF frame name. If empty, defaults to link name -->
+      <frame_name>custom_frame</frame_name>
+
+      <!-- Set to true to turn on triggering -->
+      <triggered>true</triggered>
+
+      <hack_baseline>0.07</hack_baseline>
+    </plugin>
+  \endcode
+*/
 class GazeboRosCamera : public gazebo::CameraPlugin
 {
 public:
