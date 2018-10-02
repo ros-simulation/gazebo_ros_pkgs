@@ -98,7 +98,7 @@ void GazeboRos ::getParameterBoolean(bool &_value, const char *_tag_name, const 
     _value = _default;
     if (!sdf_->HasElement(_tag_name)) {
         ROS_WARN_NAMED("utils", "%s: missing <%s> default is %s",
-                 info(), _tag_name,  (_default?"ture":"false"));
+                 info(), _tag_name,  (_default?"true":"false"));
     } else {
         getParameterBoolean(_value, _tag_name);
     }
@@ -123,7 +123,7 @@ void GazeboRos ::getParameterBoolean(bool &_value, const char *_tag_name) {
         }
     }
     ROS_DEBUG_NAMED("utils", "%s: <%s> = %s",
-              info(), _tag_name,  (_value?"ture":"false"));
+              info(), _tag_name,  (_value?"true":"false"));
 
 }
 
