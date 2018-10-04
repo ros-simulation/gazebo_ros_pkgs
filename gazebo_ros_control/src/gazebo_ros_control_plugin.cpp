@@ -268,29 +268,36 @@ std::string GazeboRosControlPlugin::getURDF(std::string param_name) const
 {
   std::string urdf_string;
 
-  // search and wait for robot_description on param server
-  while (urdf_string.empty())
+  // Search for param_name in the robot namespace and parent namespaces, waiting until it is found
+  std::string search_param_name;
+  while (true)
   {
-    std::string search_param_name;
-    if (model_nh_.searchParam(param_name, search_param_name))
+    if (!model_nh_.searchParam(param_name, search_param_name))
     {
-      ROS_INFO_ONCE_NAMED("gazebo_ros_control", "gazebo_ros_control plugin is waiting for model"
-        " URDF in parameter [%s] on the ROS param server.", search_param_name.c_str());
-
-      model_nh_.getParam(search_param_name, urdf_string);
+      ROS_WARN_ONCE_NAMED("gazebo_ros_control", "Waiting for parameter [%s] in namespace [%s] or parent namespaces.",
+        param_name.c_str(), model_nh_.getNamespace().c_str());
+      continue;
+    }
+    else if (!model_nh_.getParam(search_param_name, urdf_string))
+    {
+      ROS_WARN_ONCE_NAMED("gazebo_ros_control", "Waiting until parameter [%s] is a string",
+        search_param_name.c_str());
+      continue;
+    }
+    else if (urdf_string.empty())
+    {
+      ROS_WARN_ONCE_NAMED("gazebo_ros_control", "Waiting until parameter [%s] is not an empty string",
+        search_param_name.c_str());
+      continue;
     }
     else
-    {
-      ROS_INFO_ONCE_NAMED("gazebo_ros_control", "gazebo_ros_control plugin is waiting for model"
-        " URDF in parameter [%s] on the ROS param server.", robot_description_.c_str());
+      break;
 
-      model_nh_.getParam(param_name, urdf_string);
-    }
-
+    // Sleep 0.1 seconds to allow parameter to be set
     usleep(100000);
   }
-  ROS_DEBUG_STREAM_NAMED("gazebo_ros_control", "Recieved urdf from param server, parsing...");
 
+  ROS_INFO_NAMED("gazebo_ros_control", "URDF loaded from param [%s]", search_param_name.c_str());
   return urdf_string;
 }
 
