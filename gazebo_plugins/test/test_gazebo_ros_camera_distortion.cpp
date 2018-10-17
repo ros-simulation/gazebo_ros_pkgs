@@ -200,18 +200,16 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
 
 INSTANTIATE_TEST_CASE_P(GazeboRosCameraDistortion, GazeboRosCameraDistortionTest,
   ::testing::Values(
-    // TODO(louise) Use mapped topics once this issue is solved:
-    // https://github.com/ros-perception/image_common/issues/93
     TestParams({
   "worlds/gazebo_ros_camera_distortion_barrel.world",
-  "undistorted_camera/image_raw",
-  "distorted_camera/image_raw",
-  "distorted_camera/camera_info"
+  "undistorted_image",
+  "distorted_image",
+  "distorted_info"
 })
 //  TestParams({"worlds/gazebo_ros_camera_distortion_pincushion.world",
-//              "undistorted_camera/image_raw",
-//              "distorted_camera/image_raw",
-//              "distorted_camera/camera_info"})
+//              "undistorted_image",
+//              "distorted_image",
+//              "distorted_info"})
   ), );
 
 int main(int argc, char ** argv)

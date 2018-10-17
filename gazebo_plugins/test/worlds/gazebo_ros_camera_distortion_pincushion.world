@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<sdf version="1.4">
+<sdf version="1.6">
   <world name="default">
 
     <!-- Global light source -->
@@ -11,13 +11,6 @@
       <static>true</static>
       <pose>0.0 0.0 2.5 0.0 1.5707 0.0</pose>
       <link name="camera_link">
-        <visual name="camera_visual">
-          <geometry>
-            <box>
-              <size>0.1 0.1 0.1</size>
-            </box>
-          </geometry>
-        </visual>
         <sensor type="camera" name="camera_distorted">
           <update_rate>30.0</update_rate>
           <camera name="head">
@@ -46,12 +39,10 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
-              <namespace>test_cam_distorted</namespace>
-              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
-              <argument>image_raw:=image_test</argument>
-              <argument>camera_info:=camera_info_test</argument>
+              <argument>distorted_camera/image_raw:=distorted_image</argument>
+              <argument>distorted_camera/camera_info:=distorted_info</argument>
             </ros>
-            <camera_name>camera_name</camera_name>
+            <camera_name>distorted_camera</camera_name>
             <frame_name>frame_name</frame_name>
             <hack_baseline>0.07</hack_baseline>
             <border_crop>false</border_crop>
@@ -64,13 +55,6 @@
       <static>true</static>
       <pose>0.0 0.0 2.5 0.0 1.5707 0.0</pose>
       <link name="camera_link">
-        <visual name="camera_visual">
-          <geometry>
-            <box>
-              <size>0.1 0.1 0.1</size>
-            </box>
-          </geometry>
-        </visual>
         <sensor type="camera" name="camera_undistorted">
           <update_rate>30.0</update_rate>
           <camera name="head">
@@ -95,14 +79,10 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
-              <namespace>test_cam_undistorted</namespace>
-              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
-              <argument>image_raw:=image_test</argument>
-              <argument>camera_info:=camera_info_test</argument>
+              <argument>undistorted_camera/image_raw:=undistorted_image</argument>
             </ros>
-            <camera_name>camera_name</camera_name>
+            <camera_name>undistorted_camera</camera_name>
             <frame_name>frame_name</frame_name>
-            <hack_baseline>0.0</hack_baseline>
           </plugin>
         </sensor>
       </link>
@@ -111,5 +91,5 @@
     <include>
       <uri>model://checkerboard_plane</uri>
     </include>
-</world>
+  </world>
 </sdf>

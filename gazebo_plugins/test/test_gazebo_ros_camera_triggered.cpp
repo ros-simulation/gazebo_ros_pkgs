@@ -48,7 +48,7 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
   builtin_interfaces::msg::Time image_stamp;
 
   auto sub = image_transport::create_subscription(node,
-      "test_triggered_cam/camera1/image_raw",
+      "test_triggered_cam/image_raw_test",
       [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
         image_stamp = msg->header.stamp;
         ++msg_count;
@@ -63,7 +63,7 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
 
   // Trigger camera once
   auto pub = node->create_publisher<std_msgs::msg::Empty>(
-    "test_triggered_cam/camera1/image_trigger");
+    "test_triggered_cam/image_trigger_test");
   std_msgs::msg::Empty msg;
   pub->publish(msg);
 

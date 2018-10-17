@@ -39,9 +39,8 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
-              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
-              <argument>image_raw:=image_test</argument>
-              <argument>camera_info:=camera_info_test</argument>
+              <argument>distorted_camera/image_raw:=distorted_image</argument>
+              <argument>distorted_camera/camera_info:=distorted_info</argument>
             </ros>
             <camera_name>distorted_camera</camera_name>
             <frame_name>frame_name</frame_name>
@@ -80,9 +79,7 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
-              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
-              <argument>image_raw:=image_test</argument>
-              <argument>camera_info:=camera_info_test</argument>
+              <argument>undistorted_camera/image_raw:=undistorted_image</argument>
             </ros>
             <camera_name>undistorted_camera</camera_name>
             <frame_name>frame_name</frame_name>

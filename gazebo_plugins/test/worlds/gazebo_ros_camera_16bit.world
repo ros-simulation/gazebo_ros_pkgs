@@ -29,7 +29,7 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>test_cam_16bit</namespace>
-              <argument>image_raw:=image_test_16bit</argument>
+              <argument>test_camera_name/image_raw:=image_test_16bit</argument>
               <argument>camera_info:=camera_info_test_16bit</argument>
             </ros>
             <camera_name>test_camera_name</camera_name>

@@ -36,11 +36,8 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>test_triggered_cam</namespace>
-              <!-- TODO(louise) Remapping not working due to
-                   https://github.com/ros-perception/image_common/issues/93 -->
-              <argument>image_raw:=image_test</argument>
-              <argument>camera_info:=camera_info_test</argument>
-              <argument>image_trigger:=image_trigger_test</argument>
+              <argument>camera1/image_raw:=image_raw_test</argument>
+              <argument>camera1/image_trigger:=image_trigger_test</argument>
             </ros>
             <triggered>true</triggered>
             <hack_baseline>0.07</hack_baseline>
