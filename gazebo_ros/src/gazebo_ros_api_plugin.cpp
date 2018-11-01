@@ -2607,7 +2607,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, const 
 #endif
   if ((isLight && light != NULL) || (model != NULL))
   {
-    ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model name %s already exist.",model_name.c_str());
+    ROS_ERROR_NAMED("api_plugin", "SpawnModel: Failure - model name %s already exists.",model_name.c_str());
     res.success = false;
     res.status_message = "SpawnModel: Failure - entity already exists.";
     return true;
