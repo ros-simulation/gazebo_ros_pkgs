@@ -98,6 +98,16 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   else
     this->topic_name_ = this->sdf->Get<std::string>("topicName");
 
+  if (!this->sdf->HasElement("timeIncrement"))
+  {
+    ROS_INFO_NAMED("gpu_laser", "GazeboRosLaser plugin missing <timeIncrement>, defaults to 0");
+    this->time_increment_ = 0;
+  }
+  else
+    this->time_increment_ = this->sdf->Get<float>("timeIncrement");
+
+  this->scan_time_ = static_cast<float>(1. / this->parent_ray_sensor_->UpdateRate());
+
   this->laser_connect_count_ = 0;
 
     // Make sure the ROS node for Gazebo has already been initialized
@@ -187,8 +197,8 @@ void GazeboRosLaser::OnScan(ConstLaserScanStampedPtr &_msg)
   laser_msg.angle_min = _msg->scan().angle_min();
   laser_msg.angle_max = _msg->scan().angle_max();
   laser_msg.angle_increment = _msg->scan().angle_step();
-  laser_msg.time_increment = 0;  // instantaneous simulator scan
-  laser_msg.scan_time = 0;  // not sure whether this is correct
+  laser_msg.time_increment = this->time_increment_;
+  laser_msg.scan_time = this->scan_time_;
   laser_msg.range_min = _msg->scan().range_min();
   laser_msg.range_max = _msg->scan().range_max();
   laser_msg.ranges.resize(_msg->scan().ranges_size());

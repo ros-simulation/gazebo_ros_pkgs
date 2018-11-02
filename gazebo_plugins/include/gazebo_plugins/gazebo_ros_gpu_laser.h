@@ -82,6 +82,12 @@ namespace gazebo
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
 
+    /// \brief time between measurement points (Laserscan ROS msg property)
+    private: float time_increment_;
+
+    /// \brief time in between scans (Laserscan ROS msg property)
+    private: float scan_time_;
+
     // deferred load in case ros is blocking
     private: sdf::ElementPtr sdf;
     private: void LoadThread();
