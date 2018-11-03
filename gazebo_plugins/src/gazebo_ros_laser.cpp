@@ -106,7 +106,8 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   else
     this->time_increment_ = this->sdf->Get<float>("timeIncrement");
 
-  this->scan_time_ = static_cast<float>(1. / this->parent_ray_sensor_->UpdateRate());
+  double update_rate = this->parent_ray_sensor_->UpdateRate();
+  this->scan_time_ = static_cast<float>(update_rate > 0 ? 1. / update_rate : 0);
 
   this->laser_connect_count_ = 0;
 
