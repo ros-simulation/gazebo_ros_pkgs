@@ -64,7 +64,12 @@ namespace gazebo {
     LEFT_REAR=3,
   };
 
-  GazeboRosSkidSteerDrive::GazeboRosSkidSteerDrive() {}
+  GazeboRosSkidSteerDrive::GazeboRosSkidSteerDrive() {
+    this->seed = 0;
+    x_error = 0;
+    y_error = 0;
+    yaw_error = 0;
+  }
 
   // Destructor
   GazeboRosSkidSteerDrive::~GazeboRosSkidSteerDrive() {
@@ -74,7 +79,6 @@ namespace gazebo {
 
   // Load the controller
   void GazeboRosSkidSteerDrive::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
-
     this->parent = _parent;
     this->world = _parent->GetWorld();
 
@@ -114,13 +118,13 @@ namespace gazebo {
           this->right_front_joint_name_ = _sdf->GetElement("rightFrontJoint")->Get<std::string>();
         }
 
-	this->left_rear_joint_name_ = "left_rear_joint";
-	if (!_sdf->HasElement("leftRearJoint")) {
-	  ROS_WARN_NAMED("skid_steer_drive", "GazeboRosSkidSteerDrive Plugin (ns = %s) missing <leftRearJoint>, defaults to \"%s\"",
-		  this->robot_namespace_.c_str(), this->left_rear_joint_name_.c_str());
-	} else {
-	  this->left_rear_joint_name_ = _sdf->GetElement("leftRearJoint")->Get<std::string>();
-	}
+  	this->left_rear_joint_name_ = "left_rear_joint";
+  	if (!_sdf->HasElement("leftRearJoint")) {
+  	  ROS_WARN_NAMED("skid_steer_drive", "GazeboRosSkidSteerDrive Plugin (ns = %s) missing <leftRearJoint>, defaults to \"%s\"",
+  		  this->robot_namespace_.c_str(), this->left_rear_joint_name_.c_str());
+  	} else {
+  	  this->left_rear_joint_name_ = _sdf->GetElement("leftRearJoint")->Get<std::string>();
+  	}
 
     this->right_rear_joint_name_ = "right_rear_joint";
     if (!_sdf->HasElement("rightRearJoint")) {
@@ -186,6 +190,22 @@ namespace gazebo {
       this->odometry_frame_ = _sdf->GetElement("odometryFrame")->Get<std::string>();
     }
 
+    this->ground_truth_topic_ = "gt";
+    if (!_sdf->HasElement("groundTruthTopic")) {
+      ROS_WARN_NAMED("skid_steer_drive", "GazeboRosSkidSteerDrive Plugin (ns = %s) missing <groundTruthTopic>, defaults to \"%s\"",
+          this->robot_namespace_.c_str(), this->ground_truth_topic_.c_str());
+    } else {
+      this->ground_truth_topic_ = _sdf->GetElement("groundTruthTopic")->Get<std::string>();
+    }
+
+    this->ground_truth_frame_ = "gt";
+    if (!_sdf->HasElement("groundTruthFrame")) {
+      ROS_WARN_NAMED("skid_steer_drive", "GazeboRosSkidSteerDrive Plugin (ns = %s) missing <groundTruthFrame>, defaults to \"%s\"",
+          this->robot_namespace_.c_str(), this->ground_truth_frame_.c_str());
+    } else {
+      this->ground_truth_frame_ = _sdf->GetElement("groundTruthFrame")->Get<std::string>();
+    }
+
     this->robot_base_frame_ = "base_footprint";
     if (!_sdf->HasElement("robotBaseFrame")) {
       ROS_WARN_NAMED("skid_steer_drive", "GazeboRosSkidSteerDrive Plugin (ns = %s) missing <robotBaseFrame>, defaults to \"%s\"",
@@ -232,6 +252,16 @@ namespace gazebo {
     } else {
       this->update_period_ = 0.0;
     }
+
+    // gaussian noise
+    if (!_sdf->HasElement("gaussianNoise"))
+    {
+      ROS_DEBUG_NAMED("skid_steer_drive", "GazeboRosSkidSteerDrive Plugin (ns = %s) <gaussianNoise>, defaults to 0.0");
+      this->gaussian_noise_ = 0;
+    }
+    else
+      this->gaussian_noise_ = _sdf->GetElement("gaussianNoise")->Get<double>();
+
 #if GAZEBO_MAJOR_VERSION >= 8
     last_update_time_ = this->world->SimTime();
 #else
@@ -242,7 +272,7 @@ namespace gazebo {
     wheel_speed_[RIGHT_FRONT] = 0;
     wheel_speed_[LEFT_FRONT] = 0;
     wheel_speed_[RIGHT_REAR] = 0;
-	wheel_speed_[LEFT_REAR] = 0;
+  	wheel_speed_[LEFT_REAR] = 0;
 
     x_ = 0;
     rot_ = 0;
@@ -321,6 +351,7 @@ namespace gazebo {
     cmd_vel_subscriber_ = rosnode_->subscribe(so);
 
     odometry_publisher_ = rosnode_->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
+    ground_truth_publisher_ = rosnode_->advertise<nav_msgs::Odometry>(ground_truth_topic_, 1);
 
     // start custom queue for diff drive
     this->callback_queue_thread_ =
@@ -345,6 +376,7 @@ namespace gazebo {
     if (seconds_since_last_update > update_period_) {
 
       publishOdometry(seconds_since_last_update);
+      publishGroundTruth(seconds_since_last_update);
 
       // Update robot in case new velocities have been requested
       getWheelVelocities();
@@ -404,7 +436,7 @@ namespace gazebo {
     }
   }
 
-  void GazeboRosSkidSteerDrive::publishOdometry(double step_time) {
+  void GazeboRosSkidSteerDrive::publishOdometry(double step_time) {  // Impt
     ros::Time current_time = ros::Time::now();
     std::string odom_frame =
       tf::resolve(tf_prefix_, odometry_frame_);
@@ -420,6 +452,19 @@ namespace gazebo {
 #endif
 
     tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
+
+    if(fabs(x_) > 0 || fabs(rot_) > 0)
+    {
+      x_error = x_error + GaussianKernel(0, this->gaussian_noise_);
+      y_error = y_error + GaussianKernel(0, this->gaussian_noise_);
+      yaw_error = yaw_error + GaussianKernel(0, this->gaussian_noise_);
+    }
+
+    double r, p, y;
+    tf::Matrix3x3(qt).getRPY(r, p, y);
+    y = y + yaw_error;
+    qt.setRPY(r,p,y);
+
     tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
 
     tf::Transform base_footprint_to_odom(qt, vt);
@@ -428,17 +473,16 @@ namespace gazebo {
     	transform_broadcaster_->sendTransform(
         tf::StampedTransform(base_footprint_to_odom, current_time,
             odom_frame, base_footprint_frame));
-
     }
 
     // publish odom topic
-    odom_.pose.pose.position.x = pose.Pos().X();
-    odom_.pose.pose.position.y = pose.Pos().Y();
+    odom_.pose.pose.position.x = pose.Pos().X() + x_error;
+    odom_.pose.pose.position.y = pose.Pos().Y() + y_error;
 
-    odom_.pose.pose.orientation.x = pose.Rot().X();
-    odom_.pose.pose.orientation.y = pose.Rot().Y();
-    odom_.pose.pose.orientation.z = pose.Rot().Z();
-    odom_.pose.pose.orientation.w = pose.Rot().W();
+    odom_.pose.pose.orientation.x = qt[0];
+    odom_.pose.pose.orientation.y = qt[1];
+    odom_.pose.pose.orientation.z = qt[2];
+    odom_.pose.pose.orientation.w = qt[3];
     odom_.pose.covariance[0] = this->covariance_x_;
     odom_.pose.covariance[7] = this->covariance_y_;
     odom_.pose.covariance[14] = 1000000000000.0;
@@ -474,5 +518,99 @@ namespace gazebo {
     odometry_publisher_.publish(odom_);
   }
 
+  void GazeboRosSkidSteerDrive::publishGroundTruth(double step_time) { 
+    ros::Time current_time = ros::Time::now();
+    std::string gt_frame =
+      tf::resolve(tf_prefix_, ground_truth_frame_);
+    std::string base_footprint_frame =
+      tf::resolve(tf_prefix_, robot_base_frame_);
+
+#if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Pose3d pose = this->parent->WorldPose();
+#else
+    ignition::math::Pose3d pose = this->parent->GetWorldPose().Ign();
+#endif
+    tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
+
+    tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
+
+    tf::Transform base_footprint_to_odom(qt, vt);
+    if (this->broadcast_tf_) {
+
+      transform_broadcaster_->sendTransform(
+        tf::StampedTransform(base_footprint_to_odom, current_time,
+            gt_frame, base_footprint_frame));
+
+    }
+
+    // publish gt topic
+    ground_truth_.pose.pose.position.x = pose.Pos().X();
+    ground_truth_.pose.pose.position.y = pose.Pos().Y();
+
+    ground_truth_.pose.pose.orientation.x = qt[0];
+    ground_truth_.pose.pose.orientation.y = qt[1];
+    ground_truth_.pose.pose.orientation.z = qt[2];
+    ground_truth_.pose.pose.orientation.w = qt[3];
+    ground_truth_.pose.covariance[0] = this->covariance_x_;
+    ground_truth_.pose.covariance[7] = this->covariance_y_;
+    ground_truth_.pose.covariance[14] = 1000000000000.0;
+    ground_truth_.pose.covariance[21] = 1000000000000.0;
+    ground_truth_.pose.covariance[28] = 1000000000000.0;
+    ground_truth_.pose.covariance[35] = this->covariance_yaw_;
+
+    // get velocity in /odom frame
+    ignition::math::Vector3d linear;
+#if GAZEBO_MAJOR_VERSION >= 8
+    linear = this->parent->WorldLinearVel();
+    ground_truth_.twist.twist.angular.z = this->parent->WorldAngularVel().Z();
+#else
+    linear = this->parent->GetWorldLinearVel().Ign();
+    ground_truth_.twist.twist.angular.z = this->parent->GetWorldAngularVel().Ign().Z();
+#endif
+
+    // convert velocity to child_frame_id (aka base_footprint)
+    float yaw = pose.Rot().Yaw();
+    ground_truth_.twist.twist.linear.x = cosf(yaw) * linear.X() + sinf(yaw) * linear.Y();
+    ground_truth_.twist.twist.linear.y = cosf(yaw) * linear.Y() - sinf(yaw) * linear.X();
+    ground_truth_.twist.covariance[0] = this->covariance_x_;
+    ground_truth_.twist.covariance[7] = this->covariance_y_;
+    ground_truth_.twist.covariance[14] = 1000000000000.0;
+    ground_truth_.twist.covariance[21] = 1000000000000.0;
+    ground_truth_.twist.covariance[28] = 1000000000000.0;
+    ground_truth_.twist.covariance[35] = this->covariance_yaw_;
+
+    ground_truth_.header.stamp = current_time;
+    ground_truth_.header.frame_id = gt_frame;
+    ground_truth_.child_frame_id = base_footprint_frame;
+
+    ground_truth_publisher_.publish(ground_truth_);
+  }
+
+  // Utility for adding noise. (taken from gazebo_ros_p3d)
+  double GazeboRosSkidSteerDrive::GaussianKernel(double mu, double sigma) // change this
+  {
+    // using Box-Muller transform to generate two independent standard
+    // normally disbributed normal variables see wikipedia
+
+    // normalized uniform random variable
+    double U = static_cast<double>(rand_r(&this->seed)) /
+               static_cast<double>(RAND_MAX);
+
+    // normalized uniform random variable
+    double V = static_cast<double>(rand_r(&this->seed)) /
+               static_cast<double>(RAND_MAX);
+
+    double X = sqrt(-2.0 * ::log(U)) * cos(2.0*M_PI * V);
+    // double Y = sqrt(-2.0 * ::log(U)) * sin(2.0*M_PI * V);
+
+    // there are 2 indep. vars, we'll just use X
+    // scale to our mu and sigma
+    X = sigma * X + mu;
+    return X;
+  }
+
   GZ_REGISTER_MODEL_PLUGIN(GazeboRosSkidSteerDrive)
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
