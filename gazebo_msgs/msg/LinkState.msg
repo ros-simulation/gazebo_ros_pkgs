@@ -1,3 +1,5 @@
+# Deprecated, kept for ROS 1 bridge.
+# Use EntityState
 # @todo: FIXME: sets pose and twist of a link.  All children link poses/twists of the URDF tree are not updated accordingly, but should be.
 string link_name            # link name, link_names are in gazebo scoped name notation, [model_name::body_name]
 geometry_msgs/Pose pose     # desired pose in reference frame

@@ -243,15 +243,6 @@ void GazeboRosApiPlugin::advertiseServices()
   get_model_properties_service_ = nh_->advertiseService(get_model_properties_aso);
 
   // Advertise more services on the custom queue
-  std::string get_model_state_service_name("get_model_state");
-  ros::AdvertiseServiceOptions get_model_state_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::GetModelState>(
-                                                                     get_model_state_service_name,
-                                                                     boost::bind(&GazeboRosApiPlugin::getModelState,this,_1,_2),
-                                                                     ros::VoidPtr(), &gazebo_queue_);
-  get_model_state_service_ = nh_->advertiseService(get_model_state_aso);
-
-  // Advertise more services on the custom queue
   std::string get_world_properties_service_name("get_world_properties");
   ros::AdvertiseServiceOptions get_world_properties_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::GetWorldProperties>(
@@ -277,15 +268,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                          boost::bind(&GazeboRosApiPlugin::getLinkProperties,this,_1,_2),
                                                                          ros::VoidPtr(), &gazebo_queue_);
   get_link_properties_service_ = nh_->advertiseService(get_link_properties_aso);
-
-  // Advertise more services on the custom queue
-  std::string get_link_state_service_name("get_link_state");
-  ros::AdvertiseServiceOptions get_link_state_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::GetLinkState>(
-                                                                    get_link_state_service_name,
-                                                                    boost::bind(&GazeboRosApiPlugin::getLinkState,this,_1,_2),
-                                                                    ros::VoidPtr(), &gazebo_queue_);
-  get_link_state_service_ = nh_->advertiseService(get_link_state_aso);
 
   // Advertise more services on the custom queue
   std::string get_light_properties_service_name("get_light_properties");
@@ -351,15 +333,6 @@ void GazeboRosApiPlugin::advertiseServices()
   set_physics_properties_service_ = nh_->advertiseService(set_physics_properties_aso);
 
   // Advertise more services on the custom queue
-  std::string set_model_state_service_name("set_model_state");
-  ros::AdvertiseServiceOptions set_model_state_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetModelState>(
-                                                                     set_model_state_service_name,
-                                                                     boost::bind(&GazeboRosApiPlugin::setModelState,this,_1,_2),
-                                                                     ros::VoidPtr(), &gazebo_queue_);
-  set_model_state_service_ = nh_->advertiseService(set_model_state_aso);
-
-  // Advertise more services on the custom queue
   std::string set_model_configuration_service_name("set_model_configuration");
   ros::AdvertiseServiceOptions set_model_configuration_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetModelConfiguration>(
@@ -376,32 +349,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                           boost::bind(&GazeboRosApiPlugin::setJointProperties,this,_1,_2),
                                                                           ros::VoidPtr(), &gazebo_queue_);
   set_joint_properties_service_ = nh_->advertiseService(set_joint_properties_aso);
-
-  // Advertise more services on the custom queue
-  std::string set_link_state_service_name("set_link_state");
-  ros::AdvertiseServiceOptions set_link_state_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetLinkState>(
-                                                                    set_link_state_service_name,
-                                                                    boost::bind(&GazeboRosApiPlugin::setLinkState,this,_1,_2),
-                                                                    ros::VoidPtr(), &gazebo_queue_);
-  set_link_state_service_ = nh_->advertiseService(set_link_state_aso);
-
-  // Advertise topic on custom queue
-  // topic callback version for set_link_state
-  ros::SubscribeOptions link_state_so =
-    ros::SubscribeOptions::create<gazebo_msgs::LinkState>(
-                                                          "set_link_state",10,
-                                                          boost::bind( &GazeboRosApiPlugin::updateLinkState,this,_1),
-                                                          ros::VoidPtr(), &gazebo_queue_);
-  set_link_state_topic_ = nh_->subscribe(link_state_so);
-
-  // topic callback version for set_model_state
-  ros::SubscribeOptions model_state_so =
-    ros::SubscribeOptions::create<gazebo_msgs::ModelState>(
-                                                           "set_model_state",10,
-                                                           boost::bind( &GazeboRosApiPlugin::updateModelState,this,_1),
-                                                           ros::VoidPtr(), &gazebo_queue_);
-  set_model_state_topic_ = nh_->subscribe(model_state_so);
 
   // Advertise more services on the custom queue
   std::string pause_physics_service_name("pause_physics");
@@ -523,115 +470,6 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
     if (pub_model_states_connection_count_ < 0) // should not be possible
       ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
   }
-}
-
-bool GazeboRosApiPlugin::getModelState(gazebo_msgs::GetModelState::Request &req,
-                                       gazebo_msgs::GetModelState::Response &res)
-{
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::ModelPtr model = world_->ModelByName(req.model_name);
-  gazebo::physics::EntityPtr frame = world_->EntityByName(req.relative_entity_name);
-#else
-  gazebo::physics::ModelPtr model = world_->GetModel(req.model_name);
-  gazebo::physics::EntityPtr frame = world_->GetEntity(req.relative_entity_name);
-#endif
-  if (!model)
-  {
-    ROS_ERROR_NAMED("api_plugin", "GetModelState: model [%s] does not exist",req.model_name.c_str());
-    res.success = false;
-    res.status_message = "GetModelState: model does not exist";
-    return true;
-  }
-  else
-  {
-     /**
-     * @brief creates a header for the result
-     * @author Markus Bader markus.bader@tuwien.ac.at
-     * @date 21th Nov 2014
-     **/
-    {
-      std::map<std::string, unsigned int>::iterator it = access_count_get_model_state_.find(req.model_name);
-      if(it == access_count_get_model_state_.end())
-      {
-        access_count_get_model_state_.insert( std::pair<std::string, unsigned int>(req.model_name, 1) );
-        res.header.seq = 1;
-      }
-      else
-      {
-        it->second++;
-        res.header.seq = it->second;
-      }
-      res.header.stamp = ros::Time::now();
-      res.header.frame_id = req.relative_entity_name; /// @brief this is a redundant information
-    }
-    // get model pose
-    // get model twist
-#if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Pose3d      model_pose = model->WorldPose();
-    ignition::math::Vector3d model_linear_vel  = model->WorldLinearVel();
-    ignition::math::Vector3d model_angular_vel = model->WorldAngularVel();
-#else
-    ignition::math::Pose3d      model_pose = model->GetWorldPose().Ign();
-    ignition::math::Vector3d model_linear_vel  = model->GetWorldLinearVel().Ign();
-    ignition::math::Vector3d model_angular_vel = model->GetWorldAngularVel().Ign();
-#endif
-    ignition::math::Vector3d    model_pos = model_pose.Pos();
-    ignition::math::Quaterniond model_rot = model_pose.Rot();
-
-
-
-    if (frame)
-    {
-      // convert to relative pose, rates
-#if GAZEBO_MAJOR_VERSION >= 8
-      ignition::math::Pose3d frame_pose = frame->WorldPose();
-      ignition::math::Vector3d frame_vpos = frame->WorldLinearVel(); // get velocity in gazebo frame
-      ignition::math::Vector3d frame_veul = frame->WorldAngularVel(); // get velocity in gazebo frame
-#else
-      ignition::math::Pose3d frame_pose = frame->GetWorldPose().Ign();
-      ignition::math::Vector3d frame_vpos = frame->GetWorldLinearVel().Ign(); // get velocity in gazebo frame
-      ignition::math::Vector3d frame_veul = frame->GetWorldAngularVel().Ign(); // get velocity in gazebo frame
-#endif
-      ignition::math::Pose3d model_rel_pose = model_pose - frame_pose;
-      model_pos = model_rel_pose.Pos();
-      model_rot = model_rel_pose.Rot();
-
-      model_linear_vel = frame_pose.Rot().RotateVectorReverse(model_linear_vel - frame_vpos);
-      model_angular_vel = frame_pose.Rot().RotateVectorReverse(model_angular_vel - frame_veul);
-    }
-    /// @todo: FIXME map is really wrong, need to use tf here somehow
-    else if (req.relative_entity_name == "" || req.relative_entity_name == "world" || req.relative_entity_name == "map" || req.relative_entity_name == "/map")
-    {
-      ROS_DEBUG_NAMED("api_plugin", "GetModelState: relative_entity_name is empty/world/map, using inertial frame");
-    }
-    else
-    {
-      res.success = false;
-      res.status_message = "GetModelState: reference relative_entity_name not found, did you forget to scope the body by model name?";
-      return true;
-    }
-
-    // fill in response
-    res.pose.position.x = model_pos.X();
-    res.pose.position.y = model_pos.Y();
-    res.pose.position.z = model_pos.Z();
-    res.pose.orientation.w = model_rot.W();
-    res.pose.orientation.x = model_rot.X();
-    res.pose.orientation.y = model_rot.Y();
-    res.pose.orientation.z = model_rot.Z();
-
-    res.twist.linear.x = model_linear_vel.X();
-    res.twist.linear.y = model_linear_vel.Y();
-    res.twist.linear.z = model_linear_vel.Z();
-    res.twist.angular.x = model_angular_vel.X();
-    res.twist.angular.y = model_angular_vel.Y();
-    res.twist.angular.z = model_angular_vel.Z();
-
-    res.success = true;
-    res.status_message = "GetModelState: got properties";
-    return true;
-  }
-  return true;
 }
 
 bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Request &req,
@@ -822,86 +660,6 @@ bool GazeboRosApiPlugin::getLinkProperties(gazebo_msgs::GetLinkProperties::Reque
     res.status_message = "GetLinkProperties: got properties";
     return true;
   }
-}
-
-bool GazeboRosApiPlugin::getLinkState(gazebo_msgs::GetLinkState::Request &req,
-                                      gazebo_msgs::GetLinkState::Response &res)
-{
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.link_name));
-  gazebo::physics::EntityPtr frame = world_->EntityByName(req.reference_frame);
-#else
-  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_name));
-  gazebo::physics::EntityPtr frame = world_->GetEntity(req.reference_frame);
-#endif
-
-  if (!body)
-  {
-    res.success = false;
-    res.status_message = "GetLinkState: link not found, did you forget to scope the link by model name?";
-    return true;
-  }
-
-  // get body pose
-  // Get inertial rates
-#if GAZEBO_MAJOR_VERSION >= 8
-  ignition::math::Pose3d body_pose = body->WorldPose();
-  ignition::math::Vector3d body_vpos = body->WorldLinearVel(); // get velocity in gazebo frame
-  ignition::math::Vector3d body_veul = body->WorldAngularVel(); // get velocity in gazebo frame
-#else
-  ignition::math::Pose3d body_pose = body->GetWorldPose().Ign();
-  ignition::math::Vector3d body_vpos = body->GetWorldLinearVel().Ign(); // get velocity in gazebo frame
-  ignition::math::Vector3d body_veul = body->GetWorldAngularVel().Ign(); // get velocity in gazebo frame
-#endif
-
-  if (frame)
-  {
-    // convert to relative pose, rates
-#if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Pose3d frame_pose = frame->WorldPose();
-    ignition::math::Vector3d frame_vpos = frame->WorldLinearVel(); // get velocity in gazebo frame
-    ignition::math::Vector3d frame_veul = frame->WorldAngularVel(); // get velocity in gazebo frame
-#else
-    ignition::math::Pose3d frame_pose = frame->GetWorldPose().Ign();
-    ignition::math::Vector3d frame_vpos = frame->GetWorldLinearVel().Ign(); // get velocity in gazebo frame
-    ignition::math::Vector3d frame_veul = frame->GetWorldAngularVel().Ign(); // get velocity in gazebo frame
-#endif
-    body_pose = body_pose - frame_pose;
-
-    body_vpos = frame_pose.Rot().RotateVectorReverse(body_vpos - frame_vpos);
-    body_veul = frame_pose.Rot().RotateVectorReverse(body_veul - frame_veul);
-  }
-  /// @todo: FIXME map is really wrong, need to use tf here somehow
-  else if (req.reference_frame == "" || req.reference_frame == "world" || req.reference_frame == "map" || req.reference_frame == "/map")
-  {
-    ROS_DEBUG_NAMED("api_plugin", "GetLinkState: reference_frame is empty/world/map, using inertial frame");
-  }
-  else
-  {
-    res.success = false;
-    res.status_message = "GetLinkState: reference reference_frame not found, did you forget to scope the link by model name?";
-    return true;
-  }
-
-  res.link_state.link_name = req.link_name;
-  res.link_state.pose.position.x = body_pose.Pos().X();
-  res.link_state.pose.position.y = body_pose.Pos().Y();
-  res.link_state.pose.position.z = body_pose.Pos().Z();
-  res.link_state.pose.orientation.x = body_pose.Rot().X();
-  res.link_state.pose.orientation.y = body_pose.Rot().Y();
-  res.link_state.pose.orientation.z = body_pose.Rot().Z();
-  res.link_state.pose.orientation.w = body_pose.Rot().W();
-  res.link_state.twist.linear.x = body_vpos.X();
-  res.link_state.twist.linear.y = body_vpos.Y();
-  res.link_state.twist.linear.z = body_vpos.Z();
-  res.link_state.twist.angular.x = body_veul.X();
-  res.link_state.twist.angular.y = body_veul.Y();
-  res.link_state.twist.angular.z = body_veul.Z();
-  res.link_state.reference_frame = req.reference_frame;
-
-  res.success = true;
-  res.status_message = "GetLinkState: got state";
-  return true;
 }
 
 bool GazeboRosApiPlugin::getLightProperties(gazebo_msgs::GetLightProperties::Request &req,
@@ -1156,94 +914,6 @@ bool GazeboRosApiPlugin::setJointProperties(gazebo_msgs::SetJointProperties::Req
   }
 }
 
-bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
-                                       gazebo_msgs::SetModelState::Response &res)
-{
-  ignition::math::Vector3d target_pos(req.model_state.pose.position.x,req.model_state.pose.position.y,req.model_state.pose.position.z);
-  ignition::math::Quaterniond target_rot(req.model_state.pose.orientation.w,req.model_state.pose.orientation.x,req.model_state.pose.orientation.y,req.model_state.pose.orientation.z);
-  target_rot.Normalize(); // eliminates invalid rotation (0, 0, 0, 0)
-  ignition::math::Pose3d target_pose(target_pos,target_rot);
-  ignition::math::Vector3d target_pos_dot(req.model_state.twist.linear.x,req.model_state.twist.linear.y,req.model_state.twist.linear.z);
-  ignition::math::Vector3d target_rot_dot(req.model_state.twist.angular.x,req.model_state.twist.angular.y,req.model_state.twist.angular.z);
-
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::ModelPtr model = world_->ModelByName(req.model_state.model_name);
-#else
-  gazebo::physics::ModelPtr model = world_->GetModel(req.model_state.model_name);
-#endif
-  if (!model)
-  {
-    ROS_ERROR_NAMED("api_plugin", "Updating ModelState: model [%s] does not exist",req.model_state.model_name.c_str());
-    res.success = false;
-    res.status_message = "SetModelState: model does not exist";
-    return true;
-  }
-  else
-  {
-#if GAZEBO_MAJOR_VERSION >= 8
-    gazebo::physics::EntityPtr relative_entity = world_->EntityByName(req.model_state.reference_frame);
-#else
-    gazebo::physics::EntityPtr relative_entity = world_->GetEntity(req.model_state.reference_frame);
-#endif
-    if (relative_entity)
-    {
-#if GAZEBO_MAJOR_VERSION >= 8
-      ignition::math::Pose3d  frame_pose = relative_entity->WorldPose(); // - myBody->GetCoMPose();
-#else
-      ignition::math::Pose3d  frame_pose = relative_entity->GetWorldPose().Ign(); // - myBody->GetCoMPose();
-#endif
-
-      target_pose = target_pose + frame_pose;
-
-      // Velocities should be commanded in the requested reference
-      // frame, so we need to translate them to the world frame
-      target_pos_dot = frame_pose.Rot().RotateVector(target_pos_dot);
-      target_rot_dot = frame_pose.Rot().RotateVector(target_rot_dot);
-    }
-    /// @todo: FIXME map is really wrong, need to use tf here somehow
-    else if (req.model_state.reference_frame == "" || req.model_state.reference_frame == "world" || req.model_state.reference_frame == "map" || req.model_state.reference_frame == "/map" )
-    {
-      ROS_DEBUG_NAMED("api_plugin", "Updating ModelState: reference frame is empty/world/map, usig inertial frame");
-    }
-    else
-    {
-      ROS_ERROR_NAMED("api_plugin", "Updating ModelState: for model[%s], specified reference frame entity [%s] does not exist",
-                req.model_state.model_name.c_str(),req.model_state.reference_frame.c_str());
-      res.success = false;
-      res.status_message = "SetModelState: specified reference frame entity does not exist";
-      return true;
-    }
-
-    //ROS_ERROR_NAMED("api_plugin", "target state: %f %f %f",target_pose.Pos().X(),target_pose.Pos().Y(),target_pose.Pos().Z());
-    bool is_paused = world_->IsPaused();
-    world_->SetPaused(true);
-    model->SetWorldPose(target_pose);
-    world_->SetPaused(is_paused);
-#if GAZEBO_MAJOR_VERSION >= 8
-    //ignition::math::Pose3d p3d = model->WorldPose();
-#else
-    //ignition::math::Pose3d p3d = model->GetWorldPose().Ign();
-#endif
-    //ROS_ERROR_NAMED("api_plugin", "model updated state: %f %f %f",p3d.Pos().X(),p3d.Pos().Y(),p3d.Pos().Z());
-
-    // set model velocity
-    model->SetLinearVel(target_pos_dot);
-    model->SetAngularVel(target_rot_dot);
-
-    res.success = true;
-    res.status_message = "SetModelState: set model state done";
-    return true;
-  }
-}
-
-void GazeboRosApiPlugin::updateModelState(const gazebo_msgs::ModelState::ConstPtr& model_state)
-{
-  gazebo_msgs::SetModelState::Response res;
-  gazebo_msgs::SetModelState::Request req;
-  req.model_state = *model_state;
-  /*bool success =*/ setModelState(req,res);
-}
-
 bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request &req,
                                           gazebo_msgs::ApplyJointEffort::Response &res)
 {
@@ -1413,90 +1083,6 @@ bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguratio
     res.status_message = "SetModelConfiguration: joint name and position list have different lengths";
     return true;
   }
-}
-
-bool GazeboRosApiPlugin::setLinkState(gazebo_msgs::SetLinkState::Request &req,
-                                      gazebo_msgs::SetLinkState::Response &res)
-{
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.link_state.link_name));
-  gazebo::physics::LinkPtr frame = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(req.link_state.reference_frame));
-#else
-  gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->GetEntity(req.link_state.link_name));
-  gazebo::physics::EntityPtr frame = world_->GetEntity(req.link_state.reference_frame);
-#endif
-  if (!body)
-  {
-    ROS_ERROR_NAMED("api_plugin", "Updating LinkState: link [%s] does not exist",req.link_state.link_name.c_str());
-    res.success = false;
-    res.status_message = "SetLinkState: link does not exist";
-    return true;
-  }
-
-  /// @todo: FIXME map is really wrong, unless using tf here somehow
-  // get reference frame (body/model(link)) pose and
-  // transform target pose to absolute world frame
-  ignition::math::Vector3d target_pos(req.link_state.pose.position.x,req.link_state.pose.position.y,req.link_state.pose.position.z);
-  ignition::math::Quaterniond target_rot(req.link_state.pose.orientation.w,req.link_state.pose.orientation.x,req.link_state.pose.orientation.y,req.link_state.pose.orientation.z);
-  ignition::math::Pose3d target_pose(target_pos,target_rot);
-  ignition::math::Vector3d target_linear_vel(req.link_state.twist.linear.x,req.link_state.twist.linear.y,req.link_state.twist.linear.z);
-  ignition::math::Vector3d target_angular_vel(req.link_state.twist.angular.x,req.link_state.twist.angular.y,req.link_state.twist.angular.z);
-
-  if (frame)
-  {
-#if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Pose3d  frame_pose = frame->WorldPose(); // - myBody->GetCoMPose();
-    ignition::math::Vector3d frame_linear_vel = frame->WorldLinearVel();
-    ignition::math::Vector3d frame_angular_vel = frame->WorldAngularVel();
-#else
-    ignition::math::Pose3d  frame_pose = frame->GetWorldPose().Ign(); // - myBody->GetCoMPose();
-    ignition::math::Vector3d frame_linear_vel = frame->GetWorldLinearVel().Ign();
-    ignition::math::Vector3d frame_angular_vel = frame->GetWorldAngularVel().Ign();
-#endif
-    ignition::math::Vector3d frame_pos = frame_pose.Pos();
-    ignition::math::Quaterniond frame_rot = frame_pose.Rot();
-
-    //std::cout << " debug : " << frame->GetName() << " : " << frame_pose << " : " << target_pose << std::endl;
-    target_pose = target_pose + frame_pose;
-
-    target_linear_vel -= frame_linear_vel;
-    target_angular_vel -= frame_angular_vel;
-  }
-  else if (req.link_state.reference_frame == "" || req.link_state.reference_frame == "world" || req.link_state.reference_frame == "map" || req.link_state.reference_frame == "/map")
-  {
-    ROS_INFO_NAMED("api_plugin", "Updating LinkState: reference_frame is empty/world/map, using inertial frame");
-  }
-  else
-  {
-    ROS_ERROR_NAMED("api_plugin", "Updating LinkState: reference_frame is not a valid entity name");
-    res.success = false;
-    res.status_message = "SetLinkState: failed";
-    return true;
-  }
-
-  //std::cout << " debug : " << target_pose << std::endl;
-  //boost::recursive_mutex::scoped_lock lock(*world->GetMRMutex());
-
-  bool is_paused = world_->IsPaused();
-  if (!is_paused) world_->SetPaused(true);
-  body->SetWorldPose(target_pose);
-  world_->SetPaused(is_paused);
-
-  // set body velocity to desired twist
-  body->SetLinearVel(target_linear_vel);
-  body->SetAngularVel(target_angular_vel);
-
-  res.success = true;
-  res.status_message = "SetLinkState: success";
-  return true;
-}
-
-void GazeboRosApiPlugin::updateLinkState(const gazebo_msgs::LinkState::ConstPtr& link_state)
-{
-  gazebo_msgs::SetLinkState::Request req;
-  gazebo_msgs::SetLinkState::Response res;
-  req.link_state = *link_state;
-  /*bool success = */ setLinkState(req,res);
 }
 
 void GazeboRosApiPlugin::transformWrench( ignition::math::Vector3d &target_force, ignition::math::Vector3d &target_torque,

@@ -31,6 +31,7 @@ file(COPY worlds DESTINATION .)
 set(tests
   test_conversions
   test_gazebo_ros_factory
+  test_gazebo_ros_state
   test_node
   test_plugins
   test_sim_time
