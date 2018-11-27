@@ -91,6 +91,13 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   else
     this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
 
+  if (!_sdf->HasElement("childFrameName"))
+  {
+    this->pose_msg_.child_frame_id = this->link_name_;
+  }
+  else
+    this->pose_msg_.child_frame_id = _sdf->GetElement("childFrameName")->Get<std::string>();
+
   if (!_sdf->HasElement("xyzOffset"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <xyzOffset>, defaults to 0s");
@@ -246,8 +253,6 @@ void GazeboRosP3D::UpdateChild()
         this->pose_msg_.header.frame_id = this->tf_frame_name_;
         this->pose_msg_.header.stamp.sec = cur_time.sec;
         this->pose_msg_.header.stamp.nsec = cur_time.nsec;
-
-        this->pose_msg_.child_frame_id = this->link_name_;
 
         ignition::math::Pose3d pose, frame_pose;
         ignition::math::Vector3d frame_vpos;
