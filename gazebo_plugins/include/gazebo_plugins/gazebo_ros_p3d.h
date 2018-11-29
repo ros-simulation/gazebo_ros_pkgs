@@ -86,7 +86,7 @@ namespace gazebo
     /// \brief frame transform name, should match link name
     /// FIXME: extract link name directly?
     private: std::string frame_name_;
-    private: std::string tf_frame_name_;
+    private: std::string tf_frame_name_;  // @TODO: remove in Noetic (not used anymore)
 
     /// \brief allow specifying constant xyz and rpy offsets
     private: ignition::math::Pose3d offset_;

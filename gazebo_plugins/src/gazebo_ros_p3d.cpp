@@ -15,8 +15,10 @@
  *
 */
 
+#include <boost/algorithm/string/trim.hpp>
 #include <string>
 #include <tf/tf.h>
+#include <tf/transform_listener.h>
 #include <stdlib.h>
 
 #include "gazebo_plugins/gazebo_ros_p3d.h"
@@ -138,9 +140,14 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->pmq.startServiceThread();
 
   // resolve tf prefix
-  std::string prefix;
-  this->rosnode_->getParam(std::string("tf_prefix"), prefix);
-  this->tf_frame_name_ = tf::resolve(prefix, this->frame_name_);
+  std::string prefix = tf::getPrefixParam(*this->rosnode_);
+  if(prefix.empty()) {
+    prefix = this->robot_namespace_;
+    boost::trim_right_if(prefix, boost::is_any_of("/"));
+  }
+
+  this->pose_msg_.header.frame_id = tf::resolve(prefix, this->frame_name_);
+  this->pose_msg_.child_frame_id = tf::resolve(prefix, this->link_name_);
 
   if (this->topic_name_ != "")
   {
@@ -243,11 +250,8 @@ void GazeboRosP3D::UpdateChild()
       if (this->topic_name_ != "")
       {
         // copy data into pose message
-        this->pose_msg_.header.frame_id = this->tf_frame_name_;
         this->pose_msg_.header.stamp.sec = cur_time.sec;
         this->pose_msg_.header.stamp.nsec = cur_time.nsec;
-
-        this->pose_msg_.child_frame_id = this->link_name_;
 
         ignition::math::Pose3d pose, frame_pose;
         ignition::math::Vector3d frame_vpos;
