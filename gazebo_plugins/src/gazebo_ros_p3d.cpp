@@ -35,7 +35,6 @@ class GazeboRosP3DPrivate
 {
 public:
   gazebo::physics::WorldPtr world_;
-  gazebo::physics::ModelPtr model_;
 
   /// \brief The parent Model
   gazebo::physics::LinkPtr link_;
@@ -91,9 +90,9 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Create ROS configured from sdf
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+
   // Get the world name
   impl_->world_ = _parent->GetWorld();
-  impl_->model_ = _parent;
 
   if (!_sdf->HasElement("update_rate")) {
     RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "p3d plugin missing <update_rate>, defaults to 0.0"
@@ -171,7 +170,7 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     impl_->frame_name_ != "/map" &&
     impl_->frame_name_ != "map")
   {
-    impl_->reference_link_ = impl_->model_->GetLink(impl_->frame_name_);
+    impl_->reference_link_ = _parent->GetLink(impl_->frame_name_);
     if (!impl_->reference_link_) {
       RCLCPP_ERROR(
         impl_->ros_node_->get_logger(), "gazebo_ros_p3d plugin: frame_name: %s does not exist, will"
