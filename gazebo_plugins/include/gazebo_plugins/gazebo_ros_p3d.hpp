@@ -24,9 +24,10 @@
 #ifndef GAZEBO_PLUGINS__GAZEBO_ROS_P3D_HPP_
 #define GAZEBO_PLUGINS__GAZEBO_ROS_P3D_HPP_
 
+#include <gazebo/physics/physics.hh>
+#include <gazebo/common/Plugin.hh>
+
 #include <memory>
-#include "gazebo/physics/physics.hh"
-#include "gazebo/common/Plugin.hh"
 
 namespace gazebo_plugins
 {
