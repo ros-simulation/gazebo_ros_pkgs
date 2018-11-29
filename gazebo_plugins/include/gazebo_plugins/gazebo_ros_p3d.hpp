@@ -46,13 +46,6 @@ public:
   /// \brief Load the controller
   void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
-protected:
-  /// \brief Update the controller
-  virtual void UpdateChild();
-
-  /// \brief Gaussian noise generator
-  double GaussianKernel(double mu, double sigma);
-
 private:
   /// Private data pointer
   std::unique_ptr<GazeboRosP3DPrivate> impl_;
