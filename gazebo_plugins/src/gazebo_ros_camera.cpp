@@ -103,7 +103,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // Image publisher
   // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
-  impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_,
+  impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_.get(),
       impl_->camera_name_ + "/image_raw");
 
   // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
