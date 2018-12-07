@@ -2,6 +2,129 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [ros2] Port spawn/delete methods   (`#808 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/808>`_)
+  * First port of ROS2 of factory method. Still a work in progress
+  * Install gazebo_ros_factory
+  * Changes proposed by uncrustify
+  * Make cpplint happy
+  * Remove unneded header
+  * fix merge
+  * remove ported ROS 1 code
+  * SpawnEntity service, initialize after world is created, remove XML strip since it's not needed, simplify Is* functions
+  * support robot_namespace inside <plugin><ros><namespace>
+  * a bit more tweaks and cleanup
+  * Use libsdformat to parse the XML, instead of tinyxml, significantly reducing the code
+  * uncrustify
+  * port delete services
+  * linters
+  * spawn and delete tests, must check light test
+  * fix spawning lights, compile error for non implemented conversions, linters
+* [ros2] Port diff_drive plugin to ros2 (`#806 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/806>`_)
+  * copy gazebo_ros_diff_drive files from unported
+  * Fix copy and paste error for exporting  gazebo_ros_joint_state_publisher
+  * Add gazebo_ros_diff_drive to CMakeLists.txt
+  * Basic structures updated
+  includes updated
+  include guards updated
+  CMake rules added
+  Not compiling yet
+  * starting deboostifying
+  updating lock
+  header passing compile
+  diff drive plugin compiling
+  clear all references to callback queue
+  * pimpl, remove joint state publisher
+  * documentation, add TF publishers - commands and publishers work, but visualization on RViz is jerky, must check
+  * pass linters
+  * check that reset works now, rename params, add missing package
+  * remap topics, add pub/sub test
+  * sleep longer to see if it passes on Jenkins
+* Remove node_name from <ros> SDF tag (`#804 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/804>`_)
+  * Rename Node::Create to Node::Get
+  * Node::Get without node name
+  * Remove node_name support from SDF
+  * wip get name from plugin name
+  * Remove node name argument (will be inferred from sdf)
+  * fix tests and implement static shared node
+  * Adding test file
+* [ros2] Split conversions into headers specific to message packages (`#803 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/803>`_)
+  * Tests depend on sensor_msgs
+  * Move conversions to different headers to minimise deps brought in
+  * Remove conversions namespace
+  * Include updates
+  * Update message package dependencies
+  gazebo_ros doesn't need sensor_msgs or geometry_msgs anymore
+  * Export msg pacakges so downstream packages depend
+  * Include msg headers used directly
+  * removing redundant dependencies
+  * fix build and cpplint
+* working demo, notes and warnings about issues
+* fix build by adding includes
+* Test correctness of ray_sensor intensity
+* Add Point32->ign vector conversion, fix pointcloud conversion
+* Simplify ray_sensor using gazebo_ros conversions
+* Add LaserScan conversions to gazebo_ros
+* [ros2] Add clock publisher to gazebo_ros_init for use_sim_time support (`#794 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/794>`_)
+  * Add Throttler to gazebo_ros utilities
+  * Add sim time to gazebo_ros_init
+  * Remove period constructor from Throttler
+  * Improve sim time test
+  * Fix compilation in isolation for gazebo_ros_init
+  * Transient local durability for clock publisher
+  * Linter fixup
+  * Document Throttler will return true on first call
+  * Store rate as double not Time
+  * Import order improvements
+* [ros2] Port gazebo_ros_imu_sensor (`#793 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/793>`_)
+  * Move files to prepare for imu_sensor ROS2 port
+  * Port gazebo_ros_imu_sensor
+  * Address IMU Sensor PR comments
+  * Remove empty <imu> tag
+  * document that always_on is required
+  * alphabetical order includes
+  * Step far forward instead of multiple small steps
+  * Fix test_conversions not finding quaternion.hpp
+  * Apply force longer; check IMU values; robust to negative linear accel
+  * linter fixup
+* [ros2] gazebo_ros_joint_state_publisher (`#795 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/795>`_)
+  * Port joint_state_publisher, copyright failing checker, still need to add a test
+  * Fix copyright
+  * Tests for joint state publisher
+  * cleanup
+  * depend on sensor_msgs
+  * Use node's logger
+* Merge pull request `#796 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/796>`_ from ros-simulation/ros2_fix_ci_authors
+  [ros2] Fix missing dependencies to run CI and update maintainers
+* Missing dependency in gazebo_ros
+* Add SensorFrameID utility function
+* Add NoiseVariance method for NoisePtr type
+* Add geometry quaternion -> ignition conversion
+* PR Comments for gazebo_ros utils
+* Add gazebo_ros utils for utility functions
+* Add time and quaternion conversions
+* Add testing_utils to reduce duplicate code in tests
+* PR feedback
+* conversions
+* improve example, add demo world, fix sdf warnings
+* Add Node::Create with sdf element
+  Move ament linting back to main CmakeList
+  Various style fixes
+  Only catch RCL_NOT_INIT exception in Node::Create
+  Add larger timeouts to tests (stil flakey)
+* [ros2] gazebo_ros_init plugin (`#776 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/776>`_)
+  gazebo_ros_init plugin and very basic launch file
+* Fix bug in test_plugins not ensuring all topics were received
+* Call init from node in case it hasn't been called yet
+* Remove internal logic to check init, add more tests
+* Remove Node::Create using sdf until it is implemented
+* Add simple test for gazebo_ros::Node
+* Enable linters and make them happy
+* Create base Node class for gazebo plugins with ROS2
+* Move gazebo_ros files for porting
+* Contributors: Jose Luis Rivero, Kevin Allen, Louise Poubel, Tully Foote, chapulina, dhood
+
 2.8.4 (2018-07-06)
 ------------------
 * Refactor spawn_model script

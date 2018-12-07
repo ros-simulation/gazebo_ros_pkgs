@@ -2,6 +2,42 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [ros2] Port spawn/delete methods   (`#808 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/808>`_)
+  * First port of ROS2 of factory method. Still a work in progress
+  * Install gazebo_ros_factory
+  * Changes proposed by uncrustify
+  * Make cpplint happy
+  * Remove unneded header
+  * fix merge
+  * remove ported ROS 1 code
+  * SpawnEntity service, initialize after world is created, remove XML strip since it's not needed, simplify Is* functions
+  * support robot_namespace inside <plugin><ros><namespace>
+  * a bit more tweaks and cleanup
+  * Use libsdformat to parse the XML, instead of tinyxml, significantly reducing the code
+  * uncrustify
+  * port delete services
+  * linters
+  * spawn and delete tests, must check light test
+  * fix spawning lights, compile error for non implemented conversions, linters
+* Fix name of duration field (`#800 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/800>`_)
+* Adding ros1_bridge mapping rules for ODEJointStates message.
+  The hiStop and loStop fields in this message were renamed to
+  hi_stop and lo_stop to comply with ROS 2 naming rules.
+  This prevented the automatic mapping rules in ros1_bridge from
+  generating mapping code.
+  This change adds a manual mapping to allow the ros1_bridge to
+  successfully generate mappings for this message.
+* Merge pull request `#770 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/770>`_ from ironmig/ros2-gazebo-dev
+  ROS2: Port gazebo_dev to ament package
+* Restore url tags to gazebo_msgs package.xml
+* Merge pull request `#769 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/769>`_ from ironmig/ros2-devel
+  ROS2: boostrap repo and convert gazebo_msgs
+* Switch rosidl_default_generators to buildtool_depend
+* Converted gazebo_msgs to ros2.
+* Contributors: Carl Delsey, Ernesto Corbellini, Jose Luis Rivero, Kevin Allen, dhood
+
 2.8.4 (2018-07-06)
 ------------------
 * Correct documentation on SetModelConfiguration.srv

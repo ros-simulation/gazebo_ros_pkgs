@@ -2,6 +2,18 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#796 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/796>`_ from ros-simulation/ros2_fix_ci_authors
+  [ros2] Fix missing dependencies to run CI and update maintainers
+* Update maintainers for ROS2 in gazebo_dev
+* Merge pull request `#770 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/770>`_ from ironmig/ros2-gazebo-dev
+  ROS2: Port gazebo_dev to ament package
+* Port gazebo_dev to ament package
+  * currently dependency on gazebo is commented out as it cannot find it
+* move gazebo_dev back to root for porting
+* Contributors: Jose Luis Rivero, Kevin Allen
+
 2.8.4 (2018-07-06)
 ------------------
 

@@ -2,6 +2,96 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Reliable QoS with depth of 1 (`#819 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/819>`_)
+* Switch to use sensor_data qos setting for short queue sizes. (`#815 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/815>`_)
+  * Switch to use sensor_data qos setting for short queue sizes.
+  * Use same QoS profile on test
+* [ros2] Port diff_drive plugin to ros2 (`#806 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/806>`_)
+  * copy gazebo_ros_diff_drive files from unported
+  * Fix copy and paste error for exporting  gazebo_ros_joint_state_publisher
+  * Add gazebo_ros_diff_drive to CMakeLists.txt
+  * Basic structures updated
+  includes updated
+  include guards updated
+  CMake rules added
+  Not compiling yet
+  * starting deboostifying
+  updating lock
+  header passing compile
+  diff drive plugin compiling
+  clear all references to callback queue
+  * pimpl, remove joint state publisher
+  * documentation, add TF publishers - commands and publishers work, but visualization on RViz is jerky, must check
+  * pass linters
+  * check that reset works now, rename params, add missing package
+  * remap topics, add pub/sub test
+  * sleep longer to see if it passes on Jenkins
+* Remove node_name from <ros> SDF tag (`#804 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/804>`_)
+  * Rename Node::Create to Node::Get
+  * Node::Get without node name
+  * Remove node_name support from SDF
+  * wip get name from plugin name
+  * Remove node name argument (will be inferred from sdf)
+  * fix tests and implement static shared node
+  * Adding test file
+* [ros2] Remove unnecessary IMU include (`#805 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/805>`_)
+  * removing redundant dependencies
+  * Clear unnecessary include in imu_sensor header
+* [ros2] Split conversions into headers specific to message packages (`#803 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/803>`_)
+  * Tests depend on sensor_msgs
+  * Move conversions to different headers to minimise deps brought in
+  * Remove conversions namespace
+  * Include updates
+  * Update message package dependencies
+  gazebo_ros doesn't need sensor_msgs or geometry_msgs anymore
+  * Export msg pacakges so downstream packages depend
+  * Include msg headers used directly
+  * removing redundant dependencies
+  * fix build and cpplint
+* working demo, notes and warnings about issues
+* Add more examples, need to debug some
+* tweaks to includes
+* Test correctness of ray_sensor intensity
+* Add ray_sensor demo
+* Verify correctness of gazebo_ros_ray_sensor output
+* Simplify ray_sensor using gazebo_ros conversions
+* Add gazebo_ros_ray_sensor
+* [ros2] Add noise to imu test (`#801 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/801>`_)
+  * Add noise to IMU test world
+  * Remove bias
+  * Relax test tolerance
+* [ros2] Port gazebo_ros_imu_sensor (`#793 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/793>`_)
+  * Move files to prepare for imu_sensor ROS2 port
+  * Port gazebo_ros_imu_sensor
+  * Address IMU Sensor PR comments
+  * Remove empty <imu> tag
+  * document that always_on is required
+  * alphabetical order includes
+  * Step far forward instead of multiple small steps
+  * Fix test_conversions not finding quaternion.hpp
+  * Apply force longer; check IMU values; robust to negative linear accel
+  * linter fixup
+* [ros2] gazebo_ros_joint_state_publisher (`#795 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/795>`_)
+  * Port joint_state_publisher, copyright failing checker, still need to add a test
+  * Fix copyright
+  * Tests for joint state publisher
+  * cleanup
+  * depend on sensor_msgs
+  * Use node's logger
+* PR feedback
+* Add test using ServerFixture
+* conversions
+* Convert plugin and add test world
+* move gazebo_ros_force files
+* remove target_link_libraries
+* improve example, add demo world, fix sdf warnings
+* Port gazebo_ros_template and add more instructions
+* Boostrap gazebo_plugins as ament package
+* Move ros1 gazebo_plugins files into root
+* Contributors: Kevin Allen, Louise Poubel, Tully Foote, chapulina, dhood
+
 2.8.4 (2018-07-06)
 ------------------
 * Fix various xacro/xml issues with tests
