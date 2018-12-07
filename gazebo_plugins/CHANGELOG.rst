@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2018-12-07)
+------------------
 * Reliable QoS with depth of 1 (`#819 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/819>`_)
 * Switch to use sensor_data qos setting for short queue sizes. (`#815 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/815>`_)
   * Switch to use sensor_data qos setting for short queue sizes.
