@@ -48,15 +48,24 @@ void TestSimTime::TearDown()
 
 TEST_F(TestSimTime, TestClock)
 {
+  using ClockMsg = rosgraph_msgs::msg::Clock;
+
   // Create a node which will use sim time
   auto context = rclcpp::contexts::default_context::get_global_default_context();
   std::vector<std::string> args;
-  std::vector<rclcpp::Parameter> params = {rclcpp::Parameter("use_sim_time", true)};
+  std::vector<rclcpp::Parameter> params;
   auto node = std::make_shared<rclcpp::Node>("test_sim_time", "", context, args, params);
+  params = {rclcpp::Parameter("use_sim_time", true)};
 
-  using ClockMsg = rosgraph_msgs::msg::Clock;
+  // TODO(louise) Setting param after node is created, and discarding first message, due to
+  // https://github.com/ros2/rclcpp/issues/595 : remove once issue is fixed.
+  node->set_parameters(params);
 
-  // Get two clock messages, cachine the ROS time once each is received
+  auto zero_msg =
+    gazebo_ros::get_message_or_timeout<ClockMsg>(node, "/clock", rclcpp::Duration(5, 0));
+  ASSERT_NE(zero_msg, nullptr);
+
+  // Get two clock messages, caching the ROS time once each is received
   auto first_msg =
     gazebo_ros::get_message_or_timeout<ClockMsg>(node, "/clock", rclcpp::Duration(5, 0));
   ASSERT_NE(first_msg, nullptr);
@@ -70,10 +79,14 @@ TEST_F(TestSimTime, TestClock)
   EXPECT_LT(rclcpp::Time(first_msg->clock), rclcpp::Time(1, 0, RCL_ROS_TIME));
   EXPECT_LT(rclcpp::Time(second_msg->clock), rclcpp::Time(1, 0, RCL_ROS_TIME));
   // Time should go forward
-  EXPECT_GT(second_msg, first_msg);
+  EXPECT_GT(rclcpp::Time(second_msg->clock), rclcpp::Time(first_msg->clock)) <<
+    rclcpp::Time(second_msg->clock).nanoseconds() << "    " <<
+    rclcpp::Time(first_msg->clock).nanoseconds();
   // The message from the clock should be the node's time
-  EXPECT_EQ(first_msg_time, rclcpp::Time(first_msg->clock));
-  EXPECT_EQ(second_msg_time, rclcpp::Time(second_msg->clock));
+  EXPECT_EQ(first_msg_time, rclcpp::Time(first_msg->clock)) << first_msg_time.nanoseconds() <<
+    "    " << rclcpp::Time(first_msg->clock).nanoseconds();
+  EXPECT_EQ(second_msg_time, rclcpp::Time(second_msg->clock)) << second_msg_time.nanoseconds() <<
+    "    " << rclcpp::Time(second_msg->clock).nanoseconds();
 }
 
 int main(int argc, char ** argv)
