@@ -292,7 +292,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // Initialize camera_info_manager
   impl_->camera_info_manager_ = std::make_shared<camera_info_manager::CameraInfoManager>(
-    impl_->ros_node_, impl_->camera_name_);
+    impl_->ros_node_.get(), impl_->camera_name_);
   impl_->camera_info_manager_->setCameraInfo(camera_info_msg);
 }
 
