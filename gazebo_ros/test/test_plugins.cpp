@@ -43,6 +43,7 @@ protected:
 
 void TestPlugins::SetUp()
 {
+  std::cout << "Starting gzserver process with [" << GetParam().args[1] << "]" << std::endl;
   gazebo_process_ = std::make_unique<gazebo_ros::GazeboProcess>(GetParam().args);
   ASSERT_GT(gazebo_process_->Run(), 0);
 }
