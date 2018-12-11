@@ -2,6 +2,9 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.0.0 (2018-12-07)
 ------------------
 * [ros2] Port spawn/delete methods   (`#808 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/808>`_)

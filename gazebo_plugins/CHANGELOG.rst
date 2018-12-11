@@ -2,6 +2,26 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [ros2] Camera and triggered camera (`#827 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/827>`_)
+  * move gazebo_ros_camera and some functionality from gazebo_ros_camera_utils, needs master branch of image_transport and message_filters, not functional, but compiling
+  * port PutCameraData, needs common_interfaces PR `#58 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/58>`_
+  * move camera worlds, fix compilation, image can be seen on RViz
+  * Port camera test: simplify world, use ServerFixture for better control and not to need launch - test is hanging on exit, not sure why
+  * fix test hanging on exit
+  * port camera16bit test and fix world copying on make
+  * Start porting camera distortion tests: must port cam_info, 2nd test failing
+  * sortout camera_name and frame_name
+  * Port gazebo_ros_camera_triggered as part of gazebo_ros_camera, with test
+  * Use camera_info_manager from branch ci_manager_port_louise, enable barrel distortion test - passes but segfaults at teardown, could be a problem with having 2 plugins side-by-side.
+  * linters and comment out crashing test
+  * Demo worlds, doxygen, more node tests
+  * Use image_transport remapping
+  * adapt to new image_transport pointer API
+  * new API
+* Contributors: chapulina
+
 3.0.0 (2018-12-07)
 ------------------
 * Reliable QoS with depth of 1 (`#819 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/819>`_)

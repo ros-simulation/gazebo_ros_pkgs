@@ -2,6 +2,9 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.0.0 (2018-12-07)
 ------------------
 * Merge pull request `#796 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/796>`_ from ros-simulation/ros2_fix_ci_authors

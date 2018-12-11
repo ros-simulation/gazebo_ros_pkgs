@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [ros2] Add gazebo_plugins to gazebo_ros_pkgs (`#850 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/850>`_)
+* Contributors: chapulina
+
 3.0.0 (2018-12-07)
 ------------------
 * [ros2] gazebo_ros_pkgs 'meta'package (`#777 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/777>`_)
