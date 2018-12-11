@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.1.0 (2018-12-10)
+------------------
 * [ros2] Camera and triggered camera (`#827 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/827>`_)
   * move gazebo_ros_camera and some functionality from gazebo_ros_camera_utils, needs master branch of image_transport and message_filters, not functional, but compiling
   * port PutCameraData, needs common_interfaces PR `#58 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/58>`_
