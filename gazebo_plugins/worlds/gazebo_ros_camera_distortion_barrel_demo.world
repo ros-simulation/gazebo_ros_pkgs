@@ -1,0 +1,149 @@
+<?xml version="1.0" ?>
+<!--
+  Gazebo ROS camera with barrel distortion plugin demo
+
+  Try for example:
+
+  * Launch RViz and visualize Images from `/camera1/image_raw/raw`
+
+-->
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+            </friction>
+              <bounce>
+                <restitution_coefficient>1.0</restitution_coefficient>
+                <threshold>0</threshold>
+              </bounce>
+              <contact>
+                <ode>
+                  <max_vel>10000</max_vel>
+                  <min_depth>0.001</min_depth>
+                </ode>
+              </contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Grey</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="ball">
+      <allow_auto_disable>false</allow_auto_disable>
+      <pose>-1 0 1 0 0 0</pose>
+      <static>false</static>
+      <link name="link">
+        <inertial>
+          <mass>0.026</mass>
+          <!-- inertia based on solid sphere 2/5 mr^2 -->
+          <inertia>
+            <ixx>1.664e-5</ixx>
+            <iyy>1.664e-5</iyy>
+            <izz>1.664e-5</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <bounce>
+              <restitution_coefficient>1.0</restitution_coefficient>
+              <threshold>0</threshold>
+            </bounce>
+            <contact>
+              <ode>
+                <max_vel>10000</max_vel>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="camera_barrel">
+      <pose>0 0 0.5 0 0 3.14</pose>
+      <static>true</static>
+      <link name="barrel">
+        <sensor type="camera" name="camera_barrel">
+          <update_rate>60</update_rate>
+          <visualize>true</visualize>
+          <camera name="head">
+            <horizontal_fov>0.927295218</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.02</near>
+              <far>300</far>
+            </clip>
+            <distortion>
+              <k1>-0.1</k1>
+              <k2>-0.1</k2>
+              <p1>0</p1>
+              <p2>0</p2>
+              <k3>-0.1</k3>
+              <center>0.5 0.5</center>
+            </distortion>
+          </camera>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <border_crop>false</border_crop>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+
+    <include>
+      <pose>-1.5 0 1 0 1.57 0</pose>
+      <uri>model://checkerboard_plane</uri>
+    </include>
+  </world>
+</sdf>

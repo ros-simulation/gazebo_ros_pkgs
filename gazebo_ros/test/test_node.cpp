@@ -50,6 +50,42 @@ TEST(TestNode, StaticNode)
   EXPECT_NE(address_1.str(), address_3.str());
 }
 
+TEST(TestNode, GetSdf)
+{
+  // Plugin SDF
+  auto sdf_str =
+    "<?xml version='1.0' ?>"
+    "<sdf version='1.5'>"
+    "<world name='default'>"
+    "<plugin name='node_name' filename='libnode_name.so'/>"
+    "</world>"
+    "</sdf>";
+
+  sdf::SDF sdf;
+  sdf.SetFromString(sdf_str);
+  auto plugin_sdf = sdf.Root()->GetElement("world")->GetElement("plugin");
+
+  // Create a node
+  auto node_1 = gazebo_ros::Node::Get(plugin_sdf);
+  ASSERT_NE(nullptr, node_1);
+  EXPECT_STREQ("node_name", node_1->get_name());
+
+  // Create another node
+  auto node_2 = gazebo_ros::Node::Get(plugin_sdf);
+  ASSERT_NE(nullptr, node_2);
+  EXPECT_STREQ("node_name", node_2->get_name());
+  EXPECT_NE(node_1, node_2);
+
+  // Reset both
+  node_1.reset();
+  node_2.reset();
+
+  // Create another node
+  auto node_3 = gazebo_ros::Node::Get(plugin_sdf);
+  ASSERT_NE(nullptr, node_3);
+  EXPECT_STREQ("node_name", node_3->get_name());
+}
+
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);

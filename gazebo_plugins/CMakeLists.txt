@@ -12,24 +12,30 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(camera_info_manager REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(rclcpp REQUIRED)
+find_package(image_transport REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 include_directories(include
+  ${gazebo_dev_INCLUDE_DIRS}
   ${gazebo_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${image_transport_INCLUDE_DIRS}
   ${nav_msgs_INCLUDE_DIRS}
   ${sensor_msgs_INCLUDE_DIRS}
   ${tf2_ros_INCLUDE_DIRS}
   ${tf2_INCLUDE_DIRS}
 )
+link_directories(${gazebo_dev_LIBRARY_DIRS})
 
 # gazebo_ros_joint_state_publisher
 add_library(gazebo_ros_joint_state_publisher SHARED
@@ -82,6 +88,25 @@ ament_target_dependencies(gazebo_ros_template
 )
 ament_export_libraries(gazebo_ros_template)
 
+# gazebo_ros_camera
+add_library(gazebo_ros_camera SHARED
+  src/gazebo_ros_camera.cpp
+)
+ament_target_dependencies(gazebo_ros_camera
+  "camera_info_manager"
+  "gazebo_dev"
+  "gazebo_ros"
+  "image_transport"
+  "rclcpp"
+  "sensor_msgs"
+  "std_msgs"
+)
+target_link_libraries(gazebo_ros_camera
+  CameraPlugin
+)
+ament_export_libraries(gazebo_ros_camera)
+
+# gazebo_ros_imu_sensor
 add_library(gazebo_ros_imu_sensor SHARED
   src/gazebo_ros_imu_sensor.cpp
 )
@@ -92,6 +117,7 @@ ament_target_dependencies(gazebo_ros_imu_sensor
 )
 ament_export_libraries(gazebo_ros_imu_sensor)
 
+# gazebo_ros_ray_sensor
 add_library(gazebo_ros_ray_sensor SHARED
   src/gazebo_ros_ray_sensor.cpp
 )
@@ -118,6 +144,7 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(TARGETS
+    gazebo_ros_camera
     gazebo_ros_diff_drive
     gazebo_ros_force
     gazebo_ros_imu_sensor
