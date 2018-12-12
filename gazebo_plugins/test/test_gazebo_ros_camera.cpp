@@ -66,7 +66,12 @@ TEST_P(GazeboRosCameraTest, CameraSubscribeTest)
 
   // Update rate is 0.5 Hz, so we step 3s sim time to be sure we get exactly 1 image at 2s
   world->Step(3000);
-  executor.spin_once(100ms);
+  unsigned int sleep = 0;
+  unsigned int max_sleep = 30;
+  while (sleep < max_sleep && msg_count == 0) {
+    executor.spin_once(100ms);
+    sleep++;
+  }
 
   EXPECT_EQ(1u, msg_count);
   EXPECT_EQ(2.0, image_stamp.sec);

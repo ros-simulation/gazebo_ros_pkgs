@@ -99,7 +99,7 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
 
   // Subscribe to undistorted image
   sensor_msgs::msg::Image::ConstSharedPtr cam_image_undistorted;
-  cam_sub_undistorted_ = image_transport::create_subscription(node,
+  cam_sub_undistorted_ = image_transport::create_subscription(node.get(),
       GetParam().undistorted_topic,
       [&cam_image_undistorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
         cam_image_undistorted = _msg;
@@ -108,7 +108,7 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
 
   // Subscribe to distorted image
   sensor_msgs::msg::Image::ConstSharedPtr cam_image_distorted;
-  cam_sub_distorted_ = image_transport::create_subscription(node,
+  cam_sub_distorted_ = image_transport::create_subscription(node.get(),
       GetParam().distorted_topic,
       [&cam_image_distorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
         cam_image_distorted = _msg;

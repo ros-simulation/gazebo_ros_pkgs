@@ -1,6 +1,8 @@
 find_package(ament_cmake_gtest REQUIRED)
 find_package(cv_bridge REQUIRED)
 
+option(ENABLE_DISPLAY_TESTS "Enable the building of tests that requires a display" OFF)
+
 # Worlds
 file(GLOB worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "worlds/*.world")
 foreach(world ${worlds})
@@ -10,16 +12,21 @@ endforeach()
 
 # Tests
 set(tests
-  test_gazebo_ros_camera
-  # TODO(louise) Test hangs on teardown while destroying 2nd node
-  # test_gazebo_ros_camera_distortion
-  test_gazebo_ros_camera_triggered
   test_gazebo_ros_diff_drive
   test_gazebo_ros_force
   test_gazebo_ros_imu_sensor
   test_gazebo_ros_joint_state_publisher
   test_gazebo_ros_ray_sensor
 )
+
+if(ENABLE_DISPLAY_TESTS)
+set(tests ${tests}
+  test_gazebo_ros_camera
+  # TODO(louise) Test hangs on teardown while destroying 2nd node
+  # test_gazebo_ros_camera_distortion
+  test_gazebo_ros_camera_triggered
+)
+endif()
 
 foreach(test ${tests})
   ament_add_gtest(${test}

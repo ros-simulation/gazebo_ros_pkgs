@@ -69,7 +69,13 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
 
   // Step a bit and check that we get exactly one message
   world->Step(100);
-  executor.spin_once(100ms);
+
+  unsigned int sleep = 0;
+  unsigned int max_sleep = 30;
+  while (sleep < max_sleep && msg_count == 0) {
+    executor.spin_once(100ms);
+    sleep++;
+  }
 
   EXPECT_EQ(1u, msg_count);
 
@@ -82,7 +88,12 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
 
   // Step a bit and check that we get exactly two messages
   world->Step(100);
-  executor.spin_once(100ms);
+
+  sleep = 0;
+  while (sleep < max_sleep && msg_count < 3) {
+    executor.spin_once(100ms);
+    sleep++;
+  }
 
   EXPECT_EQ(3u, msg_count);
 
