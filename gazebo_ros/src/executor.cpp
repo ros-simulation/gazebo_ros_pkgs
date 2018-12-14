@@ -31,6 +31,7 @@ Executor::~Executor()
   if (rclcpp::ok()) {
     rclcpp::shutdown();
   }
+  cancel();
   spin_thread_.join();
 }
 

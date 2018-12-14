@@ -133,8 +133,6 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
   std::lock_guard<std::mutex> l(lock_);
 
   // Contruct Node by forwarding arguments
-  // TODO(chapulina): use rclcpp::is_initialized() once that's available, see
-  // https://github.com/ros2/rclcpp/issues/518
   Node::SharedPtr node;
   if (rclcpp::is_initialized()) {
     node = std::make_shared<Node>(std::forward<Args>(args) ...);
