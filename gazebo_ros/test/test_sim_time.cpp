@@ -53,17 +53,8 @@ TEST_F(TestSimTime, TestClock)
   // Create a node which will use sim time
   auto context = rclcpp::contexts::default_context::get_global_default_context();
   std::vector<std::string> args;
-  std::vector<rclcpp::Parameter> params;
+  std::vector<rclcpp::Parameter> params = {rclcpp::Parameter("use_sim_time", true)};
   auto node = std::make_shared<rclcpp::Node>("test_sim_time", "", context, args, params);
-  params = {rclcpp::Parameter("use_sim_time", true)};
-
-  // TODO(louise) Setting param after node is created, and discarding first message, due to
-  // https://github.com/ros2/rclcpp/issues/595 : remove once issue is fixed.
-  node->set_parameters(params);
-
-  auto zero_msg =
-    gazebo_ros::get_message_or_timeout<ClockMsg>(node, "/clock", rclcpp::Duration(5, 0));
-  ASSERT_NE(zero_msg, nullptr);
 
   // Get two clock messages, caching the ROS time once each is received
   auto first_msg =
