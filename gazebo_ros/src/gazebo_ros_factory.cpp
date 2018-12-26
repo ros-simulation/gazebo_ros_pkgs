@@ -106,10 +106,8 @@ GazeboRosFactory::~GazeboRosFactory()
 {
 }
 
-void GazeboRosFactory::Load(int argc, char ** argv)
+void GazeboRosFactory::Load(int /* argc */, char ** /* argv */)
 {
-  rclcpp::init(argc, argv);
-
   // Keep this in the constructor for performance.
   // sdf::initFile causes disk access.
   sdf::initFile("root.sdf", impl_->factory_sdf_);
