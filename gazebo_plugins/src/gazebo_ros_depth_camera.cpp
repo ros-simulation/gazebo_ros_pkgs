@@ -720,8 +720,7 @@ bool GazeboRosDepthCamera::FillDepthImageHelper(
     {
       float depth = toCopyFrom[index++];
 
-      if (depth > this->point_cloud_cutoff_ &&
-          depth < this->point_cloud_cutoff_max_)
+      if (depth > this->point_cloud_cutoff_)
       {
         if (!this->use_depth_image_16UC1_format_)
           dest.dest_float[i + j * cols_arg] = depth;
