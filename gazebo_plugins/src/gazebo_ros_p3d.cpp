@@ -15,15 +15,17 @@
  *
 */
 
+#include <ignition/math/Rand.hh>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_plugins/gazebo_ros_p3d.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
-#include <nav_msgs/msg/odometry.hpp>
 
 #include <string>
 #include <memory>
@@ -38,48 +40,38 @@ public:
   /// \param[in] info Updated simulation info
   void OnUpdate(const gazebo::common::UpdateInfo & info);
 
-  /// \brief Gaussian noise generator
-  double GaussianKernel(double mu, double sigma);
+  /// The link being traked.
+  gazebo::physics::LinkPtr link_{nullptr};
 
-  gazebo::physics::WorldPtr world_;
+  /// The body of the frame to display pose, twist
+  gazebo::physics::LinkPtr reference_link_{nullptr};
 
-  /// \brief The parent Model
-  gazebo::physics::LinkPtr link_;
+  /// Pointer to ros node
+  gazebo_ros::Node::SharedPtr ros_node_{nullptr};
 
-  /// \brief The body of the frame to display pose, twist
-  gazebo::physics::LinkPtr reference_link_;
+  /// Odometry publisher
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_{nullptr};
 
-  /// \brief pointer to ros node
-  gazebo_ros::Node::SharedPtr ros_node_;
+  /// Odom topic name
+  std::string topic_name_{"odom"};
 
-  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_;
+  /// Frame transform name, should match name of reference link, or be world.
+  std::string frame_name_{"world"};
 
-  /// \brief store bodyname
-  std::string link_name_;
-
-  /// \brief topic name
-  std::string topic_name_;
-
-  /// \brief frame transform name, should match link name
-  std::string frame_name_;
-
-  /// \brief allow specifying constant xyz and rpy offsets
+  /// Constant xyz and rpy offsets
   ignition::math::Pose3d offset_;
 
-  /// \brief save last_time
+  /// Keep track of the last update time.
   gazebo::common::Time last_time_;
 
-  // rate control
-  double update_rate_;
+  /// Publish rate in Hz.
+  double update_rate_{0.0};
 
-  /// \brief Gaussian noise
+  /// Gaussian noise
   double gaussian_noise_;
 
-  /// \brief for setting ROS name space
-  std::string robot_namespace_;
-
-  // Pointer to the update event connection
-  gazebo::event::ConnectionPtr update_connection_;
+  /// Pointer to the update event connection
+  gazebo::event::ConnectionPtr update_connection_{nullptr};
 };
 
 GazeboRosP3D::GazeboRosP3D()
@@ -100,71 +92,59 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   if (!sdf->HasElement("update_rate")) {
     RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "p3d plugin missing <update_rate>, defaults to 0.0"
       " (as fast as possible)");
-    impl_->update_rate_ = 0;
   } else {
     impl_->update_rate_ = sdf->GetElement("update_rate")->Get<double>();
   }
 
+  std::string link_name;
   if (!sdf->HasElement("body_name")) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(), "p3d plugin missing <body_name>, cannot proceed");
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Missing <body_name>, cannot proceed");
     return;
   } else {
-    impl_->link_name_ = sdf->GetElement("body_name")->Get<std::string>();
+   link_name = sdf->GetElement("body_name")->Get<std::string>();
   }
 
-  impl_->link_ = model->GetLink(impl_->link_name_);
+  impl_->link_ = model->GetLink(link_name);
   if (!impl_->link_) {
     RCLCPP_ERROR(
-      impl_->ros_node_->get_logger(), "gazebo_ros_p3d plugin error: body_name: %s does not exist\n",
-      impl_->link_name_.c_str());
+      impl_->ros_node_->get_logger(), "body_name: %s does not exist\n",
+      link_name.c_str());
     return;
   }
 
-  if (!sdf->HasElement("topic_name")) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(), "p3d plugin missing <topic_name>, cannot proceed");
-    return;
-  } else {
-    impl_->topic_name_ = sdf->GetElement("topic_name")->Get<std::string>();
-  }
-
-  if (impl_->topic_name_ != "") {
-    impl_->pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(impl_->topic_name_);
-  }
-
-  if (!sdf->HasElement("frame_name")) {
-    RCLCPP_DEBUG(
-      impl_->ros_node_->get_logger(), "p3d plugin missing <frame_name>, defaults to world");
-    impl_->frame_name_ = "world";
-  } else {
-    impl_->frame_name_ = sdf->GetElement("frame_name")->Get<std::string>();
-  }
+  impl_->pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(impl_->topic_name_);
+  impl_->topic_name_ = impl_->pub_->get_topic_name();
+  RCLCPP_DEBUG(
+    impl_->ros_node_->get_logger(), "Publishing on topic [%s]", impl_->topic_name_.c_str());
 
   if (!sdf->HasElement("xyz_offsets")) {
-    RCLCPP_DEBUG(impl_->ros_node_->get_logger(),
-      "p3d plugin missing <xyz_offsets>, defaults to 0s");
-    impl_->offset_.Pos() = ignition::math::Vector3d(0, 0, 0);
+    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <xyz_offsets>, defaults to 0s");
   } else {
     impl_->offset_.Pos() = sdf->GetElement("xyz_offsets")->Get<ignition::math::Vector3d>();
   }
 
   if (!sdf->HasElement("rpy_offsets")) {
-    RCLCPP_DEBUG(impl_->ros_node_->get_logger(),
-      "p3d plugin missing <rpy_offsets>, defaults to 0s");
-    impl_->offset_.Rot() = ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, 0));
+    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <rpy_offsets>, defaults to 0s");
   } else {
     impl_->offset_.Rot() = ignition::math::Quaterniond(sdf->GetElement(
           "rpy_offsets")->Get<ignition::math::Vector3d>());
   }
 
   if (!sdf->HasElement("gaussian_noise")) {
-    RCLCPP_DEBUG(
-      impl_->ros_node_->get_logger(), "p3d plugin missing <gassian_noise>, defaults to 0.0");
+    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <gassian_noise>, defaults to 0.0");
     impl_->gaussian_noise_ = 0;
   } else {
     impl_->gaussian_noise_ = sdf->GetElement("gaussian_noise")->Get<double>();
   }
 
   impl_->last_time_ = model->GetWorld()->SimTime();
+
+  if (!sdf->HasElement("frame_name")) {
+    RCLCPP_DEBUG(
+      impl_->ros_node_->get_logger(), "Missing <frame_name>, defaults to world");
+  } else {
+    impl_->frame_name_ = sdf->GetElement("frame_name")->Get<std::string>();
+  }
 
   // If frame_name specified is "/world", "world", "/map" or "map" report
   // back inertial values in the gazebo world
@@ -173,14 +153,11 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   {
     impl_->reference_link_ = model->GetLink(impl_->frame_name_);
     if (!impl_->reference_link_) {
-      RCLCPP_ERROR(
-        impl_->ros_node_->get_logger(), "gazebo_ros_p3d plugin: frame_name: %s does not exist, will"
-        " not publish pose\n", impl_->frame_name_.c_str());
-      return;
+      RCLCPP_WARN(impl_->ros_node_->get_logger(), "<frame_name> [%s] does not exist.",
+        impl_->frame_name_.c_str());
     }
   }
 
-  // New Mechanism for Updating every World Cycle
   // Listen to the update event. This event is broadcast every simulation iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosP3DPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
@@ -218,110 +195,75 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
     return;
   }
 
-  if (topic_name_ != "") {
-    nav_msgs::msg::Odometry pose_msg;
+  nav_msgs::msg::Odometry pose_msg;
 
-    // Copy data into pose message
-    pose_msg.header.frame_id = frame_name_;
-    pose_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
-    pose_msg.child_frame_id = link_name_;
+  // Copy data into pose message
+  pose_msg.header.frame_id = frame_name_;
+  pose_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
+  pose_msg.child_frame_id = link_->GetName();
 
-    ignition::math::Pose3d pose, frame_pose;
-    ignition::math::Vector3d frame_vpos;
-    ignition::math::Vector3d frame_veul;
+  // Get inertial rates
+  ignition::math::Vector3d vpos = link_->WorldLinearVel();
+  ignition::math::Vector3d veul = link_->WorldAngularVel();
 
-    // Get inertial rates
-    ignition::math::Vector3d vpos = link_->WorldLinearVel();
-    ignition::math::Vector3d veul = link_->WorldAngularVel();
+  // Get pose/orientation
+  auto pose = link_->WorldPose();
 
-    // Get pose/orientation
-    pose = link_->WorldPose();
+  // Apply reference frame
+  if (reference_link_) {
+    // Convert to relative pose, rates
+    auto frame_pose = reference_link_->WorldPose();
+    auto frame_vpos = reference_link_->WorldLinearVel();
+    auto frame_veul = reference_link_->WorldAngularVel();
 
-    // Apply reference frame
-    if (reference_link_) {
-      // Convert to relative pose, rates
-      frame_pose = reference_link_->WorldPose();
-      frame_vpos = reference_link_->WorldLinearVel();
-      frame_veul = reference_link_->WorldAngularVel();
+    pose.Pos() = pose.Pos() - frame_pose.Pos();
+    pose.Pos() = frame_pose.Rot().RotateVectorReverse(pose.Pos());
+    pose.Rot() *= frame_pose.Rot().Inverse();
 
-      pose.Pos() = pose.Pos() - frame_pose.Pos();
-      pose.Pos() = frame_pose.Rot().RotateVectorReverse(pose.Pos());
-      pose.Rot() *= frame_pose.Rot().Inverse();
-
-      vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
-      veul = frame_pose.Rot().RotateVector(veul - frame_veul);
-    }
-
-    // Apply constant offsets
-
-    // Apply XYZ offsets and get position and rotation components
-    pose.Pos() = pose.Pos() + offset_.Pos();
-    // Apply RPY offsets
-    pose.Rot() = offset_.Rot() * pose.Rot();
-    pose.Rot().Normalize();
-
-    // Fill out messages
-    pose_msg.pose.pose.position.x = pose.Pos().X();
-    pose_msg.pose.pose.position.y = pose.Pos().Y();
-    pose_msg.pose.pose.position.z = pose.Pos().Z();
-    pose_msg.pose.pose.orientation.x = pose.Rot().X();
-    pose_msg.pose.pose.orientation.y = pose.Rot().Y();
-    pose_msg.pose.pose.orientation.z = pose.Rot().Z();
-    pose_msg.pose.pose.orientation.w = pose.Rot().W();
-
-    pose_msg.twist.twist.linear.x = vpos.X() + GaussianKernel(0, gaussian_noise_);
-    pose_msg.twist.twist.linear.y = vpos.Y() + GaussianKernel(0, gaussian_noise_);
-    pose_msg.twist.twist.linear.z = vpos.Z() + GaussianKernel(0, gaussian_noise_);
-    pose_msg.twist.twist.angular.x = veul.X() + GaussianKernel(0, gaussian_noise_);
-    pose_msg.twist.twist.angular.y = veul.Y() + GaussianKernel(0, gaussian_noise_);
-    pose_msg.twist.twist.angular.z = veul.Z() + GaussianKernel(0, gaussian_noise_);
-
-    // Fill in covariance matrix
-    /// @TODO: let user set separate linear and angular covariance values
-    double gn2 = gaussian_noise_ * gaussian_noise_;
-    pose_msg.pose.covariance[0] = gn2;
-    pose_msg.pose.covariance[7] = gn2;
-    pose_msg.pose.covariance[14] = gn2;
-    pose_msg.pose.covariance[21] = gn2;
-    pose_msg.pose.covariance[28] = gn2;
-    pose_msg.pose.covariance[35] = gn2;
-    pose_msg.twist.covariance[0] = gn2;
-    pose_msg.twist.covariance[7] = gn2;
-    pose_msg.twist.covariance[14] = gn2;
-    pose_msg.twist.covariance[21] = gn2;
-    pose_msg.twist.covariance[28] = gn2;
-    pose_msg.twist.covariance[35] = gn2;
-
-    // Publish to ROS
-    pub_->publish(pose_msg);
+    vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
+    veul = frame_pose.Rot().RotateVector(veul - frame_veul);
   }
+
+  // Apply constant offsets
+
+  // Apply XYZ offsets and get position and rotation components
+  pose.Pos() = pose.Pos() + offset_.Pos();
+  // Apply RPY offsets
+  pose.Rot() = offset_.Rot() * pose.Rot();
+  pose.Rot().Normalize();
+
+  // Fill out messages
+  pose_msg.pose.pose.position = gazebo_ros::Convert<geometry_msgs::msg::Point>(pose.Pos());
+  pose_msg.pose.pose.orientation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
+
+  pose_msg.twist.twist.linear.x = vpos.X() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.linear.y = vpos.Y() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.linear.z = vpos.Z() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.angular.x = veul.X() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.angular.y = veul.Y() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.angular.z = veul.Z() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+
+  // Fill in covariance matrix
+  /// @TODO: let user set separate linear and angular covariance values
+  double gn2 = gaussian_noise_ * gaussian_noise_;
+  pose_msg.pose.covariance[0] = gn2;
+  pose_msg.pose.covariance[7] = gn2;
+  pose_msg.pose.covariance[14] = gn2;
+  pose_msg.pose.covariance[21] = gn2;
+  pose_msg.pose.covariance[28] = gn2;
+  pose_msg.pose.covariance[35] = gn2;
+  pose_msg.twist.covariance[0] = gn2;
+  pose_msg.twist.covariance[7] = gn2;
+  pose_msg.twist.covariance[14] = gn2;
+  pose_msg.twist.covariance[21] = gn2;
+  pose_msg.twist.covariance[28] = gn2;
+  pose_msg.twist.covariance[35] = gn2;
+
+  // Publish to ROS
+  pub_->publish(pose_msg);
 
   // Save last time stamp
   last_time_ = current_time;
-}
-
-// Utility for adding noise
-double GazeboRosP3DPrivate::GaussianKernel(double mu, double sigma)
-{
-  // Using Box-Muller transform to generate two independent standard
-  // normally disbributed normal variables see wikipedia
-
-  unsigned int seed = 0;
-
-  // Normalized uniform random variable
-  double U = static_cast<double>(rand_r(&seed)) /
-    static_cast<double>(RAND_MAX);
-
-  // Normalized uniform random variable
-  double V = static_cast<double>(rand_r(&seed)) /
-    static_cast<double>(RAND_MAX);
-
-  double X = sqrt(-2.0 * ::log(U)) * cos(2.0 * M_PI * V);
-
-  // There are 2 indep. vars, we'll just use X
-  // scale to our mu and sigma
-  X = sigma * X + mu;
-  return X;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosP3D)
