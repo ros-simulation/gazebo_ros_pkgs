@@ -351,24 +351,6 @@ void GazeboRosApiPlugin::advertiseServices()
   set_joint_properties_service_ = nh_->advertiseService(set_joint_properties_aso);
 
   // Advertise more services on the custom queue
-  std::string pause_physics_service_name("pause_physics");
-  ros::AdvertiseServiceOptions pause_physics_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          pause_physics_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::pausePhysics,this,_1,_2),
-                                                          ros::VoidPtr(), &gazebo_queue_);
-  pause_physics_service_ = nh_->advertiseService(pause_physics_aso);
-
-  // Advertise more services on the custom queue
-  std::string unpause_physics_service_name("unpause_physics");
-  ros::AdvertiseServiceOptions unpause_physics_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          unpause_physics_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::unpausePhysics,this,_1,_2),
-                                                          ros::VoidPtr(), &gazebo_queue_);
-  unpause_physics_service_ = nh_->advertiseService(unpause_physics_aso);
-
-  // Advertise more services on the custom queue
   std::string apply_body_wrench_service_name("apply_body_wrench");
   ros::AdvertiseServiceOptions apply_body_wrench_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::ApplyBodyWrench>(
@@ -403,25 +385,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                    boost::bind(&GazeboRosApiPlugin::clearBodyWrenches,this,_1,_2),
                                                                    ros::VoidPtr(), &gazebo_queue_);
   clear_body_wrenches_service_ = nh_->advertiseService(clear_body_wrenches_aso);
-
-  // Advertise more services on the custom queue
-  std::string reset_simulation_service_name("reset_simulation");
-  ros::AdvertiseServiceOptions reset_simulation_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          reset_simulation_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::resetSimulation,this,_1,_2),
-                                                          ros::VoidPtr(), &gazebo_queue_);
-  reset_simulation_service_ = nh_->advertiseService(reset_simulation_aso);
-
-  // Advertise more services on the custom queue
-  std::string reset_world_service_name("reset_world");
-  ros::AdvertiseServiceOptions reset_world_aso =
-    ros::AdvertiseServiceOptions::create<std_srvs::Empty>(
-                                                          reset_world_service_name,
-                                                          boost::bind(&GazeboRosApiPlugin::resetWorld,this,_1,_2),
-                                                          ros::VoidPtr(), &gazebo_queue_);
-  reset_world_service_ = nh_->advertiseService(reset_world_aso);
-
 
   // set param for use_sim_time if not set by user already
   if(!(nh_->hasParam("/use_sim_time")))
@@ -953,30 +916,6 @@ bool GazeboRosApiPlugin::applyJointEffort(gazebo_msgs::ApplyJointEffort::Request
 
   res.success = false;
   res.status_message = "ApplyJointEffort: joint not found";
-  return true;
-}
-
-bool GazeboRosApiPlugin::resetSimulation(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
-{
-  world_->Reset();
-  return true;
-}
-
-bool GazeboRosApiPlugin::resetWorld(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
-{
-  world_->ResetEntities(gazebo::physics::Base::MODEL);
-  return true;
-}
-
-bool GazeboRosApiPlugin::pausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
-{
-  world_->SetPaused(true);
-  return true;
-}
-
-bool GazeboRosApiPlugin::unpausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
-{
-  world_->SetPaused(false);
   return true;
 }
 

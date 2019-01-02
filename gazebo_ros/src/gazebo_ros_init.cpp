@@ -15,12 +15,18 @@
 #include "gazebo_ros/gazebo_ros_init.hpp"
 
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/physics/PhysicsIface.hh>
+#include <gazebo/physics/World.hh>
+
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
+
 #include <rosgraph_msgs/msg/clock.hpp>
+#include <std_srvs/srv/empty.hpp>
 
 #include <memory>
+#include <string>
 
 namespace gazebo_ros
 {
@@ -28,14 +34,77 @@ namespace gazebo_ros
 class GazeboRosInitPrivate
 {
 public:
+  /// Constructor
   GazeboRosInitPrivate();
-  gazebo_ros::Node::SharedPtr ros_node_;
-  rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr clock_pub_;
-  gazebo::event::ConnectionPtr world_update_event_;
-  gazebo_ros::Throttler throttler_;
-  static constexpr double DEFAULT_PUBLISH_FREQUENCY = 10.;
 
+  /// Callback when a world is created.
+  /// \param[in] _world_name The world's name
+  void OnWorldCreated(const std::string & _world_name);
+
+  /// Publish simulation time.
+  /// \param[in] _info World update information.
   void PublishSimTime(const gazebo::common::UpdateInfo & _info);
+
+  /// Callback from ROS service to reset simulation.
+  /// \param[in] req Empty request
+  /// \param[out] res Empty response
+  void OnResetSimulation(
+    std_srvs::srv::Empty::Request::SharedPtr req,
+    std_srvs::srv::Empty::Response::SharedPtr res);
+
+  /// Callback from ROS service to reset world.
+  /// \param[in] req Empty request
+  /// \param[out] res Empty response
+  void OnResetWorld(
+    std_srvs::srv::Empty::Request::SharedPtr req,
+    std_srvs::srv::Empty::Response::SharedPtr res);
+
+  /// Callback from ROS service to pause physics.
+  /// \param[in] req Empty request
+  /// \param[out] res Empty response
+  void OnPause(
+    std_srvs::srv::Empty::Request::SharedPtr req,
+    std_srvs::srv::Empty::Response::SharedPtr res);
+
+  /// Callback from ROS service to unpause (play) physics.
+  /// \param[in] req Empty request
+  /// \param[out] res Empty response
+  void OnUnpause(
+    std_srvs::srv::Empty::Request::SharedPtr req,
+    std_srvs::srv::Empty::Response::SharedPtr res);
+
+  /// \brief Keep a pointer to the world.
+  gazebo::physics::WorldPtr world_;
+
+  /// Gazebo-ROS node
+  gazebo_ros::Node::SharedPtr ros_node_;
+
+  /// Publishes simulation time
+  rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr clock_pub_;
+
+  /// ROS service to handle requests to reset simulation.
+  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_simulation_service_;
+
+  /// ROS service to handle requests to reset world.
+  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_world_service_;
+
+  /// ROS service to handle requests to pause physics.
+  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr pause_service_;
+
+  /// ROS service to handle requests to unpause physics.
+  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr unpause_service_;
+
+  /// Connection to world update event, called at every iteration
+  gazebo::event::ConnectionPtr world_update_event_;
+
+  /// To be notified once the world is created.
+  gazebo::event::ConnectionPtr world_created_event_;
+
+  /// Throttler for clock publisher.
+  gazebo_ros::Throttler throttler_;
+
+  /// Default frequency for clock publisher.
+  static constexpr double DEFAULT_PUBLISH_FREQUENCY = 10.;
 };
 
 GazeboRosInit::GazeboRosInit()
@@ -85,6 +154,36 @@ void GazeboRosInit::Load(int argc, char ** argv)
 
   impl_->world_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosInitPrivate::PublishSimTime, impl_.get(), std::placeholders::_1));
+
+  // Get a callback when a world is created
+  impl_->world_created_event_ = gazebo::event::Events::ConnectWorldCreated(
+    std::bind(&GazeboRosInitPrivate::OnWorldCreated, impl_.get(), std::placeholders::_1));
+}
+
+void GazeboRosInitPrivate::OnWorldCreated(const std::string & _world_name)
+{
+  // Only support one world
+  world_created_event_.reset();
+
+  world_ = gazebo::physics::get_world(_world_name);
+
+  // Reset services
+  reset_simulation_service_ = ros_node_->create_service<std_srvs::srv::Empty>("reset_simulation",
+      std::bind(&GazeboRosInitPrivate::OnResetSimulation, this,
+      std::placeholders::_1, std::placeholders::_2));
+
+  reset_world_service_ = ros_node_->create_service<std_srvs::srv::Empty>("reset_world",
+      std::bind(&GazeboRosInitPrivate::OnResetWorld, this,
+      std::placeholders::_1, std::placeholders::_2));
+
+  // Pause services
+  pause_service_ = ros_node_->create_service<std_srvs::srv::Empty>("pause_physics",
+      std::bind(&GazeboRosInitPrivate::OnPause, this,
+      std::placeholders::_1, std::placeholders::_2));
+
+  unpause_service_ = ros_node_->create_service<std_srvs::srv::Empty>("unpause_physics",
+      std::bind(&GazeboRosInitPrivate::OnUnpause, this,
+      std::placeholders::_1, std::placeholders::_2));
 }
 
 GazeboRosInitPrivate::GazeboRosInitPrivate()
@@ -94,11 +193,41 @@ GazeboRosInitPrivate::GazeboRosInitPrivate()
 
 void GazeboRosInitPrivate::PublishSimTime(const gazebo::common::UpdateInfo & _info)
 {
-  if (!throttler_.IsReady(_info.realTime)) {return;}
+  if (!throttler_.IsReady(_info.realTime)) {
+    return;
+  }
 
   rosgraph_msgs::msg::Clock clock;
   clock.clock = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_info.simTime);
   clock_pub_->publish(clock);
+}
+
+void GazeboRosInitPrivate::OnResetSimulation(
+  std_srvs::srv::Empty::Request::SharedPtr,
+  std_srvs::srv::Empty::Response::SharedPtr)
+{
+  world_->Reset();
+}
+
+void GazeboRosInitPrivate::OnResetWorld(
+  std_srvs::srv::Empty::Request::SharedPtr,
+  std_srvs::srv::Empty::Response::SharedPtr)
+{
+  world_->ResetEntities(gazebo::physics::Base::MODEL);
+}
+
+void GazeboRosInitPrivate::OnPause(
+  std_srvs::srv::Empty::Request::SharedPtr,
+  std_srvs::srv::Empty::Response::SharedPtr)
+{
+  world_->SetPaused(true);
+}
+
+void GazeboRosInitPrivate::OnUnpause(
+  std_srvs::srv::Empty::Request::SharedPtr,
+  std_srvs::srv::Empty::Response::SharedPtr)
+{
+  world_->SetPaused(false);
 }
 
 GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosInit)
