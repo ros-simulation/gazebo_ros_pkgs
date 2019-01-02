@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!--
+  Gazebo ROS P3D plugin demo
+
+  Try for example:
+
+  ros2 topic echo /demo/p3d_demo
+-->
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="the_model">
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="box_link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+      <link name="sphere_link">
+        <pose>3 0 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.5</radius>
+            </sphere>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.5</radius>
+            </sphere>
+          </geometry>
+        </visual>
+      </link>
+      <plugin name="gazebo_ros_p3d" filename="libgazebo_ros_p3d.so">
+        <ros>
+          <namespace>/demo</namespace>
+          <argument>odom:=p3d_demo</argument>
+        </ros>
+        <body_name>box_link</body_name>
+        <frame_name>sphere_link</frame_name>
+        <update_rate>1</update_rate>
+        <xyz_offsets>10 10 10</xyz_offsets>
+        <rpy_offsets>0.1 0.1 0.1</rpy_offsets>
+        <gaussian_noise>0.01</gaussian_noise>
+      </plugin>
+    </model>
+  </world>
+</sdf>

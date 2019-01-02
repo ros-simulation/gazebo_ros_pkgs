@@ -16,6 +16,7 @@ set(tests
   test_gazebo_ros_force
   test_gazebo_ros_imu_sensor
   test_gazebo_ros_joint_state_publisher
+  test_gazebo_ros_p3d
   test_gazebo_ros_ray_sensor
 )
 
