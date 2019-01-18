@@ -1287,14 +1287,33 @@ bool GazeboRosApiPlugin::setLightProperties(gazebo_msgs::SetLightProperties::Req
 
     phy_light->FillMsg(light);
 
+    light.set_cast_shadows(req.cast_shadows);
+
     light.mutable_diffuse()->set_r(req.diffuse.r);
     light.mutable_diffuse()->set_g(req.diffuse.g);
     light.mutable_diffuse()->set_b(req.diffuse.b);
     light.mutable_diffuse()->set_a(req.diffuse.a);
 
+    light.mutable_specular()->set_r(req.specular.r);
+    light.mutable_specular()->set_g(req.specular.g);
+    light.mutable_specular()->set_b(req.specular.b);
+    light.mutable_specular()->set_a(req.specular.a);
+
     light.set_attenuation_constant(req.attenuation_constant);
     light.set_attenuation_linear(req.attenuation_linear);
     light.set_attenuation_quadratic(req.attenuation_quadratic);
+
+    light.mutable_direction()->set_x(req.direction.x);
+    light.mutable_direction()->set_y(req.direction.y);
+    light.mutable_direction()->set_z(req.direction.z);
+
+    light.mutable_pose()->mutable_position()->set_x(req.pose.position.x);
+    light.mutable_pose()->mutable_position()->set_y(req.pose.position.y);
+    light.mutable_pose()->mutable_position()->set_z(req.pose.position.z);
+    light.mutable_pose()->mutable_orientation()->set_w(req.pose.orientation.w);
+    light.mutable_pose()->mutable_orientation()->set_x(req.pose.orientation.x);
+    light.mutable_pose()->mutable_orientation()->set_y(req.pose.orientation.y);
+    light.mutable_pose()->mutable_orientation()->set_z(req.pose.orientation.z);
 
     light_modify_pub_->Publish(light, true);
 
