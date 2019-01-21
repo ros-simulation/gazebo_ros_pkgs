@@ -131,7 +131,6 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
     EXPECT_EQ(response3->model_names[0], "ground_plane");
     EXPECT_EQ(response3->model_names[1], "sdf_box1");
     EXPECT_EQ(response3->model_names[2], "sdf_box2");
-
   }
 
   // Spawn SDF model

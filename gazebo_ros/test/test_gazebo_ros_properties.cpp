@@ -32,7 +32,7 @@
 
 #include <memory>
 #include <string>
-
+#include <vector>
 
 #define tol 0.01
 
@@ -43,62 +43,68 @@ public:
   void SetUp() override;
 
   void GetModelProperties(
-  const std::string & _model_name);
+    const std::string & _model_name);
 
   void GetJointProperties(
-  const std::string & _joint_name,
-  const double & _damping);
+    const std::string & _joint_name,
+    const double & _damping);
 
   void GetLinkProperties(
-  const std::string & _link_name,
-  const bool & _gravity_mode,
-  const double & _mass,
-  const double & _ixx,
-  const double & _ixy,
-  const double & _ixz,
-  const double & _iyy,
-  const double & _iyz,
-  const double & _izz);
+    const std::string & _link_name,
+    const bool & _gravity_mode,
+    const double & _mass,
+    const double & _ixx,
+    const double & _ixy,
+    const double & _ixz,
+    const double & _iyy,
+    const double & _iyz,
+    const double & _izz);
 
   void GetLightProperties(
-  const std::string & _light_name,
-  const ignition::math::Vector4d & _diffuse,
-  const double & _attenuation_constant,
-  const double & _attenuation_linear,
-  const double & _attenuation_quadratic);
+    const std::string & _light_name,
+    const ignition::math::Vector4d & _diffuse,
+    const double & _attenuation_constant,
+    const double & _attenuation_linear,
+    const double & _attenuation_quadratic);
 
   void SetJointProperties(
-  const std::string & _joint_name,
-  const double & _damping);
+    const std::string & _joint_name,
+    const double & _damping);
 
   void SetLinkProperties(
-  const std::string & _link_name,
-  const bool & _gravity_mode,
-  const double & _mass,
-  const double & _ixx,
-  const double & _ixy,
-  const double & _ixz,
-  const double & _iyy,
-  const double & _iyz,
-  const double & _izz);
+    const std::string & _link_name,
+    const bool & _gravity_mode,
+    const double & _mass,
+    const double & _ixx,
+    const double & _ixy,
+    const double & _ixz,
+    const double & _iyy,
+    const double & _iyz,
+    const double & _izz);
 
   void SetLightProperties(
-  const std::string & _light_name,
-  const ignition::math::Vector4d & _diffuse,
-  const double & _attenuation_constant,
-  const double & _attenuation_linear,
-  const double & _attenuation_quadratic);
+    const std::string & _light_name,
+    const ignition::math::Vector4d & _diffuse,
+    const double & _attenuation_constant,
+    const double & _attenuation_linear,
+    const double & _attenuation_quadratic);
 
   gazebo::physics::WorldPtr world_;
   rclcpp::Node::SharedPtr node_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetModelProperties>> get_model_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetJointProperties>> get_joint_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLinkProperties>> get_link_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLightProperties>> get_light_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetJointProperties>> set_joint_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLinkProperties>> set_link_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLightProperties>> set_light_properties_client_;
-
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetModelProperties>> 
+  get_model_properties_client_;
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetJointProperties>> 
+  get_joint_properties_client_;
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLinkProperties>> 
+  get_link_properties_client_;
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLightProperties>> 
+  get_light_properties_client_;
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetJointProperties>> 
+  set_joint_properties_client_;
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLinkProperties>> 
+  set_link_properties_client_;
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLightProperties>> 
+  set_light_properties_client_;
 };
 
 void GazeboRosPropertiesTest::SetUp()
@@ -148,11 +154,10 @@ void GazeboRosPropertiesTest::SetUp()
     node_->create_client<gazebo_msgs::srv::SetLightProperties>("test/set_light_properties");
   ASSERT_NE(nullptr, set_light_properties_client_);
   EXPECT_TRUE(set_light_properties_client_->wait_for_service(std::chrono::seconds(1)));
-
 }
 
 void GazeboRosPropertiesTest::GetModelProperties(
-    const std::string & _model_name)
+  const std::string & _model_name)
 {
   // Get spawned Model properties
   auto entity = world_->EntityByName(_model_name);
@@ -193,7 +198,7 @@ void GazeboRosPropertiesTest::GetModelProperties(
   EXPECT_EQ(response->joint_names[1], "arm_elbow_pan_joint");
   EXPECT_EQ(response->joint_names[2], "arm_wrist_lift_joint");
 
-  std::vector<std::string> v; // Empty
+  std::vector<std::string> v;  // Empty
   EXPECT_EQ(response->child_model_names, v);
   EXPECT_FALSE(response->is_static);
 }
@@ -215,7 +220,7 @@ void GazeboRosPropertiesTest::GetJointProperties(
 
   std::vector<double> v;
   v.push_back(_damping);
-  if ((response->damping).size() > 0){
+  if ((response->damping).size() > 0) {
     EXPECT_EQ(response->damping, v);
   }
 }
@@ -250,7 +255,7 @@ void GazeboRosPropertiesTest::GetLinkProperties(
   const double & _iyy,
   const double & _iyz,
   const double & _izz)
-{  
+{
   auto request = std::make_shared<gazebo_msgs::srv::GetLinkProperties::Request>();
   request->link_name = _link_name;
 
@@ -379,32 +384,31 @@ TEST_F(GazeboRosPropertiesTest, GetSetProperties)
   // Get / set link properties
   {
     // Get initial link properties
-    this->GetLinkProperties("simple_arm::arm_base", 
-                          true, 101.0, 1.11, 0.0, 0.0, 100.11, 0.0, 1.01);
+    this->GetLinkProperties("simple_arm::arm_base",
+      true, 101.0, 1.11, 0.0, 0.0, 100.11, 0.0, 1.01);
 
     // Set link properties
-    this->SetLinkProperties("simple_arm::arm_base", 
-                          true, 170.2, 1.2, 0.3, 0.2, 102.2, 0.2, 1.02);
+    this->SetLinkProperties("simple_arm::arm_base",
+      true, 170.2, 1.2, 0.3, 0.2, 102.2, 0.2, 1.02);
 
     // Check new link properties
-    this->GetLinkProperties("simple_arm::arm_base", 
-                          true, 170.2, 1.2, 0.3, 0.2, 102.2, 0.2, 1.02);
+    this->GetLinkProperties("simple_arm::arm_base",
+      true, 170.2, 1.2, 0.3, 0.2, 102.2, 0.2, 1.02);
   }
   // Get / set light properties
   {
-
     // Get initial light properties
-    this->GetLightProperties("sun", ignition::math::Vector4d(0.800000011920929, 0.800000011920929, 0.800000011920929, 1.0),
-                            0.8999999761581421, 0.009999999776482582, 0.0010000000474974513);
+    this->GetLightProperties("sun", ignition::math::Vector4d(0.800000011920929, 0.800000011920929,
+      0.800000011920929, 1.0), 0.8999999761581421, 0.009999999776482582, 0.0010000000474974513);
 
     // Set light properties
     this->SetLightProperties("sun", ignition::math::Vector4d(0.7, 0.1, 0.5, 1.0),
-                            0.92, 0.0092, 0.002);
+      0.92, 0.0092, 0.002);
 
     // Check new light properties. Wait for properties to be set first.
     rclcpp::sleep_for(std::chrono::milliseconds(500));
     this->GetLightProperties("sun", ignition::math::Vector4d(0.7, 0.1, 0.5, 1.0),
-                            0.92, 0.0092, 0.002);
+      0.92, 0.0092, 0.002);
   }
 }
 

@@ -163,8 +163,9 @@ void GazeboRosFactoryPrivate::GetModelList(
 {
   res->model_names.clear();
   res->sim_time = world_->SimTime().Double();
-  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
+  for (unsigned int i = 0; i < world_->ModelCount(); i++){
     res->model_names.push_back(world_->ModelByIndex(i)->GetName());
+  }
   res->success = true;
   res->status_message = "GetModelList: got model list";
 }

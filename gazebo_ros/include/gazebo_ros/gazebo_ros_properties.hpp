@@ -24,8 +24,6 @@ namespace gazebo_ros
 
 class GazeboRosPropertiesPrivate;
 
-/// TODO
-	
 class GazeboRosProperties : public gazebo::WorldPlugin
 {
 public:
