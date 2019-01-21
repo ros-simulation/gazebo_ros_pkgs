@@ -53,20 +53,9 @@
 #include "gazebo_msgs/SetPhysicsProperties.h"
 #include "gazebo_msgs/GetPhysicsProperties.h"
 
-#include "gazebo_msgs/SetJointProperties.h"
 
-#include "gazebo_msgs/GetWorldProperties.h"
-
-#include "gazebo_msgs/GetModelProperties.h"
-
-#include "gazebo_msgs/GetJointProperties.h"
 #include "gazebo_msgs/ApplyJointEffort.h"
 
-#include "gazebo_msgs/GetLinkProperties.h"
-#include "gazebo_msgs/SetLinkProperties.h"
-
-#include "gazebo_msgs/GetLightProperties.h"
-#include "gazebo_msgs/SetLightProperties.h"
 
 // Topics
 #include "gazebo_msgs/ModelStates.h"
@@ -133,34 +122,10 @@ public:
   void onModelStatesDisconnect();
 
   /// \brief
-  bool getModelProperties(gazebo_msgs::GetModelProperties::Request &req,gazebo_msgs::GetModelProperties::Response &res);
-
-  /// \brief
-  bool getWorldProperties(gazebo_msgs::GetWorldProperties::Request &req,gazebo_msgs::GetWorldProperties::Response &res);
-
-  /// \brief
-  bool getJointProperties(gazebo_msgs::GetJointProperties::Request &req,gazebo_msgs::GetJointProperties::Response &res);
-
-  /// \brief
-  bool getLinkProperties(gazebo_msgs::GetLinkProperties::Request &req,gazebo_msgs::GetLinkProperties::Response &res);
-
-  /// \brief
-  bool getLightProperties(gazebo_msgs::GetLightProperties::Request &req,gazebo_msgs::GetLightProperties::Response &res);
-
-  /// \brief
-  bool setLightProperties(gazebo_msgs::SetLightProperties::Request &req,gazebo_msgs::SetLightProperties::Response &res);
-
-  /// \brief
-  bool setLinkProperties(gazebo_msgs::SetLinkProperties::Request &req,gazebo_msgs::SetLinkProperties::Response &res);
-
-  /// \brief
   bool setPhysicsProperties(gazebo_msgs::SetPhysicsProperties::Request &req,gazebo_msgs::SetPhysicsProperties::Response &res);
 
   /// \brief
   bool getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,gazebo_msgs::GetPhysicsProperties::Response &res);
-
-  /// \brief
-  bool setJointProperties(gazebo_msgs::SetJointProperties::Request &req,gazebo_msgs::SetJointProperties::Response &res);
 
   /// \brief
   bool applyJointEffort(gazebo_msgs::ApplyJointEffort::Request &req,gazebo_msgs::ApplyJointEffort::Response &res);
@@ -238,17 +203,9 @@ private:
   gazebo::event::ConnectionPtr pub_model_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
-  ros::ServiceServer get_model_properties_service_;
-  ros::ServiceServer get_world_properties_service_;
-  ros::ServiceServer get_joint_properties_service_;
-  ros::ServiceServer get_link_properties_service_;
-  ros::ServiceServer get_light_properties_service_;
-  ros::ServiceServer set_light_properties_service_;
-  ros::ServiceServer set_link_properties_service_;
   ros::ServiceServer set_physics_properties_service_;
   ros::ServiceServer get_physics_properties_service_;
   ros::ServiceServer apply_body_wrench_service_;
-  ros::ServiceServer set_joint_properties_service_;
   ros::ServiceServer apply_joint_effort_service_;
   ros::ServiceServer set_model_configuration_service_;
   ros::ServiceServer clear_joint_forces_service_;

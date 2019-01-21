@@ -19,7 +19,9 @@
 #include <gazebo/physics/Entity.hh>
 #include <gazebo/physics/PhysicsIface.hh>
 #include <gazebo/physics/World.hh>
+#include <gazebo/physics/Model.hh>
 #include <gazebo/transport/Node.hh>
+#include <gazebo_msgs/srv/get_model_list.hpp>
 #include <gazebo_msgs/srv/delete_entity.hpp>
 #include <gazebo_msgs/srv/spawn_entity.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
@@ -43,6 +45,12 @@ public:
   /// Callback when a world is created.
   /// \param[in] _world_name The world's name
   void OnWorldCreated(const std::string & _world_name);
+
+  /// \brief Function for receiving the model list from a gazebo world.
+  /// \param[out] res Response
+  void GetModelList(
+    gazebo_msgs::srv::GetModelList::Request::SharedPtr,
+    gazebo_msgs::srv::GetModelList::Response::SharedPtr res);
 
   /// \brief Function for inserting an entity into Gazebo from ROS Service Call.
   /// Supported formats are SDF and URDF and works with both models and lights.
@@ -74,6 +82,9 @@ public:
 
   /// ROS node for communication, managed by gazebo_ros.
   gazebo_ros::Node::SharedPtr ros_node_;
+
+  /// \brief ROS service to handle requests/responses to get model list.
+  rclcpp::Service<gazebo_msgs::srv::GetModelList>::SharedPtr model_list_service_;
 
   /// \brief ROS service to handle requests/responses to spawn entities.
   rclcpp::Service<gazebo_msgs::srv::SpawnEntity>::SharedPtr spawn_service_;
@@ -126,6 +137,10 @@ void GazeboRosFactoryPrivate::OnWorldCreated(const std::string & _world_name)
   // ROS transport
   ros_node_ = gazebo_ros::Node::Get();
 
+  model_list_service_ = ros_node_->create_service<gazebo_msgs::srv::GetModelList>("get_model_list",
+      std::bind(&GazeboRosFactoryPrivate::GetModelList, this,
+      std::placeholders::_1, std::placeholders::_2));
+
   spawn_service_ = ros_node_->create_service<gazebo_msgs::srv::SpawnEntity>("spawn_entity",
       std::bind(&GazeboRosFactoryPrivate::SpawnEntity, this,
       std::placeholders::_1, std::placeholders::_2));
@@ -140,6 +155,18 @@ void GazeboRosFactoryPrivate::OnWorldCreated(const std::string & _world_name)
   gz_factory_pub_ = gz_node_->Advertise<gazebo::msgs::Factory>("~/factory");
   gz_factory_light_pub_ = gz_node_->Advertise<gazebo::msgs::Light>("~/factory/light");
   gz_request_pub_ = gz_node_->Advertise<gazebo::msgs::Request>("~/request");
+}
+
+void GazeboRosFactoryPrivate::GetModelList(
+  gazebo_msgs::srv::GetModelList::Request::SharedPtr,
+  gazebo_msgs::srv::GetModelList::Response::SharedPtr res)
+{
+  res->model_names.clear();
+  res->sim_time = world_->SimTime().Double();
+  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
+    res->model_names.push_back(world_->ModelByIndex(i)->GetName());
+  res->success = true;
+  res->status_message = "GetModelList: got model list";
 }
 
 void GazeboRosFactoryPrivate::SpawnEntity(
