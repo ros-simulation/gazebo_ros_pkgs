@@ -15,3 +15,7 @@
 .DS_Store
 
 CATKIN_IGNORE
+
+# VSCode
+.vscode
+*/build/*
