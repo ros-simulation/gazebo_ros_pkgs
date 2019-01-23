@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix typo exist -> exists (`#833 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/833>`_)
+* Fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_ 
+  (`#823 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/823>`_)
+* Contributors: Daniel Ingram, Jack Liu, Steven Peters
+
 2.5.17 (2018-06-07)
 -------------------
 
