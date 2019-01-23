@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.18 (2019-01-23)
+-------------------
 * Corrected the typo 'ture' to 'true' (`#828 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/828>`_)
 * Add horizontal movement option (`#814 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/814>`_)
   * add horizontal movement option

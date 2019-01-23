@@ -2,8 +2,8 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.18 (2019-01-23)
+-------------------
 * Merge remote-tracking branch 'upstream/kinetic-devel' into kinetic-devel
   # Conflicts:
   #	gazebo_ros_control/src/default_robot_hw_sim.cpp
