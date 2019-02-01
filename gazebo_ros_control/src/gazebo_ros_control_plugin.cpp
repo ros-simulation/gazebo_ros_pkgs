@@ -44,6 +44,8 @@
 
 #include <gazebo_ros_control/gazebo_ros_control_plugin.h>
 #include <urdf/model.h>
+#include <chrono>
+#include <thread>
 
 namespace gazebo_ros_control
 {
@@ -287,7 +289,7 @@ std::string GazeboRosControlPlugin::getURDF(std::string param_name) const
       model_nh_.getParam(param_name, urdf_string);
     }
 
-    usleep(100000);
+    std::this_thread::sleep_for(std::chrono::microseconds(100000));
   }
   ROS_DEBUG_STREAM_NAMED("gazebo_ros_control", "Recieved urdf from param server, parsing...");
 
