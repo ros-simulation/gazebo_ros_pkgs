@@ -39,6 +39,7 @@ add_service_files(DIRECTORY srv FILES
   GetWorldProperties.srv
   SetLinkProperties.srv
   SetModelState.srv
+  SetModelVisual.srv
   BodyRequest.srv
   GetLinkProperties.srv
   GetModelState.srv

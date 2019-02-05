@@ -186,6 +186,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   factory_light_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/factory/light");
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
+  visual_pub_ = gazebonode_->Advertise<gazebo::msgs::Visual>("~/visual");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
 
   // reset topic connection counts
@@ -381,6 +382,14 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                      boost::bind(&GazeboRosApiPlugin::setModelState,this,_1,_2),
                                                                      ros::VoidPtr(), &gazebo_queue_);
   set_model_state_service_ = nh_->advertiseService(set_model_state_aso);
+
+  std::string set_model_visual_service_name("set_model_visual");
+  ros::AdvertiseServiceOptions set_model_visual_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetModelVisual>(
+                                                                     set_model_visual_service_name,
+                                                                     boost::bind(&GazeboRosApiPlugin::setModelVisual,this,_1,_2),
+                                                                     ros::VoidPtr(), &gazebo_queue_);
+  set_model_visual_service_ = nh_->advertiseService(set_model_visual_aso);
 
   // Advertise more services on the custom queue
   std::string set_model_configuration_service_name("set_model_configuration");
@@ -1559,6 +1568,18 @@ bool GazeboRosApiPlugin::setModelState(gazebo_msgs::SetModelState::Request &req,
     res.status_message = "SetModelState: set model state done";
     return true;
   }
+}
+
+bool GazeboRosApiPlugin::setModelVisual(gazebo_msgs::SetModelVisual::Request &req,
+                                        gazebo_msgs::SetModelVisual::Response &res)
+{
+    gazebo::msgs::Visual msg;
+    msg.set_parent_name(req.parent_name);
+    msg.set_name(req.name);
+    msg.set_visible(req.visible);
+    msg.set_transparency(req.transparency);
+    msg.set_is_static(req.is_static);
+    visual_pub_->Publish(msg, true);
 }
 
 void GazeboRosApiPlugin::updateModelState(const gazebo_msgs::ModelState::ConstPtr& model_state)
