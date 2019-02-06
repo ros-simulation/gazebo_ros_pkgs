@@ -22,8 +22,8 @@
 #include <rclcpp/rclcpp.hpp>
 
 #ifdef NO_ERROR
-  // NO_ERROR is a macro defined in Windows that's used as an enum in tf2
-  #undef NO_ERROR
+// NO_ERROR is a macro defined in Windows that's used as an enum in tf2
+#undef NO_ERROR
 #endif
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
