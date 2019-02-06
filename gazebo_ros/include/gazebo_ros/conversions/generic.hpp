@@ -32,31 +32,31 @@ static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conver
 /// Generic conversion from an Ignition Math vector to another type.
 /// \param[in] in Input vector.
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const ignition::math::Vector3d & in)
+/// \tparam T Output type
+template<class T>
+T Convert(const ignition::math::Vector3d & in)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 /// Generic conversion from an Ignition Math quaternion to another type.
 /// \param[in] in Input quaternion
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const ignition::math::Quaterniond & in)
+/// \tparam T Output type
+template<class T>
+T Convert(const ignition::math::Quaterniond & in)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 /// Generic conversion from an Gazebo Time object to another type.
 /// \param[in] in Input time;
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const gazebo::common::Time & in)
+/// \tparam T Output type
+template<class T>
+T Convert(const gazebo::common::Time & in)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from an Gazebo Time to a RCLCPP Time.
@@ -71,11 +71,11 @@ rclcpp::Time Convert(const gazebo::common::Time & in)
 /// Generic conversion from an Gazebo Time message to another type.
 /// \param[in] in Input time
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const gazebo::msgs::Time & in)
+/// \tparam T Output type
+template<class T>
+T Convert(const gazebo::msgs::Time & in)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 }  // namespace gazebo_ros

@@ -115,6 +115,9 @@ ament_target_dependencies(gazebo_ros_imu_sensor
   "sensor_msgs"
   "gazebo_dev"
 )
+target_link_libraries(gazebo_ros_imu_sensor
+  ImuSensorPlugin
+)
 ament_export_libraries(gazebo_ros_imu_sensor)
 
 # gazebo_ros_ray_sensor
