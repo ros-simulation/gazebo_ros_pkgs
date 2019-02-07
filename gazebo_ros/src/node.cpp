@@ -28,7 +28,7 @@ std::mutex Node::lock_;
 
 Node::~Node()
 {
-  executor_->remove_node(get_node_base_interface());
+  executor_->remove_node(get_node_base_interface(true));
 }
 
 Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
