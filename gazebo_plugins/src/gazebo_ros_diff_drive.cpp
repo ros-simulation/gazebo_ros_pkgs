@@ -243,7 +243,8 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     !impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT])
   {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-      "Joint [%s] or [%s] not found, plugin will not work.", left_joint, right_joint);
+      "Joint [%s] or [%s] not found, plugin will not work.", left_joint.c_str(),
+      right_joint.c_str());
 
     impl_->ros_node_.reset();
     return;
