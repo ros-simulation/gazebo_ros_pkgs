@@ -21,6 +21,14 @@
 
 #include <string>
 
+#ifdef _WIN32
+
+#include <chrono>
+#include <thread>
+#define usleep(usec) (std::this_thread::sleep_for(std::chrono::microseconds(usec)))
+
+#endif  // _WIN32
+
 namespace gazebo_ros
 {
 

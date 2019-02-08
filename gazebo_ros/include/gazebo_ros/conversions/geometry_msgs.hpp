@@ -30,11 +30,11 @@ namespace gazebo_ros
 /// Generic conversion from a ROS geometry vector message to another type.
 /// \param[in] in Input message.
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const geometry_msgs::msg::Vector3 & in)
+/// \tparam T Output type
+template<class T>
+T Convert(const geometry_msgs::msg::Vector3 & in)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS vector message to an Ignition Math vector.
@@ -53,11 +53,11 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Vector3 & msg)
 /// Generic conversion from a ROS geometry point32 message to another type.
 /// \param[in] in Input message.
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const geometry_msgs::msg::Point32 & in)
+/// \tparam T Output type
+template<class T>
+T Convert(const geometry_msgs::msg::Point32 & in)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS point32 message to an Ignition Math vector.
@@ -76,11 +76,11 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Point32 & in)
 /// Generic conversion from a ROS geometry point message to another type.
 /// \param[in] in Input message.
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const geometry_msgs::msg::Point &)
+/// \tparam T Output type
+template<class T>
+T Convert(const geometry_msgs::msg::Point &)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 /// TODO(louise) This may already exist somewhere else, since it's within the same lib
@@ -153,11 +153,11 @@ geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
 /// Generic conversion from a ROS Quaternion message to another type
 /// \param[in] in Input quaternion
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const geometry_msgs::msg::Quaternion & in)
+/// \tparam T Output type
+template<class T>
+T Convert(const geometry_msgs::msg::Quaternion & in)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from a ROS quaternion message to ignition quaternion

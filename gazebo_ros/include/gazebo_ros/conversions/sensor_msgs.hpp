@@ -38,11 +38,11 @@ namespace gazebo_ros
 /// \param[in] in Input message;
 /// \param[in] min_intensity The minimum intensity value to clip the output intensities
 /// \return Conversion result
-/// \tparam OUT Output type
-template<class OUT>
-OUT Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity = 0.0)
+/// \tparam T Output type
+template<class T>
+T Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity = 0.0)
 {
-  OUT::ConversionNotImplemented;
+  T::ConversionNotImplemented;
 }
 
 /// \brief Specialized conversion from an Gazebo Laser Scan to a ROS Laser Scan.
