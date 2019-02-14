@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!--
+  Gazebo ROS state plugin demo
+
+  Try for example to get a model's state w.r.t. the world:
+
+      ros2 service call /demo/get_entity_state 'gazebo_msgs/GetEntityState' '{name: "boxes"}'
+
+  Or a link's state w.r.t. the world:
+
+      ros2 service call /demo/get_entity_state 'gazebo_msgs/GetEntityState' '{name: "boxes::bottom", relative_frame: "world"}'
+
+  Or a light's state w.r.t. another entity:
+
+      ros2 service call /demo/get_entity_state 'gazebo_msgs/GetEntityState' '{name: "sun", relative_frame: "ground_plane"}'
+
+  > When setting state, note that the changes for static entities may not be visible on gzclient due to https://bitbucket.org/osrf/gazebo/issues/2560
+
+  Try teleporting a model:
+
+      ros2 service call /demo/set_entity_state 'gazebo_msgs/SetEntityState' '{state: {name: "boxes", pose: {position: {y: 2}}}}'
+
+  Or rotating a light:
+
+      ros2 service call /demo/set_entity_state 'gazebo_msgs/SetEntityState' '{state: {name: "sun", pose: {position: {z: 10}, orientation: {x: 0.1, y: 0.2, z: 0.3, w: 0.5}}}}'
+
+  Try teleporting a model:
+
+      ros2 service call /demo/set_entity_state 'gazebo_msgs/SetEntityState' '{state: {name: "boxes::top", reference_frame: "boxes::top", twist: {angular: {x: 2}}}}'
+-->
+<sdf version="1.6">
+  <world name="default">
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <ros>
+        <namespace>/demo</namespace>
+      </ros>
+    </plugin>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name='boxes'>
+      <pose>0 0 0.5 0 0 0</pose>
+
+      <link name='bottom'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name='top'>
+        <pose>0 0 1.25 0 0 0</pose>
+        <self_collide>true</self_collide>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>0.5 0.5 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.5 0.5 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+
+    </model>
+  </world>
+</sdf>
+

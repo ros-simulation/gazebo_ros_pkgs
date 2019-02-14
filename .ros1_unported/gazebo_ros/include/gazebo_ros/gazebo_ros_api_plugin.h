@@ -58,23 +58,17 @@
 #include "gazebo_msgs/GetWorldProperties.h"
 
 #include "gazebo_msgs/GetModelProperties.h"
-#include "gazebo_msgs/GetModelState.h"
-#include "gazebo_msgs/SetModelState.h"
 
 #include "gazebo_msgs/GetJointProperties.h"
 #include "gazebo_msgs/ApplyJointEffort.h"
 
 #include "gazebo_msgs/GetLinkProperties.h"
 #include "gazebo_msgs/SetLinkProperties.h"
-#include "gazebo_msgs/SetLinkState.h"
-#include "gazebo_msgs/GetLinkState.h"
 
 #include "gazebo_msgs/GetLightProperties.h"
 #include "gazebo_msgs/SetLightProperties.h"
 
 // Topics
-#include "gazebo_msgs/ModelState.h"
-#include "gazebo_msgs/LinkState.h"
 #include "gazebo_msgs/ModelStates.h"
 #include "gazebo_msgs/LinkStates.h"
 
@@ -139,9 +133,6 @@ public:
   void onModelStatesDisconnect();
 
   /// \brief
-  bool getModelState(gazebo_msgs::GetModelState::Request &req,gazebo_msgs::GetModelState::Response &res);
-
-  /// \brief
   bool getModelProperties(gazebo_msgs::GetModelProperties::Request &req,gazebo_msgs::GetModelProperties::Response &res);
 
   /// \brief
@@ -152,9 +143,6 @@ public:
 
   /// \brief
   bool getLinkProperties(gazebo_msgs::GetLinkProperties::Request &req,gazebo_msgs::GetLinkProperties::Response &res);
-
-  /// \brief
-  bool getLinkState(gazebo_msgs::GetLinkState::Request &req,gazebo_msgs::GetLinkState::Response &res);
 
   /// \brief
   bool getLightProperties(gazebo_msgs::GetLightProperties::Request &req,gazebo_msgs::GetLightProperties::Response &res);
@@ -173,12 +161,6 @@ public:
 
   /// \brief
   bool setJointProperties(gazebo_msgs::SetJointProperties::Request &req,gazebo_msgs::SetJointProperties::Response &res);
-
-  /// \brief
-  bool setModelState(gazebo_msgs::SetModelState::Request &req,gazebo_msgs::SetModelState::Response &res);
-
-  /// \brief
-  void updateModelState(const gazebo_msgs::ModelState::ConstPtr& model_state);
 
   /// \brief
   bool applyJointEffort(gazebo_msgs::ApplyJointEffort::Request &req,gazebo_msgs::ApplyJointEffort::Response &res);
@@ -205,12 +187,6 @@ public:
 
   /// \brief
   bool setModelConfiguration(gazebo_msgs::SetModelConfiguration::Request &req,gazebo_msgs::SetModelConfiguration::Response &res);
-
-  /// \brief
-  bool setLinkState(gazebo_msgs::SetLinkState::Request &req,gazebo_msgs::SetLinkState::Response &res);
-
-  /// \brief
-  void updateLinkState(const gazebo_msgs::LinkState::ConstPtr& link_state);
 
   /// \brief
   bool applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &req,gazebo_msgs::ApplyBodyWrench::Response &res);
@@ -274,12 +250,10 @@ private:
   gazebo::event::ConnectionPtr pub_model_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
-  ros::ServiceServer get_model_state_service_;
   ros::ServiceServer get_model_properties_service_;
   ros::ServiceServer get_world_properties_service_;
   ros::ServiceServer get_joint_properties_service_;
   ros::ServiceServer get_link_properties_service_;
-  ros::ServiceServer get_link_state_service_;
   ros::ServiceServer get_light_properties_service_;
   ros::ServiceServer set_light_properties_service_;
   ros::ServiceServer set_link_properties_service_;
@@ -287,18 +261,14 @@ private:
   ros::ServiceServer get_physics_properties_service_;
   ros::ServiceServer apply_body_wrench_service_;
   ros::ServiceServer set_joint_properties_service_;
-  ros::ServiceServer set_model_state_service_;
   ros::ServiceServer apply_joint_effort_service_;
   ros::ServiceServer set_model_configuration_service_;
-  ros::ServiceServer set_link_state_service_;
   ros::ServiceServer reset_simulation_service_;
   ros::ServiceServer reset_world_service_;
   ros::ServiceServer pause_physics_service_;
   ros::ServiceServer unpause_physics_service_;
   ros::ServiceServer clear_joint_forces_service_;
   ros::ServiceServer clear_body_wrenches_service_;
-  ros::Subscriber    set_link_state_topic_;
-  ros::Subscriber    set_model_state_topic_;
   ros::Publisher     pub_link_states_;
   ros::Publisher     pub_model_states_;
   int                pub_link_states_connection_count_;
@@ -345,9 +315,6 @@ private:
 
   std::vector<GazeboRosApiPlugin::WrenchBodyJob*> wrench_body_jobs_;
   std::vector<GazeboRosApiPlugin::ForceJointJob*> force_joint_jobs_;
-
-  /// \brief index counters to count the accesses on models via GetModelState
-  std::map<std::string, unsigned int> access_count_get_model_state_;
 
   /// \brief enable the communication of gazebo information using ROS service/topics
   bool enable_ros_network_;

@@ -22,6 +22,7 @@ find_package(rosidl_default_generators REQUIRED)
 set(msg_files
   "msg/ContactState.msg"
   "msg/ContactsState.msg"
+  "msg/EntityState.msg"
   "msg/LinkState.msg"
   "msg/LinkStates.msg"
   "msg/ModelState.msg"
@@ -39,6 +40,7 @@ set(srv_files
   "srv/DeleteLight.srv"
   "srv/DeleteModel.srv"
   "srv/GetJointProperties.srv"
+  "srv/GetEntityState.srv"
   "srv/GetLightProperties.srv"
   "srv/GetLinkProperties.srv"
   "srv/GetLinkState.srv"
@@ -47,6 +49,7 @@ set(srv_files
   "srv/GetPhysicsProperties.srv"
   "srv/GetWorldProperties.srv"
   "srv/JointRequest.srv"
+  "srv/SetEntityState.srv"
   "srv/SetJointProperties.srv"
   "srv/SetJointTrajectory.srv"
   "srv/SetLightProperties.srv"
