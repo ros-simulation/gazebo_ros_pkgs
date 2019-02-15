@@ -25,6 +25,7 @@
   <depend>gazebo_dev</depend>
   <depend>gazebo_msgs</depend>
   <depend>rclcpp</depend>
+  <depend>std_srvs</depend>
   <depend>tinyxml_vendor</depend>
 
   <build_export_depend>geometry_msgs</build_export_depend>
