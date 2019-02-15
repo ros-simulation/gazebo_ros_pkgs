@@ -18,6 +18,7 @@ find_package(rclcpp REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(tinyxml_vendor REQUIRED)
 
 include_directories(
@@ -54,6 +55,7 @@ ament_target_dependencies(gazebo_ros_init
   "builtin_interfaces"
   "gazebo_dev"
   "rclcpp"
+  "std_srvs"
 )
 target_link_libraries(gazebo_ros_init
   gazebo_ros_node
