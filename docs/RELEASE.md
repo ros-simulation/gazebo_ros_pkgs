@@ -2,7 +2,7 @@
 
 ## Official repo
 
-The release of the official gazebo_ros_pkgs from this repository and the
+The release of the official `gazebo_ros_pkgs` from this repository and the
 use of the ROS buildfarm to generate the binaries is well covered by the
 [ROS documentation](http://wiki.ros.org/bloom/Tutorials/ReleaseCatkinPackage).
 
@@ -10,25 +10,27 @@ use of the ROS buildfarm to generate the binaries is well covered by the
 
 ### Background
 
-Each ROS release define one version of Gazebo supported officially through
+Each ROS release defines one version of Gazebo supported officially through
 all the ROS packages. The different combinations of ROS <-> Gazebo can be
 found in the [REP-3](http://www.ros.org/reps/rep-0003.html). Some examples:
 
- * ROS Kinetic: Gazebo7
- * ROS Lunar: Gazebo7
- * ROS Melodic: Gazebo9
+ * ROS Kinetic: Gazebo 7
+ * ROS Lunar: Gazebo 7
+ * ROS Melodic: Gazebo 9
 
 Some use cases require the use of alternative combinations of ROS and Gazebo
-versions. The gazebo_ros_pkgs code is usually prepared to be compatible with
-different versions of Gazebo specially the latest ones.
+versions. The `gazebo_ros_pkgs` code is usually prepared to be compatible with
+different versions of Gazebo, especially the latest ones.
 
-To release a modified version of gazebo_ros_pkgs which support a different
-major version of gazebo, before running bloom some actions needs to be done:
+To release a modified version of `gazebo_ros_pkgs` which supports a different
+major version of gazebo, before running bloom some actions need to be taken:
 
- 1. Make the system to resolve ubuntu package gazebo as gazeboX
- 2. Fork and modify the [gbp -release repo](https://github.com/ros-gbp/gazebo_ros_pkgs-release)
+ 1. Make the system resolve the Ubuntu package `gazebo` as `gazeboX`.
+ 2. Fork and modify the official [gbp -release repo](https://github.com/ros-gbp/gazebo_ros_pkgs-release).
  3. Run bloom on the modified release repository.
- 4. Custom infrastructure to create .deb packages
+ 4. Custom infrastructure to create .deb packages.
+
+We'll go over these steps in more detail below.
 
 ### Upstream versions released using this tutorial
 
@@ -38,7 +40,7 @@ the version of `gazebo_ros_pkgs` released will be the latest one existing in the
 official `gbp -release repository`. The version would be the same but the release number
 will be one above since bloom needs to be run on top of the modified `-release repository`.
 
-### Make the system to resolve gazeboX
+### Make the system resolve gazeboX
 
 To have `gazebo` packages be resolved to `gazeboX` in the local
 machine where bloom-release will be run, `rosdep` should be configured
@@ -48,9 +50,9 @@ The repository `https://github.com/osrf/osrf-rosdep/` hosts different sets
 of custom rosdep keys that can be deployed in a system in order to override
 the default configuration of resolving gazebo packages.
 
-At `/etc/ros/rosdep/sources.list.d` should be a default file named
+At `/etc/ros/rosdep/sources.list.d` there should be a default file named
 `20-default.list`. To change the default keys by a custom version of gazebo
-packages, the desired `00-gazeboX.list` from the previous indicated repository
+packages, the desired `00-gazeboX.list` from the previously indicated repository
 needs to be download to the same directory.
 
 Update the rosdep cache:
@@ -87,7 +89,7 @@ Second step, download the renaming script, place it in the fork directory recent
 The point of this last step is to generate the ubuntu packaging metadata from bloom templates since they were
 modified. The metadata will be uploaded to branches in the custom fork created before.
 
-`bloom-release` needs to be executed once per each desired ROS_DISTRO to generate metadata from. The name
+`bloom-release` needs to be executed once per each desired `ROS_DISTRO` to generate metadata from. The name
 `gazeboX_ros_pkgs` is just a stub to avoid use the official name:
 
     bloom-release --track ${ROS_DISTRO} --ros-distro ${ROS_DISTRO} gazeboX_ros_pkgs --edit
@@ -95,8 +97,8 @@ modified. The metadata will be uploaded to branches in the custom fork created b
 Bloom will stop at some points asking for the user input:
 
   * `Release repository url [press enter to abort]:` the URL of the forked github repo needs to be set here
-  * `Repository Name:` gazeboX_ros_pkgs (being X custom gazebo major version)
-  * The other options can be set to default just by pressing <enter>
+  * `Repository Name:` `gazeboX_ros_pkgs` (being `X` the custom gazebo major version)
+  * The other options can be set to default just by pressing `enter`
 
 Bloom must be stopped after generating and pushing the new tags and branches.
 
