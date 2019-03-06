@@ -17,13 +17,14 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/Entity.hh>
+#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsIface.hh>
 #include <gazebo/physics/World.hh>
-#include <gazebo/physics/Model.hh>
 #include <gazebo/transport/Node.hh>
 #include <gazebo_msgs/srv/get_model_list.hpp>
 #include <gazebo_msgs/srv/delete_entity.hpp>
 #include <gazebo_msgs/srv/spawn_entity.hpp>
+#include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
@@ -47,6 +48,7 @@ public:
   void OnWorldCreated(const std::string & _world_name);
 
   /// \brief Function for receiving the model list from a gazebo world.
+  /// \param[in] Request
   /// \param[out] res Response
   void GetModelList(
     gazebo_msgs::srv::GetModelList::Request::SharedPtr,
@@ -161,13 +163,12 @@ void GazeboRosFactoryPrivate::GetModelList(
   gazebo_msgs::srv::GetModelList::Request::SharedPtr,
   gazebo_msgs::srv::GetModelList::Response::SharedPtr res)
 {
+  res->header.stamp = Convert<builtin_interfaces::msg::Time>(world_->SimTime());
   res->model_names.clear();
-  res->sim_time = world_->SimTime().Double();
-  for (unsigned int i = 0; i < world_->ModelCount(); ++i) {
+  for (unsigned int i = 0; i < world_->ModelCount(); i++) {
     res->model_names.push_back(world_->ModelByIndex(i)->GetName());
   }
   res->success = true;
-  res->status_message = "GetModelList: got model list";
 }
 
 void GazeboRosFactoryPrivate::SpawnEntity(

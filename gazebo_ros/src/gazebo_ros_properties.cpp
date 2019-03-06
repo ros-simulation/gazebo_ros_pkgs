@@ -20,15 +20,15 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/Collision.hh>
 #include <gazebo/transport/Node.hh>
-#include <gazebo_msgs/srv/get_world_properties.hpp>
-#include <gazebo_msgs/srv/get_model_properties.hpp>
 #include <gazebo_msgs/srv/get_joint_properties.hpp>
-#include <gazebo_msgs/srv/get_link_properties.hpp>
 #include <gazebo_msgs/srv/get_light_properties.hpp>
+#include <gazebo_msgs/srv/get_link_properties.hpp>
+#include <gazebo_msgs/srv/get_model_properties.hpp>
 #include <gazebo_msgs/srv/get_physics_properties.hpp>
+#include <gazebo_msgs/srv/get_world_properties.hpp>
 #include <gazebo_msgs/srv/set_joint_properties.hpp>
-#include <gazebo_msgs/srv/set_link_properties.hpp>
 #include <gazebo_msgs/srv/set_light_properties.hpp>
+#include <gazebo_msgs/srv/set_link_properties.hpp>
 #include <gazebo_msgs/srv/set_physics_properties.hpp>
 #include <gazebo_ros/node.hpp>
 
@@ -202,13 +202,13 @@ void GazeboRosPropertiesPrivate::GetModelProperties(
     // get list of child bodies, geoms
     _res->body_names.clear();
     _res->geom_names.clear();
-    for (unsigned int i = 0; i < model->GetChildCount(); ++i) {
+    for (unsigned int i = 0; i < model->GetChildCount(); i++) {
       gazebo::physics::LinkPtr body =
         boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(i));
       if (body) {
         _res->body_names.push_back(body->GetName());
         // get list of geoms
-        for (unsigned int j = 0; j < body->GetChildCount(); ++j) {
+        for (unsigned int j = 0; j < body->GetChildCount(); j++) {
           gazebo::physics::CollisionPtr geom =
             boost::dynamic_pointer_cast<gazebo::physics::Collision>(body->GetChild(j));
           if (geom) {
@@ -249,7 +249,7 @@ void GazeboRosPropertiesPrivate::GetJointProperties(
   gazebo_msgs::srv::GetJointProperties::Response::SharedPtr _res)
 {
   gazebo::physics::JointPtr joint;
-  for (unsigned int i = 0; i < world_->ModelCount(); ++i) {
+  for (unsigned int i = 0; i < world_->ModelCount(); i++) {
     joint = world_->ModelByIndex(i)->GetJoint(_req->joint_name);
     if (joint) {
       break;
@@ -322,10 +322,10 @@ void GazeboRosPropertiesPrivate::GetLightProperties(
   gazebo_msgs::srv::GetLightProperties::Response::SharedPtr _res)
 {
   gazebo::physics::LightPtr phy_light = world_->LightByName(_req->light_name);
-  if (phy_light == NULL) {
+  if (phy_light == nullptr) {
       _res->success = false;
-      _res->status_message = "getLightProperties: Requested light " + _req->light_name
-       + " not found!";
+      _res->status_message = "getLightProperties: Requested light " + _req->light_name +
+        " not found!";
   } else {
     gazebo::msgs::Light light;
     phy_light->FillMsg(light);
@@ -350,7 +350,7 @@ void GazeboRosPropertiesPrivate::SetJointProperties(
   /// @todo: current settings only allows for setting of 1DOF joints
   /// (e.g. HingeJoint and SliderJoint) correctly.
   gazebo::physics::JointPtr joint;
-  for (unsigned int i = 0; i < world_->ModelCount(); ++i) {
+  for (unsigned int i = 0; i < world_->ModelCount(); i++) {
     joint = world_->ModelByIndex(i)->GetJoint(_req->joint_name);
     if (joint) {break;}
   }
@@ -358,27 +358,37 @@ void GazeboRosPropertiesPrivate::SetJointProperties(
   if (!joint) {
     _res->success = false;
     _res->status_message = "SetJointProperties: joint not found";
-  }else{
-    for(unsigned int i = 0;i< _req->ode_joint_config.damping.size();i++)
+  } else {
+    for (unsigned int i = 0; i < _req->ode_joint_config.damping.size(); i++){
       joint->SetDamping(i, _req->ode_joint_config.damping[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.hi_stop.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.hi_stop.size(); i++){
       joint->SetParam("hi_stop", i, _req->ode_joint_config.hi_stop[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.lo_stop.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.lo_stop.size(); i++){
       joint->SetParam("lo_stop", i, _req->ode_joint_config.lo_stop[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.erp.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.erp.size(); i++){
       joint->SetParam("erp", i, _req->ode_joint_config.erp[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.cfm.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.cfm.size(); i++){
       joint->SetParam("cfm", i, _req->ode_joint_config.cfm[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.stop_erp.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.stop_erp.size(); i++){
       joint->SetParam("stop_erp", i, _req->ode_joint_config.stop_erp[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.stop_cfm.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.stop_cfm.size(); i++){
       joint->SetParam("stop_cfm", i, _req->ode_joint_config.stop_cfm[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.fudge_factor.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.fudge_factor.size(); i++){
       joint->SetParam("fudge_factor", i, _req->ode_joint_config.fudge_factor[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.fmax.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.fmax.size(); i++){
       joint->SetParam("fmax", i, _req->ode_joint_config.fmax[i]);
-    for(unsigned int i = 0;i< _req->ode_joint_config.vel.size();i++)
+    }
+    for (unsigned int i = 0; i < _req->ode_joint_config.vel.size(); i++){
       joint->SetParam("vel", i, _req->ode_joint_config.vel[i]);
+    }
 
     _res->success = true;
     _res->status_message = "SetJointProperties: properties set";
@@ -395,19 +405,18 @@ void GazeboRosPropertiesPrivate::SetLinkProperties(
     _res->success = false;
     _res->status_message =
       "SetLinkProperties: link not found, did you forget to scope the link by model name?";
-  }else{
+  } else {
     gazebo::physics::InertialPtr mass = body->GetInertial();
     // @todo: FIXME: add inertia matrix rotation to Gazebo
     // mass.SetInertiaRotation(ignition::math::Quaternion(_req->com.orientation.w,
     // _res->com.orientation.x,_req->com.orientation.y _req->com.orientation.z));
     mass->SetCoG(ignition::math::Vector3d(
-      _req->com.position.x,
-      _req->com.position.y,
-      _req->com.position.z));
+        _req->com.position.x,
+        _req->com.position.y,
+        _req->com.position.z));
     mass->SetInertiaMatrix(_req->ixx, _req->iyy, _req->izz, _req->ixy, _req->ixz, _req->iyz);
     mass->SetMass(_req->mass);
     body->SetGravityMode(_req->gravity_mode);
-    // @todo: mass change unverified
 
     _res->success = true;
     _res->status_message = "SetLinkProperties: properties set";
@@ -419,11 +428,11 @@ void GazeboRosPropertiesPrivate::SetLightProperties(
   gazebo_msgs::srv::SetLightProperties::Response::SharedPtr _res)
 {
   gazebo::physics::LightPtr phy_light = world_->LightByName(_req->light_name);
-  if (phy_light == NULL) {
+  if (phy_light == nullptr) {
     _res->success = false;
-    _res->status_message = "setLightProperties: Requested light " + _req->light_name
-     + " not found!";
-  }else{
+    _res->status_message = "setLightProperties: Requested light " + _req->light_name +
+      " not found!";
+  } else {
     gazebo::msgs::Light light;
 
     phy_light->FillMsg(light);
