@@ -323,9 +323,9 @@ void GazeboRosPropertiesPrivate::GetLightProperties(
 {
   gazebo::physics::LightPtr phy_light = world_->LightByName(_req->light_name);
   if (phy_light == nullptr) {
-      _res->success = false;
-      _res->status_message = "getLightProperties: Requested light " + _req->light_name +
-        " not found!";
+    _res->success = false;
+    _res->status_message = "getLightProperties: Requested light " + _req->light_name +
+      " not found!";
   } else {
     gazebo::msgs::Light light;
     phy_light->FillMsg(light);
@@ -359,34 +359,34 @@ void GazeboRosPropertiesPrivate::SetJointProperties(
     _res->success = false;
     _res->status_message = "SetJointProperties: joint not found";
   } else {
-    for (unsigned int i = 0; i < _req->ode_joint_config.damping.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.damping.size(); i++) {
       joint->SetDamping(i, _req->ode_joint_config.damping[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.hi_stop.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.hi_stop.size(); i++) {
       joint->SetParam("hi_stop", i, _req->ode_joint_config.hi_stop[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.lo_stop.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.lo_stop.size(); i++) {
       joint->SetParam("lo_stop", i, _req->ode_joint_config.lo_stop[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.erp.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.erp.size(); i++) {
       joint->SetParam("erp", i, _req->ode_joint_config.erp[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.cfm.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.cfm.size(); i++) {
       joint->SetParam("cfm", i, _req->ode_joint_config.cfm[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.stop_erp.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.stop_erp.size(); i++) {
       joint->SetParam("stop_erp", i, _req->ode_joint_config.stop_erp[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.stop_cfm.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.stop_cfm.size(); i++) {
       joint->SetParam("stop_cfm", i, _req->ode_joint_config.stop_cfm[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.fudge_factor.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.fudge_factor.size(); i++) {
       joint->SetParam("fudge_factor", i, _req->ode_joint_config.fudge_factor[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.fmax.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.fmax.size(); i++) {
       joint->SetParam("fmax", i, _req->ode_joint_config.fmax[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.vel.size(); i++){
+    for (unsigned int i = 0; i < _req->ode_joint_config.vel.size(); i++) {
       joint->SetParam("vel", i, _req->ode_joint_config.vel[i]);
     }
 
