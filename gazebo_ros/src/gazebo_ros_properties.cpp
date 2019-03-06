@@ -179,7 +179,7 @@ void GazeboRosProperties::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr
   impl_->gz_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   impl_->gz_node_->Init(_world->Name());
   impl_->gz_properties_light_pub_ =
-   impl_->gz_node_->Advertise<gazebo::msgs::Light>("~/light/modify");
+    impl_->gz_node_->Advertise<gazebo::msgs::Light>("~/light/modify");
 }
 
 void GazeboRosPropertiesPrivate::GetModelProperties(
@@ -193,23 +193,23 @@ void GazeboRosPropertiesPrivate::GetModelProperties(
       _req->model_name.c_str());
     _res->success = false;
     _res->status_message = "GetModelProperties: model does not exist";
-  }else{
+  } else {
     // get model parent name
-    gazebo::physics::ModelPtr parent_model = 
-    boost::dynamic_pointer_cast<gazebo::physics::Model>(model->GetParent());
+    gazebo::physics::ModelPtr parent_model =
+      boost::dynamic_pointer_cast<gazebo::physics::Model>(model->GetParent());
     if (parent_model) {_res->parent_model_name = parent_model->GetName();}
 
     // get list of child bodies, geoms
     _res->body_names.clear();
     _res->geom_names.clear();
-    for (unsigned int i = 0 ; i < model->GetChildCount(); i ++) {
-      gazebo::physics::LinkPtr body = 
+    for (unsigned int i = 0; i < model->GetChildCount(); ++i) {
+      gazebo::physics::LinkPtr body =
         boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(i));
       if (body) {
         _res->body_names.push_back(body->GetName());
         // get list of geoms
-        for (unsigned int j = 0; j < body->GetChildCount() ; j++) {
-          gazebo::physics::CollisionPtr geom = 
+        for (unsigned int j = 0; j < body->GetChildCount(); ++j) {
+          gazebo::physics::CollisionPtr geom =
             boost::dynamic_pointer_cast<gazebo::physics::Collision>(body->GetChild(j));
           if (geom) {
             _res->geom_names.push_back(geom->GetName());
@@ -222,15 +222,14 @@ void GazeboRosPropertiesPrivate::GetModelProperties(
     _res->joint_names.clear();
 
     gazebo::physics::Joint_V joints = model->GetJoints();
-    for (unsigned int i=0;i< joints.size(); i++) {
-      _res->joint_names.push_back( joints[i]->GetName() );
+    for (unsigned int i = 0; i < joints.size(); i++) {
+      _res->joint_names.push_back(joints[i]->GetName());
     }
 
     // get children model names
     _res->child_model_names.clear();
-    for (unsigned int j = 0; j < model->GetChildCount(); j++)
-    {
-      gazebo::physics::ModelPtr child_model = 
+    for (unsigned int j = 0; j < model->GetChildCount(); j++) {
+      gazebo::physics::ModelPtr child_model =
         boost::dynamic_pointer_cast<gazebo::physics::Model>(model->GetChild(j));
       if (child_model) {
         _res->child_model_names.push_back(child_model->GetName() );
@@ -250,15 +249,17 @@ void GazeboRosPropertiesPrivate::GetJointProperties(
   gazebo_msgs::srv::GetJointProperties::Response::SharedPtr _res)
 {
   gazebo::physics::JointPtr joint;
-  for (unsigned int i = 0; i < world_->ModelCount(); i ++) {
+  for (unsigned int i = 0; i < world_->ModelCount(); ++i) {
     joint = world_->ModelByIndex(i)->GetJoint(_req->joint_name);
-    if (joint) {break;}
+    if (joint) {
+      break;
+    }
   }
 
   if (!joint) {
     _res->success = false;
     _res->status_message = "GetJointProperties: joint not found";
-  }else{
+  } else {
     /// @todo: FIXME
     _res->type = _res->REVOLUTE;
 
@@ -280,13 +281,13 @@ void GazeboRosPropertiesPrivate::GetLinkProperties(
   gazebo_msgs::srv::GetLinkProperties::Request::SharedPtr _req,
   gazebo_msgs::srv::GetLinkProperties::Response::SharedPtr _res)
 {
-  gazebo::physics::LinkPtr body = 
+  gazebo::physics::LinkPtr body =
     boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(_req->link_name));
   if (!body) {
     _res->success = false;
-    _res->status_message = 
+    _res->status_message =
       "GetLinkProperties: link not found, did you forget to scope the link by model name?";
-  }else{
+  } else {
     /// @todo: validate
     _res->gravity_mode = body->GetGravityMode();
 
@@ -325,7 +326,7 @@ void GazeboRosPropertiesPrivate::GetLightProperties(
       _res->success = false;
       _res->status_message = "getLightProperties: Requested light " + _req->light_name
        + " not found!";
-  }else{
+  } else {
     gazebo::msgs::Light light;
     phy_light->FillMsg(light);
 
@@ -346,10 +347,10 @@ void GazeboRosPropertiesPrivate::SetJointProperties(
   gazebo_msgs::srv::SetJointProperties::Request::SharedPtr _req,
   gazebo_msgs::srv::SetJointProperties::Response::SharedPtr _res)
 {
-  /// @todo: current settings only allows for setting of 1DOF joints 
+  /// @todo: current settings only allows for setting of 1DOF joints
   /// (e.g. HingeJoint and SliderJoint) correctly.
   gazebo::physics::JointPtr joint;
-  for (unsigned int i = 0; i < world_->ModelCount(); i ++) {
+  for (unsigned int i = 0; i < world_->ModelCount(); ++i) {
     joint = world_->ModelByIndex(i)->GetJoint(_req->joint_name);
     if (joint) {break;}
   }
@@ -388,11 +389,11 @@ void GazeboRosPropertiesPrivate::SetLinkProperties(
   gazebo_msgs::srv::SetLinkProperties::Request::SharedPtr _req,
   gazebo_msgs::srv::SetLinkProperties::Response::SharedPtr _res)
 {
-  gazebo::physics::LinkPtr body = 
+  gazebo::physics::LinkPtr body =
     boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(_req->link_name));
   if (!body) {
     _res->success = false;
-    _res->status_message = 
+    _res->status_message =
       "SetLinkProperties: link not found, did you forget to scope the link by model name?";
   }else{
     gazebo::physics::InertialPtr mass = body->GetInertial();
@@ -403,7 +404,7 @@ void GazeboRosPropertiesPrivate::SetLinkProperties(
       _req->com.position.x,
       _req->com.position.y,
       _req->com.position.z));
-    mass->SetInertiaMatrix(_req->ixx,_req->iyy,_req->izz,_req->ixy,_req->ixz,_req->iyz);
+    mass->SetInertiaMatrix(_req->ixx, _req->iyy, _req->izz, _req->ixy, _req->ixz, _req->iyz);
     mass->SetMass(_req->mass);
     body->SetGravityMode(_req->gravity_mode);
     // @todo: mass change unverified

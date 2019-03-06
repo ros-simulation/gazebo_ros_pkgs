@@ -91,19 +91,19 @@ public:
 
   gazebo::physics::WorldPtr world_;
   rclcpp::Node::SharedPtr node_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetModelProperties>> 
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetModelProperties>>
   get_model_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetJointProperties>> 
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetJointProperties>>
   get_joint_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLinkProperties>> 
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLinkProperties>>
   get_link_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLightProperties>> 
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLightProperties>>
   get_light_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetJointProperties>> 
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetJointProperties>>
   set_joint_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLinkProperties>> 
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLinkProperties>>
   set_link_properties_client_;
-  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLightProperties>> 
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLightProperties>>
   set_light_properties_client_;
 };
 
