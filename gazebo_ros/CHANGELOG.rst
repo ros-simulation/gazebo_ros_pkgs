@@ -2,6 +2,23 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [ros2] Disable test_node to clean CI (`#901 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/901>`_)
+  * [ros2] Disable test_node to clean CI
+  * uncrustify
+* [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+* [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+* Fix Windows conflicting macros and missing usleep (`#885 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/885>`_)
+  * Fix conflicting Windows macros and missing usleep
+  * fix spacing
+  * fix spacing again
+  * remove lint
+* Call rclcpp::init() only from gazebo_ros_init (`#859 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/859>`_)
+* [ros] Revert sim time test (`#853 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/853>`_)
+* Contributors: Jonathan Noyola, Tamaki Nishino, chapulina
+
 3.1.0 (2018-12-10)
 ------------------
 * [ros2] Camera and triggered camera (`#827 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/827>`_)

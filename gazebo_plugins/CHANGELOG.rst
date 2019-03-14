@@ -2,6 +2,26 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+* [ros2] Fix diff_drive error message (`#882 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/882>`_)
+* Fix Windows conflicting macros and missing usleep (`#885 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/885>`_)
+  * Fix conflicting Windows macros and missing usleep
+  * fix spacing
+  * fix spacing again
+  * remove lint
+* gazebo_plugins: Port the gazebo_ros_p3d plugin (`#845 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/845>`_)
+  * Port the gazebo_ros_p3d plugin
+  * Address most of the review feedback. A couple items remain
+  * Remove the model\_ member variable since it was just and alias for _parent
+  * Use OnUpdate instead to get the UpdateInfo through the callback parameter
+  * demo, test, and a bit more cleaning up
+  * linters
+* [ros2] ENABLE_DISPLAY_TESTS, and make camera tests more robust (`#854 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/854>`_)
+* Contributors: Jonathan Noyola, Michael Jeronimo, Romain Reignier, chapulina
+
 3.1.0 (2018-12-10)
 ------------------
 * [ros2] Camera and triggered camera (`#827 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/827>`_)
