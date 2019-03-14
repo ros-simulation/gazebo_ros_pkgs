@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.2.0 (2019-03-13)
+------------------
 * [ros2] Disable test_node to clean CI (`#901 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/901>`_)
   * [ros2] Disable test_node to clean CI
   * uncrustify
