@@ -17,6 +17,7 @@ find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(image_transport REQUIRED)
+find_package(cv_bridge REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -30,6 +31,7 @@ include_directories(include
   ${gazebo_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
   ${image_transport_INCLUDE_DIRS}
+  ${cv_bridge_INCLUDE_DIRS}
   ${nav_msgs_INCLUDE_DIRS}
   ${sensor_msgs_INCLUDE_DIRS}
   ${tf2_ros_INCLUDE_DIRS}
@@ -145,6 +147,17 @@ ament_target_dependencies(gazebo_ros_p3d
 )
 ament_export_libraries(gazebo_ros_p3d)
 
+# gazebo_ros_video
+add_library(gazebo_ros_video SHARED
+  src/gazebo_ros_video.cpp
+)
+ament_target_dependencies(gazebo_ros_video
+  "gazebo_ros"
+  "sensor_msgs"
+  "cv_bridge"
+)
+ament_export_libraries(gazebo_ros_video)
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
@@ -170,6 +183,7 @@ install(TARGETS
     gazebo_ros_ray_sensor
     gazebo_ros_p3d
     gazebo_ros_template
+    gazebo_ros_video
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
