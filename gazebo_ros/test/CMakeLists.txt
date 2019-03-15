@@ -65,7 +65,7 @@ set(no_gpu_tests
 )
 
 foreach(test ${no_gpu_tests})
-  add_gazebo_ros_pkgs_test("${ŧest}")
+  add_gazebo_ros_pkgs_test("${test}")
 endforeach()
 
 if(ENABLE_DISPLAY_TESTS)
