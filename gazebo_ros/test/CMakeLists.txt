@@ -29,18 +29,9 @@ endforeach()
 file(COPY worlds DESTINATION .)
 
 # Tests
-set(tests
-  test_conversions
-  test_gazebo_ros_factory
-  test_gazebo_ros_init
-  test_gazebo_ros_state
-  test_node
-  test_plugins
-  test_sim_time
-  test_utils
-)
 
-foreach(test ${tests})
+# Helper macro for generating tests
+macro(add_gazebo_ros_pkgs_test test)
   ament_add_gtest(${test}
     ${test}.cpp
     WORKING_DIRECTORY
@@ -64,5 +55,34 @@ foreach(test ${tests})
     "std_msgs"
     "std_srvs"
   )
+endmacro(add_gazebo_ros_pkgs_test)
+
+# Tests that don't require gpu to run
+set(no_gpu_tests
+  test_conversions
+  test_node
+  test_utils
+)
+
+foreach(test ${no_gpu_tests})
+  add_gazebo_ros_pkgs_test("${ŧest}")
 endforeach()
 
+if(ENABLE_DISPLAY_TESTS)
+	set(gpu_tests
+		test_gazebo_ros_factory
+		test_gazebo_ros_init
+		test_gazebo_ros_state
+		test_plugins
+		test_sim_time
+	)
+
+	foreach(gpu_test ${tests})
+		add_gazebo_ros_pkgs_test("${ŧest}")
+
+		set_test_properties(${test}
+			PROPERTIES
+			LABELS "gpu_test"
+		)
+	endforeach()
+endif()

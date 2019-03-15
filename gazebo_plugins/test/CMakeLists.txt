@@ -51,5 +51,10 @@ foreach(test ${tests})
     "rclcpp"
     "sensor_msgs"
   )
+
+  set_test_properties(${test}
+    PROPERTIES
+    LABELS "gpu_test"
+  )
 endforeach()
 
