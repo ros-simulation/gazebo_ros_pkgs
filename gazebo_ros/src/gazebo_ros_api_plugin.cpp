@@ -23,6 +23,8 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/gazebo_config.h>
 #include <gazebo_ros/gazebo_ros_api_plugin.h>
+#include <chrono>
+#include <thread>
 
 namespace gazebo
 {
@@ -129,7 +131,8 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   {
     ROS_WARN_STREAM_NAMED("api_plugin","No ROS master - start roscore to continue...");
     // wait 0.5 second
-    usleep(500*1000); // can't use ROS Time here b/c node handle is not yet initialized
+    // can't use ROS Time here b/c node handle is not yet initialized
+    std::this_thread::sleep_for(std::chrono::microseconds(500*1000));
 
     if(stop_)
     {
@@ -823,7 +826,7 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
 #endif
     }
     ROS_DEBUG_NAMED("api_plugin", "Waiting for model deletion (%s)",req.model_name.c_str());
-    usleep(1000);
+    std::this_thread::sleep_for(std::chrono::microseconds(1000));
   }
 
   // set result
@@ -867,7 +870,7 @@ bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
         return true;
       }
       // Check every 100ms
-      usleep(100000);
+      std::this_thread::sleep_for(std::chrono::microseconds(100000));
     }
   }
 
@@ -2683,7 +2686,7 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, const 
     ROS_DEBUG_STREAM_ONCE_NAMED("api_plugin","Waiting for " << timeout - ros::Time::now()
       << " for entity " << model_name << " to spawn");
 
-    usleep(2000);
+    std::this_thread::sleep_for(std::chrono::microseconds(2000));
   }
 
   // set result
