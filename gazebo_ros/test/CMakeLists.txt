@@ -69,20 +69,20 @@ foreach(test ${no_gpu_tests})
 endforeach()
 
 if(ENABLE_DISPLAY_TESTS)
-	set(gpu_tests
-		test_gazebo_ros_factory
-		test_gazebo_ros_init
-		test_gazebo_ros_state
-		test_plugins
-		test_sim_time
-	)
+  set(gpu_tests
+    test_gazebo_ros_factory
+    test_gazebo_ros_init
+    test_gazebo_ros_state
+    test_plugins
+    test_sim_time
+)
 
-	foreach(test ${gpu_tests})
-		add_gazebo_ros_pkgs_test("${test}")
+foreach(test ${gpu_tests})
+  add_gazebo_ros_pkgs_test("${test}")
 
-		set_tests_properties(${test}
-			PROPERTIES
-			LABELS "gpu_test"
-		)
-	endforeach()
+  set_tests_properties(${test}
+    PROPERTIES
+    LABELS "gpu_test"
+  )
+endforeach()
 endif()
