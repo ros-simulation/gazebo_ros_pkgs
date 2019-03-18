@@ -77,10 +77,10 @@ if(ENABLE_DISPLAY_TESTS)
 		test_sim_time
 	)
 
-	foreach(gpu_test ${tests})
-		add_gazebo_ros_pkgs_test("${ŧest}")
+	foreach(test ${gpu_tests})
+		add_gazebo_ros_pkgs_test("${test}")
 
-		set_test_properties(${test}
+		set_tests_properties(${test}
 			PROPERTIES
 			LABELS "gpu_test"
 		)

@@ -52,7 +52,7 @@ foreach(test ${tests})
     "sensor_msgs"
   )
 
-  set_test_properties(${test}
+  set_tests_properties(${test}
     PROPERTIES
     LABELS "gpu_test"
   )
