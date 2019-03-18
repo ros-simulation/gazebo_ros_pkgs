@@ -22,7 +22,6 @@
     <arg name="physics" value="$(arg physics)"/>
     <arg name="verbose" value="$(arg verbose)"/>
     <arg name="output" value="$(arg output)"/>
-    <arg name="world" value="$(arg world)"/>
   </include>
 
 </launch>
