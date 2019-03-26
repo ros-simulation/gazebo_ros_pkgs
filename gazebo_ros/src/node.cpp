@@ -77,14 +77,12 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     }
   }
 
-  // Use default context
-  auto context = rclcpp::contexts::default_context::get_global_default_context();
+  rclcpp::NodeOptions node_options;
+  node_options.arguments(arguments);
+  node_options.initial_parameters(initial_parameters);
 
   // Create node with parsed arguments
-  return CreateWithArgs(
-    name, ns,
-    context,
-    arguments, initial_parameters);
+  return CreateWithArgs(name, ns, node_options);
 }
 
 Node::SharedPtr Node::Get()

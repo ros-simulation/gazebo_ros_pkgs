@@ -51,10 +51,12 @@ TEST_F(TestSimTime, TestClock)
   using ClockMsg = rosgraph_msgs::msg::Clock;
 
   // Create a node which will use sim time
-  auto context = rclcpp::contexts::default_context::get_global_default_context();
   std::vector<std::string> args;
   std::vector<rclcpp::Parameter> params = {rclcpp::Parameter("use_sim_time", true)};
-  auto node = std::make_shared<rclcpp::Node>("test_sim_time", "", context, args, params);
+  rclcpp::NodeOptions node_options;
+  node_options.arguments(args);
+  node_options.initial_parameters(params);
+  auto node = std::make_shared<rclcpp::Node>("test_sim_time", "", node_options);
 
   // Get two clock messages, caching the ROS time once each is received
   auto first_msg =
