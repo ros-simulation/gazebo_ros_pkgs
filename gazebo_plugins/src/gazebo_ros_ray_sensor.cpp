@@ -122,7 +122,7 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
       impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::Range>("~/out");
     } else {
       RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Invalid <output_type> [%s]",
-        output_type_string);
+        output_type_string.c_str());
       return;
     }
   }
