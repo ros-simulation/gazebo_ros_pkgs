@@ -78,7 +78,6 @@ GazeboRosCameraUtils::~GazeboRosCameraUtils()
   this->camera_queue_.clear();
   this->camera_queue_.disable();
   this->callback_queue_thread_.join();
-  delete this->rosnode_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -276,13 +275,13 @@ void GazeboRosCameraUtils::LoadThread()
   // associated ROS topics.
   this->parentSensor_->SetActive(false);
 
-  this->rosnode_ = new ros::NodeHandle(this->robot_namespace_ + "/" + this->camera_name_);
+  this->rosnode_ = boost::make_shared<ros::NodeHandle>(this->robot_namespace_ + "/" + this->camera_name_);
 
   // initialize camera_info_manager
   this->camera_info_manager_.reset(new camera_info_manager::CameraInfoManager(
           *this->rosnode_, this->camera_name_));
 
-  this->itnode_ = new image_transport::ImageTransport(*this->rosnode_);
+  this->itnode_ = boost::make_shared<image_transport::ImageTransport>(*this->rosnode_);
 
   // resolve tf prefix
   this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
@@ -298,13 +297,8 @@ void GazeboRosCameraUtils::LoadThread()
 
   if (!this->camera_name_.empty())
   {
-    dyn_srv_ =
-      new dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
-      (*this->rosnode_);
-    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
-      ::CallbackType f =
-      boost::bind(&GazeboRosCameraUtils::configCallback, this, _1, _2);
-    dyn_srv_->setCallback(f);
+    dyn_srv_ = boost::make_shared<dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>>(*this->rosnode_);
+    dyn_srv_->setCallback(boost::bind(&GazeboRosCameraUtils::configCallback, this, _1, _2));
   }
   else
   {

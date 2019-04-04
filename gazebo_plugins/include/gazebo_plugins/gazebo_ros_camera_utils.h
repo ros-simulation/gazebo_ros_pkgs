@@ -107,9 +107,9 @@ namespace gazebo
 
     /// \brief A pointer to the ROS node.
     ///  A node will be instantiated if it does not exist.
-    protected: ros::NodeHandle* rosnode_;
+    protected: ros::NodeHandlePtr rosnode_;
     protected: image_transport::Publisher image_pub_;
-    private: image_transport::ImageTransport* itnode_;
+    private: boost::shared_ptr<image_transport::ImageTransport> itnode_;
 
     /// \brief ROS image message
     protected: sensor_msgs::Image image_msg_;
@@ -176,10 +176,8 @@ namespace gazebo
     // Time last published, refrain from publish unless new image has
     // been rendered
     // Allow dynamic reconfiguration of camera params
-    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
-      *dyn_srv_;
-    void configCallback(gazebo_plugins::GazeboRosCameraConfig &config,
-      uint32_t level);
+    boost::shared_ptr<dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>> dyn_srv_;
+    void configCallback(gazebo_plugins::GazeboRosCameraConfig &config, uint32_t level);
 
     protected: ros::CallbackQueue camera_queue_;
     protected: void CameraQueueThread();
