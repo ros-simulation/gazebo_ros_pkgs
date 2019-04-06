@@ -147,6 +147,21 @@ ament_target_dependencies(gazebo_ros_p3d
 )
 ament_export_libraries(gazebo_ros_p3d)
 
+# gazebo_ros_tricycle_drive
+add_library(gazebo_ros_tricycle_drive SHARED
+  src/gazebo_ros_tricycle_drive.cpp
+)
+ament_target_dependencies(gazebo_ros_tricycle_drive
+  "rclcpp"
+  "tf2"
+  "tf2_ros"
+  "nav_msgs"
+  "geometry_msgs"
+  "sensor_msgs"
+  "gazebo_ros"
+)
+ament_export_libraries(gazebo_ros_tricycle_drive)
+
 # gazebo_ros_video
 add_library(gazebo_ros_video SHARED
   src/gazebo_ros_video.cpp
@@ -183,6 +198,7 @@ install(TARGETS
     gazebo_ros_ray_sensor
     gazebo_ros_p3d
     gazebo_ros_template
+    gazebo_ros_tricycle_drive
     gazebo_ros_video
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

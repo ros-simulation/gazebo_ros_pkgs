@@ -18,6 +18,7 @@ set(tests
   test_gazebo_ros_joint_state_publisher
   test_gazebo_ros_p3d
   test_gazebo_ros_ray_sensor
+  test_gazebo_ros_tricycle_drive
   test_gazebo_ros_video
 )
 
