@@ -83,8 +83,11 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   ROS_DEBUG_STREAM_NAMED("api_plugin","Callback Queue Joined");
 
   // Physics Dynamic Reconfigure
-  physics_reconfigure_thread_->join();
-  ROS_DEBUG_STREAM_NAMED("api_plugin","Physics reconfigure joined");
+  if (physics_reconfigure_thread_)
+  {
+    physics_reconfigure_thread_->join();
+    ROS_DEBUG_STREAM_NAMED("api_plugin","Physics reconfigure joined");
+  }
 
   // Delete Force and Wrench Jobs
   lock_.lock();
@@ -150,13 +153,16 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
   /// \brief setup custom callback queue
   gazebo_callback_queue_thread_.reset(new boost::thread( &GazeboRosApiPlugin::gazeboQueueThread, this) );
 
-  /// \brief start a thread for the physics dynamic reconfigure node
-  physics_reconfigure_thread_.reset(new boost::thread(boost::bind(&GazeboRosApiPlugin::physicsReconfigureThread, this)));
-
   // below needs the world to be created first
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::loadGazeboRosApiPlugin,this,_1));
 
   nh_->getParam("enable_ros_network", enable_ros_network_);
+
+  if (enable_ros_network_)
+  {
+    /// \brief start a thread for the physics dynamic reconfigure node
+    physics_reconfigure_thread_.reset(new boost::thread(boost::bind(&GazeboRosApiPlugin::physicsReconfigureThread, this)));
+  }
 
   plugin_loaded_ = true;
   ROS_INFO_NAMED("api_plugin", "Finished loading Gazebo ROS API Plugin.");
