@@ -153,12 +153,12 @@ bool gazebo::GazeboRosImuSensor::LoadParameters()
   //TOPIC
   if (sdf->HasElement("topicName"))
   {
-    topic_name =  robot_namespace + sdf->Get<std::string>("topicName");
+    topic_name =  sdf->Get<std::string>("topicName");
     ROS_INFO_STREAM("<topicName> set to: "<<topic_name);
   }
   else
   {
-    topic_name = robot_namespace + "/imu_data";
+    topic_name = "imu_data";
     ROS_WARN_STREAM("missing <topicName>, set to /namespace/default: " << topic_name);
   }
 
