@@ -68,13 +68,12 @@ foreach(test ${no_gpu_tests})
   add_gazebo_ros_pkgs_test("${test}")
 endforeach()
 
-if(ENABLE_DISPLAY_TESTS)
-  set(gpu_tests
-    test_gazebo_ros_factory
-    test_gazebo_ros_init
-    test_gazebo_ros_state
-    test_plugins
-    test_sim_time
+set(gpu_tests
+  test_gazebo_ros_factory
+  test_gazebo_ros_init
+  test_gazebo_ros_state
+  test_plugins
+  test_sim_time
 )
 
 foreach(test ${gpu_tests})
@@ -85,4 +84,3 @@ foreach(test ${gpu_tests})
     LABELS "gpu_test"
   )
 endforeach()
-endif()
