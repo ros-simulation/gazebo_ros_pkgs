@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="box">
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+      <plugin name="gazebo_ros_f3d" filename="libgazebo_ros_f3d.so">
+        <ros>
+          <namespace>/test</namespace>
+          <argument>wrench:=f3d_test</argument>
+        </ros>
+        <body_name>link</body_name>
+        <frame_name>test_world</frame_name>
+      </plugin>
+    </model>
+  </world>
+</sdf>
