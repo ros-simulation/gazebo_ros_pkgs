@@ -200,8 +200,9 @@ void GazeboRosVideo::Load(
 
   int width = _sdf->Get<int>("width", 320).first;
 
-  impl_->video_visual_ =
-    std::make_shared<VideoVisual>("visual", _parent, height, width);
+  impl_->video_visual_ = std::make_shared<VideoVisual>(_parent->Name() + "::video_visual",
+      _parent, height, width);
+  _parent->GetScene()->AddVisual(impl_->video_visual_);
 
   // Subscribe to the image topic
   impl_->camera_subscriber_ =
@@ -214,7 +215,9 @@ void GazeboRosVideo::Load(
   impl_->update_connection_ = gazebo::event::Events::ConnectPreRender(
     std::bind(&GazeboRosVideoPrivate::onUpdate, impl_.get()));
 
-  RCLCPP_INFO(impl_->rosnode_->get_logger(), "GazeboRosVideo has started");
+  RCLCPP_INFO(impl_->rosnode_->get_logger(),
+    "GazeboRosVideo has started. Subscribed to [%s]",
+    impl_->camera_subscriber_->get_topic_name());
 }
 
 void GazeboRosVideoPrivate::onUpdate()

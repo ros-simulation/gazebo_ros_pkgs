@@ -40,7 +40,7 @@ class GazeboRosVideoPrivate;
   Example Usage:
   \code{.xml}
     <plugin name="gazebo_ros_video" filename="libgazebo_ros_video.so">
-      * Images are subscribed from: /custom_ns/custom_img
+      <!-- Images are subscribed from: /custom_ns/custom_img -->
       <ros>
         <!-- Add a namespace -->
         <namespace>/custom_ns</namespace>
