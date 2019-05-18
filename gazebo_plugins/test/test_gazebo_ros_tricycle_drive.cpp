@@ -71,14 +71,15 @@ TEST_F(GazeboRosTricycleDriveTest, Publishing)
 
   auto msg = geometry_msgs::msg::Twist();
   msg.linear.x = 0.5;
-  msg.angular.z = 0.1;
-  pub->publish(msg);
-  executor.spin_once(100ms);
+  msg.angular.z = 0.05;
 
-  // Wait for it to be processed
-  world->Step(3000);
-  executor.spin_once(100ms);
-  gazebo::common::Time::MSleep(1000);
+  double sleep = 0;
+  double max_sleep = 100;
+  for (; sleep < max_sleep; ++sleep) {
+    pub->publish(msg);
+    executor.spin_once(100ms);
+    world->Step(100);
+  }
 
   // Check message
   ASSERT_NE(nullptr, latestMsg);
@@ -90,7 +91,7 @@ TEST_F(GazeboRosTricycleDriveTest, Publishing)
   EXPECT_LT(-tol, tricycle->WorldPose().Pos().X());
   EXPECT_LT(-tol, tricycle->WorldPose().Rot().Yaw());
   EXPECT_NEAR(0.5, tricycle->WorldLinearVel().X(), tol);
-  EXPECT_NEAR(0.1, tricycle->WorldAngularVel().Z(), tol);
+  EXPECT_NEAR(0.05, tricycle->WorldAngularVel().Z(), tol);
 }
 
 int main(int argc, char ** argv)
