@@ -32,7 +32,7 @@ namespace gazebo_ros
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
-T Convert(const geometry_msgs::msg::Vector3 & in)
+T Convert(const geometry_msgs::msg::Vector3 &)
 {
   T::ConversionNotImplemented;
 }
@@ -55,7 +55,7 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Vector3 & msg)
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
-T Convert(const geometry_msgs::msg::Point32 & in)
+T Convert(const geometry_msgs::msg::Point32 &)
 {
   T::ConversionNotImplemented;
 }
@@ -155,7 +155,7 @@ geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
-T Convert(const geometry_msgs::msg::Quaternion & in)
+T Convert(const geometry_msgs::msg::Quaternion &)
 {
   T::ConversionNotImplemented;
 }
