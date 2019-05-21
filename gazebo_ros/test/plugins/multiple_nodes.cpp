@@ -46,8 +46,8 @@ void MultipleNodes::Load(int argc, char ** argv)
   assert(nullptr != nodeB);
 
   // Create publishers
-  auto pubA = nodeA->create_publisher<std_msgs::msg::String>("testA");
-  auto pubB = nodeB->create_publisher<std_msgs::msg::String>("testB");
+  auto pubA = nodeA->create_publisher<std_msgs::msg::String>("testA", rclcpp::SystemDefaultsQoS());
+  auto pubB = nodeB->create_publisher<std_msgs::msg::String>("testB", rclcpp::SystemDefaultsQoS());
 
   // Run lambdas every 1 second
   using namespace std::chrono_literals;
