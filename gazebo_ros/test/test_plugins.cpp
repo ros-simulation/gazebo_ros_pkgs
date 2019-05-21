@@ -57,7 +57,7 @@ void TestPlugins::TearDown()
 TEST_P(TestPlugins, TestTopicsReceived)
 {
   auto topics = GetParam().topics;
-  auto node = std::make_shared<rclcpp::Node>("my_node");
+  auto node = std::make_shared<rclcpp::Node>("test_topics_received");
   for (auto topic : topics) {
     auto msg = gazebo_ros::get_message_or_timeout<std_msgs::msg::String>(node, topic);
     EXPECT_NE(msg, nullptr) << topic;
@@ -72,9 +72,9 @@ INSTANTIATE_TEST_CASE_P(Plugins, TestPlugins, ::testing::Values(
     TestParams({{"-s", "./libcreate_node_without_init.so"}, {"test"}}),
     TestParams({{"-s", "./libmultiple_nodes.so"}, {"testA", "testB"}}),
     TestParams({{"-s", "libgazebo_ros_init.so", "worlds/ros_world_plugin.world",
-        "hello_ros_world:/test:=/new_test"}, {"new_test"}}),
+      "hello_ros_world:/test:=/new_test"}, {"new_test"}}),
     TestParams({{"-s", "libgazebo_ros_init.so", "-s", "libgazebo_ros_factory.so",
-        "worlds/ros_world_plugin.world"}, {"test"}}),
+      "worlds/ros_world_plugin.world"}, {"test"}}),
     TestParams({{"-s", "libgazebo_ros_init.so", "worlds/sdf_node_plugin.world"}, {"/foo/my_topic"}})
   ), );
 
