@@ -49,7 +49,8 @@ TEST_F(GazeboRosForceTest, ApplyForceTorque)
   auto node = std::make_shared<rclcpp::Node>("gazebo_ros_force_test");
   ASSERT_NE(nullptr, node);
 
-  auto pub = node->create_publisher<geometry_msgs::msg::Wrench>("test/force_test");
+  auto pub = node->create_publisher<geometry_msgs::msg::Wrench>(
+    "test/force_test", rclcpp::SensorDataQoS());
 
   // Apply force on X
   auto msg = geometry_msgs::msg::Wrench();

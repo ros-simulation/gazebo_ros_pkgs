@@ -49,7 +49,7 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
 
   sensor_msgs::msg::Imu::SharedPtr msg = nullptr;
   auto sub =
-    node->create_subscription<sensor_msgs::msg::Imu>("/imu/data",
+    node->create_subscription<sensor_msgs::msg::Imu>("/imu/data", rclcpp::SensorDataQoS(),
       [&msg](sensor_msgs::msg::Imu::SharedPtr _msg) {
         msg = _msg;
       });

@@ -61,7 +61,7 @@ TEST_F(GazeboRosP3dTest, Publishing)
   // Create subscriber
   nav_msgs::msg::Odometry::SharedPtr latest_msg{nullptr};
   auto sub = node->create_subscription<nav_msgs::msg::Odometry>(
-    "test/p3d_test",
+    "test/p3d_test", rclcpp::SensorDataQoS(),
     [&latest_msg](const nav_msgs::msg::Odometry::SharedPtr _msg) {
       latest_msg = _msg;
     });

@@ -115,7 +115,8 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     return;
   }
 
-  impl_->pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(impl_->topic_name_);
+  impl_->pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
+    impl_->topic_name_, rclcpp::SensorDataQoS());
   impl_->topic_name_ = impl_->pub_->get_topic_name();
   RCLCPP_DEBUG(
     impl_->ros_node_->get_logger(), "Publishing on topic [%s]", impl_->topic_name_.c_str());

@@ -58,7 +58,7 @@ TEST_F(GazeboRosJointStatePublisherTest, Publishing)
   // Create subscriber
   sensor_msgs::msg::JointState::SharedPtr latestMsg;
   auto sub = node->create_subscription<sensor_msgs::msg::JointState>(
-    "test/joint_states_test",
+    "test/joint_states_test", rclcpp::SensorDataQoS(),
     [&latestMsg](const sensor_msgs::msg::JointState::SharedPtr msg) {
       latestMsg = msg;
     });

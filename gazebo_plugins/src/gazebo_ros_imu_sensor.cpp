@@ -66,7 +66,8 @@ void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
     return;
   }
 
-  impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::Imu>("~/out");
+  impl_->pub_ =
+    impl_->ros_node_->create_publisher<sensor_msgs::msg::Imu>("~/out", rclcpp::SensorDataQoS());
 
   // Create message to be reused
   auto msg = std::make_shared<sensor_msgs::msg::Imu>();
@@ -109,7 +110,7 @@ void GazeboRosImuSensorPrivate::OnUpdate()
     sensor_->LinearAcceleration());
 
   // Publish message
-  pub_->publish(msg_);
+  pub_->publish(*msg_);
 }
 
 GZ_REGISTER_SENSOR_PLUGIN(GazeboRosImuSensor)
