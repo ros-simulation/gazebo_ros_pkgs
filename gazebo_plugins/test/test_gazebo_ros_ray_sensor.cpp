@@ -94,7 +94,8 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
 
   // Convienence function to subscribe to a topic and store it to a variable
   #define SUBSCRIBE_SETTER(msg, topic) \
-  node->create_subscription<decltype(msg)::element_type>(topic, [&msg](decltype(msg) _msg) { \
+  node->create_subscription<decltype(msg)::element_type>(topic, rclcpp::SensorDataQoS(), \
+    [&msg](decltype(msg) _msg) { \
       msg = _msg; \
     })
 

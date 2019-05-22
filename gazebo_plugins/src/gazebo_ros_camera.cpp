@@ -114,20 +114,17 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   // Camera info publisher
   // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
   impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-    impl_->camera_name_ + "/camera_info");
+    impl_->camera_name_ + "/camera_info", rclcpp::SensorDataQoS());
 
   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
     impl_->camera_info_pub_->get_topic_name());
 
   // Trigger
   if (_sdf->Get<bool>("triggered", false).first) {
-    rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
-    qos_profile.depth = 1;
-
     impl_->trigger_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
       impl_->camera_name_ + "/image_trigger",
-      std::bind(&GazeboRosCamera::OnTrigger, this, std::placeholders::_1),
-      qos_profile);
+      rclcpp::QoS(rclcpp::KeepLast(1)),
+      std::bind(&GazeboRosCamera::OnTrigger, this, std::placeholders::_1));
 
     RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
       impl_->trigger_sub_->get_topic_name());

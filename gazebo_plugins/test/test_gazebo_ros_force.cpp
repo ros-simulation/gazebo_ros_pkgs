@@ -49,7 +49,18 @@ TEST_F(GazeboRosForceTest, ApplyForceTorque)
   auto node = std::make_shared<rclcpp::Node>("gazebo_ros_force_test");
   ASSERT_NE(nullptr, node);
 
-  auto pub = node->create_publisher<geometry_msgs::msg::Wrench>("test/force_test");
+  auto pub = node->create_publisher<geometry_msgs::msg::Wrench>(
+    "test/force_test", rclcpp::QoS(rclcpp::KeepLast(1)));
+
+  // Wait for subscriber to come up
+  unsigned int sleep = 0;
+  unsigned int max_sleep = 30;
+  while (sleep < max_sleep && pub->get_subscription_count() == 0u) {
+    gazebo::common::Time::MSleep(100);
+    sleep++;
+  }
+  EXPECT_LT(0u, pub->get_subscription_count());
+  EXPECT_LT(sleep, max_sleep);
 
   // Apply force on X
   auto msg = geometry_msgs::msg::Wrench();
@@ -58,9 +69,8 @@ TEST_F(GazeboRosForceTest, ApplyForceTorque)
   pub->publish(msg);
 
   // Wait until box moves
+  sleep = 0;
   double target_dist{0.1};
-  unsigned int sleep = 0;
-  unsigned int max_sleep = 30;
   while (sleep < max_sleep && box->WorldPose().Pos().X() < target_dist) {
     world->Step(100);
     gazebo::common::Time::MSleep(100);

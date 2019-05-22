@@ -131,7 +131,7 @@ get_message_or_timeout(
   std::atomic_bool msg_received(false);
   typename T::SharedPtr msg = nullptr;
 
-  auto sub = node->create_subscription<T>(topic,
+  auto sub = node->create_subscription<T>(topic, rclcpp::SystemDefaultsQoS(),
       [&msg_received, &msg](typename T::SharedPtr _msg) {
         // If this is the first message from this topic, increment the counter
         if (!msg_received.exchange(true)) {

@@ -136,13 +136,11 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
   // TODO(chapulina): use rclcpp::is_initialized() once that's available, see
   // https://github.com/ros2/rclcpp/issues/518
   Node::SharedPtr node;
-  if (rclcpp::is_initialized()) {
-    node = std::make_shared<Node>(std::forward<Args>(args) ...);
-  } else {
+  if (!rclcpp::is_initialized()) {
     rclcpp::init(0, nullptr);
     RCLCPP_INFO(internal_logger(), "ROS was initialized without arguments.");
-    node = std::make_shared<Node>(std::forward<Args>(args) ...);
   }
+  node = std::make_shared<Node>(std::forward<Args>(args) ...);
 
   // Store shared pointer to static executor in this object
   node->executor_ = static_executor_.lock();

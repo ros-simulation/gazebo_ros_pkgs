@@ -41,16 +41,6 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
   auto vehicle = world->ModelByName("vehicle");
   ASSERT_NE(nullptr, vehicle);
 
-  // Step a bit for model to settle
-  world->Step(100);
-
-  // Check model state
-  EXPECT_NEAR(0.0, vehicle->WorldPose().Pos().X(), tol);
-  EXPECT_NEAR(0.0, vehicle->WorldPose().Pos().Y(), tol);
-  EXPECT_NEAR(0.0, vehicle->WorldPose().Rot().Yaw(), tol);
-  EXPECT_NEAR(0.0, vehicle->WorldLinearVel().X(), tol);
-  EXPECT_NEAR(0.0, vehicle->WorldAngularVel().Z(), tol);
-
   // Create node and executor
   auto node = std::make_shared<rclcpp::Node>("gazebo_ros_diff_drive_test");
   ASSERT_NE(nullptr, node);
@@ -61,24 +51,42 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
   // Create subscriber
   nav_msgs::msg::Odometry::SharedPtr latestMsg;
   auto sub = node->create_subscription<nav_msgs::msg::Odometry>(
-    "test/odom_test",
+    "test/odom_test", rclcpp::QoS(rclcpp::KeepLast(1)),
     [&latestMsg](const nav_msgs::msg::Odometry::SharedPtr _msg) {
       latestMsg = _msg;
     });
 
+  // Step a bit for model to settle
+  world->Step(100);
+  executor.spin_once(100ms);
+
+  // Check model state
+  EXPECT_NEAR(0.0, vehicle->WorldPose().Pos().X(), tol);
+  EXPECT_NEAR(0.0, vehicle->WorldPose().Pos().Y(), tol);
+  EXPECT_NEAR(0.0, vehicle->WorldPose().Rot().Yaw(), tol);
+  EXPECT_NEAR(0.0, vehicle->WorldLinearVel().X(), tol);
+  EXPECT_NEAR(0.0, vehicle->WorldAngularVel().Z(), tol);
+
   // Send command
-  auto pub = node->create_publisher<geometry_msgs::msg::Twist>("test/cmd_test");
+  auto pub = node->create_publisher<geometry_msgs::msg::Twist>(
+    "test/cmd_test", rclcpp::QoS(rclcpp::KeepLast(1)));
 
   auto msg = geometry_msgs::msg::Twist();
   msg.linear.x = 1.0;
   msg.angular.z = 0.1;
   pub->publish(msg);
-  executor.spin_once(100ms);
 
   // Wait for it to be processed
-  world->Step(1000);
-  executor.spin_once(100ms);
-  gazebo::common::Time::MSleep(1000);
+  int sleep{0};
+  int maxSleep{300};
+  for (; sleep < maxSleep && (vehicle->WorldLinearVel().X() < 0.9 ||
+    vehicle->WorldAngularVel().Z() < 0.09); ++sleep)
+  {
+    world->Step(100);
+    executor.spin_once(100ms);
+    gazebo::common::Time::MSleep(100);
+  }
+  EXPECT_NE(sleep, maxSleep);
 
   // Check message
   ASSERT_NE(nullptr, latestMsg);

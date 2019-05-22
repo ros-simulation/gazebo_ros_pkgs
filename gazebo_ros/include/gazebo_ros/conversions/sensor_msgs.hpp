@@ -40,8 +40,9 @@ namespace gazebo_ros
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
-T Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity = 0.0)
+T Convert(const gazebo::msgs::LaserScanStamped &, double min_intensity = 0.0)
 {
+  (void)min_intensity;
   T::ConversionNotImplemented;
 }
 

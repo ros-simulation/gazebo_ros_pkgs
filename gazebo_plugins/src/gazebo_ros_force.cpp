@@ -76,8 +76,8 @@ void GazeboRosForce::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
   impl_->wrench_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Wrench>(
-    "gazebo_ros_force", std::bind(&GazeboRosForce::OnRosWrenchMsg, this,
-    std::placeholders::_1));
+    "gazebo_ros_force", rclcpp::SystemDefaultsQoS(),
+    std::bind(&GazeboRosForce::OnRosWrenchMsg, this, std::placeholders::_1));
 
   // Callback on every iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(

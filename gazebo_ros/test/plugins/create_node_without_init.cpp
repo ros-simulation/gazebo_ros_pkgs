@@ -40,7 +40,7 @@ void CreateBeforeInit::Load(int, char **)
   assert(nullptr != node);
 
   // Create a publisher
-  auto pub = node->create_publisher<std_msgs::msg::String>("test");
+  auto pub = node->create_publisher<std_msgs::msg::String>("test", rclcpp::SystemDefaultsQoS());
 
   // Run lambda every 1 second
   using namespace std::chrono_literals;
