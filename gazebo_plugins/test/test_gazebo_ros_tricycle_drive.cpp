@@ -61,13 +61,14 @@ TEST_F(GazeboRosTricycleDriveTest, Publishing)
   // Create subscriber
   nav_msgs::msg::Odometry::SharedPtr latestMsg;
   auto sub = node->create_subscription<nav_msgs::msg::Odometry>(
-    "test/odom_test",
+    "test/odom_test", rclcpp::QoS(rclcpp::KeepLast(1)),
     [&latestMsg](const nav_msgs::msg::Odometry::SharedPtr _msg) {
       latestMsg = _msg;
     });
 
   // Send command
-  auto pub = node->create_publisher<geometry_msgs::msg::Twist>("test/cmd_test");
+  auto pub = node->create_publisher<geometry_msgs::msg::Twist>(
+    "test/cmd_test", rclcpp::QoS(rclcpp::KeepLast(1)));
 
   auto msg = geometry_msgs::msg::Twist();
   msg.linear.x = 0.5;
