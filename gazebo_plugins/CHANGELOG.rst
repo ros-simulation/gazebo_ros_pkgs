@@ -2,6 +2,39 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use latest dashing api (`#926 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/926>`_)
+  * [gazebo_ros] use qos
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * [gazebo_ros] avoid unused warning
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * [gazebo_plugins] use qos
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * allow_undeclared_parameters
+  * fix tests
+  * forward port pull request `#901 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/901>`_
+* [ros2] Port video plugin to ros2 (`#899 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/899>`_)
+  * [ros2] Port video plugin to ros2
+  * Fix test for gazebo_ros_video
+* use `.c_str()` for variadic template (`#914 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/914>`_)
+  Not sure why this never was a problem, but I had to fix this in order to make it compile on OSX.
+* [ros2] Fix diff_drive error message (`#882 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/882>`_)
+* Fix Windows conflicting macros and missing usleep (`#885 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/885>`_)
+  * Fix conflicting Windows macros and missing usleep
+  * fix spacing
+  * fix spacing again
+  * remove lint
+* gazebo_plugins: Port the gazebo_ros_p3d plugin (`#845 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/845>`_)
+  * Port the gazebo_ros_p3d plugin
+  * Address most of the review feedback. A couple items remain
+  * Remove the model\_ member variable since it was just and alias for _parent
+  * Use OnUpdate instead to get the UpdateInfo through the callback parameter
+  * demo, test, and a bit more cleaning up
+  * linters
+* [ros2] ENABLE_DISPLAY_TESTS, and make camera tests more robust (`#854 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/854>`_)
+* Contributors: Jonathan Noyola, Karsten Knese, Michael Jeronimo, Romain Reignier, Shivesh Khaitan, chapulina
+
 3.1.0 (2018-12-10)
 ------------------
 * [ros2] Camera and triggered camera (`#827 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/827>`_)

@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.1.0 (2018-12-10)
 ------------------
 * [ros2] Add gazebo_plugins to gazebo_ros_pkgs (`#850 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/850>`_)
