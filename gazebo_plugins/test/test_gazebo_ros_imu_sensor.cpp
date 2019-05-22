@@ -55,8 +55,17 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
       });
 
   // Step until an imu message will have been published
-  world->Step(100);
-  rclcpp::spin_some(node);
+  int sleep{0};
+  int max_sleep{30};
+  while (sleep < max_sleep && nullptr == msg) {
+    world->Step(100);
+    rclcpp::spin_some(node);
+    gazebo::common::Time::MSleep(100);
+    sleep++;
+  }
+  EXPECT_LT(0u, sub->get_publisher_count());
+  EXPECT_LT(sleep, max_sleep);
+  ASSERT_NE(nullptr, msg);
 
   // Get the initial imu output when the box is at rest
   auto pre_movement_msg = std::make_shared<sensor_msgs::msg::Imu>(*msg);
