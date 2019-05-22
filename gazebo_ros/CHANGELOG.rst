@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.0 (2019-05-21)
+------------------
 * use latest dashing api (`#926 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/926>`_)
   * [gazebo_ros] use qos
   Signed-off-by: Karsten Knese <karsten@openrobotics.org>
