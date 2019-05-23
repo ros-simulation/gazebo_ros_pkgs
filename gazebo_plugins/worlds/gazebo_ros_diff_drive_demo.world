@@ -14,11 +14,15 @@
 
   Try listening to TF:
 
-    ros2 run tf2_ros tf2_echo odom chassis
+    ros2 run tf2_ros tf2_echo odom_demo chassis
 
-    ros2 run tf2_ros tf2_echo chassis right_wheel
+    ros2 run tf2_ros tf2_echo chassis right_wheel0
 
-    ros2 run tf2_ros tf2_echo chassis left_wheel
+    ros2 run tf2_ros tf2_echo chassis left_wheel0
+
+    ros2 run tf2_ros tf2_echo chassis right_wheel1
+
+    ros2 run tf2_ros tf2_echo chassis left_wheel1
 -->
 <sdf version="1.6">
   <world name="default">
@@ -63,8 +67,106 @@
         </collision>
       </link>
 
-      <link name='left_wheel'>
+      <link name='left_wheel0'>
         <pose>0.554283 0.625029 -0.025 -1.5707 0 0</pose>
+        <inertial>
+          <mass>2</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <sphere>
+              <radius>0.5</radius>
+            </sphere>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <sphere>
+              <radius>0.5</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1</mu>
+                <mu2>1</mu2>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <soft_cfm>0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+13</kp>
+                <kd>1</kd>
+                <max_vel>0.01</max_vel>
+                <min_depth>0.01</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+      </link>
+
+      <link name='right_wheel0'>
+        <pose>0.554282 -0.625029 -0.025 -1.5707 0 0</pose>
+        <inertial>
+          <mass>2</mass>
+          <inertia>
+            <ixx>0.145833</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.145833</iyy>
+            <iyz>0</iyz>
+            <izz>0.125</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <sphere>
+              <radius>0.5</radius>
+            </sphere>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <sphere>
+              <radius>0.5</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1</mu>
+                <mu2>1</mu2>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <soft_cfm>0</soft_cfm>
+                <soft_erp>0.2</soft_erp>
+                <kp>1e+13</kp>
+                <kd>1</kd>
+                <max_vel>0.01</max_vel>
+                <min_depth>0.01</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+      </link>
+
+      <link name='left_wheel1'>
+        <pose>-0.554283 0.625029 -0.025 -1.5707 0 0</pose>
         <inertial>
           <mass>2</mass>
           <inertia>
@@ -112,8 +214,8 @@
         </collision>
       </link>
 
-      <link name='right_wheel'>
-        <pose>0.554282 -0.625029 -0.025 -1.5707 0 0</pose>
+      <link name='right_wheel1'>
+        <pose>-0.554282 -0.625029 -0.025 -1.5707 0 0</pose>
         <inertial>
           <mass>2</mass>
           <inertia>
@@ -190,9 +292,9 @@
         </collision>
       </link>
 
-      <joint name='left_wheel_joint' type='revolute'>
+      <joint name='left_wheel_joint0' type='revolute'>
         <parent>chassis</parent>
-        <child>left_wheel</child>
+        <child>left_wheel0</child>
         <axis>
           <xyz>0 0 1</xyz>
           <limit>
@@ -202,9 +304,33 @@
         </axis>
       </joint>
 
-      <joint name='right_wheel_joint' type='revolute'>
+      <joint name='right_wheel_joint0' type='revolute'>
         <parent>chassis</parent>
-        <child>right_wheel</child>
+        <child>right_wheel0</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-1.79769e+308</lower>
+            <upper>1.79769e+308</upper>
+          </limit>
+        </axis>
+      </joint>
+
+      <joint name='left_wheel_joint1' type='revolute'>
+        <parent>chassis</parent>
+        <child>left_wheel1</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-1.79769e+308</lower>
+            <upper>1.79769e+308</upper>
+          </limit>
+        </axis>
+      </joint>
+
+      <joint name='right_wheel_joint1' type='revolute'>
+        <parent>chassis</parent>
+        <child>right_wheel1</child>
         <axis>
           <xyz>0 0 1</xyz>
           <limit>
@@ -227,13 +353,22 @@
           <argument>odom:=odom_demo</argument>
         </ros>
 
-        <!-- wheels -->
-        <left_joint>left_wheel_joint</left_joint>
-        <right_joint>right_wheel_joint</right_joint>
+        <!-- Number of wheel pairs -->
+        <num_wheel_pairs>2</num_wheel_pairs>
+        
+        <!-- wheels0 -->
+        <left_joint0>left_wheel_joint0</left_joint0>
+        <right_joint0>right_wheel_joint0</right_joint0>
+        
+        <!-- wheels1-->
+        <left_joint1>left_wheel_joint1</left_joint1>
+        <right_joint1>right_wheel_joint1</right_joint1>
 
         <!-- kinematics -->
-        <wheel_separation>1.25</wheel_separation>
-        <wheel_diameter>0.6</wheel_diameter>
+        <wheel_separation0>1.25</wheel_separation0>
+        <wheel_separation1>1.25</wheel_separation1>
+        <wheel_diameter0>1.0</wheel_diameter0>
+        <wheel_diameter1>0.6</wheel_diameter1>
 
         <!-- limits -->
         <max_wheel_torque>20</max_wheel_torque>

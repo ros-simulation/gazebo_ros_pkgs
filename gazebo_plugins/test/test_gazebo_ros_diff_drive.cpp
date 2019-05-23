@@ -57,7 +57,7 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
     });
 
   // Step a bit for model to settle
-  world->Step(100);
+  world->Step(200);
   executor.spin_once(100ms);
 
   // Check model state
