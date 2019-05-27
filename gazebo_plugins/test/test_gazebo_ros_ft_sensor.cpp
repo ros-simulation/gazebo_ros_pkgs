@@ -24,14 +24,14 @@
 
 using namespace std::literals::chrono_literals; // NOLINT
 
-class GazeboRosF3dTest : public gazebo::ServerFixture
+class GazeboRosFTSensorTest : public gazebo::ServerFixture
 {
 };
 
-TEST_F(GazeboRosF3dTest, Publishing)
+TEST_F(GazeboRosFTSensorTest, Publishing)
 {
   // Load test world and start paused
-  this->Load("worlds/gazebo_ros_f3d.world", true);
+  this->Load("worlds/gazebo_ros_ft_sensor.world", true);
 
   // World
   auto world = gazebo::physics::get_world();
@@ -50,7 +50,7 @@ TEST_F(GazeboRosF3dTest, Publishing)
   world->Step(100);
 
   // Create node and executor
-  auto node = std::make_shared<rclcpp::Node>("gazebo_ros_f3d_test");
+  auto node = std::make_shared<rclcpp::Node>("gazebo_ros_ft_sensor_test");
   ASSERT_NE(nullptr, node);
 
   rclcpp::executors::SingleThreadedExecutor executor;
@@ -59,7 +59,7 @@ TEST_F(GazeboRosF3dTest, Publishing)
   // Create subscriber
   geometry_msgs::msg::WrenchStamped::SharedPtr latest_msg{nullptr};
   auto sub = node->create_subscription<geometry_msgs::msg::WrenchStamped>(
-    "test/f3d_test",
+    "test/ft_sensor_test", rclcpp::QoS(rclcpp::KeepLast(1)),
     [&latest_msg](const geometry_msgs::msg::WrenchStamped::SharedPtr _msg) {
       latest_msg = _msg;
     });

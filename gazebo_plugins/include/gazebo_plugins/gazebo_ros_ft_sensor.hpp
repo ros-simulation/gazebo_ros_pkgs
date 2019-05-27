@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_F3D_HPP_
-#define GAZEBO_PLUGINS__GAZEBO_ROS_F3D_HPP_
+#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_FT_SENSOR_HPP_
+#define GAZEBO_PLUGINS__GAZEBO_ROS_FT_SENSOR_HPP_
 
 #include <gazebo/common/Plugin.hh>
 
@@ -21,19 +21,21 @@
 
 namespace gazebo_plugins
 {
-class GazeboRosF3DPrivate;
+class GazeboRosFTSensorPrivate;
 
-/// This is a controller that simulates a 6 dof force sensor.
-/// (Force Feed Back Ground Truth)
+/// This is a controller that simulates a 6 dof force and torque sensor on link or joint.
+/// For joints, the wrench is reported in the joint child link frame and the
+/// measure direction is child-to-parent link. (Force and Torque Feed Back Ground Truth)
+/// If <body_name> is specified, the plugin acts as sensor on a link, otherwise if
+/// <joint_name> is specified, it acts as a sensor on a joint
 /*
  * \author  John Hsu
- *
- * \date 24 Sept 2008
+ * \author Francisco Suarez-Ruiz
  */
 /**
   Example Usage:
   \code{.xml}
-    <plugin name="gazebo_ros_f3d" filename="libgazebo_ros_f3d.so">
+    <plugin name="gazebo_ros_ft_sensor" filename="libgazebo_ros_ft_sensor.so">
 
       <ros>
 
@@ -51,17 +53,23 @@ class GazeboRosF3DPrivate;
       <!-- Frame id of published message -->
       <frame_name>demo_world</frame_name>
 
+      <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->
+      <update_rate>1</update_rate>
+
+      <!-- Standard deviation of the noise to be added to the reported wrench messages. -->
+      <gaussian_noise>0.01</gaussian_noise>
+
     </plugin>
   \endcode
 */
-class GazeboRosF3D : public gazebo::ModelPlugin
+class GazeboRosFTSensor : public gazebo::ModelPlugin
 {
 public:
   /// Constructor
-  GazeboRosF3D();
+  GazeboRosFTSensor();
 
   /// Destructor
-  ~GazeboRosF3D();
+  ~GazeboRosFTSensor();
 
 protected:
   // Documentation inherited
@@ -69,8 +77,8 @@ protected:
 
 private:
   /// Private data pointer
-  std::unique_ptr<GazeboRosF3DPrivate> impl_;
+  std::unique_ptr<GazeboRosFTSensorPrivate> impl_;
 };
 }  // namespace gazebo_plugins
 
-#endif  // GAZEBO_PLUGINS__GAZEBO_ROS_F3D_HPP_
+#endif  // GAZEBO_PLUGINS__GAZEBO_ROS_FT_SENSOR_HPP_
