@@ -152,13 +152,14 @@ add_library(gazebo_ros_tricycle_drive SHARED
   src/gazebo_ros_tricycle_drive.cpp
 )
 ament_target_dependencies(gazebo_ros_tricycle_drive
-  "rclcpp"
-  "tf2"
-  "tf2_ros"
-  "nav_msgs"
-  "geometry_msgs"
-  "sensor_msgs"
   "gazebo_ros"
+  "geometry_msgs"
+  "nav_msgs"
+  "rclcpp"
+  "sensor_msgs"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
 )
 ament_export_libraries(gazebo_ros_tricycle_drive)
 
