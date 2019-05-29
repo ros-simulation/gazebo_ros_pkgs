@@ -71,7 +71,8 @@ TEST_F(GazeboRosVideoTest, VideoSubscribeTest)
   executor.add_node(node);
 
   // Send image
-  auto pub = node->create_publisher<sensor_msgs::msg::Image>("test/video_test");
+  auto pub = node->create_publisher<sensor_msgs::msg::Image>(
+    "test/video_test", rclcpp::QoS(rclcpp::KeepLast(1)));
 
   auto msg = sensor_msgs::msg::Image();
   msg.height = 120;
