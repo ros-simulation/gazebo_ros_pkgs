@@ -167,6 +167,9 @@ public:
   /// Distance between the wheels, in meters.
   double wheel_separation_;
 
+  /// Maximum wheel torque, in Nm.
+  double max_wheel_torque_;
+
   /// Keep latest twist message
   geometry_msgs::msg::Twist cmd_;
 
@@ -303,10 +306,11 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
     return;
   }
 
-  auto max_wheel_torque = _sdf->Get<double>("max_wheel_torque", 0.15).first;
+  impl_->max_wheel_torque_ = _sdf->Get<double>("max_wheel_torque", 0.15).first;
   impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]->SetParam("fmax", 0,
-    max_wheel_torque);
-  impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam("fmax", 0, max_wheel_torque);
+    impl_->max_wheel_torque_);
+  impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam("fmax", 0,
+    impl_->max_wheel_torque_);
 
   // Update rate
   auto update_rate = _sdf->Get<double>("update_rate", 100).first;
@@ -384,7 +388,31 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
     std::bind(&GazeboRosTricycleDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
 }
 
-void GazeboRosTricycleDrive::Reset() {}
+void GazeboRosTricycleDrive::Reset()
+{
+  std::lock_guard<std::mutex> scoped_lock(impl_->lock_);
+
+  if (impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING] &&
+    impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED])
+  {
+    gazebo::common::Time current_time =
+      impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->GetWorld()->SimTime();
+    impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]->SetParam("fmax", 0,
+      impl_->max_wheel_torque_);
+    impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam("fmax", 0,
+      impl_->max_wheel_torque_);
+    impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]->SetParam("vel", 0, 0.0);
+    impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam("vel", 0, 0.0);
+    impl_->last_actuator_update_ = current_time;
+    impl_->last_odom_update_ = current_time;
+  }
+
+  impl_->pose_encoder_.x = 0;
+  impl_->pose_encoder_.y = 0;
+  impl_->pose_encoder_.theta = 0;
+  impl_->cmd_.linear.x = 0;
+  impl_->cmd_.angular.z = 0;
+}
 
 void GazeboRosTricycleDrivePrivate::PublishWheelJointState(
   const gazebo::common::Time & _current_time)
