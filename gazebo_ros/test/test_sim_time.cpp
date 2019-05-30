@@ -55,7 +55,7 @@ TEST_F(TestSimTime, TestClock)
   std::vector<rclcpp::Parameter> params = {rclcpp::Parameter("use_sim_time", true)};
   rclcpp::NodeOptions node_options;
   node_options.arguments(args);
-  node_options.initial_parameters(params);
+  node_options.parameter_overrides(params);
   auto node = std::make_shared<rclcpp::Node>("test_sim_time", "", node_options);
 
   // Get two clock messages, caching the ROS time once each is received
