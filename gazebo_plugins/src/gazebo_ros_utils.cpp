@@ -108,18 +108,18 @@ void GazeboRos ::getParameterBoolean(bool &_value, const char *_tag_name) {
 
     if (sdf_->HasElement(_tag_name)) {
         std::string value = sdf_->GetElement(_tag_name)->Get<std::string>();
-        if(boost::iequals(value, std::string("true")))
+        if(boost::iequals(value, std::string("true")) || boost::iequals(value, std::string("1")))
         {
             _value = true;
         }
-        else if(boost::iequals(value, std::string("false")))
+        else if(boost::iequals(value, std::string("false")) || boost::iequals(value, std::string("0")))
         {
             _value = false;
         }
         else
         {
-            ROS_WARN_NAMED("utils", "%s: <%s> must be either true or false",
-                     info(), _tag_name);
+            ROS_WARN_NAMED("utils", "%s: <%s> must be either true or false but is '%s'",
+                     info(), _tag_name, value.c_str());
         }
     }
     ROS_DEBUG_NAMED("utils", "%s: <%s> = %s",
