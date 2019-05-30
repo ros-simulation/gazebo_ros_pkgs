@@ -2,6 +2,19 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* qos dashing api for video plugin (`#929 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/929>`_)
+  * qos dashing api for video plugin
+  * disable video test unless display is enabled
+* [ros2] Port tricycle_drive plugin to ros2 (`#917 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/917>`_)
+  * [ros2] Port tricycle_drive plugin to ros2
+  * Set feasible test cmd_vel
+  * qos dashing api for tricycle
+  * Minor fixes
+  * Fix tricycle behaviour on gazebo reset
+* Contributors: Shivesh Khaitan
+
 3.3.0 (2019-05-21)
 ------------------
 * use latest dashing api (`#926 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/926>`_)

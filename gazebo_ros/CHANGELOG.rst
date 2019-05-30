@@ -2,6 +2,14 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Declare parameters and use overrides (`#931 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/931>`_)
+  * Declare parameters and use overrides
+  * PR feedback
+  * fix linking error
+* Contributors: chapulina
+
 3.3.0 (2019-05-21)
 ------------------
 * use latest dashing api (`#926 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/926>`_)
