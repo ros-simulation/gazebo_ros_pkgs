@@ -41,9 +41,9 @@ void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
   auto node = gazebo_ros::Node::Get(_sdf);
   assert(nullptr != node);
 
-  node->declare_parameter("declared_string", rclcpp::ParameterValue("overridden"));
-  node->declare_parameter("declared_int", rclcpp::ParameterValue(123));
-  node->declare_parameter("missing_type", rclcpp::ParameterValue("declared"));
+  node->declare_parameter("declared_string", "overridden");
+  node->declare_parameter("declared_int", 123);
+  node->declare_parameter("missing_type", "declared");
 
   const char * node_name = node->get_name();
   if (strcmp("sdf_node_name", node_name)) {

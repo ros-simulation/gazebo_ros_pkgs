@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-using namespace std::literals::chrono_literals; // NOLINT
+using namespace std::literals::chrono_literals;
 
 /// Tests the simtime published to /clock by gazebo_ros_init
 class TestSimTime : public ::testing::Test
@@ -54,7 +54,7 @@ TEST_F(TestSimTime, TestClock)
 
   // Create a node which will use sim time
   auto node = std::make_shared<rclcpp::Node>("test_sim_time");
-  node->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  node->set_parameter({"use_sim_time", true});
 
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
