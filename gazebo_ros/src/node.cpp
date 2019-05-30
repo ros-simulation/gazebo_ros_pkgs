@@ -36,7 +36,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   std::string name = "";
   std::string ns = "";
   std::vector<std::string> arguments;
-  std::vector<rclcpp::Parameter> initial_parameters;
+  std::vector<rclcpp::Parameter> parameter_overrides;
 
   // Get the name of the plugin as the name for the node.
   if (!sdf->HasAttribute("name")) {
@@ -71,23 +71,18 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     while (parameter_sdf) {
       auto param = sdf_to_ros_parameter(parameter_sdf);
       if (rclcpp::ParameterType::PARAMETER_NOT_SET != param.get_type()) {
-        initial_parameters.push_back(param);
+        parameter_overrides.push_back(param);
       }
       parameter_sdf = parameter_sdf->GetNextElement("parameter");
     }
   }
 
   rclcpp::NodeOptions node_options;
-  node_options.allow_undeclared_parameters(true);
   node_options.arguments(arguments);
-  // TODO(anyone) can't set at construction, see
-  // https://github.com/ros2/rclcpp/issues/730
-  // node_options.initial_parameters(initial_parameters);
+  node_options.parameter_overrides(parameter_overrides);
 
   // Create node with parsed arguments
-  auto node = CreateWithArgs(name, ns, node_options);
-  node->set_parameters(initial_parameters);
-  return node;
+  return CreateWithArgs(name, ns, node_options);
 }
 
 Node::SharedPtr Node::Get()

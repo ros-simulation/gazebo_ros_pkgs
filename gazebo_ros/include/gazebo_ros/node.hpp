@@ -141,6 +141,7 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
     RCLCPP_INFO(internal_logger(), "ROS was initialized without arguments.");
   }
   node = std::make_shared<Node>(std::forward<Args>(args) ...);
+  node->set_parameter(rclcpp::Parameter("use_sim_time", true));
 
   // Store shared pointer to static executor in this object
   node->executor_ = static_executor_.lock();

@@ -5,11 +5,14 @@
       <ros>
         <namespace>/foo</namespace>
         <argument>test:=my_topic</argument>
-        <parameter name="my_string" type="string">str</parameter>
-        <parameter name="my_bool_true" type="bool">True</parameter>
-        <parameter name="my_bool_false" type="bool">false</parameter>
-        <parameter name="my_int" type="int">42</parameter>
-        <parameter name="my_double" type="double">13.37</parameter>
+
+        <!-- Declared parameters, should go through -->
+        <parameter name="declared_string" type="string">from SDF</parameter>
+        <parameter name="declared_int" type="int">42</parameter>
+
+        <!-- Undeclared parameters, throw on get -->
+        <parameter name="non_declared_bool" type="bool">True</parameter>
+        <parameter name="non_declared_double" type="double">13.37</parameter>
 
         <!-- Missing 'name', should be rejected -->
         <parameter type="int">52</parameter>
