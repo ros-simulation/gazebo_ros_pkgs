@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.1 (2019-05-30)
+------------------
 * qos dashing api for video plugin (`#929 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/929>`_)
   * qos dashing api for video plugin
   * disable video test unless display is enabled

@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.1 (2019-05-30)
+------------------
 * Declare parameters and use overrides (`#931 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/931>`_)
   * Declare parameters and use overrides
   * PR feedback
