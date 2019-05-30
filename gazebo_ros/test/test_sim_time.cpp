@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+using namespace std::literals::chrono_literals;
+
 /// Tests the simtime published to /clock by gazebo_ros_init
 class TestSimTime : public ::testing::Test
 {
@@ -51,35 +53,48 @@ TEST_F(TestSimTime, TestClock)
   using ClockMsg = rosgraph_msgs::msg::Clock;
 
   // Create a node which will use sim time
-  std::vector<std::string> args;
-  std::vector<rclcpp::Parameter> params = {rclcpp::Parameter("use_sim_time", true)};
-  rclcpp::NodeOptions node_options;
-  node_options.arguments(args);
-  node_options.initial_parameters(params);
-  auto node = std::make_shared<rclcpp::Node>("test_sim_time", "", node_options);
+  auto node = std::make_shared<rclcpp::Node>("test_sim_time");
+  node->set_parameter({"use_sim_time", true});
 
-  // Get two clock messages, caching the ROS time once each is received
-  auto first_msg =
-    gazebo_ros::get_message_or_timeout<ClockMsg>(node, "/clock", rclcpp::Duration(5, 0));
-  ASSERT_NE(first_msg, nullptr);
-  auto first_msg_time = node->now();
-  auto second_msg =
-    gazebo_ros::get_message_or_timeout<ClockMsg>(node, "/clock", rclcpp::Duration(1, 0));
-  ASSERT_NE(second_msg, nullptr);
-  auto second_msg_time = node->now();
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
 
-  // The SIM time should be close to zero (start of simulation)
-  EXPECT_LT(rclcpp::Time(first_msg->clock), rclcpp::Time(1, 0, RCL_ROS_TIME));
-  EXPECT_LT(rclcpp::Time(second_msg->clock), rclcpp::Time(1, 0, RCL_ROS_TIME));
-  // Time should go forward
-  EXPECT_GT(rclcpp::Time(second_msg->clock), rclcpp::Time(first_msg->clock)) <<
-    rclcpp::Time(second_msg->clock).nanoseconds() << "    " <<
-    rclcpp::Time(first_msg->clock).nanoseconds();
-  // The message from the clock should be the node's time
-  EXPECT_EQ(first_msg_time, rclcpp::Time(first_msg->clock)) << first_msg_time.nanoseconds() <<
-    "    " << rclcpp::Time(first_msg->clock).nanoseconds();
-  EXPECT_EQ(second_msg_time, rclcpp::Time(second_msg->clock)) << second_msg_time.nanoseconds() <<
-    "    " << rclcpp::Time(second_msg->clock).nanoseconds();
+  std::vector<ClockMsg::SharedPtr> msgs;
+  std::vector<rclcpp::Time> times;
+  auto sub = node->create_subscription<ClockMsg>("/clock", rclcpp::SystemDefaultsQoS(),
+      [&](ClockMsg::SharedPtr _msg) {
+        msgs.push_back(_msg);
+        times.push_back(node->now());
+      });
+
+  unsigned int sleep{0};
+  unsigned int max_sleep{30};
+  while (msgs.size() < 5 && sleep++ < max_sleep) {
+    executor.spin_once(200ms);
+  }
+  EXPECT_LT(sleep, max_sleep);
+  EXPECT_EQ(5u, msgs.size());
+  EXPECT_EQ(5u, times.size());
+
+  // Check node starts at time zero
+  for (int i = 0; i < 5; ++i) {
+    // The SIM time should be close to zero (start of simulation)
+    EXPECT_LT(rclcpp::Time(msgs[i]->clock), rclcpp::Time(1, 0, RCL_ROS_TIME));
+    EXPECT_LT(times[i], rclcpp::Time(1, 0, RCL_ROS_TIME));
+
+    // Time should go forward
+    if (i > 0) {
+      EXPECT_GT(rclcpp::Time(msgs[i]->clock), rclcpp::Time(msgs[i - 1]->clock)) <<
+        rclcpp::Time(msgs[i]->clock).nanoseconds() << "    " <<
+        rclcpp::Time(msgs[i - 1]->clock).nanoseconds();
+      EXPECT_GT(times[i], times[i - 1]) << times[i].nanoseconds() << "    " <<
+        times[i - 1].nanoseconds();
+
+      // The message from the clock should be close to the node's time
+      // We can't guarantee they match exactly because the node may process clock messages late
+      EXPECT_NEAR(times[i].nanoseconds(), rclcpp::Time(msgs[i]->clock).nanoseconds(), 150000000);
+    }
+  }
 }
 
 int main(int argc, char ** argv)

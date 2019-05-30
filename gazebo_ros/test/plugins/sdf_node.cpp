@@ -16,8 +16,10 @@
 
 #include <std_msgs/msg/string.hpp>
 #include <gazebo_ros/node.hpp>
+#include <rclcpp/exceptions.hpp>
 
 #include <memory>
+#include <string>
 
 /// Simple example of a gazebo world plugin which uses a ROS2 node with gazebo_ros::Node.
 class SDFNode : public gazebo::WorldPlugin
@@ -39,43 +41,79 @@ void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
   auto node = gazebo_ros::Node::Get(_sdf);
   assert(nullptr != node);
 
+  node->declare_parameter("declared_string", "overridden");
+  node->declare_parameter("declared_int", 123);
+  node->declare_parameter("missing_type", "declared");
+
   const char * node_name = node->get_name();
   if (strcmp("sdf_node_name", node_name)) {
     RCLCPP_ERROR(node->get_logger(), "Node name not taken from SDF");
     return;
   }
 
+  // Attempt to get the parameters set by the SDF.
+  // If any of them fail, messages will not publish so test will fail
+
   // Create a publisher
   auto pub = node->create_publisher<std_msgs::msg::String>("test", rclcpp::SystemDefaultsQoS());
 
-  // Attempt to get the parameters set by the SDF.
-  // If any of them fail, messages will not publish so test will fail
-  #define SDF_NODE_PARAM_CHECK(param, expected) \
-  if (expected != node->get_parameter(param).get_value<decltype(expected)>()) { \
-    RCLCPP_ERROR(node->get_logger(), "Wrong value for parameter."); \
-    return; \
+  {
+    auto param = node->get_parameter("declared_string");
+    if (rclcpp::PARAMETER_STRING != param.get_type()) {
+      RCLCPP_ERROR(node->get_logger(), "Wrong parameter type, not string");
+      return;
+    }
+    if ("from SDF" != param.get_value<std::string>()) {
+      RCLCPP_ERROR(node->get_logger(), "Wrong parameter value");
+      return;
+    }
   }
 
-  SDF_NODE_PARAM_CHECK("my_string", "str");
-  SDF_NODE_PARAM_CHECK("my_bool_false", false);
-  SDF_NODE_PARAM_CHECK("my_bool_true", true);
-  SDF_NODE_PARAM_CHECK("my_int", 42);
-  SDF_NODE_PARAM_CHECK("my_double", 13.37);
-
-  // Return if the given parameter is set
-  #define SDF_NODE_PARAM_UNSET(param) \
-  { \
-    rclcpp::Parameter dummy; \
-    if (node->get_parameter(param, dummy)) { \
-      RCLCPP_ERROR(node->get_logger(), "Invalid parameter should not be set [%s]", \
-        param); \
-      return; \
-    } \
+  {
+    auto param = node->get_parameter("declared_int");
+    if (rclcpp::PARAMETER_INTEGER != param.get_type()) {
+      RCLCPP_ERROR(node->get_logger(), "Wrong parameter type, not int");
+      return;
+    }
+    if (42 != param.get_value<int>()) {
+      RCLCPP_ERROR(node->get_logger(), "Wrong parameter value");
+      return;
+    }
   }
 
-  // Check that the invalid parameter sdfs don't get set
-  SDF_NODE_PARAM_UNSET("invalid_type")
-  SDF_NODE_PARAM_UNSET("missing_type")
+  bool caught{false};
+  try {
+    node->get_parameter("non_declared_bool");
+  } catch (rclcpp::exceptions::ParameterNotDeclaredException) {
+    caught = true;
+  }
+  if (!caught) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to throw exception");
+    return;
+  }
+
+  caught = false;
+  try {
+    node->get_parameter("non_declared_double");
+  } catch (rclcpp::exceptions::ParameterNotDeclaredException) {
+    caught = true;
+  }
+  if (!caught) {
+    RCLCPP_ERROR(node->get_logger(), "Failed to throw exception");
+    return;
+  }
+
+  {
+    auto param = node->get_parameter("missing_type");
+    if (rclcpp::PARAMETER_STRING != param.get_type()) {
+      RCLCPP_ERROR(node->get_logger(), "Wrong parameter type, not int");
+      return;
+    }
+    if ("declared" != param.get_value<std::string>()) {
+      RCLCPP_ERROR(node->get_logger(), "Wrong parameter value");
+      return;
+    }
+  }
 
   // Run lambda every 1 second
   using namespace std::chrono_literals;

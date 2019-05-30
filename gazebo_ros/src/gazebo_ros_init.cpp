@@ -66,20 +66,11 @@ void GazeboRosInit::Load(int argc, char ** argv)
     "/clock",
     rclcpp::QoS(rclcpp::KeepLast(10)).transient_local());
 
-  // Get publish rate from parameter if set
-  rclcpp::Parameter rate_param;
-  if (impl_->ros_node_->get_parameter("publish_rate", rate_param)) {
-    if (rclcpp::ParameterType::PARAMETER_DOUBLE == rate_param.get_type()) {
-      impl_->throttler_ = Throttler(rate_param.as_double());
-    } else if (rclcpp::ParameterType::PARAMETER_INTEGER == rate_param.get_type()) {
-      impl_->throttler_ = Throttler(rate_param.as_int());
-    } else {
-      RCLCPP_WARN(impl_->ros_node_->get_logger(),
-        "Could not read value of param publish_rate [%s] as double/int, using default %ghz.",
-        rate_param.value_to_string().c_str(),
-        GazeboRosInitPrivate::DEFAULT_PUBLISH_FREQUENCY);
-    }
-  }
+  // Publish rate parameter
+  auto rate_param = impl_->ros_node_->declare_parameter(
+    "publish_rate",
+    rclcpp::ParameterValue(GazeboRosInitPrivate::DEFAULT_PUBLISH_FREQUENCY));
+  impl_->throttler_ = Throttler(rate_param.get<double>());
 
   impl_->world_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosInitPrivate::PublishSimTime, impl_.get(), std::placeholders::_1));
