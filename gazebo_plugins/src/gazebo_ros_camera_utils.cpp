@@ -182,8 +182,9 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
 
   if (this->sdf->HasElement("focalLength"))
   {
-    this->focal_length_x_ = this->sdf->Get<double>("focalLength");
-    this->focal_length_y_ = this->focal_length_x_;
+    this->focal_length_ = this->sdf->Get<double>("focalLength"); // deprecated
+    this->focal_length_x_ = this->focal_length_;
+    this->focal_length_y_ = this->focal_length_;
   }
 
   if (!this->sdf->HasElement("focalLengthX"))
@@ -195,7 +196,10 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
     }
   }
   else
+  {
     this->focal_length_x_ = this->sdf->Get<double>("focalLengthX");
+    this->focal_length_ = this->focal_length_x_;
+  }
 
   if (!this->sdf->HasElement("focalLengthY"))
   {
@@ -549,10 +553,10 @@ void GazeboRosCameraUtils::Init()
     // check against float precision
     if (!ignition::math::equal(this->focal_length_x_, computed_focal_length))
     {
-      ROS_WARN_NAMED("camera_utils", "The <focal_length>[%f] you have provided for camera_ [%s]"
+      ROS_WARN_NAMED("camera_utils", "The <focal_length_x>[%f] you have provided for camera_ [%s]"
                " is inconsistent with specified image_width [%d] and"
                " HFOV [%f].   Please double check to see that"
-               " focal_length = width_ / (2.0 * tan(HFOV/2.0)),"
+               " focal_length_x = width_ / (2.0 * tan(HFOV/2.0)),"
                " the explected focal_lengtth value is [%f],"
                " please update your camera_ model description accordingly.",
                 this->focal_length_x_, this->parentSensor_->Name().c_str(),
