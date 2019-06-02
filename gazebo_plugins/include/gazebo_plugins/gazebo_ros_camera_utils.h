@@ -152,6 +152,7 @@ namespace gazebo
     protected: double focal_length_ ROS_DEPRECATED;
     protected: double focal_length_x_;
     protected: double focal_length_y_;
+    protected: double axis_skew_;
     protected: double hack_baseline_;
     protected: double distortion_k1_;
     protected: double distortion_k2_;

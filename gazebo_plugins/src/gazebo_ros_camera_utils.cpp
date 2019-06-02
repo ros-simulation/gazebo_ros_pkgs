@@ -180,6 +180,14 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   else
     this->cy_ = this->sdf->Get<double>("Cy");
 
+  if (!this->sdf->HasElement("AxisSkew"))
+  {
+    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <AxisSkew>, defaults to 0");
+    this->axis_skew_= 0;
+  }
+  else
+    this->axis_skew_ = this->sdf->Get<double>("AxisSkew");
+
   if (this->sdf->HasElement("focalLength"))
   {
     this->focal_length_ = this->sdf->Get<double>("focalLength"); // deprecated
@@ -632,7 +640,7 @@ void GazeboRosCameraUtils::Init()
   camera_info_msg.D[4] = this->distortion_k3_;
   // original camera_ matrix
   camera_info_msg.K[0] = this->focal_length_x_;
-  camera_info_msg.K[1] = 0.0;
+  camera_info_msg.K[1] = this->axis_skew_;
   camera_info_msg.K[2] = this->cx_;
   camera_info_msg.K[3] = 0.0;
   camera_info_msg.K[4] = this->focal_length_y_;
@@ -653,7 +661,7 @@ void GazeboRosCameraUtils::Init()
   // camera_ projection matrix (same as camera_ matrix due
   // to lack of distortion/rectification) (is this generated?)
   camera_info_msg.P[0] = this->focal_length_x_;
-  camera_info_msg.P[1] = 0.0;
+  camera_info_msg.P[1] = this->axis_skew_;
   camera_info_msg.P[2] = this->cx_;
   camera_info_msg.P[3] = -this->focal_length_x_ * this->hack_baseline_;
   camera_info_msg.P[4] = 0.0;
