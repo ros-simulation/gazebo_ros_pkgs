@@ -539,29 +539,47 @@ void GazeboRosCameraUtils::Init()
 
 
   double hfov = this->camera_->HFOV().Radian();
-  double computed_focal_length =
+  double computed_focal_length_x =
     (static_cast<double>(this->width_)) /
     (2.0 * tan(hfov / 2.0));
 
+  double vfov = this->camera_->VFOV().Radian();
+  double computed_focal_length_y =
+    (static_cast<double>(this->height_)) /
+    (2.0 * tan(vfov / 2.0));
+
   if (this->focal_length_x_ == 0 || this->focal_length_y_ == 0)
   {
-    this->focal_length_x_ = computed_focal_length;
-    this->focal_length_y_ = computed_focal_length;
+    this->focal_length_x_ = computed_focal_length_x;
+    this->focal_length_y_ = computed_focal_length_y;
   }
   else
   {
     // check against float precision
-    if (!ignition::math::equal(this->focal_length_x_, computed_focal_length))
+    if (!ignition::math::equal(this->focal_length_x_, computed_focal_length_x))
     {
-      ROS_WARN_NAMED("camera_utils", "The <focal_length_x>[%f] you have provided for camera_ [%s]"
-               " is inconsistent with specified image_width [%d] and"
-               " HFOV [%f].   Please double check to see that"
-               " focal_length_x = width_ / (2.0 * tan(HFOV/2.0)),"
-               " the explected focal_lengtth value is [%f],"
+      ROS_WARN_NAMED("camera_utils", "The <focal_length_x> [%f] you have provided for camera [%s]"
+               " is inconsistent with specified image width [%d] and"
+               " HFOV [%f]. Please double check to see that"
+               " focal_length_x = image_width / (2.0 * tan(hfov_radians / 2.0)),"
+               " the explected x focal_length value is [%f],"
                " please update your camera_ model description accordingly.",
                 this->focal_length_x_, this->parentSensor_->Name().c_str(),
                 this->width_, hfov,
-                computed_focal_length);
+                computed_focal_length_x);
+    }
+
+    if (!ignition::math::equal(this->focal_length_y_, computed_focal_length_y))
+    {
+      ROS_WARN_NAMED("camera_utils", "The <focal_length_y> [%f] you have provided for camera [%s]"
+               " is inconsistent with specified image height [%d] and"
+               " VFOV [%f]. Please double check to see that"
+               " focal_length_y = image_height / (2.0 * tan(vfov_radians / 2.0)),"
+               " the explected y focal_length value is [%f],"
+               " please update your camera_ model description accordingly.",
+                this->focal_length_y_, this->parentSensor_->Name().c_str(),
+                this->height_, vfov,
+                computed_focal_length_y);
     }
   }
 
