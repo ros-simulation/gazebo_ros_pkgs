@@ -2,6 +2,21 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add output arg to launch files, plus some small fixes (melodic) (`#907 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/907>`_)
+  * Add output arg to empty_world
+  * add output arg to elevator_world
+  * add output arg to range_world
+  * don't set use_sim_time in range_world
+  Instead parse it to empty world, where it will be set.
+  * add xml prolog to all launch files
+  * Remove unnecessary arg in range_world.launch
+* use C++11 std sleep instead of usleep. (`#877 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/877>`_)
+* fix issue `#198 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/198>`_ (`#825 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/825>`_)
+* Lower minimum cmake version (`#817 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/817>`_)
+* Contributors: Matthijs van der Burgh, Paul Bovbel, Sean Yen [MSFT], Steven Peters
+
 2.8.4 (2018-07-06)
 ------------------
 * Refactor spawn_model script
