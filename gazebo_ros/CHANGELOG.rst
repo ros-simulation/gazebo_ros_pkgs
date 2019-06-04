@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.5 (2019-06-04)
+------------------
 * Add output arg to launch files, plus some small fixes (melodic) (`#907 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/907>`_)
   * Add output arg to empty_world
   * add output arg to elevator_world
