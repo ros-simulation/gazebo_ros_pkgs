@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.19 (2019-06-04)
+-------------------
 * Accept 0 and 1 as booleans to support URDF to SDF boolean conversion; establish function parity with melodic (`#928 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/928>`_)
 * Contributors: ampleh
 
