@@ -2,6 +2,18 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add output arg to launch files, plus some small fixes (`#905 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/905>`_)
+  * Add output arg to empty_world
+  * add output arg to elevator_world
+  * add output arg to range_world
+  * don't set use_sim_time in range_world
+  Instead parse it to empty world, where it will be set.
+  * add xml prolog to all launch files
+  * Remove unnecessary arg in range_world.launch
+* Contributors: Matthijs van der Burgh
+
 2.5.18 (2019-01-23)
 -------------------
 * Fix typo exist -> exists (`#833 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/833>`_)

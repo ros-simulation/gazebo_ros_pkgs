@@ -2,6 +2,9 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.18 (2019-01-23)
 -------------------
 * Merge remote-tracking branch 'upstream/kinetic-devel' into kinetic-devel
