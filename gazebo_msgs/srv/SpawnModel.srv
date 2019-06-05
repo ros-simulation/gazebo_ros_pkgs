@@ -1,3 +1,5 @@
+# Deprecated, kept for ROS 1 bridge.
+# Use SpawnEntity
 string model_name                 # name of the model to be spawn
 string model_xml                  # this should be an urdf or gazebo xml
 string robot_namespace            # spawn robot and all ROS interfaces under this namespace

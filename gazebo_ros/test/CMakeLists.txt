@@ -4,6 +4,7 @@ find_package(gazebo_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 
 # Plugins
 set(plugins
@@ -31,6 +32,8 @@ file(COPY worlds DESTINATION .)
 set(tests
   test_conversions
   test_gazebo_ros_factory
+  test_gazebo_ros_init
+  test_gazebo_ros_state
   test_node
   test_plugins
   test_sim_time
@@ -59,6 +62,7 @@ foreach(test ${tests})
     "rclcpp"
     "sensor_msgs"
     "std_msgs"
+    "std_srvs"
   )
 endforeach()
 

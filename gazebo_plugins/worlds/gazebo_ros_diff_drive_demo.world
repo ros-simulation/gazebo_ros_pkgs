@@ -14,7 +14,7 @@
 
   Try listening to TF:
 
-    ros2 run tf2_ros tf2_echo odom chassis
+    ros2 run tf2_ros tf2_echo odom_demo chassis
 
     ros2 run tf2_ros tf2_echo chassis right_wheel
 
