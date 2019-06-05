@@ -8,11 +8,11 @@
 
   Or a link's state w.r.t. the world:
 
-      ros2 service call /demo/get_entity_state 'gazebo_msgs/GetEntityState' '{name: "boxes::bottom", relative_frame: "world"}'
+      ros2 service call /demo/get_entity_state 'gazebo_msgs/GetEntityState' '{name: "boxes::bottom", reference_frame: "world"}'
 
   Or a light's state w.r.t. another entity:
 
-      ros2 service call /demo/get_entity_state 'gazebo_msgs/GetEntityState' '{name: "sun", relative_frame: "ground_plane"}'
+      ros2 service call /demo/get_entity_state 'gazebo_msgs/GetEntityState' '{name: "sun", reference_frame: "ground_plane"}'
 
   > When setting state, note that the changes for static entities may not be visible on gzclient due to https://bitbucket.org/osrf/gazebo/issues/2560
 
