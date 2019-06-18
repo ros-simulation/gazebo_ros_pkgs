@@ -65,16 +65,13 @@ class GazeboRosDiffDrivePrivate;
       <!-- Update rate in Hz -->
       <update_rate>50</update_rate>
 
-      <!-- Number of wheel pairs -->
-      <num_wheel_pairs>1</num_wheel_pairs>
-
       <!-- wheels -->
-      <left_joint0>left_wheel_joint</left_joint0>
-      <right_joint0>right_wheel_joint</right_joint0>
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
 
       <!-- kinematics -->
-      <wheel_separation0>1.25</wheel_separation0>
-      <wheel_diameter0>0.6</wheel_diameter0>
+      <wheel_separation>1.25</wheel_separation>
+      <wheel_diameter>0.6</wheel_diameter>
 
       <!-- limits -->
       <max_wheel_torque>20</max_wheel_torque>
