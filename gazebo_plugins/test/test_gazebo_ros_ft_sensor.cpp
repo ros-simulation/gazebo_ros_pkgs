@@ -1,4 +1,4 @@
-// Copyright 2018 Open Source Robotics Foundation, Inc.
+// Copyright 2019 Open Source Robotics Foundation, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -75,6 +75,15 @@ TEST_F(GazeboRosFTSensorTest, Publishing)
   // Check message
   ASSERT_NE(nullptr, latest_msg);
   EXPECT_EQ("test_world", latest_msg->header.frame_id);
+
+  // The box is under free fall because of no ground plane.
+  // Therefore the only force acting should be gravity.
+  EXPECT_DOUBLE_EQ(0.0, latest_msg->wrench.force.x);
+  EXPECT_DOUBLE_EQ(0.0, latest_msg->wrench.force.y);
+  EXPECT_DOUBLE_EQ(-9.8, latest_msg->wrench.force.z);
+  EXPECT_DOUBLE_EQ(0.0, latest_msg->wrench.torque.x);
+  EXPECT_DOUBLE_EQ(0.0, latest_msg->wrench.torque.y);
+  EXPECT_DOUBLE_EQ(0.0, latest_msg->wrench.torque.z);
 }
 
 int main(int argc, char ** argv)

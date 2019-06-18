@@ -2,9 +2,6 @@
 <sdf version="1.6">
   <world name="default">
     <include>
-      <uri>model://ground_plane</uri>
-    </include>
-    <include>
       <uri>model://sun</uri>
     </include>
     <model name="box">

@@ -50,7 +50,7 @@ class GazeboRosFTSensorPrivate;
       <!-- Link name -->
       <body_name>link</body_name>
 
-      <!-- Frame id of published message -->
+      <!-- Set frame id of published message. Used only when sensor used on links -->
       <frame_name>demo_world</frame_name>
 
       <!-- Update rate in Hz, defaults to 0.0, which means as fast as possible -->

@@ -20,7 +20,9 @@
  *
  */
 
-#include <gazebo/physics/physics.hh>
+#include <gazebo/physics/Link.hh>
+#include <gazebo/physics/Model.hh>
+#include <gazebo/physics/World.hh>
 #include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/common/Events.hh>
 #include <gazebo_plugins/gazebo_ros_ft_sensor.hpp>
@@ -96,31 +98,34 @@ void GazeboRosFTSensor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _
   impl_->update_rate_ = _sdf->Get<double>("update_rate", 0.0).first;
 
   if (!_sdf->HasElement("body_name") && !_sdf->HasElement("joint_name")) {
-    RCLCPP_WARN(impl_->rosnode_->get_logger(),
+    RCLCPP_ERROR(impl_->rosnode_->get_logger(),
       "ft_sensor plugin missing <body_name> and <joint_name>, cannot proceed");
+    impl_->rosnode_.reset();
     return;
   }
 
   if (_sdf->HasElement("body_name")) {
-    auto link_name = _sdf->Get<std::string>("body_name", "link").first;
+    auto link_name = _sdf->Get<std::string>("body_name");
 
     impl_->link_ = _model->GetLink(link_name);
 
     if (!impl_->link_) {
-      RCLCPP_WARN(impl_->rosnode_->get_logger(),
+      RCLCPP_ERROR(impl_->rosnode_->get_logger(),
         "Link [%s] does not exist. Aborting", link_name.c_str());
+      impl_->rosnode_.reset();
       return;
     }
 
     impl_->frame_id_ = _sdf->Get<std::string>("frame_name", "world").first;
   } else {
-    auto joint_name = _sdf->Get<std::string>("joint_name", "joint").first;
+    auto joint_name = _sdf->Get<std::string>("joint_name");
 
     impl_->joint_ = _model->GetJoint(joint_name);
 
     if (!impl_->joint_) {
-      RCLCPP_WARN(impl_->rosnode_->get_logger(),
+      RCLCPP_ERROR(impl_->rosnode_->get_logger(),
         "Joint [%s] does not exist. Aborting", joint_name.c_str());
+      impl_->rosnode_.reset();
       return;
     }
 
