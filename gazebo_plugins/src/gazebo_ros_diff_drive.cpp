@@ -238,55 +238,92 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
   if (impl_->num_wheel_pairs_ < 1) {
     impl_->num_wheel_pairs_ = 1;
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_WARN(impl_->ros_node_->get_logger(),
       "Drive requires at least one pair of wheels. Setting [num_wheel_pairs] to 1");
   }
-
-  impl_->joints_.resize(2 * impl_->num_wheel_pairs_);
-  impl_->wheel_separation_.resize(2 * impl_->num_wheel_pairs_);
-  impl_->wheel_speed_instr_.resize(2 * impl_->num_wheel_pairs_);
-  impl_->wheel_diameter_.resize(2 * impl_->num_wheel_pairs_);
-  impl_->desired_wheel_speed_.resize(2 * impl_->num_wheel_pairs_);
 
   // Dynamic properties
   impl_->max_wheel_accel_ = _sdf->Get<double>("max_wheel_acceleration", 0.0).first;
   impl_->max_wheel_torque_ = _sdf->Get<double>("max_wheel_torque", 5.0).first;
 
   // Get joints and Kinematic properties
-  for (unsigned int i = 0; i < impl_->num_wheel_pairs_; ++i) {
-    std::string index = std::to_string(i);
+  std::vector<gazebo::physics::JointPtr> left_joints, right_joints;
 
-    auto left_joint = _sdf->Get<std::string>("left_joint" + index, "left_joint" + index).first;
-    impl_->joints_[2 * i + GazeboRosDiffDrivePrivate::LEFT] = _model->GetJoint(left_joint);
-
-    if (!_model->GetJoint(left_joint)) {
+  for (auto left_joint_elem = _sdf->GetElement("left_joint"); left_joint_elem != nullptr;
+    left_joint_elem = left_joint_elem->GetNextElement("left_joint"))
+  {
+    auto left_joint_name = left_joint_elem->Get<std::string>();
+    auto left_joint = _model->GetJoint(left_joint_name);
+    if (!left_joint) {
       RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-        "Joint [%s] not found, plugin will not work.", left_joint.c_str());
+        "Joint [%s] not found, plugin will not work.", left_joint_name.c_str());
       impl_->ros_node_.reset();
       return;
     }
-
-    auto right_joint = _sdf->Get<std::string>("right_joint" + index, "right_joint" + index).first;
-    impl_->joints_[2 * i + GazeboRosDiffDrivePrivate::RIGHT] = _model->GetJoint(right_joint);
-
-    if (!_model->GetJoint(right_joint)) {
-      RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-        "Joint [%s] not found, plugin will not work.", right_joint.c_str());
-      impl_->ros_node_.reset();
-      return;
-    }
-
-    impl_->wheel_separation_[i] = _sdf->Get<double>("wheel_separation" + index, 0.34).first;
-    impl_->wheel_diameter_[i] = _sdf->Get<double>("wheel_diameter" + index, 0.15).first;
-    impl_->desired_wheel_speed_[2 * i + GazeboRosDiffDrivePrivate::RIGHT] = 0;
-    impl_->desired_wheel_speed_[2 * i + GazeboRosDiffDrivePrivate::LEFT] = 0;
-    impl_->wheel_speed_instr_[2 * i + GazeboRosDiffDrivePrivate::RIGHT] = 0;
-    impl_->wheel_speed_instr_[2 * i + GazeboRosDiffDrivePrivate::LEFT] = 0;
-    impl_->joints_[2 * i + GazeboRosDiffDrivePrivate::LEFT]->SetParam(
-      "fmax", 0, impl_->max_wheel_torque_);
-    impl_->joints_[2 * i + GazeboRosDiffDrivePrivate::RIGHT]->SetParam(
-      "fmax", 0, impl_->max_wheel_torque_);
+    left_joint->SetParam("fmax", 0, impl_->max_wheel_torque_);
+    left_joints.push_back(left_joint);
   }
+
+  for (auto right_joint_elem = _sdf->GetElement("right_joint"); right_joint_elem != nullptr;
+    right_joint_elem = right_joint_elem->GetNextElement("right_joint"))
+  {
+    auto right_joint_name = right_joint_elem->Get<std::string>();
+    auto right_joint = _model->GetJoint(right_joint_name);
+    if (!right_joint) {
+      RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+        "Joint [%s] not found, plugin will not work.", right_joint_name.c_str());
+      impl_->ros_node_.reset();
+      return;
+    }
+    right_joint->SetParam("fmax", 0, impl_->max_wheel_torque_);
+    right_joints.push_back(right_joint);
+  }
+
+  if (left_joints.size() != right_joints.size() || left_joints.size() != impl_->num_wheel_pairs_) {
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+      "Inconsistent number of joints specified. Plugin will not work.");
+    impl_->ros_node_.reset();
+    return;
+  }
+
+  unsigned int index;
+  for (index = 0; index < impl_->num_wheel_pairs_; ++index) {
+    impl_->joints_.push_back(right_joints[index]);
+    impl_->joints_.push_back(left_joints[index]);
+  }
+
+  index = 0;
+  impl_->wheel_separation_.assign(impl_->num_wheel_pairs_, 0.34);
+  for (auto wheel_separation = _sdf->GetElement("wheel_separation"); wheel_separation != nullptr;
+    wheel_separation = wheel_separation->GetNextElement("wheel_separation"))
+  {
+    if (index >= impl_->num_wheel_pairs_) {
+      RCLCPP_WARN(impl_->ros_node_->get_logger(), "Ignoring rest of specified <wheel_separation>");
+      break;
+    }
+    impl_->wheel_separation_[index] = wheel_separation->Get<double>();
+    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      "Wheel pair %i separation set to [%fm]", index + 1, impl_->wheel_separation_[index]);
+    index++;
+  }
+
+  index = 0;
+  impl_->wheel_diameter_.assign(impl_->num_wheel_pairs_, 0.15);
+  for (auto wheel_diameter = _sdf->GetElement("wheel_diameter"); wheel_diameter != nullptr;
+    wheel_diameter = wheel_diameter->GetNextElement("wheel_diameter"))
+  {
+    if (index >= impl_->num_wheel_pairs_) {
+      RCLCPP_WARN(impl_->ros_node_->get_logger(), "Ignoring rest of specified <wheel_diameter>");
+      break;
+    }
+    impl_->wheel_diameter_[index] = wheel_diameter->Get<double>();
+    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      "Wheel pair %i diameter set to [%fm]", index + 1, impl_->wheel_diameter_[index]);
+    index++;
+  }
+
+  impl_->wheel_speed_instr_.assign(2 * impl_->num_wheel_pairs_, 0);
+  impl_->desired_wheel_speed_.assign(2 * impl_->num_wheel_pairs_, 0);
 
   // Update rate
   auto update_rate = _sdf->Get<double>("update_rate", 100.0).first;
@@ -300,6 +337,7 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", rclcpp::QoS(rclcpp::KeepLast(1)),
     std::bind(&GazeboRosDiffDrivePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
+
   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
     impl_->cmd_vel_sub_->get_topic_name());
 
@@ -323,8 +361,8 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->publish_wheel_tf_ = _sdf->Get<bool>("publish_wheel_tf", false).first;
   impl_->publish_odom_tf_ = _sdf->Get<bool>("publish_odom_tf", false).first;
   if (impl_->publish_wheel_tf_ || impl_->publish_odom_tf_) {
-    impl_->transform_broadcaster_ = std::shared_ptr<tf2_ros::TransformBroadcaster>(
-      new tf2_ros::TransformBroadcaster(impl_->ros_node_));
+    impl_->transform_broadcaster_ =
+      std::make_shared<tf2_ros::TransformBroadcaster>(impl_->ros_node_);
 
     if (impl_->publish_odom_tf_) {
       RCLCPP_INFO(impl_->ros_node_->get_logger(),
@@ -332,13 +370,13 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
         impl_->robot_base_frame_.c_str());
     }
 
-    for (unsigned int i = 0; i < impl_->num_wheel_pairs_; ++i) {
+    for (index = 0; index < impl_->num_wheel_pairs_; ++index) {
       if (impl_->publish_wheel_tf_) {
         RCLCPP_INFO(impl_->ros_node_->get_logger(),
           "Publishing wheel transforms between [%s], [%s] and [%s]",
           impl_->robot_base_frame_.c_str(),
-          impl_->joints_[2 * i + GazeboRosDiffDrivePrivate::LEFT]->GetName().c_str(),
-          impl_->joints_[2 * i + GazeboRosDiffDrivePrivate::RIGHT]->GetName().c_str());
+          impl_->joints_[2 * index + GazeboRosDiffDrivePrivate::LEFT]->GetName().c_str(),
+          impl_->joints_[2 * index + GazeboRosDiffDrivePrivate::RIGHT]->GetName().c_str());
       }
     }
   }

@@ -19,19 +19,29 @@
 #include <nav_msgs/msg/odometry.hpp>
 
 #include <memory>
+#include <string>
 
 #define tol 10e-2
 
 using namespace std::literals::chrono_literals; // NOLINT
 
-class GazeboRosDiffDriveTest : public gazebo::ServerFixture
+/// Test parameters
+struct TestParams
+{
+  /// Path to world file
+  std::string world;
+};
+
+
+class GazeboRosDiffDriveTest
+  : public gazebo::ServerFixture, public ::testing::WithParamInterface<TestParams>
 {
 };
 
-TEST_F(GazeboRosDiffDriveTest, Publishing)
+TEST_P(GazeboRosDiffDriveTest, Publishing)
 {
   // Load test world and start paused
-  this->Load("worlds/gazebo_ros_diff_drive.world", true);
+  this->Load(GetParam().world, true);
 
   // World
   auto world = gazebo::physics::get_world();
@@ -101,9 +111,16 @@ TEST_F(GazeboRosDiffDriveTest, Publishing)
   EXPECT_NEAR(0.1, vehicle->WorldAngularVel().Z(), tol);
 }
 
+INSTANTIATE_TEST_CASE_P(GazeboRosDiffDrive, GazeboRosDiffDriveTest, ::testing::Values(
+    TestParams({"worlds/gazebo_ros_diff_drive.world"}),
+    TestParams({"worlds/gazebo_ros_skid_steer_drive.world"})
+  ), );
+
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  int ret = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+  return ret;
 }
