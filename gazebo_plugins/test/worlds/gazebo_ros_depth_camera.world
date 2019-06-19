@@ -26,13 +26,14 @@
               <stddev>0.007</stddev>
             </noise>
           </camera>
-          <plugin name="camera_controller" filename="libgazebo_ros_depth_camera.so">
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>test_cam</namespace>
               <argument>camera1/image_raw:=camera/raw_image_test</argument>
               <argument>camera1/image_depth:=camera/depth_image_test</argument>
               <argument>camera1/points:=camera/points_test</argument>
             </ros>
+            <sensor_type>depth</sensor_type>
             <!-- camera_name>omit so it defaults to sensor name</camera_name-->
             <!-- frame_name>omit so it defaults to link name</frameName-->
             <hack_baseline>0.07</hack_baseline>

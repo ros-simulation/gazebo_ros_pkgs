@@ -143,17 +143,19 @@
               <stddev>0.007</stddev>
             </noise>
           </camera>
-          <plugin name="camera_controller" filename="libgazebo_ros_depth_camera.so">
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>demo_cam</namespace>
 
               <!-- topics need to be prefixed with camera_name for remapping -->
               <argument>mycamera/image_raw:=mycamera/image_demo</argument>
               <argument>mycamera/image_depth:=mycamera/depth_demo</argument>
-              <argument>mycamera/camera_info_raw:=mycamera/raw_cam_info_demo</argument>
+              <argument>mycamera/camera_info:=mycamera/raw_cam_info_demo</argument>
               <argument>mycamera/camera_info_depth:=mycamera/depth_cam_info_demo</argument>
               <argument>mycamera/points:=mycamera/points_demo</argument>
             </ros>
+
+            <sensor_type>depth</sensor_type>
 
             <!-- omit camera_name to default to sensor name -->
             <camera_name>mycamera</camera_name>
