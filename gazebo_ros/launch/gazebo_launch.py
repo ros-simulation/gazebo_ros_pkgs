@@ -1,4 +1,4 @@
-# Copyright 2018 Open Source Robotics Foundation, Inc.
+# Copyright 2019 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,22 +32,21 @@ e.g.  install(DIRECTORY models
 
 import os
 
-from ament_index_python.packages import get_packages_with_prefixes
+from ament_index_python.packages import get_package_share_directory
 from catkin_pkg.package import InvalidPackage, PACKAGE_MANIFEST_FILENAME, parse_package
-
 import launch
+from ros2pkg.api import get_package_names
 
 
-def add_gazebo_ros_paths():
+def gazebo_ros_paths():
     gazebo_model_path = []
     gazebo_plugin_path = []
     gazebo_media_path = []
 
-    for package_name, package_path in get_packages_with_prefixes().items():
-        package_share_path = os.path.join(package_path, 'share', package_name)
+    for package_name in get_package_names():
+        package_share_path = get_package_share_directory(package_name)
         package_file_path = os.path.join(package_share_path, PACKAGE_MANIFEST_FILENAME)
         if os.path.isfile(package_file_path):
-            # only try to import catkin if a PACKAGE_FILE is found
             try:
                 package = parse_package(package_file_path)
             except InvalidPackage:
@@ -65,21 +64,36 @@ def add_gazebo_ros_paths():
                     if 'gazebo_media_path' in export.attributes:
                         plugin_xml_path = export.attributes['gazebo_media_path']
                         plugin_xml_path = plugin_xml_path.replace('${prefix}', package_share_path)
-                        gazebo_media_path.appedn(plugin_xml_path)
+                        gazebo_media_path.append(plugin_xml_path)
 
-    os.environ['GAZEBO_MODEL_PATH'] = ':'.join(gazebo_model_path)
-    os.environ['GAZEBO_PLUGIN_PATH'] = ':'.join(gazebo_plugin_path)
-    os.environ['GAZEBO_RESOURCE_PATH'] = ':'.join(gazebo_media_path)
+    gazebo_model_path = ':'.join(gazebo_model_path)
+    gazebo_plugin_path = ':'.join(gazebo_plugin_path)
+    gazebo_media_path = ':'.join(gazebo_media_path)
+
+    return gazebo_model_path, gazebo_plugin_path, gazebo_media_path
 
 
 def generate_launch_description():
-    add_gazebo_ros_paths()
+    os.system('. /usr/share/gazebo/setup.sh')
 
+    model, plugin, media = gazebo_ros_paths()
+    model += ':'+os.environ['GAZEBO_MODEL_PATH']
+    plugin += ':'+os.environ['GAZEBO_PLUGIN_PATH']
+    media += ':'+os.environ['GAZEBO_RESOURCE_PATH']
+
+    world_argument = launch.actions.DeclareLaunchArgument(
+        'world',
+        default_value='worlds/empty.world')
+    world_substitution = launch.substitutions.LaunchConfiguration('world')
+
+    env = {'GAZEBO_MODEL_PATH': model, 'GAZEBO_PLUGIN_PATH': plugin, 'GAZEBO_RESOURCE_PATH': media}
     gazebo = launch.actions.ExecuteProcess(
-        cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so'],
+        cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so', world_substitution],
+        additional_env=env,
         output='screen'
     )
 
     return launch.LaunchDescription([
+        world_argument,
         gazebo
     ])
