@@ -506,11 +506,11 @@ void GazeboRosCameraUtils::Init()
 
   /// Compute camera_ parameters if set to 0
   if (this->cx_prime_ == 0)
-    this->cx_prime_ = (static_cast<double>(this->width_) + 1.0) /2.0;
+    this->cx_prime_ = (static_cast<double>(this->width_) - 1.0) /2.0;
   if (this->cx_ == 0)
-    this->cx_ = (static_cast<double>(this->width_) + 1.0) /2.0;
+    this->cx_ = (static_cast<double>(this->width_) - 1.0) /2.0;
   if (this->cy_ == 0)
-    this->cy_ = (static_cast<double>(this->height_) + 1.0) /2.0;
+    this->cy_ = (static_cast<double>(this->height_) - 1.0) /2.0;
 
 
   double hfov = this->camera_->HFOV().Radian();
