@@ -31,8 +31,10 @@ file(COPY worlds DESTINATION .)
 # Tests
 set(tests
   test_conversions
+  test_gazebo_ros_body_effort
   test_gazebo_ros_factory
   test_gazebo_ros_init
+  test_gazebo_ros_joint_effort
   test_gazebo_ros_state
   test_node
   test_plugins
