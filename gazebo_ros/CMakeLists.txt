@@ -110,16 +110,27 @@ install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
   )
 
 # Install Gazebo Scripts
-install(PROGRAMS scripts/gazebo
-                 scripts/debug
-		 scripts/gzclient
-		 scripts/gzserver
-		 scripts/gdbrun
-		 scripts/perf
-		 scripts/libcommon.sh
-        DESTINATION
-                 ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+if (WIN32)
+  install(PROGRAMS
+                  scripts/debug.bat
+                  scripts/gzclient.bat
+                  scripts/gzserver.bat
+          DESTINATION
+                  ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+else ()
+  install(PROGRAMS
+                  scripts/gazebo
+                  scripts/debug
+                  scripts/gzclient
+                  scripts/gzserver
+                  scripts/gdbrun
+                  scripts/perf
+                  scripts/libcommon.sh
+          DESTINATION
+                  ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+endif()
 
 # This one is a Python program, not a shell script, so install it separately
 catkin_install_python(PROGRAMS scripts/spawn_model
