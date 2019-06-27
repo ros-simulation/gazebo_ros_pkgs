@@ -186,6 +186,9 @@ GazeboRosVideo::GazeboRosVideo()
 // Destructor
 GazeboRosVideo::~GazeboRosVideo()
 {
+  if (rclcpp::is_initialized()) {
+    rclcpp::shutdown();
+  }
   impl_->update_connection_.reset();
   impl_->rosnode_.reset();
 }
