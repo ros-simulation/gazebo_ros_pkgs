@@ -120,14 +120,14 @@ protected:
     unsigned int _depth, const std::string & _format) override;
 
   /// Callback when camera is triggered.
-  void OnTrigger(std_msgs::msg::Empty::SharedPtr _dummy);
+  void OnTrigger(const std_msgs::msg::Empty::SharedPtr _dummy);
 
   /// Callback on pre-render event.
   void PreRender();
 
   /// Enables or disables the camera so it produces messages or not.
   /// param[in] _enabled True to enable.
-  void SetCameraEnabled(bool _enabled);
+  void SetCameraEnabled(const bool _enabled);
 
 private:
   /// Private data pointer
