@@ -294,7 +294,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   auto width = impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA ?
     CameraPlugin::width : DepthCameraPlugin::width;
-  auto height = impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH ?
+  auto height = impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA ?
     CameraPlugin::height : DepthCameraPlugin::height;
 
   // C parameters
