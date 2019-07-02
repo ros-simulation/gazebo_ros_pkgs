@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+ * \desc Bumper controller
+ * \author Nate Koenig
+ * \date 09 Sept. 2008
+ */
+
 #include <gazebo/plugins/ContactPlugin.hh>
 
 #include <gazebo_msgs/msg/contact_state.hpp>
