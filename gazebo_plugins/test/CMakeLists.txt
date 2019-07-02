@@ -12,6 +12,7 @@ endforeach()
 
 # Tests
 set(tests
+  test_gazebo_ros_bumper
   test_gazebo_ros_diff_drive
   test_gazebo_ros_force
   test_gazebo_ros_ft_sensor
@@ -47,6 +48,7 @@ foreach(test ${tests})
   ament_target_dependencies(${test}
     "cv_bridge"
     "gazebo_dev"
+    "gazebo_msgs"
     "gazebo_ros"
     "geometry_msgs"
     "image_transport"

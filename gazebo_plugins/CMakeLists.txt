@@ -14,6 +14,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(camera_info_manager REQUIRED)
 find_package(gazebo_dev REQUIRED)
+find_package(gazebo_msgs REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(image_transport REQUIRED)
@@ -186,9 +187,21 @@ ament_target_dependencies(gazebo_ros_ft_sensor
 )
 ament_export_libraries(gazebo_ros_ft_sensor)
 
+# gazebo_ros_bumper
+add_library(gazebo_ros_bumper SHARED
+  src/gazebo_ros_bumper.cpp
+)
+ament_target_dependencies(gazebo_ros_bumper
+  "gazebo_ros"
+  "gazebo_msgs"
+  "geometry_msgs"
+)
+ament_export_libraries(gazebo_ros_bumper)
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
+ament_export_dependencies(gazebo_msgs)
 ament_export_dependencies(gazebo_ros)
 
 if(BUILD_TESTING)
@@ -203,6 +216,7 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(TARGETS
+    gazebo_ros_bumper
     gazebo_ros_camera
     gazebo_ros_diff_drive
     gazebo_ros_force
