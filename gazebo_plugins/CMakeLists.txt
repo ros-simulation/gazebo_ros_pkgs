@@ -186,6 +186,21 @@ ament_target_dependencies(gazebo_ros_ft_sensor
 )
 ament_export_libraries(gazebo_ros_ft_sensor)
 
+# gazebo_ros_harness
+add_library(gazebo_ros_harness SHARED
+  src/gazebo_ros_harness.cpp
+)
+ament_target_dependencies(gazebo_ros_harness
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "std_msgs"
+)
+target_link_libraries(gazebo_ros_harness
+  HarnessPlugin
+)
+ament_export_libraries(gazebo_ros_harness)
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
@@ -207,6 +222,7 @@ install(TARGETS
     gazebo_ros_diff_drive
     gazebo_ros_force
     gazebo_ros_ft_sensor
+    gazebo_ros_harness
     gazebo_ros_imu_sensor
     gazebo_ros_joint_state_publisher
     gazebo_ros_ray_sensor
