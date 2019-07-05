@@ -186,6 +186,22 @@ ament_target_dependencies(gazebo_ros_ft_sensor
 )
 ament_export_libraries(gazebo_ros_ft_sensor)
 
+# gazebo_ros_ackermann_drive
+add_library(gazebo_ros_ackermann_drive SHARED
+  src/gazebo_ros_ackermann_drive.cpp
+)
+ament_target_dependencies(gazebo_ros_ackermann_drive
+  "gazebo_dev"
+  "gazebo_ros"
+  "geometry_msgs"
+  "nav_msgs"
+  "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+)
+ament_export_libraries(gazebo_ros_ackermann_drive)
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
@@ -203,6 +219,7 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(TARGETS
+    gazebo_ros_ackermann_drive
     gazebo_ros_camera
     gazebo_ros_diff_drive
     gazebo_ros_force
