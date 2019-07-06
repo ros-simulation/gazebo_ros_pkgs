@@ -31,6 +31,8 @@ link_directories(
 
 ament_python_install_package(scripts/)
 
+ament_python_install_package(scripts/)
+
 # gazebo_ros_node
 add_library(gazebo_ros_node SHARED
   src/executor.cpp
@@ -128,6 +130,12 @@ install(
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
+
+install(
+  PROGRAMS
+    scripts/spawn_model.py
+    DESTINATION bin
+)
 
 install(DIRECTORY
   launch
