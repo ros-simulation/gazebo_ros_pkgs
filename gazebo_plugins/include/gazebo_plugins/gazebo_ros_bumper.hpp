@@ -36,7 +36,7 @@ class GazeboRosBumperPrivate;
         <argument>bumper_states:=custom_topic</argument>
       </ros>
 
-      <!-- Set TF frame name. If empty, defaults to link name -->
+      <!-- Set TF frame name. Defaults to world -->
       <frame_name>custom_frame</frame_name>
     </plugin>
   \endcode
