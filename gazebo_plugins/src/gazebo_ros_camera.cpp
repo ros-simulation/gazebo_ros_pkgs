@@ -161,44 +161,25 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   // Get tf frame for output
   impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf);
 
-  if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
-    // Image publisher
-    // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
-    impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_.get(),
-        impl_->camera_name_ + "/image_raw");
+  // Image publisher
+  // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
+  impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_.get(),
+      impl_->camera_name_ + "/image_raw");
 
-    // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
-    // full topic.
-    // RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing images to [%s]",
-    //  impl_->image_pub_.getTopic());
+  // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
+  // full topic.
+  // RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing images to [%s]",
+  //  impl_->image_pub_.getTopic());
 
-    // Camera info publisher
-    // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
-    impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-      impl_->camera_name_ + "/camera_info", rclcpp::SensorDataQoS());
+  // Camera info publisher
+  // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
+  impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
+    impl_->camera_name_ + "/camera_info", rclcpp::SensorDataQoS());
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
-      impl_->camera_info_pub_->get_topic_name());
+  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
+    impl_->camera_info_pub_->get_topic_name());
 
-  } else {
-    // Image publisher
-    // TODO(shivesh) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
-    impl_->image_pub_ = image_transport::create_publisher(impl_->ros_node_.get(),
-        impl_->camera_name_ + "/ir/image_raw");
-
-    // TODO(shivesh) Uncomment this once image_transport::Publisher has a function to return the
-    // full topic.
-    // RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing images to [%s]",
-    //  impl_->image_pub_.getTopic());
-
-    // Camera info publisher
-    // TODO(shivesh) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
-    impl_->camera_info_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-      impl_->camera_name_ + "/ir/camera_info", rclcpp::SensorDataQoS());
-
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
-      impl_->camera_info_pub_->get_topic_name());
-
+  if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     // Depth image publisher
     impl_->depth_image_pub_ = image_transport::create_publisher(impl_->ros_node_.get(),
         impl_->camera_name_ + "/depth/image_raw");

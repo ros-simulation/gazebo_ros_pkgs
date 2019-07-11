@@ -29,7 +29,7 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>test_cam</namespace>
-              <argument>camera1/ir/image_raw:=camera/raw_image_test</argument>
+              <argument>camera1/image_raw:=camera/raw_image_test</argument>
               <argument>camera1/depth/image_raw:=camera/depth_image_test</argument>
               <argument>camera1/points:=camera/points_test</argument>
             </ros>
