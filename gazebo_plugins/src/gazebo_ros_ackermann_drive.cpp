@@ -34,6 +34,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace gazebo_plugins
 {
@@ -73,8 +74,10 @@ public:
   /// \param[in] _msg Twist command message.
   void OnCmdVel(geometry_msgs::msg::Twist::SharedPtr _msg);
 
-  /// Extracts radius of a cylinder or sphere collision shape. Otherwise returns zero
+  /// Extracts radius of a cylinder or sphere collision shape
   /// \param[in] _coll Pointer to collision
+  /// \return If the collision shape is valid, return radius
+  /// \return If the collision shape is invalid, return 0
   double CollisionRadius(const gazebo::physics::CollisionPtr & _coll);
 
   /// Update odometry according to world
@@ -108,7 +111,7 @@ public:
   gazebo::event::ConnectionPtr update_connection_;
 
   /// Pointers to wheel joints.
-  gazebo::physics::JointPtr joints_[7];
+  std::vector<gazebo::physics::JointPtr> joints_;
 
   /// Pointer to model.
   gazebo::physics::ModelPtr model_;
@@ -176,8 +179,14 @@ public:
   /// Covariance in odometry
   double covariance_[3];
 
-  /// PID control for force controls
-  gazebo::common::PID pid_[3];
+  /// PID control for left steering control
+  gazebo::common::PID pid_left_steering_;
+
+  /// PID control for right steering control
+  gazebo::common::PID pid_right_steering_;
+
+  /// PID control for linear velocity control
+  gazebo::common::PID pid_linear_vel_;
 };
 
 GazeboRosAckermannDrive::GazeboRosAckermannDrive()
@@ -200,13 +209,16 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
-  auto chassis_name = _sdf->Get<std::string>("chassis", "chassis").first;
-  auto chassis = impl_->model_->GetLink(chassis_name);
-  if (!chassis) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-      "Chassis link [%s] not found, plugin will not work.", chassis_name.c_str());
-    impl_->ros_node_.reset();
-    return;
+  impl_->joints_.resize(7);
+
+  auto steering_wheel_joint =
+    _sdf->Get<std::string>("steering_wheel_joint", "steering_wheel_joint").first;
+  impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_WHEEL] =
+    _model->GetJoint(steering_wheel_joint);
+  if (!impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_WHEEL]) {
+    RCLCPP_WARN(impl_->ros_node_->get_logger(),
+      "Steering wheel joint [%s] not found.", steering_wheel_joint.c_str());
+    impl_->joints_.resize(6);
   }
 
   auto front_right_joint = _sdf->Get<std::string>("front_right_joint", "front_right_joint").first;
@@ -269,17 +281,6 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
     return;
   }
 
-  auto steering_wheel_joint =
-    _sdf->Get<std::string>("steering_wheel_joint", "steering_wheel_joint").first;
-  impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_WHEEL] =
-    _model->GetJoint(steering_wheel_joint);
-  if (!impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_WHEEL]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-      "Steering wheel joint [%s] not found, plugin will not work.", steering_wheel_joint.c_str());
-    impl_->ros_node_.reset();
-    return;
-  }
-
   impl_->max_speed_ = _sdf->Get<double>("max_speed", 20.0).first;
   impl_->max_steer_ = _sdf->Get<double>("max_steer", 0.6).first;
 
@@ -289,24 +290,23 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   // Compute the angle ratio between the steering wheel and the tires
   impl_->steering_ratio_ = impl_->max_steer_ / max_steering_angle;
 
-  double pgain, dgain, igain, imax, imin;
+  auto pid = _sdf->Get<ignition::math::Vector3d>(
+    "right_steering_pid_gain", ignition::math::Vector3d::Zero).first;
+  auto i_range = _sdf->Get<ignition::math::Vector2d>(
+    "right_steering_i_range", ignition::math::Vector2d::Zero).first;
+  impl_->pid_right_steering_.Init(pid.X(), pid.Y(), pid.Z(), i_range.Y(), i_range.X());
 
-  pgain = _sdf->Get<double>("left_steering_p_gain", 0.0).first;
-  igain = _sdf->Get<double>("left_steering_i_gain", 0.0).first;
-  dgain = _sdf->Get<double>("left_steering_d_gain", 0.0).first;
-  impl_->pid_[GazeboRosAckermannDrivePrivate::FRONT_LEFT].Init(pgain, dgain, igain);
+  pid = _sdf->Get<ignition::math::Vector3d>(
+    "left_steering_pid_gain", ignition::math::Vector3d::Zero).first;
+  i_range = _sdf->Get<ignition::math::Vector2d>(
+    "left_steering_i_range", ignition::math::Vector2d::Zero).first;
+  impl_->pid_left_steering_.Init(pid.X(), pid.Y(), pid.Z(), i_range.Y(), i_range.X());
 
-  pgain = _sdf->Get<double>("right_steering_p_gain", 0.0).first;
-  igain = _sdf->Get<double>("right_steering_i_gain", 0.0).first;
-  dgain = _sdf->Get<double>("right_steering_d_gain", 0.0).first;
-  impl_->pid_[GazeboRosAckermannDrivePrivate::FRONT_RIGHT].Init(pgain, dgain, igain);
-
-  pgain = _sdf->Get<double>("linear_velocity_p_gain", 0.0).first;
-  igain = _sdf->Get<double>("linear_velocity_i_gain", 0.0).first;
-  dgain = _sdf->Get<double>("linear_velocity_d_gain", 0.0).first;
-  imax = _sdf->Get<double>("linear_velocity_i_max", 0.0).first;
-  imin = _sdf->Get<double>("linear_velocity_i_min", 0.0).first;
-  impl_->pid_[GazeboRosAckermannDrivePrivate::REAR_RIGHT].Init(pgain, dgain, igain, imax, imin);
+  pid = _sdf->Get<ignition::math::Vector3d>(
+    "linear_velocity_pid_gain", ignition::math::Vector3d::Zero).first;
+  i_range = _sdf->Get<ignition::math::Vector2d>(
+    "linear_velocity_i_range", ignition::math::Vector2d::Zero).first;
+  impl_->pid_linear_vel_.Init(pid.X(), pid.Y(), pid.Z(), i_range.Y(), i_range.X());
 
   // Update wheel radiu for wheel from SDF collision objects
   // assumes that wheel link is child of joint (and not parent of joint)
@@ -456,7 +456,7 @@ void GazeboRosAckermannDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo &
   auto linear_vel = joints_[REAR_RIGHT]->GetVelocity(0);
   auto target_linear = ignition::math::clamp(target_linear_, -max_speed_, max_speed_);
   double linear_diff = linear_vel - target_linear / wheel_radius_;
-  double linear_cmd = pid_[REAR_RIGHT].Update(linear_diff, seconds_since_last_update);
+  double linear_cmd = pid_linear_vel_.Update(linear_diff, seconds_since_last_update);
 
   auto target_rot = target_rot_ * copysign(1.0, target_linear_);
   target_rot = ignition::math::clamp(target_rot, -max_steer_, max_steer_);
@@ -468,23 +468,27 @@ void GazeboRosAckermannDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo &
   auto target_right_steering =
     atan2(tanSteer, 1.0 + wheel_separation_ / 2.0 / wheel_base_ * tanSteer);
 
-  auto left_steering_angle = joints_[STEER_LEFT]->Position(2);
-  auto right_steering_angle = joints_[STEER_RIGHT]->Position(2);
+  auto left_steering_angle = joints_[STEER_LEFT]->Position(0);
+  auto right_steering_angle = joints_[STEER_RIGHT]->Position(0);
 
   double left_steering_diff = left_steering_angle - target_left_steering;
-  double left_steering_cmd = pid_[FRONT_LEFT].Update(left_steering_diff, seconds_since_last_update);
+  double left_steering_cmd =
+    pid_left_steering_.Update(left_steering_diff, seconds_since_last_update);
 
   double right_steering_diff = right_steering_angle - target_right_steering;
   double right_steering_cmd =
-    pid_[FRONT_RIGHT].Update(right_steering_diff, seconds_since_last_update);
+    pid_right_steering_.Update(right_steering_diff, seconds_since_last_update);
 
   auto steer_wheel_angle = (left_steering_angle + right_steering_angle) * 0.5 / steering_ratio_;
 
   joints_[STEER_LEFT]->SetForce(0, left_steering_cmd);
   joints_[STEER_RIGHT]->SetForce(0, right_steering_cmd);
-  joints_[STEER_WHEEL]->SetPosition(0, steer_wheel_angle);
   joints_[REAR_RIGHT]->SetForce(0, linear_cmd);
   joints_[REAR_LEFT]->SetForce(0, linear_cmd);
+
+  if (joints_.size() == 7) {
+    joints_[STEER_WHEEL]->SetPosition(0, steer_wheel_angle);
+  }
 
   last_update_time_ = _info.simTime;
 }
