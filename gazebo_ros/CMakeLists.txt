@@ -133,8 +133,8 @@ install(
 
 install(
   PROGRAMS
-    scripts/spawn_model.py
-    DESTINATION bin
+    scripts/spawn_entity.py
+    DESTINATION lib/${PROJECT_NAME}/
 )
 
 install(DIRECTORY

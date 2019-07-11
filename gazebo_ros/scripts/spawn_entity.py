@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Desc: helper script for spawning models in gazebo
+# Desc: helper script for spawning entities in gazebo
 # Author: John Hsu, Dave Coleman
 #
 import argparse
@@ -24,9 +24,9 @@ import sys
 from urllib.parse import SplitResult, urlsplit
 from xml.etree import ElementTree
 
-from gazebo_msgs.msg import ModelStates
-from gazebo_msgs.srv import DeleteEntity
-from gazebo_msgs.srv import SetModelConfiguration
+# from gazebo_msgs.msg import ModelStates
+# from gazebo_msgs.srv import DeleteEntity
+# from gazebo_msgs.srv import SetModelConfiguration
 from gazebo_msgs.srv import SpawnEntity
 from geometry_msgs.msg import Pose
 import rclpy
@@ -34,8 +34,8 @@ from rclpy.node import Node
 from std_srvs.srv import Empty
 
 
-class SpawnModelNode(Node):
-    # Node to spawn a model in Gazebo using the Gazebo ROS Factory
+class SpawnEntityNode(Node):
+    # Node to spawn an entity in Gazebo.
     MODEL_DATABASE_TEMPLATE = """\
     <sdf version="1.6">
         <world name="default">
@@ -46,31 +46,32 @@ class SpawnModelNode(Node):
     </sdf>"""
 
     def __init__(self, args):
-        super().__init__('spawn_model')
+        super().__init__('spawn_entity')
         parser = argparse.ArgumentParser(
-            description='Spawn a model in gazebo using the Gazebo ROS Factory')
+            description='Spawn an entity in gazebo. Gazebo must be started with gazebo_ros_init,\
+            gazebo_ros_factory and gazebo_ros_state for all functionalities to work')
         source = parser.add_mutually_exclusive_group(required=True)
-        source.add_argument(
-            '-file', type=str, metavar='FILE_NAME', help='Load model xml from file')
-        source.add_argument(
-            '-param', type=str, metavar='PARAM_NAME', help='Load model xml from ROS parameter')
-        source.add_argument('-database', type=str, metavar='MODEL_NAME',
-                            help='Load model XML from specified model in Gazebo Model Database')
-        source.add_argument('-stdin', action='store_true', help='Load model from stdin')
-        parser.add_argument(
-            '-model', required=True, type=str, metavar='MODEL_NAME', help='Name of model to spawn')
+        source.add_argument('-file', type=str, metavar='FILE_NAME',
+                            help='Load entity xml from file')
+        source.add_argument('-param', type=str, metavar='PARAM_NAME',
+                            help='Load entity xml from ROS parameter')
+        source.add_argument('-database', type=str, metavar='ENTITY_NAME',
+                            help='Load entity XML from specified entity in Gazebo Model Database')
+        source.add_argument('-stdin', action='store_true', help='Load entity from stdin')
+        parser.add_argument('-entity', required=True, type=str, metavar='ENTITY_NAME',
+                            help='Name of entity to spawn')
         parser.add_argument('-reference_frame', type=str, default='',
                             help='Name of the model/body where initial pose is defined.\
                             If left empty or specified as "world", gazebo world frame is used')
-        parser.add_argument('-gazebo_namespace', type=str, default='/gazebo',
+        parser.add_argument('-gazebo_namespace', type=str, default='',
                             help='ROS namespace of gazebo offered ROS interfaces. \
-                            Defaults to /gazebo/')
+                            Default is without any namespace')
         parser.add_argument('-robot_namespace', type=str, default=self.get_namespace(),
                             help='change ROS namespace of gazebo-plugins')
         parser.add_argument('-unpause', action='store_true',
-                            help='unpause physics after spawning model')
-        parser.add_argument('-wait', type=str, metavar='MODEL_NAME',
-                            help='Wait for model to exist')
+                            help='unpause physics after spawning entity')
+        parser.add_argument('-wait', type=str, metavar='ENTITY_NAME',
+                            help='Wait for entity to exist')
         parser.add_argument('-x', type=float, default=0,
                             help='x component of initial position, meters')
         parser.add_argument('-y', type=float, default=0,
@@ -95,7 +96,7 @@ class SpawnModelNode(Node):
 
         # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
         # parser.add_argument('-b', dest='bond', action='store_true', help='bond to gazebo \
-        #                      and delete the model when this program is interrupted')
+        #                      and delete the entity when this program is interrupted')
         self.args = parser.parse_args(args[1:])
 
         # TODO(shivesh): Wait for /set_model_configuration
@@ -106,28 +107,31 @@ class SpawnModelNode(Node):
 
     def run(self):
         """
-        Run node, spawning model and doing other actions as configured in program arguments.
+        Run node, spawning entity and doing other actions as configured in program arguments.
 
         Returns exit code, 1 for failure, 0 for success
         """
-        # Wait for model to exist if wait flag is enabled
+        # Wait for entity to exist if wait flag is enabled
         if self.args.wait:
-            self.model_exists = False
+            self.entity_exists = False
 
-            def models_cb(models):
-                self.model_exists = self.args.wait in models.name
+            # TODO(shivesh): Wait for /model_states
+            # (https://github.com/ros-simulation/gazebo_ros_pkgs/issues/779)
+            # def entity_cb(entity):
+            #     self.entity_exists = self.args.wait in entity.name
+            #
+            # self.subscription = self.create_subscription(
+            #     ModelStates, '%s/model_states' % self.args.gazebo_namespace, entity_cb, 10)
 
-            self.subscription = self.create_subscription(
-                ModelStates, '%s/model_states' % self.args.gazebo_namespace, models_cb, 10)
             self.get_logger().info(
-                'Waiting for model {} before proceeding.'.format(self.args.wait))
+                'Waiting for entity {} before proceeding.'.format(self.args.wait))
 
-            while rclpy.ok() and not self.model_exists:
+            while rclpy.ok() and not self.entity_exists:
                 pass
 
-        # Load model XML from file
+        # Load entity XML from file
         if self.args.file:
-            self.get_logger().info('Loading model XML from file %s' % self.args.file)
+            self.get_logger().info('Loading entity XML from file %s' % self.args.file)
             if not os.path.exists(self.args.file):
                 self.get_logger().error('Error: specified file %s does not exist', self.args.file)
                 return 1
@@ -137,34 +141,34 @@ class SpawnModelNode(Node):
             # load file
             try:
                 f = open(self.args.file, 'r')
-                model_xml = f.read()
+                entity_xml = f.read()
             except IOError as e:
                 self.get_logger().error('Error reading file {}: {}'.format(self.args.file, e))
                 return 1
-            if model_xml == '':
+            if entity_xml == '':
                 self.get_logger().error('Error: file %s is empty', self.args.file)
                 return 1
-        # Load model XML from ROS param
+        # Load entity XML from ROS param
         elif self.args.param:
-            self.get_logger().info('Loading model XML from ros parameter %s' % self.args.param)
-            model_xml = self.get_parameter(self.args.param)
-            if model_xml == '':
+            self.get_logger().info('Loading entity XML from ros parameter %s' % self.args.param)
+            entity_xml = self.get_parameter(self.args.param)
+            if entity_xml == '':
                 self.get_logger().error('Error: param does not exist or is empty')
                 return 1
-        # Generate model XML by putting requested model name into request template
+        # Generate entity XML by putting requested entity name into request template
         elif self.args.database:
-            self.get_logger().info('Loading model XML from Gazebo Model Database')
-            model_xml = self.MODEL_DATABASE_TEMPLATE.format(self.args.database)
+            self.get_logger().info('Loading entity XML from Gazebo Model Database')
+            entity_xml = self.MODEL_DATABASE_TEMPLATE.format(self.args.database)
         elif self.args.stdin:
-            self.get_logger().info('Loading model XML from stdin')
-            model_xml = sys.stdin.read()
-            if model_xml == '':
+            self.get_logger().info('Loading entity XML from stdin')
+            entity_xml = sys.stdin.read()
+            if entity_xml == '':
                 self.get_logger().error('Error: stdin buffer was empty')
                 return 1
 
         # Parse xml to detect invalid xml before sending to gazebo
         try:
-            xml_parsed = ElementTree.fromstring(model_xml)
+            xml_parsed = ElementTree.fromstring(entity_xml)
         except ElementTree.ParseError as e:
             self.get_logger().error('Invalid XML: {}'.format(e))
             return 1
@@ -181,7 +185,7 @@ class SpawnModelNode(Node):
                     element.set('filename', url.geturl())
 
         # Encode xml object back into string for service call
-        model_xml = ElementTree.tostring(xml_parsed)
+        entity_xml = ElementTree.tostring(xml_parsed)
 
         # Form requested Pose from arguments
         initial_pose = Pose()
@@ -195,8 +199,7 @@ class SpawnModelNode(Node):
         initial_pose.orientation.y = q[2]
         initial_pose.orientation.z = q[3]
 
-        # Spawn model using urdf or sdf service based on arguments
-        success = self._spawn_entity(model_xml, initial_pose)
+        success = self._spawn_entity(entity_xml, initial_pose)
         if not success:
             self.get_logger().error('Spawn service failed. Exiting.')
             return 1
@@ -214,27 +217,28 @@ class SpawnModelNode(Node):
 
         # Unpause physics if user requested
         if self.args.unpause:
-            client = self.create_client(Empty, '/unpause_physics')
-            client.wait_for_service(timeout_sec=5)
-            self.get_logger().info('Calling service /unpause_physics')
+            client = self.create_client(Empty, '%s/unpause_physics' % self.args.gazebo_namespace)
+            client.wait_for_service(timeout_sec=5.0)
+            self.get_logger().info(
+                'Calling service %s/unpause_physics' % self.args.gazebo_namespace)
             client.call_async(Empty.Request())
 
         # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
         # If bond enabled, setup shutdown callback and wait for shutdown
         # if self.args.bond:
         #     rospy.on_shutdown(self._delete_entity)
-        #     rospy.loginfo('Waiting for shutdown to delete model {}'.format(self.args.model))
+        #     rospy.loginfo('Waiting for shutdown to delete entity {}'.format(self.args.entity))
         #     rospy.spin()
 
         return 0
 
-    def _spawn_entity(self, model_xml, initial_pose):
+    def _spawn_entity(self, entity_xml, initial_pose):
         self.get_logger().info('Waiting for service %s/spawn_entity' % self.args.gazebo_namespace)
-        client = self.create_client(SpawnEntity, 'spawn_entity')
+        client = self.create_client(SpawnEntity, '%s/spawn_entity' % self.args.gazebo_namespace)
         client.wait_for_service(timeout_sec=5.0)
         req = SpawnEntity.Request()
-        req.name = self.args.model
-        req.xml = str(model_xml, 'utf-8')
+        req.name = self.args.entity
+        req.xml = str(entity_xml, 'utf-8')
         req.robot_namespace = self.args.robot_namespace
         req.initial_pose = initial_pose
         req.reference_frame = self.args.reference_frame
@@ -247,41 +251,43 @@ class SpawnModelNode(Node):
             rclpy.spin_once(self)
         return srv_call.result().success
 
-    def _delete_entity(self):
-        # Delete model from gazebo on shutdown if bond flag enabled
-        self.get_logger().info('Deleting model {}'.format(self.args.model))
-        client = self.create_client(DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
-        client.wait_for_service(timeout_sec=5)
-        req = DeleteEntity.Request()
-        req.name = self.args.model
-        self.get_logger().info('Calling service %s/delete_entity' % self.args.gazebo_namespace)
-        srv_call = client.call_async(req)
-        while rclpy.ok():
-            if srv_call.done():
-                self.get_logger().info('Deleting status: %s' % srv_call.result().status_message)
-                break
-            rclpy.spin_once(self)
+    # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
+    # def _delete_entity(self):
+    #     # Delete entity from gazebo on shutdown if bond flag enabled
+    #     self.get_logger().info('Deleting entity {}'.format(self.args.entity))
+    #     client = self.create_client(
+    #         DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
+    #     client.wait_for_service(timeout_sec=5.0)
+    #     req = DeleteEntity.Request()
+    #     req.name = self.args.entity
+    #     self.get_logger().info('Calling service %s/delete_entity' % self.args.gazebo_namespace)
+    #     srv_call = client.call_async(req)
+    #     while rclpy.ok():
+    #         if srv_call.done():
+    #             self.get_logger().info('Deleting status: %s' % srv_call.result().status_message)
+    #             break
+    #         rclpy.spin_once(self)
 
-    def _set_model_configuration(self, joint_names, joint_positions):
-        self.get_logger().info(
-            'Waiting for service %s/set_model_configuration' % self.args.gazebo_namespace)
-        client = self.create_client(SetModelConfiguration, 'set_model_configuration')
-        client.wait_for_service(timeout_sec=5)
-        req = SetModelConfiguration.Request()
-        req.model_name = self.args.model
-        req.urdf_param_name = ''
-        req.joint_names = joint_names
-        req.joint_positions = joint_positions
-        self.get_logger().info(
-            'Calling service %s/set_model_configuration' % self.args.gazebo_namespace)
-        srv_call = client.call_async(req)
-        while rclpy.ok():
-            if srv_call.done():
-                self.get_logger().info(
-                    'Set model configuration status: %s' % srv_call.result().status_message)
-                break
-            rclpy.spin_once(self)
-        return srv_call.result().success
+    # def _set_model_configuration(self, joint_names, joint_positions):
+    #     self.get_logger().info(
+    #         'Waiting for service %s/set_model_configuration' % self.args.gazebo_namespace)
+    #     client = self.create_client(SetModelConfiguration, 'set_model_configuration')
+    #     client.wait_for_service(timeout_sec=5.0)
+    #     req = SetModelConfiguration.Request()
+    #     req.model_name = self.args.entity
+    #     req.urdf_param_name = ''
+    #     req.joint_names = joint_names
+    #     req.joint_positions = joint_positions
+    #     self.get_logger().info(
+    #         'Calling service %s/set_model_configuration' % self.args.gazebo_namespace)
+    #     srv_call = client.call_async(req)
+    #     while rclpy.ok():
+    #         if srv_call.done():
+    #             self.get_logger().info(
+    #                 'Set model configuration status: %s' % srv_call.result().status_message)
+    #             break
+    #         rclpy.spin_once(self)
+    #     return srv_call.result().success
 
 
 def quaternion_from_euler(roll, pitch, yaw):
@@ -303,8 +309,9 @@ def quaternion_from_euler(roll, pitch, yaw):
 
 def main(args=sys.argv):
     rclpy.init(args=args)
-    spawn_model_node = SpawnModelNode(args)
-    exit_code = spawn_model_node.run()
+    spawn_entity_node = SpawnEntityNode(args)
+    spawn_entity_node.get_logger().info('Spawn Entity started')
+    exit_code = spawn_entity_node.run()
     sys.exit(exit_code)
 
 
