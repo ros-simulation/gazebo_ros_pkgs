@@ -200,8 +200,8 @@ void GazeboRosVideo::Load(
 
   int width = _sdf->Get<int>("width", 320).first;
 
-  impl_->video_visual_ = std::make_shared<VideoVisual>(_parent->Name() + "::video_visual",
-      _parent, height, width);
+  impl_->video_visual_ = std::make_shared<VideoVisual>(_parent->Name() + "::video_visual::" +
+      _sdf->Get<std::string>("name"), _parent, height, width);
   _parent->GetScene()->AddVisual(impl_->video_visual_);
 
   // Subscribe to the image topic
