@@ -21,6 +21,7 @@ set(tests
   test_gazebo_ros_hand_of_god
   test_gazebo_ros_harness
   test_gazebo_ros_imu_sensor
+  test_gazebo_ros_joint_pose_trajectory
   test_gazebo_ros_joint_state_publisher
   test_gazebo_ros_p3d
   test_gazebo_ros_planar_move
@@ -64,6 +65,7 @@ foreach(test ${tests})
     "tf2"
     "tf2_geometry_msgs"
     "tf2_ros"
+    "trajectory_msgs"
   )
 endforeach()
 
