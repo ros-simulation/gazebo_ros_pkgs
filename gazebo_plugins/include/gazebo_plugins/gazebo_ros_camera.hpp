@@ -16,6 +16,7 @@
 #define GAZEBO_PLUGINS__GAZEBO_ROS_CAMERA_HPP_
 
 #include <gazebo/plugins/CameraPlugin.hh>
+#include <gazebo/plugins/DepthCameraPlugin.hh>
 #include <std_msgs/msg/empty.hpp>
 
 #include <memory>
@@ -26,6 +27,8 @@ namespace gazebo_plugins
 class GazeboRosCameraPrivate;
 
 /// A plugin that publishes raw images and camera info for generic camera sensors.
+/// It can also be configured to publish raw depth images, point cloud
+/// and camera info for depth camera sensors.
 /**
   Example Usage:
   \code{.xml}
@@ -55,7 +58,7 @@ class GazeboRosCameraPrivate;
     </plugin>
   \endcode
 */
-class GazeboRosCamera : public gazebo::CameraPlugin
+class GazeboRosCamera : public gazebo::CameraPlugin, gazebo::DepthCameraPlugin
 {
 public:
   /// Constructor
@@ -81,6 +84,38 @@ protected:
    */
   void OnNewFrame(
     const unsigned char * _image,
+    unsigned int _width, unsigned int _height,
+    unsigned int _depth, const std::string & _format) override;
+
+  /// Callback when depth camera produces a new image.
+  /*
+  * \details This is called at the camera's update rate.
+  * \details Not called when the camera isn't active. For a triggered camera, it will only be
+  * called after triggered.
+  * \param[in] _image Image
+  * \param[in] _width Image width
+  * \param[in] _height Image height
+  * \param[in] _depth Image depth
+  * \param[in] _format Image format
+  */
+  void OnNewImageFrame(
+    const unsigned char * _image,
+    unsigned int _width, unsigned int _height,
+    unsigned int _depth, const std::string & _format) override;
+
+  /// Callback when camera produces a new depth image.
+  /*
+  * \details This is called at the camera's update rate.
+  * \details Not called when the camera isn't active. For a triggered camera, it will only be
+  * called after triggered.
+  * \param[in] _image Image
+  * \param[in] _width Image width
+  * \param[in] _height Image height
+  * \param[in] _depth Image depth
+  * \param[in] _format Image format
+  */
+  void OnNewDepthFrame(
+    const float * _image,
     unsigned int _width, unsigned int _height,
     unsigned int _depth, const std::string & _format) override;
 

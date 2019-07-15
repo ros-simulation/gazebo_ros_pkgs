@@ -105,6 +105,7 @@ ament_target_dependencies(gazebo_ros_camera
 )
 target_link_libraries(gazebo_ros_camera
   CameraPlugin
+  DepthCameraPlugin
 )
 ament_export_libraries(gazebo_ros_camera)
 
