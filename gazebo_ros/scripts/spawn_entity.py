@@ -218,10 +218,13 @@ class SpawnEntityNode(Node):
         # Unpause physics if user requested
         if self.args.unpause:
             client = self.create_client(Empty, '%s/unpause_physics' % self.args.gazebo_namespace)
-            client.wait_for_service(timeout_sec=5.0)
-            self.get_logger().info(
-                'Calling service %s/unpause_physics' % self.args.gazebo_namespace)
-            client.call_async(Empty.Request())
+            if client.wait_for_service(timeout_sec=5.0):
+                self.get_logger().info(
+                    'Calling service %s/unpause_physics' % self.args.gazebo_namespace)
+                client.call_async(Empty.Request())
+            else:
+                self.get_logger().error('Service %s/unpause_physics unavailable. \
+                                         Was Gazebo started with GazeboRosInit?')
 
         # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
         # If bond enabled, setup shutdown callback and wait for shutdown
@@ -235,21 +238,24 @@ class SpawnEntityNode(Node):
     def _spawn_entity(self, entity_xml, initial_pose):
         self.get_logger().info('Waiting for service %s/spawn_entity' % self.args.gazebo_namespace)
         client = self.create_client(SpawnEntity, '%s/spawn_entity' % self.args.gazebo_namespace)
-        client.wait_for_service(timeout_sec=5.0)
-        req = SpawnEntity.Request()
-        req.name = self.args.entity
-        req.xml = str(entity_xml, 'utf-8')
-        req.robot_namespace = self.args.robot_namespace
-        req.initial_pose = initial_pose
-        req.reference_frame = self.args.reference_frame
-        self.get_logger().info('Calling service %s/spawn_entity' % self.args.gazebo_namespace)
-        srv_call = client.call_async(req)
-        while rclpy.ok():
-            if srv_call.done():
-                self.get_logger().info('Spawn status: %s' % srv_call.result().status_message)
-                break
-            rclpy.spin_once(self)
-        return srv_call.result().success
+        if client.wait_for_service(timeout_sec=5.0):
+            req = SpawnEntity.Request()
+            req.name = self.args.entity
+            req.xml = str(entity_xml, 'utf-8')
+            req.robot_namespace = self.args.robot_namespace
+            req.initial_pose = initial_pose
+            req.reference_frame = self.args.reference_frame
+            self.get_logger().info('Calling service %s/spawn_entity' % self.args.gazebo_namespace)
+            srv_call = client.call_async(req)
+            while rclpy.ok():
+                if srv_call.done():
+                    self.get_logger().info('Spawn status: %s' % srv_call.result().status_message)
+                    break
+                rclpy.spin_once(self)
+            return srv_call.result().success
+        self.get_logger().error(
+            'Service %s/spawn_entity unavailable. Was Gazebo started with GazeboRosFactory?')
+        return False
 
     # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
     # def _delete_entity(self):
@@ -257,37 +263,45 @@ class SpawnEntityNode(Node):
     #     self.get_logger().info('Deleting entity {}'.format(self.args.entity))
     #     client = self.create_client(
     #         DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
-    #     client.wait_for_service(timeout_sec=5.0)
-    #     req = DeleteEntity.Request()
-    #     req.name = self.args.entity
-    #     self.get_logger().info('Calling service %s/delete_entity' % self.args.gazebo_namespace)
-    #     srv_call = client.call_async(req)
-    #     while rclpy.ok():
-    #         if srv_call.done():
-    #             self.get_logger().info('Deleting status: %s' % srv_call.result().status_message)
-    #             break
-    #         rclpy.spin_once(self)
+    #     if client.wait_for_service(timeout_sec=5.0):
+    #         req = DeleteEntity.Request()
+    #         req.name = self.args.entity
+    #         self.get_logger().info(
+    #             'Calling service %s/delete_entity' % self.args.gazebo_namespace)
+    #         srv_call = client.call_async(req)
+    #         while rclpy.ok():
+    #             if srv_call.done():
+    #                 self.get_logger().info(
+    #                     'Deleting status: %s' % srv_call.result().status_message)
+    #                 break
+    #             rclpy.spin_once(self)
+    #     else:
+    #         self.get_logger().error('Service %s/delete_entity unavailable. \
+    #                                  Was Gazebo started with GazeboRosFactory?')
 
     # def _set_model_configuration(self, joint_names, joint_positions):
     #     self.get_logger().info(
     #         'Waiting for service %s/set_model_configuration' % self.args.gazebo_namespace)
     #     client = self.create_client(SetModelConfiguration, 'set_model_configuration')
-    #     client.wait_for_service(timeout_sec=5.0)
-    #     req = SetModelConfiguration.Request()
-    #     req.model_name = self.args.entity
-    #     req.urdf_param_name = ''
-    #     req.joint_names = joint_names
-    #     req.joint_positions = joint_positions
-    #     self.get_logger().info(
-    #         'Calling service %s/set_model_configuration' % self.args.gazebo_namespace)
-    #     srv_call = client.call_async(req)
-    #     while rclpy.ok():
-    #         if srv_call.done():
-    #             self.get_logger().info(
-    #                 'Set model configuration status: %s' % srv_call.result().status_message)
-    #             break
-    #         rclpy.spin_once(self)
-    #     return srv_call.result().success
+    #     if client.wait_for_service(timeout_sec=5.0):
+    #         req = SetModelConfiguration.Request()
+    #         req.model_name = self.args.entity
+    #         req.urdf_param_name = ''
+    #         req.joint_names = joint_names
+    #         req.joint_positions = joint_positions
+    #         self.get_logger().info(
+    #             'Calling service %s/set_model_configuration' % self.args.gazebo_namespace)
+    #         srv_call = client.call_async(req)
+    #         while rclpy.ok():
+    #             if srv_call.done():
+    #                 self.get_logger().info(
+    #                     'Set model configuration status: %s' % srv_call.result().status_message)
+    #                 break
+    #             rclpy.spin_once(self)
+    #         return srv_call.result().success
+    #     self.get_logger().error('Service %s/set_model_configuration unavailable. \
+    #                              Was Gazebo started with GazeboRosState?')
+    #     return False
 
 
 def quaternion_from_euler(roll, pitch, yaw):
