@@ -23,6 +23,8 @@
 
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/fill_image.h>
 #include <image_transport/image_transport.h>
@@ -252,7 +254,25 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   }
   else
     this->border_crop_ = this->sdf->Get<bool>("borderCrop");
-
+  
+  gzdbg << "starting optical frame stuff" <<std::endl;
+  this->camera_optical_frame_transform_.header.stamp = ros::Time::now();
+  this->camera_optical_frame_transform_.header.frame_id =
+    this->sdf->GetName();
+  this->camera_optical_frame_transform_.transform.translation.x = 0.0;
+  this->camera_optical_frame_transform_.transform.translation.y = 0.0;
+  this->camera_optical_frame_transform_.transform.translation.z = 0.0;
+  tf2::Matrix3x3 t (0,-1, 0,
+                    0, 0,-1,
+                    1, 0, 0);
+  tf2::Quaternion q;
+  t.getRotation(q);
+  this->camera_optical_frame_transform_.transform.rotation.x = q.x();
+  this->camera_optical_frame_transform_.transform.rotation.y = q.y();
+  this->camera_optical_frame_transform_.transform.rotation.z = q.z();
+  this->camera_optical_frame_transform_.transform.rotation.w = q.w();
+  this->optical_broadcaster_.sendTransform(camera_optical_frame_transform_);
+  
   // initialize shared_ptr members
   if (!this->image_connect_count_) this->image_connect_count_ = boost::shared_ptr<int>(new int(0));
   if (!this->image_connect_count_lock_) this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
