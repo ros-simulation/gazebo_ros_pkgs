@@ -17,6 +17,7 @@
 
 #include <gazebo/plugins/CameraPlugin.hh>
 #include <gazebo/plugins/DepthCameraPlugin.hh>
+#include <gazebo_plugins/MultiCameraPlugin.hpp>
 #include <std_msgs/msg/empty.hpp>
 
 #include <memory>
@@ -29,6 +30,7 @@ class GazeboRosCameraPrivate;
 /// A plugin that publishes raw images and camera info for generic camera sensors.
 /// It can also be configured to publish raw depth images, point cloud
 /// and camera info for depth camera sensors.
+/// Also configurable as multi camera sensor.
 /**
   Example Usage:
   \code{.xml}
@@ -58,7 +60,8 @@ class GazeboRosCameraPrivate;
     </plugin>
   \endcode
 */
-class GazeboRosCamera : public gazebo::CameraPlugin, gazebo::DepthCameraPlugin
+class GazeboRosCamera
+  : public gazebo::CameraPlugin, gazebo::DepthCameraPlugin, gazebo::MultiCameraPlugin
 {
 public:
   /// Constructor
@@ -70,6 +73,18 @@ public:
 protected:
   // Documentation inherited
   void Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf) override;
+
+  /// Helper to process and publish the image received to appropriate topic.
+  /*
+   * \param[in] _image Image to publish
+   * \param[in] _width Image width
+   * \param[in] _height Image height
+   * \param[in] camera_num Index number of camera
+   */
+  void NewFrame(
+    const unsigned char * _image,
+    unsigned int _width, unsigned int _height,
+    int camera_num);
 
   /// Callback when camera produces a new image.
   /*
@@ -118,6 +133,24 @@ protected:
     const float * _image,
     unsigned int _width, unsigned int _height,
     unsigned int _depth, const std::string & _format) override;
+
+
+  /// Callback when multi camera produces a new image.
+  /*
+  * \details This is called at the multi camera's update rate.
+  * \details Not called when the camera isn't active. For a triggered multi camera, it will only be
+  * called after triggered.
+  * \param[in] _image Image
+  * \param[in] _width Image width
+  * \param[in] _height Image height
+  * \param[in] _depth Image depth
+  * \param[in] _format Image format
+  * \param[in] _camera_num Index number of camera
+  */
+  void OnNewMultiFrame(
+    const unsigned char * _image,
+    unsigned int _width, unsigned int _height,
+    unsigned int _depth, const std::string & _format, int camera_num) override;
 
   /// Callback when camera is triggered.
   void OnTrigger(const std_msgs::msg::Empty::SharedPtr _dummy);
