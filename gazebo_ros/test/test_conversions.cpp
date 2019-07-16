@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
-#include <gazebo_ros/conversions/sensor_msgs.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gtest/gtest.h>
 
