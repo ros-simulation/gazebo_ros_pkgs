@@ -14,6 +14,7 @@ endforeach()
 set(tests
   test_gazebo_ros_ackermann_drive
   test_gazebo_ros_diff_drive
+  test_gazebo_ros_elevator
   test_gazebo_ros_force
   test_gazebo_ros_ft_sensor
   test_gazebo_ros_imu_sensor
@@ -54,6 +55,7 @@ foreach(test ${tests})
     "nav_msgs"
     "rclcpp"
     "sensor_msgs"
+    "std_msgs"
   )
 endforeach()
 
