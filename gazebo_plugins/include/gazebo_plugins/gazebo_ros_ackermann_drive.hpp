@@ -59,15 +59,12 @@ class GazeboRosAckermannDrivePrivate;
       <max_speed>20</max_speed>
 
       <!-- PID tuning -->
-      <left_steering_p_gain>1000</left_steering_p_gain>
-      <left_steering_i_gain>100</left_steering_i_gain>
-      <left_steering_d_gain>1e15</left_steering_d_gain>
-      <right_steering_p_gain>1000</right_steering_p_gain>
-      <right_steering_i_gain>100</right_steering_i_gain>
-      <right_steering_d_gain>1e15</right_steering_d_gain>
-      <linear_velocity_p_gain>1300</linear_velocity_p_gain>
-      <linear_velocity_i_gain>0.1</linear_velocity_i_gain>
-      <linear_velocity_d_gain>10000</linear_velocity_d_gain>
+      <left_steering_pid_gain>1500 0 1</left_steering_pid_gain>
+      <left_steering_i_range>0 0</left_steering_i_range>
+      <right_steering_pid_gain>1500 0 1</right_steering_pid_gain>
+      <right_steering_i_range>0 0</right_steering_i_range>
+      <linear_velocity_pid_gain>1000 0 1</linear_velocity_pid_gain>
+      <linear_velocity_i_range>0 0</linear_velocity_i_range>
 
       <!-- output -->
       <publish_odom>true</publish_odom>
