@@ -150,6 +150,11 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   else
     this->frame_name_ = this->sdf->Get<std::string>("frameName");
 
+  if (!this->sdf->HasElement("opticalFrameName"))
+    this->frame_name_optical_ = this->frame_name_ + "_optical"; 
+  else
+    this->frame_name_optical_ = this->sdf->Get<std::string>("opticalFrameName");
+
   if (!this->sdf->HasElement("updateRate"))
   {
     ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <updateRate>, defaults to unlimited (0).");
@@ -255,23 +260,22 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   else
     this->border_crop_ = this->sdf->Get<bool>("borderCrop");
   
-  gzdbg << "starting optical frame stuff" <<std::endl;
-  this->camera_optical_frame_transform_.header.stamp = ros::Time::now();
+  //setup the optical frame trasnform
   this->camera_optical_frame_transform_.header.frame_id =
-    this->sdf->GetName();
+    this->frame_name_;
+  this->camera_optical_frame_transform_.child_frame_id = this->frame_name_optical_;
   this->camera_optical_frame_transform_.transform.translation.x = 0.0;
   this->camera_optical_frame_transform_.transform.translation.y = 0.0;
   this->camera_optical_frame_transform_.transform.translation.z = 0.0;
-  tf2::Matrix3x3 t (0,-1, 0,
-                    0, 0,-1,
-                    1, 0, 0);
+  tf2::Matrix3x3 t ( 0, 0, 1,
+                    -1, 0, 0,
+                     0,-1, 0);
   tf2::Quaternion q;
   t.getRotation(q);
   this->camera_optical_frame_transform_.transform.rotation.x = q.x();
   this->camera_optical_frame_transform_.transform.rotation.y = q.y();
   this->camera_optical_frame_transform_.transform.rotation.z = q.z();
   this->camera_optical_frame_transform_.transform.rotation.w = q.w();
-  this->optical_broadcaster_.sendTransform(camera_optical_frame_transform_);
   
   // initialize shared_ptr members
   if (!this->image_connect_count_) this->image_connect_count_ = boost::shared_ptr<int>(new int(0));

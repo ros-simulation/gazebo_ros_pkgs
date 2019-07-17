@@ -27,7 +27,7 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <ros/advertise_options.h>
-#include <tf2_ros/static_transform_broadcaster.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 // ros messages stuff
 #include <sensor_msgs/PointCloud.h>
@@ -142,9 +142,10 @@ namespace gazebo
     /// \brief ROS frame transform name to use in the image message header.
     ///        This should typically match the link name the parent sensor + "_optical".
     protected: std::string frame_name_;
+    protected: std::string frame_name_optical_;
     
-    /// \brief static transform broadcaster
-    protected: tf2_ros::StaticTransformBroadcaster optical_broadcaster_;
+    /// \brief optical transform broadcaster
+    protected: tf2_ros::TransformBroadcaster optical_broadcaster_;
     protected: geometry_msgs::TransformStamped camera_optical_frame_transform_;
     
     /// update rate of this sensor
