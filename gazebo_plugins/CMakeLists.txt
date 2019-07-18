@@ -201,6 +201,21 @@ target_link_libraries(gazebo_ros_harness
 )
 ament_export_libraries(gazebo_ros_harness)
 
+# gazebo_ros_elevator
+add_library(gazebo_ros_elevator SHARED
+  src/gazebo_ros_elevator.cpp
+)
+ament_target_dependencies(gazebo_ros_elevator
+  "gazebo_ros"
+  "gazebo_dev"
+  "rclcpp"
+  "std_msgs"
+)
+target_link_libraries(gazebo_ros_elevator
+  ElevatorPlugin
+)
+ament_export_libraries(gazebo_ros_elevator)
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
@@ -220,6 +235,7 @@ install(DIRECTORY include/
 install(TARGETS
     gazebo_ros_camera
     gazebo_ros_diff_drive
+    gazebo_ros_elevator
     gazebo_ros_force
     gazebo_ros_ft_sensor
     gazebo_ros_harness
