@@ -21,6 +21,7 @@ set(tests
   test_gazebo_ros_p3d
   test_gazebo_ros_ray_sensor
   test_gazebo_ros_tricycle_drive
+  test_gazebo_ros_vacuum_gripper
 )
 
 if(ENABLE_DISPLAY_TESTS)
@@ -55,6 +56,7 @@ foreach(test ${tests})
     "rclcpp"
     "sensor_msgs"
     "std_msgs"
+    "std_srvs"
   )
 endforeach()
 
