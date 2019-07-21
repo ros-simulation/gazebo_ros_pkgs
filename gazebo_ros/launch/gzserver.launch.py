@@ -75,6 +75,10 @@ def generate_launch_description():
         DeclareLaunchArgument('profile', default_value='',
                               description='Specify physics preset profile name from the options '
                                           'in the world file.'),
+        DeclareLaunchArgument('gdb', default_value='false',
+                              description='Set "true" to run gzserver with gdb'),
+        DeclareLaunchArgument('valgrind', default_value='false',
+                              description='Set "true" to run gzserver with valgrind'),
 
         ExecuteProcess(
             cmd=['gzserver',
@@ -101,6 +105,11 @@ def generate_launch_description():
                  ],
             output='screen',
             additional_env=env,
+            prefix=PythonExpression(['"gdb -ex run --args" if "true" == "',
+                                     LaunchConfiguration('gdb'),
+                                     '" else "valgrind" if "true" == "',
+                                     LaunchConfiguration('valgrind'),
+                                     '" else ""']),
         )
     ])
 
