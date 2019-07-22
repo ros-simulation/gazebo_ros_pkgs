@@ -25,6 +25,9 @@ include_directories(
   include
   ${gazebo_dev_INCLUDE_DIRS}
 )
+link_directories(
+  ${gazebo_dev_LIBRARY_DIRS}
+)
 
 # gazebo_ros_node
 add_library(gazebo_ros_node SHARED
