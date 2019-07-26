@@ -19,6 +19,7 @@
 
 #include <camera_info_manager/camera_info_manager.h>
 #include <gazebo_plugins/gazebo_ros_camera.hpp>
+#include <gazebo_plugins/gazebo_ros_depth_camera.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
@@ -72,6 +73,9 @@ public:
 
   /// Protects trigger.
   std::mutex trigger_mutex_;
+
+  /// Pointer to GazeboROS Depth Camera
+  std::shared_ptr<GazeboRosDepthCamera> depth_camera_;
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -90,6 +94,12 @@ GazeboRosCamera::~GazeboRosCamera()
 
 void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
+  if (std::dynamic_pointer_cast<gazebo::sensors::DepthCameraSensor>(_sensor)) {
+    impl_->depth_camera_ = std::make_shared<GazeboRosDepthCamera>();
+    impl_->depth_camera_->Load(_sensor, _sdf);
+    return;
+  }
+
   gazebo::CameraPlugin::Load(_sensor, _sdf);
 
   // Camera name
