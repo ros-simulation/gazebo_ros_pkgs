@@ -77,7 +77,7 @@ void GazeboRosProjector::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Setting projector topic
   auto name = "~/" + _model->GetName() + "/" + link_name + "/" + projector_name;
 
-  // Create a publisher on the ~/physics topic
+  // Create a Gazebo publisher to switch the projector
   impl_->projector_pub_ = impl_->gazebo_node_->Advertise<gazebo::msgs::Projector>(name);
 
   RCLCPP_INFO(impl_->ros_node_->get_logger(),
