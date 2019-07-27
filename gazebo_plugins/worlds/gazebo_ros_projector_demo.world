@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<!--
+  Gazebo ROS projector controller plugin demo
+
+  Try sending commands:
+
+  ros2 topic pub /demo/switch_demo std_msgs/msg/Bool '{data: False}' -1
+
+  ros2 topic pub /demo/switch_demo std_msgs/msg/Bool '{data: True}' -1
+-->
+
+<sdf version="1.6">
+
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="projector_model">
+      <pose>0 0 1 0.0 0.0 0</pose>
+      <link name="projector_link">
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.1</radius>
+            </sphere>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.1</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>Gazebo/Grey</script>
+          </material>
+        </visual>
+        <projector name="texture_projector">
+          <pose>0 0 0 0 0 0</pose>
+          <texture>bricks.png</texture>
+          <fov>0.959931088597</fov>
+          <near_clip>0.1</near_clip>
+          <far_clip>10</far_clip>
+        </projector>
+      </link>
+      <static>true</static>
+      <plugin name="projector_controller" filename="libgazebo_ros_projector.so">
+        <ros>
+          <!-- Remap for switch topic to be subscribed -->
+          <namespace>/demo</namespace>
+          <argument>switch:=switch_demo</argument>
+        </ros>
+        <projector_link>projector_link</projector_link>
+        <projector_name>texture_projector</projector_name>
+      </plugin>
+    </model>
+
+  </world>
+</sdf>
