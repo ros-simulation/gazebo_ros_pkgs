@@ -446,7 +446,7 @@
       </joint>
 
       <link name="rear_axle">
-        <pose>-1.45 0 0.3 0 0 1.57</pose>
+        <pose>-1.45 0 0.3 0 0 0</pose>
         <inertial>
           <mass>30.0</mass>
           <inertia>

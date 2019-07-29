@@ -554,14 +554,14 @@ void GazeboRosAckermannDrivePrivate::PublishOdometryTf(const gazebo::common::Tim
 void GazeboRosAckermannDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _current_time)
 {
   for (const auto & joint : joints_) {
-    auto pose_wheel = joint->GetChild()->RelativePose();
+    auto pose = joint->GetChild()->WorldPose() - model_->WorldPose();
 
     geometry_msgs::msg::TransformStamped msg;
     msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
-    msg.header.frame_id = joint->GetParent()->GetName();
+    msg.header.frame_id = robot_base_frame_;
     msg.child_frame_id = joint->GetChild()->GetName();
-    msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose_wheel.Pos());
-    msg.transform.rotation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose_wheel.Rot());
+    msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose.Pos());
+    msg.transform.rotation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
 
     transform_broadcaster_->sendTransform(msg);
   }
