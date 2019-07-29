@@ -216,6 +216,18 @@ ament_target_dependencies(gazebo_ros_planar_move
 )
 ament_export_libraries(gazebo_ros_planar_move)
 
+# gazebo_ros_projector
+add_library(gazebo_ros_projector SHARED
+  src/gazebo_ros_projector.cpp
+)
+ament_target_dependencies(gazebo_ros_projector
+  "gazebo_ros"
+  "gazebo_dev"
+  "rclcpp"
+  "std_msgs"
+)
+ament_export_libraries(gazebo_ros_projector)
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
@@ -241,6 +253,7 @@ install(TARGETS
     gazebo_ros_imu_sensor
     gazebo_ros_joint_state_publisher
     gazebo_ros_planar_move
+    gazebo_ros_projector
     gazebo_ros_ray_sensor
     gazebo_ros_p3d
     gazebo_ros_template
