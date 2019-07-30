@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <model name='box'>
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <plugin name='planar_move' filename='libgazebo_ros_planar_move.so'>
+        <ros>
+          <namespace>/test</namespace>
+          <argument>cmd_vel:=cmd_test</argument>
+          <argument>odom:=odom_test</argument>
+        </ros>
+
+        <update_rate>100</update_rate>
+        <publish_rate>100</publish_rate>
+
+        <publish_odom>true</publish_odom>
+        <publish_odom_tf>true</publish_odom_tf>
+        <odometry_frame>odom_frame_test</odometry_frame>
+        <robot_base_frame>link</robot_base_frame>
+      </plugin>
+    </model>
+
+  </world>
+</sdf>
