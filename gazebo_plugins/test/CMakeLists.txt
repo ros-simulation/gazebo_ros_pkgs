@@ -12,6 +12,7 @@ endforeach()
 
 # Tests
 set(tests
+  test_gazebo_ros_ackermann_drive
   test_gazebo_ros_bumper
   test_gazebo_ros_diff_drive
   test_gazebo_ros_elevator

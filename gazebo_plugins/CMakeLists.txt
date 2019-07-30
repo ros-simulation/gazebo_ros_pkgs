@@ -205,6 +205,22 @@ ament_target_dependencies(gazebo_ros_bumper
 )
 ament_export_libraries(gazebo_ros_bumper)
 
+# gazebo_ros_ackermann_drive
+add_library(gazebo_ros_ackermann_drive SHARED
+  src/gazebo_ros_ackermann_drive.cpp
+)
+ament_target_dependencies(gazebo_ros_ackermann_drive
+  "gazebo_dev"
+  "gazebo_ros"
+  "geometry_msgs"
+  "nav_msgs"
+  "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+)
+ament_export_libraries(gazebo_ros_ackermann_drive)
+
 # gazebo_ros_elevator
 add_library(gazebo_ros_elevator SHARED
   src/gazebo_ros_elevator.cpp
@@ -265,6 +281,7 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(TARGETS
+    gazebo_ros_ackermann_drive
     gazebo_ros_bumper
     gazebo_ros_camera
     gazebo_ros_diff_drive
