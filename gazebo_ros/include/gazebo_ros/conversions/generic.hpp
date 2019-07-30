@@ -19,6 +19,7 @@
 
 #include <gazebo/common/Time.hh>
 #include <gazebo/msgs/time.pb.h>
+#include <ignition/math/Pose3.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <rclcpp/logging.hpp>
@@ -45,6 +46,16 @@ T Convert(const ignition::math::Vector3d &)
 /// \tparam T Output type
 template<class T>
 T Convert(const ignition::math::Quaterniond &)
+{
+  T::ConversionNotImplemented;
+}
+
+/// Generic conversion from an Ignition Math pose3d to another type.
+/// \param[in] in Input pose3d
+/// \return Conversion result
+/// \tparam T Output type
+template<class T>
+T Convert(const ignition::math::Pose3d &)
 {
   T::ConversionNotImplemented;
 }

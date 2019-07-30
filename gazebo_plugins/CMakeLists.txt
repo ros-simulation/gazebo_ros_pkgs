@@ -220,6 +220,21 @@ target_link_libraries(gazebo_ros_elevator
 )
 ament_export_libraries(gazebo_ros_elevator)
 
+# gazebo_ros_planar_move
+add_library(gazebo_ros_planar_move SHARED
+  src/gazebo_ros_planar_move.cpp
+)
+ament_target_dependencies(gazebo_ros_planar_move
+  "gazebo_dev"
+  "gazebo_ros"
+  "nav_msgs"
+  "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+)
+ament_export_libraries(gazebo_ros_planar_move)
+
 # gazebo_ros_projector
 add_library(gazebo_ros_projector SHARED
   src/gazebo_ros_projector.cpp
@@ -258,6 +273,7 @@ install(TARGETS
     gazebo_ros_ft_sensor
     gazebo_ros_imu_sensor
     gazebo_ros_joint_state_publisher
+    gazebo_ros_planar_move
     gazebo_ros_projector
     gazebo_ros_ray_sensor
     gazebo_ros_p3d
