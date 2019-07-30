@@ -16,6 +16,7 @@
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
 
+#include <gazebo_msgs/msg/model_states.hpp>
 #include <gazebo_msgs/srv/get_entity_state.hpp>
 #include <gazebo_msgs/srv/set_entity_state.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
@@ -25,6 +26,8 @@
 #include <string>
 
 #define tol 10e-2
+
+using namespace std::literals::chrono_literals; // NOLINT
 
 class GazeboRosStateTest : public gazebo::ServerFixture
 {
@@ -50,6 +53,7 @@ public:
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetEntityState>> get_state_client_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetEntityState>> set_state_client_;
+  rclcpp::Subscription<gazebo_msgs::msg::ModelStates>::SharedPtr model_states_sub_;
 };
 
 void GazeboRosStateTest::SetUp()
@@ -178,6 +182,42 @@ TEST_F(GazeboRosStateTest, GetSet)
     // Check new state
     this->GetState("boxes::top", ignition::math::Pose3d(10, 20, 30, 0.1, 0, 0),
       ignition::math::Vector3d(1.0, 2.0, 3.0), ignition::math::Vector3d(0.0, 0.0, 4.0));
+  }
+
+  // Model states
+  {
+    // Set new state
+    this->SetState("boxes", ignition::math::Pose3d(1, 2, 0.5, 0, 0, 0));
+
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node_);
+    gazebo_msgs::msg::ModelStates::SharedPtr model_states_msg{nullptr};
+    model_states_sub_ = node_->create_subscription<gazebo_msgs::msg::ModelStates>(
+      "test/model_states_test", rclcpp::SystemDefaultsQoS(),
+      [&model_states_msg](gazebo_msgs::msg::ModelStates::SharedPtr _msg) {
+        model_states_msg = _msg;
+      });
+
+    // Wait for a message
+    world_->Step(1000);
+
+    // Wait for it to be processed
+    int sleep{0};
+    int maxSleep{300};
+
+    for (; sleep < maxSleep && !model_states_msg; ++sleep) {
+      executor.spin_once(100ms);
+      gazebo::common::Time::MSleep(100);
+    }
+    EXPECT_NE(sleep, maxSleep);
+    EXPECT_NE(model_states_msg, nullptr);
+    EXPECT_NEAR(model_states_msg->pose[1].position.x, 1.0, tol);
+    EXPECT_NEAR(model_states_msg->pose[1].position.y, 2.0, tol);
+    EXPECT_NEAR(model_states_msg->pose[1].position.z, 0.5, tol);
+    EXPECT_NEAR(model_states_msg->pose[1].orientation.x, 0.0, tol);
+    EXPECT_NEAR(model_states_msg->pose[1].orientation.y, 0.0, tol);
+    EXPECT_NEAR(model_states_msg->pose[1].orientation.z, 0.0, tol);
+    EXPECT_NEAR(model_states_msg->pose[1].orientation.w, 1.0, tol);
   }
 }
 
