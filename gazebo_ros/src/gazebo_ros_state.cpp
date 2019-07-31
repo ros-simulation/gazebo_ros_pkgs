@@ -18,6 +18,7 @@
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
+#include <gazebo_msgs/msg/link_states.hpp>
 #include <gazebo_msgs/msg/model_states.hpp>
 #include <gazebo_msgs/srv/get_entity_state.hpp>
 #include <gazebo_msgs/srv/set_entity_state.hpp>
@@ -68,6 +69,9 @@ public:
   /// \brief ROS publisher to publish model_states.
   rclcpp::Publisher<gazebo_msgs::msg::ModelStates>::SharedPtr model_states_pub_;
 
+  /// \brief ROS publisher to publish link_states.
+  rclcpp::Publisher<gazebo_msgs::msg::LinkStates>::SharedPtr link_states_pub_;
+
   /// \brief Connection to world update event, called at every iteration
   gazebo::event::ConnectionPtr world_update_event_;
 
@@ -109,6 +113,12 @@ void GazeboRosState::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr _sdf
   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing states of gazebo models at [%s]",
     impl_->model_states_pub_->get_topic_name());
 
+  impl_->link_states_pub_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::LinkStates>(
+    "link_states", rclcpp::QoS(rclcpp::KeepLast(1)));
+
+  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing states of gazebo links at [%s]",
+    impl_->link_states_pub_->get_topic_name());
+
   // Get a callback when world is updated
   impl_->world_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosStatePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
@@ -132,6 +142,7 @@ void GazeboRosStatePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
   }
 
   gazebo_msgs::msg::ModelStates model_states;
+  gazebo_msgs::msg::LinkStates link_states;
 
   // fill model_states
   for (const auto & model : world_->Models()) {
@@ -144,8 +155,23 @@ void GazeboRosStatePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
     twist.linear = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(model->WorldLinearVel());
     twist.angular = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(model->WorldAngularVel());
     model_states.twist.push_back(twist);
+
+    for (unsigned int j = 0; j < model->GetChildCount(); ++j) {
+      auto body = boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(j));
+
+      if (body) {
+        link_states.name.push_back(body->GetScopedName());
+
+        pose = gazebo_ros::Convert<geometry_msgs::msg::Pose>(body->WorldPose());
+        link_states.pose.push_back(pose);
+        twist.linear = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(body->WorldLinearVel());
+        twist.angular = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(body->WorldAngularVel());
+        link_states.twist.push_back(twist);
+      }
+    }
   }
   model_states_pub_->publish(model_states);
+  link_states_pub_->publish(link_states);
 
   last_update_time_ = _info.simTime;
 }
