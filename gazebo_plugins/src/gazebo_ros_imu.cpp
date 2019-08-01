@@ -21,6 +21,7 @@
  */
 
 #include <gazebo_plugins/gazebo_ros_imu.h>
+#include <ignition/math/Rand.hh>
 
 namespace gazebo
 {
@@ -31,7 +32,6 @@ GZ_REGISTER_MODEL_PLUGIN(GazeboRosIMU)
 // Constructor
 GazeboRosIMU::GazeboRosIMU()
 {
-  this->seed = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -343,12 +343,10 @@ double GazeboRosIMU::GaussianKernel(double mu, double sigma)
   // normally disbributed normal variables see wikipedia
 
   // normalized uniform random variable
-  double U = static_cast<double>(rand_r(&this->seed)) /
-             static_cast<double>(RAND_MAX);
+  double U = ignition::math::Rand::DblUniform();
 
   // normalized uniform random variable
-  double V = static_cast<double>(rand_r(&this->seed)) /
-             static_cast<double>(RAND_MAX);
+  double V = ignition::math::Rand::DblUniform();
 
   double X = sqrt(-2.0 * ::log(U)) * cos(2.0*M_PI * V);
   // double Y = sqrt(-2.0 * ::log(U)) * sin(2.0*M_PI * V);

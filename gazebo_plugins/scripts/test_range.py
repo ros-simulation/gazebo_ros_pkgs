@@ -12,7 +12,7 @@ class TestRangePlugin(unittest.TestCase):
 
   def test_inside_range(self):
     msg = rospy.wait_for_message('/sonar', Range)
-    self.assertTrue(msg.range < 0.25 and msg.range > 0.22)
+    self.assertTrue(msg.range < 0.25 and msg.range > 0.22, 'actual value: {0}'.format(msg.range))
 
 if __name__ == '__main__':
   import rostest

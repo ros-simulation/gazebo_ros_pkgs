@@ -124,8 +124,6 @@ namespace gazebo
     // Pointer to the update event connection
     private: event::ConnectionPtr update_connection_;
 
-    private: unsigned int seed;
-
     // ros publish multi queue, prevents publish() blocking
     private: PubMultiQueue pmq;
   };

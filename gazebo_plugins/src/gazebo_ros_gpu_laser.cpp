@@ -40,6 +40,7 @@
 
 #include "gazebo_plugins/gazebo_ros_gpu_laser.h"
 #include <gazebo_plugins/gazebo_ros_utils.h>
+#include <ignition/math/Rand.hh>
 
 namespace gazebo
 {
@@ -50,7 +51,6 @@ GZ_REGISTER_SENSOR_PLUGIN(GazeboRosLaser)
 // Constructor
 GazeboRosLaser::GazeboRosLaser()
 {
-  this->seed = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
