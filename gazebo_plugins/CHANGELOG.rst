@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.2 (2019-07-31)
+------------------
 * [ros2] Add ackermann drive plugin (`#947 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/947>`_)
   * [ros2] Add ackermann drive plugin
   * Minor fixes
