@@ -139,7 +139,6 @@ class GazeboRosRange : public RayPlugin
     private: sdf::ElementPtr sdf;
     private: void LoadThread();
     private: boost::thread deferred_load_thread_;
-    private: unsigned int seed;
 };
 }
 #endif // GAZEBO_ROS_RANGE_H

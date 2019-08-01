@@ -88,7 +88,7 @@ class GazeboRosFT : public ModelPlugin
 
   /// \brief Gaussian noise
   private: double gaussian_noise_;
-  private: unsigned int seed;
+
   /// \brief Gaussian noise generator
   private: double GaussianKernel(double mu, double sigma);
 

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 
 #include "gazebo_plugins/gazebo_ros_p3d.h"
+#include <ignition/math/Rand.hh>
 
 namespace gazebo
 {
@@ -29,7 +30,6 @@ GZ_REGISTER_MODEL_PLUGIN(GazeboRosP3D);
 // Constructor
 GazeboRosP3D::GazeboRosP3D()
 {
-  this->seed = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -367,12 +367,10 @@ double GazeboRosP3D::GaussianKernel(double mu, double sigma)
   // normally disbributed normal variables see wikipedia
 
   // normalized uniform random variable
-  double U = static_cast<double>(rand_r(&this->seed)) /
-             static_cast<double>(RAND_MAX);
+  double U = ignition::math::Rand::DblUniform();
 
   // normalized uniform random variable
-  double V = static_cast<double>(rand_r(&this->seed)) /
-             static_cast<double>(RAND_MAX);
+  double V = ignition::math::Rand::DblUniform();
 
   double X = sqrt(-2.0 * ::log(U)) * cos(2.0*M_PI * V);
   // double Y = sqrt(-2.0 * ::log(U)) * sin(2.0*M_PI * V);

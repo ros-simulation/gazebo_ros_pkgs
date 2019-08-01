@@ -84,9 +84,6 @@ namespace gazebo
     ignition::math::Vector3d accelerometer_data;
     /// \brief Angular velocity data from the sensor.
     ignition::math::Vector3d gyroscope_data;
-    
-    /// \brief Seed for the Gaussian noise generator.
-    unsigned int seed;
 
     //loaded parameters
     /// \brief The data is published on the topic named: /robot_namespace/topic_name.
