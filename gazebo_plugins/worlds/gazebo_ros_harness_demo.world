@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<!--
+  Gazebo ROS harness plugin demo
+
+  Try for example:
+
+  ros2 topic pub -1 /demo/velocity_demo std_msgs/msg/Float32 "data: -1.0"
+  ros2 topic pub -1 /demo/detach_demo std_msgs/msg/Empty
+-->
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- box to be harnessed -->
+    <model name="box">
+      <pose>0 0 1.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+      <plugin name="harness" filename="libgazebo_ros_harness.so">
+        <ros>
+          <namespace>demo</namespace>
+          <argument>box/harness/velocity:=velocity_demo</argument>
+          <argument>box/harness/detach:=detach_demo</argument>
+        </ros>
+        <!-- set initial harness velocity -->
+        <!--<init_vel>-0.1</init_vel>-->
+
+        <joint name="joint1" type="prismatic">
+          <!-- The joint that raises or lowers the harness.
+           This must be specified within the body of this plugin. -->
+          <pose>0 0 0 0 0 0</pose>
+          <parent>world</parent>
+          <child>link</child>
+          <axis>
+            <xyz>0 0 1</xyz>
+            <dynamics>
+              <damping>10</damping>
+            </dynamics>
+            <limit>
+              <lower>-1.5</lower>
+              <upper>1.5</upper>
+              <effort>10000</effort>
+              <velocity>-1</velocity>
+              <stiffness>0</stiffness>
+              <dissipation>0</dissipation>
+            </limit>
+          </axis>
+          <physics>
+            <ode>
+              <implicit_spring_damper>1</implicit_spring_damper>
+              <limit>
+                <cfm>0.0</cfm>
+                <erp>0.0</erp>
+              </limit>
+            </ode>
+          </physics>
+        </joint>
+
+        <winch>
+          <joint>joint1</joint>
+          <!-- PID value for velocity control of the winch. -->
+          <pos_pid>
+            <p>1000000</p>
+            <i>0</i>
+            <d>0</d>
+            <i_min>0</i_min>
+            <i_max>0</i_max>
+            <cmd_min>-10000</cmd_min>
+            <cmd_max>10000</cmd_max>
+          </pos_pid>
+
+          <vel_pid>
+            <p>10000</p>
+            <i>0</i>
+            <d>0</d>
+            <i_min>0</i_min>
+            <i_max>0</i_max>
+            <cmd_min>0</cmd_min>
+            <cmd_max>10000</cmd_max>
+          </vel_pid>
+        </winch>
+
+        <!-- Joint to detach. Once the joint is detached, it cannot be
+          reattached. This must be a joint specified within the
+          body of this plugin. -->
+        <detach>joint1</detach>
+      </plugin>
+    </model>
+  </world>
+</sdf>
