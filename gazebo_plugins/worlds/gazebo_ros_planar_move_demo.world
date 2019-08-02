@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!--
+  Gazebo ROS differential drive plugin demo
+
+  Try sending commands:
+
+    ros2 topic pub /demo/cmd_demo geometry_msgs/Twist '{linear: {x: 1.0}}' -1
+
+    ros2 topic pub /demo/cmd_demo geometry_msgs/Twist '{angular: {z: 0.1}}' -1
+
+  Try listening to odometry:
+
+    ros2 topic echo /demo/odom_demo
+
+  Try listening to TF:
+
+    ros2 run tf2_ros tf2_echo odom_demo link
+-->
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="box">
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <plugin name='planar_move' filename='libgazebo_ros_planar_move.so'>
+        <ros>
+          <namespace>/demo</namespace>
+          <argument>cmd_vel:=cmd_demo</argument>
+          <argument>odom:=odom_demo</argument>
+        </ros>
+
+        <update_rate>100</update_rate>
+        <publish_rate>10</publish_rate>
+
+        <!-- output -->
+        <publish_odom>true</publish_odom>
+        <publish_odom_tf>true</publish_odom_tf>
+
+        <odometry_frame>odom_demo</odometry_frame>
+        <robot_base_frame>link</robot_base_frame>
+
+        <covariance_x>0.0001</covariance_x>
+        <covariance_y>0.0001</covariance_y>
+        <covariance_yaw>0.01</covariance_yaw>
+      </plugin>
+    </model>
+
+  </world>
+</sdf>
