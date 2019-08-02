@@ -41,7 +41,12 @@ class GazeboRosHandOfGodPrivate;
       <link_name>link</link_name>
 
       <!-- Defaults to world -->
+      <!-- The plugin expects TF `frame_id` + "_desired" and broadcasts `frame_id` + "_actual" -->
       <frame_id>link</frame_id>
+
+      <!-- Set force and torque gains -->
+      <ka>200</ka>
+      <kl>200</kl>
 
     </plugin>
   \endcode

@@ -137,17 +137,12 @@ void GazeboRosHandOfGod::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
 void GazeboRosHandOfGodPrivate::OnUpdate()
 {
-  // Get TF transform relative to the /world link
+  // Get TF transform relative to the /world frame
   geometry_msgs::msg::TransformStamped hog_desired_tform;
-  static bool errored = false;
   try {
     hog_desired_tform = buffer_->lookupTransform("world", frame_ + "_desired", tf2::TimePointZero);
-    errored = false;
   } catch (const tf2::TransformException & ex) {
-    if (!errored) {
-      RCLCPP_WARN(ros_node_->get_logger(), "%s", ex.what());
-      errored = true;
-    }
+    RCLCPP_WARN_ONCE(ros_node_->get_logger(), "%s", ex.what());
     return;
   }
 
