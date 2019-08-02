@@ -4,7 +4,7 @@
   <!-- TODO: Make this a metapackage, see
        https://github.com/ros2/ros2/issues/408 -->
   <name>gazebo_ros_pkgs</name>
-  <version>3.3.1</version>
+  <version>3.3.2</version>
   <description>Interface for using ROS with the <a href="http://gazebosim.org/">Gazebo</a> simulator.</description>
 
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>

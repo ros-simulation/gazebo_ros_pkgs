@@ -12,6 +12,7 @@ endforeach()
 
 # Tests
 set(tests
+  test_gazebo_ros_ackermann_drive
   test_gazebo_ros_diff_drive
   test_gazebo_ros_elevator
   test_gazebo_ros_force
@@ -19,6 +20,7 @@ set(tests
   test_gazebo_ros_imu_sensor
   test_gazebo_ros_joint_state_publisher
   test_gazebo_ros_p3d
+  test_gazebo_ros_planar_move
   test_gazebo_ros_ray_sensor
   test_gazebo_ros_tricycle_drive
   test_gazebo_ros_vacuum_gripper
