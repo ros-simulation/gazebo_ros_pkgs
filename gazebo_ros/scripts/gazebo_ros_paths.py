@@ -34,6 +34,7 @@ from ros2pkg.api import get_package_names
 
 
 class GazeboRosPaths:
+
     @staticmethod
     def get_paths():
         gazebo_model_path = []
