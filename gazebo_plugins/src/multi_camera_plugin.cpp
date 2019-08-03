@@ -12,88 +12,93 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo_plugins/MultiCameraPlugin.hpp>
+#include <gazebo_plugins/multi_camera_plugin.hpp>
 #include <gazebo/sensors/CameraSensor.hh>
 #include <gazebo/sensors/DepthCameraSensor.hh>
+#include <gazebo/rendering/Camera.hh>
 
+#include <memory>
 #include <string>
+#include <vector>
 
-GZ_REGISTER_SENSOR_PLUGIN(gazebo::MultiCameraPlugin)
+namespace gazebo_plugins
+{
+class MultiCameraPluginPrivate
+{
+public:
+  /// Connects to pre-render events.
+  std::vector<gazebo::event::ConnectionPtr> new_frame_connection_;
+};
 
 /////////////////////////////////////////////////
-gazebo::MultiCameraPlugin::MultiCameraPlugin()
-: SensorPlugin()
+MultiCameraPlugin::MultiCameraPlugin()
+: SensorPlugin(),
+  impl_(std::make_unique<MultiCameraPluginPrivate>())
 {
 }
 
 /////////////////////////////////////////////////
-gazebo::MultiCameraPlugin::~MultiCameraPlugin()
+MultiCameraPlugin::~MultiCameraPlugin()
 {
-  for (auto conn : this->newFrameConnection) {
+  for (auto conn : impl_->new_frame_connection_) {
     conn.reset();
   }
-  this->newFrameConnection.clear();
+  impl_->new_frame_connection_.clear();
 
-  this->parentSensor.reset();
-  this->camera.clear();
+  parent_sensor_.reset();
+  camera_.clear();
 }
 
 /////////////////////////////////////////////////
-void gazebo::MultiCameraPlugin::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr /*_sdf*/)
+void MultiCameraPlugin::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr /*_sdf*/)
 {
   if (!_sensor) {
     gzerr << "Invalid sensor pointer.\n";
   }
 
-  this->parentSensor = std::dynamic_pointer_cast<sensors::MultiCameraSensor>(_sensor);
+  parent_sensor_ = std::dynamic_pointer_cast<gazebo::sensors::MultiCameraSensor>(_sensor);
 
-  if (!this->parentSensor) {
+  if (!parent_sensor_) {
     gzerr << "MultiCameraPlugin requires a CameraSensor.\n";
-    if (std::dynamic_pointer_cast<sensors::DepthCameraSensor>(_sensor)) {
+    if (std::dynamic_pointer_cast<gazebo::sensors::DepthCameraSensor>(_sensor)) {
       gzmsg << "It is a depth camera sensor\n";
     }
-    if (std::dynamic_pointer_cast<sensors::CameraSensor>(_sensor)) {
+    if (std::dynamic_pointer_cast<gazebo::sensors::CameraSensor>(_sensor)) {
       gzmsg << "It is a camera sensor\n";
     }
   }
 
-  if (!this->parentSensor) {
+  if (!parent_sensor_) {
     gzerr << "MultiCameraPlugin not attached to a camera sensor\n";
     return;
   }
-
-  for (unsigned int i = 0; i < this->parentSensor->CameraCount(); ++i) {
-    this->camera.push_back(this->parentSensor->Camera(i));
+  for (unsigned int i = 0; i < parent_sensor_->CameraCount(); ++i) {
+    camera_.push_back(parent_sensor_->Camera(i));
 
     // save camera attributes
-    this->width.push_back(this->camera[i]->ImageWidth());
-    this->height.push_back(this->camera[i]->ImageHeight());
-    this->depth.push_back(this->camera[i]->ImageDepth());
-    this->format.push_back(this->camera[i]->ImageFormat());
+    width_.push_back(camera_[i]->ImageWidth());
+    height_.push_back(camera_[i]->ImageHeight());
+    depth_.push_back(camera_[i]->ImageDepth());
+    format_.push_back(camera_[i]->ImageFormat());
 
-    std::string cameraName = this->parentSensor->Camera(i)->Name();
-    // gzdbg << "camera(" << i << ") name [" << cameraName << "]\n";
-
-    this->newFrameConnection.push_back(this->camera[i]->ConnectNewImageFrame(
+    impl_->new_frame_connection_.push_back(camera_[i]->ConnectNewImageFrame(
         std::bind(&MultiCameraPlugin::OnNewMultiFrame,
         this, std::placeholders::_1, std::placeholders::_2,
         std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, i)));
   }
 
-  this->parentSensor->SetActive(true);
+  parent_sensor_->SetActive(true);
 }
 
 /////////////////////////////////////////////////
-void gazebo::MultiCameraPlugin::OnNewMultiFrame(
+void MultiCameraPlugin::OnNewMultiFrame(
   const unsigned char * /*_image*/,
   unsigned int /*_width*/,
   unsigned int /*_height*/,
   unsigned int /*_depth*/,
   const std::string & /*_format*/,
-  int /*camera_num*/)
+  const int /*_camera_num*/)
 {
-  /*rendering::Camera::SaveFrame(_image, this->width,
-    this->height, this->depth, this->format,
-    "/tmp/camera/me.jpg");
-    */
 }
+GZ_REGISTER_SENSOR_PLUGIN(MultiCameraPlugin)
+}  // namespace gazebo_plugins

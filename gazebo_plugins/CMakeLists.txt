@@ -90,9 +90,9 @@ ament_target_dependencies(gazebo_ros_template
 )
 ament_export_libraries(gazebo_ros_template)
 
-# MultiCameraPlugin
-add_library(MultiCameraPlugin SHARED
-  src/MultiCameraPlugin.cpp
+# multi_camera_plugin
+add_library(multi_camera_plugin SHARED
+  src/multi_camera_plugin.cpp
 )
 
 # gazebo_ros_camera
@@ -111,7 +111,7 @@ ament_target_dependencies(gazebo_ros_camera
 target_link_libraries(gazebo_ros_camera
   CameraPlugin
   DepthCameraPlugin
-  MultiCameraPlugin
+  multi_camera_plugin
 )
 ament_export_libraries(gazebo_ros_camera)
 
@@ -211,7 +211,6 @@ install(DIRECTORY include/
 
 install(TARGETS
     gazebo_ros_camera
-    MultiCameraPlugin
     gazebo_ros_diff_drive
     gazebo_ros_force
     gazebo_ros_ft_sensor
@@ -222,6 +221,7 @@ install(TARGETS
     gazebo_ros_template
     gazebo_ros_tricycle_drive
     gazebo_ros_video
+    multi_camera_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)

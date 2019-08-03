@@ -17,7 +17,7 @@
 
 #include <gazebo/plugins/CameraPlugin.hh>
 #include <gazebo/plugins/DepthCameraPlugin.hh>
-#include <gazebo_plugins/MultiCameraPlugin.hpp>
+#include <gazebo_plugins/multi_camera_plugin.hpp>
 #include <std_msgs/msg/empty.hpp>
 
 #include <memory>
@@ -61,7 +61,7 @@ class GazeboRosCameraPrivate;
   \endcode
 */
 class GazeboRosCamera
-  : public gazebo::CameraPlugin, gazebo::DepthCameraPlugin, gazebo::MultiCameraPlugin
+  : public gazebo::CameraPlugin, gazebo::DepthCameraPlugin, MultiCameraPlugin
 {
 public:
   /// Constructor
@@ -150,7 +150,7 @@ protected:
   void OnNewMultiFrame(
     const unsigned char * _image,
     unsigned int _width, unsigned int _height,
-    unsigned int _depth, const std::string & _format, int camera_num) override;
+    unsigned int _depth, const std::string & _format, const int _camera_num) override;
 
   /// Callback when camera is triggered.
   void OnTrigger(const std_msgs::msg::Empty::SharedPtr _dummy);

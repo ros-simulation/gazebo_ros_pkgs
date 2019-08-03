@@ -12,20 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GAZEBO_PLUGINS__MULTICAMERAPLUGIN_HPP_
-#define GAZEBO_PLUGINS__MULTICAMERAPLUGIN_HPP_
+#ifndef GAZEBO_PLUGINS__MULTI_CAMERA_PLUGIN_HPP_
+#define GAZEBO_PLUGINS__MULTI_CAMERA_PLUGIN_HPP_
 
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/sensors/MultiCameraSensor.hh>
+#include <gazebo/util/system.hh>
+
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "gazebo/common/Plugin.hh"
-#include "gazebo/sensors/MultiCameraSensor.hh"
-#include "gazebo/rendering/Camera.hh"
-#include "gazebo/util/system.hh"
-
-namespace gazebo
+namespace gazebo_plugins
 {
-class GAZEBO_VISIBLE MultiCameraPlugin : public SensorPlugin
+class MultiCameraPluginPrivate;
+
+class GAZEBO_VISIBLE MultiCameraPlugin : public gazebo::SensorPlugin
 {
 public:
   /// Constructor
@@ -34,8 +36,9 @@ public:
   /// Destructor
   virtual ~MultiCameraPlugin();
 
+protected:
   // Documentation inherited
-  virtual void Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf);
+  virtual void Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf);
 
   /// Callback when multi camera produces a new image.
   /*
@@ -47,30 +50,29 @@ public:
    * \param[in] _height Image height
    * \param[in] _depth Image depth
    * \param[in] _format Image format
-   * \param[in] camera_num Index number of camera
+   * \param[in] _camera_num Index number of camera
    */
   virtual void OnNewMultiFrame(
     const unsigned char * _image,
     unsigned int _width, unsigned int _height,
-    unsigned int _depth, const std::string & _format, int camera_num);
+    unsigned int _depth, const std::string & _format, const int _camera_num);
 
-protected:
   // Pointer to multicamera sensor
-  sensors::MultiCameraSensorPtr parentSensor;
+  gazebo::sensors::MultiCameraSensorPtr parent_sensor_;
 
   // Store dimensions of camera image
-  std::vector<unsigned int> width, height, depth;
+  std::vector<unsigned int> width_, height_, depth_;
 
-  // Store image format
-  std::vector<std::string> format;
+  // Store image format_
+  std::vector<std::string> format_;
 
   // Pointer to multicamera
-  std::vector<rendering::CameraPtr> camera;
+  std::vector<gazebo::rendering::CameraPtr> camera_;
 
 private:
-  /// Connects to pre-render events.
-  std::vector<event::ConnectionPtr> newFrameConnection;
+  /// Private data pointer
+  std::unique_ptr<MultiCameraPluginPrivate> impl_;
 };
-}  // namespace gazebo
+}  // namespace gazebo_plugins
 
-#endif  // GAZEBO_PLUGINS__MULTICAMERAPLUGIN_HPP_
+#endif  // GAZEBO_PLUGINS__MULTI_CAMERA_PLUGIN_HPP_
