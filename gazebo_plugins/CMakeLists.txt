@@ -187,6 +187,35 @@ ament_target_dependencies(gazebo_ros_ft_sensor
 )
 ament_export_libraries(gazebo_ros_ft_sensor)
 
+# gazebo_ros_harness
+add_library(gazebo_ros_harness SHARED
+  src/gazebo_ros_harness.cpp
+)
+ament_target_dependencies(gazebo_ros_harness
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "std_msgs"
+)
+target_link_libraries(gazebo_ros_harness
+  HarnessPlugin
+)
+ament_export_libraries(gazebo_ros_harness)
+
+# gazebo_ros_hand_of_god
+add_library(gazebo_ros_hand_of_god SHARED
+  src/gazebo_ros_hand_of_god.cpp
+)
+ament_target_dependencies(gazebo_ros_hand_of_god
+  "gazebo_ros"
+  "gazebo_dev"
+  "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+)
+ament_export_libraries(gazebo_ros_hand_of_god)
+
 # gazebo_ros_ackermann_drive
 add_library(gazebo_ros_ackermann_drive SHARED
   src/gazebo_ros_ackermann_drive.cpp
@@ -281,6 +310,8 @@ install(TARGETS
     gazebo_ros_elevator
     gazebo_ros_force
     gazebo_ros_ft_sensor
+    gazebo_ros_hand_of_god
+    gazebo_ros_harness
     gazebo_ros_imu_sensor
     gazebo_ros_joint_state_publisher
     gazebo_ros_planar_move
