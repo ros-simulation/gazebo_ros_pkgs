@@ -33,9 +33,9 @@ set(msg_files
 )
 
 set(srv_files
-  "srv/ApplyBodyWrench.srv"
+  "srv/ApplyLinkWrench.srv"
   "srv/ApplyJointEffort.srv"
-  "srv/BodyRequest.srv"
+  "srv/LinkRequest.srv"
   "srv/DeleteEntity.srv"
   "srv/DeleteLight.srv"
   "srv/DeleteModel.srv"

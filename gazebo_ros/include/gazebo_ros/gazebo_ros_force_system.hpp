@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GAZEBO_ROS__GAZEBO_ROS_EFFORT_HPP_
-#define GAZEBO_ROS__GAZEBO_ROS_EFFORT_HPP_
+#ifndef GAZEBO_ROS__GAZEBO_ROS_FORCE_SYSTEM_HPP_
+#define GAZEBO_ROS__GAZEBO_ROS_FORCE_SYSTEM_HPP_
 
 #include <gazebo/common/Plugin.hh>
 
@@ -22,26 +22,40 @@
 namespace gazebo_ros
 {
 
-class GazeboRosEffortPrivate;
+class GazeboRosForceSystemPrivate;
 
 /// Provides services and topics to
-/// Apply and clear wrenches on gazebo bodies.
+/// Apply and clear wrenches on gazebo links.
 /// Apply and clear forces on gazebo joints
-class GazeboRosEffort : public gazebo::SystemPlugin
+///
+/// Services:
+///
+///      apply_link_wrench (gazebo_msgs::srv::ApplyLinkWrench)
+///          Apply wrench on gazebo links
+///
+///      clear_link_wrenches (gazebo_msgs::srv::LinkRequest)
+///          Clear wrenches on gazebo links.
+///
+///      apply_joint_effort (gazebo_msgs::srv::ApplyJointEffort)
+///          Apply effort on gazebo joints
+///
+///      clear_joint_efforts (gazebo_msgs::srv::JointRequest)
+///          Clear efforts on gazebo joints.
+class GazeboRosForceSystem : public gazebo::SystemPlugin
 {
 public:
   /// Constructor
-  GazeboRosEffort();
+  GazeboRosForceSystem();
 
   /// Destructor
-  virtual ~GazeboRosEffort();
+  virtual ~GazeboRosForceSystem();
 
   // Documentation inherited
   void Load(int argc, char ** argv) override;
 
 private:
-  std::unique_ptr<GazeboRosEffortPrivate> impl_;
+  std::unique_ptr<GazeboRosForceSystemPrivate> impl_;
 };
 
 }  // namespace gazebo_ros
-#endif  // GAZEBO_ROS__GAZEBO_ROS_EFFORT_HPP_
+#endif  // GAZEBO_ROS__GAZEBO_ROS_FORCE_SYSTEM_HPP_

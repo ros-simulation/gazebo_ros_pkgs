@@ -13,43 +13,43 @@
 // limitations under the License.
 
 #include <gazebo/test/ServerFixture.hh>
-#include <gazebo_msgs/srv/apply_body_wrench.hpp>
-#include <gazebo_msgs/srv/body_request.hpp>
+#include <gazebo_msgs/srv/apply_link_wrench.hpp>
+#include <gazebo_msgs/srv/link_request.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <memory>
 
 #define tol 10e-2
 
-class GazeboRosBodyEffortTest : public gazebo::ServerFixture
+class GazeboRosLinkWrenchTest : public gazebo::ServerFixture
 {
 };
 
-TEST_F(GazeboRosBodyEffortTest, BodyEffortTest)
+TEST_F(GazeboRosLinkWrenchTest, LinkWrenchTest)
 {
   // Load test world
   this->LoadArgs(
-    "worlds/gazebo_ros_body_effort_test.world -u --verbose -s libgazebo_ros_effort.so");
+    "worlds/gazebo_ros_link_wrench_test.world -u --verbose -s libgazebo_ros_force_system.so");
 
   // World
   auto world = gazebo::physics::get_world();
   ASSERT_NE(nullptr, world);
 
   // Create ROS clients
-  auto node = std::make_shared<rclcpp::Node>("gazebo_ros_body_effort_test");
+  auto node = std::make_shared<rclcpp::Node>("gazebo_ros_link_wrench_test");
   ASSERT_NE(nullptr, node);
 
-  auto apply_body_wrench =
-    node->create_client<gazebo_msgs::srv::ApplyBodyWrench>("apply_body_wrench");
-  ASSERT_NE(nullptr, apply_body_wrench);
-  EXPECT_TRUE(apply_body_wrench->wait_for_service(std::chrono::seconds(1)));
+  auto apply_link_wrench =
+    node->create_client<gazebo_msgs::srv::ApplyLinkWrench>("apply_link_wrench");
+  ASSERT_NE(nullptr, apply_link_wrench);
+  EXPECT_TRUE(apply_link_wrench->wait_for_service(std::chrono::seconds(1)));
 
-  auto clear_body_wrenches =
-    node->create_client<gazebo_msgs::srv::BodyRequest>("clear_body_wrenches");
-  ASSERT_NE(nullptr, clear_body_wrenches);
-  EXPECT_TRUE(clear_body_wrenches->wait_for_service(std::chrono::seconds(1)));
+  auto clear_link_wrenches =
+    node->create_client<gazebo_msgs::srv::LinkRequest>("clear_link_wrenches");
+  ASSERT_NE(nullptr, clear_link_wrenches);
+  EXPECT_TRUE(clear_link_wrenches->wait_for_service(std::chrono::seconds(1)));
 
-  auto apply_request = std::make_shared<gazebo_msgs::srv::ApplyBodyWrench::Request>();
-  apply_request->body_name = "box::base";
+  auto apply_request = std::make_shared<gazebo_msgs::srv::ApplyLinkWrench::Request>();
+  apply_request->link_name = "box::base";
   apply_request->wrench.force.x = 10;
   apply_request->wrench.force.y = 10;
   apply_request->wrench.force.z = 10;
@@ -58,7 +58,7 @@ TEST_F(GazeboRosBodyEffortTest, BodyEffortTest)
   apply_request->wrench.torque.z = 10;
   apply_request->duration = rclcpp::Duration(-1, 0);
 
-  auto apply_response_future = apply_body_wrench->async_send_request(apply_request);
+  auto apply_response_future = apply_link_wrench->async_send_request(apply_request);
   EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, apply_response_future));
 
@@ -76,10 +76,10 @@ TEST_F(GazeboRosBodyEffortTest, BodyEffortTest)
   EXPECT_NEAR(entity->WorldTorque().Y(), 10, tol);
   EXPECT_NEAR(entity->WorldTorque().Z(), 10, tol);
 
-  auto clear_request = std::make_shared<gazebo_msgs::srv::BodyRequest::Request>();
-  clear_request->body_name = "box::base";
+  auto clear_request = std::make_shared<gazebo_msgs::srv::LinkRequest::Request>();
+  clear_request->link_name = "box::base";
 
-  auto clear_response_future = clear_body_wrenches->async_send_request(clear_request);
+  auto clear_response_future = clear_link_wrenches->async_send_request(clear_request);
   EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, clear_response_future));
 

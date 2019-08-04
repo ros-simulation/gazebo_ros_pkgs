@@ -28,7 +28,7 @@ TEST_F(GazeboRosJointEffortTest, JointEffortTest)
 {
   // Load test world
   this->LoadArgs(
-    "worlds/gazebo_ros_joint_effort_test.world -u --verbose -s libgazebo_ros_effort.so");
+    "worlds/gazebo_ros_joint_effort_test.world -u --verbose -s libgazebo_ros_force_system.so");
 
   // World
   auto world = gazebo::physics::get_world();
@@ -43,10 +43,10 @@ TEST_F(GazeboRosJointEffortTest, JointEffortTest)
   ASSERT_NE(nullptr, apply_joint_effort);
   EXPECT_TRUE(apply_joint_effort->wait_for_service(std::chrono::seconds(1)));
 
-  auto clear_joint_forces =
-    node->create_client<gazebo_msgs::srv::JointRequest>("clear_joint_forces");
-  ASSERT_NE(nullptr, clear_joint_forces);
-  EXPECT_TRUE(clear_joint_forces->wait_for_service(std::chrono::seconds(1)));
+  auto clear_joint_efforts =
+    node->create_client<gazebo_msgs::srv::JointRequest>("clear_joint_efforts");
+  ASSERT_NE(nullptr, clear_joint_efforts);
+  EXPECT_TRUE(clear_joint_efforts->wait_for_service(std::chrono::seconds(1)));
 
   auto apply_request = std::make_shared<gazebo_msgs::srv::ApplyJointEffort::Request>();
   apply_request->joint_name = "upper_joint";
@@ -69,7 +69,7 @@ TEST_F(GazeboRosJointEffortTest, JointEffortTest)
   auto clear_request = std::make_shared<gazebo_msgs::srv::JointRequest::Request>();
   clear_request->joint_name = "upper_joint";
 
-  auto clear_response_future = clear_joint_forces->async_send_request(clear_request);
+  auto clear_response_future = clear_joint_efforts->async_send_request(clear_request);
   EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, clear_response_future));
 

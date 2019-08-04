@@ -16,10 +16,10 @@
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsIface.hh>
 #include <gazebo/physics/World.hh>
-#include <gazebo_msgs/srv/apply_body_wrench.hpp>
-#include <gazebo_msgs/srv/body_request.hpp>
+#include <gazebo_msgs/srv/apply_link_wrench.hpp>
 #include <gazebo_msgs/srv/apply_joint_effort.hpp>
 #include <gazebo_msgs/srv/joint_request.hpp>
+#include <gazebo_msgs/srv/link_request.hpp>
 #include <gazebo_ros/node.hpp>
 
 #include <memory>
@@ -27,15 +27,15 @@
 #include <vector>
 
 #include "gazebo_ros/conversions/builtin_interfaces.hpp"
-#include "gazebo_ros/gazebo_ros_effort.hpp"
+#include "gazebo_ros/gazebo_ros_force_system.hpp"
 
 namespace gazebo_ros
 {
-class GazeboRosEffortPrivate
+class GazeboRosForceSystemPrivate
 {
 public:
-  /// Apply body wrench task
-  struct BodyWrenchTask
+  /// Apply link wrench task
+  struct LinkWrenchTask
   {
     gazebo::physics::LinkPtr link;
     ignition::math::Vector3d force;
@@ -43,7 +43,7 @@ public:
     rclcpp::Time start_time;
     rclcpp::Duration duration;
 
-    BodyWrenchTask()
+    LinkWrenchTask()
     : duration(0, 0) {}
   };
 
@@ -63,27 +63,6 @@ public:
   /// \param[in] _world_name The world's name
   void OnWorldCreated(const std::string & _world_name);
 
-  /// \brief Callback for apply body wrench service.
-  /// \param[in] req Request
-  /// \param[out] res Response
-  void ApplyBodyWrench(
-    gazebo_msgs::srv::ApplyBodyWrench::Request::SharedPtr _req,
-    gazebo_msgs::srv::ApplyBodyWrench::Response::SharedPtr _res);
-
-  /// \brief Callback for clear body wrenches service.
-  /// \param[in] req Request
-  /// \param[out] res Response
-  void ClearBodyWrenches(
-    gazebo_msgs::srv::BodyRequest::Request::SharedPtr _req,
-    gazebo_msgs::srv::BodyRequest::Response::SharedPtr _res);
-
-  /// \brief Callback for clear joint forces service.
-  /// \param[in] req Request
-  /// \param[out] res Response
-  void ClearJointForces(
-    gazebo_msgs::srv::JointRequest::Request::SharedPtr _req,
-    gazebo_msgs::srv::JointRequest::Response::SharedPtr _res);
-
   /// \brief Callback for apply joint effort service.
   /// \param[in] req Request
   /// \param[out] res Response
@@ -91,26 +70,43 @@ public:
     gazebo_msgs::srv::ApplyJointEffort::Request::SharedPtr _req,
     gazebo_msgs::srv::ApplyJointEffort::Response::SharedPtr _res);
 
+  /// \brief Callback for apply link wrench service.
+  /// \param[in] req Request
+  /// \param[out] res Response
+  void ApplyLinkWrench(
+    gazebo_msgs::srv::ApplyLinkWrench::Request::SharedPtr _req,
+    gazebo_msgs::srv::ApplyLinkWrench::Response::SharedPtr _res);
+
+  /// \brief Callback for clear link wrenches service.
+  /// \param[in] req Request
+  /// \param[out] res Response
+  void ClearLinkWrenches(
+    gazebo_msgs::srv::LinkRequest::Request::SharedPtr _req,
+    gazebo_msgs::srv::LinkRequest::Response::SharedPtr _res);
+
+  /// \brief Callback for clear joint efforts service.
+  /// \param[in] req Request
+  /// \param[out] res Response
+  void ClearJointEfforts(
+    gazebo_msgs::srv::JointRequest::Request::SharedPtr _req,
+    gazebo_msgs::srv::JointRequest::Response::SharedPtr _res);
+
   /// \bried Helper to shift wrench from reference frame to target frame
   /// \param[in] reference_force Reference Frame Force
   /// \param[in] reference_torque Reference Frame Torque
   /// \param[in] target_to_reference Reference for transform
   /// \param[out] target_force Shifted Force
   /// \param[out] target_torque Shifted Torque
-  void transformWrench(
+  void TransformWrench(
     ignition::math::Vector3d & target_force, ignition::math::Vector3d & target_torque,
     const ignition::math::Vector3d & reference_force,
     const ignition::math::Vector3d & reference_torque,
     const ignition::math::Pose3d & target_to_reference
   );
 
-  /// Execute body wrench tasks.
+  /// Execute link wrench and joint effort tasks.
   /// \param[in] _info World update information.
-  void BodyWrenchTaskExecutor(const gazebo::common::UpdateInfo & _info);
-
-  /// Execute joint effort tasks.
-  /// \param[in] _info World update information.
-  void JointEffortTaskExecutor(const gazebo::common::UpdateInfo & _info);
+  void TaskExecutor(const gazebo::common::UpdateInfo & _info);
 
   /// \brief World pointer from Gazebo.
   gazebo::physics::WorldPtr world_;
@@ -118,70 +114,53 @@ public:
   /// ROS node for communication, managed by gazebo_ros.
   gazebo_ros::Node::SharedPtr ros_node_;
 
-  /// Reusable factory SDF for efficiency.
-  sdf::SDFPtr factory_sdf_ = std::make_shared<sdf::SDF>();
+  /// \brief ROS service to handle requests for apply link wrench.
+  rclcpp::Service<gazebo_msgs::srv::ApplyLinkWrench>::SharedPtr apply_link_wrench_service_;
 
-  /// \brief ROS service to handle requests for apply body wrench.
-  rclcpp::Service<gazebo_msgs::srv::ApplyBodyWrench>::SharedPtr apply_body_wrench_service_;
-
-  /// \brief ROS service to handle requests for clear body wrenches.
-  rclcpp::Service<gazebo_msgs::srv::BodyRequest>::SharedPtr clear_body_wrenches_service_;
+  /// \brief ROS service to handle requests for clear link wrenches.
+  rclcpp::Service<gazebo_msgs::srv::LinkRequest>::SharedPtr clear_link_wrenches_service_;
 
   /// \brief ROS service to handle requests for apply joint effort.
   rclcpp::Service<gazebo_msgs::srv::ApplyJointEffort>::SharedPtr apply_joint_effort_service_;
 
   /// \brief ROS service to handle requests for clear joint forces.
-  rclcpp::Service<gazebo_msgs::srv::JointRequest>::SharedPtr clear_joint_forces_service_;
+  rclcpp::Service<gazebo_msgs::srv::JointRequest>::SharedPtr clear_joint_efforts_service_;
 
   /// To be notified once the world is created.
   gazebo::event::ConnectionPtr world_created_connection_;
 
-  /// Connection to body wrench update event, called at every iteration
-  gazebo::event::ConnectionPtr body_wrench_update_event_;
-
-  /// Connection to joint effort update event, called at every iteration
-  gazebo::event::ConnectionPtr joint_effort_update_event_;
+  /// Connection to event called at every world iteration.
+  gazebo::event::ConnectionPtr update_connection_;
 
   /// Pointer to apply wrench tasks
-  std::vector<std::shared_ptr<BodyWrenchTask>> body_wrench_tasks_;
+  std::vector<std::shared_ptr<LinkWrenchTask>> link_wrench_tasks_;
 
   /// Pointer to joint effort tasks
   std::vector<std::shared_ptr<JointEffortTask>> joint_effort_tasks_;
 
-  /// Lock for body wrench tasks
-  std::mutex wrench_lock_;
-
-  /// Lock for joint effort tasks
-  std::mutex effort_lock_;
+  /// Lock for executing tasks
+  std::mutex lock_;
 };
 
-GazeboRosEffort::GazeboRosEffort()
-: impl_(std::make_unique<GazeboRosEffortPrivate>())
+GazeboRosForceSystem::GazeboRosForceSystem()
+: impl_(std::make_unique<GazeboRosForceSystemPrivate>())
 {
 }
 
-GazeboRosEffort::~GazeboRosEffort()
+GazeboRosForceSystem::~GazeboRosForceSystem()
 {
 }
 
-void GazeboRosEffort::Load(int /* argc */, char ** /* argv */)
+void GazeboRosForceSystem::Load(int /* argc */, char ** /* argv */)
 {
-  // Keep this in the constructor for performance.
-  // sdf::initFile causes disk access.
-  sdf::initFile("root.sdf", impl_->factory_sdf_);
-
-  impl_->body_wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboRosEffortPrivate::BodyWrenchTaskExecutor, impl_.get(), std::placeholders::_1));
-
-  impl_->joint_effort_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboRosEffortPrivate::JointEffortTaskExecutor, impl_.get(),
-    std::placeholders::_1));
+  impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+    std::bind(&GazeboRosForceSystemPrivate::TaskExecutor, impl_.get(), std::placeholders::_1));
 
   impl_->world_created_connection_ = gazebo::event::Events::ConnectWorldCreated(
-    std::bind(&GazeboRosEffortPrivate::OnWorldCreated, impl_.get(), std::placeholders::_1));
+    std::bind(&GazeboRosForceSystemPrivate::OnWorldCreated, impl_.get(), std::placeholders::_1));
 }
 
-void GazeboRosEffortPrivate::OnWorldCreated(const std::string & _world_name)
+void GazeboRosForceSystemPrivate::OnWorldCreated(const std::string & _world_name)
 {
   // Only support one world
   world_created_connection_.reset();
@@ -191,41 +170,41 @@ void GazeboRosEffortPrivate::OnWorldCreated(const std::string & _world_name)
   // ROS transport
   ros_node_ = gazebo_ros::Node::Get();
 
-  apply_body_wrench_service_ = ros_node_->create_service<gazebo_msgs::srv::ApplyBodyWrench>(
-    "apply_body_wrench", std::bind(&GazeboRosEffortPrivate::ApplyBodyWrench, this,
+  apply_link_wrench_service_ = ros_node_->create_service<gazebo_msgs::srv::ApplyLinkWrench>(
+    "apply_link_wrench", std::bind(&GazeboRosForceSystemPrivate::ApplyLinkWrench, this,
     std::placeholders::_1, std::placeholders::_2));
 
-  clear_body_wrenches_service_ = ros_node_->create_service<gazebo_msgs::srv::BodyRequest>(
-    "clear_body_wrenches", std::bind(&GazeboRosEffortPrivate::ClearBodyWrenches, this,
+  clear_link_wrenches_service_ = ros_node_->create_service<gazebo_msgs::srv::LinkRequest>(
+    "clear_link_wrenches", std::bind(&GazeboRosForceSystemPrivate::ClearLinkWrenches, this,
     std::placeholders::_1, std::placeholders::_2));
 
   apply_joint_effort_service_ = ros_node_->create_service<gazebo_msgs::srv::ApplyJointEffort>(
-    "apply_joint_effort", std::bind(&GazeboRosEffortPrivate::ApplyJointEffort, this,
+    "apply_joint_effort", std::bind(&GazeboRosForceSystemPrivate::ApplyJointEffort, this,
     std::placeholders::_1, std::placeholders::_2));
 
-  clear_joint_forces_service_ = ros_node_->create_service<gazebo_msgs::srv::JointRequest>(
-    "clear_joint_forces", std::bind(&GazeboRosEffortPrivate::ClearJointForces, this,
+  clear_joint_efforts_service_ = ros_node_->create_service<gazebo_msgs::srv::JointRequest>(
+    "clear_joint_efforts", std::bind(&GazeboRosForceSystemPrivate::ClearJointEfforts, this,
     std::placeholders::_1, std::placeholders::_2));
 }
 
-void GazeboRosEffortPrivate::BodyWrenchTaskExecutor(const gazebo::common::UpdateInfo & _info)
+void GazeboRosForceSystemPrivate::TaskExecutor(const gazebo::common::UpdateInfo & _info)
 {
-  std::lock_guard<std::mutex> scoped_lock(wrench_lock_);
+  // Store sim time
+  rclcpp::Time sim_time = Convert<builtin_interfaces::msg::Time>(_info.simTime);
 
-  for (auto body_wrench_task = body_wrench_tasks_.begin();
-    body_wrench_task != body_wrench_tasks_.end(); ++body_wrench_task)
+  std::lock_guard<std::mutex> scoped_lock(lock_);
+
+  for (auto link_wrench_task = link_wrench_tasks_.begin();
+    link_wrench_task != link_wrench_tasks_.end(); ++link_wrench_task)
   {
-    // check times and apply wrench if necessary
-    rclcpp::Time sim_time = Convert<builtin_interfaces::msg::Time>(_info.simTime);
-
-    auto start = (*body_wrench_task)->start_time;
-    auto duration = (*body_wrench_task)->duration;
+    auto start = (*link_wrench_task)->start_time;
+    auto duration = (*link_wrench_task)->duration;
     auto end = start + duration;
 
-    if (!(*body_wrench_task)->link) {
-      body_wrench_tasks_.erase(body_wrench_task--);
+    if (!(*link_wrench_task)->link) {
+      link_wrench_tasks_.erase(link_wrench_task--);
       RCLCPP_ERROR(ros_node_->get_logger(),
-        "Link [%s] does not exist. Deleting task", (*body_wrench_task)->link->GetName().c_str());
+        "Link [%s] does not exist. Deleting task", (*link_wrench_task)->link->GetName().c_str());
     }
 
     if (sim_time < start) {
@@ -233,25 +212,17 @@ void GazeboRosEffortPrivate::BodyWrenchTaskExecutor(const gazebo::common::Update
     }
 
     if (sim_time <= end || duration.seconds() < 0.0) {
-      (*body_wrench_task)->link->SetForce((*body_wrench_task)->force);
-      (*body_wrench_task)->link->SetTorque((*body_wrench_task)->torque);
+      (*link_wrench_task)->link->SetForce((*link_wrench_task)->force);
+      (*link_wrench_task)->link->SetTorque((*link_wrench_task)->torque);
     } else {
       // remove from queue once expires
-      body_wrench_tasks_.erase(body_wrench_task--);
+      link_wrench_tasks_.erase(link_wrench_task--);
     }
   }
-}
-
-void GazeboRosEffortPrivate::JointEffortTaskExecutor(const gazebo::common::UpdateInfo & _info)
-{
-  std::lock_guard<std::mutex> scoped_lock(effort_lock_);
 
   for (auto joint_effort_task = joint_effort_tasks_.begin();
     joint_effort_task != joint_effort_tasks_.end(); ++joint_effort_task)
   {
-    // check times and apply force if necessary
-    rclcpp::Time sim_time = Convert<builtin_interfaces::msg::Time>(_info.simTime);
-
     auto start = (*joint_effort_task)->start_time;
     auto duration = (*joint_effort_task)->duration;
     auto end = start + duration;
@@ -275,18 +246,18 @@ void GazeboRosEffortPrivate::JointEffortTaskExecutor(const gazebo::common::Updat
   }
 }
 
-void GazeboRosEffortPrivate::ApplyBodyWrench(
-  gazebo_msgs::srv::ApplyBodyWrench::Request::SharedPtr _req,
-  gazebo_msgs::srv::ApplyBodyWrench::Response::SharedPtr _res)
+void GazeboRosForceSystemPrivate::ApplyLinkWrench(
+  gazebo_msgs::srv::ApplyLinkWrench::Request::SharedPtr _req,
+  gazebo_msgs::srv::ApplyLinkWrench::Response::SharedPtr _res)
 {
-  auto body = boost::dynamic_pointer_cast<gazebo::physics::Link>(
-    world_->EntityByName(_req->body_name));
+  auto link = boost::dynamic_pointer_cast<gazebo::physics::Link>(
+    world_->EntityByName(_req->link_name));
   auto frame = world_->EntityByName(_req->reference_frame);
 
-  if (!body) {
-    RCLCPP_ERROR(ros_node_->get_logger(), "Link [%s] does not exist", _req->body_name.c_str());
+  if (!link) {
+    RCLCPP_ERROR(ros_node_->get_logger(), "Link [%s] does not exist", _req->link_name.c_str());
     _res->success = false;
-    _res->status_message = "ApplyBodyWrench: link does not exist";
+    _res->status_message = "ApplyLinkWrench: link does not exist";
     return;
   }
 
@@ -306,11 +277,11 @@ void GazeboRosEffortPrivate::ApplyBodyWrench(
 
   if (frame) {
     ignition::math::Pose3d framePose = frame->WorldPose();
-    ignition::math::Pose3d bodyPose = body->WorldPose();
-    ignition::math::Pose3d target_to_ref = framePose - bodyPose;
+    ignition::math::Pose3d linkPose = link->WorldPose();
+    ignition::math::Pose3d target_to_ref = framePose - linkPose;
 
-    auto body_pose = bodyPose.Pos();
-    auto body_rot = bodyPose.Rot().Euler();
+    auto link_pose = linkPose.Pos();
+    auto link_rot = linkPose.Rot().Euler();
     auto frame_pose = framePose.Pos();
     auto frame_rot = framePose.Rot().Euler();
     auto target_pose = target_to_ref.Pos();
@@ -319,31 +290,31 @@ void GazeboRosEffortPrivate::ApplyBodyWrench(
     RCLCPP_DEBUG(ros_node_->get_logger(),
       "Reference frame for applied wrench:"
       "[%f %f %f, %f %f %f] - [%f %f %f, %f %f %f] = [%f %f %f, %f %f %f]",
-      body_pose.X(), body_pose.Y(), body_pose.Z(),
-      body_rot.X(), body_rot.Y(), body_rot.Z(),
+      link_pose.X(), link_pose.Y(), link_pose.Z(),
+      link_rot.X(), link_rot.Y(), link_rot.Z(),
       frame_pose.X(), frame_pose.Y(), frame_pose.Z(),
       frame_rot.X(), frame_rot.Y(), frame_rot.Z(),
       target_pose.X(), target_pose.Y(), target_pose.Z(),
       target_rot.X(), target_rot.Y(), target_rot.Z()
     );
 
-    transformWrench(target_force, target_torque, ref_force, ref_torque, target_to_ref);
+    TransformWrench(target_force, target_torque, ref_force, ref_torque, target_to_ref);
 
     RCLCPP_INFO(ros_node_->get_logger(),
       "Wrench defined as [%s]:[%f %f %f, %f %f %f] -> Applied as [%s]:[%f %f %f, %f %f %f]",
       frame->GetName().c_str(),
       ref_force.X(), ref_force.Y(), ref_force.Z(),
       ref_torque.X(), ref_torque.Y(), ref_torque.Z(),
-      body->GetName().c_str(),
+      link->GetName().c_str(),
       target_force.X(), target_force.Y(), target_force.Z(),
       target_torque.X(), target_torque.Y(), target_torque.Z());
 
   } else if (ref_frame.empty() || ref_frame == "world" || ref_frame == "map") {
-    ignition::math::Pose3d target_to_reference = body->WorldPose();
+    ignition::math::Pose3d target_to_reference = link->WorldPose();
     target_force = ref_force;
     target_torque = ref_torque;
     RCLCPP_INFO(ros_node_->get_logger(), "Reference_frame is empty/world/map,"
-      "using inertial frame, transferring from body relative to inertial frame");
+      "using inertial frame, transferring from link relative to inertial frame");
 
   } else {
     RCLCPP_ERROR(ros_node_->get_logger(), "Reference_frame is not a valid entity name");
@@ -352,19 +323,19 @@ void GazeboRosEffortPrivate::ApplyBodyWrench(
     return;
   }
 
-  auto body_wrench_task = std::make_shared<BodyWrenchTask>();
-  body_wrench_task->link = body;
-  body_wrench_task->force = target_force;
-  body_wrench_task->torque = target_torque;
-  body_wrench_task->start_time = _req->start_time;
-  body_wrench_task->duration = _req->duration;
+  auto link_wrench_task = std::make_shared<LinkWrenchTask>();
+  link_wrench_task->link = link;
+  link_wrench_task->force = target_force;
+  link_wrench_task->torque = target_torque;
+  link_wrench_task->start_time = _req->start_time;
+  link_wrench_task->duration = _req->duration;
 
-  std::lock_guard<std::mutex> scoped_lock(wrench_lock_);
-  body_wrench_tasks_.push_back(body_wrench_task);
+  std::lock_guard<std::mutex> scoped_lock(lock_);
+  link_wrench_tasks_.push_back(link_wrench_task);
   _res->success = true;
 }
 
-void GazeboRosEffortPrivate::transformWrench(
+void GazeboRosForceSystemPrivate::TransformWrench(
   ignition::math::Vector3d & target_force, ignition::math::Vector3d & target_torque,
   const ignition::math::Vector3d & reference_force,
   const ignition::math::Vector3d & reference_torque,
@@ -379,27 +350,27 @@ void GazeboRosEffortPrivate::transformWrench(
   target_torque = target_torque + target_to_reference.Pos().Cross(target_force);
 }
 
-void GazeboRosEffortPrivate::ClearBodyWrenches(
-  gazebo_msgs::srv::BodyRequest::Request::SharedPtr _req,
-  gazebo_msgs::srv::BodyRequest::Response::SharedPtr /*_res*/)
+void GazeboRosForceSystemPrivate::ClearLinkWrenches(
+  gazebo_msgs::srv::LinkRequest::Request::SharedPtr _req,
+  gazebo_msgs::srv::LinkRequest::Response::SharedPtr /*_res*/)
 {
   bool found = false;
-  std::lock_guard<std::mutex> scoped_lock(wrench_lock_);
-  for (auto body_wrench_task = body_wrench_tasks_.begin();
-    body_wrench_task != body_wrench_tasks_.end(); ++body_wrench_task)
+  std::lock_guard<std::mutex> scoped_lock(lock_);
+  for (auto link_wrench_task = link_wrench_tasks_.begin();
+    link_wrench_task != link_wrench_tasks_.end(); ++link_wrench_task)
   {
-    if ((*body_wrench_task)->link->GetScopedName() == _req->body_name) {
-      body_wrench_tasks_.erase(body_wrench_task--);
-      RCLCPP_INFO(ros_node_->get_logger(), "Deleted wrench on [%s]", _req->body_name.c_str());
+    if ((*link_wrench_task)->link->GetScopedName() == _req->link_name) {
+      link_wrench_tasks_.erase(link_wrench_task--);
+      RCLCPP_INFO(ros_node_->get_logger(), "Deleted wrench on [%s]", _req->link_name.c_str());
       found = true;
     }
   }
   if (!found) {
-    RCLCPP_WARN(ros_node_->get_logger(), "No applied wrenches on [%s]", _req->body_name.c_str());
+    RCLCPP_WARN(ros_node_->get_logger(), "No applied wrenches on [%s]", _req->link_name.c_str());
   }
 }
 
-void GazeboRosEffortPrivate::ApplyJointEffort(
+void GazeboRosForceSystemPrivate::ApplyJointEffort(
   gazebo_msgs::srv::ApplyJointEffort::Request::SharedPtr _req,
   gazebo_msgs::srv::ApplyJointEffort::Response::SharedPtr _res)
 {
@@ -414,7 +385,7 @@ void GazeboRosEffortPrivate::ApplyJointEffort(
       joint_effort_task->start_time = _req->start_time;
       joint_effort_task->duration = _req->duration;
 
-      std::lock_guard<std::mutex> lock(effort_lock_);
+      std::lock_guard<std::mutex> lock(lock_);
       joint_effort_tasks_.push_back(joint_effort_task);
 
       _res->success = true;
@@ -426,26 +397,26 @@ void GazeboRosEffortPrivate::ApplyJointEffort(
   _res->status_message = "Joint not found";
 }
 
-void GazeboRosEffortPrivate::ClearJointForces(
+void GazeboRosForceSystemPrivate::ClearJointEfforts(
   gazebo_msgs::srv::JointRequest::Request::SharedPtr _req,
   gazebo_msgs::srv::JointRequest::Response::SharedPtr /*_res*/)
 {
   bool found = false;
-  std::lock_guard<std::mutex> scoped_lock(effort_lock_);
+  std::lock_guard<std::mutex> scoped_lock(lock_);
   for (auto joint_effort_task = joint_effort_tasks_.begin();
     joint_effort_task != joint_effort_tasks_.end(); ++joint_effort_task)
   {
     if ((*joint_effort_task)->joint->GetName() == _req->joint_name) {
       joint_effort_tasks_.erase(joint_effort_task--);
-      RCLCPP_INFO(ros_node_->get_logger(), "Deleted force on [%s]", _req->joint_name.c_str());
+      RCLCPP_INFO(ros_node_->get_logger(), "Deleted effort on [%s]", _req->joint_name.c_str());
       found = true;
     }
   }
   if (!found) {
-    RCLCPP_WARN(ros_node_->get_logger(), "No applied forces on [%s]", _req->joint_name.c_str());
+    RCLCPP_WARN(ros_node_->get_logger(), "No applied efforts on [%s]", _req->joint_name.c_str());
   }
 }
 
-GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosEffort)
+GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosForceSystem)
 
 }  // namespace gazebo_ros
