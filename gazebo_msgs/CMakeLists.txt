@@ -44,6 +44,7 @@ set(srv_files
   "srv/GetLightProperties.srv"
   "srv/GetLinkProperties.srv"
   "srv/GetLinkState.srv"
+  "srv/GetModelList.srv"
   "srv/GetModelProperties.srv"
   "srv/GetModelState.srv"
   "srv/GetPhysicsProperties.srv"
