@@ -173,7 +173,7 @@
 
             <camera_name>mycamera</camera_name>
 
-            <!-- frame_name>omit so it defaults to link name</frameName-->
+            <!-- frame_name>omit so it defaults to link name</frame_name-->
           </plugin>
         </sensor>
       </link>

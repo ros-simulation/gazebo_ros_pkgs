@@ -34,7 +34,7 @@
               <argument>camera1/points:=camera/points_test</argument>
             </ros>
             <!-- camera_name>omit so it defaults to sensor name</camera_name-->
-            <!-- frame_name>omit so it defaults to link name</frameName-->
+            <!-- frame_name>omit so it defaults to link name</frame_name-->
             <hack_baseline>0.07</hack_baseline>
           </plugin>
         </sensor>

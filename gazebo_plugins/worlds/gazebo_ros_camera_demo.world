@@ -142,7 +142,7 @@
               <argument>camera_info:=camera_info_demo</argument>
             </ros>
             <!-- camera_name>omit so it defaults to sensor name</camera_name-->
-            <!-- frame_name>omit so it defaults to link name</frameName-->
+            <!-- frame_name>omit so it defaults to link name</frame_name-->
           </plugin>
         </sensor>
       </link>
