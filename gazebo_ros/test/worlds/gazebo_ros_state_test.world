@@ -4,6 +4,7 @@
     <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
       <ros>
         <namespace>/test</namespace>
+        <argument>model_states:=model_states_test</argument>
       </ros>
     </plugin>
 
