@@ -33,7 +33,6 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   stop_(false),
   plugin_loaded_(false),
   pub_link_states_connection_count_(0),
-  pub_model_states_connection_count_(0),
   pub_clock_frequency_(0),
   enable_ros_network_(true)
 {
@@ -64,8 +63,6 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
 
   if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
     pub_link_states_event_.reset();
-  if (pub_model_states_connection_count_ > 0) // disconnect if there are subscribers on exit
-    pub_model_states_event_.reset();
   ROS_DEBUG_STREAM_NAMED("api_plugin","Disconnected World Updates");
 
   // Stop the multi threaded ROS spinner
@@ -189,7 +186,6 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
 
   // reset topic connection counts
   pub_link_states_connection_count_ = 0;
-  pub_model_states_connection_count_ = 0;
 
   /// \brief advertise all services
   if (enable_ros_network_)
@@ -305,15 +301,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                            ros::VoidPtr(), &gazebo_queue_);
   pub_link_states_ = nh_->advertise(pub_link_states_ao);
 
-  // publish complete model states in world frame
-  ros::AdvertiseOptions pub_model_states_ao =
-    ros::AdvertiseOptions::create<gazebo_msgs::ModelStates>(
-                                                            "model_states",10,
-                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesConnect,this),
-                                                            boost::bind(&GazeboRosApiPlugin::onModelStatesDisconnect,this),
-                                                            ros::VoidPtr(), &gazebo_queue_);
-  pub_model_states_ = nh_->advertise(pub_model_states_ao);
-
   // Advertise more services on the custom queue
   std::string set_link_properties_service_name("set_link_properties");
   ros::AdvertiseServiceOptions set_link_properties_aso =
@@ -406,13 +393,6 @@ void GazeboRosApiPlugin::onLinkStatesConnect()
     pub_link_states_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishLinkStates,this));
 }
 
-void GazeboRosApiPlugin::onModelStatesConnect()
-{
-  pub_model_states_connection_count_++;
-  if (pub_model_states_connection_count_ == 1) // connect on first subscriber
-    pub_model_states_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishModelStates,this));
-}
-
 void GazeboRosApiPlugin::onLinkStatesDisconnect()
 {
   pub_link_states_connection_count_--;
@@ -421,17 +401,6 @@ void GazeboRosApiPlugin::onLinkStatesDisconnect()
     pub_link_states_event_.reset();
     if (pub_link_states_connection_count_ < 0) // should not be possible
       ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_link_states_ in gazebo_ros.cpp? something weird");
-  }
-}
-
-void GazeboRosApiPlugin::onModelStatesDisconnect()
-{
-  pub_model_states_connection_count_--;
-  if (pub_model_states_connection_count_ <= 0) // disconnect with no subscribers
-  {
-    pub_model_states_event_.reset();
-    if (pub_model_states_connection_count_ < 0) // should not be possible
-      ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
   }
 }
 
@@ -1340,50 +1309,6 @@ void GazeboRosApiPlugin::publishLinkStates()
   }
 
   pub_link_states_.publish(link_states);
-}
-
-void GazeboRosApiPlugin::publishModelStates()
-{
-  gazebo_msgs::ModelStates model_states;
-
-  // fill model_states
-#if GAZEBO_MAJOR_VERSION >= 8
-  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
-  {
-    gazebo::physics::ModelPtr model = world_->ModelByIndex(i);
-    ignition::math::Pose3d  model_pose = model->WorldPose(); // - myBody->GetCoMPose();
-    ignition::math::Vector3d linear_vel  = model->WorldLinearVel();
-    ignition::math::Vector3d angular_vel = model->WorldAngularVel();
-#else
-  for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
-  {
-    gazebo::physics::ModelPtr model = world_->GetModel(i);
-    ignition::math::Pose3d  model_pose = model->GetWorldPose().Ign(); // - myBody->GetCoMPose();
-    ignition::math::Vector3d linear_vel  = model->GetWorldLinearVel().Ign();
-    ignition::math::Vector3d angular_vel = model->GetWorldAngularVel().Ign();
-#endif
-    ignition::math::Vector3d pos = model_pose.Pos();
-    ignition::math::Quaterniond rot = model_pose.Rot();
-    geometry_msgs::Pose pose;
-    pose.position.x = pos.X();
-    pose.position.y = pos.Y();
-    pose.position.z = pos.Z();
-    pose.orientation.w = rot.W();
-    pose.orientation.x = rot.X();
-    pose.orientation.y = rot.Y();
-    pose.orientation.z = rot.Z();
-    model_states.pose.push_back(pose);
-    model_states.name.push_back(model->GetName());
-    geometry_msgs::Twist twist;
-    twist.linear.x = linear_vel.X();
-    twist.linear.y = linear_vel.Y();
-    twist.linear.z = linear_vel.Z();
-    twist.angular.x = angular_vel.X();
-    twist.angular.y = angular_vel.Y();
-    twist.angular.z = angular_vel.Z();
-    model_states.twist.push_back(twist);
-  }
-  pub_model_states_.publish(model_states);
 }
 
 void GazeboRosApiPlugin::physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level)
