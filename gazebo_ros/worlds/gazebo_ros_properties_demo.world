@@ -135,7 +135,7 @@
           </inertia>
           <mass>101</mass>
         </inertial>
-        <collision name='arm_base_geom'>
+        <collision name='arm_base_collision'>
           <pose frame=''>0 0 0.05 0 -0 0</pose>
           <geometry>
             <box>
@@ -156,7 +156,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_base_geom_visual'>
+        <visual name='arm_base_collision_visual'>
           <pose frame=''>0 0 0.05 0 -0 0</pose>
           <geometry>
             <box>
@@ -170,7 +170,7 @@
             </script>
           </material>
         </visual>
-        <collision name='arm_base_geom_arm_trunk'>
+        <collision name='arm_base_collision_arm_trunk'>
           <pose frame=''>0 0 0.6 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -192,7 +192,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_base_geom_arm_trunk_visual'>
+        <visual name='arm_base_collision_arm_trunk_visual'>
           <pose frame=''>0 0 0.6 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -225,7 +225,7 @@
           </inertia>
           <mass>1.1</mass>
         </inertial>
-        <collision name='arm_shoulder_pan_geom'>
+        <collision name='arm_shoulder_pan_collision'>
           <pose frame=''>0 0 0.05 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -247,7 +247,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_shoulder_pan_geom_visual'>
+        <visual name='arm_shoulder_pan_collision_visual'>
           <pose frame=''>0 0 0.05 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -262,7 +262,7 @@
             </script>
           </material>
         </visual>
-        <collision name='arm_shoulder_pan_geom_arm_shoulder'>
+        <collision name='arm_shoulder_pan_collision_arm_shoulder'>
           <pose frame=''>0.55 0 0.05 0 -0 0</pose>
           <geometry>
             <box>
@@ -283,7 +283,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_shoulder_pan_geom_arm_shoulder_visual'>
+        <visual name='arm_shoulder_pan_collision_arm_shoulder_visual'>
           <pose frame=''>0.55 0 0.05 0 -0 0</pose>
           <geometry>
             <box>
@@ -315,7 +315,7 @@
           </inertia>
           <mass>1.2</mass>
         </inertial>
-        <collision name='arm_elbow_pan_geom'>
+        <collision name='arm_elbow_pan_collision'>
           <pose frame=''>0 0 0.1 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -337,7 +337,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_elbow_pan_geom_visual'>
+        <visual name='arm_elbow_pan_collision_visual'>
           <pose frame=''>0 0 0.1 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -352,7 +352,7 @@
             </script>
           </material>
         </visual>
-        <collision name='arm_elbow_pan_geom_arm_elbow'>
+        <collision name='arm_elbow_pan_collision_arm_elbow'>
           <pose frame=''>0.3 0 0.15 0 -0 0</pose>
           <geometry>
             <box>
@@ -373,7 +373,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_elbow_pan_geom_arm_elbow_visual'>
+        <visual name='arm_elbow_pan_collision_arm_elbow_visual'>
           <pose frame=''>0.3 0 0.15 0 -0 0</pose>
           <geometry>
             <box>
@@ -387,7 +387,7 @@
             </script>
           </material>
         </visual>
-        <collision name='arm_elbow_pan_geom_arm_wrist'>
+        <collision name='arm_elbow_pan_collision_arm_wrist'>
           <pose frame=''>0.55 0 0.15 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -409,7 +409,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_elbow_pan_geom_arm_wrist_visual'>
+        <visual name='arm_elbow_pan_collision_arm_wrist_visual'>
           <pose frame=''>0.55 0 0.15 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -442,7 +442,7 @@
           </inertia>
           <mass>0.1</mass>
         </inertial>
-        <collision name='arm_wrist_lift_geom'>
+        <collision name='arm_wrist_lift_collision'>
           <pose frame=''>0 0 0.5 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -464,7 +464,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_wrist_lift_geom_visual'>
+        <visual name='arm_wrist_lift_collision_visual'>
           <pose frame=''>0 0 0.5 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -497,7 +497,7 @@
           </inertia>
           <mass>0.1</mass>
         </inertial>
-        <collision name='arm_wrist_roll_geom'>
+        <collision name='arm_wrist_roll_collision'>
           <pose frame=''>0 0 0.025 0 -0 0</pose>
           <geometry>
             <cylinder>
@@ -519,7 +519,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='arm_wrist_roll_geom_visual'>
+        <visual name='arm_wrist_roll_collision_visual'>
           <pose frame=''>0 0 0.025 0 -0 0</pose>
           <geometry>
             <cylinder>

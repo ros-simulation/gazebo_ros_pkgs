@@ -14,6 +14,7 @@
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/Entity.hh>
+#include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/Light.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
@@ -30,6 +31,7 @@
 #include <gazebo_msgs/srv/set_light_properties.hpp>
 #include <gazebo_msgs/srv/set_link_properties.hpp>
 #include <gazebo_msgs/srv/set_physics_properties.hpp>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 
 #include <memory>
@@ -121,7 +123,7 @@ public:
   /// Gazebo node for communication.
   gazebo::transport::NodePtr gz_node_;
 
-  /// Publishes light factory messages.
+  /// Publishes light modify messages.
   gazebo::transport::PublisherPtr gz_properties_light_pub_;
 };
 
@@ -193,55 +195,58 @@ void GazeboRosPropertiesPrivate::GetModelProperties(
       _req->model_name.c_str());
     _res->success = false;
     _res->status_message = "GetModelProperties: model does not exist";
-  } else {
-    // get model parent name
-    gazebo::physics::ModelPtr parent_model =
-      boost::dynamic_pointer_cast<gazebo::physics::Model>(model->GetParent());
-    if (parent_model) {_res->parent_model_name = parent_model->GetName();}
+    return;
+  }
+  // get model parent name
+  gazebo::physics::ModelPtr parent_model =
+    boost::dynamic_pointer_cast<gazebo::physics::Model>(model->GetParent());
+  if (parent_model) {_res->parent_model_name = parent_model->GetName();}
 
-    // get list of child bodies, geoms
-    _res->body_names.clear();
-    _res->geom_names.clear();
-    for (unsigned int i = 0; i < model->GetChildCount(); i++) {
-      gazebo::physics::LinkPtr body =
-        boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(i));
-      if (body) {
-        _res->body_names.push_back(body->GetName());
-        // get list of geoms
-        for (unsigned int j = 0; j < body->GetChildCount(); j++) {
-          gazebo::physics::CollisionPtr geom =
-            boost::dynamic_pointer_cast<gazebo::physics::Collision>(body->GetChild(j));
-          if (geom) {
-            _res->geom_names.push_back(geom->GetName());
-          }
+  // get list of child links, collisions
+  _res->link_names.clear();
+  _res->collision_names.clear();
+  for (unsigned int i = 0; i < model->GetChildCount(); i++) {
+    gazebo::physics::LinkPtr link =
+      boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(i));
+    if (link) {
+      if (link->IsCanonicalLink()) {
+        _res->canonical_link_name = link->GetScopedName();
+      }
+      _res->link_names.push_back(link->GetScopedName());
+      // get list of collisions
+      for (unsigned int j = 0; j < link->GetChildCount(); j++) {
+        gazebo::physics::CollisionPtr collision =
+          boost::dynamic_pointer_cast<gazebo::physics::Collision>(link->GetChild(j));
+        if (collision) {
+          _res->collision_names.push_back(collision->GetName());
         }
       }
     }
-
-    // get list of joints
-    _res->joint_names.clear();
-
-    gazebo::physics::Joint_V joints = model->GetJoints();
-    for (unsigned int i = 0; i < joints.size(); i++) {
-      _res->joint_names.push_back(joints[i]->GetName());
-    }
-
-    // get children model names
-    _res->child_model_names.clear();
-    for (unsigned int j = 0; j < model->GetChildCount(); j++) {
-      gazebo::physics::ModelPtr child_model =
-        boost::dynamic_pointer_cast<gazebo::physics::Model>(model->GetChild(j));
-      if (child_model) {
-        _res->child_model_names.push_back(child_model->GetName() );
-      }
-    }
-
-    // is model static
-    _res->is_static = model->IsStatic();
-
-    _res->success = true;
-    _res->status_message = "GetModelProperties: got properties";
   }
+
+  // get list of joints
+  _res->joint_names.clear();
+
+  gazebo::physics::Joint_V joints = model->GetJoints();
+  for (auto & joint : joints) {
+    _res->joint_names.push_back(joint->GetName());
+  }
+
+  // get children model names
+  _res->child_model_names.clear();
+  for (unsigned int j = 0; j < model->GetChildCount(); j++) {
+    gazebo::physics::ModelPtr child_model =
+      boost::dynamic_pointer_cast<gazebo::physics::Model>(model->GetChild(j));
+    if (child_model) {
+      _res->child_model_names.push_back(child_model->GetName() );
+    }
+  }
+
+  // is model static
+  _res->is_static = model->IsStatic();
+
+  _res->success = true;
+  _res->status_message = "GetModelProperties: got properties";
 }
 
 void GazeboRosPropertiesPrivate::GetJointProperties(
@@ -281,19 +286,19 @@ void GazeboRosPropertiesPrivate::GetLinkProperties(
   gazebo_msgs::srv::GetLinkProperties::Request::SharedPtr _req,
   gazebo_msgs::srv::GetLinkProperties::Response::SharedPtr _res)
 {
-  gazebo::physics::LinkPtr body =
+  gazebo::physics::LinkPtr link =
     boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(_req->link_name));
-  if (!body) {
+  if (!link) {
     _res->success = false;
     _res->status_message =
       "GetLinkProperties: link not found, did you forget to scope the link by model name?";
   } else {
     /// @todo: validate
-    _res->gravity_mode = body->GetGravityMode();
+    _res->gravity_mode = link->GetGravityMode();
 
-    gazebo::physics::InertialPtr inertia = body->GetInertial();
+    gazebo::physics::InertialPtr inertia = link->GetInertial();
 
-    _res->mass = body->GetInertial()->Mass();
+    _res->mass = link->GetInertial()->Mass();
 
     _res->ixx = inertia->IXX();
     _res->iyy = inertia->IYY();
@@ -302,15 +307,10 @@ void GazeboRosPropertiesPrivate::GetLinkProperties(
     _res->ixz = inertia->IXZ();
     _res->iyz = inertia->IYZ();
 
-    ignition::math::Vector3d com = body->GetInertial()->CoG();
+    auto com = link->GetInertial()->Pose();
 
-    _res->com.position.x = com.X();
-    _res->com.position.y = com.Y();
-    _res->com.position.z = com.Z();
-    _res->com.orientation.x = 0;  // @todo: gazebo do not support rotated inertia yet
-    _res->com.orientation.y = 0;
-    _res->com.orientation.z = 0;
-    _res->com.orientation.w = 1;
+    _res->com.position = gazebo_ros::Convert<geometry_msgs::msg::Point>(com.Pos());
+    _res->com.orientation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(com.Rot());
 
     _res->success = true;
     _res->status_message = "GetLinkProperties: got properties";
@@ -399,14 +399,14 @@ void GazeboRosPropertiesPrivate::SetLinkProperties(
   gazebo_msgs::srv::SetLinkProperties::Request::SharedPtr _req,
   gazebo_msgs::srv::SetLinkProperties::Response::SharedPtr _res)
 {
-  gazebo::physics::LinkPtr body =
+  gazebo::physics::LinkPtr link =
     boost::dynamic_pointer_cast<gazebo::physics::Link>(world_->EntityByName(_req->link_name));
-  if (!body) {
+  if (!link) {
     _res->success = false;
     _res->status_message =
       "SetLinkProperties: link not found, did you forget to scope the link by model name?";
   } else {
-    gazebo::physics::InertialPtr mass = body->GetInertial();
+    gazebo::physics::InertialPtr mass = link->GetInertial();
     // @todo: FIXME: add inertia matrix rotation to Gazebo
     // mass.SetInertiaRotation(ignition::math::Quaternion(_req->com.orientation.w,
     // _res->com.orientation.x,_req->com.orientation.y _req->com.orientation.z));
@@ -416,7 +416,7 @@ void GazeboRosPropertiesPrivate::SetLinkProperties(
         _req->com.position.z));
     mass->SetInertiaMatrix(_req->ixx, _req->iyy, _req->izz, _req->ixy, _req->ixz, _req->iyz);
     mass->SetMass(_req->mass);
-    body->SetGravityMode(_req->gravity_mode);
+    link->SetGravityMode(_req->gravity_mode);
 
     _res->success = true;
     _res->status_message = "SetLinkProperties: properties set";
