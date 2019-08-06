@@ -1,10 +1,15 @@
 <?xml version="1.0" ?>
 <!--
-  Gazebo ROS camera plugin demo
+  Gazebo ROS multi camera plugin demo
 
   Try for example:
 
-  * Launch RViz and visualize Images from `/demo_cam/camera1/image_raw/raw`
+  * Try listening to left camera info at `/demo_cam/mycamera/left/camera_info_demo`
+  * Try listening to right camera info at `/demo_cam/mycamera/right/camera_info_demo`
+
+  * Launch RViz
+  * Visualize left camera images from `/demo_cam/mycamera/left/image_demo`
+  * Visualize right camera images from `/demo_cam/mycamera/right/image_demo`
 
 -->
 <sdf version="1.6">
@@ -111,10 +116,11 @@
       <pose>0 0 0.5 0 0 3.14</pose>
       <static>true</static>
       <link name="camera_link">
-        <sensor type="camera" name="camera1">
+        <sensor type="multicamera" name="camera1">
+          <pose>0 -0.2 0 0 0 0</pose>
           <update_rate>60</update_rate>
           <visualize>true</visualize>
-          <camera name="head">
+          <camera name="left">
             <horizontal_fov>1.3962634</horizontal_fov>
             <image>
               <width>640</width>
@@ -134,14 +140,39 @@
               <stddev>0.007</stddev>
             </noise>
           </camera>
+          <camera name="right">
+            <pose>0 0.4 0 0 0 0</pose>
+            <horizontal_fov>0.7</horizontal_fov>
+            <image>
+              <width>320</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.02</near>
+              <far>300</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <!-- Noise is sampled independently per pixel on each frame.
+                   That pixel's noise value is added to each of its color
+                   channels, which at that point lie in the range [0,1]. -->
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+          </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>demo_cam</namespace>
-              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
-              <argument>image_raw:=image_demo</argument>
-              <argument>camera_info:=camera_info_demo</argument>
+              <!-- topics need to be prefixed with camera_name for remapping -->
+              <argument>mycamera/left/image_raw:=mycamera/left/image_demo</argument>
+              <argument>mycamera/right/image_raw:=mycamera/right/image_demo</argument>
+              <argument>mycamera/left/camera_info:=mycamera/left/camera_info_demo</argument>
+              <argument>mycamera/right/camera_info:=mycamera/right/camera_info_demo</argument>
             </ros>
-            <!-- camera_name>omit so it defaults to sensor name</camera_name-->
+
+            <camera_name>mycamera</camera_name>
+
             <!-- frame_name>omit so it defaults to link name</frame_name-->
           </plugin>
         </sensor>
