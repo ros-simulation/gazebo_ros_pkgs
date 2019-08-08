@@ -24,13 +24,15 @@ import sys
 from urllib.parse import SplitResult, urlsplit
 from xml.etree import ElementTree
 
-# from gazebo_msgs.msg import ModelStates
+from gazebo_msgs.msg import ModelStates
 # from gazebo_msgs.srv import DeleteEntity
 # from gazebo_msgs.srv import SetModelConfiguration
 from gazebo_msgs.srv import SpawnEntity
 from geometry_msgs.msg import Pose
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy
+from std_msgs.msg import String
 from std_srvs.srv import Empty
 
 
@@ -54,9 +56,11 @@ class SpawnEntityNode(Node):
         source.add_argument('-file', type=str, metavar='FILE_NAME',
                             help='Load entity xml from file')
         source.add_argument('-param', type=str, metavar='PARAM_NAME',
-                            help='Load entity xml from ROS parameter')
+                            help='Load entity xml from file published on topic specified in \
+                            ROS parameter')
         source.add_argument('-database', type=str, metavar='ENTITY_NAME',
-                            help='Load entity XML from specified entity in Gazebo Model Database')
+                            help='Load entity XML from specified entity in GAZEBO_MODEL_PATH \
+                            or Gazebo Model Database')
         source.add_argument('-stdin', action='store_true', help='Load entity from stdin')
         parser.add_argument('-entity', required=True, type=str, metavar='ENTITY_NAME',
                             help='Name of entity to spawn')
@@ -115,18 +119,17 @@ class SpawnEntityNode(Node):
         if self.args.wait:
             self.entity_exists = False
 
-            # TODO(shivesh): Wait for /model_states
-            # (https://github.com/ros-simulation/gazebo_ros_pkgs/issues/779)
-            # def entity_cb(entity):
-            #     self.entity_exists = self.args.wait in entity.name
-            #
-            # self.subscription = self.create_subscription(
-            #     ModelStates, '%s/model_states' % self.args.gazebo_namespace, entity_cb, 10)
+            def entity_cb(entity):
+                self.entity_exists = self.args.wait in entity.name
+
+            self.subscription = self.create_subscription(
+                ModelStates, '%s/model_states' % self.args.gazebo_namespace, entity_cb, 10)
 
             self.get_logger().info(
                 'Waiting for entity {} before proceeding.'.format(self.args.wait))
 
             while rclpy.ok() and not self.entity_exists:
+                rclpy.spin_once(self)
                 pass
 
         # Load entity XML from file
@@ -148,13 +151,31 @@ class SpawnEntityNode(Node):
             if entity_xml == '':
                 self.get_logger().error('Error: file %s is empty', self.args.file)
                 return 1
-        # Load entity XML from ROS param
+        # Load entity XML from file published on topic specified in ROS param
         elif self.args.param:
-            self.get_logger().info('Loading entity XML from ros parameter %s' % self.args.param)
-            entity_xml = self.get_parameter(self.args.param)
-            if entity_xml == '':
-                self.get_logger().error('Error: param does not exist or is empty')
-                return 1
+            self.get_logger().info(
+                'Loading entity XML from file published on topic %s' % self.args.param)
+            entity_xml = ''
+
+            def entity_xml_cb(entity_xml_path):
+                nonlocal entity_xml
+                try:
+                    f = open(entity_xml_path.data, 'r')
+                    entity_xml = f.read()
+                except IOError as e:
+                    self.get_logger().error(
+                        'Error reading file {}: {}'.format(entity_xml_path.data, e))
+                    entity_xml = ''
+
+            self.subscription = self.create_subscription(
+                String, self.args.param, entity_xml_cb,
+                QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
+
+            while rclpy.ok() and entity_xml == '':
+                self.get_logger().info('Waiting for entity xml file path on %s' % self.args.param)
+                rclpy.spin_once(self)
+                pass
+
         # Generate entity XML by putting requested entity name into request template
         elif self.args.database:
             self.get_logger().info('Loading entity XML from Gazebo Model Database')
