@@ -6,17 +6,17 @@
 
     To apply wrench to a link:
 
-      ros2 service call /apply_link_wrench gazebo_msgs/srv/ApplyLinkWrench '{link_name:
+      ros2 service call /apply_link_wrench gazebo_msgs/srv/ApplyLinkWrench '{link_name: \
       "single_pendulum_with_base::base", wrench: { force: { x: 100 } }, duration: {sec: -1, nanosec: 0} }'
 
     To clear wrenches on a link:
 
-      ros2 service call /clear_link_wrenches 'gazebo_msgs/srv/LinkRequest'
+      ros2 service call /clear_link_wrenches 'gazebo_msgs/srv/LinkRequest' \
       '{link_name: "single_pendulum_with_base::base"}'
 
     To apply effort to a joint:
 
-      ros2 service call /apply_joint_effort gazebo_msgs/srv/ApplyJointEffort '{joint_name:
+      ros2 service call /apply_joint_effort gazebo_msgs/srv/ApplyJointEffort '{joint_name: \
       "upper_joint", effort: -1.0, start_time: {sec: 0, nanosec: 0}, duration: {sec: -1, nanosec: 0} }'
 
     To clear efforts on a joint:
