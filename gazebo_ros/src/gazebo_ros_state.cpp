@@ -157,15 +157,15 @@ void GazeboRosStatePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
     model_states.twist.push_back(twist);
 
     for (unsigned int j = 0; j < model->GetChildCount(); ++j) {
-      auto body = boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(j));
+      auto link = boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(j));
 
-      if (body) {
-        link_states.name.push_back(body->GetScopedName());
+      if (link) {
+        link_states.name.push_back(link->GetScopedName());
 
-        pose = gazebo_ros::Convert<geometry_msgs::msg::Pose>(body->WorldPose());
+        pose = gazebo_ros::Convert<geometry_msgs::msg::Pose>(link->WorldPose());
         link_states.pose.push_back(pose);
-        twist.linear = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(body->WorldLinearVel());
-        twist.angular = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(body->WorldAngularVel());
+        twist.linear = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(link->WorldLinearVel());
+        twist.angular = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(link->WorldAngularVel());
         link_states.twist.push_back(twist);
       }
     }
