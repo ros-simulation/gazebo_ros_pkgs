@@ -107,6 +107,8 @@ add_subdirectory(test)
 # Install Gazebo System Plugins
 install(TARGETS gazebo_ros_api_plugin gazebo_ros_paths_plugin
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
   )
 
 # Install Gazebo Scripts

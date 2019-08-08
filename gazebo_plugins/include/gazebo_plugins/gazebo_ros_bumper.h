@@ -24,7 +24,9 @@
 #include <ros/callback_queue.h>
 #include <ros/advertise_options.h>
 
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
