@@ -2,6 +2,15 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.2 (2019-07-31)
+------------------
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Shivesh Khaitan
+
 3.3.1 (2019-05-30)
 ------------------
 

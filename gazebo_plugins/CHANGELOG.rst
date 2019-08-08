@@ -2,6 +2,43 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.2 (2019-07-31)
+------------------
+* [ros2] Add ackermann drive plugin (`#947 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/947>`_)
+  * [ros2] Add ackermann drive plugin
+  * Minor fixes
+  Use gazebo database model
+  * Update example usage
+  * Fix TF for demo
+* [ros2] Port planar move to ROS2 (`#958 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/958>`_)
+  * [ros2] Port planar move to ROS2
+  * Add test for pose conversion
+* [ros2] Port projector to ROS2 (`#956 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/956>`_)
+  * [ros2] Port projector to ROS2
+  * fix small typo
+* Merge pull request `#945 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/945>`_ from shiveshkhaitan/elevator
+  [ros2] Port elevator to ROS2
+* [ros2] Fix test for diff drive (`#951 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/951>`_)
+* [ros2] Port elevator to ROS2
+* [ros2] Port skid_steer_drive to ROS2 (`#927 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/927>`_)
+  * [ros2] Port skid_steer_drive to ROS2
+  Integrate skid steer drive into diff drive
+  * Reverted to original diff drive
+  * Delete skid steer from .ros1_unported
+  * Fix for diff drive changed api
+  * Add support to specify odom covariance
+* [ros2] Port F3d and FTSensor plugin to ros2 (`#921 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/921>`_)
+  * [ros2] Port F3d plugin to ros2
+  * Merge ft_sensor and f3d_plugin
+  * Delete ft_sensor from .ros1_unported
+  * Minor fixes
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Shivesh Khaitan, chapulina
+
 3.3.1 (2019-05-30)
 ------------------
 * qos dashing api for video plugin (`#929 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/929>`_)

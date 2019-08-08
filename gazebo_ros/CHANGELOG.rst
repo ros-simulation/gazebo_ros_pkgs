@@ -2,6 +2,20 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.2 (2019-07-31)
+------------------
+* [ros2] Port planar move to ROS2 (`#958 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/958>`_)
+  * [ros2] Port planar move to ROS2
+  * Add test for pose conversion
+* use c_str() (`#950 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/950>`_) (`#954 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/954>`_)
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Shivesh Khaitan, chapulina
+
 3.3.1 (2019-05-30)
 ------------------
 * Declare parameters and use overrides (`#931 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/931>`_)
