@@ -24,6 +24,7 @@ namespace gazebo_plugins
 class GazeboRosJointPoseTrajectoryPrivate;
 
 /// Set the trajectory of points to be followed by joints in simulation.
+/// Currently only positions specified in the trajectory_msgs are handled.
 /**
   Example Usage:
   \code{.xml}

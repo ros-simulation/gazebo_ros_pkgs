@@ -3,7 +3,7 @@
   Gazebo ROS joint pose trajectory plugin demo
 
   Try for example:
-  ros2 topic pub /demo/set_trajectory_demo trajectory_msgs/msg/JointTrajectory
+  ros2 topic pub /demo/set_trajectory_demo trajectory_msgs/msg/JointTrajectory \
   '{header: {frame_id: world}, joint_names: {upper_joint}, points: [{positions: {-1.57}}]}'
 -->
 <sdf version="1.6">
