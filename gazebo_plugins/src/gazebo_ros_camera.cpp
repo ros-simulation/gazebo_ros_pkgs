@@ -140,10 +140,6 @@ GazeboRosCamera::~GazeboRosCamera()
   for (auto pub : impl_->image_pub_) {
     pub.shutdown();
   }
-
-  // TODO(louise) Why does this hang for the 2nd camera plugin?
-  // Commenting it out here just pushes the problem somewhere else.
-  // impl_->ros_node_.reset();
 }
 
 void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
