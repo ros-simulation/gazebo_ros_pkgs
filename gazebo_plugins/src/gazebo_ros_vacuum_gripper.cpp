@@ -75,15 +75,6 @@ public:
 
   /// Entities not affected by gripper.
   std::unordered_set<std::string> fixed_;
-
-  /// Max distance to apply force.
-  double max_distance_;
-
-  /// Min distance to apply force.
-  double min_distance_;
-
-  /// Max applied force.
-  double max_force_;
 };
 
 GazeboRosVacuumGripper::GazeboRosVacuumGripper()
@@ -113,10 +104,6 @@ void GazeboRosVacuumGripper::Load(gazebo::physics::ModelPtr _model, sdf::Element
   } else {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Please specify <link_name>. Aborting.");
   }
-
-  impl_->max_distance_ = _sdf->Get<double>("max_distance", 0.05).first;
-  impl_->min_distance_ = _sdf->Get<double>("min_distance", 0.01).first;
-  impl_->max_force_ = _sdf->Get<double>("max_force", 20).first;
 
   if (_sdf->HasElement("fixed")) {
     for (auto fixed = _sdf->GetElement("fixed"); fixed != nullptr;
@@ -172,24 +159,8 @@ void GazeboRosVacuumGripperPrivate::OnUpdate()
     for (auto & link : links) {
       ignition::math::Pose3d link_pose = link->WorldPose();
       ignition::math::Pose3d diff = parent_pose - link_pose;
-      double norm = diff.Pos().Length();
-
-      if (norm < max_distance_) {
-        link->SetLinearVel(link_->WorldLinearVel());
-        link->SetAngularVel(link_->WorldAngularVel());
-
-        double norm_force = 1 / norm;
-        if (norm < min_distance_) {
-          link_pose.Set(parent_pose.Pos(), link_pose.Rot());
-          link->SetWorldPose(link_pose);
-        }
-
-        norm_force = std::min(norm_force, max_force_);  // max_force
-
-        ignition::math::Vector3d force = norm_force * diff.Pos().Normalize();
-        link->AddForce(force);
-        grasping_msg.data = true;
-      }
+      link->SetForce(link_pose.Rot().RotateVector((parent_pose - link_pose).Pos()).Normalize());
+      grasping_msg.data = true;
     }
   }
   pub_->publish(grasping_msg);

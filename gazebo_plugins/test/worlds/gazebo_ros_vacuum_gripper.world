@@ -34,9 +34,6 @@
         </ros>
 
         <link_name>link</link_name>
-        <max_distance>10.0</max_distance>
-        <min_distance>0.01</min_distance>
-        <max_force>2</max_force>
 
         <fixed>ground_plane</fixed>
 
