@@ -69,7 +69,7 @@ TEST_F(GazeboRosAckermannDriveTest, Publishing)
 
   // Send command
   auto pub = node->create_publisher<geometry_msgs::msg::Twist>(
-    "test/cmd_test", rclcpp::QoS(rclcpp::KeepLast(1)));
+    "test/cmd_test", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local());
 
   auto msg = geometry_msgs::msg::Twist();
   msg.linear.x = 5.0;
