@@ -31,8 +31,6 @@ link_directories(
 
 ament_python_install_package(scripts/)
 
-ament_python_install_package(scripts/)
-
 # gazebo_ros_node
 add_library(gazebo_ros_node SHARED
   src/executor.cpp
