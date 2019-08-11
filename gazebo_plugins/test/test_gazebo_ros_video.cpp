@@ -54,7 +54,8 @@ TEST_F(GazeboRosVideoTest, VideoSubscribeTest)
     model_vis = scene->GetVisual("box_display");
     link_vis = scene->GetVisual("box_display::base_link");
     visual_vis = scene->GetVisual("box_display::base_link::visual");
-    video_vis = scene->GetVisual("box_display::base_link::visual::video_visual");
+    video_vis = scene->GetVisual(
+      "box_display::base_link::visual::video_visual::display_video_controller");
     gazebo::common::Time::MSleep(100);
   }
   EXPECT_LT(sleep, max_sleep);
@@ -98,7 +99,8 @@ TEST_F(GazeboRosVideoTest, VideoSubscribeTest)
     gazebo::event::Events::postRender();
 
     EXPECT_NE(nullptr, scene->GetVisual("box_display"));
-    EXPECT_NE(nullptr, scene->GetVisual("box_display::base_link::visual::video_visual"));
+    EXPECT_NE(nullptr, scene->GetVisual(
+        "box_display::base_link::visual::video_visual::display_video_controller"));
   }
 }
 
