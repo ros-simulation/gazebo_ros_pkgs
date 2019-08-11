@@ -483,36 +483,40 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
           return result;
         }
       }
+
+      result.successful = true;
       for (const auto & parameter : parameters) {
-        if (nullptr != impl_->trigger_sub_) {
-          RCLCPP_WARN(impl_->ros_node_->get_logger(),
-            "Cannot set update rate for triggered camera");
-          result.successful = false;
-        } else {
-          rclcpp::ParameterType parameter_type = parameter.get_type();
-          if (rclcpp::ParameterType::PARAMETER_DOUBLE == parameter_type) {
-            double rate = parameter.as_double();
+        std::string param_name = parameter.get_name();
+        if (param_name == "update_rate") {
+          if (nullptr != impl_->trigger_sub_) {
+            RCLCPP_WARN(impl_->ros_node_->get_logger(),
+              "Cannot set update rate for triggered camera");
+            result.successful = false;
+          } else {
+            rclcpp::ParameterType parameter_type = parameter.get_type();
+            if (rclcpp::ParameterType::PARAMETER_DOUBLE == parameter_type) {
+              double rate = parameter.as_double();
 
-            if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
-              gazebo::CameraPlugin::parentSensor->SetUpdateRate(rate);
-            } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
-              gazebo::DepthCameraPlugin::parentSensor->SetUpdateRate(rate);
-            } else {
-              MultiCameraPlugin::parent_sensor_->SetUpdateRate(rate);
-            }
-            result.successful = true;
+              if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
+                gazebo::CameraPlugin::parentSensor->SetUpdateRate(rate);
+              } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
+                gazebo::DepthCameraPlugin::parentSensor->SetUpdateRate(rate);
+              } else {
+                MultiCameraPlugin::parent_sensor_->SetUpdateRate(rate);
+              }
 
-            if (rate >= 0.0) {
-              RCLCPP_INFO(impl_->ros_node_->get_logger(),
-                "Camera update rate changed to [%.2f Hz]", rate);
+              if (rate >= 0.0) {
+                RCLCPP_INFO(impl_->ros_node_->get_logger(),
+                  "Camera update rate changed to [%.2f Hz]", rate);
+              } else {
+                RCLCPP_WARN(impl_->ros_node_->get_logger(),
+                  "Camera update rate should be positive. Setting to maximum");
+              }
             } else {
               RCLCPP_WARN(impl_->ros_node_->get_logger(),
-                "Camera update rate should be positive. Setting to maximum");
+                "Value for param [update_rate] has to be of double type.");
+              result.successful = false;
             }
-          } else {
-            RCLCPP_WARN(impl_->ros_node_->get_logger(),
-              "Value for param [update_rate] has to be of double type.");
-            result.successful = false;
           }
         }
       }

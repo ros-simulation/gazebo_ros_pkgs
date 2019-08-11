@@ -5,7 +5,15 @@
   Try for example:
 
   * Launch RViz and visualize Images from `/demo_cam/camera1/image_raw/raw`
+  * Get camera info at /demo_cam/camera1/camera_info
 
+  To change update rate of the camera:
+
+    ros2 param set /demo_cam/camera_controller update_rate 1.0
+
+  To get the current update rate of the camera:
+
+    ros2 param get /demo_cam/camera_controller update_rate
 -->
 <sdf version="1.6">
   <world name="default">
