@@ -46,8 +46,10 @@ void MultipleNodes::Load(int argc, char ** argv)
   assert(nullptr != nodeB);
 
   // Create publishers
-  auto pubA = nodeA->create_publisher<std_msgs::msg::String>("testA", rclcpp::SystemDefaultsQoS());
-  auto pubB = nodeB->create_publisher<std_msgs::msg::String>("testB", rclcpp::SystemDefaultsQoS());
+  auto pubA = nodeA->create_publisher<std_msgs::msg::String>("testA",
+      rclcpp::QoS(rclcpp::KeepLast(1)).transient_local());
+  auto pubB = nodeB->create_publisher<std_msgs::msg::String>("testB",
+      rclcpp::QoS(rclcpp::KeepLast(1)).transient_local());
 
   // Run lambdas every 1 second
   using namespace std::chrono_literals;
@@ -59,10 +61,11 @@ void MultipleNodes::Load(int argc, char ** argv)
 
         // Warn with this node's name (to test logging)
         RCLCPP_WARN(nodeA->get_logger(), "Publishing A");
-        RCLCPP_WARN(nodeB->get_logger(), "Publishing B");
 
         // Publish message
         pubA->publish(msg);
+
+        RCLCPP_WARN(nodeB->get_logger(), "Publishing B");
         pubB->publish(msg);
       });
 }

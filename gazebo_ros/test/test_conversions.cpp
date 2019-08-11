@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
-#include <gazebo_ros/conversions/sensor_msgs.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gtest/gtest.h>
 
@@ -47,6 +46,30 @@ TEST(TestConversions, Quaternion)
   EXPECT_EQ(0.4, ign_quat.Y());
   EXPECT_EQ(0.6, ign_quat.Z());
   EXPECT_EQ(1.0, ign_quat.W());
+}
+
+TEST(TestConversions, Pose)
+{
+  // Ign to ROS Pose
+  ignition::math::Pose3d pose(0.6, 0.5, 0.7, 0.9, 0.0, 0.3, -0.1);
+  auto pose_msg = gazebo_ros::Convert<geometry_msgs::msg::Pose>(pose);
+  EXPECT_EQ(0.6, pose_msg.position.x);
+  EXPECT_EQ(0.5, pose_msg.position.y);
+  EXPECT_EQ(0.7, pose_msg.position.z);
+  EXPECT_EQ(0.9, pose_msg.orientation.w);
+  EXPECT_EQ(0.0, pose_msg.orientation.x);
+  EXPECT_EQ(0.3, pose_msg.orientation.y);
+  EXPECT_EQ(-0.1, pose_msg.orientation.z);
+
+  // ROS Pose to ROS Transform
+  auto transform_msg = gazebo_ros::Convert<geometry_msgs::msg::Transform>(pose_msg);
+  EXPECT_EQ(0.6, transform_msg.translation.x);
+  EXPECT_EQ(0.5, transform_msg.translation.y);
+  EXPECT_EQ(0.7, transform_msg.translation.z);
+  EXPECT_EQ(0.9, transform_msg.rotation.w);
+  EXPECT_EQ(0.0, transform_msg.rotation.x);
+  EXPECT_EQ(0.3, transform_msg.rotation.y);
+  EXPECT_EQ(-0.1, transform_msg.rotation.z);
 }
 
 TEST(TestConversions, Time)

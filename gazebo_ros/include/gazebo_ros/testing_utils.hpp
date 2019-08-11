@@ -122,7 +122,7 @@ template<typename T>
 typename T::SharedPtr
 get_message_or_timeout(
   rclcpp::Node::SharedPtr node, const std::string & topic,
-  rclcpp::Duration timeout = rclcpp::Duration(5, 0))
+  rclcpp::Duration timeout = rclcpp::Duration(10, 0))
 {
   rclcpp::Clock clock;
   rclcpp::executors::SingleThreadedExecutor executor;
@@ -131,7 +131,7 @@ get_message_or_timeout(
   std::atomic_bool msg_received(false);
   typename T::SharedPtr msg = nullptr;
 
-  auto sub = node->create_subscription<T>(topic, rclcpp::SystemDefaultsQoS(),
+  auto sub = node->create_subscription<T>(topic, rclcpp::QoS(rclcpp::KeepLast(1)).transient_local(),
       [&msg_received, &msg](typename T::SharedPtr _msg) {
         // If this is the first message from this topic, increment the counter
         if (!msg_received.exchange(true)) {
@@ -139,9 +139,16 @@ get_message_or_timeout(
         }
       });
 
-  // Wait until message is received or timeout occurs
+  // Wait for topic to be available
   using namespace std::literals::chrono_literals; // NOLINT
-  auto timeout_absolute = clock.now() + timeout;
+  auto timeout_absolute = clock.now() + timeout * 0.5;
+  while (node->count_publishers(topic) == 0) {
+    executor.spin_once(200ms);
+  }
+  EXPECT_GT(node->count_publishers(topic), 0u);
+
+  // Wait until message is received or timeout occurs
+  timeout_absolute = clock.now() + timeout * 0.5;
 
   while (false == msg_received && clock.now() < timeout_absolute) {
     executor.spin_once(200ms);

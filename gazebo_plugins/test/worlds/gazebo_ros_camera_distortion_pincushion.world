@@ -13,7 +13,7 @@
       <link name="camera_link">
         <sensor type="camera" name="camera_distorted">
           <update_rate>30.0</update_rate>
-          <camera name="head">
+          <camera name="head_distorted">
             <horizontal_fov>0.927295218</horizontal_fov>
             <image>
               <width>1000</width>
@@ -37,7 +37,7 @@
               <center>0.5 0.5</center>
             </distortion>
           </camera>
-          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+          <plugin name="camera_distorted" filename="libgazebo_ros_camera.so">
             <ros>
               <argument>distorted_camera/image_raw:=distorted_image</argument>
               <argument>distorted_camera/camera_info:=distorted_info</argument>
@@ -57,7 +57,7 @@
       <link name="camera_link">
         <sensor type="camera" name="camera_undistorted">
           <update_rate>30.0</update_rate>
-          <camera name="head">
+          <camera name="head_undistorted">
             <horizontal_fov>0.927295218</horizontal_fov>
             <image>
               <width>1000</width>
@@ -77,7 +77,7 @@
               <center>0.5 0.5</center>
             </distortion>
           </camera>
-          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+          <plugin name="camera_undistorted" filename="libgazebo_ros_camera.so">
             <ros>
               <argument>undistorted_camera/image_raw:=undistorted_image</argument>
             </ros>

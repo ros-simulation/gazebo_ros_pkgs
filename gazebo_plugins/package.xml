@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>gazebo_plugins</name>
-  <version>3.3.1</version>
+  <version>3.3.2</version>
   <description>
     Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
@@ -30,10 +30,12 @@
   <depend>tf2_ros</depend>
 
   <build_depend>gazebo_dev</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
   <build_depend>gazebo_ros</build_depend>
   <build_depend>rclcpp</build_depend>
 
   <exec_depend>gazebo_dev</exec_depend>
+  <exec_depend>gazebo_msgs</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>rclcpp</exec_depend>
 

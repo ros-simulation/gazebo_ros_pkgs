@@ -18,6 +18,8 @@
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
+#include <gazebo_msgs/msg/link_states.hpp>
+#include <gazebo_msgs/msg/model_states.hpp>
 #include <gazebo_msgs/srv/get_entity_state.hpp>
 #include <gazebo_msgs/srv/set_entity_state.hpp>
 #include <gazebo_ros/node.hpp>
@@ -34,6 +36,10 @@ namespace gazebo_ros
 class GazeboRosStatePrivate
 {
 public:
+  /// Callback when world is updated.
+  /// \param[in] _info Updated simulation info.
+  void OnUpdate(const gazebo::common::UpdateInfo & _info);
+
   /// \brief Callback for get entity state service.
   /// \param[in] req Request
   /// \param[out] res Response
@@ -59,6 +65,21 @@ public:
 
   /// \brief ROS service to handle requests to set entity states.
   rclcpp::Service<gazebo_msgs::srv::SetEntityState>::SharedPtr set_entity_state_service_;
+
+  /// \brief ROS publisher to publish model_states.
+  rclcpp::Publisher<gazebo_msgs::msg::ModelStates>::SharedPtr model_states_pub_;
+
+  /// \brief ROS publisher to publish link_states.
+  rclcpp::Publisher<gazebo_msgs::msg::LinkStates>::SharedPtr link_states_pub_;
+
+  /// \brief Connection to world update event, called at every iteration
+  gazebo::event::ConnectionPtr world_update_event_;
+
+  /// \brief Update period in seconds.
+  double update_period_;
+
+  /// \brief Last update time.
+  gazebo::common::Time last_update_time_;
 };
 
 GazeboRosState::GazeboRosState()
@@ -85,6 +106,74 @@ void GazeboRosState::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr _sdf
     impl_->ros_node_->create_service<gazebo_msgs::srv::SetEntityState>(
     "set_entity_state", std::bind(&GazeboRosStatePrivate::SetEntityState, impl_.get(),
     std::placeholders::_1, std::placeholders::_2));
+
+  impl_->model_states_pub_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::ModelStates>(
+    "model_states", rclcpp::QoS(rclcpp::KeepLast(1)));
+
+  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing states of gazebo models at [%s]",
+    impl_->model_states_pub_->get_topic_name());
+
+  impl_->link_states_pub_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::LinkStates>(
+    "link_states", rclcpp::QoS(rclcpp::KeepLast(1)));
+
+  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing states of gazebo links at [%s]",
+    impl_->link_states_pub_->get_topic_name());
+
+  // Get a callback when world is updated
+  impl_->world_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+    std::bind(&GazeboRosStatePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+
+  // Update rate
+  auto update_rate = _sdf->Get<double>("update_rate", 100.0).first;
+  if (update_rate > 0.0) {
+    impl_->update_period_ = 1.0 / update_rate;
+  } else {
+    impl_->update_period_ = 0.0;
+  }
+  impl_->last_update_time_ = _world->SimTime();
+}
+
+void GazeboRosStatePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
+{
+  double seconds_since_last_update = (_info.simTime - last_update_time_).Double();
+
+  if (seconds_since_last_update < update_period_) {
+    return;
+  }
+
+  gazebo_msgs::msg::ModelStates model_states;
+  gazebo_msgs::msg::LinkStates link_states;
+
+  // fill model_states
+  for (const auto & model : world_->Models()) {
+    auto pose = gazebo_ros::Convert<geometry_msgs::msg::Pose>(model->WorldPose());
+
+    model_states.pose.push_back(pose);
+    model_states.name.push_back(model->GetName());
+
+    geometry_msgs::msg::Twist twist;
+    twist.linear = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(model->WorldLinearVel());
+    twist.angular = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(model->WorldAngularVel());
+    model_states.twist.push_back(twist);
+
+    for (unsigned int j = 0; j < model->GetChildCount(); ++j) {
+      auto link = boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(j));
+
+      if (link) {
+        link_states.name.push_back(link->GetScopedName());
+
+        pose = gazebo_ros::Convert<geometry_msgs::msg::Pose>(link->WorldPose());
+        link_states.pose.push_back(pose);
+        twist.linear = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(link->WorldLinearVel());
+        twist.angular = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(link->WorldAngularVel());
+        link_states.twist.push_back(twist);
+      }
+    }
+  }
+  model_states_pub_->publish(model_states);
+  link_states_pub_->publish(link_states);
+
+  last_update_time_ = _info.simTime;
 }
 
 void GazeboRosStatePrivate::GetEntityState(

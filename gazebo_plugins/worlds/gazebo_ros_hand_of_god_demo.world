@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!--
+  Gazebo ROS hand of god plugin demo
+
+  Try for example:
+
+  ros2 run tf2_ros static_transform_publisher 0 0 10 0 0 0 1 world link_desired
+
+  Try listening to TF:
+
+  ros2 run tf2_ros tf2_echo world link_actual
+-->
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="box">
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+      <plugin name="hand_of_god" filename="libgazebo_ros_hand_of_god.so">
+        <ros>
+          <namespace>/demo</namespace>
+        </ros>
+        <link_name>link</link_name>
+        <frame_id>link</frame_id>
+      </plugin>
+    </model>
+  </world>
+</sdf>
