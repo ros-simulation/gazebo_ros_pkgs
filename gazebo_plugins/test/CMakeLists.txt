@@ -13,6 +13,7 @@ endforeach()
 # Tests
 set(tests
   test_gazebo_ros_ackermann_drive
+  test_gazebo_ros_bumper
   test_gazebo_ros_diff_drive
   test_gazebo_ros_elevator
   test_gazebo_ros_force
@@ -30,8 +31,7 @@ set(tests
 if(ENABLE_DISPLAY_TESTS)
 set(tests ${tests}
   test_gazebo_ros_camera
-  # TODO(louise) Test hangs on teardown while destroying 2nd node
-  # test_gazebo_ros_camera_distortion
+  test_gazebo_ros_camera_distortion
   test_gazebo_ros_camera_triggered
   test_gazebo_ros_projector
   test_gazebo_ros_video
@@ -53,6 +53,7 @@ foreach(test ${tests})
   ament_target_dependencies(${test}
     "cv_bridge"
     "gazebo_dev"
+    "gazebo_msgs"
     "gazebo_ros"
     "geometry_msgs"
     "image_transport"

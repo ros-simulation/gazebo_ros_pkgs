@@ -31,6 +31,10 @@
   Try listening to model states:
 
       ros2 topic echo /demo/model_states_demo
+
+  Try listening to link states:
+
+      ros2 topic echo /demo/link_states_demo
 -->
 <sdf version="1.6">
   <world name="default">
@@ -38,6 +42,7 @@
       <ros>
         <namespace>/demo</namespace>
         <argument>model_states:=model_states_demo</argument>
+        <argument>link_states:=link_states_demo</argument>
       </ros>
 
       <update_rate>1.0</update_rate>
