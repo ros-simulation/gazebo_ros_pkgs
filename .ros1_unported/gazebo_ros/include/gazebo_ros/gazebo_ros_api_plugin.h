@@ -69,8 +69,6 @@
 #include "gazebo_msgs/SetLightProperties.h"
 
 // Topics
-#include "gazebo_msgs/LinkStates.h"
-
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Wrench.h"
 #include "geometry_msgs/Pose.h"
@@ -118,12 +116,6 @@ public:
 
   /// \brief advertise services
   void advertiseServices();
-
-  /// \brief
-  void onLinkStatesConnect();
-
-  /// \brief
-  void onLinkStatesDisconnect();
 
   /// \brief
   bool getModelProperties(gazebo_msgs::GetModelProperties::Request &req,gazebo_msgs::GetModelProperties::Response &res);
@@ -184,9 +176,6 @@ private:
   void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
   void publishSimTime();
 
-  /// \brief
-  void publishLinkStates();
-
   /// \brief helper function for applyBodyWrench
   ///        shift wrench from reference frame to target frame
   void transformWrench(ignition::math::Vector3d &target_force, ignition::math::Vector3d &target_torque,
@@ -224,7 +213,6 @@ private:
   gazebo::event::ConnectionPtr wrench_update_event_;
   gazebo::event::ConnectionPtr force_update_event_;
   gazebo::event::ConnectionPtr time_update_event_;
-  gazebo::event::ConnectionPtr pub_link_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
   ros::ServiceServer get_model_properties_service_;
@@ -242,8 +230,6 @@ private:
   ros::ServiceServer set_model_configuration_service_;
   ros::ServiceServer clear_joint_forces_service_;
   ros::ServiceServer clear_body_wrenches_service_;
-  ros::Publisher     pub_link_states_;
-  int                pub_link_states_connection_count_;
 
   // ROS comm
   boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;

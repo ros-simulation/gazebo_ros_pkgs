@@ -32,7 +32,6 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   world_created_(false),
   stop_(false),
   plugin_loaded_(false),
-  pub_link_states_connection_count_(0),
   pub_clock_frequency_(0),
   enable_ros_network_(true)
 {
@@ -60,10 +59,6 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   force_update_event_.reset();
   time_update_event_.reset();
   ROS_DEBUG_STREAM_NAMED("api_plugin","Slots disconnected");
-
-  if (pub_link_states_connection_count_ > 0) // disconnect if there are subscribers on exit
-    pub_link_states_event_.reset();
-  ROS_DEBUG_STREAM_NAMED("api_plugin","Disconnected World Updates");
 
   // Stop the multi threaded ROS spinner
   async_ros_spin_->stop();
@@ -184,9 +179,6 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   //stat_sub_ = gazebonode_->Subscribe("~/world_stats", &GazeboRosApiPlugin::publishSimTime, this); // TODO: does not work in server plugin?
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
 
-  // reset topic connection counts
-  pub_link_states_connection_count_ = 0;
-
   /// \brief advertise all services
   if (enable_ros_network_)
     advertiseServices();
@@ -292,15 +284,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                             ros::VoidPtr(), &gazebo_queue_);
   get_physics_properties_service_ = nh_->advertiseService(get_physics_properties_aso);
 
-  // publish complete link states in world frame
-  ros::AdvertiseOptions pub_link_states_ao =
-    ros::AdvertiseOptions::create<gazebo_msgs::LinkStates>(
-                                                           "link_states",10,
-                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesConnect,this),
-                                                           boost::bind(&GazeboRosApiPlugin::onLinkStatesDisconnect,this),
-                                                           ros::VoidPtr(), &gazebo_queue_);
-  pub_link_states_ = nh_->advertise(pub_link_states_ao);
-
   // Advertise more services on the custom queue
   std::string set_link_properties_service_name("set_link_properties");
   ros::AdvertiseServiceOptions set_link_properties_aso =
@@ -384,24 +367,6 @@ void GazeboRosApiPlugin::advertiseServices()
 #else
   last_pub_clock_time_ = world_->GetSimTime();
 #endif
-}
-
-void GazeboRosApiPlugin::onLinkStatesConnect()
-{
-  pub_link_states_connection_count_++;
-  if (pub_link_states_connection_count_ == 1) // connect on first subscriber
-    pub_link_states_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishLinkStates,this));
-}
-
-void GazeboRosApiPlugin::onLinkStatesDisconnect()
-{
-  pub_link_states_connection_count_--;
-  if (pub_link_states_connection_count_ <= 0) // disconnect with no subscribers
-  {
-    pub_link_states_event_.reset();
-    if (pub_link_states_connection_count_ < 0) // should not be possible
-      ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_link_states_ in gazebo_ros.cpp? something weird");
-  }
 }
 
 bool GazeboRosApiPlugin::getModelProperties(gazebo_msgs::GetModelProperties::Request &req,
@@ -1252,63 +1217,6 @@ void GazeboRosApiPlugin::publishSimTime()
   //  publish time to ros
   last_pub_clock_time_ = sim_time;
   pub_clock_.publish(ros_time_);
-}
-
-void GazeboRosApiPlugin::publishLinkStates()
-{
-  gazebo_msgs::LinkStates link_states;
-
-  // fill link_states
-#if GAZEBO_MAJOR_VERSION >= 8
-  for (unsigned int i = 0; i < world_->ModelCount(); i ++)
-  {
-    gazebo::physics::ModelPtr model = world_->ModelByIndex(i);
-#else
-  for (unsigned int i = 0; i < world_->GetModelCount(); i ++)
-  {
-    gazebo::physics::ModelPtr model = world_->GetModel(i);
-#endif
-
-    for (unsigned int j = 0 ; j < model->GetChildCount(); j ++)
-    {
-      gazebo::physics::LinkPtr body = boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(j));
-
-      if (body)
-      {
-        link_states.name.push_back(body->GetScopedName());
-        geometry_msgs::Pose pose;
-#if GAZEBO_MAJOR_VERSION >= 8
-        ignition::math::Pose3d  body_pose = body->WorldPose(); // - myBody->GetCoMPose();
-        ignition::math::Vector3d linear_vel  = body->WorldLinearVel();
-        ignition::math::Vector3d angular_vel = body->WorldAngularVel();
-#else
-        ignition::math::Pose3d  body_pose = body->GetWorldPose().Ign(); // - myBody->GetCoMPose();
-        ignition::math::Vector3d linear_vel  = body->GetWorldLinearVel().Ign();
-        ignition::math::Vector3d angular_vel = body->GetWorldAngularVel().Ign();
-#endif
-        ignition::math::Vector3d pos = body_pose.Pos();
-        ignition::math::Quaterniond rot = body_pose.Rot();
-        pose.position.x = pos.X();
-        pose.position.y = pos.Y();
-        pose.position.z = pos.Z();
-        pose.orientation.w = rot.W();
-        pose.orientation.x = rot.X();
-        pose.orientation.y = rot.Y();
-        pose.orientation.z = rot.Z();
-        link_states.pose.push_back(pose);
-        geometry_msgs::Twist twist;
-        twist.linear.x = linear_vel.X();
-        twist.linear.y = linear_vel.Y();
-        twist.linear.z = linear_vel.Z();
-        twist.angular.x = angular_vel.X();
-        twist.angular.y = angular_vel.Y();
-        twist.angular.z = angular_vel.Z();
-        link_states.twist.push_back(twist);
-      }
-    }
-  }
-
-  pub_link_states_.publish(link_states);
 }
 
 void GazeboRosApiPlugin::physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level)

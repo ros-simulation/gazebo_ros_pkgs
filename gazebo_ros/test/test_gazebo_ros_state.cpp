@@ -16,6 +16,7 @@
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
 
+#include <gazebo_msgs/msg/link_states.hpp>
 #include <gazebo_msgs/msg/model_states.hpp>
 #include <gazebo_msgs/srv/get_entity_state.hpp>
 #include <gazebo_msgs/srv/set_entity_state.hpp>
@@ -53,6 +54,7 @@ public:
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetEntityState>> get_state_client_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetEntityState>> set_state_client_;
+  rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr link_states_sub_;
   rclcpp::Subscription<gazebo_msgs::msg::ModelStates>::SharedPtr model_states_sub_;
 };
 
@@ -218,6 +220,39 @@ TEST_F(GazeboRosStateTest, GetSet)
     EXPECT_NEAR(model_states_msg->pose[1].orientation.y, 0.0, tol);
     EXPECT_NEAR(model_states_msg->pose[1].orientation.z, 0.0, tol);
     EXPECT_NEAR(model_states_msg->pose[1].orientation.w, 1.0, tol);
+  }
+
+  // Link states
+  {
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node_);
+    gazebo_msgs::msg::LinkStates::SharedPtr link_states_msg{nullptr};
+    link_states_sub_ = node_->create_subscription<gazebo_msgs::msg::LinkStates>(
+      "test/link_states_test", rclcpp::SystemDefaultsQoS(),
+      [&link_states_msg](gazebo_msgs::msg::LinkStates::SharedPtr _msg) {
+        link_states_msg = _msg;
+      });
+
+    // Wait for a message
+    world_->Step(1000);
+
+    // Wait for it to be processed
+    int sleep{0};
+    int maxSleep{300};
+
+    for (; sleep < maxSleep && !link_states_msg; ++sleep) {
+      executor.spin_once(100ms);
+      gazebo::common::Time::MSleep(100);
+    }
+    EXPECT_NE(sleep, maxSleep);
+    EXPECT_NE(link_states_msg, nullptr);
+    EXPECT_NEAR(link_states_msg->pose[1].position.x, 1.0, tol);
+    EXPECT_NEAR(link_states_msg->pose[1].position.y, 2.0, tol);
+    EXPECT_NEAR(link_states_msg->pose[1].position.z, 0.5, tol);
+    EXPECT_NEAR(link_states_msg->pose[1].orientation.x, 0.0, tol);
+    EXPECT_NEAR(link_states_msg->pose[1].orientation.y, 0.0, tol);
+    EXPECT_NEAR(link_states_msg->pose[1].orientation.z, 0.0, tol);
+    EXPECT_NEAR(link_states_msg->pose[1].orientation.w, 1.0, tol);
   }
 }
 
