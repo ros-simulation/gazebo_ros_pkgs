@@ -256,16 +256,6 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       std::bind(&GazeboRosCamera::PreRender, this));
   }
 
-  // Dynamic reconfigure
-//    dyn_srv_ =
-//      new dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
-//      (*this->rosnode_);
-//    dynamic_reconfigure::Server<gazebo_plugins::GazeboRosCameraConfig>
-//      ::CallbackType f =
-//      boost::bind(&GazeboRosCameraUtils::configCallback, this, _1, _2);
-//    dyn_srv_->setCallback(f);
-//  }
-
   // Buffer size
   std::vector<std::string> image_format;
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
@@ -470,6 +460,70 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
     impl_->cloud_msg_.header.frame_id = impl_->frame_name_;
   }
+
+  // Dynamic reconfigure
+  if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
+    impl_->ros_node_->declare_parameter(
+      "update_rate", gazebo::CameraPlugin::parentSensor->UpdateRate());
+  } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
+    impl_->ros_node_->declare_parameter(
+      "update_rate", gazebo::DepthCameraPlugin::parentSensor->UpdateRate());
+  } else {
+    impl_->ros_node_->declare_parameter(
+      "update_rate", MultiCameraPlugin::parent_sensor_->UpdateRate());
+  }
+
+  auto existing_callback = impl_->ros_node_->set_on_parameters_set_callback(nullptr);
+  auto param_change_callback =
+    [this, existing_callback](std::vector<rclcpp::Parameter> parameters) {
+      auto result = rcl_interfaces::msg::SetParametersResult();
+      if (nullptr != existing_callback) {
+        result = existing_callback(parameters);
+        if (!result.successful) {
+          return result;
+        }
+      }
+
+      result.successful = true;
+      for (const auto & parameter : parameters) {
+        std::string param_name = parameter.get_name();
+        if (param_name == "update_rate") {
+          if (nullptr != impl_->trigger_sub_) {
+            RCLCPP_WARN(impl_->ros_node_->get_logger(),
+              "Cannot set update rate for triggered camera");
+            result.successful = false;
+          } else {
+            rclcpp::ParameterType parameter_type = parameter.get_type();
+            if (rclcpp::ParameterType::PARAMETER_DOUBLE == parameter_type) {
+              double rate = parameter.as_double();
+
+              if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
+                gazebo::CameraPlugin::parentSensor->SetUpdateRate(rate);
+              } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
+                gazebo::DepthCameraPlugin::parentSensor->SetUpdateRate(rate);
+              } else {
+                MultiCameraPlugin::parent_sensor_->SetUpdateRate(rate);
+              }
+
+              if (rate >= 0.0) {
+                RCLCPP_INFO(impl_->ros_node_->get_logger(),
+                  "Camera update rate changed to [%.2f Hz]", rate);
+              } else {
+                RCLCPP_WARN(impl_->ros_node_->get_logger(),
+                  "Camera update rate should be positive. Setting to maximum");
+              }
+            } else {
+              RCLCPP_WARN(impl_->ros_node_->get_logger(),
+                "Value for param [update_rate] has to be of double type.");
+              result.successful = false;
+            }
+          }
+        }
+      }
+      return result;
+    };
+
+  impl_->ros_node_->set_on_parameters_set_callback(param_change_callback);
 }
 
 void GazeboRosCamera::NewFrame(
