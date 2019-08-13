@@ -28,6 +28,7 @@
   <depend>std_msgs</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_ros</depend>
+  <depend>trajectory_msgs</depend>
 
   <build_depend>gazebo_dev</build_depend>
   <build_depend>gazebo_msgs</build_depend>
