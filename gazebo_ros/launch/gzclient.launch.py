@@ -40,51 +40,44 @@ def generate_launch_description():
            'GAZEBO_RESOURCE_PATH': media}
 
     return LaunchDescription([
+        # Pass-through arguments to gzclient
         DeclareLaunchArgument('version', default_value='false',
                               description='Set "true" to output version information'),
         DeclareLaunchArgument('verbose', default_value='false',
                               description='Set "true" to increase messages written to terminal'),
         DeclareLaunchArgument('help', default_value='false',
                               description='Set "true" to produce gzclient help message'),
-        DeclareLaunchArgument('Timer', default_value='false',
-                              description='Set "true" to start gzclient with Timer GUI plugin'),
-        DeclareLaunchArgument('Cessna', default_value='false',
-                              description='Set "true" to start gzclient with Cessna GUI plugin'),
-        DeclareLaunchArgument('Keyboard', default_value='false',
-                              description='Set "true" to start gzclient with Keyboard GUI plugin'),
+        DeclareLaunchArgument('extra_gazebo_args', default_value='',
+                              description='Extra arguments to be passed to Gazebo'),
 
+        # Specific to gazebo_ros
+        DeclareLaunchArgument('gdb', default_value='false',
+                              description='Set "true" to run gzserver with gdb'),
+        DeclareLaunchArgument('valgrind', default_value='false',
+                              description='Set "true" to run gzserver with valgrind'),
+
+        # Execute
         ExecuteProcess(
-            cmd=['gzclient',
-                 _command('version'),
-                 _command('verbose'),
-                 _command('help'),
-                 _plugin_command('Timer'), _plugin_value('Timer'),
-                 _plugin_command('Cessna'), _plugin_value('Cessna'),
-                 _plugin_command('Keyboard'), _plugin_value('Keyboard'),
-                 '-s', 'libgazebo_ros_init.so',
-                 '-s', 'libgazebo_ros_factory.so',
-                 # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
-                 # '-s', 'libgazebo_ros_effort.so',
-                 ],
+            cmd=[['gzclient ',
+                 _boolean_command('version'), ' ',
+                 _boolean_command('verbose'), ' ',
+                 _boolean_command('help'), ' ',
+                 LaunchConfiguration('extra_gazebo_args')
+                 ]],
             output='screen',
             additional_env=env,
+            shell=True,
+            prefix=PythonExpression(['"gdb -ex run --args" if "true" == "',
+                                     LaunchConfiguration('gdb'),
+                                     '" else "valgrind" if "true" == "',
+                                     LaunchConfiguration('valgrind'),
+                                     '" else ""']),
         )
     ])
 
-
-def _command(arg):
+# Add boolean commands if true
+def _boolean_command(arg):
     cmd = ['"--', arg, '" if "true" == "', LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
     return py_cmd
 
-
-def _plugin_command(arg):
-    cmd = ['"--gui-client-plugin" if "true" == "', LaunchConfiguration(arg), '" else ""']
-    py_cmd = PythonExpression(cmd)
-    return py_cmd
-
-
-def _plugin_value(arg):
-    cmd = ['"lib', arg, 'GUIPlugin.so" if "true" == "', LaunchConfiguration(arg), '" else ""']
-    py_cmd = PythonExpression(cmd)
-    return py_cmd

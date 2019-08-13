@@ -40,7 +40,8 @@ def generate_launch_description():
            'GAZEBO_RESOURCE_PATH': media}
 
     return LaunchDescription([
-        DeclareLaunchArgument('world', default_value='worlds/empty.world',
+        # Pass-through to gzclient
+        DeclareLaunchArgument('world', default_value='',
                               description='Specify world file name'),
         DeclareLaunchArgument('version', default_value='false',
                               description='Set "true" to output version information.'),
@@ -67,7 +68,7 @@ def generate_launch_description():
                               description='Specify recording filter '
                                           '(supports wildcard and regular expression).'),
         DeclareLaunchArgument('seed', default_value='',
-                              description='Set "true" to start with a random number seed.'),
+                              description='Start with a given random number seed.'),
         DeclareLaunchArgument('iters', default_value='',
                               description='Specify number of iterations to simulate.'),
         DeclareLaunchArgument('minimal_comms', default_value='false',
@@ -75,36 +76,50 @@ def generate_launch_description():
         DeclareLaunchArgument('profile', default_value='',
                               description='Specify physics preset profile name from the options '
                                           'in the world file.'),
+        DeclareLaunchArgument('extra_gazebo_args', default_value='',
+                              description='Extra arguments to be passed to Gazebo'),
+
+        # Specific to gazebo_ros
         DeclareLaunchArgument('gdb', default_value='false',
                               description='Set "true" to run gzserver with gdb'),
         DeclareLaunchArgument('valgrind', default_value='false',
                               description='Set "true" to run gzserver with valgrind'),
+        DeclareLaunchArgument('init', default_value='true',
+                              description='Set "false" not to load "libgazebo_ros_init.so"'),
+        DeclareLaunchArgument('factory', default_value='true',
+                              description='Set "false" not to load "libgazebo_ros_factory.so"'),
+
+        # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
+        # DeclareLaunchArgument('effort_plugin', default_value='true',
+        #                       description='Set "false" not to load "libgazebo_ros_effort.so"'),
 
         ExecuteProcess(
-            cmd=['gzserver',
-                 LaunchConfiguration('world'),
-                 _command('version'),
-                 _command('verbose'),
-                 _command('help'),
-                 _command('pause'),
-                 _arg_command('physics'), LaunchConfiguration('physics'),
-                 _arg_command('play'), LaunchConfiguration('play'),
-                 _command('record'),
-                 _arg_command('record_encoding'), LaunchConfiguration('record_encoding'),
-                 _arg_command('record_path'), LaunchConfiguration('record_path'),
-                 _arg_command('record_period'), LaunchConfiguration('record_period'),
-                 _arg_command('record_filter'), LaunchConfiguration('record_filter'),
-                 _arg_command('seed'), LaunchConfiguration('seed'),
-                 _arg_command('iters'), LaunchConfiguration('iters'),
-                 _command('minimal_comms'),
-                 '-s', 'libgazebo_ros_init.so',
-                 '-s', 'libgazebo_ros_factory.so',
-                 # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
-                 # '-s', 'libgazebo_ros_effort.so',
-                 _arg_command('profile'), LaunchConfiguration('profile'),
+            cmd=['gzserver ',
+                 # Pass-through arguments to gzserver
+                 LaunchConfiguration('world'), ' ',
+                 _boolean_command('version'), ' ',
+                 _boolean_command('verbose'), ' ',
+                 _boolean_command('help'), ' ',
+                 _boolean_command('pause'), ' ',
+                 _arg_command('physics'), ' ', LaunchConfiguration('physics'), ' ',
+                 _arg_command('play'), LaunchConfiguration('play'), ' ',
+                 _boolean_command('record'), ' ',
+                 _arg_command('record_encoding'), ' ', LaunchConfiguration('record_encoding'), ' ',
+                 _arg_command('record_path'), ' ', LaunchConfiguration('record_path'), ' ',
+                 _arg_command('record_period'), ' ', LaunchConfiguration('record_period'), ' ',
+                 _arg_command('record_filter'), ' ', LaunchConfiguration('record_filter'), ' ',
+                 _arg_command('seed'), ' ', LaunchConfiguration('seed'), ' ',
+                 _arg_command('iters'), ' ', LaunchConfiguration('iters'), ' ',
+                 _boolean_command('minimal_comms'), ' ',
+                 _plugin_command('init'), ' ',
+                 _plugin_command('factory'), ' ',
+                 #_plugin_command('effort'), ' ',
+                 _arg_command('profile'), ' ', LaunchConfiguration('profile'), ' ',
+                 LaunchConfiguration('extra_gazebo_args')
                  ],
             output='screen',
             additional_env=env,
+            shell=True,
             prefix=PythonExpression(['"gdb -ex run --args" if "true" == "',
                                      LaunchConfiguration('gdb'),
                                      '" else "valgrind" if "true" == "',
@@ -113,14 +128,21 @@ def generate_launch_description():
         )
     ])
 
-
-def _command(arg):
+# Add boolean commands if true
+def _boolean_command(arg):
     cmd = ['"--', arg, '" if "true" == "', LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
     return py_cmd
 
-
+# Add string commands if not empty
 def _arg_command(arg):
     cmd = ['"--', arg, '" if "" != "', LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
     return py_cmd
+
+# Add gazebo_ros plugins if true
+def _plugin_command(arg):
+    cmd = ['"-s libgazebo_ros_', arg, '.so" if "true" == "', LaunchConfiguration(arg), '" else ""']
+    py_cmd = PythonExpression(cmd)
+    return py_cmd
+
