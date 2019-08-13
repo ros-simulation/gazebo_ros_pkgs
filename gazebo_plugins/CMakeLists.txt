@@ -26,6 +26,7 @@ find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(trajectory_msgs REQUIRED)
 
 include_directories(include
   ${gazebo_dev_INCLUDE_DIRS}
@@ -265,6 +266,18 @@ target_link_libraries(gazebo_ros_elevator
 )
 ament_export_libraries(gazebo_ros_elevator)
 
+# gazebo_ros_joint_pose_trajectory
+add_library(gazebo_ros_joint_pose_trajectory SHARED
+  src/gazebo_ros_joint_pose_trajectory.cpp
+)
+ament_target_dependencies(gazebo_ros_joint_pose_trajectory
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "trajectory_msgs"
+)
+ament_export_libraries(gazebo_ros_joint_pose_trajectory)
+
 # gazebo_ros_planar_move
 add_library(gazebo_ros_planar_move SHARED
   src/gazebo_ros_planar_move.cpp
@@ -320,6 +333,7 @@ install(TARGETS
     gazebo_ros_hand_of_god
     gazebo_ros_harness
     gazebo_ros_imu_sensor
+    gazebo_ros_joint_pose_trajectory
     gazebo_ros_joint_state_publisher
     gazebo_ros_planar_move
     gazebo_ros_projector
