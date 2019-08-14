@@ -47,6 +47,9 @@ class GazeboRosVacuumGripperPrivate;
       <!-- Link associated with gripper -->
       <link_name>link</link_name>
 
+      <!-- Max distance to attract entities -->
+      <max_distance>10.0</max_distance>
+
       <!-- List of entities to be not attracted by the gripper -->
       <fixed>ground_plane</fixed>
       <fixed>wall</fixed>

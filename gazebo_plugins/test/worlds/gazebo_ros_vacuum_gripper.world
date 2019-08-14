@@ -35,6 +35,8 @@
 
         <link_name>link</link_name>
 
+        <max_distance>5.0</max_distance>
+
         <fixed>ground_plane</fixed>
 
       </plugin>

@@ -75,6 +75,9 @@ public:
 
   /// Entities not affected by gripper.
   std::unordered_set<std::string> fixed_;
+
+  /// Max distance to apply force.
+  double max_distance_;
 };
 
 GazeboRosVacuumGripper::GazeboRosVacuumGripper()
@@ -104,6 +107,8 @@ void GazeboRosVacuumGripper::Load(gazebo::physics::ModelPtr _model, sdf::Element
   } else {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Please specify <link_name>. Aborting.");
   }
+
+  impl_->max_distance_ = _sdf->Get<double>("max_distance", 0.05).first;
 
   if (_sdf->HasElement("fixed")) {
     for (auto fixed = _sdf->GetElement("fixed"); fixed != nullptr;
@@ -159,7 +164,10 @@ void GazeboRosVacuumGripperPrivate::OnUpdate()
     for (auto & link : links) {
       ignition::math::Pose3d link_pose = link->WorldPose();
       ignition::math::Pose3d diff = parent_pose - link_pose;
-      link->SetForce(link_pose.Rot().RotateVector((parent_pose - link_pose).Pos()).Normalize());
+      if (diff.Pos().Length() > max_distance_) {
+        continue;
+      }
+      link->AddForce(link_pose.Rot().RotateVector((parent_pose - link_pose).Pos()).Normalize());
       grasping_msg.data = true;
     }
   }
