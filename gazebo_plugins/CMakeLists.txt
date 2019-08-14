@@ -23,6 +23,7 @@ find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -259,6 +260,19 @@ target_link_libraries(gazebo_ros_elevator
 )
 ament_export_libraries(gazebo_ros_elevator)
 
+# gazebo_ros_vacuum_gripper
+add_library(gazebo_ros_vacuum_gripper SHARED
+  src/gazebo_ros_vacuum_gripper.cpp
+)
+ament_target_dependencies(gazebo_ros_vacuum_gripper
+  "gazebo_ros"
+  "gazebo_dev"
+  "rclcpp"
+  "std_msgs"
+  "std_srvs"
+)
+ament_export_libraries(gazebo_ros_vacuum_gripper)
+
 # gazebo_ros_joint_pose_trajectory
 add_library(gazebo_ros_joint_pose_trajectory SHARED
   src/gazebo_ros_joint_pose_trajectory.cpp
@@ -336,6 +350,7 @@ install(TARGETS
     gazebo_ros_p3d
     gazebo_ros_template
     gazebo_ros_tricycle_drive
+    gazebo_ros_vacuum_gripper
     gazebo_ros_video
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
