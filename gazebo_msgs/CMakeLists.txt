@@ -34,6 +34,7 @@ set(msg_files
 
 set(srv_files
   "srv/ApplyBodyWrench.srv"
+  "srv/ApplyLinkWrench.srv"
   "srv/ApplyJointEffort.srv"
   "srv/BodyRequest.srv"
   "srv/DeleteEntity.srv"
@@ -49,6 +50,7 @@ set(srv_files
   "srv/GetPhysicsProperties.srv"
   "srv/GetWorldProperties.srv"
   "srv/JointRequest.srv"
+  "srv/LinkRequest.srv"
   "srv/SetEntityState.srv"
   "srv/SetJointProperties.srv"
   "srv/SetJointTrajectory.srv"
