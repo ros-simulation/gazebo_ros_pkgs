@@ -22,6 +22,8 @@ from launch.substitutions import ThisLaunchFileDir
 
 def generate_launch_description():
 
+    # (TODO) Allow conditional include of gzserver and gzclient, once supported
+    # https://github.com/ros2/launch/issues/303
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/gzserver.launch.py']),
