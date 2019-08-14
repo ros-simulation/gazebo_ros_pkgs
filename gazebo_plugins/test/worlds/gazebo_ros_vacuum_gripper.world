@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <model name='box'>
+      <pose>0 0 0.04 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.08 0.08 0.08</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.08 0.08 0.08</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <plugin name='vacuum_gripper' filename='libgazebo_ros_vacuum_gripper.so'>
+
+        <ros>
+          <namespace>/test</namespace>
+          <argument>switch:=switch_test</argument>
+          <argument>grasping:=grasping_test</argument>
+        </ros>
+
+        <link_name>link</link_name>
+
+        <max_distance>5.0</max_distance>
+
+        <fixed>ground_plane</fixed>
+
+      </plugin>
+    </model>
+
+    <model name='ball1'>
+      <pose>0.6 0 0.04 0 0 0</pose>
+      <link name="link1">
+        <inertial>
+          <mass>0.026</mass>
+          <inertia>
+            <ixx>1.664e-5</ixx>
+            <iyy>1.664e-5</iyy>
+            <izz>1.664e-5</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+
+    <model name='ball2'>
+      <pose>-0.6 0 0.04 0 0 0</pose>
+      <link name="link2">
+        <inertial>
+          <mass>0.026</mass>
+          <inertia>
+            <ixx>1.664e-5</ixx>
+            <iyy>1.664e-5</iyy>
+            <izz>1.664e-5</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

@@ -27,6 +27,7 @@ set(tests
   test_gazebo_ros_planar_move
   test_gazebo_ros_ray_sensor
   test_gazebo_ros_tricycle_drive
+  test_gazebo_ros_vacuum_gripper
 )
 
 if(ENABLE_DISPLAY_TESTS)
@@ -64,6 +65,7 @@ foreach(test ${tests})
     "rclcpp"
     "sensor_msgs"
     "std_msgs"
+    "std_srvs"
     "tf2"
     "tf2_geometry_msgs"
     "tf2_ros"
