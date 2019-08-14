@@ -9,7 +9,7 @@
     </include>
     <model name="box">
       <pose>0 0 0.5 0 0 0</pose>
-      <link name="link">
+      <link name="box_link">
         <collision name="collision">
           <geometry>
             <box>
@@ -30,7 +30,8 @@
           <namespace>/test</namespace>
           <argument>gazebo_ros_force:=force_test</argument>
         </ros>
-        <link_name>link</link_name>
+        <link_name>box_link</link_name>
+        <force_frame>world</force_frame>
       </plugin>
     </model>
   </world>

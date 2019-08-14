@@ -2,6 +2,11 @@
 <!--
   Gazebo ROS force plugin demo
 
+  If you want the force to be applied on the world frame, use
+    <force_frame>world</force_frame>
+  If you want the force to be applied on the body frame, use
+    <force_frame>body</force_frame>
+
   Try for example:
 
   ros2 topic pub -1 /demo/force_demo geometry_msgs/Wrench "force: {x: 10.0}"
@@ -38,6 +43,7 @@
           <argument>gazebo_ros_force:=force_demo</argument>
         </ros>
         <link_name>link</link_name>
+        <force_frame>world</force_frame>
       </plugin>
     </model>
   </world>

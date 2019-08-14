@@ -46,6 +46,9 @@ class GazeboRosForcePrivate;
       <!-- Name of link within model which will receive the force -->
       <link_name>link</link_name>
 
+      <!-- Frame where the force/torque will be applied (options: world; body)-->
+      <force_frame>link</force_frame>
+
     </plugin>
   \endcode
 */
@@ -65,6 +68,9 @@ protected:
 
   /// Optional callback to be called at every simulation iteration.
   virtual void OnUpdate();
+
+  /// Optional callback to be called at every simulation iteration when the force is applied on the body frame.
+  virtual void OnUpdateRelative();
 
 private:
   /// Callback when a ROS Wrench message is received
