@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+    <gravity>0 0 0</gravity>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+      <uri>model://double_pendulum_with_base</uri>
+
+      <plugin name="gazebo_ros_joint_pose_trajectory"
+              filename="libgazebo_ros_joint_pose_trajectory.so">
+        <ros>
+          <namespace>/test</namespace>
+          <argument>set_joint_trajectory:=set_trajectory_test</argument>
+        </ros>
+        <update_rate>2</update_rate>
+      </plugin>
+
+    </include>
+  </world>
+</sdf>

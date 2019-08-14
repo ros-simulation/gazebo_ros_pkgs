@@ -29,12 +29,15 @@
   <depend>std_srvs</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_ros</depend>
+  <depend>trajectory_msgs</depend>
 
   <build_depend>gazebo_dev</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
   <build_depend>gazebo_ros</build_depend>
   <build_depend>rclcpp</build_depend>
 
   <exec_depend>gazebo_dev</exec_depend>
+  <exec_depend>gazebo_msgs</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>rclcpp</exec_depend>
 

@@ -48,5 +48,49 @@ builtin_interfaces::msg::Time Convert(const gazebo::msgs::Time & in)
   return time;
 }
 
+/// Generic conversion from a ROS builtin interface time message to another type.
+/// \param[in] in Input message.
+/// \return Conversion result
+/// \tparam T Output type
+template<class T>
+T Convert(const builtin_interfaces::msg::Time &)
+{
+  T::ConversionNotImplemented;
+}
+
+/// \brief Specialized conversion from a ROS Time message to a Gazebo Time.
+/// \param[in] in ROS Time message to convert.
+/// \return A Gazebo Time with the same value as in
+template<>
+gazebo::common::Time Convert(const builtin_interfaces::msg::Time & in)
+{
+  gazebo::common::Time time;
+  time.sec = in.sec;
+  time.nsec = in.nanosec;
+  return time;
+}
+
+/// Generic conversion from a ROS builtin interface duration message to another type.
+/// \param[in] in Input message.
+/// \return Conversion result
+/// \tparam T Output type
+template<class T>
+T Convert(const builtin_interfaces::msg::Duration &)
+{
+  T::ConversionNotImplemented;
+}
+
+/// \brief Specialized conversion from a ROS duration message to a Gazebo Time.
+/// \param[in] in ROS Time message to convert.
+/// \return A Gazebo Time with the same value as in
+template<>
+gazebo::common::Time Convert(const builtin_interfaces::msg::Duration & in)
+{
+  gazebo::common::Time time;
+  time.sec = in.sec;
+  time.nsec = in.nanosec;
+  return time;
+}
+
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__CONVERSIONS__BUILTIN_INTERFACES_HPP_

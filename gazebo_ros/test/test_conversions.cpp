@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
-#include <gazebo_ros/conversions/sensor_msgs.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gtest/gtest.h>
 
@@ -87,6 +86,11 @@ TEST(TestConversions, Time)
     auto time_msg = gazebo_ros::Convert<builtin_interfaces::msg::Time>(time);
     EXPECT_EQ(200, time_msg.sec);
     EXPECT_EQ(100u, time_msg.nanosec);
+
+    // to Gazebo time
+    auto gazebo_time = gazebo_ros::Convert<gazebo::common::Time>(time_msg);
+    EXPECT_EQ(200, gazebo_time.sec);
+    EXPECT_EQ(100, gazebo_time.nsec);
   }
 
   // Gazebo msg
@@ -99,6 +103,18 @@ TEST(TestConversions, Time)
     auto time_msg = gazebo_ros::Convert<builtin_interfaces::msg::Time>(time);
     EXPECT_EQ(200, time_msg.sec);
     EXPECT_EQ(100u, time_msg.nanosec);
+  }
+
+  // ROS Duration
+  {
+    auto duration = builtin_interfaces::msg::Duration();
+    duration.sec = 200;
+    duration.nanosec = 100u;
+
+    // to Gazebo time
+    auto gazebo_time = gazebo_ros::Convert<gazebo::common::Time>(duration);
+    EXPECT_EQ(200, gazebo_time.sec);
+    EXPECT_EQ(100, gazebo_time.nsec);
   }
 }
 
