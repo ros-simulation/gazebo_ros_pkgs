@@ -15,20 +15,20 @@
 """
 Demo for spawn_entity.
 
-Loads Gazebo with gazebo_ros_init, gazebo_ros_factory.
-Spawns a model in the gazebo empty world
+Launches Gazebo and spawns a model
 """
 
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import ThisLaunchFileDir
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    gazebo = ExecuteProcess(
-        cmd=['gazebo', '-s', 'libgazebo_ros_init.so', '-s', 'libgazebo_ros_factory.so'],
-        output='screen'
-    )
+    gazebo = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/gazebo.launch.py']),
+             )
 
     # GAZEBO_MODEL_PATH has to be correctly set for Gazebo to be able to find the model
     spawn_entity = Node(package='gazebo_ros', node_executable='spawn_entity.py',
