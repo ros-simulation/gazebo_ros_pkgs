@@ -55,9 +55,8 @@ class SpawnEntityNode(Node):
         source = parser.add_mutually_exclusive_group(required=True)
         source.add_argument('-file', type=str, metavar='FILE_NAME',
                             help='Load entity xml from file')
-        source.add_argument('-param', type=str, metavar='PARAM_NAME',
-                            help='Load entity xml from file published on topic specified in \
-                            ROS parameter')
+        source.add_argument('-topic', type=str, metavar='TOPIC_NAME',
+                            help='Load entity xml published on topic')
         source.add_argument('-database', type=str, metavar='ENTITY_NAME',
                             help='Load entity XML from specified entity in GAZEBO_MODEL_PATH \
                             or Gazebo Model Database')
@@ -151,28 +150,22 @@ class SpawnEntityNode(Node):
             if entity_xml == '':
                 self.get_logger().error('Error: file %s is empty', self.args.file)
                 return 1
-        # Load entity XML from file published on topic specified in ROS param
-        elif self.args.param:
+        # Load entity XML published on topic specified
+        elif self.args.topic:
             self.get_logger().info(
-                'Loading entity XML from file published on topic %s' % self.args.param)
+                'Loading entity published on topic %s' % self.args.topic)
             entity_xml = ''
 
-            def entity_xml_cb(entity_xml_path):
+            def entity_xml_cb(msg):
                 nonlocal entity_xml
-                try:
-                    f = open(entity_xml_path.data, 'r')
-                    entity_xml = f.read()
-                except IOError as e:
-                    self.get_logger().error(
-                        'Error reading file {}: {}'.format(entity_xml_path.data, e))
-                    entity_xml = ''
+                entity_xml = msg.data
 
             self.subscription = self.create_subscription(
-                String, self.args.param, entity_xml_cb,
+                String, self.args.topic, entity_xml_cb,
                 QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
 
             while rclpy.ok() and entity_xml == '':
-                self.get_logger().info('Waiting for entity xml file path on %s' % self.args.param)
+                self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
                 rclpy.spin_once(self)
                 pass
 
