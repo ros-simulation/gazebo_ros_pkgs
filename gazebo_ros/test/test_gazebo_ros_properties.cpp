@@ -62,7 +62,7 @@ public:
 
   void GetLightProperties(
     const std::string & _light_name,
-    const ignition::math::Vector4d & _diffuse,
+    const ignition::math::Color & _diffuse,
     const double & _attenuation_constant,
     const double & _attenuation_linear,
     const double & _attenuation_quadratic);
@@ -84,7 +84,7 @@ public:
 
   void SetLightProperties(
     const std::string & _light_name,
-    const ignition::math::Vector4d & _diffuse,
+    const ignition::math::Color & _diffuse,
     const double & _attenuation_constant,
     const double & _attenuation_linear,
     const double & _attenuation_quadratic);
@@ -178,12 +178,14 @@ void GazeboRosPropertiesTest::GetModelProperties(
   EXPECT_EQ(response->parent_model_name, "");
   EXPECT_EQ(response->canonical_link_name, "simple_arm::arm_base");
 
+  ASSERT_EQ(5u, response->link_names.size());
   EXPECT_EQ(response->link_names[0], "simple_arm::arm_base");
   EXPECT_EQ(response->link_names[1], "simple_arm::arm_shoulder_pan");
   EXPECT_EQ(response->link_names[2], "simple_arm::arm_elbow_pan");
   EXPECT_EQ(response->link_names[3], "simple_arm::arm_wrist_lift");
   EXPECT_EQ(response->link_names[4], "simple_arm::arm_wrist_roll");
 
+  ASSERT_EQ(9u, response->collision_names.size());
   EXPECT_EQ(response->collision_names[0], "arm_base_collision");
   EXPECT_EQ(response->collision_names[1], "arm_base_collision_arm_trunk");
   EXPECT_EQ(response->collision_names[2], "arm_shoulder_pan_collision");
@@ -194,12 +196,13 @@ void GazeboRosPropertiesTest::GetModelProperties(
   EXPECT_EQ(response->collision_names[7], "arm_wrist_lift_collision");
   EXPECT_EQ(response->collision_names[8], "arm_wrist_roll_collision");
 
+  ASSERT_EQ(4u, response->joint_names.size());
   EXPECT_EQ(response->joint_names[0], "arm_shoulder_pan_joint");
   EXPECT_EQ(response->joint_names[1], "arm_elbow_pan_joint");
   EXPECT_EQ(response->joint_names[2], "arm_wrist_lift_joint");
+  EXPECT_EQ(response->joint_names[3], "arm_wrist_roll_joint");
 
-  std::vector<std::string> v;  // Empty
-  EXPECT_EQ(response->child_model_names, v);
+  EXPECT_TRUE(response->child_model_names.empty());
   EXPECT_FALSE(response->is_static);
 }
 
@@ -218,10 +221,20 @@ void GazeboRosPropertiesTest::GetJointProperties(
   ASSERT_NE(nullptr, response);
   EXPECT_TRUE(response->success);
 
-  std::vector<double> v;
-  v.push_back(_damping);
+  if (_joint_name == "arm_wrist_roll_joint") {
+    EXPECT_EQ(response->UNIVERSAL, response->type);
+    EXPECT_EQ(2u, response->damping.size());
+    EXPECT_EQ(2u, response->position.size());
+    EXPECT_EQ(2u, response->rate.size());
+  } else {
+    EXPECT_EQ(response->REVOLUTE, response->type);
+    EXPECT_EQ(1u, response->damping.size());
+    EXPECT_EQ(1u, response->position.size());
+    EXPECT_EQ(1u, response->rate.size());
+  }
+
   if ((response->damping).size() > 0) {
-    EXPECT_EQ(response->damping, v);
+    EXPECT_EQ(_damping, response->damping[0]);
   }
 }
 
@@ -232,9 +245,7 @@ void GazeboRosPropertiesTest::SetJointProperties(
   auto request = std::make_shared<gazebo_msgs::srv::SetJointProperties::Request>();
   request->joint_name = _joint_name;
 
-  std::vector<double> v;
-  v.push_back(_damping);
-  request->ode_joint_config.damping = v;
+  request->ode_joint_config.damping.push_back(_damping);
 
   auto response_future = set_joint_properties_client_->async_send_request(request);
   EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
@@ -310,7 +321,7 @@ void GazeboRosPropertiesTest::SetLinkProperties(
 
 void GazeboRosPropertiesTest::GetLightProperties(
   const std::string & _light_name,
-  const ignition::math::Vector4d & _diffuse,
+  const ignition::math::Color & _diffuse,
   const double & _attenuation_constant,
   const double & _attenuation_linear,
   const double & _attenuation_quadratic)
@@ -326,10 +337,10 @@ void GazeboRosPropertiesTest::GetLightProperties(
   ASSERT_NE(nullptr, response);
   EXPECT_TRUE(response->success);
 
-  EXPECT_NEAR(_diffuse.X(), response->diffuse.r, tol) << _light_name;
-  EXPECT_NEAR(_diffuse.Y(), response->diffuse.g, tol) << _light_name;
-  EXPECT_NEAR(_diffuse.Z(), response->diffuse.b, tol) << _light_name;
-  EXPECT_NEAR(_diffuse.W(), response->diffuse.a, tol) << _light_name;
+  EXPECT_DOUBLE_EQ(_diffuse.R(), response->diffuse.r) << _light_name;
+  EXPECT_DOUBLE_EQ(_diffuse.G(), response->diffuse.g) << _light_name;
+  EXPECT_DOUBLE_EQ(_diffuse.B(), response->diffuse.b) << _light_name;
+  EXPECT_DOUBLE_EQ(_diffuse.A(), response->diffuse.a) << _light_name;
 
   EXPECT_NEAR(_attenuation_constant, response->attenuation_constant, tol) << _light_name;
   EXPECT_NEAR(_attenuation_linear, response->attenuation_linear, tol) << _light_name;
@@ -338,17 +349,17 @@ void GazeboRosPropertiesTest::GetLightProperties(
 
 void GazeboRosPropertiesTest::SetLightProperties(
   const std::string & _light_name,
-  const ignition::math::Vector4d & _diffuse,
+  const ignition::math::Color & _diffuse,
   const double & _attenuation_constant,
   const double & _attenuation_linear,
   const double & _attenuation_quadratic)
 {
   auto request = std::make_shared<gazebo_msgs::srv::SetLightProperties::Request>();
   request->light_name = _light_name;
-  request->diffuse.r = _diffuse.X();
-  request->diffuse.g = _diffuse.Y();
-  request->diffuse.b = _diffuse.Z();
-  request->diffuse.a = _diffuse.W();
+  request->diffuse.r = _diffuse.R();
+  request->diffuse.g = _diffuse.G();
+  request->diffuse.b = _diffuse.B();
+  request->diffuse.a = _diffuse.A();
   request->attenuation_constant = _attenuation_constant;
   request->attenuation_linear = _attenuation_linear;
   request->attenuation_quadratic = _attenuation_quadratic;
@@ -398,16 +409,16 @@ TEST_F(GazeboRosPropertiesTest, GetSetProperties)
   // Get / set light properties
   {
     // Get initial light properties
-    this->GetLightProperties("sun", ignition::math::Vector4d(0.800000011920929, 0.800000011920929,
-      0.800000011920929, 1.0), 0.8999999761581421, 0.009999999776482582, 0.0010000000474974513);
+    this->GetLightProperties("sun", ignition::math::Color(0.8, 0.8, 0.8, 1.0),
+      0.9, 0.01, 0.001);
 
     // Set light properties
-    this->SetLightProperties("sun", ignition::math::Vector4d(0.7, 0.1, 0.5, 1.0),
+    this->SetLightProperties("sun", ignition::math::Color(0.7, 0.1, 0.5, 1.0),
       0.92, 0.0092, 0.002);
 
     // Check new light properties. Wait for properties to be set first.
     rclcpp::sleep_for(std::chrono::milliseconds(500));
-    this->GetLightProperties("sun", ignition::math::Vector4d(0.7, 0.1, 0.5, 1.0),
+    this->GetLightProperties("sun", ignition::math::Color(0.7, 0.1, 0.5, 1.0),
       0.92, 0.0092, 0.002);
   }
 }

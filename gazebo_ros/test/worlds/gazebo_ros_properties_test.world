@@ -557,7 +557,7 @@
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
       </joint>
-      <joint name='arm_wrist_roll_joint' type='revolute'>
+      <joint name='arm_wrist_roll_joint' type='universal'>
         <parent>arm_wrist_lift</parent>
         <child>arm_wrist_roll</child>
         <axis>
@@ -574,6 +574,20 @@
           <xyz>0 0 1</xyz>
           <use_parent_model_frame>1</use_parent_model_frame>
         </axis>
+        <axis2>
+          <dynamics>
+            <damping>2</damping>
+            <friction>0</friction>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+          <limit>
+            <lower>-2.99999</lower>
+            <upper>2.99999</upper>
+          </limit>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+        </axis2>
       </joint>
       <pose frame=''>0.033491 0.033439 0 0 -0 0</pose>
     </model>

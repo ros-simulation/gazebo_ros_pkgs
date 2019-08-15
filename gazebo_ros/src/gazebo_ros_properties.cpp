@@ -205,7 +205,7 @@ void GazeboRosPropertiesPrivate::GetModelProperties(
   // get list of child links, collisions
   _res->link_names.clear();
   _res->collision_names.clear();
-  for (unsigned int i = 0; i < model->GetChildCount(); i++) {
+  for (unsigned int i = 0; i < model->GetChildCount(); ++i) {
     gazebo::physics::LinkPtr link =
       boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(i));
     if (link) {
@@ -254,7 +254,7 @@ void GazeboRosPropertiesPrivate::GetJointProperties(
   gazebo_msgs::srv::GetJointProperties::Response::SharedPtr _res)
 {
   gazebo::physics::JointPtr joint;
-  for (unsigned int i = 0; i < world_->ModelCount(); i++) {
+  for (unsigned int i = 0; i < world_->ModelCount(); ++i) {
     joint = world_->ModelByIndex(i)->GetJoint(_req->joint_name);
     if (joint) {
       break;
@@ -264,22 +264,35 @@ void GazeboRosPropertiesPrivate::GetJointProperties(
   if (!joint) {
     _res->success = false;
     _res->status_message = "GetJointProperties: joint not found";
-  } else {
-    /// @todo: FIXME
-    _res->type = _res->REVOLUTE;
-
-    _res->damping.clear();
-    _res->damping.push_back(joint->GetDamping(0));
-
-    _res->position.clear();
-    _res->position.push_back(joint->Position(0));
-
-    _res->rate.clear();  // use GetVelocity(i)
-    _res->rate.push_back(joint->GetVelocity(0));
-
-    _res->success = true;
-    _res->status_message = "GetJointProperties: got properties";
+    return;
   }
+
+  auto type = joint->GetMsgType();
+  if (type == gazebo::msgs::Joint::REVOLUTE) {
+    _res->type = _res->REVOLUTE;
+  } else if (type == gazebo::msgs::Joint::PRISMATIC) {
+    _res->type = _res->PRISMATIC;
+  } else if (type == gazebo::msgs::Joint::UNIVERSAL) {
+    _res->type = _res->UNIVERSAL;
+  } else if (type == gazebo::msgs::Joint::BALL) {
+    _res->type = _res->BALL;
+  } else if (type == gazebo::msgs::Joint::FIXED) {
+    _res->type = _res->FIXED;
+  } else {
+    RCLCPP_WARN(ros_node_->get_logger(), "Partial support for joint type [%i]", type);
+  }
+
+  _res->damping.clear();
+  _res->position.clear();
+  _res->rate.clear();
+  for (auto i = 0u; i < joint->DOF(); ++i) {
+    _res->damping.push_back(joint->GetDamping(i));
+    _res->position.push_back(joint->Position(i));
+    _res->rate.push_back(joint->GetVelocity(i));
+  }
+
+  _res->success = true;
+  _res->status_message = "GetJointProperties: got properties";
 }
 
 void GazeboRosPropertiesPrivate::GetLinkProperties(
@@ -293,7 +306,6 @@ void GazeboRosPropertiesPrivate::GetLinkProperties(
     _res->status_message =
       "GetLinkProperties: link not found, did you forget to scope the link by model name?";
   } else {
-    /// @todo: validate
     _res->gravity_mode = link->GetGravityMode();
 
     gazebo::physics::InertialPtr inertia = link->GetInertial();
@@ -350,7 +362,7 @@ void GazeboRosPropertiesPrivate::SetJointProperties(
   /// @todo: current settings only allows for setting of 1DOF joints
   /// (e.g. HingeJoint and SliderJoint) correctly.
   gazebo::physics::JointPtr joint;
-  for (unsigned int i = 0; i < world_->ModelCount(); i++) {
+  for (unsigned int i = 0; i < world_->ModelCount(); ++i) {
     joint = world_->ModelByIndex(i)->GetJoint(_req->joint_name);
     if (joint) {break;}
   }
@@ -359,34 +371,34 @@ void GazeboRosPropertiesPrivate::SetJointProperties(
     _res->success = false;
     _res->status_message = "SetJointProperties: joint not found";
   } else {
-    for (unsigned int i = 0; i < _req->ode_joint_config.damping.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.damping.size(); ++i) {
       joint->SetDamping(i, _req->ode_joint_config.damping[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.hi_stop.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.hi_stop.size(); ++i) {
       joint->SetParam("hi_stop", i, _req->ode_joint_config.hi_stop[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.lo_stop.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.lo_stop.size(); ++i) {
       joint->SetParam("lo_stop", i, _req->ode_joint_config.lo_stop[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.erp.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.erp.size(); ++i) {
       joint->SetParam("erp", i, _req->ode_joint_config.erp[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.cfm.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.cfm.size(); ++i) {
       joint->SetParam("cfm", i, _req->ode_joint_config.cfm[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.stop_erp.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.stop_erp.size(); ++i) {
       joint->SetParam("stop_erp", i, _req->ode_joint_config.stop_erp[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.stop_cfm.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.stop_cfm.size(); ++i) {
       joint->SetParam("stop_cfm", i, _req->ode_joint_config.stop_cfm[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.fudge_factor.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.fudge_factor.size(); ++i) {
       joint->SetParam("fudge_factor", i, _req->ode_joint_config.fudge_factor[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.fmax.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.fmax.size(); ++i) {
       joint->SetParam("fmax", i, _req->ode_joint_config.fmax[i]);
     }
-    for (unsigned int i = 0; i < _req->ode_joint_config.vel.size(); i++) {
+    for (unsigned int i = 0; i < _req->ode_joint_config.vel.size(); ++i) {
       joint->SetParam("vel", i, _req->ode_joint_config.vel[i]);
     }
 
