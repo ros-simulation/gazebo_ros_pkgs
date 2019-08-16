@@ -55,6 +55,11 @@ TEST_F(GazeboRosJointStatePublisherTest, Publishing)
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
+  // Step a bit before starting
+  world->Step(500);
+  executor.spin_once(500ms);
+  gazebo::common::Time::MSleep(100);
+
   // Create subscriber
   sensor_msgs::msg::JointState::SharedPtr latestMsg;
   auto sub = node->create_subscription<sensor_msgs::msg::JointState>(
@@ -69,7 +74,7 @@ TEST_F(GazeboRosJointStatePublisherTest, Publishing)
     executor.spin_once(100ms);
     gazebo::common::Time::MSleep(100);
 
-    ASSERT_NE(nullptr, latestMsg);
+    ASSERT_NE(nullptr, latestMsg) << "Iteration: " << i;
 
     ASSERT_EQ(1u, latestMsg->name.size());
     ASSERT_EQ(1u, latestMsg->position.size());
@@ -78,6 +83,8 @@ TEST_F(GazeboRosJointStatePublisherTest, Publishing)
     EXPECT_EQ("hinge", latestMsg->name[0]);
     EXPECT_NEAR(hinge->Position(), latestMsg->position[0], tol);
     EXPECT_NEAR(hinge->GetVelocity(0), latestMsg->velocity[0], tol);
+
+    latestMsg.reset();
   }
 }
 

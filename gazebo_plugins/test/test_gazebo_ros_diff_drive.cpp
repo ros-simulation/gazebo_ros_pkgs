@@ -89,9 +89,17 @@ TEST_P(GazeboRosDiffDriveTest, Publishing)
   // Wait for it to be processed
   int sleep{0};
   int maxSleep{300};
-  for (; sleep < maxSleep && (vehicle->WorldLinearVel().X() < 0.9 ||
+
+  auto yaw = static_cast<float>(vehicle->WorldPose().Rot().Yaw());
+  auto linear_vel = vehicle->WorldLinearVel();
+  double linear_vel_x = cosf(yaw) * linear_vel.X() + sinf(yaw) * linear_vel.Y();
+
+  for (; sleep < maxSleep && (linear_vel_x < 0.9 ||
     vehicle->WorldAngularVel().Z() < 0.09); ++sleep)
   {
+    yaw = static_cast<float>(vehicle->WorldPose().Rot().Yaw());
+    linear_vel = vehicle->WorldLinearVel();
+    linear_vel_x = cosf(yaw) * linear_vel.X() + sinf(yaw) * linear_vel.Y();
     world->Step(100);
     executor.spin_once(100ms);
     gazebo::common::Time::MSleep(100);
@@ -105,9 +113,12 @@ TEST_P(GazeboRosDiffDriveTest, Publishing)
   EXPECT_LT(0.0, latestMsg->pose.pose.orientation.z);
 
   // Check movement
+  yaw = static_cast<float>(vehicle->WorldPose().Rot().Yaw());
+  linear_vel = vehicle->WorldLinearVel();
+  linear_vel_x = cosf(yaw) * linear_vel.X() + sinf(yaw) * linear_vel.Y();
   EXPECT_LT(0.0, vehicle->WorldPose().Pos().X());
-  EXPECT_LT(0.0, vehicle->WorldPose().Rot().Yaw());
-  EXPECT_NEAR(1.0, vehicle->WorldLinearVel().X(), tol);
+  EXPECT_LT(0.0, yaw);
+  EXPECT_NEAR(1.0, linear_vel_x, tol);
   EXPECT_NEAR(0.1, vehicle->WorldAngularVel().Z(), tol);
 }
 

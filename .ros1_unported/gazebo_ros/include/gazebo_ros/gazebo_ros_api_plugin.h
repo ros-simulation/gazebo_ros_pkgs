@@ -63,9 +63,6 @@
 #include "gazebo_msgs/SetLightProperties.h"
 
 // Topics
-#include "gazebo_msgs/ModelStates.h"
-#include "gazebo_msgs/LinkStates.h"
-
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/Twist.h"
@@ -114,18 +111,6 @@ public:
   void advertiseServices();
 
   /// \brief
-  void onLinkStatesConnect();
-
-  /// \brief
-  void onModelStatesConnect();
-
-  /// \brief
-  void onLinkStatesDisconnect();
-
-  /// \brief
-  void onModelStatesDisconnect();
-
-  /// \brief
   bool getModelProperties(gazebo_msgs::GetModelProperties::Request &req,gazebo_msgs::GetModelProperties::Response &res);
 
   /// \brief
@@ -164,12 +149,6 @@ private:
   void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
   void publishSimTime();
 
-  /// \brief
-  void publishLinkStates();
-
-  /// \brief
-  void publishModelStates();
-
   /// \brief Used for the dynamic reconfigure callback function template
   void physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level);
 
@@ -198,8 +177,6 @@ private:
 
   gazebo::physics::WorldPtr world_;
   gazebo::event::ConnectionPtr time_update_event_;
-  gazebo::event::ConnectionPtr pub_link_states_event_;
-  gazebo::event::ConnectionPtr pub_model_states_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
   ros::ServiceServer get_model_properties_service_;
@@ -213,10 +190,6 @@ private:
   ros::ServiceServer get_physics_properties_service_;
   ros::ServiceServer set_joint_properties_service_;
   ros::ServiceServer set_model_configuration_service_;
-  ros::Publisher     pub_link_states_;
-  ros::Publisher     pub_model_states_;
-  int                pub_link_states_connection_count_;
-  int                pub_model_states_connection_count_;
 
   // ROS comm
   boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;

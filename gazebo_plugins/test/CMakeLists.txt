@@ -12,25 +12,32 @@ endforeach()
 
 # Tests
 set(tests
+  test_gazebo_ros_ackermann_drive
   test_gazebo_ros_bumper
   test_gazebo_ros_diff_drive
+  test_gazebo_ros_elevator
   test_gazebo_ros_force
   test_gazebo_ros_ft_sensor
+  test_gazebo_ros_hand_of_god
+  test_gazebo_ros_harness
   test_gazebo_ros_imu_sensor
+  test_gazebo_ros_joint_pose_trajectory
   test_gazebo_ros_joint_state_publisher
   test_gazebo_ros_p3d
+  test_gazebo_ros_planar_move
   test_gazebo_ros_ray_sensor
   test_gazebo_ros_tricycle_drive
+  test_gazebo_ros_vacuum_gripper
 )
 
 if(ENABLE_DISPLAY_TESTS)
 set(tests ${tests}
   test_gazebo_ros_camera
+  test_gazebo_ros_camera_distortion
+  test_gazebo_ros_camera_triggered
   test_gazebo_ros_depth_camera
   test_gazebo_ros_multicamera
-  # TODO(louise) Test hangs on teardown while destroying 2nd node
-  # test_gazebo_ros_camera_distortion
-  test_gazebo_ros_camera_triggered
+  test_gazebo_ros_projector
   test_gazebo_ros_video
 )
 endif()
@@ -57,6 +64,12 @@ foreach(test ${tests})
     "nav_msgs"
     "rclcpp"
     "sensor_msgs"
+    "std_msgs"
+    "std_srvs"
+    "tf2"
+    "tf2_geometry_msgs"
+    "tf2_ros"
+    "trajectory_msgs"
   )
 endforeach()
 

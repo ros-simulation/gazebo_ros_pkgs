@@ -23,9 +23,11 @@ find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(trajectory_msgs REQUIRED)
 
 include_directories(include
   ${gazebo_dev_INCLUDE_DIRS}
@@ -205,6 +207,118 @@ ament_target_dependencies(gazebo_ros_bumper
 )
 ament_export_libraries(gazebo_ros_bumper)
 
+# gazebo_ros_harness
+add_library(gazebo_ros_harness SHARED
+  src/gazebo_ros_harness.cpp
+)
+ament_target_dependencies(gazebo_ros_harness
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "std_msgs"
+)
+target_link_libraries(gazebo_ros_harness
+  HarnessPlugin
+)
+ament_export_libraries(gazebo_ros_harness)
+
+# gazebo_ros_hand_of_god
+add_library(gazebo_ros_hand_of_god SHARED
+  src/gazebo_ros_hand_of_god.cpp
+)
+ament_target_dependencies(gazebo_ros_hand_of_god
+  "gazebo_ros"
+  "gazebo_dev"
+  "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+)
+ament_export_libraries(gazebo_ros_hand_of_god)
+
+# gazebo_ros_ackermann_drive
+add_library(gazebo_ros_ackermann_drive SHARED
+  src/gazebo_ros_ackermann_drive.cpp
+)
+ament_target_dependencies(gazebo_ros_ackermann_drive
+  "gazebo_dev"
+  "gazebo_ros"
+  "geometry_msgs"
+  "nav_msgs"
+  "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+)
+ament_export_libraries(gazebo_ros_ackermann_drive)
+
+# gazebo_ros_elevator
+add_library(gazebo_ros_elevator SHARED
+  src/gazebo_ros_elevator.cpp
+)
+ament_target_dependencies(gazebo_ros_elevator
+  "gazebo_ros"
+  "gazebo_dev"
+  "rclcpp"
+  "std_msgs"
+)
+target_link_libraries(gazebo_ros_elevator
+  ElevatorPlugin
+)
+ament_export_libraries(gazebo_ros_elevator)
+
+# gazebo_ros_vacuum_gripper
+add_library(gazebo_ros_vacuum_gripper SHARED
+  src/gazebo_ros_vacuum_gripper.cpp
+)
+ament_target_dependencies(gazebo_ros_vacuum_gripper
+  "gazebo_ros"
+  "gazebo_dev"
+  "rclcpp"
+  "std_msgs"
+  "std_srvs"
+)
+ament_export_libraries(gazebo_ros_vacuum_gripper)
+
+# gazebo_ros_joint_pose_trajectory
+add_library(gazebo_ros_joint_pose_trajectory SHARED
+  src/gazebo_ros_joint_pose_trajectory.cpp
+)
+ament_target_dependencies(gazebo_ros_joint_pose_trajectory
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "trajectory_msgs"
+)
+ament_export_libraries(gazebo_ros_joint_pose_trajectory)
+
+# gazebo_ros_planar_move
+add_library(gazebo_ros_planar_move SHARED
+  src/gazebo_ros_planar_move.cpp
+)
+ament_target_dependencies(gazebo_ros_planar_move
+  "gazebo_dev"
+  "gazebo_ros"
+  "nav_msgs"
+  "rclcpp"
+  "tf2"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+)
+ament_export_libraries(gazebo_ros_planar_move)
+
+# gazebo_ros_projector
+add_library(gazebo_ros_projector SHARED
+  src/gazebo_ros_projector.cpp
+)
+ament_target_dependencies(gazebo_ros_projector
+  "gazebo_ros"
+  "gazebo_dev"
+  "rclcpp"
+  "std_msgs"
+)
+ament_export_libraries(gazebo_ros_projector)
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
@@ -223,17 +337,25 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(TARGETS
+    gazebo_ros_ackermann_drive
     gazebo_ros_bumper
     gazebo_ros_camera
     gazebo_ros_diff_drive
+    gazebo_ros_elevator
     gazebo_ros_force
     gazebo_ros_ft_sensor
+    gazebo_ros_hand_of_god
+    gazebo_ros_harness
     gazebo_ros_imu_sensor
+    gazebo_ros_joint_pose_trajectory
     gazebo_ros_joint_state_publisher
+    gazebo_ros_planar_move
+    gazebo_ros_projector
     gazebo_ros_ray_sensor
     gazebo_ros_p3d
     gazebo_ros_template
     gazebo_ros_tricycle_drive
+    gazebo_ros_vacuum_gripper
     gazebo_ros_video
     multi_camera_plugin
   ARCHIVE DESTINATION lib
