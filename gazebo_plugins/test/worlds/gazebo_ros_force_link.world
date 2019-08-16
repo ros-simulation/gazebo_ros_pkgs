@@ -1,16 +1,4 @@
 <?xml version="1.0"?>
-<!--
-  Gazebo ROS force plugin demo
-
-  If you want the force to be applied on the world frame, use
-    <force_frame>world</force_frame>
-  If you want the force to be applied on the link frame, use
-    <force_frame>link</force_frame>
-
-  Try for example:
-
-  ros2 topic pub -1 /demo/force_demo geometry_msgs/Wrench "force: {x: 10.0}"
--->
 <sdf version="1.6">
   <world name="default">
     <include>
@@ -20,8 +8,8 @@
       <uri>model://sun</uri>
     </include>
     <model name="box">
-      <pose>0 0 0.5 0 0 0</pose>
-      <link name="link">
+      <pose>0 0 0.5 0 0 -1.5707963267948966</pose>
+      <link name="box_link">
         <collision name="collision">
           <geometry>
             <box>
@@ -39,11 +27,11 @@
       </link>
       <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
         <ros>
-          <namespace>/demo</namespace>
-          <argument>gazebo_ros_force:=force_demo</argument>
+          <namespace>/test</namespace>
+          <argument>gazebo_ros_force:=force_test</argument>
         </ros>
-        <link_name>link</link_name>
-        <force_frame>world</force_frame>
+        <link_name>box_link</link_name>
+        <force_frame>link</force_frame>
       </plugin>
     </model>
   </world>
