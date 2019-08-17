@@ -65,17 +65,16 @@ public:
 
     // Apply force
     auto msg = geometry_msgs::msg::Wrench();
-    switch (force_axis)
-    {
-    case AXIS::Y:
-      msg.force.y = 10.0;
-      break;
-    case AXIS::Z:
-      msg.force.z = 10.0;
-      break;
-    default:
-      msg.force.x = 10.0;
-      break;
+    switch (force_axis) {
+      case AXIS::Y:
+        msg.force.y = 10.0;
+        break;
+      case AXIS::Z:
+        msg.force.z = 10.0;
+        break;
+      default:
+        msg.force.x = 10.0;
+        break;
     }
     msg.torque.z = 10.0;
     pub->publish(msg);
@@ -109,7 +108,7 @@ TEST_F(GazeboRosForceTest, ApplyForceTorqueLink)
   // Load test world and start paused
   this->Load("worlds/gazebo_ros_force_link.world", true);
 
-  this->ApplyForceTorque(AXIS::Y, -M_PI/2);
+  this->ApplyForceTorque(AXIS::Y, -M_PI / 2);
 }
 
 int main(int argc, char ** argv)

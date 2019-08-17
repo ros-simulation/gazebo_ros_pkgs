@@ -75,16 +75,16 @@ void GazeboRosForce::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   // Force frame
   bool force_on_world_frame;
   if (!sdf->HasElement("force_frame")) {
-    RCLCPP_WARN(logger, "Force plugin missing <force_frame> wasn't set, therefore it's been set as 'world'. The other option is 'link'.");
+    RCLCPP_WARN(logger, "Force plugin missing <force_frame> wasn't set,"
+      "therefore it's been set as 'world'. The other option is 'link'.");
     force_on_world_frame = true;
-  }
-  else {
+  } else {
     auto force_frame = sdf->GetElement("force_frame")->Get<std::string>();
-    if (force_frame == "world")
+    if (force_frame == "world") {
       force_on_world_frame = true;
-    else if (force_frame == "link")
+    } else if (force_frame == "link") {
       force_on_world_frame = false;
-    else {
+    } else {
       RCLCPP_ERROR(logger, "Force plugin <force_frame> can only be 'world' or 'link'");
       return;
     }
@@ -99,8 +99,8 @@ void GazeboRosForce::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 
   // Callback on every iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    force_on_world_frame ? std::bind(&GazeboRosForce::OnUpdate, this)
-      : std::bind(&GazeboRosForce::OnUpdateRelative, this));
+    force_on_world_frame ? std::bind(&GazeboRosForce::OnUpdate, this) :
+    std::bind(&GazeboRosForce::OnUpdateRelative, this));
 }
 
 void GazeboRosForce::OnRosWrenchMsg(const geometry_msgs::msg::Wrench::SharedPtr msg)
@@ -121,8 +121,10 @@ void GazeboRosForce::OnUpdate()
 
 void GazeboRosForce::OnUpdateRelative()
 {
-  impl_->link_->AddRelativeForce(gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.force));
-  impl_->link_->AddRelativeTorque(gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.torque));
+  impl_->link_->AddRelativeForce(
+    gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.force));
+  impl_->link_->AddRelativeTorque(
+    gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.torque));
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosForce)
