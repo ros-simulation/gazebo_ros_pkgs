@@ -24,6 +24,35 @@ namespace gazebo_ros
 
 class GazeboRosPropertiesPrivate;
 
+/// Provides services and topics to query and set the properties of entities in simulation.
+///
+///  Services:
+///
+///      get_model_properties (gazebo_msgs::srv::GetModelProperties)
+///          Get a model's properties including
+///          parent's name, links, collisions, joints and child links.
+///
+///      get_joint_properties (gazebo_msgs::srv::GetJointProperties)
+///          Get a joint's properties including
+///          joint type, dynamics, position and velocity.
+///
+///      set_joint_properties (gazebo_msgs::srv::SetJointProperties)
+///          Set OJE joint properties.
+///
+///      get_link_properties (gazebo_msgs::srv::GetLinkProperties)
+///          Get a link's properties including
+///          center of mass, gravity, mass and inertia.
+///
+///      set_link_properties (gazebo_msgs::srv::SetLinkProperties)
+///          Set a link's properties including
+///          center of mass, gravity, mass and inertia.
+///
+///      get_light_properties (gazebo_msgs::srv::GetLightProperties)
+///          Get light's properties including color and attenuation.
+///
+///      set_light_properties (gazebo_msgs::srv::SetLightProperties)
+///          Set light's properties including color and attenuation.
+///
 class GazeboRosProperties : public gazebo::WorldPlugin
 {
 public:

@@ -176,25 +176,25 @@ void GazeboRosPropertiesTest::GetModelProperties(
 
   // gazebo models simple_arm
   EXPECT_EQ(response->parent_model_name, "");
-  EXPECT_EQ(response->canonical_link_name, "simple_arm::arm_base");
+  EXPECT_EQ(response->canonical_body_name, "simple_arm::arm_base");
 
-  ASSERT_EQ(5u, response->link_names.size());
-  EXPECT_EQ(response->link_names[0], "simple_arm::arm_base");
-  EXPECT_EQ(response->link_names[1], "simple_arm::arm_shoulder_pan");
-  EXPECT_EQ(response->link_names[2], "simple_arm::arm_elbow_pan");
-  EXPECT_EQ(response->link_names[3], "simple_arm::arm_wrist_lift");
-  EXPECT_EQ(response->link_names[4], "simple_arm::arm_wrist_roll");
+  ASSERT_EQ(5u, response->body_names.size());
+  EXPECT_EQ(response->body_names[0], "simple_arm::arm_base");
+  EXPECT_EQ(response->body_names[1], "simple_arm::arm_shoulder_pan");
+  EXPECT_EQ(response->body_names[2], "simple_arm::arm_elbow_pan");
+  EXPECT_EQ(response->body_names[3], "simple_arm::arm_wrist_lift");
+  EXPECT_EQ(response->body_names[4], "simple_arm::arm_wrist_roll");
 
-  ASSERT_EQ(9u, response->collision_names.size());
-  EXPECT_EQ(response->collision_names[0], "arm_base_collision");
-  EXPECT_EQ(response->collision_names[1], "arm_base_collision_arm_trunk");
-  EXPECT_EQ(response->collision_names[2], "arm_shoulder_pan_collision");
-  EXPECT_EQ(response->collision_names[3], "arm_shoulder_pan_collision_arm_shoulder");
-  EXPECT_EQ(response->collision_names[4], "arm_elbow_pan_collision");
-  EXPECT_EQ(response->collision_names[5], "arm_elbow_pan_collision_arm_elbow");
-  EXPECT_EQ(response->collision_names[6], "arm_elbow_pan_collision_arm_wrist");
-  EXPECT_EQ(response->collision_names[7], "arm_wrist_lift_collision");
-  EXPECT_EQ(response->collision_names[8], "arm_wrist_roll_collision");
+  ASSERT_EQ(9u, response->geom_names.size());
+  EXPECT_EQ(response->geom_names[0], "arm_base_collision");
+  EXPECT_EQ(response->geom_names[1], "arm_base_collision_arm_trunk");
+  EXPECT_EQ(response->geom_names[2], "arm_shoulder_pan_collision");
+  EXPECT_EQ(response->geom_names[3], "arm_shoulder_pan_collision_arm_shoulder");
+  EXPECT_EQ(response->geom_names[4], "arm_elbow_pan_collision");
+  EXPECT_EQ(response->geom_names[5], "arm_elbow_pan_collision_arm_elbow");
+  EXPECT_EQ(response->geom_names[6], "arm_elbow_pan_collision_arm_wrist");
+  EXPECT_EQ(response->geom_names[7], "arm_wrist_lift_collision");
+  EXPECT_EQ(response->geom_names[8], "arm_wrist_roll_collision");
 
   ASSERT_EQ(4u, response->joint_names.size());
   EXPECT_EQ(response->joint_names[0], "arm_shoulder_pan_joint");

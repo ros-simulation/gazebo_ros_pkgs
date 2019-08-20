@@ -203,22 +203,22 @@ void GazeboRosPropertiesPrivate::GetModelProperties(
   if (parent_model) {_res->parent_model_name = parent_model->GetName();}
 
   // get list of child links, collisions
-  _res->link_names.clear();
-  _res->collision_names.clear();
+  _res->body_names.clear();
+  _res->geom_names.clear();
   for (unsigned int i = 0; i < model->GetChildCount(); ++i) {
     gazebo::physics::LinkPtr link =
       boost::dynamic_pointer_cast<gazebo::physics::Link>(model->GetChild(i));
     if (link) {
       if (link->IsCanonicalLink()) {
-        _res->canonical_link_name = link->GetScopedName();
+        _res->canonical_body_name = link->GetScopedName();
       }
-      _res->link_names.push_back(link->GetScopedName());
+      _res->body_names.push_back(link->GetScopedName());
       // get list of collisions
       for (unsigned int j = 0; j < link->GetChildCount(); j++) {
         gazebo::physics::CollisionPtr collision =
           boost::dynamic_pointer_cast<gazebo::physics::Collision>(link->GetChild(j));
         if (collision) {
-          _res->collision_names.push_back(collision->GetName());
+          _res->geom_names.push_back(collision->GetName());
         }
       }
     }
