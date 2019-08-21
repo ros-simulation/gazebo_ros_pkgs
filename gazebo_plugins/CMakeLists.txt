@@ -144,6 +144,18 @@ target_link_libraries(gazebo_ros_imu_sensor
 )
 ament_export_libraries(gazebo_ros_imu_sensor)
 
+
+# gazebo_ros_gps_sensor
+add_library(gazebo_ros_gps_sensor SHARED
+  src/gazebo_ros_gps_sensor.cpp
+)
+ament_target_dependencies(gazebo_ros_gps_sensor
+  "gazebo_ros"
+  "sensor_msgs"
+  "gazebo_dev"
+)
+ament_export_libraries(gazebo_ros_gps_sensor)
+
 # gazebo_ros_ray_sensor
 add_library(gazebo_ros_ray_sensor SHARED
   src/gazebo_ros_ray_sensor.cpp
@@ -362,6 +374,7 @@ install(TARGETS
     gazebo_ros_hand_of_god
     gazebo_ros_harness
     gazebo_ros_imu_sensor
+    gazebo_ros_gps_sensor
     gazebo_ros_joint_pose_trajectory
     gazebo_ros_joint_state_publisher
     gazebo_ros_planar_move

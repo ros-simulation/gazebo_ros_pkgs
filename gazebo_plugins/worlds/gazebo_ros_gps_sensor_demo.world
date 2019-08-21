@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!--
+  Gazebo ROS GPS plugin demo
+
+  Try for example:
+
+  ros2 topic echo /gps/data
+-->
+<sdf version="1.6">
+  <world name="gazebo_ros_gps_sensor_world">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <spherical_coordinates>
+        <!-- currently gazebo has a bug: instead of outputing lat, long, altitude in ENU
+        (x = East, y = North and z = Up) as the default configurations, it's outputting (-E)(-N)U,
+        therefore we rotate the default frame 180 so that it would go back to ENU -->
+        <heading_deg>180</heading_deg>
+    </spherical_coordinates>
+    <model name="box">
+      <pose>0 0 0.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+        <sensor name="my_gps" type="gps">
+          <always_on>true</always_on>
+          <update_rate>30</update_rate>
+          <gps>
+            <position_sensing>
+              <horizontal>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </horizontal>
+              <vertical>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </vertical>
+            </position_sensing>
+          </gps>
+          <plugin name="my_gps_plugin" filename="libgazebo_ros_gps_sensor.so">
+            <ros>
+              <namespace>/gps</namespace>
+              <argument>~/out:=data</argument>
+            </ros>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>
