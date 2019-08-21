@@ -1,4 +1,11 @@
 <?xml version="1.0"?>
+<!--
+  Gazebo ROS GPS plugin demo
+
+  Try for example:
+
+  ros2 topic echo /gps/data
+-->
 <sdf version="1.6">
   <world name="gazebo_ros_gps_sensor_world">
     <include>
