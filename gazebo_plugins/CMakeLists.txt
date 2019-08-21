@@ -93,6 +93,29 @@ ament_target_dependencies(gazebo_ros_template
 )
 ament_export_libraries(gazebo_ros_template)
 
+# multi_camera_plugin
+add_library(multi_camera_plugin SHARED
+  src/multi_camera_plugin.cpp
+)
+
+# gazebo_ros_multi_camera
+add_library(gazebo_ros_multi_camera SHARED
+  src/gazebo_ros_multi_camera.cpp
+)
+ament_target_dependencies(gazebo_ros_multi_camera
+  "camera_info_manager"
+  "gazebo_dev"
+  "gazebo_ros"
+  "image_transport"
+  "rclcpp"
+  "sensor_msgs"
+  "std_msgs"
+)
+target_link_libraries(gazebo_ros_multi_camera
+  multi_camera_plugin
+)
+ament_export_libraries(gazebo_ros_multi_camera)
+
 # gazebo_ros_depth_camera
 add_library(gazebo_ros_depth_camera SHARED
   src/gazebo_ros_depth_camera.cpp
@@ -127,6 +150,7 @@ ament_target_dependencies(gazebo_ros_camera
 target_link_libraries(gazebo_ros_camera
   CameraPlugin
   gazebo_ros_depth_camera
+  gazebo_ros_multi_camera
 )
 ament_export_libraries(gazebo_ros_camera)
 
@@ -364,6 +388,7 @@ install(TARGETS
     gazebo_ros_imu_sensor
     gazebo_ros_joint_pose_trajectory
     gazebo_ros_joint_state_publisher
+    gazebo_ros_multi_camera
     gazebo_ros_planar_move
     gazebo_ros_projector
     gazebo_ros_ray_sensor
@@ -372,6 +397,7 @@ install(TARGETS
     gazebo_ros_tricycle_drive
     gazebo_ros_vacuum_gripper
     gazebo_ros_video
+    multi_camera_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
