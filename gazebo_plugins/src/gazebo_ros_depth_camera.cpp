@@ -19,7 +19,6 @@
 #include <ignition/math/Helpers.hh>
 
 #include <camera_info_manager/camera_info_manager.h>
-#include <gazebo_plugins/gazebo_ros_depth_camera.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
@@ -35,6 +34,9 @@
 #include <memory>
 #include <mutex>
 #include <string>
+
+// Not installed on Dashing because it will be removed on Eloquent
+#include "gazebo_ros_depth_camera.hpp"
 
 #define FLOAT_SIZE sizeof(float)
 

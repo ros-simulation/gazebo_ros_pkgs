@@ -158,7 +158,7 @@
             <!-- omit camera_name to default to sensor name -->
             <camera_name>mycamera</camera_name>
 
-            <!-- frame_name>omit so it defaults to link name</frameName-->
+            <!-- frame_name>omit so it defaults to link name</frame_name-->
 
             <min_depth>0.1</min_depth>
             <max_depth>500</max_depth>
