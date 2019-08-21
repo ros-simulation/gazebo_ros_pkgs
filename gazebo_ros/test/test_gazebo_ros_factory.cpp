@@ -108,6 +108,10 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
       "<inertia ixx='1' ixy='0.0' ixz='0.0' iyy='1' iyz='0.0' izz='1'/>"
       "</inertial>"
       "</link>"
+      "<gazebo>"
+      "  <plugin filename='fake_plugin.so' name='fake'>"
+      "  </plugin>"
+      "</gazebo>"
       "</robot>";
 
     auto response_future = spawn_client->async_send_request(request);
