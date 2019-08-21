@@ -318,7 +318,18 @@ void GazeboRosFactoryPrivate::AddNamespace(
     // <plugin>
     if (child_elem->GetName() == "plugin") {
       // Get / create <ros>
-      auto ros_elem = child_elem->GetElement("ros");
+      sdf::ElementPtr ros_elem;
+      if (child_elem->HasElement("ros")) {
+        ros_elem = child_elem->GetElement("ros");
+      } else {
+        // Tell SDF it's ok for <plugin> to have <ros> element
+        auto ros_desc = std::make_shared<sdf::Element>();
+        ros_desc->SetName("ros");
+        child_elem->AddElementDescription(ros_desc);
+
+        // Then we can add the element
+        ros_elem = child_elem->AddElement("ros");
+      }
 
       // Get namespace element
       sdf::ElementPtr ns_elem;
