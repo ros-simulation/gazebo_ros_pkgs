@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_DEPTH_CAMERA_HPP_
-#define GAZEBO_PLUGINS__GAZEBO_ROS_DEPTH_CAMERA_HPP_
+#ifndef GAZEBO_ROS_DEPTH_CAMERA_HPP_
+#define GAZEBO_ROS_DEPTH_CAMERA_HPP_
 
 #include <gazebo/plugins/DepthCameraPlugin.hh>
 #include <std_msgs/msg/empty.hpp>
@@ -123,4 +123,4 @@ private:
 };
 }  // namespace gazebo_plugins
 
-#endif  // GAZEBO_PLUGINS__GAZEBO_ROS_DEPTH_CAMERA_HPP_
+#endif  // GAZEBO_ROS_DEPTH_CAMERA_HPP_
