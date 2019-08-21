@@ -419,13 +419,7 @@ void GazeboRosPropertiesPrivate::SetLinkProperties(
       "SetLinkProperties: link not found, did you forget to scope the link by model name?";
   } else {
     gazebo::physics::InertialPtr mass = link->GetInertial();
-    // @todo: FIXME: add inertia matrix rotation to Gazebo
-    // mass.SetInertiaRotation(ignition::math::Quaternion(_req->com.orientation.w,
-    // _res->com.orientation.x,_req->com.orientation.y _req->com.orientation.z));
-    mass->SetCoG(ignition::math::Vector3d(
-        _req->com.position.x,
-        _req->com.position.y,
-        _req->com.position.z));
+    mass->SetCoG(gazebo_ros::Convert<ignition::math::Pose3d>(_req->com));
     mass->SetInertiaMatrix(_req->ixx, _req->iyy, _req->izz, _req->ixy, _req->ixz, _req->iyz);
     mass->SetMass(_req->mass);
     link->SetGravityMode(_req->gravity_mode);

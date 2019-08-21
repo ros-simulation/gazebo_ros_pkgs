@@ -113,28 +113,6 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Point & in)
   return out;
 }
 
-/// Generic conversion from a ROS geometry pose message to another type.
-/// \param[in] in Input message.
-/// \return Conversion result
-/// \tparam T Output type
-template<class T>
-T Convert(const geometry_msgs::msg::Pose &)
-{
-  T::ConversionNotImplemented;
-}
-
-/// \brief Specialized conversion from a ROS pose message to a ROS geometry transform message.
-/// \param[in] in ROS pose message to convert.
-/// \return A ROS geometry transform message.
-template<>
-geometry_msgs::msg::Transform Convert(const geometry_msgs::msg::Pose & in)
-{
-  geometry_msgs::msg::Transform msg;
-  msg.translation = Convert<geometry_msgs::msg::Vector3>(in.position);
-  msg.rotation = in.orientation;
-  return msg;
-}
-
 /// \brief Specialized conversion from an Ignition Math vector to a ROS message.
 /// \param[in] vec Ignition vector to convert.
 /// \return ROS geometry vector message
@@ -238,6 +216,38 @@ ignition::math::Pose3d Convert(const geometry_msgs::msg::Transform & in)
   msg.Pos() = Convert<ignition::math::Vector3d>(in.translation);
   msg.Rot() = Convert<ignition::math::Quaterniond>(in.rotation);
   return msg;
+}
+
+/// Generic conversion from a ROS geometry pose message to another type.
+/// \param[in] in Input message.
+/// \return Conversion result
+/// \tparam T Output type
+template<class T>
+T Convert(const geometry_msgs::msg::Pose &)
+{
+  T::ConversionNotImplemented;
+}
+
+/// \brief Specialized conversion from a ROS pose message to a ROS geometry transform message.
+/// \param[in] in ROS pose message to convert.
+/// \return A ROS geometry transform message.
+template<>
+geometry_msgs::msg::Transform Convert(const geometry_msgs::msg::Pose & in)
+{
+  geometry_msgs::msg::Transform msg;
+  msg.translation = Convert<geometry_msgs::msg::Vector3>(in.position);
+  msg.rotation = in.orientation;
+  return msg;
+}
+
+/// \brief Specialized conversion from a ROS pose message to an Ignition Math pose.
+/// \param[in] in ROS pose message to convert.
+/// \return Ignition Math pose.
+template<>
+ignition::math::Pose3d Convert(const geometry_msgs::msg::Pose & in)
+{
+  return {Convert<ignition::math::Vector3d>(in.position),
+    Convert<ignition::math::Quaterniond>(in.orientation)};
 }
 
 }  // namespace gazebo_ros
