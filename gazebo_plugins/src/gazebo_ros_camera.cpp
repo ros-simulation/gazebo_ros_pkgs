@@ -32,6 +32,9 @@
 #include <mutex>
 #include <string>
 
+// Not installed on Dashing because it will be removed on Eloquent
+#include "gazebo_ros_depth_camera.hpp"
+
 namespace gazebo_plugins
 {
 class GazeboRosCameraPrivate
@@ -72,6 +75,9 @@ public:
 
   /// Protects trigger.
   std::mutex trigger_mutex_;
+
+  /// Pointer to GazeboROS Depth Camera
+  std::shared_ptr<GazeboRosDepthCamera> depth_camera_;
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -86,6 +92,12 @@ GazeboRosCamera::~GazeboRosCamera()
 
 void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
+  if (std::dynamic_pointer_cast<gazebo::sensors::DepthCameraSensor>(_sensor)) {
+    impl_->depth_camera_ = std::make_shared<GazeboRosDepthCamera>();
+    impl_->depth_camera_->Load(_sensor, _sdf);
+    return;
+  }
+
   gazebo::CameraPlugin::Load(_sensor, _sdf);
 
   // Camera name

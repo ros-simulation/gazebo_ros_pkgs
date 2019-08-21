@@ -93,6 +93,24 @@ ament_target_dependencies(gazebo_ros_template
 )
 ament_export_libraries(gazebo_ros_template)
 
+# gazebo_ros_depth_camera
+add_library(gazebo_ros_depth_camera SHARED
+  src/gazebo_ros_depth_camera.cpp
+)
+ament_target_dependencies(gazebo_ros_depth_camera
+  "camera_info_manager"
+  "gazebo_dev"
+  "gazebo_ros"
+  "image_transport"
+  "rclcpp"
+  "sensor_msgs"
+  "std_msgs"
+)
+target_link_libraries(gazebo_ros_depth_camera
+  DepthCameraPlugin
+)
+ament_export_libraries(gazebo_ros_depth_camera)
+
 # gazebo_ros_camera
 add_library(gazebo_ros_camera SHARED
   src/gazebo_ros_camera.cpp
@@ -108,6 +126,7 @@ ament_target_dependencies(gazebo_ros_camera
 )
 target_link_libraries(gazebo_ros_camera
   CameraPlugin
+  gazebo_ros_depth_camera
 )
 ament_export_libraries(gazebo_ros_camera)
 
@@ -335,6 +354,7 @@ install(TARGETS
     gazebo_ros_ackermann_drive
     gazebo_ros_bumper
     gazebo_ros_camera
+    gazebo_ros_depth_camera
     gazebo_ros_diff_drive
     gazebo_ros_elevator
     gazebo_ros_force

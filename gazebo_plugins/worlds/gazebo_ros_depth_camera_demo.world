@@ -1,0 +1,170 @@
+<?xml version="1.0" ?>
+<!--
+  Gazebo ROS depth camera plugin demo
+
+  Try for example:
+
+  * Try listening to camera info at
+      `/demo_cam/mycamera/raw_cam_info_demo`
+      `/demo_cam/mycamera/depth_cam_info_demo`
+
+  * Launch RViz
+  * Visualize Raw Images from `/demo_cam/mycamera/image_demo`
+  * Visualize Depth Images from `/demo_cam/mycamera/depth_demo`
+  * Visualize Point Cloud from `/demo_cam/mycamera/points_demo`
+
+-->
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+            </friction>
+            <bounce>
+              <restitution_coefficient>1.0</restitution_coefficient>
+              <threshold>0</threshold>
+            </bounce>
+            <contact>
+              <ode>
+                <max_vel>10000</max_vel>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Grey</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="ball">
+      <allow_auto_disable>false</allow_auto_disable>
+      <pose>-1 0 1 0 0 0</pose>
+      <static>false</static>
+      <link name="link">
+        <inertial>
+          <mass>0.026</mass>
+          <!-- inertia based on solid sphere 2/5 mr^2 -->
+          <inertia>
+            <ixx>1.664e-5</ixx>
+            <iyy>1.664e-5</iyy>
+            <izz>1.664e-5</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <bounce>
+              <restitution_coefficient>1.0</restitution_coefficient>
+              <threshold>0</threshold>
+            </bounce>
+            <contact>
+              <ode>
+                <max_vel>10000</max_vel>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="camera_model">
+      <pose>0 0 0.5 0 0 3.14</pose>
+      <static>true</static>
+      <link name="camera_link">
+        <sensor type="depth" name="camera1">
+          <update_rate>60</update_rate>
+          <visualize>false</visualize>
+          <camera>
+            <horizontal_fov>1.92</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>B8G8R8</format>
+            </image>
+            <depth_camera>
+            </depth_camera>
+            <clip>
+              <near>0.02</near>
+              <far>300</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <!-- Noise is sampled independently per pixel on each frame.
+                   That pixel's noise value is added to each of its color
+                   channels, which at that point lie in the range [0,1]. -->
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+          </camera>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <ros>
+              <namespace>demo_cam</namespace>
+
+              <!-- topics need to be prefixed with camera_name for remapping -->
+              <argument>mycamera/image_raw:=mycamera/image_demo</argument>
+              <argument>mycamera/depth/image_raw:=mycamera/depth_demo</argument>
+              <argument>mycamera/camera_info:=mycamera/raw_cam_info_demo</argument>
+              <argument>mycamera/depth/camera_info:=mycamera/depth_cam_info_demo</argument>
+              <argument>mycamera/points:=mycamera/points_demo</argument>
+            </ros>
+
+            <!-- omit camera_name to default to sensor name -->
+            <camera_name>mycamera</camera_name>
+
+            <!-- frame_name>omit so it defaults to link name</frame_name-->
+
+            <min_depth>0.1</min_depth>
+            <max_depth>500</max_depth>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>
