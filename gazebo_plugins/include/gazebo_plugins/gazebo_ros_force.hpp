@@ -69,10 +69,6 @@ protected:
   /// Optional callback to be called at every simulation iteration.
   virtual void OnUpdate();
 
-  /// Optional callback to be called at every simulation iteration when the force
-  /// is applied on the body frame.
-  virtual void OnUpdateRelative();
-
 private:
   /// Callback when a ROS Wrench message is received
   /// \param[in] msg The Incoming ROS message representing the new force to
