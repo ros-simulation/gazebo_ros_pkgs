@@ -2,9 +2,18 @@
 <!--
   Gazebo ROS force plugin demo
 
+  If you want the force to be applied on the world frame, use
+    <force_frame>world</force_frame>
+  If you want the force to be applied on the link frame, use
+    <force_frame>link</force_frame>
+
   Try for example:
 
-  ros2 topic pub -1 /demo/force_demo geometry_msgs/Wrench "force: {x: 10.0}"
+  ros2 topic pub -1 /demo/world/force_demo geometry_msgs/Wrench "force: {x: 10.0}"
+
+  and
+
+  ros2 topic pub -1 /demo/link/force_demo geometry_msgs/Wrench "force: {x: 10.0}"
 -->
 <sdf version="1.6">
   <world name="default">
@@ -14,8 +23,8 @@
     <include>
       <uri>model://sun</uri>
     </include>
-    <model name="box">
-      <pose>0 0 0.5 0 0 0</pose>
+    <model name="force_on_world_frame">
+      <pose>0 3 0.5 0 0 1.57</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -34,10 +43,38 @@
       </link>
       <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
         <ros>
-          <namespace>/demo</namespace>
+          <namespace>/demo/world</namespace>
           <argument>gazebo_ros_force:=force_demo</argument>
         </ros>
         <link_name>link</link_name>
+        <force_frame>world</force_frame>
+      </plugin>
+    </model>
+    <model name="force_on_link_frame">
+      <pose>0 -3 0.5 0 0 1.57</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+      <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
+        <ros>
+          <namespace>/demo/link</namespace>
+          <argument>gazebo_ros_force:=force_demo</argument>
+        </ros>
+        <link_name>link</link_name>
+        <force_frame>link</force_frame>
       </plugin>
     </model>
   </world>
