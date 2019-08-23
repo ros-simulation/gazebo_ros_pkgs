@@ -8,7 +8,7 @@
       <uri>model://sun</uri>
     </include>
     <model name="box">
-      <pose>0 0 0.5 0 0 0</pose>
+      <pose>0 0 0.5 0 0 -1.5707963267948966</pose>
       <link name="box_link">
         <collision name="collision">
           <geometry>
@@ -31,7 +31,7 @@
           <argument>gazebo_ros_force:=force_test</argument>
         </ros>
         <link_name>box_link</link_name>
-        <force_frame>world</force_frame>
+        <force_frame>link</force_frame>
       </plugin>
     </model>
   </world>

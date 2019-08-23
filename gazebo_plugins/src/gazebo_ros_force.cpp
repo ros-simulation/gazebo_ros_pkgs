@@ -43,6 +43,9 @@ public:
 
   // Pointer to the update event connection
   gazebo::event::ConnectionPtr update_connection_;
+
+  /// Indicates that the force should be applied on the world frame instead of the link frame
+  bool force_on_world_frame_;
 };
 
 GazeboRosForce::GazeboRosForce()
@@ -72,6 +75,23 @@ void GazeboRosForce::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     return;
   }
 
+  // Force frame
+  if (!sdf->HasElement("force_frame")) {
+    RCLCPP_INFO(logger, "Force plugin missing <force_frame> wasn't set,"
+      "therefore it's been set as 'world'. The other option is 'link'.");
+    impl_->force_on_world_frame_ = true;
+  } else {
+    auto force_frame = sdf->GetElement("force_frame")->Get<std::string>();
+    if (force_frame == "world") {
+      impl_->force_on_world_frame_ = true;
+    } else if (force_frame == "link") {
+      impl_->force_on_world_frame_ = false;
+    } else {
+      RCLCPP_ERROR(logger, "Force plugin <force_frame> can only be 'world' or 'link'");
+      return;
+    }
+  }
+
   // Subscribe to wrench messages
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
@@ -96,8 +116,17 @@ void GazeboRosForce::OnRosWrenchMsg(const geometry_msgs::msg::Wrench::SharedPtr 
 
 void GazeboRosForce::OnUpdate()
 {
-  impl_->link_->AddForce(gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.force));
-  impl_->link_->AddTorque(gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.torque));
+  if (impl_->force_on_world_frame_) {
+    impl_->link_->AddForce(
+      gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.force));
+    impl_->link_->AddTorque(
+      gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.torque));
+  } else {
+    impl_->link_->AddRelativeForce(
+      gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.force));
+    impl_->link_->AddRelativeTorque(
+      gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.torque));
+  }
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosForce)
