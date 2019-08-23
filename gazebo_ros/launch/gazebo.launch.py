@@ -14,7 +14,6 @@
 
 """Launch Gazebo server and client with command line arguments."""
 
-from launch import Condition
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
