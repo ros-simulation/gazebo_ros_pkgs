@@ -8,6 +8,7 @@
   <description>Interface for using ROS with the <a href="http://gazebosim.org/">Gazebo</a> simulator.</description>
 
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
+  <maintainer email="louise@openrobotics.org">Louise Poubel</maintainer>
 
   <license>BSD,LGPL,Apache 2.0</license>
 

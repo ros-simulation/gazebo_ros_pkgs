@@ -8,6 +8,7 @@
   </description>
 
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
+  <maintainer email="louise@openrobotics.org">Louise Poubel</maintainer>
 
   <license>BSD, Apache 2.0</license>
 
