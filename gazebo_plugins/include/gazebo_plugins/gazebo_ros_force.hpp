@@ -46,6 +46,9 @@ class GazeboRosForcePrivate;
       <!-- Name of link within model which will receive the force -->
       <link_name>link</link_name>
 
+      <!-- Frame where the force/torque will be applied (options: world; link)-->
+      <force_frame>link</force_frame>
+
     </plugin>
   \endcode
 */
