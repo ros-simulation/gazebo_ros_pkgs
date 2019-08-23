@@ -51,6 +51,8 @@
               <namespace>test_cam</namespace>
               <argument>camera1/left/image_raw:=camera/left/image_test</argument>
               <argument>camera1/right/image_raw:=camera/right/image_test</argument>
+              <argument>camera1/left/camera_info:=camera/left/camera_info_test</argument>
+              <argument>camera1/right/camera_info:=camera/right/camera_info_test</argument>
             </ros>
             <!-- camera_name>omit so it defaults to sensor name</camera_name-->
             <!-- frame_name>omit so it defaults to link name</frame_name-->

@@ -105,7 +105,7 @@ TEST_P(GazeboRosMultiCameraTest, CameraSubscribeTest)
 }
 
 INSTANTIATE_TEST_CASE_P(GazeboRosMultiCamera, GazeboRosMultiCameraTest, ::testing::Values(
-    TestParams({"worlds/gazebo_ros_multicamera.world",
+    TestParams({"worlds/gazebo_ros_multi_camera.world",
       "test_cam/camera/left/image_test",
       "test_cam/camera/right/image_test"})
   ), );
