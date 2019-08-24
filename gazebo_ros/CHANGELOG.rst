@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.3 (2019-08-23)
+------------------
 * [ros2] Conditional launch includes (`#979 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/979>`_)
   * [ros2] Conditional launch includes
   Signed-off-by: Louise Poubel <louise@openrobotics.org>

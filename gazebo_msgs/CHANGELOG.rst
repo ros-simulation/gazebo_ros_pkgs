@@ -2,8 +2,8 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.3 (2019-08-23)
+------------------
 * Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
   Signed-off-by: Louise Poubel <louise@openrobotics.org>
 * Address reviews on `#868 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/868>`_ (`#972 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/972>`_)
