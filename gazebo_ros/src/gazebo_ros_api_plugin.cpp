@@ -28,13 +28,13 @@ namespace gazebo
 {
 
 GazeboRosApiPlugin::GazeboRosApiPlugin() :
-  physics_reconfigure_initialized_(false),
-  world_created_(false),
-  stop_(false),
   plugin_loaded_(false),
+  stop_(false),
   pub_link_states_connection_count_(0),
   pub_model_states_connection_count_(0),
-  pub_clock_frequency_(0)
+  physics_reconfigure_initialized_(false),
+  pub_clock_frequency_(0),
+  world_created_(false)
 {
   robot_namespace_.clear();
 }
