@@ -241,8 +241,8 @@ class SpawnEntityNode(Node):
 
         # If bond enabled, setup shutdown callback and wait for shutdown
         if self.args.bond:
-            self.get_logger().info('Waiting for shutdown to delete ' +
-                                    'entity [{}]'.format(self.args.entity))
+            self.get_logger().info(
+                'Waiting for shutdown to delete entity [{}]'.format(self.args.entity))
             try:
                 rclpy.spin(self)
             except KeyboardInterrupt:
@@ -292,8 +292,9 @@ class SpawnEntityNode(Node):
                     break
                 rclpy.spin_once(self)
         else:
-            self.get_logger().error('Service %s/delete_entity unavailable. ' +
-                                     'Was Gazebo started with GazeboRosFactory?')
+            self.get_logger().error(
+                'Service %s/delete_entity unavailable. ' +
+                'Was Gazebo started with GazeboRosFactory?')
 
     # def _set_model_configuration(self, joint_names, joint_positions):
     #     self.get_logger().info(
