@@ -25,7 +25,7 @@ from urllib.parse import SplitResult, urlsplit
 from xml.etree import ElementTree
 
 from gazebo_msgs.msg import ModelStates
-# from gazebo_msgs.srv import DeleteEntity
+from gazebo_msgs.srv import DeleteEntity
 # from gazebo_msgs.srv import SetModelConfiguration
 from gazebo_msgs.srv import SpawnEntity
 from geometry_msgs.msg import Pose
@@ -97,9 +97,8 @@ class SpawnEntityNode(Node):
         parser.add_argument('-package_to_model', action='store_true', help='convert urdf \
                             <mesh filename="package://..." to <mesh filename="model://..."')
 
-        # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
-        # parser.add_argument('-b', dest='bond', action='store_true', help='bond to gazebo \
-        #                      and delete the entity when this program is interrupted')
+        parser.add_argument('-b', dest='bond', action='store_true', help='bond to gazebo \
+                             and delete the entity when this program is interrupted')
         self.args = parser.parse_args(args[1:])
 
         # TODO(shivesh): Wait for /set_model_configuration
@@ -240,12 +239,15 @@ class SpawnEntityNode(Node):
                 self.get_logger().error('Service %s/unpause_physics unavailable. \
                                          Was Gazebo started with GazeboRosInit?')
 
-        # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
         # If bond enabled, setup shutdown callback and wait for shutdown
-        # if self.args.bond:
-        #     rospy.on_shutdown(self._delete_entity)
-        #     rospy.loginfo('Waiting for shutdown to delete entity {}'.format(self.args.entity))
-        #     rospy.spin()
+        if self.args.bond:
+            self.get_logger().info('Waiting for shutdown to delete ' +
+                                    'entity [{}]'.format(self.args.entity))
+            try:
+                rclpy.spin(self)
+            except KeyboardInterrupt:
+                self.get_logger().info('Ctrl-C detected')
+            self._delete_entity()
 
         return 0
 
@@ -272,26 +274,26 @@ class SpawnEntityNode(Node):
         return False
 
     # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
-    # def _delete_entity(self):
-    #     # Delete entity from gazebo on shutdown if bond flag enabled
-    #     self.get_logger().info('Deleting entity {}'.format(self.args.entity))
-    #     client = self.create_client(
-    #         DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
-    #     if client.wait_for_service(timeout_sec=5.0):
-    #         req = DeleteEntity.Request()
-    #         req.name = self.args.entity
-    #         self.get_logger().info(
-    #             'Calling service %s/delete_entity' % self.args.gazebo_namespace)
-    #         srv_call = client.call_async(req)
-    #         while rclpy.ok():
-    #             if srv_call.done():
-    #                 self.get_logger().info(
-    #                     'Deleting status: %s' % srv_call.result().status_message)
-    #                 break
-    #             rclpy.spin_once(self)
-    #     else:
-    #         self.get_logger().error('Service %s/delete_entity unavailable. \
-    #                                  Was Gazebo started with GazeboRosFactory?')
+    def _delete_entity(self):
+        # Delete entity from gazebo on shutdown if bond flag enabled
+        self.get_logger().info('Deleting entity [{}]'.format(self.args.entity))
+        client = self.create_client(
+            DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
+        if client.wait_for_service(timeout_sec=5.0):
+            req = DeleteEntity.Request()
+            req.name = self.args.entity
+            self.get_logger().info(
+                'Calling service %s/delete_entity' % self.args.gazebo_namespace)
+            srv_call = client.call_async(req)
+            while rclpy.ok():
+                if srv_call.done():
+                    self.get_logger().info(
+                        'Deleting status: %s' % srv_call.result().status_message)
+                    break
+                rclpy.spin_once(self)
+        else:
+            self.get_logger().error('Service %s/delete_entity unavailable. ' +
+                                     'Was Gazebo started with GazeboRosFactory?')
 
     # def _set_model_configuration(self, joint_names, joint_positions):
     #     self.get_logger().info(
