@@ -45,17 +45,8 @@
 // Services
 #include "std_srvs/Empty.h"
 
-#include "gazebo_msgs/JointRequest.h"
-#include "gazebo_msgs/BodyRequest.h"
-
-#include "gazebo_msgs/ApplyBodyWrench.h"
-
 #include "gazebo_msgs/SetPhysicsProperties.h"
 #include "gazebo_msgs/GetPhysicsProperties.h"
-
-
-#include "gazebo_msgs/ApplyJointEffort.h"
-
 
 // Topics
 #include "geometry_msgs/Vector3.h"
@@ -116,37 +107,9 @@ public:
   bool applyJointEffort(gazebo_msgs::ApplyJointEffort::Request &req,gazebo_msgs::ApplyJointEffort::Response &res);
 
   /// \brief
-  bool clearJointForces(gazebo_msgs::JointRequest::Request &req,gazebo_msgs::JointRequest::Response &res);
-  bool clearJointForces(std::string joint_name);
-
-  /// \brief
-  bool clearBodyWrenches(gazebo_msgs::BodyRequest::Request &req,gazebo_msgs::BodyRequest::Response &res);
-  bool clearBodyWrenches(std::string body_name);
-
-  /// \brief
   bool setModelConfiguration(gazebo_msgs::SetModelConfiguration::Request &req,gazebo_msgs::SetModelConfiguration::Response &res);
 
-  /// \brief
-  bool applyBodyWrench(gazebo_msgs::ApplyBodyWrench::Request &req,gazebo_msgs::ApplyBodyWrench::Response &res);
-
 private:
-
-  /// \brief
-  void wrenchBodySchedulerSlot();
-
-  /// \brief
-  void forceJointSchedulerSlot();
-
-  /// \brief
-  void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
-  void publishSimTime();
-
-  /// \brief helper function for applyBodyWrench
-  ///        shift wrench from reference frame to target frame
-  void transformWrench(ignition::math::Vector3d &target_force, ignition::math::Vector3d &target_torque,
-                       const ignition::math::Vector3d &reference_force,
-                       const ignition::math::Vector3d &reference_torque,
-                       const ignition::math::Pose3d &target_to_reference );
 
   /// \brief Used for the dynamic reconfigure callback function template
   void physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level);
@@ -164,29 +127,19 @@ private:
   bool stop_;
   gazebo::event::ConnectionPtr sigint_event_;
 
-  std::string robot_namespace_;
-
   gazebo::transport::NodePtr gazebonode_;
-  gazebo::transport::SubscriberPtr stat_sub_;
-  gazebo::transport::PublisherPtr light_modify_pub_;
 
   boost::shared_ptr<ros::NodeHandle> nh_;
   ros::CallbackQueue gazebo_queue_;
   boost::shared_ptr<boost::thread> gazebo_callback_queue_thread_;
 
   gazebo::physics::WorldPtr world_;
-  gazebo::event::ConnectionPtr wrench_update_event_;
-  gazebo::event::ConnectionPtr force_update_event_;
   gazebo::event::ConnectionPtr time_update_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
   ros::ServiceServer set_physics_properties_service_;
   ros::ServiceServer get_physics_properties_service_;
-  ros::ServiceServer apply_body_wrench_service_;
-  ros::ServiceServer apply_joint_effort_service_;
   ros::ServiceServer set_model_configuration_service_;
-  ros::ServiceServer clear_joint_forces_service_;
-  ros::ServiceServer clear_body_wrenches_service_;
 
   // ROS comm
   boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;
@@ -199,39 +152,7 @@ private:
   boost::shared_ptr< dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig> > physics_reconfigure_srv_;
   dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
 
-  ros::Publisher     pub_clock_;
-  int pub_clock_frequency_;
-  gazebo::common::Time last_pub_clock_time_;
-
-  /// \brief A mutex to lock access to fields that are used in ROS message callbacks
-  boost::mutex lock_;
-
   bool world_created_;
-
-  class WrenchBodyJob
-  {
-  public:
-    gazebo::physics::LinkPtr body;
-    ignition::math::Vector3d force;
-    ignition::math::Vector3d torque;
-    ros::Time start_time;
-    ros::Duration duration;
-  };
-
-  class ForceJointJob
-  {
-  public:
-    gazebo::physics::JointPtr joint;
-    double force; // should this be a array?
-    ros::Time start_time;
-    ros::Duration duration;
-  };
-
-  std::vector<GazeboRosApiPlugin::WrenchBodyJob*> wrench_body_jobs_;
-  std::vector<GazeboRosApiPlugin::ForceJointJob*> force_joint_jobs_;
-
-  /// \brief enable the communication of gazebo information using ROS service/topics
-  bool enable_ros_network_;
 };
 }
 #endif
