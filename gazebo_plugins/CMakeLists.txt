@@ -117,9 +117,9 @@ target_link_libraries(gazebo_ros_camera
 ament_export_libraries(gazebo_ros_camera)
 
 find_package(CUDA)
-if(${CUDA_FOUND})
+if((${CUDA_FOUND}) AND (${ENABLE_CUDA}))
   include(FindCUDA)
-  add_definitions(-DCUDA_FOUND=1)
+  add_definitions(-DCUDA_ENABLED=1)
   cuda_add_library(fill_depth SHARED
     include/gazebo_plugins/fill_depth.hpp
     src/fill_depth.cu
@@ -254,7 +254,7 @@ install(TARGETS
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-if(${CUDA_FOUND})
+if((${CUDA_FOUND}) AND (${ENABLE_CUDA}))
   install(TARGETS
       fill_depth
     ARCHIVE DESTINATION lib

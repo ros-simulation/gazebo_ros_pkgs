@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if CUDA_FOUND
+#if CUDA_ENABLED
 #include <gazebo_plugins/fill_depth.hpp>
 #endif
 
@@ -133,7 +133,7 @@ public:
   /// Number of cameras
   uint64_t num_cameras_{1};
 
-  #if CUDA_FOUND
+  #if CUDA_ENABLED
   /// FillDepth object
   FillDepth fill_depth;
   #endif
@@ -469,7 +469,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
     impl_->cloud_msg_.header.frame_id = impl_->frame_name_;
 
-    #if CUDA_FOUND
+    #if CUDA_ENABLED
     double fl = (static_cast<double>(width[0])) / (2.0 * tan(impl_->hfov_[0] / 2.0));
     impl_->fill_depth.initialize(height[0], width[0], fl, impl_->min_depth_, impl_->max_depth_);
     #endif
@@ -653,7 +653,7 @@ void GazeboRosCamera::OnNewDepthFrame(
 
   std::lock_guard<std::mutex> image_lock(impl_->image_mutex_);
 
-  #if CUDA_FOUND
+  #if CUDA_ENABLED
   impl_->cloud_msg_.is_dense = false;
   impl_->fill_depth.compute(_image, &(impl_->image_msg_.data[0]),
     reinterpret_cast<float *>(&(image_msg.data[0])),
