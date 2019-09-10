@@ -26,7 +26,6 @@
 #include <gazebo_msgs/srv/get_link_properties.hpp>
 #include <gazebo_msgs/srv/get_model_properties.hpp>
 #include <gazebo_msgs/srv/get_physics_properties.hpp>
-#include <gazebo_msgs/srv/get_world_properties.hpp>
 #include <gazebo_msgs/srv/set_joint_properties.hpp>
 #include <gazebo_msgs/srv/set_light_properties.hpp>
 #include <gazebo_msgs/srv/set_link_properties.hpp>
