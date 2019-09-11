@@ -20,6 +20,10 @@
 
       ros2 service call /demo/get_light_properties 'gazebo_msgs/GetLightProperties' '{light_name: "sun"}'
 
+  Or get physics properties:
+
+    ros2 service call /demo/get_physics_properties 'gazebo_msgs/GetPhysicsProperties'
+
   SETTING PROPERTIES
 
   Try modifying the damping of a joint:
@@ -31,6 +35,10 @@
   Or a lights properties:
 
       ros2 service call /demo/set_light_properties 'gazebo_msgs/SetLightProperties' '{light_name: "sun", diffuse: {r: 0.8, g: 0.7, b: 0.2, a: 1.0}, attenuation_constant: 0.9, attenuation_linear: 0.01, attenuation_quadratic: 0.001}'
+
+  Or physics properties:
+
+      ros2 service call /demo/set_physics_properties 'gazebo_msgs/SetPhysicsProperties' '{gravity: {x: 0.0, y: 0.0, z: 0.0}}'
 
 -->
 <sdf version='1.6'>

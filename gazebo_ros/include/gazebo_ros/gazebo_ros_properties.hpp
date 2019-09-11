@@ -53,6 +53,16 @@ class GazeboRosPropertiesPrivate;
 ///      set_light_properties (gazebo_msgs::srv::SetLightProperties)
 ///          Set light's properties including color and attenuation.
 ///
+///      get_physics_properties (gazebo_msgs::srv::GetPhysicsProperties)
+///          Get physics properties including gravity, update rate etc.
+///
+///      set_light_properties (gazebo_msgs::srv::SetLightProperties)
+///          Set physics properties including gravity, update rate etc.
+///
+/// Physics properties services provide similar functionalities as the physics properties params.
+/// The parameters interface might not provide the actual values when they are changed from gazebo
+/// or another interface. Setting the parameters however have no such limitations.
+///
 class GazeboRosProperties : public gazebo::WorldPlugin
 {
 public:
