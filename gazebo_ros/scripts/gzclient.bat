@@ -6,13 +6,11 @@ SET "DESIRED_MODEL_DATABASE_URI=%GAZEBO_MODEL_DATABASE_URI%"
 
 SET "FINAL=%*"
 
-FOR /F "tokens=* USEBACKQ" %%F IN (`catkin_find --first-only gazebo_ros_paths_plugin.dll`) DO (
-SET "FINAL=%FINAL% -g "%%F""
-)
+call :FIND_IN_WORKSPACES gazebo_ros_paths_plugin.dll
+SET "FINAL=%FINAL% -g %FIND_IN_WORKSPACES_OUTPUT%"
 
-FOR /F "tokens=* USEBACKQ" %%F IN (`catkin_find --first-only gazebo_ros_api_plugin.dll`) DO (
-SET "FINAL=%FINAL% -g "%%F""
-)
+call :FIND_IN_WORKSPACES gazebo_ros_api_plugin.dll
+SET "FINAL=%FINAL% -g %FIND_IN_WORKSPACES_OUTPUT%"
 
 SET GAZEBO_SETUP=
 FOR /F "tokens=* USEBACKQ" %%F IN (`pkg-config --variable=prefix gazebo`) DO (
@@ -45,5 +43,11 @@ FOR /F "tokens=1*" %%A IN ("%*") DO (
         SET "OPTIONS_OUTPUT=!OPTIONS_OUTPUT! !_TEMP_VAR!"
     )
     IF NOT "%%B"=="" call :RELOCATE_REMAPPINGS %%B
+)
+EXIT /B
+
+:FIND_IN_WORKSPACES
+FOR /F "tokens=* USEBACKQ" %%F IN (`python -c "from catkin.find_in_workspaces import find_in_workspaces as catkin_find; print(catkin_find(path='%*')[0])"`) DO (
+SET "FIND_IN_WORKSPACES_OUTPUT="%%F""
 )
 EXIT /B
