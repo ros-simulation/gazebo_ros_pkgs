@@ -14,7 +14,6 @@
 
 #include <gazebo/test/ServerFixture.hh>
 
-#include <gazebo_msgs/srv/get_world_properties.hpp>
 #include <gazebo_msgs/srv/get_model_properties.hpp>
 #include <gazebo_msgs/srv/get_joint_properties.hpp>
 #include <gazebo_msgs/srv/get_link_properties.hpp>

@@ -2,12 +2,13 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>gazebo_plugins</name>
-  <version>3.3.2</version>
+  <version>3.3.3</version>
   <description>
     Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
 
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
+  <maintainer email="louise@openrobotics.org">Louise Poubel</maintainer>
 
   <license>BSD, Apache 2.0</license>
 

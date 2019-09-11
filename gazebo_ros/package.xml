@@ -2,12 +2,13 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>gazebo_ros</name>
-  <version>3.3.2</version>
+  <version>3.3.3</version>
   <description>
     Utilities to interface with <a href="http://gazebosim.org">Gazebo</a> through ROS.
   </description>
 
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
+  <maintainer email="louise@openrobotics.org">Louise Poubel</maintainer>
 
   <license>Apache 2.0</license>
 
@@ -28,6 +29,8 @@
   <depend>rclpy</depend>
   <depend>std_srvs</depend>
   <depend>tinyxml_vendor</depend>
+
+  <exec_depend>launch_ros</exec_depend>
 
   <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>

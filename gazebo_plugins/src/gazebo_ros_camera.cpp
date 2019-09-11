@@ -34,6 +34,7 @@
 
 // Not installed on Dashing because it will be removed on Eloquent
 #include "gazebo_ros_depth_camera.hpp"
+#include "gazebo_ros_multi_camera.hpp"
 
 namespace gazebo_plugins
 {
@@ -78,6 +79,9 @@ public:
 
   /// Pointer to GazeboROS Depth Camera
   std::shared_ptr<GazeboRosDepthCamera> depth_camera_;
+
+  /// Pointer to GazeboROS Multi Camera
+  std::shared_ptr<GazeboRosMultiCamera> multi_camera_;
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -95,6 +99,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   if (std::dynamic_pointer_cast<gazebo::sensors::DepthCameraSensor>(_sensor)) {
     impl_->depth_camera_ = std::make_shared<GazeboRosDepthCamera>();
     impl_->depth_camera_->Load(_sensor, _sdf);
+    return;
+  } else if (std::dynamic_pointer_cast<gazebo::sensors::MultiCameraSensor>(_sensor)) {
+    impl_->multi_camera_ = std::make_shared<GazeboRosMultiCamera>();
+    impl_->multi_camera_->Load(_sensor, _sdf);
     return;
   }
 

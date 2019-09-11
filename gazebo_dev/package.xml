@@ -2,12 +2,13 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>gazebo_dev</name>
-  <version>3.3.2</version>
+  <version>3.3.3</version>
   <description>
     Provides a cmake config for the default version of Gazebo for the ROS distribution.
   </description>
 
   <maintainer email="jrivero@openrobotics.org">Jose Luis Rivero</maintainer>
+  <maintainer email="louise@openrobotics.org">Louise Poubel</maintainer>
 
   <license>Apache 2.0</license>
 
