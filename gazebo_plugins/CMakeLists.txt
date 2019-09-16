@@ -97,6 +97,15 @@ ament_export_libraries(gazebo_ros_template)
 add_library(multi_camera_plugin SHARED
   src/multi_camera_plugin.cpp
 )
+ament_target_dependencies(multi_camera_plugin
+  "gazebo_dev"
+)
+target_link_libraries(multi_camera_plugin
+  gazebo_sensors
+)
+target_compile_definitions(multi_camera_plugin
+  PRIVATE BUILDING_DLL
+)
 
 # gazebo_ros_multi_camera
 add_library(gazebo_ros_multi_camera SHARED
