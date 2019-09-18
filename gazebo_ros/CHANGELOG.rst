@@ -2,6 +2,32 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove ROS-specific arguments before passing to argparse (`#994 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/994>`_)
+  This resolves argparse errors when trying to launch the spawn_entity script as a ROS node.
+  For example, a launch file like the following wouldn't work without this change:
+  <launch>
+  <arg name="model_urdf" default="$(find-pkg-share mymodels)/urdf/ball.urdf" />
+  <node
+  pkg="gazebo_ros"
+  exec="spawn_entity.py"
+  name="spawner"
+  args="-entity foo -file /path/to/my/model/foo.urdf" />
+  </launch>
+  Signed-off-by: Jacob Perron <jacob@openrobotics.org>
+* [ros2] Remove ported / deprecated (`#989 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/989>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* linter :sweat_smile:
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Uncommenting bond option on spawn_entity (wait Ctrl+C then remove entity) (`#986 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/986>`_)
+  * Uncommenting bond option on spawn_entity (wait Ctrl+C then remove entity)
+  Instead of waiting for a shutdown callback to be created in rclpy,
+  we can use the try/except to get the SIGINT signal, then delete the entity.
+  * Message formatting
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Contributors: Jacob Perron, Louise Poubel, alexfneves, chapulina
+
 3.3.3 (2019-08-23)
 ------------------
 * [ros2] Conditional launch includes (`#979 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/979>`_)
