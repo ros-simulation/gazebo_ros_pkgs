@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.4 (2019-09-18)
+------------------
 * Remove ROS-specific arguments before passing to argparse (`#994 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/994>`_)
   This resolves argparse errors when trying to launch the spawn_entity script as a ROS node.
   For example, a launch file like the following wouldn't work without this change:

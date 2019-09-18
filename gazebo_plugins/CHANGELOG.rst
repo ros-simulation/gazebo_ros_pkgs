@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.4 (2019-09-18)
+------------------
 * fix multi_camera_plugin on windows (`#999 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/999>`_)
 * Contributors: Jonathan Noyola
 
