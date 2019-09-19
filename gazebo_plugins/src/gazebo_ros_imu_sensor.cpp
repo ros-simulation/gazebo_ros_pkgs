@@ -13,8 +13,11 @@
 // limitations under the License.
 
 
-#include <builtin_interfaces/msg/time.hpp>
 #include <gazebo_plugins/gazebo_ros_imu_sensor.hpp>
+
+#include <gazebo/physics/World.hh>
+
+#include <builtin_interfaces/msg/time.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
@@ -65,6 +68,48 @@ void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
     RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Parent is not an imu sensor. Exiting.");
     return;
   }
+
+  // Get reference to the Gazebo world
+  gazebo::physics::WorldPtr world = gazebo::physics::get_world(impl_->sensor_->WorldName());
+  if (!world) {
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
+      "Could not find a valid world for the imu sensor. Exiting.");
+    return;
+  }
+
+  // IMU orientation reference frame
+  sdf::ElementPtr sdf_imu = _sdf->GetParent()->GetElement("imu");
+  sdf::ElementPtr sdf_orientation;
+  std::string imu_localization = "CUSTOM";
+  //
+  if (sdf_imu->HasElement("orientation_reference_frame")) {
+    sdf_orientation = sdf_imu->GetElement("orientation_reference_frame");
+    imu_localization = sdf_orientation->Get<std::string>("localization");
+  }
+  // Compute initial imu frame considering that Gazebo's reference frame is ENU
+  ignition::math::Quaterniond imu_reference;
+  if (imu_localization == "NED") {
+    imu_reference.Matrix(ignition::math::Matrix3d(
+        0, 1, 0,
+        1, 0, 0,
+        0, 0, -1
+    ));
+  } else if (imu_localization == "ENU") {
+    imu_reference.Euler(0, 0, 0);
+  } else if (imu_localization == "NWU") {
+    imu_reference.Matrix(ignition::math::Matrix3d(
+        0, -1, 0,
+        1, 0, 0,
+        0, 0, 1
+    ));
+  } else if (imu_localization == "CUSTOM") {
+    ignition::math::Vector3d imu_custom_rpy = (sdf_orientation) ?
+      sdf_orientation->Get<ignition::math::Vector3d>("custom_rpy") :
+      ignition::math::Vector3d(0, 0, 0);
+    imu_reference.Euler(imu_custom_rpy);
+  }
+  impl_->sensor_->SetWorldToReferenceOrientation(imu_reference);
 
   impl_->pub_ =
     impl_->ros_node_->create_publisher<sensor_msgs::msg::Imu>("~/out", rclcpp::SensorDataQoS());
