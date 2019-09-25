@@ -176,9 +176,6 @@ public:
 
   /// Publishes light modify messages.
   gazebo::transport::PublisherPtr gz_properties_light_pub_;
-
-  /// Store Gazebo Gravity
-  ignition::math::Vector3d gravity_;
 };
 
 GazeboRosProperties::GazeboRosProperties()
@@ -248,40 +245,39 @@ void GazeboRosProperties::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr
   impl_->gz_node_->Init(_world->Name());
   impl_->gz_properties_light_pub_ =
     impl_->gz_node_->Advertise<gazebo::msgs::Light>("~/light/modify");
-  impl_->gravity_ = impl_->world_->Gravity();
 
   std::string description;
   description = "Simulation world time step size in seconds,"
-    "smaller time steps produces lower, more stable simulation.";
+    "smaller time steps produce lower, more stable simulation.";
   impl_->DeclareParameter("time_step", description, 0.001f, 0.0f, 10.0f);
 
   description = "Simulator max update rate, -1 unlimited, 1 restricts to real-time if possible.";
-  impl_->DeclareParameter("max_update_rate", description, 60.0f, 0.0f, 1000.0f);
+  impl_->DeclareParameter("max_update_rate", description, 1.0f, -1.0f, 1000.0f);
 
-  description = "Simulated gravity in the x direction.";
+  description = "Simulated gravity in the X direction.";
   impl_->DeclareParameter("gravity_x", description, 0.0f, -100.0f, 100.0f);
 
-  description = "Simulated gravity in the y direction.";
+  description = "Simulated gravity in the Y direction.";
   impl_->DeclareParameter("gravity_y", description, 0.0f, -100.0f, 100.0f);
 
-  description = "Simulated gravity in the z direction.";
-  impl_->DeclareParameter("gravity_z", description, -9.8f, -100.0f, 100.0f);
+  description = "Simulated gravity in the Z direction.";
+  impl_->DeclareParameter("gravity_z", description, -55.5f, -100.0f, 100.0f);
 
-  description = "Auto disable of links in simulation if link is not moving.";
-  impl_->DeclareParameter("auto_disable_links", description, false);
+  description = "Auto disable links in simulation if they are not moving.";
+  impl_->DeclareParameter("auto_disable", description, true);
 
   description = "Number of preconditioning iterations for SOR PGS LCP as implemented in quickstep.";
-  impl_->DeclareParameter("sor_pgs_precon_iters", description, 0, 0, 10000);
+  impl_->DeclareParameter("precon_iters", description, 0, 0, 10000);
 
   description = "Number of iterations for SOR PGS LCP as implemented in quickstep.";
-  impl_->DeclareParameter("sor_pgs_iters", description, 20, 0, 10000);
+  impl_->DeclareParameter("iters", description, 20, 0, 10000);
 
   description =
     "Relaxation parameter for SOR PGS LCP, usually set to 1.3, but reduce to stabilize simulation.";
-  impl_->DeclareParameter("sor_pgs_w", description, 1.3f, 0.0f, 5.0f);
+  impl_->DeclareParameter("sor", description, 1.3f, 0.0f, 5.0f);
 
   description = "The number of scans to skip between each measured scan";
-  impl_->DeclareParameter("sor_pgs_rms_error_tol", description, -1, -1, 10000);
+  impl_->DeclareParameter("sor_lcp_tolerance", description, -1, -1, 10000);
 
   description = "Constraint Force Mixing per ODE's users manual.";
   impl_->DeclareParameter("cfm", description, 0.0f, 0.0f, 10.0f);
@@ -321,14 +317,16 @@ void GazeboRosProperties::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr
         }
         if (pe->GetType() == "ode") {
           // stuff only works in ODE right now
-          if (name == "auto_disable_bodies") {
+          if (name == "auto_disable") {
             pe->SetAutoDisableFlag(parameter.as_bool());
-          } else if (name == "sor_pgs_precon_iters") {
+          } else if (name == "precon_iters") {
             pe->SetParam("precon_iters", parameter.as_int());
-          } else if (name == "sor_pgs_iters") {
+          } else if (name == "iters") {
             pe->SetParam("iters", parameter.as_int());
-          } else if (name == "sor_pgs_w") {
+          } else if (name == "sor") {
             pe->SetParam("sor", parameter.as_double());
+          } else if (name == "sor_lcp_tolerance") {
+            pe->SetParam("sor_lcp_tolerance", parameter.as_double());
           } else if (name == "cfm") {
             pe->SetParam("cfm", parameter.as_double());
           } else if (name == "erp") {
@@ -340,19 +338,19 @@ void GazeboRosProperties::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr
           } else if (name == "max_contacts") {
             pe->SetParam("max_contacts", parameter.as_int());
           } else if (name == "gravity_x" || name == "gravity_y" || name == "gravity_z") {
+            auto gravity = impl_->world_->Gravity();
             if (name == "gravity_x") {
-              impl_->gravity_.X() = parameter.as_double();
+              gravity.X() = parameter.as_double();
             } else if (name == "gravity_y") {
-              impl_->gravity_.Y() = parameter.as_double();
+              gravity.Y() = parameter.as_double();
             } else {
-              impl_->gravity_.Z() = parameter.as_double();
+              gravity.Z() = parameter.as_double();
             }
-            pe->SetGravity(impl_->gravity_);
+            pe->SetGravity(gravity);
           }
           impl_->world_->SetPaused(is_paused);
           result.successful = true;
         } else {
-          /// \TODO: add support for simbody, dart and bullet physics properties.
           RCLCPP_ERROR(impl_->ros_node_->get_logger(),
             "Setting physics properties is not supported for physics engine [%s].",
             pe->GetType().c_str());

@@ -56,7 +56,7 @@ class GazeboRosPropertiesPrivate;
 ///      get_physics_properties (gazebo_msgs::srv::GetPhysicsProperties)
 ///          Get physics properties including gravity, update rate etc.
 ///
-///      set_light_properties (gazebo_msgs::srv::SetLightProperties)
+///      set_physics_properties (gazebo_msgs::srv::SetPhysicsProperties)
 ///          Set physics properties including gravity, update rate etc.
 ///
 /// Physics properties services provide similar functionalities as the physics properties params.
