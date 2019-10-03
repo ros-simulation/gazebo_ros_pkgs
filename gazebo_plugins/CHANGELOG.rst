@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.0 (2019-10-03)
+------------------
 * Add Gazebo builtin plugins to LD_LIBRARY_PATH (`#974 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/974>`_)
   * Add Gazebo builtin plugins to LD_LIBRARY_PATH
   Signed-off-by: Louise Poubel <louise@openrobotics.org>
