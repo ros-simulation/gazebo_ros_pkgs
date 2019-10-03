@@ -2,6 +2,21 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Merge pull request `#980 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/980>`_ from shiveshkhaitan/forward_port
+  [forward_port] dashing -> ros2
+* [ros2] Port joint pose trajectory to ROS2 (`#955 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/955>`_)
+* [ros2] Port apply/clear wrench and effort services (`#941 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/941>`_)
+  * Change gazebo_ros_effort to gazebo_ros_force_system. Change usage of body to link
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Shivesh Khaitan, chapulina
+
 3.3.1 (2019-05-30)
 ------------------
 
