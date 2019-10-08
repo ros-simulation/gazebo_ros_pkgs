@@ -352,6 +352,17 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+if(NOT WIN32)
+  if(NOT APPLE)
+    set(
+      AMENT_CMAKE_ENVIRONMENT_HOOKS_DESC_gazebo_plugins
+      "prepend-non-duplicate;LD_LIBRARY_PATH;${GAZEBO_PLUGIN_PATH}")
+  else()
+    set(
+      AMENT_CMAKE_ENVIRONMENT_HOOKS_DESC_gazebo_plugins
+      "prepend-non-duplicate;DYLD_LIBRARY_PATH;${GAZEBO_PLUGIN_PATH}")
+  endif()
+endif()
 ament_environment_hooks("${CMAKE_CURRENT_SOURCE_DIR}/env-hooks/gazebo_plugins.sh.in")
 
 ament_package()
