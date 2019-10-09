@@ -2,6 +2,11 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* generate a .dsv file for the environment hook
+* Contributors: Dirk Thomas
+
 3.4.0 (2019-10-03)
 ------------------
 * Add Gazebo builtin plugins to LD_LIBRARY_PATH (`#974 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/974>`_)
