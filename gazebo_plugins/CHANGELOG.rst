@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.1 (2019-10-10)
+------------------
 * generate a .dsv file for the environment hook
 * Contributors: Dirk Thomas
 
