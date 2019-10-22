@@ -84,7 +84,7 @@ void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
   bool caught{false};
   try {
     node->get_parameter("non_declared_bool");
-  } catch (rclcpp::exceptions::ParameterNotDeclaredException) {
+  } catch (const rclcpp::exceptions::ParameterNotDeclaredException &) {
     caught = true;
   }
   if (!caught) {
@@ -95,7 +95,7 @@ void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
   caught = false;
   try {
     node->get_parameter("non_declared_double");
-  } catch (rclcpp::exceptions::ParameterNotDeclaredException) {
+  } catch (const rclcpp::exceptions::ParameterNotDeclaredException &) {
     caught = true;
   }
   if (!caught) {
