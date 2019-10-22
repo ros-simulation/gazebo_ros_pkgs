@@ -4,7 +4,8 @@
     <plugin name="sdf_node_name" filename="./libsdf_node.so">
       <ros>
         <namespace>/foo</namespace>
-        <argument>test:=my_topic</argument>
+        <remapping>test:=my_topic</remapping>
+        <argument>from:=to</argument>
 
         <!-- Declared parameters, should go through -->
         <parameter name="declared_string" type="string">from SDF</parameter>

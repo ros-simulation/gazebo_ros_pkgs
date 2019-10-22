@@ -13,13 +13,14 @@
 // limitations under the License.
 
 #include <gazebo_ros/node.hpp>
+
+#include <rcl/arguments.h>
+
 #include <sdf/Param.hh>
 
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <rcl/arguments.h>
 
 namespace gazebo_ros
 {
@@ -50,7 +51,6 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   // Get inner <ros> element if full plugin sdf was passed in
   if (sdf->HasElement("ros")) {
     sdf = sdf->GetElement("ros");
-    arguments.push_back(RCL_ROS_ARGS_FLAG);
   }
 
   // Set namespace if tag is present
@@ -73,6 +73,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   if (sdf->HasElement("remapping")) {
     sdf::ElementPtr argument_sdf = sdf->GetElement("remapping");
 
+    arguments.push_back(RCL_ROS_ARGS_FLAG);
     while (argument_sdf) {
       std::string argument = argument_sdf->Get<std::string>();
       arguments.push_back(RCL_REMAP_FLAG);
