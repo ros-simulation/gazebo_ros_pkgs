@@ -14,6 +14,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
+find_package(rcl REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_msgs REQUIRED)
@@ -39,6 +40,7 @@ add_library(gazebo_ros_node SHARED
 ament_target_dependencies(gazebo_ros_node
   "gazebo_dev"
   "rclcpp"
+  "rcl"
 )
 ament_export_libraries(gazebo_ros_node)
 
