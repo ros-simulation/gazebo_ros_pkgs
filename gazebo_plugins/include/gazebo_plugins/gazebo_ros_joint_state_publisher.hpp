@@ -56,7 +56,7 @@ class GazeboRosJointStatePublisherPrivate;
         <namespace>/ny_namespace</namespace>
 
         <!-- Remap the default topic -->
-        <argument>joint_states:=my_joint_states</argument>
+        <remapping>joint_states:=my_joint_states</remapping>
 
       </ros>
 

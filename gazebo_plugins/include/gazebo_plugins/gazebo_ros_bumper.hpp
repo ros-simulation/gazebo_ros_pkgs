@@ -33,7 +33,7 @@ class GazeboRosBumperPrivate;
       -->
       <ros>
         <namespace>custom_ns</namespace>
-        <argument>bumper_states:=custom_topic</argument>
+        <remapping>bumper_states:=custom_topic</remapping>
       </ros>
 
       <!-- Set TF frame name. Defaults to world -->

@@ -42,9 +42,9 @@ class GazeboRosCameraPrivate;
       -->
       <ros>
         <namespace>custom_ns</namespace>
-        <argument>image_raw:=custom_img</argument>
-        <argument>camera_info:=custom_info</argument>
-        <argument>image_trigger:=custom_trigger</argument>
+        <remapping>image_raw:=custom_img</remapping>
+        <remapping>camera_info:=custom_info</remapping>
+        <remapping>image_trigger:=custom_trigger</remapping>
       </ros>
 
       <!-- Set camera name. If empty, defaults to sensor name -->

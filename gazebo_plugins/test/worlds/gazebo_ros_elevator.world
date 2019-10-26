@@ -133,7 +133,7 @@
       <plugin name="elevator" filename="libgazebo_ros_elevator.so">
         <ros>
           <namespace>test</namespace>
-          <argument>elevator:=elevator_test</argument>
+          <remapping>elevator:=elevator_test</remapping>
         </ros>
         <bottom_floor>0</bottom_floor>
         <top_floor>1</top_floor>

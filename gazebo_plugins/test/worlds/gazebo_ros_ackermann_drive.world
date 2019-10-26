@@ -537,9 +537,9 @@
 
         <ros>
           <namespace>test</namespace>
-          <argument>cmd_vel:=cmd_test</argument>
-          <argument>odom:=odom_test</argument>
-          <argument>distance:=distance_test</argument>
+          <remapping>cmd_vel:=cmd_test</remapping>
+          <remapping>odom:=odom_test</remapping>
+          <remapping>distance:=distance_test</remapping>
         </ros>
 
         <update_rate>100.0</update_rate>

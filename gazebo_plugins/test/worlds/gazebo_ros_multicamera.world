@@ -49,8 +49,8 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>test_cam</namespace>
-              <argument>camera1/left/image_raw:=camera/left/image_test</argument>
-              <argument>camera1/right/image_raw:=camera/right/image_test</argument>
+              <remapping>camera1/left/image_raw:=camera/left/image_test</remapping>
+              <remapping>camera1/right/image_raw:=camera/right/image_test</remapping>
             </ros>
             <!-- camera_name>omit so it defaults to sensor name</camera_name-->
             <!-- frame_name>omit so it defaults to link name</frame_name-->

@@ -28,7 +28,7 @@
             <ros>
               <!-- Remap for image topic to be subscribed -->
               <namespace>/test</namespace>
-              <argument>~/image_raw:=video_test</argument>
+              <remapping>~/image_raw:=video_test</remapping>
             </ros>
             <height>120</height>
             <width>160</width>

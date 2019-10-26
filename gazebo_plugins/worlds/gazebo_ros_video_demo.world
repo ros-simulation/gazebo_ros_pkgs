@@ -142,7 +142,7 @@
           <plugin name="display_video_controller" filename="libgazebo_ros_video.so">
             <ros>
               <!-- Remap for image topic to be subscribed -->
-              <argument>~/image_raw:=/camera1/image_raw</argument>
+              <remapping>~/image_raw:=/camera1/image_raw</remapping>
             </ros>
             <height>120</height>
             <width>160</width>

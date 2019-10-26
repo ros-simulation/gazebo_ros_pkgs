@@ -146,8 +146,8 @@
             <ros>
               <namespace>demo_cam</namespace>
               <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
-              <argument>image_raw:=image_demo</argument>
-              <argument>camera_info:=camera_info_demo</argument>
+              <remapping>image_raw:=image_demo</remapping>
+              <remapping>camera_info:=camera_info_demo</remapping>
             </ros>
             <!-- camera_name>omit so it defaults to sensor name</camera_name-->
             <!-- frame_name>omit so it defaults to link name</frame_name-->

@@ -58,7 +58,7 @@ class GazeboRosRaySensorPrivate;
       <ros>
         <!-- Configure namespace and remap to publish to /ray/pointcloud2 -->
         <namespace>/ray</namespace>
-        <argument>~/out:=pointcloud2</argument>
+        <remapping>~/out:=pointcloud2</remapping>
       </ros>
       <!-- Output as a PointCloud2, see above for other types -->
       <output_type>sensor_msgs/PointCloud2</output_type>

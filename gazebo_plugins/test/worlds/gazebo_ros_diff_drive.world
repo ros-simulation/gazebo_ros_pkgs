@@ -201,8 +201,8 @@
       <plugin name='diff_drive' filename='libgazebo_ros_diff_drive.so'>
         <ros>
           <namespace>/test</namespace>
-          <argument>cmd_vel:=cmd_test</argument>
-          <argument>odom:=odom_test</argument>
+          <remapping>cmd_vel:=cmd_test</remapping>
+          <remapping>odom:=odom_test</remapping>
         </ros>
 
         <left_joint>left_wheel_joint</left_joint>

@@ -53,7 +53,7 @@
         <ros>
           <!-- Remap for switch topic to be subscribed -->
           <namespace>/demo</namespace>
-          <argument>switch:=switch_demo</argument>
+          <remapping>switch:=switch_demo</remapping>
         </ros>
         <projector_link>projector_link</projector_link>
         <projector_name>texture_projector</projector_name>

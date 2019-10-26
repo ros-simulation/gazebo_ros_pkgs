@@ -21,7 +21,7 @@
           filename="libgazebo_ros_joint_pose_trajectory.so">
         <ros>
           <namespace>/demo</namespace>
-          <argument>set_joint_trajectory:=set_trajectory_demo</argument>
+          <remapping>set_joint_trajectory:=set_trajectory_demo</remapping>
         </ros>
         <update_rate>2</update_rate>
       </plugin>
