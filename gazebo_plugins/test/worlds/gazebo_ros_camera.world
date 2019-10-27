@@ -29,8 +29,8 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>test_cam</namespace>
-              <argument>camera1/image_raw:=camera/image_test</argument>
-              <argument>camera_info:=camera_info_test</argument>
+              <remapping>camera1/image_raw:=camera/image_test</remapping>
+              <remapping>camera_info:=camera_info_test</remapping>
             </ros>
             <!-- camera_name>omit so it defaults to sensor name</camera_name-->
             <!-- frame_name>omit so it defaults to link name</frame_name-->

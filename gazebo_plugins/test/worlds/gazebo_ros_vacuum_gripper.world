@@ -29,8 +29,8 @@
 
         <ros>
           <namespace>/test</namespace>
-          <argument>switch:=switch_test</argument>
-          <argument>grasping:=grasping_test</argument>
+          <remapping>switch:=switch_test</remapping>
+          <remapping>grasping:=grasping_test</remapping>
         </ros>
 
         <link_name>link</link_name>

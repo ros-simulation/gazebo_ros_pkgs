@@ -45,7 +45,7 @@ class GazeboRosVideoPrivate;
         <!-- Add a namespace -->
         <namespace>/custom_ns</namespace>
         <!-- remap image subscribe topic -->
-        <argument>~/image_raw:=custom_img</argument>
+        <remapping>~/image_raw:=custom_img</remapping>
       </ros>
 
       <!-- Dimensions of image -->

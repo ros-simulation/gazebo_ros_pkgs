@@ -41,8 +41,8 @@ class GazeboRosPlanarMovePrivate;
         <namespace>/demo</namespace>
 
         <!-- Remap the default topic -->
-        <argument>cmd_vel:=custom_cmd_vel</argument>
-        <argument>odom:=custom_odom</argument>
+        <remapping>cmd_vel:=custom_cmd_vel</remapping>
+        <remapping>odom:=custom_odom</remapping>
 
       </ros>
 

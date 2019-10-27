@@ -32,9 +32,9 @@ class GazeboRosAckermannDrivePrivate;
 
       <ros>
         <namespace>demo</namespace>
-        <argument>cmd_vel:=cmd_demo</argument>
-        <argument>odom:=odom_demo</argument>
-        <argument>distance:=distance_demo</argument>
+        <remapping>cmd_vel:=cmd_demo</remapping>
+        <remapping>odom:=odom_demo</remapping>
+        <remapping>distance:=distance_demo</remapping>
       </ros>
 
       <update_rate>100.0</update_rate>

@@ -65,11 +65,13 @@ public:
    *    <!-- Namespace of the node -->
    *    <namespace>/my_ns</namespace>
    *    <!-- Command line arguments sent to Node's constructor for remappings -->
-   *    <argument>my_topic:=new_topic</argument>
    *    <argument>__name:=super_cool_node</argument>
+   *    <argument>__log_level:=debug</argument>
    *    <!-- Initial ROS params set for node -->
    *    <parameter name="max_velocity" type="int">55</parameter>
    *    <parameter name="publish_odom" type="bool">True</parameter>
+   *    <!-- Remapping rules for node -->
+   *    <remapping>my_topic:=new_topic</remapping>
    *   </ros>
    * </plugin>
    * \endcode
