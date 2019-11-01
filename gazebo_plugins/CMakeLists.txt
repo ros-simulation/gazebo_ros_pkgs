@@ -54,6 +54,18 @@ ament_target_dependencies(gazebo_ros_joint_state_publisher
 )
 ament_export_libraries(gazebo_ros_joint_state_publisher)
 
+# gazebo_ros_joint_effort
+add_library(gazebo_ros_joint_effort SHARED
+  src/gazebo_ros_joint_effort.cpp
+)
+ament_target_dependencies(gazebo_ros_joint_effort
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "sensor_msgs"
+)
+ament_export_libraries(gazebo_ros_joint_effort)
+
 # gazebo_ros_diff_drive
 add_library(gazebo_ros_diff_drive SHARED
   src/gazebo_ros_diff_drive.cpp
@@ -410,6 +422,7 @@ install(TARGETS
     gazebo_ros_gps_sensor
     gazebo_ros_joint_pose_trajectory
     gazebo_ros_joint_state_publisher
+    gazebo_ros_joint_effort
     gazebo_ros_multi_camera
     gazebo_ros_planar_move
     gazebo_ros_projector
