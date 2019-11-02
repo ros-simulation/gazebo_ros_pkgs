@@ -17,8 +17,60 @@
 #include <iostream>
 #include <limits>
 
+class FillDepthPrivate
+{
+public:
+  struct parameters
+  {
+    /// Image height
+    int height;
+
+    /// Image width
+    int width;
+
+    /// Size of single image channel
+    int size;
+
+    /// Camera focal length
+    double fl;
+
+    /// Minimum depth value in image
+    double min_depth;
+
+    /// Maximum depth value in image
+    double max_depth;
+
+    /// Value of infinity
+    float infinity;
+  } params;
+
+  /// Pointer to struct parameters
+  parameters * gpu_params;
+
+  /// Pointer to depth information stored in GPU
+  float * gpu_image_depth;
+
+  /// Pointer to RGB image stored in GPU
+  uint8_t * gpu_image_rgb;
+
+  /// Pointer to pointcloud computed in GPU
+  float * gpu_cloud;
+
+  /// Pointer to depth image computed in GPU
+  float * gpu_depth;
+
+  /// Number of GPU threads to use
+  int threads;
+
+  /// Number of GPU blocks to use
+  int blocks;
+
+  /// Size of single image channel
+  int size;
+};
+
 extern "C" __global__ void fill(
-  FillDepth::parameters * params,
+  FillDepthPrivate::parameters * params,
   float * image_depth, uint8_t * image_rgb, float * depth, float * cloud)
 {
   double pAngle = 0;
@@ -85,47 +137,53 @@ extern "C" __global__ void fill(
 
 FillDepth::FillDepth()
 {
-  cudaMalloc(reinterpret_cast<void **>(&(gpu_params)), sizeof(params));
+  impl_ = (FillDepthPrivate *) std::malloc(sizeof(FillDepthPrivate));
+  cudaMalloc(reinterpret_cast<void **>(&(impl_->gpu_params)), sizeof(impl_->params));
 }
 
 FillDepth::~FillDepth()
 {
-  cudaFree(gpu_params);
-  cudaFree(gpu_image_depth);
-  cudaFree(gpu_image_rgb);
-  cudaFree(gpu_cloud);
+  cudaFree(impl_->gpu_params);
+  cudaFree(impl_->gpu_image_depth);
+  cudaFree(impl_->gpu_image_rgb);
+  cudaFree(impl_->gpu_cloud);
+  free(impl_);
 }
 
 void FillDepth::initialize(
   unsigned int height, unsigned int width, double fl, double min_depth, double max_depth)
 {
-  params.height = height;
-  params.width = width;
-  params.fl = fl;
-  params.min_depth = min_depth;
-  params.max_depth = max_depth;
-  size = params.width * params.height;
-  params.size = size;
-  params.infinity = std::numeric_limits<float>::infinity();
+  impl_->params.height = height;
+  impl_->params.width = width;
+  impl_->params.fl = fl;
+  impl_->params.min_depth = min_depth;
+  impl_->params.max_depth = max_depth;
+  impl_->size = impl_->params.width * impl_->params.height;
+  impl_->params.size = impl_->size;
+  impl_->params.infinity = std::numeric_limits<float>::infinity();
 
-  cudaMemcpy(FillDepth::gpu_params, &params, sizeof(params), cudaMemcpyHostToDevice);
-  cudaMalloc(reinterpret_cast<void **>(&(gpu_image_depth)), size * sizeof(float));
-  cudaMalloc(reinterpret_cast<void **>(&(gpu_image_rgb)), 3 * size * sizeof(uint8_t));
-  cudaMalloc(reinterpret_cast<void **>(&(gpu_depth)), size * sizeof(float));
-  cudaMalloc(reinterpret_cast<void **>(&(gpu_cloud)), 8 * size * sizeof(float));
+  cudaMemcpy(impl_->gpu_params, &impl_->params, sizeof(impl_->params), cudaMemcpyHostToDevice);
+  cudaMalloc(reinterpret_cast<void **>(&(impl_->gpu_image_depth)), impl_->size * sizeof(float));
+  cudaMalloc(reinterpret_cast<void **>(&(impl_->gpu_image_rgb)), 3 * impl_->size * sizeof(uint8_t));
+  cudaMalloc(reinterpret_cast<void **>(&(impl_->gpu_depth)), impl_->size * sizeof(float));
+  cudaMalloc(reinterpret_cast<void **>(&(impl_->gpu_cloud)), 8 * impl_->size * sizeof(float));
 
-  threads = 512;
-  blocks = (size + threads - 1) / threads;
+  impl_->threads = 512;
+  impl_->blocks = (impl_->size + impl_->threads - 1) / impl_->threads;
 }
 
 void FillDepth::compute(
   const float * image_depth, uint8_t * image_rgb, float * depth, float * cloud)
 {
-  cudaMemcpy(gpu_image_depth, image_depth, size * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_image_rgb, image_rgb, 3 * size * sizeof(uint8_t), cudaMemcpyHostToDevice);
+  cudaMemcpy(
+    impl_->gpu_image_depth, image_depth, impl_->size * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(
+    impl_->gpu_image_rgb, image_rgb, 3 * impl_->size * sizeof(uint8_t), cudaMemcpyHostToDevice);
 
-  fill <<< blocks, threads >>> (gpu_params, gpu_image_depth, gpu_image_rgb, gpu_depth, gpu_cloud);
+  fill <<< impl_->blocks, impl_->threads >>> (
+    impl_->gpu_params, impl_->gpu_image_depth, impl_->gpu_image_rgb,
+    impl_->gpu_depth, impl_->gpu_cloud);
 
-  cudaMemcpy(depth, gpu_depth, size * sizeof(float), cudaMemcpyDeviceToHost);
-  cudaMemcpy(cloud, gpu_cloud, 8 * size * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(depth, impl_->gpu_depth, impl_->size * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(cloud, impl_->gpu_cloud, 8 * impl_->size * sizeof(float), cudaMemcpyDeviceToHost);
 }

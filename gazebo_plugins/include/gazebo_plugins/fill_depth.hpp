@@ -17,37 +17,42 @@
 
 #include <cuda.h>
 
+class FillDepthPrivate;
+
 class FillDepth
 {
 public:
-  struct parameters
-  {
-    int height;
-    int width;
-    int size;
-    double fl;
-    double min_depth;
-    double max_depth;
-    float infinity;
-  } params;
-
+  /// Constructor
   FillDepth();
 
+  /// Destructor
   ~FillDepth();
 
+  /// Initializes parameters and allocates GPU memory
+  /*
+  * \param[in] height Image height
+  * \param[in] width Image width
+  * \param[in] fl Camera focal length
+  * \param[in] min_depth Minimum depth in image
+  * \param[in] max_depth Maximum depth in image
+  */
   void initialize(
-    unsigned int height, unsigned int width, double fl, double min_depth, double max_depth);
+    unsigned int _height, unsigned int _width,
+    double _fl,
+    double _min_depth, double _max_depth);
 
+  /// Computes depth image and pointcloud
+  /*
+  * \param[in] image_depth Depth image
+  * \param[in] image_rgb RGB image
+  * \param[out] depth Depth image
+  * \param[out] cloud PointCloud
+  */
   void compute(const float * image_depth, uint8_t * image_rgb, float * depth, float * cloud);
 
 private:
-  parameters * gpu_params;
-  float * gpu_image_depth;
-  uint8_t * gpu_image_rgb;
-  float * gpu_cloud;
-  float * gpu_depth;
-  int threads, blocks;
-  int size;
+  /// Private data pointer
+  FillDepthPrivate * impl_;
 };
 
 #endif  // GAZEBO_PLUGINS__FILL_DEPTH_HPP_
