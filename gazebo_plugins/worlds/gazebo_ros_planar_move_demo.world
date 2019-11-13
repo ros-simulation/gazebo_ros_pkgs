@@ -49,8 +49,8 @@
       <plugin name='planar_move' filename='libgazebo_ros_planar_move.so'>
         <ros>
           <namespace>/demo</namespace>
-          <argument>cmd_vel:=cmd_demo</argument>
-          <argument>odom:=odom_demo</argument>
+          <remapping>cmd_vel:=cmd_demo</remapping>
+          <remapping>odom:=odom_demo</remapping>
         </ros>
 
         <update_rate>100</update_rate>

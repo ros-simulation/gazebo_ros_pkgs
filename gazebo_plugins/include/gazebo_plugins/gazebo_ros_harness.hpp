@@ -34,8 +34,8 @@ class GazeboRosHarnessPrivate;
       <ros>
         <!-- Add a namespace -->
         <namespace>demo</namespace>
-        <argument>box/harness/velocity:=velocity_demo</argument>
-        <argument>box/harness/detach:=detach_demo</argument>
+        <remapping>box/harness/velocity:=velocity_demo</remapping>
+        <remapping>box/harness/detach:=detach_demo</remapping>
       </ros>
       <!-- set initial harness velocity -->
       <!--<init_vel>-0.1</init_vel>-->

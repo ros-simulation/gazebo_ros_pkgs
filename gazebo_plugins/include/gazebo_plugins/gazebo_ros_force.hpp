@@ -39,7 +39,7 @@ class GazeboRosForcePrivate;
         <namespace>/test</namespace>
 
         <!-- Remap the default topic -->
-        <argument>gazebo_ros_force:=force_test</argument>
+        <remapping>gazebo_ros_force:=force_test</remapping>
 
       </ros>
 

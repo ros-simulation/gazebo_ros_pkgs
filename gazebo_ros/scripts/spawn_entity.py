@@ -340,7 +340,8 @@ def quaternion_from_euler(roll, pitch, yaw):
 
 def main(args=sys.argv):
     rclpy.init(args=args)
-    spawn_entity_node = SpawnEntityNode(args)
+    args_without_ros = rclpy.utilities.remove_ros_args(args)
+    spawn_entity_node = SpawnEntityNode(args_without_ros)
     spawn_entity_node.get_logger().info('Spawn Entity started')
     exit_code = spawn_entity_node.run()
     sys.exit(exit_code)

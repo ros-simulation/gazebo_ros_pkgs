@@ -50,8 +50,8 @@ class GazeboRosTricycleDrivePrivate;
 
     <ros>
       <namespace></namespace>
-      <argument>cmd_vel:=cmd_vel</argument>
-      <argument>odom:=odom</argument>
+      <remapping>cmd_vel:=cmd_vel</remapping>
+      <remapping>odom:=odom</remapping>
     </ros>
 
     <!-- wheels -->

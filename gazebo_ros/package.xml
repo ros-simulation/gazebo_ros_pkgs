@@ -25,6 +25,7 @@
   <depend>builtin_interfaces</depend>
   <depend>gazebo_dev</depend>
   <depend>gazebo_msgs</depend>
+  <depend>rcl</depend>
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>std_srvs</depend>

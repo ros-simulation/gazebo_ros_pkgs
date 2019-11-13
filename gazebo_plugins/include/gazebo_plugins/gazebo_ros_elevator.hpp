@@ -34,7 +34,7 @@ class GazeboRosElevatorPrivate;
         <namespace>demo</namespace>
 
         <!-- topic remapping -->
-        <argument>elevator:=elevator_demo</argument>
+        <remapping>elevator:=elevator_demo</remapping>
       </ros>
 
       <!-- min and max floor constraints -->

@@ -165,10 +165,10 @@
             <ros>
               <namespace>demo_cam</namespace>
               <!-- topics need to be prefixed with camera_name for remapping -->
-              <argument>mycamera/left/image_raw:=mycamera/left/image_demo</argument>
-              <argument>mycamera/right/image_raw:=mycamera/right/image_demo</argument>
-              <argument>mycamera/left/camera_info:=mycamera/left/camera_info_demo</argument>
-              <argument>mycamera/right/camera_info:=mycamera/right/camera_info_demo</argument>
+              <remapping>mycamera/left/image_raw:=mycamera/left/image_demo</remapping>
+              <remapping>mycamera/right/image_raw:=mycamera/right/image_demo</remapping>
+              <remapping>mycamera/left/camera_info:=mycamera/left/camera_info_demo</remapping>
+              <remapping>mycamera/right/camera_info:=mycamera/right/camera_info_demo</remapping>
             </ros>
 
             <camera_name>mycamera</camera_name>

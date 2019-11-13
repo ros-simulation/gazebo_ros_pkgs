@@ -187,7 +187,7 @@
       <plugin name="gazebo_ros_ft_sensor_joint" filename="libgazebo_ros_ft_sensor.so">
         <ros>
           <namespace>/demo_joint</namespace>
-          <argument>wrench:=ft_sensor_demo</argument>
+          <remapping>wrench:=ft_sensor_demo</remapping>
         </ros>
         <update_rate>200</update_rate>
         <joint_name>lower_joint</joint_name>
@@ -197,7 +197,7 @@
       <plugin name="gazebo_ros_ft_sensor_link" filename="libgazebo_ros_ft_sensor.so">
         <ros>
           <namespace>/demo_link</namespace>
-          <argument>wrench:=ft_sensor_demo</argument>
+          <remapping>wrench:=ft_sensor_demo</remapping>
         </ros>
         <update_rate>200</update_rate>
         <body_name>upper_link</body_name>

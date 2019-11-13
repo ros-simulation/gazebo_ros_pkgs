@@ -41,8 +41,8 @@
     <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
       <ros>
         <namespace>/demo</namespace>
-        <argument>model_states:=model_states_demo</argument>
-        <argument>link_states:=link_states_demo</argument>
+        <remapping>model_states:=model_states_demo</remapping>
+        <remapping>link_states:=link_states_demo</remapping>
       </ros>
 
       <update_rate>1.0</update_rate>

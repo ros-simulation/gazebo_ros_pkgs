@@ -33,7 +33,7 @@ class GazeboRosProjectorPrivate;
         <namespace>demo</namespace>
 
         <!-- topic remapping -->
-        <argument>switch:=switch_demo</argument>
+        <remapping>switch:=switch_demo</remapping>
 
         <projector_link>projector_link</projector_link>
         <projector_name>my_projector</projector_name>
