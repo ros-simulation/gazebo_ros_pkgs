@@ -60,7 +60,8 @@ void MultiCameraPlugin::Load(sensors::SensorPtr _sensor,
     return;
   }
 
-  for (unsigned int i = 0; i < this->parentSensor->CameraCount(); ++i)
+  for (size_t i = 0;
+       i < static_cast<size_t>(this->parentSensor->CameraCount()); ++i)
   {
     this->camera.push_back(this->parentSensor->Camera(i));
 
@@ -73,39 +74,17 @@ void MultiCameraPlugin::Load(sensors::SensorPtr _sensor,
     std::string cameraName = this->parentSensor->Camera(i)->Name();
     // gzdbg << "camera(" << i << ") name [" << cameraName << "]\n";
 
-    // FIXME: hardcoded 2 camera support only
-    if (cameraName.find("left") != std::string::npos)
-    {
-      this->newFrameConnection.push_back(this->camera[i]->ConnectNewImageFrame(
-        boost::bind(&MultiCameraPlugin::OnNewFrameLeft,
-        this, _1, _2, _3, _4, _5)));
-    }
-    else if (cameraName.find("right") != std::string::npos)
-    {
-      this->newFrameConnection.push_back(this->camera[i]->ConnectNewImageFrame(
-        boost::bind(&MultiCameraPlugin::OnNewFrameRight,
-        this, _1, _2, _3, _4, _5)));
-    }
+    this->newFrameConnection.push_back(this->camera[i]->ConnectNewImageFrame(
+      boost::bind(&MultiCameraPlugin::OnNewFrame,
+      this, _1, i, _2, _3, _4, _5)));
   }
 
   this->parentSensor->SetActive(true);
 }
 
 /////////////////////////////////////////////////
-void MultiCameraPlugin::OnNewFrameLeft(const unsigned char * /*_image*/,
-                              unsigned int /*_width*/,
-                              unsigned int /*_height*/,
-                              unsigned int /*_depth*/,
-                              const std::string &/*_format*/)
-{
-  /*rendering::Camera::SaveFrame(_image, this->width,
-    this->height, this->depth, this->format,
-    "/tmp/camera/me.jpg");
-    */
-}
-
-/////////////////////////////////////////////////
-void MultiCameraPlugin::OnNewFrameRight(const unsigned char * /*_image*/,
+void MultiCameraPlugin::OnNewFrame(const unsigned char * /*_image*/,
+                              const size_t /*_camNumber*/,
                               unsigned int /*_width*/,
                               unsigned int /*_height*/,
                               unsigned int /*_depth*/,
