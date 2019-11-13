@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.2 (2019-11-12)
+------------------
 * Merge branch 'ros2' into eloquent
 * [ros2] Add remapping tag (`#1011 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1011>`_)
   * add --ros-args and a remapping element for ros arguments

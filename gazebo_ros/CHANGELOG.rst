@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.2 (2019-11-12)
+------------------
 * Merge branch 'ros2' into eloquent
 * Remove ROS-specific arguments before passing to argparse (`#994 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/994>`_) (`#1013 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1013>`_)
   This resolves argparse errors when trying to launch the spawn_entity script as a ROS node.

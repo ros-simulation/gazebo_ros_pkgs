@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.2 (2019-11-12)
+------------------
 * Merge branch 'ros2' into eloquent
 * Remove TODO in package.xml (`#1010 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1010>`_)
   As I understand, listing execution dependencies is the correct way to form a metapackage.
