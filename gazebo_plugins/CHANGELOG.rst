@@ -2,6 +2,21 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge branch 'ros2' into eloquent
+* [ros2] Add remapping tag (`#1011 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1011>`_)
+  * add --ros-args and a remapping element for ros arguments
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * keep backward compatibility
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * update docs and world file accordingly
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * remap all the things :fist_raised:
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* generate a .dsv file for the environment hook
+* Contributors: Dirk Thomas, Louise Poubel, Mikael Arguedas
+
 3.4.1 (2019-10-10)
 ------------------
 * generate a .dsv file for the environment hook

@@ -2,6 +2,34 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge branch 'ros2' into eloquent
+* Remove ROS-specific arguments before passing to argparse (`#994 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/994>`_) (`#1013 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1013>`_)
+  This resolves argparse errors when trying to launch the spawn_entity script as a ROS node.
+  For example, a launch file like the following wouldn't work without this change:
+  <launch>
+  <arg name="model_urdf" default="$(find-pkg-share mymodels)/urdf/ball.urdf" />
+  <node
+  pkg="gazebo_ros"
+  exec="spawn_entity.py"
+  name="spawner"
+  args="-entity foo -file /path/to/my/model/foo.urdf" />
+  </launch>
+  Signed-off-by: Jacob Perron <jacob@openrobotics.org>
+* [ros2] Add remapping tag (`#1011 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1011>`_)
+  * add --ros-args and a remapping element for ros arguments
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * keep backward compatibility
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * update docs and world file accordingly
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * remap all the things :fist_raised:
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* catch const ref to fix -Wcatch-value warnings (`#1012 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1012>`_)
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+* Contributors: Jacob Perron, Louise Poubel, Mikael Arguedas
+
 3.4.1 (2019-10-10)
 ------------------
 

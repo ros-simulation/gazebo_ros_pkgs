@@ -2,6 +2,14 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge branch 'ros2' into eloquent
+* Remove TODO in package.xml (`#1010 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1010>`_)
+  As I understand, listing execution dependencies is the correct way to form a metapackage.
+  Signed-off-by: Jacob Perron <jacob@openrobotics.org>
+* Contributors: Jacob Perron, Louise Poubel
+
 3.4.1 (2019-10-10)
 ------------------
 
