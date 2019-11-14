@@ -4,7 +4,7 @@
 
   Try for example:
 
-  ros2 topic pub "/demo/joint_efforts" sensor_msgs/msg/JointState "{effort: [10, 10]}" -1
+  ros2 topic pub "/demo/joint_efforts_demo" sensor_msgs/msg/JointState "{name: [upper_joint, lower_joint], effort: [0, 0]}" -1
 -->
 <sdf version="1.6">
   <world name="default">
@@ -21,7 +21,7 @@
           filename="libgazebo_ros_joint_effort.so">
         <ros>
           <namespace>/demo</namespace>
-          <argument>joint_states:=joint_states_demo</argument>
+          <argument>joint_efforts:=joint_efforts_demo</argument>
         </ros>
         <update_rate>2</update_rate>
         <joint_name>upper_joint</joint_name>

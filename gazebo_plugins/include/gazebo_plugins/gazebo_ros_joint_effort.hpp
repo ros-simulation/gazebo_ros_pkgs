@@ -1,4 +1,4 @@
-// Copyright 2012 Open Source Robotics Foundation, Inc.
+// Copyright 2019 Open Source Robotics Foundation, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ class GazeboRosJointEffortPrivate;
 
   Example Usage:
   \code{.xml}
-    <plugin name="gazebo_ros_effort" filename="libgazebo_ros_effort.so">
+    <plugin name="gazebo_ros_joint_effort" filename="libgazebo_ros_joint_effort.so">
 
       <ros>
 
@@ -39,7 +39,7 @@ class GazeboRosJointEffortPrivate;
         <namespace>/test</namespace>
 
         <!-- Remap the default topic -->
-        <argument>gazebo_ros_effort:=effort_test</argument>
+        <argument>joint_efforts:=effort_test</argument>
 
       </ros>
 

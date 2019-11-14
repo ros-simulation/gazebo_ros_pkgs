@@ -1,4 +1,4 @@
-// Copyright 2013 Open Source Robotics Foundation, Inc.
+// Copyright 2019 Open Source Robotics Foundation, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
 #include <gazebo_plugins/gazebo_ros_joint_effort.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
@@ -34,6 +33,9 @@ class GazeboRosJointEffortPrivate
 public:
   /// A pointer to the GazeboROS node.
   gazebo_ros::Node::SharedPtr ros_node_;
+
+  /// Pointer to model.
+  gazebo::physics::ModelPtr model_;
 
   /// Joints being tracked.
   std::vector<gazebo::physics::JointPtr> joints_;
@@ -59,6 +61,8 @@ GazeboRosJointEffort::~GazeboRosJointEffort()
 
 void GazeboRosJointEffort::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
+  impl_->model_ = model;
+
   // ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
@@ -78,8 +82,6 @@ void GazeboRosJointEffort::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr
       RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Joint %s does not exist!", joint_name.c_str());
     } else {
       impl_->joints_.push_back(joint);
-      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Going to publish joint [%s]",
-        joint_name.c_str() );
     }
     joint_elem = joint_elem->GetNextElement("joint_name");
   }
@@ -99,28 +101,44 @@ void GazeboRosJointEffort::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr
     std::bind(&GazeboRosJointEffort::OnUpdate, this));
 
   impl_->joint_state_msg_.effort.resize(impl_->joints_.size());
-  impl_->joint_state_msg_.position.resize(impl_->joints_.size());
-  impl_->joint_state_msg_.velocity.resize(impl_->joints_.size());
+  impl_->joint_state_msg_.name.resize(impl_->joints_.size());
 }
 
 void GazeboRosJointEffort::OnRosJointStateMsg(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
-  if (msg->effort.size() != impl_->joints_.size()) {
-    RCLCPP_ERROR(
-      impl_->ros_node_->get_logger(),
-      "Joint input size differs from msg");
+  if(msg->name.empty()) {
+      RCLCPP_ERROR(
+        impl_->ros_node_->get_logger(),
+        "No joint names in msg");
+        return;
   }
 
-  impl_->joint_state_msg_.header = msg->header;
-  for (size_t i = 0; i < impl_->joints_.size(); ++i) {
-    impl_->joint_state_msg_.effort[i] = msg->effort[i];
+  if (msg->name.size() != impl_->joints_.size()) {
+    RCLCPP_ERROR(
+        impl_->ros_node_->get_logger(),
+        "All joints from model must be addressed in msg"
+        );
+    return;
   }
+
+  impl_->joint_state_msg_ = *msg;
 }
 
 void GazeboRosJointEffort::OnUpdate()
 {
-  for (size_t i = 0; i < impl_->joints_.size(); ++i) {
-    impl_->joints_[i]->SetForce(0, impl_->joint_state_msg_.effort[i]);
+  if (impl_->joint_state_msg_.name.size() != impl_->joint_state_msg_.effort.size()) {
+    RCLCPP_ERROR(
+        impl_->ros_node_->get_logger(),
+        "The sizes from effort vector and name vector in JointState msg must be equal"
+        );
+    return;
+  }
+
+  for (size_t i = 0; i < impl_->joint_state_msg_.name.size(); ++i){
+    auto joint = impl_->model_->GetJoint(impl_->joint_state_msg_.name[i]);
+    if (joint) {
+      joint->SetForce(0, impl_->joint_state_msg_.effort[i]);
+    }
   }
 }
 
