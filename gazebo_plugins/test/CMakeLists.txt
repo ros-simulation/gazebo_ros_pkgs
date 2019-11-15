@@ -24,6 +24,7 @@ set(tests
   test_gazebo_ros_gps_sensor
   test_gazebo_ros_joint_pose_trajectory
   test_gazebo_ros_joint_state_publisher
+  test_gazebo_ros_joint_effort
   test_gazebo_ros_p3d
   test_gazebo_ros_planar_move
   test_gazebo_ros_ray_sensor
