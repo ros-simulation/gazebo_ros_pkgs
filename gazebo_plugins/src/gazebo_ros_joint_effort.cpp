@@ -106,18 +106,17 @@ void GazeboRosJointEffort::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr
 
 void GazeboRosJointEffort::OnRosJointStateMsg(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
-  if(msg->name.empty()) {
-      RCLCPP_ERROR(
-        impl_->ros_node_->get_logger(),
-        "No joint names in msg");
-        return;
+  if (msg->name.empty()) {
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
+      "No joint names in msg");
+    return;
   }
 
   if (msg->name.size() != impl_->joints_.size()) {
     RCLCPP_ERROR(
-        impl_->ros_node_->get_logger(),
-        "All joints from model must be addressed in msg"
-        );
+      impl_->ros_node_->get_logger(),
+      "All joints from model must be addressed in msg");
     return;
   }
 
@@ -128,13 +127,12 @@ void GazeboRosJointEffort::OnUpdate()
 {
   if (impl_->joint_state_msg_.name.size() != impl_->joint_state_msg_.effort.size()) {
     RCLCPP_ERROR(
-        impl_->ros_node_->get_logger(),
-        "The sizes from effort vector and name vector in JointState msg must be equal"
-        );
+      impl_->ros_node_->get_logger(),
+      "The sizes from effort vector and name vector in JointState msg must be equal");
     return;
   }
 
-  for (size_t i = 0; i < impl_->joint_state_msg_.name.size(); ++i){
+  for (size_t i = 0; i < impl_->joint_state_msg_.name.size(); ++i) {
     auto joint = impl_->model_->GetJoint(impl_->joint_state_msg_.name[i]);
     if (joint) {
       joint->SetForce(0, impl_->joint_state_msg_.effort[i]);
