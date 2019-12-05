@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name='revoluter'>
+      <pose>0.5 0.5 1 0 0 0</pose>
+
+      <link name='base'>
+        <pose>0 0 0 0 -0 0</pose>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>0.2 1 0.1</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.2 1 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+
+      <link name='motor1'>
+        <pose>0 0.5 0.15</pose>
+        <inertial>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+        <mass>0.01</mass>
+      </inertial>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>0.1 0.1 0.1</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Grey</name>
+            </script>
+          </material>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.1 0.1 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+
+      <link name='motor2'>
+        <pose>0 -0.5 0.15</pose>
+        <inertial>
+        <inertia>
+          <ixx>0.1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.1</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+        <mass>0.01</mass>
+      </inertial>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>0.1 0.1 0.1</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.1 0.1 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+
+      <joint name ='rotor1' type='fixed'>
+        <parent>base</parent>
+        <child>motor1</child>
+      </joint>
+
+      <joint name ='rotor2' type='fixed'>
+        <parent>base</parent>
+        <child>motor2</child>
+      </joint>
+
+      <plugin name="gazebo_ros_simple_blade"
+          filename="libgazebo_ros_simple_blade.so">
+        <link_name>motor1</link_name>
+        <blade_offset>0.0 0.0 0.1</blade_offset>
+        <link_name>motor2</link_name>
+        <blade_offset>0.0 0.0 0.25</blade_offset>
+        <km_gain>1.0</km_gain>
+        <kf_gain>1.0</kf_gain>
+        <clockwise>1 0</clockwise>
+      </plugin>
+
+    </model>
+  </world>
+</sdf>
