@@ -60,6 +60,11 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
+## Restrict Windows header namespace usage
+if(WIN32)
+  add_definitions(-DNOGDI)
+endif()
+
 ## Libraries
 add_library(${PROJECT_NAME} src/gazebo_ros_control_plugin.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
