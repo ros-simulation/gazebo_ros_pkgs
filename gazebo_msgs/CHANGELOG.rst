@@ -2,6 +2,11 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* ROS API: remove unhelpful error in GetWorldProperties call (`#747 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/747>`_)
+* Contributors: Kevin Allen
+
 2.8.5 (2019-06-04)
 ------------------
 

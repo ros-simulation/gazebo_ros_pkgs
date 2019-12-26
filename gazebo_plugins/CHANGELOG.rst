@@ -2,6 +2,17 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_plugins: export plugin path in package.xml (`#923 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/923>`_)
+* Fix destructor of gazebo_ros_diff_drive.cpp (`#1021 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1021>`_)
+  Fix issue referenced in `#123 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/123>`_ where the destructor of ROS DiffDrive plugin causes gzserver to crash on model deletion.
+* [Windows][melodic-devel] more Windows build break fix (`#975 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/975>`_)
+  * Fix CMake install error for Windows build.
+  * conditionally include <sys/time.h>
+* Use ignition::math::Rand utility for portability. (`#878 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/878>`_)
+* Contributors: Ben Wolsieffer, RemiRigal, Sean Yen
+
 2.8.5 (2019-06-04)
 ------------------
 * use C++11 std sleep instead of usleep. (`#877 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/877>`_)

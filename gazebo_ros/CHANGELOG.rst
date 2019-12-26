@@ -2,6 +2,24 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* ROS API: remove unhelpful error in GetWorldProperties call (`#747 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/747>`_)
+* Create reconfigure thread only if network enabled (`#919 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/919>`_)
+  This thread was blocked in client.waitForExistance because the services
+  it depends on are only created if `enable_ros_network` is true. This in
+  turn blocked gazebo from being shut down.
+  Signed-off-by: Shane Loretz <sloretz@osrfoundation.org>
+* spawn_model: Fix urlparse imports for Python 3
+* spawn_model: Ensure that "model_xml" is a string, required for Python 3
+* catkin_find gazebo plugin from bin folder. (`#993 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/993>`_)
+* [Windows][melodic-devel] more Windows build break fix (`#975 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/975>`_)
+  * Fix CMake install error for Windows build.
+  * conditionally include <sys/time.h>
+* provide Windows implemenation for setenv. (`#879 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/879>`_)
+* implement basic gazebo scripts to support launch file on Windows build. (`#880 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/880>`_)
+* Contributors: Kartik Mohta, Kevin Allen, Sean Yen, Shane Loretz
+
 2.8.5 (2019-06-04)
 ------------------
 * Add output arg to launch files, plus some small fixes (melodic) (`#907 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/907>`_)

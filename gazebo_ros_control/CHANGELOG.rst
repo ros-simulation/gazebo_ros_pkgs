@@ -2,6 +2,14 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* restrict Windows header namespace. (`#1023 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1023>`_)
+* [Windows][melodic-devel] more Windows build break fix (`#975 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/975>`_)
+  * Fix CMake install error for Windows build.
+  * conditionally include <sys/time.h>
+* Contributors: Sean Yen
+
 2.8.5 (2019-06-04)
 ------------------
 * use C++11 std sleep instead of usleep. (`#877 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/877>`_)
