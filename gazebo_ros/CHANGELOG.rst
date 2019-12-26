@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.6 (2019-12-26)
+------------------
 * ROS API: remove unhelpful error in GetWorldProperties call (`#747 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/747>`_)
 * Create reconfigure thread only if network enabled (`#919 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/919>`_)
   This thread was blocked in client.waitForExistance because the services

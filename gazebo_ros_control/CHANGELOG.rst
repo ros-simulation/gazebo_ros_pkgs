@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.6 (2019-12-26)
+------------------
 * restrict Windows header namespace. (`#1023 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1023>`_)
 * [Windows][melodic-devel] more Windows build break fix (`#975 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/975>`_)
   * Fix CMake install error for Windows build.

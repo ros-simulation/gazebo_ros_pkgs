@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.6 (2019-12-26)
+------------------
 * gazebo_plugins: export plugin path in package.xml (`#923 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/923>`_)
 * Fix destructor of gazebo_ros_diff_drive.cpp (`#1021 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1021>`_)
   Fix issue referenced in `#123 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/123>`_ where the destructor of ROS DiffDrive plugin causes gzserver to crash on model deletion.
