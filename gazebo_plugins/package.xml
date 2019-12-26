@@ -25,6 +25,7 @@
   -->
   <exec_depend>gazebo_dev</exec_depend>
 
+  <depend>gazebo_ros</depend>
   <depend>gazebo_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
@@ -52,4 +53,7 @@
 
   <test_depend>rostest</test_depend>
 
+  <export>
+    <gazebo_ros plugin_path="${prefix}/../../lib" gazebo_media_path="${prefix}" />
+  </export>
 </package>
