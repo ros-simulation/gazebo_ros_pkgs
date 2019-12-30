@@ -72,5 +72,10 @@ foreach(test ${tests})
     "tf2_ros"
     "trajectory_msgs"
   )
+
+  set_tests_properties(${test}
+    PROPERTIES
+    LABELS "gpu_test"
+  )
 endforeach()
 
