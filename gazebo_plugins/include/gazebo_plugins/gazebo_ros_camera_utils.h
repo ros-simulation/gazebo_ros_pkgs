@@ -109,7 +109,7 @@ namespace gazebo
     ///  A node will be instantiated if it does not exist.
     protected: ros::NodeHandle* rosnode_;
     protected: image_transport::Publisher image_pub_;
-    private: image_transport::ImageTransport* itnode_;
+    protected: image_transport::ImageTransport* itnode_;
 
     /// \brief ROS image message
     protected: sensor_msgs::Image image_msg_;

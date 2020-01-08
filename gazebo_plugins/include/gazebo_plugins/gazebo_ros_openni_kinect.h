@@ -109,7 +109,7 @@ namespace gazebo
 
     /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
     private: ros::Publisher point_cloud_pub_;
-    private: ros::Publisher depth_image_pub_;
+    private: image_transport::Publisher depth_image_pub_;
 
     /// \brief PointCloud2 point cloud message
     private: sensor_msgs::PointCloud2 point_cloud_msg_;

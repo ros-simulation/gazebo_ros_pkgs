@@ -117,13 +117,11 @@ void GazeboRosOpenniKinect::Advertise()
       ros::VoidPtr(), &this->camera_queue_);
   this->point_cloud_pub_ = this->rosnode_->advertise(point_cloud_ao);
 
-  ros::AdvertiseOptions depth_image_ao =
-    ros::AdvertiseOptions::create< sensor_msgs::Image >(
-      this->depth_image_topic_name_,1,
-      boost::bind( &GazeboRosOpenniKinect::DepthImageConnect,this),
-      boost::bind( &GazeboRosOpenniKinect::DepthImageDisconnect,this),
-      ros::VoidPtr(), &this->camera_queue_);
-  this->depth_image_pub_ = this->rosnode_->advertise(depth_image_ao);
+  this->depth_image_pub_ = this->itnode_->advertise(
+      this->depth_image_topic_name_, 1,
+      boost::bind(&GazeboRosOpenniKinect::DepthImageConnect, this),
+      boost::bind(&GazeboRosOpenniKinect::DepthImageDisconnect, this),
+      ros::VoidPtr(), true);
 
   ros::AdvertiseOptions depth_image_camera_info_ao =
     ros::AdvertiseOptions::create<sensor_msgs::CameraInfo>(
