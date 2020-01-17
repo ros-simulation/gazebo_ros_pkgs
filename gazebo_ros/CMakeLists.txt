@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(gazebo_ros)
 
-
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
@@ -22,10 +21,6 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tinyxml_vendor REQUIRED)
 
-include_directories(
-  include
-  ${gazebo_dev_INCLUDE_DIRS}
-)
 link_directories(
   ${gazebo_dev_LIBRARY_DIRS}
 )
@@ -37,6 +32,13 @@ add_library(gazebo_ros_node SHARED
   src/executor.cpp
   src/node.cpp
 )
+target_include_directories(gazebo_ros_node
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    ${gazebo_dev_INCLUDE_DIRS}
+)
+
 ament_target_dependencies(gazebo_ros_node
   "gazebo_dev"
   "rclcpp"
@@ -47,6 +49,11 @@ ament_export_libraries(gazebo_ros_node)
 # gazebo_ros_utils
 add_library(gazebo_ros_utils SHARED
   src/utils.cpp
+)
+target_include_directories(gazebo_ros_utils
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(gazebo_ros_utils
   "gazebo_dev"

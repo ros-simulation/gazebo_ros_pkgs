@@ -32,6 +32,8 @@ from geometry_msgs.msg import Pose
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy
+from rclpy.qos import QoSProfile
+from rclpy.qos import QoSReliabilityPolicy
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 

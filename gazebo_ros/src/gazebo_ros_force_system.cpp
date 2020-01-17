@@ -354,18 +354,15 @@ void GazeboRosForceSystemPrivate::ClearLinkWrenches(
   gazebo_msgs::srv::LinkRequest::Request::SharedPtr _req,
   gazebo_msgs::srv::LinkRequest::Response::SharedPtr /*_res*/)
 {
-  bool found = false;
   std::lock_guard<std::mutex> scoped_lock(lock_);
-  for (auto link_wrench_task = link_wrench_tasks_.begin();
-    link_wrench_task != link_wrench_tasks_.end(); ++link_wrench_task)
-  {
-    if ((*link_wrench_task)->link->GetScopedName() == _req->link_name) {
-      link_wrench_tasks_.erase(link_wrench_task--);
-      RCLCPP_INFO(ros_node_->get_logger(), "Deleted wrench on [%s]", _req->link_name.c_str());
-      found = true;
-    }
-  }
-  if (!found) {
+  auto it = std::find_if(link_wrench_tasks_.begin(), link_wrench_tasks_.end(),
+      [_req](auto & link_wrench_task) {
+        return link_wrench_task->link->GetScopedName() == _req->link_name;
+      });
+  if (it != link_wrench_tasks_.end()) {
+    link_wrench_tasks_.erase(it);
+    RCLCPP_INFO(ros_node_->get_logger(), "Deleted wrench on [%s]", _req->link_name.c_str());
+  } else {
     RCLCPP_WARN(ros_node_->get_logger(), "No applied wrenches on [%s]", _req->link_name.c_str());
   }
 }
@@ -401,18 +398,15 @@ void GazeboRosForceSystemPrivate::ClearJointEfforts(
   gazebo_msgs::srv::JointRequest::Request::SharedPtr _req,
   gazebo_msgs::srv::JointRequest::Response::SharedPtr /*_res*/)
 {
-  bool found = false;
   std::lock_guard<std::mutex> scoped_lock(lock_);
-  for (auto joint_effort_task = joint_effort_tasks_.begin();
-    joint_effort_task != joint_effort_tasks_.end(); ++joint_effort_task)
-  {
-    if ((*joint_effort_task)->joint->GetName() == _req->joint_name) {
-      joint_effort_tasks_.erase(joint_effort_task--);
-      RCLCPP_INFO(ros_node_->get_logger(), "Deleted effort on [%s]", _req->joint_name.c_str());
-      found = true;
-    }
-  }
-  if (!found) {
+  auto it = std::find_if(joint_effort_tasks_.begin(), joint_effort_tasks_.end(),
+      [_req](auto & joint_effort_task) {
+        return joint_effort_task->joint->GetName() == _req->joint_name;
+      });
+  if (it != joint_effort_tasks_.end()) {
+    joint_effort_tasks_.erase(it);
+    RCLCPP_INFO(ros_node_->get_logger(), "Deleted effort on [%s]", _req->joint_name.c_str());
+  } else {
     RCLCPP_WARN(ros_node_->get_logger(), "No applied efforts on [%s]", _req->joint_name.c_str());
   }
 }

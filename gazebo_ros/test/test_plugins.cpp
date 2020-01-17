@@ -76,6 +76,7 @@ INSTANTIATE_TEST_CASE_P(Plugins, TestPlugins, ::testing::Values(
     TestParams({{"-s", "libgazebo_ros_init.so", "-s", "libgazebo_ros_factory.so",
       "worlds/ros_world_plugin.world"}, {"test"}}),
     TestParams({{"-s", "libgazebo_ros_init.so", "worlds/sdf_node_plugin.world"}, {"/foo/my_topic"}})
+    // cppcheck-suppress syntaxError
   ), );
 
 int main(int argc, char ** argv)
