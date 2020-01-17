@@ -159,9 +159,12 @@ class SpawnEntityNode(Node):
                 nonlocal entity_xml
                 entity_xml = msg.data
 
+            custom_qos = QoSProfile(
+                depth=1,
+                durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+                reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE)
             self.subscription = self.create_subscription(
-                String, self.args.topic, entity_xml_cb,
-                QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
+                String, self.args.topic, entity_xml_cb, custom_qos)
 
             while rclpy.ok() and entity_xml == '':
                 self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
