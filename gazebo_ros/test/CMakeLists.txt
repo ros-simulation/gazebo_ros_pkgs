@@ -76,7 +76,6 @@ ament_target_dependencies(mock_robot_state_publisher
   "rclcpp"
   "std_msgs"
 )
-message("full path of mock ${CMAKE_CURRENT_BINARY_DIR}")
 add_launch_test(entity_spawner.test.py
   ARGS "mock_robot_state_publisher:=${CMAKE_CURRENT_BINARY_DIR}/mock_robot_state_publisher"
 )
