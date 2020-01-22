@@ -33,7 +33,6 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy
 from rclpy.qos import QoSProfile
-# from rclpy.qos import QoSReliabilityPolicy
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 
@@ -161,11 +160,11 @@ class SpawnEntityNode(Node):
                 nonlocal entity_xml
                 entity_xml = msg.data
 
-            custom_qos = QoSProfile(
+            latched_qos = QoSProfile(
                 depth=1,
                 durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
             self.subscription = self.create_subscription(
-                String, self.args.topic, entity_xml_cb, custom_qos)
+                String, self.args.topic, entity_xml_cb, latched_qos)
 
             while rclpy.ok() and entity_xml == '':
                 self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
