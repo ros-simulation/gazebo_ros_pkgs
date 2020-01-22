@@ -13,11 +13,11 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
-find_package(rcl REQUIRED)
-find_package(rclcpp REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(rcl REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tinyxml_vendor REQUIRED)
 
