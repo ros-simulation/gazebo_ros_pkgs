@@ -30,7 +30,7 @@ import pytest
 
 @pytest.mark.launch_test
 @launch_testing.markers.keep_alive
-def generate_test_description(ready_fn):
+def generate_test_description():
     return launch.LaunchDescription([
         launch.actions.DeclareLaunchArgument(
             'mock_robot_state_publisher',
@@ -46,8 +46,7 @@ def generate_test_description(ready_fn):
                 '/launch', '/gzserver.launch.py'
                 ])
         ),
-        launch.actions.OpaqueFunction(function=lambda context: ready_fn())
-        # launch_testing.actions.ReadyToTest()
+        launch_testing.actions.ReadyToTest()
     ])
 
 
