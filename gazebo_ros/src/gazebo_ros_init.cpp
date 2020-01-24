@@ -119,7 +119,7 @@ GazeboRosInit::~GazeboRosInit()
 void GazeboRosInit::Load(int argc, char ** argv)
 {
   // Initialize ROS with arguments
-  if (!rclcpp::is_initialized()) {
+  if (!rclcpp::ok()) {
     rclcpp::init(argc, argv);
     impl_->ros_node_ = gazebo_ros::Node::Get();
   } else {

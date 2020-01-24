@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <gtest/gtest.h>
+
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
-#include <gtest/gtest.h>
 
 TEST(TestConversions, Vector3)
 {
@@ -116,10 +117,4 @@ TEST(TestConversions, Time)
     EXPECT_EQ(200, gazebo_time.sec);
     EXPECT_EQ(100, gazebo_time.nsec);
   }
-}
-
-int main(int argc, char ** argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }
