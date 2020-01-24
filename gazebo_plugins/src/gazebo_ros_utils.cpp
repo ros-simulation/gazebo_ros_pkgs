@@ -142,7 +142,7 @@ physics::JointPtr GazeboRos::getJoint(physics::ModelPtr &_parent, const char *_t
     return joint;
 }
 
-bool GazeboRos::isInitialized() {
+bool GazeboRos::isInitialized() const {
     if (!ros::isInitialized())
     {
         ROS_FATAL_STREAM(info() << "A ROS node for Gazebo has not been initialized, unable to load plugin. "

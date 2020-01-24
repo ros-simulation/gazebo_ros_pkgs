@@ -215,7 +215,7 @@ public:
      * checks if the ros is initialized and prints a message if not
      * @retun bool whether ros is initialized
      **/
-    bool isInitialized();
+    bool isInitialized() const;
 
 
     /**
