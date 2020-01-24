@@ -87,10 +87,9 @@ def generate_launch_description():
                               description='Set "false" not to load "libgazebo_ros_init.so"'),
         DeclareLaunchArgument('factory', default_value='true',
                               description='Set "false" not to load "libgazebo_ros_factory.so"'),
-        # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
-        # DeclareLaunchArgument('force_system', default_value='true',
-        #                       description='Set "false" not to load \
-        #                                   "libgazebo_ros_force_system.so"'),
+        DeclareLaunchArgument('force_system', default_value='true',
+                              description='Set "false" not to load \
+                                          "libgazebo_ros_force_system.so"'),
 
         ExecuteProcess(
             cmd=['gzserver',
@@ -112,8 +111,7 @@ def generate_launch_description():
                  _boolean_command('minimal_comms'),
                  _plugin_command('init'), ' ',
                  _plugin_command('factory'), ' ',
-                 # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
-                 # _plugin_command('force_system'), ' ',
+                 _plugin_command('force_system'), ' ',
                  _arg_command('profile'), ' ', LaunchConfiguration('profile'),
                  LaunchConfiguration('extra_gazebo_args'),
                  ],
