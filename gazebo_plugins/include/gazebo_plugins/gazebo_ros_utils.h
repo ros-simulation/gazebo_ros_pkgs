@@ -212,10 +212,10 @@ public:
      **/
     physics::JointPtr getJoint ( physics::ModelPtr &_parent, const char *_tag_name, const std::string &_joint_default_name );
     /**
-     * checks if the ros not is initialized
-     * @retun JointPtr
+     * checks if the ros is initialized and prints a message if not
+     * @retun bool whether ros is initialized
      **/
-    void isInitialized();
+    bool isInitialized();
 
 
     /**
