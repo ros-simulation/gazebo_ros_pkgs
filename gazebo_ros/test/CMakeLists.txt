@@ -2,6 +2,7 @@ find_package(ament_cmake_gtest REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(gazebo_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(launch_testing_ament_cmake REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
@@ -68,3 +69,13 @@ foreach(test ${tests})
   )
 endforeach()
 
+add_executable(mock_robot_state_publisher
+  mock_robot_state_publisher/robot_state_publisher.cpp
+)
+ament_target_dependencies(mock_robot_state_publisher
+  "rclcpp"
+  "std_msgs"
+)
+add_launch_test(entity_spawner.test.py
+  ARGS "mock_robot_state_publisher:=${CMAKE_CURRENT_BINARY_DIR}/mock_robot_state_publisher"
+)
