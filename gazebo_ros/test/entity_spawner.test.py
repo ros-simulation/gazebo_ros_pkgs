@@ -14,13 +14,9 @@
 
 import unittest
 
-import ament_index_python
-
 import launch
 import launch.actions
 
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 import launch_testing
 import launch_testing.asserts
 import launch_testing.markers
@@ -40,11 +36,9 @@ def generate_test_description():
             cmd=[launch.substitutions.LaunchConfiguration('mock_robot_state_publisher')],
             output='screen'
         ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([
-                ament_index_python.get_package_share_directory('gazebo_ros'),
-                '/launch', '/gzserver.launch.py'
-                ])
+        launch.actions.ExecuteProcess(
+            cmd=['gzserver', '-s', 'libgazebo_ros_factory.so'],
+            output='screen'
         ),
         launch_testing.actions.ReadyToTest()
     ])
