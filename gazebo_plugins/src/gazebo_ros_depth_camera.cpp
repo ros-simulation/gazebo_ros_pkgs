@@ -45,9 +45,11 @@ GZ_REGISTER_SENSOR_PLUGIN(GazeboRosDepthCamera)
 GazeboRosDepthCamera::GazeboRosDepthCamera()
 {
   this->point_cloud_connect_count_ = 0;
+  this->normals_connect_count_ = 0;
   this->depth_image_connect_count_ = 0;
   this->depth_info_connect_count_ = 0;
   this->last_depth_image_camera_info_update_time_ = common::Time(0);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,6 +91,12 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
     this->point_cloud_topic_name_ = "points";
   else
     this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->Get<std::string>();
+
+  // normals stuff
+  if (!_sdf->HasElement("normalsTopicName"))
+    this->normals_topic_name_ = "normals";
+  else
+    this->normals_topic_name_ = _sdf->GetElement("normalsTopicName")->Get<std::string>();
 
   // depth image stuff
   if (!_sdf->HasElement("depthImageTopicName"))
@@ -135,8 +143,15 @@ void GazeboRosDepthCamera::Advertise()
         boost::bind( &GazeboRosDepthCamera::DepthInfoDisconnect,this),
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
-}
 
+  ros::AdvertiseOptions normals_ao =
+    ros::AdvertiseOptions::create<visualization_msgs::MarkerArray >(
+      normals_topic_name_, 1,
+      boost::bind( &GazeboRosDepthCamera::NormalsConnect,this),
+      boost::bind( &GazeboRosDepthCamera::NormalsDisconnect,this),
+      ros::VoidPtr(), &this->camera_queue_);
+  this->normal_pub_ = this->rosnode_->advertise(normals_ao);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Increment count
@@ -153,6 +168,24 @@ void GazeboRosDepthCamera::PointCloudDisconnect()
   this->point_cloud_connect_count_--;
   (*this->image_connect_count_)--;
   if (this->point_cloud_connect_count_ <= 0)
+    this->parentSensor->SetActive(false);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Increment count
+void GazeboRosDepthCamera::NormalsConnect()
+{
+  this->normals_connect_count_++;
+  (*this->image_connect_count_)++;
+  this->parentSensor->SetActive(true);
+}
+////////////////////////////////////////////////////////////////////////////////
+// Decrement count
+void GazeboRosDepthCamera::NormalsDisconnect()
+{
+  this->normals_connect_count_--;
+  (*this->image_connect_count_)--;
+  if (this->normals_connect_count_ <= 0)
     this->parentSensor->SetActive(false);
 }
 
@@ -250,6 +283,12 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
     if (this->point_cloud_connect_count_ > 0)
     {
       this->lock_.lock();
+
+      if(pcd_ == nullptr)
+        pcd_ = new float[_width * _height * 4];
+
+      memcpy(pcd_, _pcd, sizeof(float)* _width * _height * 4);
+
       this->point_cloud_msg_.header.frame_id = this->frame_name_;
       this->point_cloud_msg_.header.stamp.sec = this->depth_sensor_update_time_.sec;
       this->point_cloud_msg_.header.stamp.nsec = this->depth_sensor_update_time_.nsec;
@@ -325,6 +364,72 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
       // this->PublishCameraInfo(sensor_update_time);
     }
   }
+}
+
+void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
+               unsigned int _width, unsigned int _height,
+               unsigned int _depth, const std::string &_format)
+{
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
+  visualization_msgs::MarkerArray m_array;
+
+  this->lock_.lock();
+  if(this->point_cloud_msg_.data.size()>0){
+
+    for (unsigned int i = 0; i < _width; i++)
+    {
+      for (unsigned int j = 0; j < _height; j++)
+      {
+        visualization_msgs::Marker m;
+        m.type = visualization_msgs::Marker::ARROW;
+        m.header.frame_id = this->frame_name_;
+        m.header.stamp.sec = this->depth_sensor_update_time_.sec;
+        m.header.stamp.nsec = this->depth_sensor_update_time_.nsec;
+        m.action = visualization_msgs::Marker::ADD;
+
+        m.color.r = 1.0;
+        m.color.g = 0.0;
+        m.color.b = 0.0;
+        m.color.a = 1.0;
+        m.scale.x = 1;
+        m.scale.y = 0.01;
+        m.scale.z = 0.01;
+        m.lifetime.sec = 1;
+        m.lifetime.nsec = 0;
+
+        unsigned int index = (j * _width) + i;
+        m.id = index;
+        float x = _normals[4 * index];
+        float y = _normals[4 * index + 1];
+        float z = _normals[4 * index + 2];
+
+        m.pose.position.x = pcd_[4 * index];
+        m.pose.position.y = pcd_[4 * index + 1];
+        m.pose.position.z = pcd_[4 * index + 2];
+
+        // calculating the angle of the normal with the world
+        tf::Vector3 axis_vector(x, y, z);
+        tf::Vector3 vector(1.0, 0.0, 0.0);
+        tf::Vector3 right_vector = axis_vector.cross(vector);
+        right_vector.normalized();
+        tf::Quaternion q(right_vector, -1.0*acos(axis_vector.dot(vector)));
+        q.normalize();
+
+        m.pose.orientation.x = q.x();
+        m.pose.orientation.y = q.y();
+        m.pose.orientation.z = q.z();
+        m.pose.orientation.w = q.w();
+
+        // plotting some of the normals, otherwise rviz will block it
+        if(index%50==0)
+          m_array.markers.push_back(m);
+      }
+    }
+  }
+  this->lock_.unlock();
+  this->normal_pub_.publish(m_array);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
