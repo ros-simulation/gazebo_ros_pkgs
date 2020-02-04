@@ -57,6 +57,8 @@ class SpawnEntityNode(Node):
                             help='Load entity xml from file')
         source.add_argument('-topic', type=str, metavar='TOPIC_NAME',
                             help='Load entity xml published on topic')
+        source.add_argument('-param', type=str, metavar='PARAM_NAME',
+                            help='Load entity xml contained in parameter')
         source.add_argument('-database', type=str, metavar='ENTITY_NAME',
                             help='Load entity XML from specified entity in GAZEBO_MODEL_PATH \
                             or Gazebo Model Database')
@@ -167,6 +169,12 @@ class SpawnEntityNode(Node):
                 self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
                 rclpy.spin_once(self)
                 pass
+        # Load entity XML contained in the specified parameter
+        elif self.args.param:
+            self.get_logger().info(
+                'Loading entity from parameter %s' % self.args.param)
+            self.declare_parameter(self.args.param)
+            entity_xml = self.get_parameter(self.args.param)._value
 
         # Generate entity XML by putting requested entity name into request template
         elif self.args.database:
