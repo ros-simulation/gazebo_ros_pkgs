@@ -32,6 +32,7 @@ from geometry_msgs.msg import Pose
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy
+from rclpy.qos import QoSProfile
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 
@@ -159,9 +160,11 @@ class SpawnEntityNode(Node):
                 nonlocal entity_xml
                 entity_xml = msg.data
 
+            latched_qos = QoSProfile(
+                depth=1,
+                durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
             self.subscription = self.create_subscription(
-                String, self.args.topic, entity_xml_cb,
-                QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
+                String, self.args.topic, entity_xml_cb, latched_qos)
 
             while rclpy.ok() and entity_xml == '':
                 self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
