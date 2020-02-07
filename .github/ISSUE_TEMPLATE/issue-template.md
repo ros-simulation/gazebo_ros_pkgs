@@ -40,6 +40,7 @@ If applicable, add screenshots to help explain your problem.
  - Gazebo version: [e.g. Gazebo 9]
  - ROS version: [e.g. Melodic | Dashing]
   - gazebo_ros_pkgs: [e.g. debian install | source install at commit X]
+ - glx server in use: output from `glxinfo | grep 'server glx vendor'` (glxinfo is in mesa-utils package for Debian/Ubuntu)
 
 **Additional context**
 
