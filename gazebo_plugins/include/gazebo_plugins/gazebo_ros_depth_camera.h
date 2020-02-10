@@ -87,6 +87,10 @@ namespace gazebo
     protected: virtual void OnNewImageFrame(const unsigned char *_image,
                    unsigned int _width, unsigned int _height,
                    unsigned int _depth, const std::string &_format);
+     /// \brief Update the controller
+     protected: virtual void OnNewReflectanceFrame(const float * _reflectance,
+                    unsigned int _width, unsigned int _height,
+                    unsigned int _depth, const std::string &_format);
 
     /// \brief Put camera data to the ROS topic
     private: void FillPointdCloud(const float *_src);
@@ -98,6 +102,12 @@ namespace gazebo
     private: int point_cloud_connect_count_;
     private: void PointCloudConnect();
     private: void PointCloudDisconnect();
+
+    /// \brief Keep track of number of connctions for point clouds
+    /// \brief Keep track of number of connctions for point clouds
+    private: int reflectance_connect_count_;
+    private: void ReflectanceConnect();
+    private: void ReflectanceDisconnect();
 
     /// \brief Keep track of number of connctions for point clouds
     private: int depth_image_connect_count_;
@@ -116,15 +126,20 @@ namespace gazebo
     /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
     private: ros::Publisher point_cloud_pub_;
     private: ros::Publisher depth_image_pub_;
+    private: ros::Publisher reflectance_pub_;
 
     /// \brief PointCloud2 point cloud message
     private: sensor_msgs::PointCloud2 point_cloud_msg_;
     private: sensor_msgs::Image depth_image_msg_;
+    private: sensor_msgs::Image reflectance_msg_;
 
     private: double point_cloud_cutoff_;
 
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;
+
+    /// \brief ROS reflectance topic name
+    private: std::string reflectance_topic_name_;
 
     private: void InfoConnect();
     private: void InfoDisconnect();
@@ -148,4 +163,3 @@ namespace gazebo
 
 }
 #endif
-
