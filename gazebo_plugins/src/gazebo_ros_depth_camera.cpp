@@ -47,6 +47,7 @@ GazeboRosDepthCamera::GazeboRosDepthCamera()
   this->point_cloud_connect_count_ = 0;
   this->depth_image_connect_count_ = 0;
   this->depth_info_connect_count_ = 0;
+  this->reflectance_connect_count_ = 0;
   this->last_depth_image_camera_info_update_time_ = common::Time(0);
 }
 
@@ -89,6 +90,12 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
     this->point_cloud_topic_name_ = "points";
   else
     this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->Get<std::string>();
+
+  // reflectance stuff
+  if (!_sdf->HasElement("reflectanceTopicName"))
+    this->reflectance_topic_name_ = "reflectance";
+  else
+    this->reflectance_topic_name_ = _sdf->GetElement("reflectanceTopicName")->Get<std::string>();
 
   // depth image stuff
   if (!_sdf->HasElement("depthImageTopicName"))
@@ -135,6 +142,13 @@ void GazeboRosDepthCamera::Advertise()
         boost::bind( &GazeboRosDepthCamera::DepthInfoDisconnect,this),
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
+  ros::AdvertiseOptions reflectance_ao =
+    ros::AdvertiseOptions::create<sensor_msgs::Image>(
+      reflectance_topic_name_, 1,
+      boost::bind( &GazeboRosDepthCamera::ReflectanceConnect,this),
+      boost::bind( &GazeboRosDepthCamera::ReflectanceDisconnect,this),
+      ros::VoidPtr(), &this->camera_queue_);
+  this->reflectance_pub_ = this->rosnode_->advertise(reflectance_ao);
 }
 
 
@@ -153,6 +167,26 @@ void GazeboRosDepthCamera::PointCloudDisconnect()
   this->point_cloud_connect_count_--;
   (*this->image_connect_count_)--;
   if (this->point_cloud_connect_count_ <= 0)
+    this->parentSensor->SetActive(false);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Increment count
+////////////////////////////////////////////////////////////////////////////////
+// Increment count
+void GazeboRosDepthCamera::ReflectanceConnect()
+{
+  this->reflectance_connect_count_++;
+  (*this->image_connect_count_)++;
+  this->parentSensor->SetActive(true);
+}
+////////////////////////////////////////////////////////////////////////////////
+// Decrement count
+void GazeboRosDepthCamera::ReflectanceDisconnect()
+{
+  this->reflectance_connect_count_--;
+  (*this->image_connect_count_)--;
+  if (this->reflectance_connect_count_ <= 0)
     this->parentSensor->SetActive(false);
 }
 
@@ -292,6 +326,38 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
       this->lock_.unlock();
     }
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Update the controller
+void GazeboRosDepthCamera::OnNewReflectanceFrame(const float *_image,
+    unsigned int _width, unsigned int _height, unsigned int _depth,
+    const std::string &_format)
+{
+
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
+  /// don't bother if there are no subscribers
+  if (this->reflectance_connect_count_ > 0)
+  {
+    boost::mutex::scoped_lock lock(this->lock_);
+
+    // copy data into image
+    this->reflectance_msg_.header.frame_id = this->frame_name_;
+    this->reflectance_msg_.header.stamp.sec = this->sensor_update_time_.sec;
+    this->reflectance_msg_.header.stamp.nsec = this->sensor_update_time_.nsec;
+
+    printf("width: %d, height: %d, depth: %d\n", _width, _height, _depth);
+
+    // copy from src to image_msg_
+    fillImage(this->reflectance_msg_, sensor_msgs::image_encodings::TYPE_32FC1, _height, _width,
+        4*_width, reinterpret_cast<const void*>(_image));
+
+    // publish to ros
+    this->reflectance_pub_.publish(this->reflectance_msg_);
+  }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
