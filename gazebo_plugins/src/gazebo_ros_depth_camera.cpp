@@ -348,8 +348,6 @@ void GazeboRosDepthCamera::OnNewReflectanceFrame(const float *_image,
     this->reflectance_msg_.header.stamp.sec = this->sensor_update_time_.sec;
     this->reflectance_msg_.header.stamp.nsec = this->sensor_update_time_.nsec;
 
-    printf("width: %d, height: %d, depth: %d\n", _width, _height, _depth);
-
     // copy from src to image_msg_
     fillImage(this->reflectance_msg_, sensor_msgs::image_encodings::TYPE_32FC1, _height, _width,
         4*_width, reinterpret_cast<const void*>(_image));
