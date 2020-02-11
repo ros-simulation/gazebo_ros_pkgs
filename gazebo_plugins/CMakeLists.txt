@@ -115,6 +115,7 @@ catkin_package(
   gazebo_ros_planar_move
   gazebo_ros_range
   gazebo_ros_vacuum_gripper
+  gazebo_ros_magnetometer_sensor
 
   CATKIN_DEPENDS
   message_runtime
@@ -289,6 +290,9 @@ target_link_libraries(gazebo_ros_range ${catkin_LIBRARIES} ${Boost_LIBRARIES} Ra
 add_library(gazebo_ros_vacuum_gripper src/gazebo_ros_vacuum_gripper.cpp)
 target_link_libraries(gazebo_ros_vacuum_gripper ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_library(gazebo_ros_magnetometer_sensor src/gazebo_ros_magnetometer_sensor.cpp)
+target_link_libraries(gazebo_ros_magnetometer_sensor ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 ##
 ## Add your new plugin here
 ##
@@ -332,6 +336,7 @@ install(TARGETS
   gazebo_ros_video
   gazebo_ros_planar_move
   gazebo_ros_vacuum_gripper
+  gazebo_ros_magnetometer_sensor
   pub_joint_trajectory_test
   gazebo_ros_gpu_laser
   gazebo_ros_range
