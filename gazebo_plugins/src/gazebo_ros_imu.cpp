@@ -266,6 +266,13 @@ void GazeboRosIMU::UpdateChild()
       this->last_veul_ = veul;
     }
 
+    // subtract gravity vector from acceleration to represent accelerometer output
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->apos_ -= this->world_->Gravity();
+#else
+    this->apos_ -= this->world_->GetPhysicsEngine()->GetGravity().Ign();
+#endif
+
     // copy data into pose message
     this->imu_msg_.header.frame_id = this->frame_name_;
     this->imu_msg_.header.stamp.sec = cur_time.sec;
