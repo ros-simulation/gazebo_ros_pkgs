@@ -156,7 +156,7 @@
                 </script>
               </material>
               <plugin filename="libReflectancePlugin.so" name="reflectance_plugin">
-                <material>terrain.png</material>
+                <reflectance_map>terrain.png</reflectance_map>
               </plugin>
             </visual>
             <collision name="visual">
