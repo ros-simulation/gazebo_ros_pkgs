@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+
 3.4.2 (2019-11-12)
 ------------------
 * Merge branch 'ros2' into eloquent
