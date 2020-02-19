@@ -1,17 +1,15 @@
 <?xml version="1.0" ?>
 <!--
-  Gazebo ROS depth camera plugin demo
+  Gazebo ROS multi camera plugin demo
 
   Try for example:
 
-  * Try listening to camera info at
-      `/demo_cam/mycamera/raw_cam_info_demo`
-      `/demo_cam/mycamera/depth_cam_info_demo`
+  * Try listening to left camera info at `/demo_cam/mycamera/left/camera_info_demo`
+  * Try listening to right camera info at `/demo_cam/mycamera/right/camera_info_demo`
 
   * Launch RViz
-  * Visualize Raw Images from `/demo_cam/mycamera/image_demo`
-  * Visualize Depth Images from `/demo_cam/mycamera/depth_demo`
-  * Visualize Point Cloud from `/demo_cam/mycamera/points_demo`
+  * Visualize left camera images from `/demo_cam/mycamera/left/image_demo`
+  * Visualize right camera images from `/demo_cam/mycamera/right/image_demo`
 
 -->
 <sdf version="1.6">
@@ -118,18 +116,38 @@
       <pose>0 0 0.5 0 0 3.14</pose>
       <static>true</static>
       <link name="camera_link">
-        <sensor type="depth" name="camera1">
+        <sensor type="multicamera" name="camera1">
+          <pose>0 -0.2 0 0 0 0</pose>
           <update_rate>60</update_rate>
-          <visualize>false</visualize>
-          <camera>
-            <horizontal_fov>1.92</horizontal_fov>
+          <visualize>true</visualize>
+          <camera name="left">
+            <horizontal_fov>1.3962634</horizontal_fov>
             <image>
               <width>640</width>
               <height>480</height>
-              <format>B8G8R8</format>
+              <format>R8G8B8</format>
             </image>
-            <depth_camera>
-            </depth_camera>
+            <clip>
+              <near>0.02</near>
+              <far>300</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <!-- Noise is sampled independently per pixel on each frame.
+                   That pixel's noise value is added to each of its color
+                   channels, which at that point lie in the range [0,1]. -->
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+          </camera>
+          <camera name="right">
+            <pose>0 0.4 0 0 0 0</pose>
+            <horizontal_fov>0.7</horizontal_fov>
+            <image>
+              <width>320</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
             <clip>
               <near>0.02</near>
               <far>300</far>
@@ -146,22 +164,19 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
               <namespace>demo_cam</namespace>
-
               <!-- topics need to be prefixed with camera_name for remapping -->
-              <remapping>mycamera/image_raw:=mycamera/image_demo</remapping>
-              <remapping>mycamera/depth/image_raw:=mycamera/depth_demo</remapping>
-              <remapping>mycamera/camera_info:=mycamera/raw_cam_info_demo</remapping>
-              <remapping>mycamera/depth/camera_info:=mycamera/depth_cam_info_demo</remapping>
-              <remapping>mycamera/points:=mycamera/points_demo</remapping>
+              <remapping>mycamera/left/image_raw:=mycamera/left/image_demo</remapping>
+              <remapping>mycamera/right/image_raw:=mycamera/right/image_demo</remapping>
+              <remapping>mycamera/left/camera_info:=mycamera/left/camera_info_demo</remapping>
+              <remapping>mycamera/right/camera_info:=mycamera/right/camera_info_demo</remapping>
             </ros>
 
-            <!-- omit camera_name to default to sensor name -->
             <camera_name>mycamera</camera_name>
 
             <!-- frame_name>omit so it defaults to link name</frame_name-->
 
-            <min_depth>0.1</min_depth>
-            <max_depth>500</max_depth>
+            <!-- Specify if triggered camera -->
+            <triggered>false</triggered>
           </plugin>
         </sensor>
       </link>

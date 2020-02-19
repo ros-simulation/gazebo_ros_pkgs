@@ -64,8 +64,8 @@ class GazeboRosPaths:
                             xml_path = xml_path.replace('${prefix}', package_share_path)
                             gazebo_media_path.append(xml_path)
 
-        gazebo_model_path = ':'.join(gazebo_model_path)
-        gazebo_plugin_path = ':'.join(gazebo_plugin_path)
-        gazebo_media_path = ':'.join(gazebo_media_path)
+        gazebo_model_path = os.pathsep.join(gazebo_model_path)
+        gazebo_plugin_path = os.pathsep.join(gazebo_plugin_path)
+        gazebo_media_path = os.pathsep.join(gazebo_media_path)
 
         return gazebo_model_path, gazebo_plugin_path, gazebo_media_path

@@ -36,6 +36,7 @@ set(tests
   test_gazebo_ros_init
   test_gazebo_ros_joint_effort
   test_gazebo_ros_link_wrench
+  test_gazebo_ros_properties
   test_gazebo_ros_state
   test_node
   test_plugins

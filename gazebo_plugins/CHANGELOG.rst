@@ -66,6 +66,116 @@ Changelog for package gazebo_plugins
   * relative -> reference
 * Contributors: Jonathan Noyola, Shivesh Khaitan, alexfneves, chapulina
 
+3.3.4 (2019-09-18)
+------------------
+* fix multi_camera_plugin on windows (`#999 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/999>`_)
+* Contributors: Jonathan Noyola
+
+3.3.3 (2019-08-23)
+------------------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [backport] Backport multicamera to dashing (`#984 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/984>`_)
+  * [backport] Backport multicamera to dashing
+  * fix test - use correct world
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Adding option to select the frame where the force will be applied (`#978 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/978>`_)
+  * Adding option to select the frame where the force will be applied
+  A new parameter was added on the plugin with the options 'world' and 'link' frame.
+  The default value is 'world'.
+  Internally the AddRelativeForce() and torque functions are used instead of the AddForce() when the body option is selected.
+  * Modifying force test for the 'world' frame, and adding test for the force on the 'link' frame
+  The new world file starts with the box rotated.
+  * Fix cpplint and uncrustify on force plugin files
+  * Removing OnUpdateRelative() from the force plugin
+  This function could potentially break the ABI, therefore is been removed.
+  * body -> link, warn -> info, more examples
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Adding GPS plugin (`#982 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/982>`_)
+  * Adding gps plugin sensor
+  * Adding test for the gps plugin
+  * Adding GPS world demo and other small text corrections
+* [ros2] Backport depth camera to dashing (`#967 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/967>`_)
+  * [ros2] Backport depth camera to dashing
+  * don't install header that will be removed
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * fix linting error
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port vacuum gripper to ROS2 (`#960 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/960>`_)
+  * [ros2] Port vacuum gripper to ROS2
+  * Fix gripper forces
+  * Add option to set max_distance
+  Change SetForce -> Add Force
+* [ros2] Port joint pose trajectory to ROS2 (`#955 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/955>`_)
+  * [ros2] Port joint pose trajectory to ROS2
+  * Add conversion tests
+  Minor fixes
+* Merge pull request `#977 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/977>`_ from ros-simulation/backport
+  [backport] ros2 -> dashing
+* fix video test
+  Signed-off-by: chapulina <louise@openrobotics.org>
+* [ros2] Port bumper sensor to ROS2 (`#943 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/943>`_)
+  * [ros2] Port bumper sensor to ROS2
+  * Add author name
+  * Minor fixes and add contact msg conversion
+  * Remove unused header includes
+* Fix for multiple video plugins (`#898 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/898>`_) (`#937 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/937>`_)
+  * Fix for multiple video plugins (`#898 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/898>`_)
+  * Fix crash on shutdown
+  * Fix gazebo node destructor
+* [ros2] Fix tests on Dashing (`#953 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/953>`_)
+  * [ros2] Fix camera triggered test on Dashing
+  backport remove noe fix and re-enable distortion tests
+  * improve robustness of joint state pub test
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Add Gazebo builtin plugins to LD_LIBRARY_PATH (`#974 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/974>`_)
+  * Add Gazebo builtin plugins to LD_LIBRARY_PATH
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * cross-platform
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port hand of god to ROS2 (`#957 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/957>`_)
+  * [ros2] Port hand of god to ROS2
+  * Minor fixes
+* [ros2] Port harness to ROS2 (`#944 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/944>`_)
+* Contributors: Shivesh Khaitan, alexfneves, chapulina
+
+3.3.2 (2019-07-31)
+------------------
+* [ros2] Add ackermann drive plugin (`#947 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/947>`_)
+  * [ros2] Add ackermann drive plugin
+  * Minor fixes
+  Use gazebo database model
+  * Update example usage
+  * Fix TF for demo
+* [ros2] Port planar move to ROS2 (`#958 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/958>`_)
+  * [ros2] Port planar move to ROS2
+  * Add test for pose conversion
+* [ros2] Port projector to ROS2 (`#956 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/956>`_)
+  * [ros2] Port projector to ROS2
+  * fix small typo
+* Merge pull request `#945 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/945>`_ from shiveshkhaitan/elevator
+  [ros2] Port elevator to ROS2
+* [ros2] Fix test for diff drive (`#951 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/951>`_)
+* [ros2] Port elevator to ROS2
+* [ros2] Port skid_steer_drive to ROS2 (`#927 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/927>`_)
+  * [ros2] Port skid_steer_drive to ROS2
+  Integrate skid steer drive into diff drive
+  * Reverted to original diff drive
+  * Delete skid steer from .ros1_unported
+  * Fix for diff drive changed api
+  * Add support to specify odom covariance
+* [ros2] Port F3d and FTSensor plugin to ros2 (`#921 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/921>`_)
+  * [ros2] Port F3d plugin to ros2
+  * Merge ft_sensor and f3d_plugin
+  * Delete ft_sensor from .ros1_unported
+  * Minor fixes
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Shivesh Khaitan, chapulina
+
 3.3.1 (2019-05-30)
 ------------------
 * qos dashing api for video plugin (`#929 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/929>`_)
