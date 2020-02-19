@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.3 (2020-02-18)
+------------------
 * [backport][ros2] make transient local reliable (`#1033 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1033>`_) (`#1036 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1036>`_)
   * [ros2] make transient local reliable (`#1033 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1033>`_)
   * make transient local reliable

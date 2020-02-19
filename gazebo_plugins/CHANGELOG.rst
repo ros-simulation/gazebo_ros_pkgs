@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.3 (2020-02-18)
+------------------
 * Image publishers use SensorDataQoSProfile (`#1031 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1031>`_)
   All other sensor publishers were updated previously to use the same profile (`#926 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/926>`_).
   I'm not sure if the image publishers were overlooked or the image_transport API didn't

@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.3 (2020-02-18)
+------------------
 * Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
   Signed-off-by: Louise Poubel <louise@openrobotics.org>
 
