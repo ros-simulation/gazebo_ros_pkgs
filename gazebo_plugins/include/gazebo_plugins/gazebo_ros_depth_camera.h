@@ -90,7 +90,7 @@ namespace gazebo
                    unsigned int _width, unsigned int _height,
                    unsigned int _depth, const std::string &_format);
 
-    /// \brief Update the controller
+    // Documentation inherited
     protected: virtual void OnNewNormalsFrame(const float * _normals,
                    unsigned int _width, unsigned int _height,
                    unsigned int _depth, const std::string &_format);
@@ -108,7 +108,9 @@ namespace gazebo
 
     /// \brief Keep track of number of connctions for point clouds
     private: int normals_connect_count_;
+    /// \brief Increase the counter which count the subscribers are connected
     private: void NormalsConnect();
+    /// \brief Decrease the counter which count the subscribers are connected
     private: void NormalsDisconnect();
 
     /// \brief Keep track of number of connctions for point clouds

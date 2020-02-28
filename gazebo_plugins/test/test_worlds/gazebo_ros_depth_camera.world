@@ -108,9 +108,6 @@
                           <near>0.1</near>
                           <far>100</far>
                         </clip>
-                        <save enabled='0'>
-                          <path>__default__</path>
-                        </save>
                         <depth_camera>
                           <output>points;normals</output>
                         </depth_camera>
