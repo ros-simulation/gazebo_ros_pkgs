@@ -121,6 +121,7 @@
                         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
                         <cameraName>depth_cam</cameraName>
                         <frameName>/base_link</frameName>
+                        <reduceNormals>50</reduceNormals>
                         <pointCloudCutoff>0.001</pointCloudCutoff>
                         <distortionK1>0.00000001</distortionK1>
                         <distortionK2>0.00000001</distortionK2>

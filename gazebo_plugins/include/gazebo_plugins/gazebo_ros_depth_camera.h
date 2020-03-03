@@ -140,6 +140,9 @@ namespace gazebo
 
     private: double point_cloud_cutoff_;
 
+    /// \brief adding one value each reduce_normals_ to the array marker
+    private: int reduce_normals_;
+
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;
 

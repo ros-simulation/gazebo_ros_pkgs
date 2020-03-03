@@ -114,6 +114,11 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->Get<double>();
 
+  if (!_sdf->HasElement("reduceNormals"))
+    this->reduce_normals_ = 50;
+  else
+    this->reduce_normals_ = _sdf->GetElement("reduceNormals")->Get<int>();
+
   load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosDepthCamera::Advertise, this));
   GazeboRosCameraUtils::Load(_parent, _sdf);
 }
@@ -430,7 +435,7 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
             m.pose.orientation.w = q.w();
 
             // plotting some of the normals, otherwise rviz will block it
-            if (index % 50 == 0)
+            if (index % this->reduce_normals_ == 0)
               m_array.markers.push_back(m);
           }
         }
