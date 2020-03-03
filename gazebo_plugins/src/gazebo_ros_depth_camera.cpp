@@ -277,7 +277,7 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
   }
   else
   {
-    if (this->point_cloud_connect_count_ > 0)
+    if (this->point_cloud_connect_count_ > 0 || this->normals_connect_count_ > 0)
     {
       this->lock_.lock();
 
