@@ -93,46 +93,9 @@ void GazeboRosWheelSlip::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     boost::bind(&GazeboRosWheelSlip::configCallback, this, _1, _2);
   dyn_srv_->setCallback(f);
 
-  this->wheelSlipPub_ = this->rosnode_->advertise<sensor_msgs::JointState>("wheel_slips", 1000);
-
   // Custom Callback Queue
   this->callbackQueueThread_ =
     boost::thread(boost::bind(&GazeboRosWheelSlip::QueueThread, this));
-
-  // Callback for each simulation step
-  this->updateConnection_ = event::Events::ConnectWorldUpdateBegin(
-        std::bind(&GazeboRosWheelSlip::Update, this));
-}
-
-/////////////////////////////////////////////////
-void GazeboRosWheelSlip::PublishWheelSlips(
-              const std::map<std::string, ignition::math::Vector3d> &_slips)
-{
-  ros::Time current_time = ros::Time::now();
-
-  this->wheelSlips_.header.stamp = current_time;
-  this->wheelSlips_.name.resize(_slips.size());
-  this->wheelSlips_.position.resize(_slips.size());
-  this->wheelSlips_.velocity.resize(_slips.size());
-  this->wheelSlips_.effort.resize(_slips.size());
-
-  int i = 0;
-  for (const auto &slip : _slips)
-  {
-    this->wheelSlips_.name[i] = slip.first;
-    this->wheelSlips_.position[i] = slip.second.X();
-    this->wheelSlips_.velocity[i] = slip.second.Y();
-    this->wheelSlips_.effort[i] = slip.second.Z();
-    ++i;
-  }
-  this->wheelSlipPub_.publish(this->wheelSlips_);
-}
-
-/////////////////////////////////////////////////
-void GazeboRosWheelSlip::Update()
-{
-  this->GetSlips(this->slipsMap_);
-  this->PublishWheelSlips(this->slipsMap_);
 }
 
 /////////////////////////////////////////////////

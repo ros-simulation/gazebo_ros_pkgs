@@ -22,7 +22,6 @@
 #include <ros/subscribe_options.h>
 
 #include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
 #include <std_msgs/Bool.h>
 
 // dynamic reconfigure stuff
@@ -30,7 +29,6 @@
 #include <dynamic_reconfigure/server.h>
 
 #include <gazebo/plugins/WheelSlipPlugin.hh>
-#include <gazebo/common/Events.hh>
 
 namespace gazebo
 {
@@ -59,19 +57,8 @@ class GazeboRosWheelSlip : public WheelSlipPlugin
     /// \brief Load the plugin
     public: virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
-    /// \brief Publish wheel slip information.
-    /// \param[in] _slips Map of wheel name to a Vector3 of slip velocities.
-    /// The Vector3.X value is the longitudinal slip in m/s,
-    /// the Vector3.Y value is the lateral slip in m/s, and
-    /// the Vector3.Z value is the product of radius and spin rate in m/s.
-    private: void PublishWheelSlips(
-              const std::map<std::string, ignition::math::Vector3d> &_slips);
-
     /// \brief Custom callback queue thread
     private: void QueueThread();
-
-    /// \brief Callback for each simulation time step.
-    private: void Update();
 
     // Allow dynamic reconfiguration of wheel slip params
     private: void configCallback(
@@ -80,15 +67,6 @@ class GazeboRosWheelSlip : public WheelSlipPlugin
 
     /// \brief pointer to ros node
     private: ros::NodeHandle *rosnode_;
-
-    /// \brief Publisher of wheel slip messages.
-    private: ros::Publisher wheelSlipPub_;
-
-    /// \brief JointState message used to publish wheel slips.
-    private: sensor_msgs::JointState wheelSlips_;
-
-    /// \brief Map of wheel slips provided by WheelSlipPlugin::GetSlips.
-    private: std::map<std::string, ignition::math::Vector3d> slipsMap_;
 
     /// \brief Subscriber to detach control messages.
     private: ros::Subscriber detachSub_;
@@ -101,9 +79,6 @@ class GazeboRosWheelSlip : public WheelSlipPlugin
     private: std::string robotNamespace_;
     private: ros::CallbackQueue queue_;
     private: boost::thread callbackQueueThread_;
-
-    /// \brief Pointer to the update event connection
-    public: event::ConnectionPtr updateConnection_;
 };
 }
 #endif
