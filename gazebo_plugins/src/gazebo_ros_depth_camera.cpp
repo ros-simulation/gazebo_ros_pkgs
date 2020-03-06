@@ -394,48 +394,48 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
         {
           for (unsigned int j = 0; j < _height; j++)
           {
-            visualization_msgs::Marker m;
-            m.type = visualization_msgs::Marker::ARROW;
-            m.header.frame_id = this->frame_name_;
-            m.header.stamp.sec = this->depth_sensor_update_time_.sec;
-            m.header.stamp.nsec = this->depth_sensor_update_time_.nsec;
-            m.action = visualization_msgs::Marker::ADD;
-
-            m.color.r = 1.0;
-            m.color.g = 0.0;
-            m.color.b = 0.0;
-            m.color.a = 1.0;
-            m.scale.x = 1;
-            m.scale.y = 0.01;
-            m.scale.z = 0.01;
-            m.lifetime.sec = 1;
-            m.lifetime.nsec = 0;
-
-            unsigned int index = (j * _width) + i;
-            m.id = index;
-            float x = _normals[4 * index];
-            float y = _normals[4 * index + 1];
-            float z = _normals[4 * index + 2];
-
-            m.pose.position.x = pcd_[4 * index];
-            m.pose.position.y = pcd_[4 * index + 1];
-            m.pose.position.z = pcd_[4 * index + 2];
-
-            // calculating the angle of the normal with the world
-            tf::Vector3 axis_vector(x, y, z);
-            tf::Vector3 vector(1.0, 0.0, 0.0);
-            tf::Vector3 right_vector = axis_vector.cross(vector);
-            right_vector.normalized();
-            tf::Quaternion q(right_vector, -1.0*acos(axis_vector.dot(vector)));
-            q.normalize();
-
-            m.pose.orientation.x = q.x();
-            m.pose.orientation.y = q.y();
-            m.pose.orientation.z = q.z();
-            m.pose.orientation.w = q.w();
-
             // plotting some of the normals, otherwise rviz will block it
             if (index % this->reduce_normals_ == 0)
+              visualization_msgs::Marker m;
+              m.type = visualization_msgs::Marker::ARROW;
+              m.header.frame_id = this->frame_name_;
+              m.header.stamp.sec = this->depth_sensor_update_time_.sec;
+              m.header.stamp.nsec = this->depth_sensor_update_time_.nsec;
+              m.action = visualization_msgs::Marker::ADD;
+
+              m.color.r = 1.0;
+              m.color.g = 0.0;
+              m.color.b = 0.0;
+              m.color.a = 1.0;
+              m.scale.x = 1;
+              m.scale.y = 0.01;
+              m.scale.z = 0.01;
+              m.lifetime.sec = 1;
+              m.lifetime.nsec = 0;
+
+              unsigned int index = (j * _width) + i;
+              m.id = index;
+              float x = _normals[4 * index];
+              float y = _normals[4 * index + 1];
+              float z = _normals[4 * index + 2];
+
+              m.pose.position.x = pcd_[4 * index];
+              m.pose.position.y = pcd_[4 * index + 1];
+              m.pose.position.z = pcd_[4 * index + 2];
+
+              // calculating the angle of the normal with the world
+              tf::Vector3 axis_vector(x, y, z);
+              tf::Vector3 vector(1.0, 0.0, 0.0);
+              tf::Vector3 right_vector = axis_vector.cross(vector);
+              right_vector.normalized();
+              tf::Quaternion q(right_vector, -1.0*acos(axis_vector.dot(vector)));
+              q.normalize();
+
+              m.pose.orientation.x = q.x();
+              m.pose.orientation.y = q.y();
+              m.pose.orientation.z = q.z();
+              m.pose.orientation.w = q.w();
+
               m_array.markers.push_back(m);
           }
         }
