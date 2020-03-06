@@ -104,18 +104,24 @@
                             <height>480</height>
                             <format>R8G8B8</format>
                         </image>
-                        <clip near="0.01" far="100.0" />
-                        <save enabled="false" path="/tmp" />
-                        <depth_camera output="points" />
+                        <clip>
+                          <near>0.1</near>
+                          <far>100</far>
+                        </clip>
+                        <depth_camera>
+                          <output>points;normals</output>
+                        </depth_camera>
                     </camera>
                     <plugin name="plugin_1" filename="libgazebo_ros_depth_camera.so">
                         <alwaysOn>1</alwaysOn>
                         <updateRate>10.0</updateRate>
                         <imageTopicName>image_raw</imageTopicName>
                         <pointCloudTopicName>points</pointCloudTopicName>
+                        <normalsTopicName>normals</normalsTopicName>
                         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
                         <cameraName>depth_cam</cameraName>
                         <frameName>/base_link</frameName>
+                        <reduceNormals>50</reduceNormals>
                         <pointCloudCutoff>0.001</pointCloudCutoff>
                         <distortionK1>0.00000001</distortionK1>
                         <distortionK2>0.00000001</distortionK2>

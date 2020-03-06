@@ -35,6 +35,8 @@
 #include <sensor_msgs/fill_image.h>
 #include <std_msgs/Float64.h>
 #include <image_transport/image_transport.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
 
 // gazebo stuff
 #include <sdf/Param.hh>
@@ -88,6 +90,11 @@ namespace gazebo
                    unsigned int _width, unsigned int _height,
                    unsigned int _depth, const std::string &_format);
 
+    // Documentation inherited
+    protected: virtual void OnNewNormalsFrame(const float * _normals,
+                   unsigned int _width, unsigned int _height,
+                   unsigned int _depth, const std::string &_format);
+
     /// \brief Put camera data to the ROS topic
     private: void FillPointdCloud(const float *_src);
 
@@ -98,6 +105,13 @@ namespace gazebo
     private: int point_cloud_connect_count_;
     private: void PointCloudConnect();
     private: void PointCloudDisconnect();
+
+    /// \brief Keep track of number of connctions for point clouds
+    private: int normals_connect_count_;
+    /// \brief Increase the counter which count the subscribers are connected
+    private: void NormalsConnect();
+    /// \brief Decrease the counter which count the subscribers are connected
+    private: void NormalsDisconnect();
 
     /// \brief Keep track of number of connctions for point clouds
     private: int depth_image_connect_count_;
@@ -116,15 +130,24 @@ namespace gazebo
     /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
     private: ros::Publisher point_cloud_pub_;
     private: ros::Publisher depth_image_pub_;
+    private: ros::Publisher normal_pub_;
 
     /// \brief PointCloud2 point cloud message
     private: sensor_msgs::PointCloud2 point_cloud_msg_;
     private: sensor_msgs::Image depth_image_msg_;
 
+    private: float * pcd_ = nullptr;
+
     private: double point_cloud_cutoff_;
+
+    /// \brief adding one value each reduce_normals_ to the array marker
+    private: int reduce_normals_;
 
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;
+
+    /// \brief ROS normals topic name
+    private: std::string normals_topic_name_;
 
     private: void InfoConnect();
     private: void InfoDisconnect();
@@ -148,4 +171,3 @@ namespace gazebo
 
 }
 #endif
-

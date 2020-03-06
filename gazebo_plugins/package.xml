@@ -30,6 +30,7 @@
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>trajectory_msgs</depend>
+  <depend>visualization_msgs</depend>
   <depend>std_srvs</depend>
   <depend>roscpp</depend>
   <depend>rospy</depend>
