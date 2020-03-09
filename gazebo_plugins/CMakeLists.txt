@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
   camera_info_manager
   std_msgs
+  visualization_msgs
 )
 
 # Through transitive dependencies in the packages above, gazebo_plugins depends
@@ -157,6 +158,7 @@ catkin_package(
   rosconsole
   camera_info_manager
   std_msgs
+  visualization_msgs
 )
 add_dependencies(${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
