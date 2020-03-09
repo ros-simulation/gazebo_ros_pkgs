@@ -181,6 +181,7 @@ void GazeboRosDepthCamera::PointCloudConnect()
   (*this->image_connect_count_)++;
   this->parentSensor->SetActive(true);
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
 void GazeboRosDepthCamera::PointCloudDisconnect()
@@ -201,7 +202,7 @@ void GazeboRosDepthCamera::ReflectanceConnect()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Increment count 
+// Increment count
 void GazeboRosDepthCamera::NormalsConnect()
 {
   this->normals_connect_count_++;
@@ -236,6 +237,7 @@ void GazeboRosDepthCamera::DepthImageConnect()
   this->depth_image_connect_count_++;
   this->parentSensor->SetActive(true);
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
 void GazeboRosDepthCamera::DepthImageDisconnect()
@@ -456,14 +458,16 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
     if (this->normals_connect_count_ > 0)
     {
       this->lock_.lock();
-      if (this->point_cloud_msg_.data.size() > 0){
-
+      if (this->point_cloud_msg_.data.size() > 0)
+      {
         for (unsigned int i = 0; i < _width; i++)
         {
           for (unsigned int j = 0; j < _height; j++)
           {
             // plotting some of the normals, otherwise rviz will block it
+            unsigned int index = (j * _width) + i;
             if (index % this->reduce_normals_ == 0)
+            {
               visualization_msgs::Marker m;
               m.type = visualization_msgs::Marker::ARROW;
               m.header.frame_id = this->frame_name_;
@@ -481,7 +485,6 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
               m.lifetime.sec = 1;
               m.lifetime.nsec = 0;
 
-              unsigned int index = (j * _width) + i;
               m.id = index;
               float x = _normals[4 * index];
               float y = _normals[4 * index + 1];
@@ -505,6 +508,7 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
               m.pose.orientation.w = q.w();
 
               m_array.markers.push_back(m);
+            }
           }
         }
       }
