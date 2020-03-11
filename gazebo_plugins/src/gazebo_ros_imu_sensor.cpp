@@ -66,6 +66,16 @@ void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
     return;
   }
 
+  if (sdf->HasElement("initial_orientation_as_reference"))
+  {
+    bool initial_orientation_as_reference = sdf->Get<bool>("initial_orientation_as_reference");
+    ROS_INFO_STREAM("<initial_orientation_as_reference> set to: "<< initial_orientation_as_reference);
+    if (!initial_orientation_as_reference) {
+      // This complies with REP 145
+      sensor->SetWorldToReferenceOrientation(ignition::math::Quaterniond::Identity);
+    }
+  }
+
   impl_->pub_ =
     impl_->ros_node_->create_publisher<sensor_msgs::msg::Imu>("~/out", rclcpp::SensorDataQoS());
 
