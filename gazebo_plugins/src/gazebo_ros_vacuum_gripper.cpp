@@ -116,7 +116,8 @@ void GazeboRosVacuumGripper::Load(gazebo::physics::ModelPtr _model, sdf::Element
     {
       auto name = fixed->Get<std::string>();
       impl_->fixed_.insert(name);
-      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(),
         "Model/Link [%s] exempted from gripper force", name.c_str());
     }
   }
@@ -127,15 +128,19 @@ void GazeboRosVacuumGripper::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Bool>(
     "grasping", rclcpp::QoS(rclcpp::KeepLast(1)));
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(),
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(),
     "Advertise gripper status on [%s]", impl_->pub_->get_topic_name());
 
   // Initialize service
-  impl_->service_ = impl_->ros_node_->create_service<std_srvs::srv::SetBool>("switch",
-      std::bind(&GazeboRosVacuumGripperPrivate::OnSwitch, impl_.get(),
+  impl_->service_ = impl_->ros_node_->create_service<std_srvs::srv::SetBool>(
+    "switch",
+    std::bind(
+      &GazeboRosVacuumGripperPrivate::OnSwitch, impl_.get(),
       std::placeholders::_1, std::placeholders::_2));
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(),
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(),
     "Advertise gripper switch service on [%s]", impl_->service_->get_service_name());
 
   // Listen to the update event (broadcast every simulation iteration)

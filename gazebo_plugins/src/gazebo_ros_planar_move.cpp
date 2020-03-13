@@ -157,7 +157,8 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
     "cmd_vel", rclcpp::QoS(rclcpp::KeepLast(1)),
     std::bind(&GazeboRosPlanarMovePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(), "Subscribed to [%s]",
     impl_->cmd_vel_sub_->get_topic_name());
 
   // Advertise odometry topic
@@ -166,7 +167,8 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
       "odom", rclcpp::QoS(rclcpp::KeepLast(1)));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
       impl_->odometry_pub_->get_topic_name());
   }
 
@@ -176,7 +178,8 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
     impl_->transform_broadcaster_ =
       std::make_shared<tf2_ros::TransformBroadcaster>(impl_->ros_node_);
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(),
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(),
       "Publishing odom transforms between [%s] and [%s]", impl_->odometry_frame_.c_str(),
       impl_->robot_base_frame_.c_str());
   }
@@ -226,7 +229,8 @@ void GazeboRosPlanarMovePrivate::OnUpdate(const gazebo::common::UpdateInfo & _in
   if (seconds_since_last_update >= update_period_) {
     ignition::math::Pose3d pose = model_->WorldPose();
     auto yaw = static_cast<float>(pose.Rot().Yaw());
-    model_->SetLinearVel(ignition::math::Vector3d(
+    model_->SetLinearVel(
+      ignition::math::Vector3d(
         target_cmd_vel_.linear.x * cosf(yaw) - target_cmd_vel_.linear.y * sinf(yaw),
         target_cmd_vel_.linear.y * cosf(yaw) + target_cmd_vel_.linear.x * sinf(yaw),
         0));

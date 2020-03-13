@@ -77,7 +77,8 @@ void GazeboRosForce::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 
   // Force frame
   if (!sdf->HasElement("force_frame")) {
-    RCLCPP_INFO(logger, "Force plugin missing <force_frame> wasn't set,"
+    RCLCPP_INFO(
+      logger, "Force plugin missing <force_frame> wasn't set,"
       "therefore it's been set as 'world'. The other option is 'link'.");
     impl_->force_on_world_frame_ = true;
   } else {

@@ -93,7 +93,8 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
   if (!sdf->HasElement("update_rate")) {
-    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "p3d plugin missing <update_rate>, defaults to 0.0"
+    RCLCPP_DEBUG(
+      impl_->ros_node_->get_logger(), "p3d plugin missing <update_rate>, defaults to 0.0"
       " (as fast as possible)");
   } else {
     impl_->update_rate_ = sdf->GetElement("update_rate")->Get<double>();
@@ -130,8 +131,8 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   if (!sdf->HasElement("rpy_offsets")) {
     RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <rpy_offsets>, defaults to 0s");
   } else {
-    impl_->offset_.Rot() = ignition::math::Quaterniond(sdf->GetElement(
-          "rpy_offsets")->Get<ignition::math::Vector3d>());
+    impl_->offset_.Rot() = ignition::math::Quaterniond(
+      sdf->GetElement("rpy_offsets")->Get<ignition::math::Vector3d>());
   }
 
   if (!sdf->HasElement("gaussian_noise")) {
@@ -157,7 +158,8 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   {
     impl_->reference_link_ = model->GetLink(impl_->frame_name_);
     if (!impl_->reference_link_) {
-      RCLCPP_WARN(impl_->ros_node_->get_logger(), "<frame_name> [%s] does not exist.",
+      RCLCPP_WARN(
+        impl_->ros_node_->get_logger(), "<frame_name> [%s] does not exist.",
         impl_->frame_name_.c_str());
     }
   }

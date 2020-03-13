@@ -79,11 +79,14 @@ TEST_F(GazeboRosP3dTest, Publishing)
   EXPECT_EQ("sphere_link", latest_msg->header.frame_id);
   EXPECT_EQ("box_link", latest_msg->child_frame_id);
 
-  EXPECT_NEAR(latest_msg->pose.pose.position.x,
+  EXPECT_NEAR(
+    latest_msg->pose.pose.position.x,
     -ref_link->WorldPose().Pos().X() + link->WorldPose().Pos().X() + 10, tol);
-  EXPECT_NEAR(latest_msg->pose.pose.position.y,
+  EXPECT_NEAR(
+    latest_msg->pose.pose.position.y,
     -ref_link->WorldPose().Pos().Y() + link->WorldPose().Pos().Y() + 10, tol);
-  EXPECT_NEAR(latest_msg->pose.pose.position.z,
+  EXPECT_NEAR(
+    latest_msg->pose.pose.position.z,
     -ref_link->WorldPose().Pos().Z() + link->WorldPose().Pos().Z() + 10, tol);
   EXPECT_NEAR(latest_msg->pose.pose.orientation.x, link->WorldPose().Rot().X(), tol);
   EXPECT_NEAR(latest_msg->pose.pose.orientation.y, link->WorldPose().Rot().Y(), tol);

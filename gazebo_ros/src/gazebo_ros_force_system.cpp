@@ -172,20 +172,24 @@ void GazeboRosForceSystemPrivate::OnWorldCreated(const std::string & _world_name
   ros_node_ = gazebo_ros::Node::Get();
 
   apply_link_wrench_service_ = ros_node_->create_service<gazebo_msgs::srv::ApplyLinkWrench>(
-    "apply_link_wrench", std::bind(&GazeboRosForceSystemPrivate::ApplyLinkWrench, this,
-    std::placeholders::_1, std::placeholders::_2));
+    "apply_link_wrench", std::bind(
+      &GazeboRosForceSystemPrivate::ApplyLinkWrench, this,
+      std::placeholders::_1, std::placeholders::_2));
 
   clear_link_wrenches_service_ = ros_node_->create_service<gazebo_msgs::srv::LinkRequest>(
-    "clear_link_wrenches", std::bind(&GazeboRosForceSystemPrivate::ClearLinkWrenches, this,
-    std::placeholders::_1, std::placeholders::_2));
+    "clear_link_wrenches", std::bind(
+      &GazeboRosForceSystemPrivate::ClearLinkWrenches, this,
+      std::placeholders::_1, std::placeholders::_2));
 
   apply_joint_effort_service_ = ros_node_->create_service<gazebo_msgs::srv::ApplyJointEffort>(
-    "apply_joint_effort", std::bind(&GazeboRosForceSystemPrivate::ApplyJointEffort, this,
-    std::placeholders::_1, std::placeholders::_2));
+    "apply_joint_effort", std::bind(
+      &GazeboRosForceSystemPrivate::ApplyJointEffort, this,
+      std::placeholders::_1, std::placeholders::_2));
 
   clear_joint_efforts_service_ = ros_node_->create_service<gazebo_msgs::srv::JointRequest>(
-    "clear_joint_efforts", std::bind(&GazeboRosForceSystemPrivate::ClearJointEfforts, this,
-    std::placeholders::_1, std::placeholders::_2));
+    "clear_joint_efforts", std::bind(
+      &GazeboRosForceSystemPrivate::ClearJointEfforts, this,
+      std::placeholders::_1, std::placeholders::_2));
 }
 
 void GazeboRosForceSystemPrivate::TaskExecutor(const gazebo::common::UpdateInfo & _info)
@@ -204,7 +208,8 @@ void GazeboRosForceSystemPrivate::TaskExecutor(const gazebo::common::UpdateInfo 
 
     if (!(*link_wrench_task)->link) {
       link_wrench_tasks_.erase(link_wrench_task--);
-      RCLCPP_ERROR(ros_node_->get_logger(),
+      RCLCPP_ERROR(
+        ros_node_->get_logger(),
         "Link [%s] does not exist. Deleting task", (*link_wrench_task)->link->GetName().c_str());
     }
 
@@ -230,7 +235,8 @@ void GazeboRosForceSystemPrivate::TaskExecutor(const gazebo::common::UpdateInfo 
 
     if (!(*joint_effort_task)->joint) {
       joint_effort_tasks_.erase(joint_effort_task--);
-      RCLCPP_ERROR(ros_node_->get_logger(),
+      RCLCPP_ERROR(
+        ros_node_->get_logger(),
         "Joint [%s] does not exist. Deleting task", (*joint_effort_task)->joint->GetName().c_str());
     }
 
@@ -288,7 +294,8 @@ void GazeboRosForceSystemPrivate::ApplyLinkWrench(
     auto target_pose = target_to_ref.Pos();
     auto target_rot = target_to_ref.Rot().Euler();
 
-    RCLCPP_DEBUG(ros_node_->get_logger(),
+    RCLCPP_DEBUG(
+      ros_node_->get_logger(),
       "Reference frame for applied wrench:"
       "[%f %f %f, %f %f %f] - [%f %f %f, %f %f %f] = [%f %f %f, %f %f %f]",
       link_pose.X(), link_pose.Y(), link_pose.Z(),
@@ -301,7 +308,8 @@ void GazeboRosForceSystemPrivate::ApplyLinkWrench(
 
     TransformWrench(target_force, target_torque, ref_force, ref_torque, target_to_ref);
 
-    RCLCPP_INFO(ros_node_->get_logger(),
+    RCLCPP_INFO(
+      ros_node_->get_logger(),
       "Wrench defined as [%s]:[%f %f %f, %f %f %f] -> Applied as [%s]:[%f %f %f, %f %f %f]",
       frame->GetName().c_str(),
       ref_force.X(), ref_force.Y(), ref_force.Z(),
@@ -314,7 +322,8 @@ void GazeboRosForceSystemPrivate::ApplyLinkWrench(
     ignition::math::Pose3d target_to_reference = link->WorldPose();
     target_force = ref_force;
     target_torque = ref_torque;
-    RCLCPP_INFO(ros_node_->get_logger(), "Reference_frame is empty/world/map,"
+    RCLCPP_INFO(
+      ros_node_->get_logger(), "Reference_frame is empty/world/map,"
       "using inertial frame, transferring from link relative to inertial frame");
 
   } else {
@@ -357,14 +366,17 @@ void GazeboRosForceSystemPrivate::ClearLinkWrenches(
 {
   std::lock_guard<std::mutex> scoped_lock(lock_);
   auto prev_end = link_wrench_tasks_.end();
-  link_wrench_tasks_.erase(std::remove_if(link_wrench_tasks_.begin(), link_wrench_tasks_.end(),
-    [_req, this](auto & link_wrench_task) {
-      if (link_wrench_task->link->GetScopedName() == _req->link_name) {
-        RCLCPP_INFO(ros_node_->get_logger(), "Deleted wrench on [%s]", _req->link_name.c_str());
-        return true;
-      }
-      return false;
-    }), link_wrench_tasks_.end());
+  link_wrench_tasks_.erase(
+    std::remove_if(
+      link_wrench_tasks_.begin(), link_wrench_tasks_.end(),
+      [_req, this](auto & link_wrench_task) {
+        if (link_wrench_task->link->GetScopedName() == _req->link_name) {
+          RCLCPP_INFO(ros_node_->get_logger(), "Deleted wrench on [%s]", _req->link_name.c_str());
+          return true;
+        }
+        return false;
+      }),
+    link_wrench_tasks_.end());
   if (prev_end == link_wrench_tasks_.end()) {
     RCLCPP_WARN(ros_node_->get_logger(), "No applied wrenches on [%s]", _req->link_name.c_str());
   }
@@ -403,14 +415,17 @@ void GazeboRosForceSystemPrivate::ClearJointEfforts(
 {
   std::lock_guard<std::mutex> scoped_lock(lock_);
   auto prev_end = joint_effort_tasks_.end();
-  joint_effort_tasks_.erase(std::remove_if(joint_effort_tasks_.begin(), joint_effort_tasks_.end(),
-    [_req, this](auto & joint_effort_task) {
-      if (joint_effort_task->joint->GetName() == _req->joint_name) {
-        RCLCPP_INFO(ros_node_->get_logger(), "Deleted effort on [%s]", _req->joint_name.c_str());
-        return true;
-      }
-      return false;
-    }), joint_effort_tasks_.end());
+  joint_effort_tasks_.erase(
+    std::remove_if(
+      joint_effort_tasks_.begin(), joint_effort_tasks_.end(),
+      [_req, this](auto & joint_effort_task) {
+        if (joint_effort_task->joint->GetName() == _req->joint_name) {
+          RCLCPP_INFO(ros_node_->get_logger(), "Deleted effort on [%s]", _req->joint_name.c_str());
+          return true;
+        }
+        return false;
+      }),
+    joint_effort_tasks_.end());
   if (prev_end == joint_effort_tasks_.end()) {
     RCLCPP_WARN(ros_node_->get_logger(), "No applied efforts on [%s]", _req->joint_name.c_str());
   }

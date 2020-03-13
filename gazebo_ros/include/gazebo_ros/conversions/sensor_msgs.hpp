@@ -206,7 +206,8 @@ sensor_msgs::msg::PointCloud2 Convert(
 
   // Create fields in pointcloud
   sensor_msgs::PointCloud2Modifier pcd_modifier(pc);
-  pcd_modifier.setPointCloud2Fields(4,
+  pcd_modifier.setPointCloud2Fields(
+    4,
     "x", 1, sensor_msgs::msg::PointField::FLOAT32,
     "y", 1, sensor_msgs::msg::PointField::FLOAT32,
     "z", 1, sensor_msgs::msg::PointField::FLOAT32,

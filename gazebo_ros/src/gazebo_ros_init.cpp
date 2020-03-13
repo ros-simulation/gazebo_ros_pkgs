@@ -124,7 +124,8 @@ void GazeboRosInit::Load(int argc, char ** argv)
     impl_->ros_node_ = gazebo_ros::Node::Get();
   } else {
     impl_->ros_node_ = gazebo_ros::Node::Get();
-    RCLCPP_WARN(impl_->ros_node_->get_logger(),
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(),
       "gazebo_ros_init didn't initialize ROS "
       "because it's already initialized with other arguments");
   }
@@ -157,21 +158,29 @@ void GazeboRosInitPrivate::OnWorldCreated(const std::string & _world_name)
   world_ = gazebo::physics::get_world(_world_name);
 
   // Reset services
-  reset_simulation_service_ = ros_node_->create_service<std_srvs::srv::Empty>("reset_simulation",
-      std::bind(&GazeboRosInitPrivate::OnResetSimulation, this,
+  reset_simulation_service_ = ros_node_->create_service<std_srvs::srv::Empty>(
+    "reset_simulation",
+    std::bind(
+      &GazeboRosInitPrivate::OnResetSimulation, this,
       std::placeholders::_1, std::placeholders::_2));
 
-  reset_world_service_ = ros_node_->create_service<std_srvs::srv::Empty>("reset_world",
-      std::bind(&GazeboRosInitPrivate::OnResetWorld, this,
+  reset_world_service_ = ros_node_->create_service<std_srvs::srv::Empty>(
+    "reset_world",
+    std::bind(
+      &GazeboRosInitPrivate::OnResetWorld, this,
       std::placeholders::_1, std::placeholders::_2));
 
   // Pause services
-  pause_service_ = ros_node_->create_service<std_srvs::srv::Empty>("pause_physics",
-      std::bind(&GazeboRosInitPrivate::OnPause, this,
+  pause_service_ = ros_node_->create_service<std_srvs::srv::Empty>(
+    "pause_physics",
+    std::bind(
+      &GazeboRosInitPrivate::OnPause, this,
       std::placeholders::_1, std::placeholders::_2));
 
-  unpause_service_ = ros_node_->create_service<std_srvs::srv::Empty>("unpause_physics",
-      std::bind(&GazeboRosInitPrivate::OnUnpause, this,
+  unpause_service_ = ros_node_->create_service<std_srvs::srv::Empty>(
+    "unpause_physics",
+    std::bind(
+      &GazeboRosInitPrivate::OnUnpause, this,
       std::placeholders::_1, std::placeholders::_2));
 }
 
