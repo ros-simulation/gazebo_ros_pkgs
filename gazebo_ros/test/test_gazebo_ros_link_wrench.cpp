@@ -59,7 +59,8 @@ TEST_F(GazeboRosLinkWrenchTest, LinkWrenchTest)
   apply_request->duration = rclcpp::Duration(-1, 0);
 
   auto apply_response_future = apply_link_wrench->async_send_request(apply_request);
-  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+  EXPECT_EQ(
+    rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, apply_response_future));
 
   auto apply_response = apply_response_future.get();
@@ -80,7 +81,8 @@ TEST_F(GazeboRosLinkWrenchTest, LinkWrenchTest)
   clear_request->link_name = "box::base";
 
   auto clear_response_future = clear_link_wrenches->async_send_request(clear_request);
-  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+  EXPECT_EQ(
+    rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, clear_response_future));
 
   auto clear_response = clear_response_future.get();

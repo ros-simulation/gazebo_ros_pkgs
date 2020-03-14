@@ -67,15 +67,15 @@ void GazeboRosHarness::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _s
       SetWinchVelocity(msg->data);
     });
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
-    impl_->vel_sub_->get_topic_name());
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(), "Subscribed to [%s]", impl_->vel_sub_->get_topic_name());
 
   impl_->detach_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
     impl_->model_ + "/harness/detach", rclcpp::QoS(rclcpp::KeepLast(1)),
     std::bind(&GazeboRosHarness::OnDetach, this, std::placeholders::_1));
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
-    impl_->detach_sub_->get_topic_name());
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(), "Subscribed to [%s]", impl_->detach_sub_->get_topic_name());
 
   if (_sdf->HasElement("init_vel")) {
     auto init_vel = _sdf->Get<float>("init_vel");
@@ -88,7 +88,8 @@ void GazeboRosHarness::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _s
 void GazeboRosHarness::OnDetach(const std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
 {
   if (impl_->detached_) {
-    RCLCPP_WARN(impl_->ros_node_->get_logger(),
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(),
       "[%s] is already detached from harness", impl_->model_.c_str());
     return;
   }

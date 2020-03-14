@@ -216,7 +216,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_WHEEL] =
     _model->GetJoint(steering_wheel_joint);
   if (!impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_WHEEL]) {
-    RCLCPP_WARN(impl_->ros_node_->get_logger(),
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(),
       "Steering wheel joint [%s] not found.", steering_wheel_joint.c_str());
     impl_->joints_.resize(6);
   }
@@ -224,7 +225,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   auto front_right_joint = _sdf->Get<std::string>("front_right_joint", "front_right_joint").first;
   impl_->joints_[GazeboRosAckermannDrivePrivate::FRONT_RIGHT] = _model->GetJoint(front_right_joint);
   if (!impl_->joints_[GazeboRosAckermannDrivePrivate::FRONT_RIGHT]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Front right wheel joint [%s] not found, plugin will not work.", front_right_joint.c_str());
     impl_->ros_node_.reset();
     return;
@@ -233,7 +235,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   auto front_left_joint = _sdf->Get<std::string>("front_left_joint", "front_left_joint").first;
   impl_->joints_[GazeboRosAckermannDrivePrivate::FRONT_LEFT] = _model->GetJoint(front_left_joint);
   if (!impl_->joints_[GazeboRosAckermannDrivePrivate::FRONT_LEFT]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Front left wheel joint [%s] not found, plugin will not work.", front_left_joint.c_str());
     impl_->ros_node_.reset();
     return;
@@ -242,7 +245,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   auto rear_right_joint = _sdf->Get<std::string>("rear_right_joint", "rear_right_joint").first;
   impl_->joints_[GazeboRosAckermannDrivePrivate::REAR_RIGHT] = _model->GetJoint(rear_right_joint);
   if (!impl_->joints_[GazeboRosAckermannDrivePrivate::REAR_RIGHT]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Rear right wheel joint [%s] not found, plugin will not work.", rear_right_joint.c_str());
     impl_->ros_node_.reset();
     return;
@@ -251,7 +255,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   auto rear_left_joint = _sdf->Get<std::string>("rear_left_joint", "rear_left_joint").first;
   impl_->joints_[GazeboRosAckermannDrivePrivate::REAR_LEFT] = _model->GetJoint(rear_left_joint);
   if (!impl_->joints_[GazeboRosAckermannDrivePrivate::REAR_LEFT]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Rear left wheel joint [%s] not found, plugin will not work.", rear_left_joint.c_str());
     impl_->ros_node_.reset();
     return;
@@ -262,7 +267,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_RIGHT] =
     _model->GetJoint(right_steering_joint);
   if (!impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_RIGHT]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Right wheel steering joint [%s] not found, plugin will not work.",
       right_steering_joint.c_str());
     impl_->ros_node_.reset();
@@ -274,7 +280,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_LEFT] =
     _model->GetJoint(left_steering_joint);
   if (!impl_->joints_[GazeboRosAckermannDrivePrivate::STEER_LEFT]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Left wheel steering joint [%s] not found, plugin will not work.",
       left_steering_joint.c_str());
     impl_->ros_node_.reset();
@@ -351,8 +358,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
     "cmd_vel", rclcpp::QoS(rclcpp::KeepLast(1)),
     std::bind(&GazeboRosAckermannDrivePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(),
-    "Subscribed to [%s]", impl_->cmd_vel_sub_->get_topic_name());
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(), "Subscribed to [%s]", impl_->cmd_vel_sub_->get_topic_name());
 
   // Odometry
   impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
@@ -364,7 +371,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
       "odom", rclcpp::QoS(rclcpp::KeepLast(1)));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
       impl_->odometry_pub_->get_topic_name());
   }
 
@@ -374,7 +382,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
     impl_->distance_pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Float32>(
       "distance", rclcpp::QoS(rclcpp::KeepLast(1)));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise distance on [%s]",
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Advertise distance on [%s]",
       impl_->distance_pub_->get_topic_name());
   }
 
@@ -386,14 +395,16 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
       std::make_shared<tf2_ros::TransformBroadcaster>(impl_->ros_node_);
 
     if (impl_->publish_odom_tf_) {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(),
         "Publishing odom transforms between [%s] and [%s]", impl_->odometry_frame_.c_str(),
         impl_->robot_base_frame_.c_str());
     }
 
     if (impl_->publish_wheel_tf_) {
       for (auto & joint : impl_->joints_) {
-        RCLCPP_INFO(impl_->ros_node_->get_logger(),
+        RCLCPP_INFO(
+          impl_->ros_node_->get_logger(),
           "Publishing wheel transforms between [%s], [%s] and [%s]",
           impl_->robot_base_frame_.c_str(), joint->GetName().c_str(), joint->GetName().c_str());
       }

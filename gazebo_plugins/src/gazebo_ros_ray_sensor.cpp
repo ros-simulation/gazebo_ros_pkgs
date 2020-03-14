@@ -126,8 +126,8 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
       impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::Range>(
         "~/out", rclcpp::SensorDataQoS());
     } else {
-      RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Invalid <output_type> [%s]",
-        output_type_string.c_str());
+      RCLCPP_ERROR(
+        impl_->ros_node_->get_logger(), "Invalid <output_type> [%s]", output_type_string.c_str());
       return;
     }
   }
@@ -135,8 +135,8 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   // Get parameters specific to Range output from sdf
   if (impl_->pub_.type() == typeid(GazeboRosRaySensorPrivate::RangePub)) {
     if (!_sdf->HasElement("radiation_type")) {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(),
-        "missing <radiation_type>, defaulting to infrared");
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(), "missing <radiation_type>, defaulting to infrared");
       impl_->range_radiation_type_ = sensor_msgs::msg::Range::INFRARED;
     } else if ("ultrasound" == _sdf->Get<std::string>("radiation_type")) {
       impl_->range_radiation_type_ = sensor_msgs::msg::Range::ULTRASOUND;
@@ -152,7 +152,8 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   }
 
   if (!_sdf->HasElement("min_intensity")) {
-    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "missing <min_intensity>, defaults to %f",
+    RCLCPP_DEBUG(
+      impl_->ros_node_->get_logger(), "missing <min_intensity>, defaults to %f",
       impl_->min_intensity_);
   } else {
     impl_->min_intensity_ = _sdf->Get<double>("min_intensity");
@@ -170,17 +171,17 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 void GazeboRosRaySensorPrivate::SubscribeGazeboLaserScan()
 {
   if (pub_.type() == typeid(LaserScanPub)) {
-    laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_,
-        &GazeboRosRaySensorPrivate::PublishLaserScan, this);
+    laser_scan_sub_ = gazebo_node_->Subscribe(
+      sensor_topic_, &GazeboRosRaySensorPrivate::PublishLaserScan, this);
   } else if (pub_.type() == typeid(PointCloudPub)) {
-    laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_,
-        &GazeboRosRaySensorPrivate::PublishPointCloud, this);
+    laser_scan_sub_ = gazebo_node_->Subscribe(
+      sensor_topic_, &GazeboRosRaySensorPrivate::PublishPointCloud, this);
   } else if (pub_.type() == typeid(PointCloud2Pub)) {
-    laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_,
-        &GazeboRosRaySensorPrivate::PublishPointCloud2, this);
+    laser_scan_sub_ = gazebo_node_->Subscribe(
+      sensor_topic_, &GazeboRosRaySensorPrivate::PublishPointCloud2, this);
   } else if (pub_.type() == typeid(RangePub)) {
-    laser_scan_sub_ = gazebo_node_->Subscribe(sensor_topic_,
-        &GazeboRosRaySensorPrivate::PublishRange, this);
+    laser_scan_sub_ = gazebo_node_->Subscribe(
+      sensor_topic_, &GazeboRosRaySensorPrivate::PublishRange, this);
   } else {
     RCLCPP_ERROR(ros_node_->get_logger(), "Publisher is an invalid type. This is an internal bug.");
   }

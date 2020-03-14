@@ -37,8 +37,8 @@ protected:
 
 void TestSimTime::SetUp()
 {
-  gazebo_process_ = std::make_unique<gazebo_ros::GazeboProcess>(std::vector<const char *>{"-s",
-        "libgazebo_ros_init.so"});
+  gazebo_process_ = std::make_unique<gazebo_ros::GazeboProcess>(
+    std::vector<const char *>{"-s", "libgazebo_ros_init.so"});
   ASSERT_GT(gazebo_process_->Run(), 0);
 }
 
@@ -61,11 +61,12 @@ TEST_F(TestSimTime, TestClock)
 
   std::vector<ClockMsg::SharedPtr> msgs;
   std::vector<rclcpp::Time> times;
-  auto sub = node->create_subscription<ClockMsg>("/clock", rclcpp::SystemDefaultsQoS(),
-      [&](ClockMsg::SharedPtr _msg) {
-        msgs.push_back(_msg);
-        times.push_back(node->now());
-      });
+  auto sub = node->create_subscription<ClockMsg>(
+    "/clock", rclcpp::SystemDefaultsQoS(),
+    [&](ClockMsg::SharedPtr _msg) {
+      msgs.push_back(_msg);
+      times.push_back(node->now());
+    });
 
   unsigned int sleep{0};
   unsigned int max_sleep{30};

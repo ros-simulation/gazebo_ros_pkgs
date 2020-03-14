@@ -119,12 +119,14 @@ Node::SharedPtr Node::Get()
 rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)
 {
   if (!sdf->HasAttribute("name")) {
-    RCLCPP_WARN(internal_logger(),
+    RCLCPP_WARN(
+      internal_logger(),
       "Ignoring parameter because it has no attribute 'name'. Tag: %s", sdf->ToString("").c_str());
     return rclcpp::Parameter();
   }
   if (!sdf->HasAttribute("type")) {
-    RCLCPP_WARN(internal_logger(),
+    RCLCPP_WARN(
+      internal_logger(),
       "Ignoring parameter because it has no attribute 'type'. Tag: %s", sdf->ToString("").c_str());
     return rclcpp::Parameter();
   }
@@ -141,7 +143,8 @@ rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)
   } else if ("string" == type) {
     return rclcpp::Parameter(name, sdf->Get<std::string>());
   } else {
-    RCLCPP_WARN(internal_logger(),
+    RCLCPP_WARN(
+      internal_logger(),
       "Ignoring parameter because attribute 'type' is invalid. Tag: %s", sdf->ToString("").c_str());
     return rclcpp::Parameter();
   }

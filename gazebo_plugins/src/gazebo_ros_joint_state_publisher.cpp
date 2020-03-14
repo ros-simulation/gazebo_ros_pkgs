@@ -103,7 +103,8 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
       RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Joint %s does not exist!", joint_name.c_str());
     } else {
       impl_->joints_.push_back(joint);
-      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Going to publish joint [%s]",
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(), "Going to publish joint [%s]",
         joint_name.c_str() );
     }
 
@@ -119,8 +120,8 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
   // Update rate
   double update_rate = 100.0;
   if (!sdf->HasElement("update_rate")) {
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Missing <update_rate>, defaults to %f",
-      update_rate);
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Missing <update_rate>, defaults to %f", update_rate);
   } else {
     update_rate = sdf->GetElement("update_rate")->Get<double>();
   }
