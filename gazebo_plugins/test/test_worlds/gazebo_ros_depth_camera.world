@@ -155,7 +155,10 @@
                 </script>
               </material>
               <plugin filename="libReflectancePlugin.so" name="reflectance_plugin">
-                <reflectance_map>terrain.png</reflectance_map>
+                <reflectance_map>
+                  <uri>model://suv/materials/textures/</uri>
+                  <name>wheels_01.png</name>
+                </reflectance_map>
               </plugin>
             </visual>
             <collision name="visual">
