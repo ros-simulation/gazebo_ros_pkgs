@@ -70,30 +70,35 @@ namespace gazebo
 
     /// \brief Load the plugin
     /// \param take in SDF root element
-    public: virtual void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
+    public: virtual void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf) override;
 
-    /// \brief Advertise point cloud and depth image
+    /// \brief Advertise point cloud, depth image, normals and reflectance
     public: virtual void Advertise();
 
     /// \brief Update the controller
     protected: virtual void OnNewDepthFrame(const float *_image,
                    unsigned int _width, unsigned int _height,
-                   unsigned int _depth, const std::string &_format);
+                   unsigned int _depth, const std::string &_format) override;
 
     /// \brief Update the controller
     protected: virtual void OnNewRGBPointCloud(const float *_pcd,
                     unsigned int _width, unsigned int _height,
-                    unsigned int _depth, const std::string &_format);
+                    unsigned int _depth, const std::string &_format) override;
 
     /// \brief Update the controller
     protected: virtual void OnNewImageFrame(const unsigned char *_image,
                    unsigned int _width, unsigned int _height,
-                   unsigned int _depth, const std::string &_format);
+                   unsigned int _depth, const std::string &_format) override;
 
-    // Documentation inherited
+     /// \brief Update the reflectance frame
+     protected: virtual void OnNewReflectanceFrame(const float * _reflectance,
+                    unsigned int _width, unsigned int _height,
+                    unsigned int _depth, const std::string &_format) override;
+
+    /// \brief Update the normals frame
     protected: virtual void OnNewNormalsFrame(const float * _normals,
                    unsigned int _width, unsigned int _height,
-                   unsigned int _depth, const std::string &_format);
+                   unsigned int _depth, const std::string &_format) override;
 
     /// \brief Put camera data to the ROS topic
     private: void FillPointdCloud(const float *_src);
@@ -106,7 +111,14 @@ namespace gazebo
     private: void PointCloudConnect();
     private: void PointCloudDisconnect();
 
-    /// \brief Keep track of number of connctions for point clouds
+    /// \brief Keep track of number of connections for reflectance
+    private: int reflectance_connect_count_;
+    /// \brief Increase the counter which count the subscribers are connected
+    private: void ReflectanceConnect();
+    /// \brief Decrease the counter which count the subscribers are connected
+    private: void ReflectanceDisconnect();
+
+    /// \brief Keep track of number of connections for normals
     private: int normals_connect_count_;
     /// \brief Increase the counter which count the subscribers are connected
     private: void NormalsConnect();
@@ -130,12 +142,15 @@ namespace gazebo
     /// \brief A pointer to the ROS node.  A node will be instantiated if it does not exist.
     private: ros::Publisher point_cloud_pub_;
     private: ros::Publisher depth_image_pub_;
+    private: ros::Publisher reflectance_pub_;
     private: ros::Publisher normal_pub_;
 
     /// \brief PointCloud2 point cloud message
     private: sensor_msgs::PointCloud2 point_cloud_msg_;
     private: sensor_msgs::Image depth_image_msg_;
+    private: sensor_msgs::Image reflectance_msg_;
 
+    /// \brief copy of the pointcloud data, used to place normals in the world
     private: float * pcd_ = nullptr;
 
     private: double point_cloud_cutoff_;
@@ -145,6 +160,9 @@ namespace gazebo
 
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;
+
+    /// \brief ROS reflectance topic name
+    private: std::string reflectance_topic_name_;
 
     /// \brief ROS normals topic name
     private: std::string normals_topic_name_;
