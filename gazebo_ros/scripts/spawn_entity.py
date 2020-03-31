@@ -260,7 +260,7 @@ class SpawnEntityNode(Node):
     def _spawn_entity(self, entity_xml, initial_pose):
         self.get_logger().info('Waiting for service %s/spawn_entity' % self.args.gazebo_namespace)
         client = self.create_client(SpawnEntity, '%s/spawn_entity' % self.args.gazebo_namespace)
-        if client.wait_for_service(timeout_sec=5.0):
+        if client.wait_for_service(timeout_sec=self.args.timeout):
             req = SpawnEntity.Request()
             req.name = self.args.entity
             req.xml = str(entity_xml, 'utf-8')
@@ -285,7 +285,7 @@ class SpawnEntityNode(Node):
         self.get_logger().info('Deleting entity [{}]'.format(self.args.entity))
         client = self.create_client(
             DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
-        if client.wait_for_service(timeout_sec=5.0):
+        if client.wait_for_service(timeout_sec=self.args.timeout):
             req = DeleteEntity.Request()
             req.name = self.args.entity
             self.get_logger().info(
