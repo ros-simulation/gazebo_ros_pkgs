@@ -21,8 +21,9 @@ class Tester(unittest.TestCase):
         cmd = ['rostopic', 'list']
         po = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = po.communicate()
-        self.assertEqual(po.returncode, 0, 'rostopic failed (%s). stdout: %s stderr: %s'%(cmd, out, err))
-        topics_actual = set(out.split('\n')) - set([''])
+        self.assertEqual(po.returncode, 0, 'rostopic failed (%s). stdout: %s stderr: %s'%(cmd, out.decode(), err.decode()))
+        topics_actual = set(out.split(b'\n')) - set([b''])
+        topics_actual = set([x.decode() for x in topics_actual])
         topics_expected = set([x['topic'] for x in topics])
         topics_extra = topics_actual - topics_expected
         self.assertEqual(topics_extra, set([]))
@@ -31,8 +32,9 @@ class Tester(unittest.TestCase):
         cmd = ['rosservice', 'list']
         po = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = po.communicate()
-        self.assertEqual(po.returncode, 0, 'rosservice failed (%s). stdout: %s stderr: %s'%(cmd, out, err))
-        services_actual = set(out.split('\n')) - set([''])
+        self.assertEqual(po.returncode, 0, 'rosservice failed (%s). stdout: %s stderr: %s'%(cmd, out.decode(), err.decode()))
+        services_actual = set(out.split(b'\n')) - set([b''])
+        services_actual = set([x.decode() for x in services_actual])
         services_expected = set([x['service'] for x in services])
         services_extra = services_actual - services_expected
         self.assertEqual(services_extra, set([]))
@@ -46,14 +48,14 @@ class Tester(unittest.TestCase):
         cmd = ['rostopic', 'info', t['topic']]
         po = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = po.communicate()
-        self.assertEqual(po.returncode, 0, 'rostopic info failed (%s). stdout: %s stderr: %s'%(cmd, out, err))
+        self.assertEqual(po.returncode, 0, 'rostopic info failed (%s). stdout: %s stderr: %s'%(cmd, out.decode(), err.decode()))
         self._parse_rostopic(t, out)
 
     def _parse_rostopic(self, t, out):
         # Should probably do this through a library API instead...
 
         # Step 0: make sure we have enough output
-        outsplit = out.split('\n')
+        outsplit = out.split(b'\n')
         self.assertTrue(len(outsplit) >= 5)
 
         type_re = re.compile('\w*Type: (.*)')
@@ -62,7 +64,7 @@ class Tester(unittest.TestCase):
         pub_sub_re = re.compile(' *\* *([^ ]*).*')
 
         # Step 1: check type
-        m = type_re.match(outsplit[0])
+        m = type_re.match(outsplit[0].decode())
         self.assertEqual(len(m.groups()), 1)
         self.assertEqual(m.groups()[0], t['type'])
 
@@ -71,12 +73,12 @@ class Tester(unittest.TestCase):
         pubs = 0
         subs = 0
         for l in outsplit:
-            if pub_start_re.match(l):
+            if pub_start_re.match(l.decode()):
                 state = 'in_pubs'
-            elif sub_start_re.match(l):
+            elif sub_start_re.match(l.decode()):
                 state = 'in_subs'
             else:
-                m = pub_sub_re.match(l)
+                m = pub_sub_re.match(l.decode())
                 if m and len(m.groups()) == 1:
                     if state == 'in_pubs':
                         pubs += 1
@@ -94,20 +96,20 @@ class Tester(unittest.TestCase):
         cmd = ['rosservice', 'info', s['service']]
         po = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = po.communicate()
-        self.assertEqual(po.returncode, 0, 'rosservice info failed (%s). stdout: %s stderr: %s'%(cmd, out, err))
+        self.assertEqual(po.returncode, 0, 'rosservice info failed (%s). stdout: %s stderr: %s'%(cmd, out.decode(), err.decode()))
         self._parse_rosservice(s, out)
 
     def _parse_rosservice(self, s, out):
         # Should probably do this through a library API instead...
 
         # Step 0: make sure we have enough output
-        outsplit = out.split('\n')
+        outsplit = out.split(b'\n')
         self.assertTrue(len(outsplit) >= 4)
 
         type_re = re.compile('Type: (.*)')
 
         # Step 1: check type
-        m = type_re.match(outsplit[2])
+        m = type_re.match(outsplit[2].decode())
         self.assertEqual(len(m.groups()), 1)
         self.assertEqual(m.groups()[0], s['type'])
 
@@ -188,7 +190,7 @@ if __name__ == '__main__':
     # amount of time when we're downloading models.
     while rospy.Time.now().to_sec() == 0.0:
         print('Waiting for Gazebo to start...')
-        time.sleep(1.0)
+        time.sleep(0.1)
     # Take an extra nap, to allow plugins to be loaded
     time.sleep(5.0)
     print('OK, starting test.')
