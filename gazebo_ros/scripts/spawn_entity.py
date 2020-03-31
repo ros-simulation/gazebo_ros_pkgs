@@ -71,6 +71,9 @@ class SpawnEntityNode(Node):
                             Default is without any namespace')
         parser.add_argument('-robot_namespace', type=str, default=self.get_namespace(),
                             help='change ROS namespace of gazebo-plugins')
+        parser.add_argument('-timeout', type=float, default=30.0,
+                            help='Number of seconds to wait for the spawn entity service to \
+                            become available')
         parser.add_argument('-unpause', action='store_true',
                             help='unpause physics after spawning entity')
         parser.add_argument('-wait', type=str, metavar='ENTITY_NAME',
@@ -231,7 +234,7 @@ class SpawnEntityNode(Node):
         # Unpause physics if user requested
         if self.args.unpause:
             client = self.create_client(Empty, '%s/unpause_physics' % self.args.gazebo_namespace)
-            if client.wait_for_service(timeout_sec=5.0):
+            if client.wait_for_service(timeout_sec=self.args.timeout):
                 self.get_logger().info(
                     'Calling service %s/unpause_physics' % self.args.gazebo_namespace)
                 client.call_async(Empty.Request())
