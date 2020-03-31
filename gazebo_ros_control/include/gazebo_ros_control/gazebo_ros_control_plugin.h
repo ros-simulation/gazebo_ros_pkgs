@@ -44,9 +44,9 @@
 #include <boost/thread.hpp>
 
 // ROS
-#include <ros/ros.h>
-#include <pluginlib/class_loader.h>
-#include <std_msgs/Bool.h>
+#include <rclcpp/rclcpp.hpp>
+#include <pluginlib/class_loader.hpp>
+#include <std_msgs/msg/bool.hpp>
 
 // Gazebo
 #include <gazebo/gazebo.hh>
@@ -55,8 +55,8 @@
 
 // ros_control
 #include <gazebo_ros_control/robot_hw_sim.h>
-#include <controller_manager/controller_manager.h>
-#include <transmission_interface/transmission_parser.h>
+#include <controller_manager/controller_manager.hpp>
+#include <transmission_interface/transmission_parser.hpp>
 
 namespace gazebo_ros_control
 {
@@ -83,10 +83,10 @@ public:
   bool parseTransmissionsFromURDF(const std::string& urdf_string);
 
 protected:
-  void eStopCB(const std_msgs::BoolConstPtr& e_stop_active);
+  void eStopCB(const std::shared_ptr<std_msgs::msg::Bool> e_stop_active);
 
   // Node Handles
-  ros::NodeHandle model_nh_; // namespaces to robot name
+  rclcpp::Node::SharedPtr model_nh_; // namespaces to robot name
 
   // Pointer to the model
   gazebo::physics::ModelPtr parent_model_;
@@ -111,19 +111,23 @@ protected:
 
   // Robot simulator interface
   std::string robot_hw_sim_type_str_;
-  boost::shared_ptr<gazebo_ros_control::RobotHWSim> robot_hw_sim_;
+  std::shared_ptr<gazebo_ros_control::RobotHWSim> robot_hw_sim_;
+  rclcpp::executors::MultiThreadedExecutor::SharedPtr executor_;
+  std::thread thread_executor_spin_; //executor_->spin causes lockups, us ethis alternative for now
 
   // Controller manager
-  boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
+  std::shared_ptr<controller_manager::ControllerManager> controller_manager_;
+  std::shared_ptr<controller_interface::ControllerInterface> controller_;
+  std::shared_ptr<controller_interface::ControllerInterface> controller2_;
 
   // Timing
-  ros::Duration control_period_;
-  ros::Time last_update_sim_time_ros_;
-  ros::Time last_write_sim_time_ros_;
+  rclcpp::Duration control_period_ = rclcpp::Duration(0);
+  rclcpp::Time last_update_sim_time_ros_;
+  rclcpp::Time last_write_sim_time_ros_;
 
   // e_stop_active_ is true if the emergency stop is active.
   bool e_stop_active_, last_e_stop_active_;
-  ros::Subscriber e_stop_sub_;  // Emergency stop subscriber
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr e_stop_sub_;  // Emergency stop subscriber
 
 };
 

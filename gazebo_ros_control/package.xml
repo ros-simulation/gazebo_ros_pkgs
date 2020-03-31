@@ -15,11 +15,11 @@
   <author>Jonathan Bohren</author>
   <author>Dave Coleman</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>gazebo_dev</build_depend>
   <exec_depend>gazebo_ros</exec_depend>
-  <depend>roscpp</depend>
+  <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>control_toolbox</depend>
   <depend>controller_manager</depend>
@@ -31,6 +31,7 @@
   <depend>angles</depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
     <gazebo_ros_control plugin="${prefix}/robot_hw_sim_plugins.xml"/>
   </export>
 </package>

@@ -42,13 +42,18 @@
 #define _GAZEBO_ROS_CONTROL___DEFAULT_ROBOT_HW_SIM_H_
 
 // ros_control
-#include <control_toolbox/pid.h>
-#include <hardware_interface/joint_command_interface.h>
-#include <hardware_interface/robot_hw.h>
-#include <joint_limits_interface/joint_limits.h>
-#include <joint_limits_interface/joint_limits_interface.h>
-#include <joint_limits_interface/joint_limits_rosparam.h>
-#include <joint_limits_interface/joint_limits_urdf.h>
+#if 0 //@todo
+#include <control_toolbox/pid.hpp>
+#endif
+#if 0 //@todo
+#include <hardware_interface/joint_command_interface.hpp>
+#include <hardware_interface/robot_hw.hpp>
+#endif
+
+#include <joint_limits_interface/joint_limits.hpp>
+#include <joint_limits_interface/joint_limits_interface.hpp>
+#include <joint_limits_interface/joint_limits_rosparam.hpp>
+#include <joint_limits_interface/joint_limits_urdf.hpp>
 
 // Gazebo
 #include <gazebo/common/common.hh>
@@ -56,9 +61,9 @@
 #include <gazebo/gazebo.hh>
 
 // ROS
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <angles/angles.h>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 // gazebo_ros_control
 #include <gazebo_ros_control/robot_hw_sim.h>
@@ -77,53 +82,59 @@ public:
 
   virtual bool initSim(
     const std::string& robot_namespace,
-    ros::NodeHandle model_nh,
+    rclcpp::Node::SharedPtr& model_nh,
     gazebo::physics::ModelPtr parent_model,
     const urdf::Model *const urdf_model,
     std::vector<transmission_interface::TransmissionInfo> transmissions);
 
-  virtual void readSim(ros::Time time, ros::Duration period);
+  virtual void readSim(rclcpp::Time time, rclcpp::Duration period);
 
-  virtual void writeSim(ros::Time time, ros::Duration period);
+  virtual void writeSim(rclcpp::Time time, rclcpp::Duration period);
 
   virtual void eStopActive(const bool active);
 
-protected:
   // Methods used to control a joint.
   enum ControlMethod {EFFORT, POSITION, POSITION_PID, VELOCITY, VELOCITY_PID};
-
+protected:
+  
   // Register the limits of the joint specified by joint_name and joint_handle. The limits are
   // retrieved from joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
   // Return the joint's type, lower position limit, upper position limit, and effort limit.
   void registerJointLimits(const std::string& joint_name,
-                           const hardware_interface::JointHandle& joint_handle,
+                           const hardware_interface::JointStateHandle& joint_handle,
                            const ControlMethod ctrl_method,
-                           const ros::NodeHandle& joint_limit_nh,
+                           const rclcpp::Node::SharedPtr& joint_limit_nh,
                            const urdf::Model *const urdf_model,
                            int *const joint_type, double *const lower_limit,
-                           double *const upper_limit, double *const effort_limit);
+                           double *const upper_limit, double *const effort_limit,
+                           double *const vel_limit);
 
   unsigned int n_dof_;
 
+#if 0 //@todo
   hardware_interface::JointStateInterface    js_interface_;
   hardware_interface::EffortJointInterface   ej_interface_;
   hardware_interface::PositionJointInterface pj_interface_;
   hardware_interface::VelocityJointInterface vj_interface_;
-
+#endif
+#if 0 //@todo
   joint_limits_interface::EffortJointSaturationInterface   ej_sat_interface_;
   joint_limits_interface::EffortJointSoftLimitsInterface   ej_limits_interface_;
   joint_limits_interface::PositionJointSaturationInterface pj_sat_interface_;
   joint_limits_interface::PositionJointSoftLimitsInterface pj_limits_interface_;
   joint_limits_interface::VelocityJointSaturationInterface vj_sat_interface_;
   joint_limits_interface::VelocityJointSoftLimitsInterface vj_limits_interface_;
-
+#endif
   std::vector<std::string> joint_names_;
   std::vector<int> joint_types_;
   std::vector<double> joint_lower_limits_;
   std::vector<double> joint_upper_limits_;
   std::vector<double> joint_effort_limits_;
+  std::vector<double> joint_vel_limits_;
   std::vector<ControlMethod> joint_control_methods_;
+#if 0
   std::vector<control_toolbox::Pid> pid_controllers_;
+#endif
   std::vector<double> joint_position_;
   std::vector<double> joint_velocity_;
   std::vector<double> joint_effort_;
@@ -131,8 +142,23 @@ protected:
   std::vector<double> joint_position_command_;
   std::vector<double> last_joint_position_command_;
   std::vector<double> joint_velocity_command_;
+  std::vector<hardware_interface::OperationMode> joint_opmodes_;
 
   std::vector<gazebo::physics::JointPtr> sim_joints_;
+
+  std::vector<hardware_interface::JointStateHandle> joint_states_;
+  std::vector<hardware_interface::JointCommandHandle> joint_cmds_;
+  std::vector<hardware_interface::JointCommandHandle> joint_eff_cmdhandle_;
+  std::vector<hardware_interface::JointCommandHandle> joint_vel_cmdhandle_;
+  std::vector<hardware_interface::OperationModeHandle> joint_opmodehandles_;
+
+  //limits
+  std::vector<joint_limits_interface::PositionJointSaturationHandle> joint_pos_limit_handles_;
+  std::vector<joint_limits_interface::PositionJointSoftLimitsHandle> joint_pos_soft_limit_handles_;
+  std::vector<joint_limits_interface::EffortJointSaturationHandle> joint_eff_limit_handles_;
+  std::vector<joint_limits_interface::EffortJointSoftLimitsHandle> joint_eff_soft_limit_handles_;
+  std::vector<joint_limits_interface::VelocityJointSaturationHandle> joint_vel_limit_handles_;
+  //std::vector<joint_limits_interface::VelocityJointSoftLimitsHandle> joint_vel_soft_limit_handles_;
 
   std::string physics_type_;
 

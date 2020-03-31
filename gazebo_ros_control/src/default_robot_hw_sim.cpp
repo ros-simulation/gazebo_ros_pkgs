@@ -42,7 +42,6 @@
 #include <gazebo_ros_control/default_robot_hw_sim.h>
 #include <urdf/model.h>
 
-
 namespace
 {
 
@@ -55,18 +54,18 @@ double clamp(const double val, const double min_val, const double max_val)
 
 namespace gazebo_ros_control
 {
-
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("default_robot_hw_sim");
 
 bool DefaultRobotHWSim::initSim(
   const std::string& robot_namespace,
-  ros::NodeHandle model_nh,
+  rclcpp::Node::SharedPtr& model_nh,
   gazebo::physics::ModelPtr parent_model,
   const urdf::Model *const urdf_model,
   std::vector<transmission_interface::TransmissionInfo> transmissions)
 {
   // getJointLimits() searches joint_limit_nh for joint limit parameters. The format of each
   // parameter's name is "joint_limits/<joint name>". An example is "joint_limits/axle_joint".
-  const ros::NodeHandle joint_limit_nh(model_nh);
+  rclcpp::Node::SharedPtr& joint_limit_nh = model_nh;
 
   // Resize vectors to our DOF
   n_dof_ = transmissions.size();
@@ -75,28 +74,44 @@ bool DefaultRobotHWSim::initSim(
   joint_lower_limits_.resize(n_dof_);
   joint_upper_limits_.resize(n_dof_);
   joint_effort_limits_.resize(n_dof_);
+  joint_vel_limits_.resize(n_dof_);
   joint_control_methods_.resize(n_dof_);
+#if 0
   pid_controllers_.resize(n_dof_);
+#endif
   joint_position_.resize(n_dof_);
   joint_velocity_.resize(n_dof_);
   joint_effort_.resize(n_dof_);
   joint_effort_command_.resize(n_dof_);
   joint_position_command_.resize(n_dof_);
   joint_velocity_command_.resize(n_dof_);
+  joint_opmodes_.resize(n_dof_);
+
+  joint_states_.resize(n_dof_);
+  joint_cmds_.resize(n_dof_);
+  joint_opmodehandles_.resize(n_dof_);
+  joint_eff_cmdhandle_.resize(n_dof_);
+  joint_vel_cmdhandle_.resize(n_dof_);
+
+  joint_pos_limit_handles_.resize(n_dof_);
+  joint_pos_soft_limit_handles_.resize(n_dof_);
+  joint_eff_limit_handles_.resize(n_dof_);
+  joint_eff_soft_limit_handles_.resize(n_dof_);
+  joint_vel_limit_handles_.resize(n_dof_);
 
   // Initialize values
   for(unsigned int j=0; j < n_dof_; j++)
   {
     // Check that this transmission has one joint
-    if(transmissions[j].joints_.size() == 0)
+    if(transmissions[j].joints_.empty())
     {
-      ROS_WARN_STREAM_NAMED("default_robot_hw_sim","Transmission " << transmissions[j].name_
+      RCLCPP_WARN_STREAM(LOGGER,"Transmission " << transmissions[j].name_
         << " has no associated joints.");
       continue;
     }
     else if(transmissions[j].joints_.size() > 1)
     {
-      ROS_WARN_STREAM_NAMED("default_robot_hw_sim","Transmission " << transmissions[j].name_
+      RCLCPP_WARN_STREAM(LOGGER,"Transmission " << transmissions[j].name_
         << " has more than one joint. Currently the default robot hardware simulation "
         << " interface only supports one.");
       continue;
@@ -109,21 +124,21 @@ bool DefaultRobotHWSim::initSim(
     {
       // TODO: Deprecate HW interface specification in actuators in ROS J
       joint_interfaces = transmissions[j].actuators_[0].hardware_interfaces_;
-      ROS_WARN_STREAM_NAMED("default_robot_hw_sim", "The <hardware_interface> element of tranmission " <<
+      RCLCPP_WARN_STREAM(LOGGER, "The <hardware_interface> element of tranmission " <<
         transmissions[j].name_ << " should be nested inside the <joint> element, not <actuator>. " <<
         "The transmission will be properly loaded, but please update " <<
         "your robot model to remain compatible with future versions of the plugin.");
     }
     if (joint_interfaces.empty())
     {
-      ROS_WARN_STREAM_NAMED("default_robot_hw_sim", "Joint " << transmissions[j].joints_[0].name_ <<
+      RCLCPP_WARN_STREAM(LOGGER, "Joint " << transmissions[j].name_ <<
         " of transmission " << transmissions[j].name_ << " does not specify any hardware interface. " <<
         "Not adding it to the robot hardware simulation.");
       continue;
     }
     else if (joint_interfaces.size() > 1)
     {
-      ROS_WARN_STREAM_NAMED("default_robot_hw_sim", "Joint " << transmissions[j].joints_[0].name_ <<
+      RCLCPP_WARN_STREAM(LOGGER, "Joint " << transmissions[j].name_ <<
         " of transmission " << transmissions[j].name_ << " specifies multiple hardware interfaces. " <<
         "Currently the default robot hardware simulation interface only supports one. Using the first entry");
       //continue;
@@ -141,62 +156,74 @@ bool DefaultRobotHWSim::initSim(
     const std::string& hardware_interface = joint_interfaces.front();
 
     // Debug
-    ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim","Loading joint '" << joint_names_[j]
+    RCLCPP_ERROR_STREAM(LOGGER, "Loading joint '" << joint_names_[j]
       << "' of type '" << hardware_interface << "'");
 
     // Create joint state interface for all joints
+#if 0 //@todo
     js_interface_.registerHandle(hardware_interface::JointStateHandle(
         joint_names_[j], &joint_position_[j], &joint_velocity_[j], &joint_effort_[j]));
+#endif
 
     // Decide what kind of command interface this actuator/joint has
-    hardware_interface::JointHandle joint_handle;
+    hardware_interface::JointStateHandle joint_handle;
     if(hardware_interface == "EffortJointInterface" || hardware_interface == "hardware_interface/EffortJointInterface")
     {
       // Create effort joint interface
       joint_control_methods_[j] = EFFORT;
+#if 0 //@todo
       joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
                                                      &joint_effort_command_[j]);
+
       ej_interface_.registerHandle(joint_handle);
+#endif
     }
     else if(hardware_interface == "PositionJointInterface" || hardware_interface == "hardware_interface/PositionJointInterface")
     {
       // Create position joint interface
       joint_control_methods_[j] = POSITION;
+#if 0 //@todo
       joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
                                                      &joint_position_command_[j]);
       pj_interface_.registerHandle(joint_handle);
+#endif
     }
     else if(hardware_interface == "VelocityJointInterface" || hardware_interface == "hardware_interface/VelocityJointInterface")
     {
       // Create velocity joint interface
       joint_control_methods_[j] = VELOCITY;
+#if 0 //@todo
       joint_handle = hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[j]),
                                                      &joint_velocity_command_[j]);
       vj_interface_.registerHandle(joint_handle);
+#endif
     }
     else
     {
-      ROS_FATAL_STREAM_NAMED("default_robot_hw_sim","No matching hardware interface found for '"
+      RCLCPP_FATAL_STREAM(LOGGER,"No matching hardware interface found for '"
         << hardware_interface << "' while loading interfaces for " << joint_names_[j] );
       return false;
     }
-
     if(hardware_interface == "EffortJointInterface" || hardware_interface == "PositionJointInterface" || hardware_interface == "VelocityJointInterface") {
-      ROS_WARN_STREAM("Deprecated syntax, please prepend 'hardware_interface/' to '" << hardware_interface << "' within the <hardwareInterface> tag in joint '" << joint_names_[j] << "'.");
+      RCLCPP_WARN_STREAM(LOGGER,"Deprecated syntax, please prepend 'hardware_interface/' to '" << hardware_interface << "' within the <hardwareInterface> tag in joint '" << joint_names_[j] << "'.");
     }
 
     // Get the gazebo joint that corresponds to the robot joint.
-    //ROS_DEBUG_STREAM_NAMED("default_robot_hw_sim", "Getting pointer to gazebo joint: "
+    //RCLCPP_DEBUG_STREAM(LOGGER, "Getting pointer to gazebo joint: "
     //  << joint_names_[j]);
     gazebo::physics::JointPtr joint = parent_model->GetJoint(joint_names_[j]);
     if (!joint)
     {
-      ROS_ERROR_STREAM_NAMED("default_robot_hw", "This robot has a joint named \"" << joint_names_[j]
+      RCLCPP_ERROR_STREAM(LOGGER, "This robot has a joint named \"" << joint_names_[j]
         << "\" which is not in the gazebo model.");
       return false;
     }
     sim_joints_.push_back(joint);
+    joint_position_[j] = joint->Position(0);
+    joint_velocity_[j] = joint->GetVelocity(0);
 
+    RCLCPP_ERROR(rclcpp::get_logger("initial"), " pos: %f", joint_position_[j]);
+    RCLCPP_ERROR(rclcpp::get_logger("initial"), " vel: %f", joint_velocity_[j]);
     // get physics engine type
 #if GAZEBO_MAJOR_VERSION >= 8
     gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
@@ -206,19 +233,22 @@ bool DefaultRobotHWSim::initSim(
     physics_type_ = physics->GetType();
     if (physics_type_.empty())
     {
-      ROS_WARN_STREAM_NAMED("default_robot_hw_sim", "No physics type found.");
+      RCLCPP_WARN_STREAM(LOGGER, "No physics type found.");
     }
 
     registerJointLimits(joint_names_[j], joint_handle, joint_control_methods_[j],
                         joint_limit_nh, urdf_model,
                         &joint_types_[j], &joint_lower_limits_[j], &joint_upper_limits_[j],
-                        &joint_effort_limits_[j]);
+                        &joint_effort_limits_[j], &joint_vel_limits_[j]);
     if (joint_control_methods_[j] != EFFORT)
     {
       // Initialize the PID controller. If no PID gain values are found, use joint->SetAngle() or
       // joint->SetParam("vel") to control the joint.
+#if 0
       const ros::NodeHandle nh(robot_namespace + "/gazebo_ros_control/pid_gains/" +
                                joint_names_[j]);
+#endif
+#if 0
       if (pid_controllers_[j].init(nh))
       {
         switch (joint_control_methods_[j])
@@ -232,6 +262,7 @@ bool DefaultRobotHWSim::initSim(
         }
       }
       else
+#endif
       {
         // joint->SetParam("fmax") must be called if joint->SetAngle() or joint->SetParam("vel") are
         // going to be called. joint->SetParam("fmax") must *not* be called if joint->SetForce() is
@@ -242,15 +273,63 @@ bool DefaultRobotHWSim::initSim(
         joint->SetMaxForce(0, joint_effort_limits_[j]);
 #endif
       }
-    }
-  }
 
+    }
+    joint_states_[j] = hardware_interface::JointStateHandle(
+      joint_names_[j], &joint_position_[j], &joint_velocity_[j], &joint_effort_[j]);
+    if (register_joint_state_handle(&joint_states_[j]) != hardware_interface::HW_RET_OK) {
+      RCLCPP_WARN_ONCE(LOGGER,"cant register jointstatehandle");
+    }
+
+    joint_cmds_[j] = hardware_interface::JointCommandHandle(
+      joint_names_[j], &joint_position_command_[j]);
+    /*if (register_joint_command_handle(&joint_cmds_[j]) != hardware_interface::HW_RET_OK) {
+      RCLCPP_WARN_ONCE(LOGGER,"cant register jointcommandhandle");
+    }*/
+
+
+    joint_opmodehandles_[j] = hardware_interface::OperationModeHandle(
+      joint_names_[j], &joint_opmodes_[j]);
+    if (register_operation_mode_handle(&joint_opmodehandles_[j]) != hardware_interface::HW_RET_OK) {
+      RCLCPP_WARN_ONCE(LOGGER,"cant register jointopmodehandle");
+    }
+
+    joint_limits_interface::JointLimits limits; //hack, refactor registerjointhandle
+    limits.has_position_limits = true;
+    limits.min_position = joint_lower_limits_[j];
+    limits.max_position = joint_upper_limits_[j];
+    limits.max_velocity = joint_vel_limits_[j];
+    limits.has_velocity_limits = true;
+    limits.max_effort = joint_effort_limits_[j];
+    limits.has_effort_limits = true;
+
+    joint_pos_limit_handles_[j] = joint_limits_interface::PositionJointSaturationHandle(
+      joint_states_[j], joint_cmds_[j], limits);
+
+    joint_eff_cmdhandle_[j] = hardware_interface::JointCommandHandle(
+      joint_names_[j], &joint_effort_command_[j]);
+    //should be register_joint_effort_command_handle, but there's only 1 buffer for now
+    if (register_joint_command_handle(&joint_eff_cmdhandle_[j]) != hardware_interface::HW_RET_OK) {
+      RCLCPP_WARN_ONCE(LOGGER,"cant register jointcommandhandle");
+    }
+    
+    joint_eff_limit_handles_[j] = joint_limits_interface::EffortJointSaturationHandle(
+      joint_states_[j], joint_eff_cmdhandle_[j], limits);
+    
+    joint_vel_cmdhandle_[j] = hardware_interface::JointCommandHandle(
+      joint_names_[j], &joint_velocity_command_[j]);
+
+    joint_vel_limit_handles_[j] = joint_limits_interface::VelocityJointSaturationHandle(
+      joint_states_[j], joint_vel_cmdhandle_[j], limits);
+    //register not implemented
+  }
+#if 0 //@todo
   // Register interfaces
   registerInterface(&js_interface_);
   registerInterface(&ej_interface_);
   registerInterface(&pj_interface_);
   registerInterface(&vj_interface_);
-
+#endif
   // Initialize the emergency stop code.
   e_stop_active_ = false;
   last_e_stop_active_ = false;
@@ -258,7 +337,7 @@ bool DefaultRobotHWSim::initSim(
   return true;
 }
 
-void DefaultRobotHWSim::readSim(ros::Time time, ros::Duration period)
+void DefaultRobotHWSim::readSim(rclcpp::Time time, rclcpp::Duration period)
 {
   for(unsigned int j=0; j < n_dof_; j++)
   {
@@ -282,7 +361,7 @@ void DefaultRobotHWSim::readSim(ros::Time time, ros::Duration period)
   }
 }
 
-void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
+void DefaultRobotHWSim::writeSim(rclcpp::Time time, rclcpp::Duration period)
 {
   // If the E-stop is active, joints controlled by position commands will maintain their positions.
   if (e_stop_active_)
@@ -298,20 +377,42 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
   {
     last_e_stop_active_ = false;
   }
-
+#if 0 //@todo
   ej_sat_interface_.enforceLimits(period);
   ej_limits_interface_.enforceLimits(period);
   pj_sat_interface_.enforceLimits(period);
   pj_limits_interface_.enforceLimits(period);
   vj_sat_interface_.enforceLimits(period);
   vj_limits_interface_.enforceLimits(period);
-
+#else
+  for (auto eff_limit_handle : joint_eff_limit_handles_)
+  {
+    eff_limit_handle.enforceLimits(period);
+  }
+  for (auto pos_limit_handle : joint_pos_limit_handles_)
+  {
+    pos_limit_handle.enforceLimits(period);
+  }
+  for (auto vel_limit_handle : joint_vel_limit_handles_)
+  {
+    vel_limit_handle.enforceLimits(period);
+  }
+  
+#endif
+static int f = 0;
   for(unsigned int j=0; j < n_dof_; j++)
   {
+    //@note: all effort control method atm
+    //RCLCPP_ERROR(rclcpp::get_logger("asd"), "%d: %d", j, joint_control_methods_[j]);
     switch (joint_control_methods_[j])
     {
       case EFFORT:
         {
+          if (f < 64)
+          {
+            // if (j == 1)
+            //   RCLCPP_ERROR(rclcpp::get_logger("effort_cmd"), "%d (%s): %f", j, joint_names_[j].c_str(), joint_effort_command_[j]);
+          }
           const double effort = e_stop_active_ ? 0 : joint_effort_command_[j];
           sim_joints_[j]->SetForce(0, effort);
         }
@@ -321,10 +422,10 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
 #if GAZEBO_MAJOR_VERSION >= 9
         sim_joints_[j]->SetPosition(0, joint_position_command_[j], true);
 #else
-        ROS_WARN_ONCE("The default_robot_hw_sim plugin is using the Joint::SetPosition method without preserving the link velocity.");
-        ROS_WARN_ONCE("As a result, gravity will not be simulated correctly for your model.");
-        ROS_WARN_ONCE("Please set gazebo_pid parameters, switch to the VelocityJointInterface or EffortJointInterface, or upgrade to Gazebo 9.");
-        ROS_WARN_ONCE("For details, see https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612");
+        RCLCPP_WARN_ONCE(LOGGER,"The default_robot_hw_sim plugin is using the Joint::SetPosition method without preserving the link velocity.");
+        RCLCPP_WARN_ONCE(LOGGER,"As a result, gravity will not be simulated correctly for your model.");
+        RCLCPP_WARN_ONCE(LOGGER,"Please set gazebo_pid parameters, switch to the VelocityJointInterface or EffortJointInterface, or upgrade to Gazebo 9.");
+        RCLCPP_WARN_ONCE(LOGGER,"For details, see https://github.com/ros-simulation/gazebo_ros_pkgs/issues/612");
         sim_joints_[j]->SetPosition(0, joint_position_command_[j]);
 #endif
         break;
@@ -350,8 +451,12 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
           }
 
           const double effort_limit = joint_effort_limits_[j];
+#if 0 //@todo
           const double effort = clamp(pid_controllers_[j].computeCommand(error, period),
                                       -effort_limit, effort_limit);
+#else
+          const double effort = 0.0;
+#endif
           sim_joints_[j]->SetForce(0, effort);
         }
         break;
@@ -378,12 +483,17 @@ void DefaultRobotHWSim::writeSim(ros::Time time, ros::Duration period)
         else
           error = joint_velocity_command_[j] - joint_velocity_[j];
         const double effort_limit = joint_effort_limits_[j];
+#if 0 //@todo
         const double effort = clamp(pid_controllers_[j].computeCommand(error, period),
                                     -effort_limit, effort_limit);
+#else
+        const double effort = 0.0;
+#endif
         sim_joints_[j]->SetForce(0, effort);
         break;
     }
   }
+  f++;
 }
 
 void DefaultRobotHWSim::eStopActive(const bool active)
@@ -395,12 +505,13 @@ void DefaultRobotHWSim::eStopActive(const bool active)
 // retrieved from joint_limit_nh. If urdf_model is not NULL, limits are retrieved from it also.
 // Return the joint's type, lower position limit, upper position limit, and effort limit.
 void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
-                         const hardware_interface::JointHandle& joint_handle,
+                         const hardware_interface::JointStateHandle& joint_handle,
                          const ControlMethod ctrl_method,
-                         const ros::NodeHandle& joint_limit_nh,
+                         const rclcpp::Node::SharedPtr& joint_limit_nh,
                          const urdf::Model *const urdf_model,
                          int *const joint_type, double *const lower_limit,
-                         double *const upper_limit, double *const effort_limit)
+                         double *const upper_limit, double *const effort_limit,
+                         double *const vel_limit)
 {
   *joint_type = urdf::Joint::UNKNOWN;
   *lower_limit = -std::numeric_limits<double>::max();
@@ -409,6 +520,7 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
 
   joint_limits_interface::JointLimits limits;
   bool has_limits = false;
+
   joint_limits_interface::SoftJointLimits soft_limits;
   bool has_soft_limits = false;
 
@@ -419,19 +531,44 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
     {
       *joint_type = urdf_joint->type;
       // Get limits from the URDF file.
-      if (joint_limits_interface::getJointLimits(urdf_joint, limits))
+      if (joint_limits_interface::getJointLimits(urdf_joint->name, joint_limit_nh, limits))
         has_limits = true;
-      if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits))
+      if (joint_limits_interface::getSoftJointLimits(urdf_joint->name, joint_limit_nh, soft_limits))
         has_soft_limits = true;
+      
+      //@note (ddeng): these joint limits arent input into the node, so fetch them from the urdf
+      RCLCPP_ERROR(rclcpp::get_logger("here"), "%s %d lower:%f upper:%f vel:%f eff:%f", urdf_joint->name.c_str(), urdf_joint->type,
+        urdf_joint->limits->lower, urdf_joint->limits->upper, urdf_joint->limits->velocity, urdf_joint->limits->effort);
+
+      limits.min_position = urdf_joint->limits->lower;
+      limits.max_position = urdf_joint->limits->upper;
+      limits.has_position_limits = true;
+
+      limits.max_velocity = urdf_joint->limits->velocity;
+      limits.has_velocity_limits = limits.max_velocity == 0.0 ? false : true;
+
+      limits.max_effort = urdf_joint->limits->effort;
+      limits.has_effort_limits = limits.max_effort == 0.0 ? false : true;
+
+      *lower_limit = limits.min_position;
+      *upper_limit = limits.max_position;
+      *effort_limit = limits.max_effort;
+      *vel_limit = limits.max_velocity;
+
+      //urdf_joint->safety->k_position;
+      RCLCPP_ERROR(rclcpp::get_logger("here"), "%d %d", has_limits, has_soft_limits);
+      has_limits = true;
     }
   }
+
   // Get limits from the parameter server.
+  //@note: no longer using parameter servers
   if (joint_limits_interface::getJointLimits(joint_name, joint_limit_nh, limits))
     has_limits = true;
 
   if (!has_limits)
     return;
-
+    
   if (*joint_type == urdf::Joint::UNKNOWN)
   {
     // Infer the joint type.
@@ -463,23 +600,29 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
     {
       case EFFORT:
         {
+#if 0 //@todo
           const joint_limits_interface::EffortJointSoftLimitsHandle
             limits_handle(joint_handle, limits, soft_limits);
           ej_limits_interface_.registerHandle(limits_handle);
+#endif
         }
         break;
       case POSITION:
         {
+#if 0 //@todo
           const joint_limits_interface::PositionJointSoftLimitsHandle
             limits_handle(joint_handle, limits, soft_limits);
           pj_limits_interface_.registerHandle(limits_handle);
+#endif
         }
         break;
       case VELOCITY:
         {
+#if 0 //@todo
           const joint_limits_interface::VelocityJointSoftLimitsHandle
             limits_handle(joint_handle, limits, soft_limits);
           vj_limits_interface_.registerHandle(limits_handle);
+#endif
         }
         break;
     }
@@ -490,23 +633,31 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
     {
       case EFFORT:
         {
+#if 0
           const joint_limits_interface::EffortJointSaturationHandle
             sat_handle(joint_handle, limits);
+
           ej_sat_interface_.registerHandle(sat_handle);
+#endif
         }
         break;
       case POSITION:
         {
+#if 0 //@todo
           const joint_limits_interface::PositionJointSaturationHandle
             sat_handle(joint_handle, limits);
+
           pj_sat_interface_.registerHandle(sat_handle);
+#endif
         }
         break;
       case VELOCITY:
         {
+#if 0 //@todo
           const joint_limits_interface::VelocityJointSaturationHandle
             sat_handle(joint_handle, limits);
           vj_sat_interface_.registerHandle(sat_handle);
+#endif
         }
         break;
     }

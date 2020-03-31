@@ -43,9 +43,9 @@
 #define __ROS_CONTROL_GAZEBO_ROBOT_HW_SIM_H
 
 #include <gazebo/physics/physics.hh>
-#include <ros/ros.h>
-#include <hardware_interface/robot_hw.h>
-#include <transmission_interface/transmission_info.h>
+#include <rclcpp/rclcpp.hpp>
+#include <hardware_interface/robot_hardware.hpp>
+#include <transmission_interface/transmission_info.hpp>
 #include <urdf/model.h>
 
 namespace gazebo_ros_control {
@@ -65,7 +65,7 @@ namespace gazebo_ros_control {
   /// \brief Gazebo plugin version of RobotHW
   ///
   /// An object of class RobotHWSim represents a robot's simulated hardware.
-  class RobotHWSim : public hardware_interface::RobotHW
+  class RobotHWSim : public hardware_interface::RobotHardware
   {
   public:
 
@@ -84,7 +84,7 @@ namespace gazebo_ros_control {
     /// \return  \c true if the simulated robot hardware is initialized successfully, \c false if not.
     virtual bool initSim(
         const std::string& robot_namespace,
-        ros::NodeHandle model_nh,
+        rclcpp::Node::SharedPtr& model_nh,
         gazebo::physics::ModelPtr parent_model,
         const urdf::Model *const urdf_model,
         std::vector<transmission_interface::TransmissionInfo> transmissions) = 0;
@@ -95,7 +95,7 @@ namespace gazebo_ros_control {
     ///
     /// \param time  Simulation time.
     /// \param period  Time since the last simulation step.
-    virtual void readSim(ros::Time time, ros::Duration period) = 0;
+    virtual void readSim(rclcpp::Time time, rclcpp::Duration period) = 0;
 
     /// \brief Write commands to the simulated robot hardware
     ///
@@ -103,7 +103,7 @@ namespace gazebo_ros_control {
     ///
     /// \param time  Simulation time.
     /// \param period  Time since the last simulation step.
-    virtual void writeSim(ros::Time time, ros::Duration period) = 0;
+    virtual void writeSim(rclcpp::Time time, rclcpp::Duration period) = 0;
 
     /// \brief Set the emergency stop state
     ///
@@ -112,6 +112,11 @@ namespace gazebo_ros_control {
     /// \param active  \c true if the emergency stop is active, \c false if not.
     virtual void eStopActive(const bool active) {}
 
+    //@note: Avoid using these functions! ros2_control was not built with gazebo_ros_control 
+    //in mind, keep to using readSim and writeSim so we don't have to update the documents for now
+    virtual hardware_interface::hardware_interface_ret_t init() { }
+    virtual hardware_interface::hardware_interface_ret_t read() { }
+    virtual hardware_interface::hardware_interface_ret_t write() { }
   };
 
 }
