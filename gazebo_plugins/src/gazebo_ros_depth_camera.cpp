@@ -56,7 +56,10 @@ GazeboRosDepthCamera::GazeboRosDepthCamera()
 // Destructor
 GazeboRosDepthCamera::~GazeboRosDepthCamera()
 {
-  delete [] pcd_;
+  if (pcd_ != nullptr)
+  {
+    delete [] pcd_;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -156,6 +159,7 @@ void GazeboRosDepthCamera::Advertise()
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
 
+#if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
   ros::AdvertiseOptions reflectance_ao =
     ros::AdvertiseOptions::create<sensor_msgs::Image>(
       reflectance_topic_name_, 1,
@@ -171,6 +175,7 @@ void GazeboRosDepthCamera::Advertise()
       boost::bind( &GazeboRosDepthCamera::NormalsDisconnect,this),
       ros::VoidPtr(), &this->camera_queue_);
   this->normal_pub_ = this->rosnode_->advertise(normals_ao);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -375,6 +380,7 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
   }
 }
 
+#if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
 void GazeboRosDepthCamera::OnNewReflectanceFrame(const float *_image,
@@ -404,6 +410,7 @@ void GazeboRosDepthCamera::OnNewReflectanceFrame(const float *_image,
   }
 
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
@@ -438,6 +445,7 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
   }
 }
 
+#if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
 void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
                unsigned int _width, unsigned int _height,
                unsigned int _depth, const std::string &_format)
@@ -517,6 +525,7 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
     }
   }
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Put camera data to the interface

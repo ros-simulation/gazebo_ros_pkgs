@@ -90,6 +90,7 @@ namespace gazebo
                    unsigned int _width, unsigned int _height,
                    unsigned int _depth, const std::string &_format) override;
 
+#if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
      /// \brief Update the reflectance frame
      protected: virtual void OnNewReflectanceFrame(const float * _reflectance,
                     unsigned int _width, unsigned int _height,
@@ -99,6 +100,7 @@ namespace gazebo
     protected: virtual void OnNewNormalsFrame(const float * _normals,
                    unsigned int _width, unsigned int _height,
                    unsigned int _depth, const std::string &_format) override;
+#endif
 
     /// \brief Put camera data to the ROS topic
     private: void FillPointdCloud(const float *_src);
