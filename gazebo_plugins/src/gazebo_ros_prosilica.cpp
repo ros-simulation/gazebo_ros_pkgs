@@ -44,10 +44,7 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <sensor_msgs/RegionOfInterest.h>
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
-
-#include <opencv/cvwimage.h>
+#include <opencv2/highgui.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/bind.hpp>
