@@ -73,7 +73,7 @@ class SpawnEntityNode(Node):
         parser.add_argument('-robot_namespace', type=str, default=self.get_namespace(),
                             help='change ROS namespace of gazebo-plugins')
         parser.add_argument('-timeout', type=float, default=30.0,
-                            help='Number of seconds to wait for the spawn entity service to \
+                            help='Number of seconds to wait for the spawn and delete services to \
                             become available')
         parser.add_argument('-unpause', action='store_true',
                             help='unpause physics after spawning entity')
