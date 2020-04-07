@@ -156,7 +156,7 @@ bool DefaultRobotHWSim::initSim(
     const std::string& hardware_interface = joint_interfaces.front();
 
     // Debug
-    RCLCPP_ERROR_STREAM(LOGGER, "Loading joint '" << joint_names_[j]
+    RCLCPP_DEBUG_STREAM(LOGGER, "Loading joint '" << joint_names_[j]
       << "' of type '" << hardware_interface << "'");
 
     // Create joint state interface for all joints
@@ -222,8 +222,6 @@ bool DefaultRobotHWSim::initSim(
     joint_position_[j] = joint->Position(0);
     joint_velocity_[j] = joint->GetVelocity(0);
 
-    RCLCPP_ERROR(rclcpp::get_logger("initial"), " pos: %f", joint_position_[j]);
-    RCLCPP_ERROR(rclcpp::get_logger("initial"), " vel: %f", joint_velocity_[j]);
     // get physics engine type
 #if GAZEBO_MAJOR_VERSION >= 8
     gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
@@ -537,9 +535,6 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
         has_soft_limits = true;
       
       //@note (ddeng): these joint limits arent input into the node, so fetch them from the urdf
-      RCLCPP_ERROR(rclcpp::get_logger("here"), "%s %d lower:%f upper:%f vel:%f eff:%f", urdf_joint->name.c_str(), urdf_joint->type,
-        urdf_joint->limits->lower, urdf_joint->limits->upper, urdf_joint->limits->velocity, urdf_joint->limits->effort);
-
       limits.min_position = urdf_joint->limits->lower;
       limits.max_position = urdf_joint->limits->upper;
       limits.has_position_limits = true;
@@ -556,7 +551,6 @@ void DefaultRobotHWSim::registerJointLimits(const std::string& joint_name,
       *vel_limit = limits.max_velocity;
 
       //urdf_joint->safety->k_position;
-      RCLCPP_ERROR(rclcpp::get_logger("here"), "%d %d", has_limits, has_soft_limits);
       has_limits = true;
     }
   }

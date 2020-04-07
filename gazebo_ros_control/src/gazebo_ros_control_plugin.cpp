@@ -228,6 +228,8 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
         [&](YAML::Node yaml_node, const std::string & key,
           std::shared_ptr<rclcpp_lifecycle::LifecycleNode> node, const std::string& prefix)
         {
+          if (node->get_name() != prefix)
+            return;
           static constexpr char separator = '.';
           if (yaml_node.Type() == YAML::NodeType::Scalar) {
             std::string val_str = yaml_node.as<std::string>();
@@ -261,7 +263,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
           } else if (yaml_node.Type() == YAML::NodeType::Map) {
             for (auto yaml_node_it : yaml_node) {
               std::string newkey = yaml_node_it.first.as<std::string>();
-              RCLCPP_ERROR(rclcpp::get_logger("load"), "newkey: %s", newkey.c_str());
+              //RCLCPP_ERROR(rclcpp::get_logger("load"), "newkey: %s", newkey.c_str());
               if (newkey == prefix || newkey == "ros__parameters")
                 newkey = "";
               else if (!key.empty())
@@ -308,9 +310,11 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
                 }
               }
             }
-            RCLCPP_ERROR(rclcpp::get_logger("load")," exit");
+            //RCLCPP_ERROR(rclcpp::get_logger("load")," exit");
           }
         };
+        if (lc_node->get_name() != prefix)
+            return;
       feed_yaml_to_node_rec(yaml_node, prefix, lc_node, prefix);
     };
     auto load_params_from_yaml = [&](rclcpp_lifecycle::LifecycleNode::SharedPtr lc_node, 
@@ -323,9 +327,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
       YAML::Node root_node = YAML::LoadFile(yaml_config_file);
       for (auto yaml : root_node)
       {
-        //RCLCPP_ERROR(rclcpp::get_logger("load"),"sad %d", yaml.first.Type());
         auto nodename = yaml.first.as<std::string>();
-        //RCLCPP_ERROR(rclcpp::get_logger("load")," %s", nodename.c_str());
         if (nodename == prefix)
           load_params_from_yaml_node(lc_node, yaml.second, prefix);
       }
