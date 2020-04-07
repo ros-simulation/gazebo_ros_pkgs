@@ -397,20 +397,12 @@ void DefaultRobotHWSim::writeSim(rclcpp::Time time, rclcpp::Duration period)
   }
   
 #endif
-static int f = 0;
   for(unsigned int j=0; j < n_dof_; j++)
   {
-    //@note: all effort control method atm
-    //RCLCPP_ERROR(rclcpp::get_logger("asd"), "%d: %d", j, joint_control_methods_[j]);
     switch (joint_control_methods_[j])
     {
       case EFFORT:
         {
-          if (f < 64)
-          {
-            // if (j == 1)
-            //   RCLCPP_ERROR(rclcpp::get_logger("effort_cmd"), "%d (%s): %f", j, joint_names_[j].c_str(), joint_effort_command_[j]);
-          }
           const double effort = e_stop_active_ ? 0 : joint_effort_command_[j];
           sim_joints_[j]->SetForce(0, effort);
         }
@@ -491,7 +483,6 @@ static int f = 0;
         break;
     }
   }
-  f++;
 }
 
 void DefaultRobotHWSim::eStopActive(const bool active)

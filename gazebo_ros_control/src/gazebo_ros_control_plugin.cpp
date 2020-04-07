@@ -193,7 +193,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
       (new pluginlib::ClassLoader<gazebo_ros_control::RobotHWSim>
         ("gazebo_ros_control",
           "gazebo_ros_control::RobotHWSim"));
-    RCLCPP_ERROR(rclcpp::get_logger("OMGWTF"), "a1");
+          
 #if 0 //@todo: pluginlib can't seem to find my gazebo_ros_control/DefaultRobotHWSim
     robot_hw_sim_ = robot_hw_sim_loader_->createSharedInstance(robot_hw_sim_type_str_);
 #else
@@ -282,9 +282,9 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
                 for (auto yaml_node_it : yaml_node) {
                   std::string name = yaml_node_it.as<std::string>();
                   val.push_back(name);
-                  RCLCPP_ERROR(rclcpp::get_logger("load"),"n: %s", name.c_str());
+                  //RCLCPP_ERROR(rclcpp::get_logger("load"),"n: %s", name.c_str());
                 }
-                RCLCPP_ERROR(rclcpp::get_logger("load")," %s array_param: %s", node->get_name(), key.c_str());
+                //RCLCPP_ERROR(rclcpp::get_logger("load")," %s array_param: %s", node->get_name(), key.c_str());
                 if (!node->has_parameter(key))
                   node->declare_parameter(key);
                 node->set_parameter({rclcpp::Parameter(key, val)});
@@ -347,7 +347,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
     std::string param_file = 
       ament_index_cpp::get_package_share_directory("coffeebot_controller") +
       "/params/coffeebot_controllers.yaml";
-    RCLCPP_ERROR(rclcpp::get_logger("ros_control_plugin"),"file: %s", param_file.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger("ros_control_plugin"),"param file: %s", param_file.c_str());
  
     load_params_from_yaml(controller_->get_lifecycle_node(), param_file, "coffeebot_arm_effort_controller");
     if (controller2_)
