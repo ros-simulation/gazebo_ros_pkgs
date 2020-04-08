@@ -38,6 +38,8 @@ GazeboRosWheelSlip::~GazeboRosWheelSlip()
   this->queue_.clear();
   this->queue_.disable();
 
+  delete this->dyn_srv_;
+
   this->rosnode_->shutdown();
   delete this->rosnode_;
 }
