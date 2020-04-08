@@ -135,10 +135,14 @@ class SpawnEntityNode(Node):
         if self.args.file:
             self.get_logger().info('Loading entity XML from file %s' % self.args.file)
             if not os.path.exists(self.args.file):
-                self.get_logger().error('Error: specified file %s does not exist', self.args.file)
+                self.get_logger().error(
+                    'Error: specified file %s does not exist' % self.args.file
+                )
                 return 1
             if not os.path.isfile(self.args.file):
-                self.get_logger().error('Error: specified file %s is not a file', self.args.file)
+                self.get_logger().error(
+                    'Error: specified file %s is not a file' % self.args.file
+                )
                 return 1
             # load file
             try:
@@ -148,12 +152,13 @@ class SpawnEntityNode(Node):
                 self.get_logger().error('Error reading file {}: {}'.format(self.args.file, e))
                 return 1
             if entity_xml == '':
-                self.get_logger().error('Error: file %s is empty', self.args.file)
+                self.get_logger().error('Error: file %s is empty' % self.args.file)
                 return 1
         # Load entity XML published on topic specified
         elif self.args.topic:
             self.get_logger().info(
-                'Loading entity published on topic %s' % self.args.topic)
+                'Loading entity published on topic %s' % self.args.topic
+            )
             entity_xml = ''
 
             def entity_xml_cb(msg):
@@ -273,7 +278,11 @@ class SpawnEntityNode(Node):
                 rclpy.spin_once(self)
             return srv_call.result().success
         self.get_logger().error(
-            'Service %s/spawn_entity unavailable. Was Gazebo started with GazeboRosFactory?')
+            (
+                'Service %s/spawn_entity unavailable. '
+                'Was Gazebo started with GazeboRosFactory?'
+            ) % self.args.gazebo_namespace
+        )
         return False
 
     # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
@@ -296,8 +305,11 @@ class SpawnEntityNode(Node):
                 rclpy.spin_once(self)
         else:
             self.get_logger().error(
-                'Service %s/delete_entity unavailable. ' +
-                'Was Gazebo started with GazeboRosFactory?')
+                (
+                    'Service %s/delete_entity unavailable. '
+                    'Was Gazebo started with GazeboRosFactory?'
+                ) % self.args.gazebo_namespace
+            )
 
     # def _set_model_configuration(self, joint_names, joint_positions):
     #     self.get_logger().info(
@@ -319,8 +331,12 @@ class SpawnEntityNode(Node):
     #                 break
     #             rclpy.spin_once(self)
     #         return srv_call.result().success
-    #     self.get_logger().error('Service %s/set_model_configuration unavailable. \
-    #                              Was Gazebo started with GazeboRosState?')
+    #     self.get_logger().error(
+    #         (
+    #             'Service %s/set_model_configuration unavailable. '
+    #             'Was Gazebo started with GazeboRosState?'
+    #         ) % self.args.gazebo_namespace
+    #     )
     #     return False
 
 
