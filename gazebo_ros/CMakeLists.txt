@@ -36,6 +36,7 @@ catkin_package(
     gazebo_ros_paths_plugin
 
   CATKIN_DEPENDS
+    gazebo_dev
     roslib
     roscpp
     geometry_msgs
