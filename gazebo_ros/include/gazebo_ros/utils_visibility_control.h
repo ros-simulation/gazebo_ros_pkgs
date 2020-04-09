@@ -19,8 +19,8 @@
  * library cannot have, but the consuming code must have inorder to link.
  */
 
-#ifndef GAZEBO_ROS_UTILS__VISIBILITY_CONTROL_H_
-#define GAZEBO_ROS_UTILS__VISIBILITY_CONTROL_H_
+#ifndef GAZEBO_ROS__UTILS_VISIBILITY_CONTROL_H_
+#define GAZEBO_ROS__UTILS_VISIBILITY_CONTROL_H_
 
 // This logic was borrowed (then namespaced) from the examples on the gcc wiki:
 //     https://gcc.gnu.org/wiki/Visibility
@@ -53,4 +53,4 @@
   #define GAZEBO_ROS_UTILS_PUBLIC_TYPE
 #endif
 
-#endif  // GAZEBO_ROS_UTILS__VISIBILITY_CONTROL_H_
+#endif  // GAZEBO_ROS__UTILS_VISIBILITY_CONTROL_H_
