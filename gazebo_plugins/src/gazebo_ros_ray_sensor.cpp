@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <boost/variant.hpp>
 #include <boost/make_shared.hpp>
 #include <gazebo/transport/transport.hh>
 #include <gazebo_plugins/gazebo_ros_ray_sensor.hpp>

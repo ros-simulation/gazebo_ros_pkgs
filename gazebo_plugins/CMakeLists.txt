@@ -11,6 +11,16 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 endif()
 
+if(WIN32)
+  add_compile_definitions(
+    # For math constants
+    _USE_MATH_DEFINES
+    # Minimize Windows namespace collision
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN
+  )
+endif()
+
 find_package(ament_cmake REQUIRED)
 find_package(camera_info_manager REQUIRED)
 find_package(gazebo_dev REQUIRED)
@@ -220,6 +230,9 @@ ament_export_libraries(gazebo_ros_ft_sensor)
 # gazebo_ros_bumper
 add_library(gazebo_ros_bumper SHARED
   src/gazebo_ros_bumper.cpp
+)
+target_link_libraries(gazebo_ros_bumper
+  ContactPlugin
 )
 ament_target_dependencies(gazebo_ros_bumper
   "gazebo_ros"
