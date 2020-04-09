@@ -46,8 +46,14 @@ GazeboRosWheelSlip::~GazeboRosWheelSlip()
 
 /////////////////////////////////////////////////
 void GazeboRosWheelSlip::configCallback(
-  gazebo_plugins::WheelSlipConfig &config, uint32_t /*level*/)
+  gazebo_plugins::WheelSlipConfig &config, uint32_t level)
 {
+  if (level == ~0)
+  {
+    // don't overwrite initial parameters
+    return;
+  }
+
   ROS_INFO_NAMED("wheel_slip", "Reconfigure request for the gazebo ros wheel_slip: %s. New slip compliances, lateral: %.3e, longitudinal: %.3e",
            this->GetParentModel()->GetScopedName().c_str(),
            config.slip_compliance_unitless_lateral,
