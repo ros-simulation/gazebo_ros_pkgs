@@ -220,9 +220,9 @@ class SpawnEntityNode(Node):
         initial_pose.orientation.y = q[2]
         initial_pose.orientation.z = q[3]
 
-        success = self._spawn_entity(entity_xml, initial_pose)
+        success, message = self._spawn_entity(entity_xml, initial_pose)
         if not success:
-            self.get_logger().error('Spawn service failed. Exiting.')
+            self.get_logger().error('Spawn service failed. Error was: %s' % message)
             return 1
 
         # TODO(shivesh): Wait for /set_model_configuration
@@ -280,7 +280,8 @@ class SpawnEntityNode(Node):
                     self.get_logger().info('Spawn status: %s' % srv_call.result().status_message)
                     break
                 rclpy.spin_once(self)
-            return srv_call.result().success
+            # return srv_call.result().success
+            return srv_call.result().success, srv_call.result().status_message
         self.get_logger().error(
             (
                 'Service %s/spawn_entity unavailable. '
