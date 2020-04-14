@@ -16,6 +16,11 @@ find_package(urdf REQUIRED)
 find_package(angles REQUIRED)
 find_package(yaml_cpp_vendor REQUIRED)
 
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
 set(LIBS
   ${gazebo_dev_LIBRARIES}
   ${rclcpp_LIBRARIES} ${std_msgs_LIBRARIES}
