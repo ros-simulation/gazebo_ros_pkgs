@@ -48,7 +48,9 @@ target_include_directories(gazebo_ros_node
     $<INSTALL_INTERFACE:include>
     ${gazebo_dev_INCLUDE_DIRS}
 )
-target_compile_definitions(gazebo_ros_node PRIVATE "GAZEBO_ROS_NODE_BUILDING_DLL")
+if(WIN32)
+  target_compile_definitions(gazebo_ros_node PRIVATE "GAZEBO_ROS_NODE_BUILDING_DLL")
+endif()
 
 ament_target_dependencies(gazebo_ros_node
   "gazebo_dev"
@@ -66,7 +68,9 @@ target_include_directories(gazebo_ros_utils
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_compile_definitions(gazebo_ros_utils PRIVATE "GAZEBO_ROS_UTILS_BUILDING_DLL")
+if(WIN32)
+  target_compile_definitions(gazebo_ros_utils PRIVATE "GAZEBO_ROS_UTILS_BUILDING_DLL")
+endif()
 ament_target_dependencies(gazebo_ros_utils
   "gazebo_dev"
   "rclcpp"
