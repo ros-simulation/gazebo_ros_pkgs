@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <limits>
 
 #include <gazebo_plugins/gazebo_ros_block_laser.h>
 #include <gazebo_plugins/gazebo_ros_utils.h>
@@ -314,9 +315,15 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
       r = (1-vb)*((1 - hb) * r1 + hb * r2)
          +   vb *((1 - hb) * r3 + hb * r4);
 
-      // clamp r to the min and max range of the sensor
-      r = std::min(r, maxRange);
-      r = std::max(r, minRange);
+      // REP 117 says readings too close to the sensor become -inf, and too far away +inf
+      if (r < minRange)
+      {
+        r = -std::numeric_limits<double>::infinity();
+      }
+      else if ( r > maxRange)
+      {
+        r = std::numeric_limits<double>::infinity();
+      }
 
       // Intensity is averaged
       intensity = 0.25*(this->parent_ray_sensor_->LaserShape()->GetRetro(j1) +

@@ -68,7 +68,7 @@
 
     <model name="slope">
       <static>true</static>
-      <pose>0.0991 -0.002 0.0909 -0.239 0.789 0</pose>
+      <pose>0.0991 -0.002 0.0909 -0.254819 0.847737 -0.021658</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
