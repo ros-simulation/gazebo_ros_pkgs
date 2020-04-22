@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
         model_msg = GazeboModel(model_name,param_name,GazeboModel.URDF_PARAM_NAME,namespace,Pose(Point(lx,ly,lz),Quaternion()))
         success = gazebo_plugins_interface.load_model(model_msg)
-        print("spawning success", success)
+        print("spawning success ", success)
 
     elif sys.argv[1] == 'delete':
         print("not implemented yet")
