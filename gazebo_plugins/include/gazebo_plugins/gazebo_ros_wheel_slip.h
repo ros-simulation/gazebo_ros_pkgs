@@ -68,9 +68,6 @@ class GazeboRosWheelSlip : public WheelSlipPlugin
     /// \brief pointer to ros node
     private: ros::NodeHandle *rosnode_;
 
-    /// \brief Subscriber to detach control messages.
-    private: ros::Subscriber detachSub_;
-
     /// \brief Dynamic reconfigure server.
     private: dynamic_reconfigure::Server<gazebo_plugins::WheelSlipConfig>
                     *dyn_srv_;
