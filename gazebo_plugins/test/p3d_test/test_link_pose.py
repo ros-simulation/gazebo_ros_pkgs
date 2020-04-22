@@ -142,7 +142,7 @@ class LinkPoseTest(unittest.TestCase):
 
 
     def test_link_pose(self):
-        print("LNK")
+        print("LNK\n")
         rospy.init_node(NAME, anonymous=True)
         self.link_pose_topic = rospy.get_param(self.link_pose_topic_name,self.link_pose_topic);
         self.valid_pose_topic = rospy.get_param(self.valid_pose_topic_name,self.valid_pose_topic);

@@ -92,7 +92,7 @@ class BumperTest(unittest.TestCase):
 
 
     def test_bumper(self):
-        print("LNK")
+        print("LNK\n")
         rospy.init_node(NAME, anonymous=True)
         self.bumper_topic = rospy.get_param(self.bumper_topic_name,self.bumper_topic);
         self.min_samples = rospy.get_param(self.min_samples_topic,self.min_samples);
