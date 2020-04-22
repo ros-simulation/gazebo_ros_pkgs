@@ -48,6 +48,7 @@ GazeboRosDepthCamera::GazeboRosDepthCamera()
   this->normals_connect_count_ = 0;
   this->depth_image_connect_count_ = 0;
   this->depth_info_connect_count_ = 0;
+  this->reflectance_connect_count_ = 0;
   this->last_depth_image_camera_info_update_time_ = common::Time(0);
 }
 
@@ -55,7 +56,10 @@ GazeboRosDepthCamera::GazeboRosDepthCamera()
 // Destructor
 GazeboRosDepthCamera::~GazeboRosDepthCamera()
 {
-  delete [] pcd_;
+  if (pcd_ != nullptr)
+  {
+    delete [] pcd_;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,6 +95,12 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
     this->point_cloud_topic_name_ = "points";
   else
     this->point_cloud_topic_name_ = _sdf->GetElement("pointCloudTopicName")->Get<std::string>();
+
+  // reflectance stuff
+  if (!_sdf->HasElement("reflectanceTopicName"))
+    this->reflectance_topic_name_ = "reflectance";
+  else
+    this->reflectance_topic_name_ = _sdf->GetElement("reflectanceTopicName")->Get<std::string>();
 
   // normals stuff
   if (!_sdf->HasElement("normalsTopicName"))
@@ -149,6 +159,15 @@ void GazeboRosDepthCamera::Advertise()
         ros::VoidPtr(), &this->camera_queue_);
   this->depth_image_camera_info_pub_ = this->rosnode_->advertise(depth_image_camera_info_ao);
 
+#if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
+  ros::AdvertiseOptions reflectance_ao =
+    ros::AdvertiseOptions::create<sensor_msgs::Image>(
+      reflectance_topic_name_, 1,
+      boost::bind( &GazeboRosDepthCamera::ReflectanceConnect,this),
+      boost::bind( &GazeboRosDepthCamera::ReflectanceDisconnect,this),
+      ros::VoidPtr(), &this->camera_queue_);
+  this->reflectance_pub_ = this->rosnode_->advertise(reflectance_ao);
+
   ros::AdvertiseOptions normals_ao =
     ros::AdvertiseOptions::create<visualization_msgs::MarkerArray >(
       normals_topic_name_, 1,
@@ -156,6 +175,7 @@ void GazeboRosDepthCamera::Advertise()
       boost::bind( &GazeboRosDepthCamera::NormalsDisconnect,this),
       ros::VoidPtr(), &this->camera_queue_);
   this->normal_pub_ = this->rosnode_->advertise(normals_ao);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,6 +186,7 @@ void GazeboRosDepthCamera::PointCloudConnect()
   (*this->image_connect_count_)++;
   this->parentSensor->SetActive(true);
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
 void GazeboRosDepthCamera::PointCloudDisconnect()
@@ -178,17 +199,40 @@ void GazeboRosDepthCamera::PointCloudDisconnect()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Increment count
+void GazeboRosDepthCamera::ReflectanceConnect()
+{
+  this->reflectance_connect_count_++;
+  (*this->image_connect_count_)++;
+  this->parentSensor->SetActive(true);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Increment count
 void GazeboRosDepthCamera::NormalsConnect()
 {
   this->normals_connect_count_++;
   (*this->image_connect_count_)++;
   this->parentSensor->SetActive(true);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Decrement count
+void GazeboRosDepthCamera::ReflectanceDisconnect()
+{
+  this->reflectance_connect_count_--;
+  (*this->image_connect_count_)--;
+  if (this->reflectance_connect_count_ <= 0)
+    this->parentSensor->SetActive(false);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
 void GazeboRosDepthCamera::NormalsDisconnect()
 {
   this->normals_connect_count_--;
+  (*this->image_connect_count_)--;
+  if (this->reflectance_connect_count_ <= 0)
+    this->parentSensor->SetActive(false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -198,6 +242,7 @@ void GazeboRosDepthCamera::DepthImageConnect()
   this->depth_image_connect_count_++;
   this->parentSensor->SetActive(true);
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
 void GazeboRosDepthCamera::DepthImageDisconnect()
@@ -335,6 +380,38 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
   }
 }
 
+#if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
+////////////////////////////////////////////////////////////////////////////////
+// Update the controller
+void GazeboRosDepthCamera::OnNewReflectanceFrame(const float *_image,
+    unsigned int _width, unsigned int _height, unsigned int _depth,
+    const std::string &_format)
+{
+
+  if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
+    return;
+
+  /// don't bother if there are no subscribers
+  if (this->reflectance_connect_count_ > 0)
+  {
+    boost::mutex::scoped_lock lock(this->lock_);
+
+    // copy data into image
+    this->reflectance_msg_.header.frame_id = this->frame_name_;
+    this->reflectance_msg_.header.stamp.sec = this->sensor_update_time_.sec;
+    this->reflectance_msg_.header.stamp.nsec = this->sensor_update_time_.nsec;
+
+    // copy from src to image_msg_
+    fillImage(this->reflectance_msg_, sensor_msgs::image_encodings::TYPE_32FC1, _height, _width,
+        4*_width, reinterpret_cast<const void*>(_image));
+
+    // publish to ros
+    this->reflectance_pub_.publish(this->reflectance_msg_);
+  }
+
+}
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 // Update the controller
 void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
@@ -368,6 +445,7 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
   }
 }
 
+#if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
 void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
                unsigned int _width, unsigned int _height,
                unsigned int _depth, const std::string &_format)
@@ -388,14 +466,16 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
     if (this->normals_connect_count_ > 0)
     {
       this->lock_.lock();
-      if (this->point_cloud_msg_.data.size() > 0){
-
+      if (this->point_cloud_msg_.data.size() > 0)
+      {
         for (unsigned int i = 0; i < _width; i++)
         {
           for (unsigned int j = 0; j < _height; j++)
           {
             // plotting some of the normals, otherwise rviz will block it
+            unsigned int index = (j * _width) + i;
             if (index % this->reduce_normals_ == 0)
+            {
               visualization_msgs::Marker m;
               m.type = visualization_msgs::Marker::ARROW;
               m.header.frame_id = this->frame_name_;
@@ -413,7 +493,6 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
               m.lifetime.sec = 1;
               m.lifetime.nsec = 0;
 
-              unsigned int index = (j * _width) + i;
               m.id = index;
               float x = _normals[4 * index];
               float y = _normals[4 * index + 1];
@@ -437,6 +516,7 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
               m.pose.orientation.w = q.w();
 
               m_array.markers.push_back(m);
+            }
           }
         }
       }
@@ -445,6 +525,7 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
     }
   }
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Put camera data to the interface

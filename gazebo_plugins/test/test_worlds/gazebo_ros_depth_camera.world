@@ -109,7 +109,7 @@
                           <far>100</far>
                         </clip>
                         <depth_camera>
-                          <output>points;normals</output>
+                          <output>points;normals;reflectance</output>
                         </depth_camera>
                     </camera>
                     <plugin name="plugin_1" filename="libgazebo_ros_depth_camera.so">
@@ -138,6 +138,39 @@
             </link>
             <static>false</static>
         </model>
+
+        <model  name="box_reflectance">
+          <pose>1.0 0.0 5.0 0 0 0</pose>
+          <link name="box_link">
+            <visual name="visual">
+              <geometry>
+                <box>
+                  <size>.2 .2 .2</size>
+                </box>
+              </geometry>
+              <material>
+                <script>
+                  <uri>file://media/materials/scripts/gazebo.material</uri>
+                  <name>Gazebo/Red</name>
+                </script>
+              </material>
+              <plugin filename="libReflectancePlugin.so" name="reflectance_plugin">
+                <reflectance_map>
+                  <uri>model://suv/materials/textures/</uri>
+                  <name>wheels_01.png</name>
+                </reflectance_map>
+              </plugin>
+            </visual>
+            <collision name="visual">
+              <geometry>
+                <box>
+                  <size>.2 .2 .2</size>
+                </box>
+              </geometry>
+            </collision>
+          </link>
+        </model>
+
         <model name="model_2">
             <pose>5.0 0.0 5.0 0.0 0.0 0.0</pose>
             <link name="link_1">
