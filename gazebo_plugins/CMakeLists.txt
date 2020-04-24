@@ -374,9 +374,8 @@ install(DIRECTORY include/
    FILES_MATCHING PATTERN "*.h"
 )
 
-install(PROGRAMS scripts/set_wrench.py scripts/set_pose.py scripts/gazebo_model
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+catkin_install_python(PROGRAMS scripts/set_wrench.py scripts/set_pose.py scripts/gazebo_model
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY Media
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
