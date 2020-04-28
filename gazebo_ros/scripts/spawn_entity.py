@@ -76,6 +76,8 @@ class SpawnEntityNode(Node):
                             help='unpause physics after spawning entity')
         parser.add_argument('-wait', type=str, metavar='ENTITY_NAME',
                             help='Wait for entity to exist')
+        parser.add_argument('-spawn_service_timeout', type=float, metavar='TIMEOUT',
+                            default=5.0, help='Spawn service wait timeout in seconds')
         parser.add_argument('-x', type=float, default=0,
                             help='x component of initial position, meters')
         parser.add_argument('-y', type=float, default=0,
@@ -215,7 +217,7 @@ class SpawnEntityNode(Node):
         initial_pose.orientation.y = q[2]
         initial_pose.orientation.z = q[3]
 
-        success = self._spawn_entity(entity_xml, initial_pose)
+        success = self._spawn_entity(entity_xml, initial_pose, self.args.spawn_service_timeout)
         if not success:
             self.get_logger().error('Spawn service failed. Exiting.')
             return 1
@@ -254,10 +256,16 @@ class SpawnEntityNode(Node):
 
         return 0
 
-    def _spawn_entity(self, entity_xml, initial_pose):
+    def _spawn_entity(self, entity_xml, initial_pose, timeout=5.0):
+        if timeout < 0:
+            self.get_logger().error('spawn_entity timeout must be greater than zero')
+            return False
+        self.get_logger().info(
+            'Waiting for service %s/spawn_entity, timeout = %.f' % (
+                self.args.gazebo_namespace, timeout))
         self.get_logger().info('Waiting for service %s/spawn_entity' % self.args.gazebo_namespace)
         client = self.create_client(SpawnEntity, '%s/spawn_entity' % self.args.gazebo_namespace)
-        if client.wait_for_service(timeout_sec=5.0):
+        if client.wait_for_service(timeout_sec=timeout):
             req = SpawnEntity.Request()
             req.name = self.args.entity
             req.xml = str(entity_xml, 'utf-8')
