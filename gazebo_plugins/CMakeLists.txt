@@ -317,7 +317,6 @@ target_link_libraries(gazebo_ros_template ${catkin_LIBRARIES} ${Boost_LIBRARIES}
 install(TARGETS
   hokuyo_node
   camera_synchronizer
-  pub_joint_trajectory_test
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
