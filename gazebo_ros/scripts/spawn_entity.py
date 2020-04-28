@@ -77,7 +77,7 @@ class SpawnEntityNode(Node):
         parser.add_argument('-wait', type=str, metavar='ENTITY_NAME',
                             help='Wait for entity to exist')
         parser.add_argument('-spawn_service_timeout', type=float, metavar='TIMEOUT',
-                            default=5.0, help='Spawn service wait timeout')
+                            default=5.0, help='Spawn service wait timeout in seconds')
         parser.add_argument('-x', type=float, default=0,
                             help='x component of initial position, meters')
         parser.add_argument('-y', type=float, default=0,
