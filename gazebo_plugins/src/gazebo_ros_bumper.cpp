@@ -80,9 +80,12 @@ void GazeboRosBumper::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     return;
   }
 
+  // Get QoS profiles
+  const gazebo_ros::QoS qos = impl_->ros_node_->get_qos();
+
   // Contact state publisher
   impl_->pub_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::ContactsState>(
-    "bumper_states", rclcpp::SensorDataQoS());
+    "bumper_states", qos.get_publisher_qos("bumper_states", rclcpp::SensorDataQoS()));
 
   RCLCPP_INFO(
     impl_->ros_node_->get_logger(), "Publishing contact states to [%s]",
