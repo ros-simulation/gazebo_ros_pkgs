@@ -68,6 +68,8 @@ TEST(TestNode, GetSdf)
   ASSERT_NE(nullptr, node_1);
   EXPECT_STREQ("node_1", node_1->get_name());
 
+  node_1->get_qos();
+
   // TODO(anyone) Fix this test, see
   // https://github.com/ros-simulation/gazebo_ros_pkgs/issues/855
 

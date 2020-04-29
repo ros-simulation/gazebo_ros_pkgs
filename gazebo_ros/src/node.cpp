@@ -94,12 +94,15 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     }
   }
 
+  // Parse qos tag
+  gazebo_ros::QoS qos(sdf);
+
   rclcpp::NodeOptions node_options;
   node_options.arguments(arguments);
   node_options.parameter_overrides(parameter_overrides);
 
   // Create node with parsed arguments
-  return CreateWithArgs(name, ns, node_options);
+  return CreateWithArgs(qos, name, ns, node_options);
 }
 
 Node::SharedPtr Node::Get()
@@ -109,7 +112,8 @@ Node::SharedPtr Node::Get()
   if (!node) {
     rclcpp::NodeOptions node_options;
     node_options.allow_undeclared_parameters(true);
-    node = CreateWithArgs("gazebo", "", node_options);
+    gazebo_ros::QoS qos;
+    node = CreateWithArgs(qos, "gazebo", "", node_options);
     static_node_ = node;
   }
 

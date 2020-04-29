@@ -18,6 +18,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <gazebo_ros/executor.hpp>
+#include <gazebo_ros/qos.hpp>
 
 #include <atomic>
 #include <memory>
@@ -55,7 +56,7 @@ public:
    * \details This will create a new node; the node's name will be the same as the name argument
    * on the <plugin> tag.
    * \details This will call rclcpp::init if it hasn't been called yet.
-   * \details Sets node name, namespace, remappings, and parameters from SDF.
+   * \details Sets node name, namespace, remappings, parameters, and quality of service from SDF.
    * SDF is in the form:
    * \code{.xml}
    * <!-- Node name will be the same as the plugin name -->
@@ -72,6 +73,10 @@ public:
    *    <parameter name="publish_odom" type="bool">True</parameter>
    *    <!-- Remapping rules for node -->
    *    <remapping>my_topic:=new_topic</remapping>
+   *    <!-- QoS for node publishers and subscriptions -->
+   *    <qos>
+   *      <!-- See #gazebo_ros::QoS -->
+   *    </qos>
    *   </ros>
    * </plugin>
    * \endcode
@@ -84,11 +89,12 @@ public:
   /**
    * \details This will call rclcpp::init if it hasn't been called yet.
    * \details Forwards arguments to the constructor for rclcpp::Node
+   * \param[in] qos Quality of service profile for the node entities.
    * \param[in] args List of arguments to pass to <a href="http://docs.ros2.org/latest/api/rclcpp/classrclcpp_1_1_node.html">rclcpp::Node</a>
    * \return A shared pointer to a new #gazebo_ros::Node
    */
   template<typename ... Args>
-  static SharedPtr CreateWithArgs(Args && ... args);
+  static SharedPtr CreateWithArgs(gazebo_ros::QoS & qos, Args && ... args);
 
   /// Convert an sdf element to an rclcpp::Parameter
   /* \details SDF must have a type and name attribute
@@ -108,6 +114,11 @@ public:
    */
   static rclcpp::Parameter sdf_to_ros_parameter(sdf::ElementPtr const & _sdf);
 
+  inline gazebo_ros::QoS get_qos() const
+  {
+    return this->qos_;
+  }
+
 private:
   /// Inherit constructor
   using rclcpp::Node::Node;
@@ -115,6 +126,9 @@ private:
   /// Points to #static_executor_, so that when all #gazebo_ros::Node instances are destroyed, the
   /// executor thread is too
   std::shared_ptr<Executor> executor_;
+
+  /// QoS for node entities
+  gazebo_ros::QoS qos_;
 
   /// Locks #initialized_ and #executor_
   static std::mutex lock_;
@@ -130,7 +144,7 @@ private:
 };
 
 template<typename ... Args>
-Node::SharedPtr Node::CreateWithArgs(Args && ... args)
+Node::SharedPtr Node::CreateWithArgs(gazebo_ros::QoS & qos, Args && ... args)
 {
   std::lock_guard<std::mutex> l(lock_);
 
@@ -144,6 +158,9 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
   }
   node = std::make_shared<Node>(std::forward<Args>(args) ...);
   node->set_parameter(rclcpp::Parameter("use_sim_time", true));
+
+  // Store the QoS profile
+  node->qos_ = qos;
 
   // Store shared pointer to static executor in this object
   node->executor_ = static_executor_.lock();
