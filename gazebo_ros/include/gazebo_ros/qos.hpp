@@ -54,7 +54,7 @@ public:
   /// Constructor with SDF
   /**
    * \details Create a new QoS profile for a collection of node entities from SDF.
-   * SDF is should have the form:
+   * SDF should have the form:
    * \code{.xml}
    * <qos>
    *  <!-- Zero or more topic tags with topic names to configure -->
