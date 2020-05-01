@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.7 (2020-05-01)
+------------------
 * gazebo_ros_control: catch all pluginlib exceptions (`#1062 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1062>`_)
 * Contributors: Max Schwarz
 

@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.7 (2020-05-01)
+------------------
 * gazebo_ros_wheel_slip: remove unused member data (`#1084 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1084>`_)
 * gazebo_ros_wheel_slip plugin (`#995 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/995>`_)
   Uses dynamic_reconfigure to set wheel slip parameters.
