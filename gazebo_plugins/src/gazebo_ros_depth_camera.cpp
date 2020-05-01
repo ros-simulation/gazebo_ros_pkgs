@@ -282,14 +282,18 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
   {
     if (this->point_cloud_connect_count_ <= 0 &&
         this->depth_image_connect_count_ <= 0 &&
-        (*this->image_connect_count_) <= 0)
+        (*this->image_connect_count_) <= 0 &&
+        this->normals_connect_count_ <= 0)
     {
       this->parentSensor->SetActive(false);
     }
     else
     {
-      if (this->point_cloud_connect_count_ > 0)
+      if (this->point_cloud_connect_count_ > 0 ||
+          this->normals_connect_count_ > 0)
+      {
         this->FillPointdCloud(_image);
+      }
 
       if (this->depth_image_connect_count_ > 0)
         this->FillDepthImage(_image);
@@ -465,8 +469,8 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
   {
     if (this->normals_connect_count_ > 0)
     {
-      this->lock_.lock();
-      if (this->point_cloud_msg_.data.size() > 0)
+      boost::mutex::scoped_lock lock(this->lock_);
+      if (pcd_ != nullptr)
       {
         for (unsigned int i = 0; i < _width; i++)
         {
@@ -520,7 +524,6 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
           }
         }
       }
-      this->lock_.unlock();
       this->normal_pub_.publish(m_array);
     }
   }
@@ -598,6 +601,10 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
   double hfov = this->parentSensor->DepthCamera()->HFOV().Radian();
   double fl = ((double)this->width) / (2.0 *tan(hfov/2.0));
 
+  if (pcd_ == nullptr){
+    pcd_ = new float[rows_arg * cols_arg * 4];
+  }
+
   // convert depth to point cloud
   for (uint32_t j=0; j<rows_arg; j++)
   {
@@ -617,17 +624,24 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
       // hardcoded rotation rpy(-M_PI/2, 0, -M_PI/2) is built-in
       // to urdf, where the *_optical_frame should have above relative
       // rotation from the physical camera *_frame
+      unsigned int index = (j * cols_arg) + i;
       *iter_x      = depth * tan(yAngle);
       *iter_y      = depth * tan(pAngle);
       if(depth > this->point_cloud_cutoff_)
       {
         *iter_z    = depth;
+        pcd_[4 * index + 2] = *iter_z;
       }
       else //point in the unseeable range
       {
         *iter_x = *iter_y = *iter_z = std::numeric_limits<float>::quiet_NaN ();
+        pcd_[4 * index + 2] = 0;
         point_cloud_msg.is_dense = false;
       }
+
+      pcd_[4 * index] = *iter_x;
+      pcd_[4 * index + 1] = *iter_y;
+      pcd_[4 * index + 3] = 0;
 
       // put image color data for each point
       uint8_t*  image_src = (uint8_t*)(&(this->image_msg_.data[0]));
