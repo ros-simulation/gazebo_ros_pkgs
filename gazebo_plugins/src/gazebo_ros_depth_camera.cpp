@@ -358,14 +358,6 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
           *iter_y = _pcd[4 * index + 1];
           *iter_z = _pcd[4 * index + 2];
           *iter_rgb = _pcd[4 * index + 3];
-          if (i == _width /2 && j == _height / 2)
-          {
-            uint32_t rgb = *reinterpret_cast<int*>(&(*iter_rgb));
-            uint8_t r = (rgb >> 16) & 0x0000ff;
-            uint8_t g = (rgb >> 8)  & 0x0000ff;
-            uint8_t b = (rgb)       & 0x0000ff;
-            std::cerr << (int)r << " " << (int)g << " " << (int)b << "\n";
-          }
         }
       }
 
@@ -496,11 +488,15 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
 
               // calculating the angle of the normal with the world
               tf::Vector3 axis_vector(x, y, z);
-              tf::Vector3 vector(1.0, 0.0, 0.0);
-              tf::Vector3 right_vector = axis_vector.cross(vector);
-              right_vector.normalized();
-              tf::Quaternion q(right_vector, -1.0*acos(axis_vector.dot(vector)));
-              q.normalize();
+              tf::Quaternion q = tf::Quaternion::getIdentity();
+              if (!axis_vector.isZero())
+              {
+                tf::Vector3 vector(1.0, 0.0, 0.0);
+                tf::Vector3 right_vector = axis_vector.cross(vector);
+                right_vector.normalized();
+                q.setRotation(right_vector, -1.0*acos(axis_vector.dot(vector)));
+                q.normalize();
+              }
 
               m.pose.orientation.x = q.x();
               m.pose.orientation.y = q.y();
