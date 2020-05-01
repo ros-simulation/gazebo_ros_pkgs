@@ -2,6 +2,21 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_ros_wheel_slip: remove unused member data (`#1084 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1084>`_)
+* gazebo_ros_wheel_slip plugin (`#995 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/995>`_)
+  Uses dynamic_reconfigure to set wheel slip parameters.
+  Requires gazebo 9.5.
+  * don't overwrite initial slip values
+  * Add test world using trisphere_cycles
+* portable installation fix. (`#1061 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1061>`_)
+* Measure IMU orientation with respect to world (`#1051 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1051>`_)
+  Report the IMU orientation from the sensor plugin with respect to the world frame.
+  This complies with convention documented in REP 145: https://www.ros.org/reps/rep-0145.html
+  In order to not break existing behavior, users should opt-in by adding a new SDF tag.
+* Contributors: Jacob Perron, Sean Yen, Steven Peters
+
 2.8.6 (2019-12-26)
 ------------------
 * gazebo_plugins: export plugin path in package.xml (`#923 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/923>`_)

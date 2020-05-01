@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_ros_control: catch all pluginlib exceptions (`#1062 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1062>`_)
+* Contributors: Max Schwarz
+
 2.8.6 (2019-12-26)
 ------------------
 * restrict Windows header namespace. (`#1023 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1023>`_)
