@@ -127,7 +127,9 @@ def generate_launch_description():
         DeclareLaunchArgument('server_required', default_value='false',
                               description='Set "true" to shut down launch script when server is terminated'),
 
-        # Execute node with Shutdown if required
+        # Execute node with on_exit=Shutdown if server_required is specified.
+        # See ros-simulation/gazebo_ros_pkgs#1086. Simplification of logic
+        # would be possible pending ros2/launch#290.
         ExecuteProcess(
             cmd=cmd,
             output='screen',
@@ -138,7 +140,7 @@ def generate_launch_description():
             condition=IfCondition(LaunchConfiguration('server_required')),
         ),
 
-        # Execute node without Shutdown if not required
+        # Execute node with default on_exit if the node is not required
         ExecuteProcess(
             cmd=cmd,
             output='screen',
