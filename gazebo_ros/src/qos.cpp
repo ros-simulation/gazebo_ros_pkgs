@@ -28,17 +28,37 @@ namespace gazebo_ros
 /// Helper function for creating an rclcpp::QoS from SDF and a default QoS as a base.
 QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
 {
+  // Map strings to QoS policies
+  static std::map<std::string, rmw_qos_reliability_policy_t> reliability_map = {
+    {"system", RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT},
+    {"reliable", RMW_QOS_POLICY_RELIABILITY_RELIABLE},
+    {"best_effort", RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT},
+  };
+  static std::map<std::string, rmw_qos_durability_policy_t> durability_map = {
+    {"system", RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT},
+    {"volatile", RMW_QOS_POLICY_DURABILITY_VOLATILE},
+    {"transient_local", RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL},
+  };
+  static std::map<std::string, rmw_qos_history_policy_t> history_map = {
+    {"system", RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT},
+    {"keep_last", RMW_QOS_POLICY_HISTORY_KEEP_LAST},
+    {"keep_all", RMW_QOS_POLICY_HISTORY_KEEP_ALL},
+  };
+  static std::map<std::string, rmw_qos_liveliness_policy_t> liveliness_map = {
+    {"system", RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT},
+    {"automatic", RMW_QOS_POLICY_LIVELINESS_AUTOMATIC},
+    {"manual_by_node", RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE},
+    {"manual_by_topic", RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC},
+  };
+
   QoS::QoSOverrides qos_overrides;
 
   // Parse 'reliability' QoS
   if (_sdf->HasElement("reliability")) {
     auto reliability = _sdf->GetElement("reliability")->Get<std::string>();
-    if ("system" == reliability) {
-      qos_overrides.reliability = RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT;
-    } else if ("reliable" == reliability) {
-      qos_overrides.reliability = RMW_QOS_POLICY_RELIABILITY_RELIABLE;
-    } else if ("best_effort" == reliability) {
-      qos_overrides.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
+    auto find_result = reliability_map.find(reliability);
+    if (find_result != reliability_map.end()) {
+      qos_overrides.reliability = find_result->second;
     } else {
       std::stringstream oss;
       oss << "invalid setting for reliability '" << reliability << "'";
@@ -49,12 +69,9 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
   // Parse 'durability' QoS
   if (_sdf->HasElement("durability")) {
     auto durability = _sdf->GetElement("durability")->Get<std::string>();
-    if ("system" == durability) {
-      qos_overrides.durability = RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT;
-    } else if ("volatile" == durability) {
-      qos_overrides.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
-    } else if ("transient_local" == durability) {
-      qos_overrides.durability = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL;
+    auto find_result = durability_map.find(durability);
+    if (find_result != durability_map.end()) {
+      qos_overrides.durability = find_result->second;
     } else {
       std::stringstream oss;
       oss << "invalid setting for durability '" << durability << "'";
@@ -66,17 +83,17 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
   if (_sdf->HasElement("history")) {
     auto history_element = _sdf->GetElement("history");
     auto history = history_element->Get<std::string>();
-    if ("system" == history) {
-      qos_overrides.history = RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;
-    } else if ("keep_last" == history) {
-      if (!history_element->HasAttribute("depth")) {
-        throw InvalidQoSException("'keep_last' used without providing a depth");
+    auto find_result = history_map.find(history);
+    if (find_result != history_map.end()) {
+      qos_overrides.history = find_result->second;
+      if (RMW_QOS_POLICY_HISTORY_KEEP_LAST == find_result->second) {
+        if (!history_element->HasAttribute("depth")) {
+          std::stringstream oss;
+          oss << "'" << find_result->first << "' used without providing a depth";
+          throw InvalidQoSException(oss.str());
+        }
+        qos_overrides.depth = history_element->Get<size_t>("depth");
       }
-      auto depth = history_element->Get<size_t>("depth");
-      qos_overrides.history = RMW_QOS_POLICY_HISTORY_KEEP_LAST;
-      qos_overrides.depth = depth;
-    } else if ("keep_all" == history) {
-      qos_overrides.history = RMW_QOS_POLICY_HISTORY_KEEP_ALL;
     } else {
       std::stringstream oss;
       oss << "invalid setting for history '" << history << "'";
@@ -99,14 +116,9 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
   // Parse 'liveliness' QoS
   if (_sdf->HasElement("liveliness")) {
     auto liveliness = _sdf->GetElement("liveliness")->Get<std::string>();
-    if ("system" == liveliness) {
-      qos_overrides.liveliness = RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT;
-    } else if ("automatic" == liveliness) {
-      qos_overrides.liveliness = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC;
-    } else if ("manual_by_node" == liveliness) {
-      qos_overrides.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE;
-    } else if ("manual_by_topic" == liveliness) {
-      qos_overrides.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC;
+    auto find_result = liveliness_map.find(liveliness);
+    if (find_result != liveliness_map.end()) {
+      qos_overrides.liveliness = find_result->second;
     } else {
       std::stringstream oss;
       oss << "invalid setting for liveliness '" << liveliness << "'";
