@@ -34,7 +34,7 @@ TEST(TestQoS, ValidConstruction)
     gazebo_ros::QoS qos(sdf.Root());
 
     // We should get the default QoS for an arbitrary topic
-    rclcpp::QoS some_qos = qos.get_publisher_qos("some_random_test_topic");
+    rclcpp::QoS some_qos = qos.get_publisher_qos("some_random_test_topic", rclcpp::QoS(10));
     EXPECT_EQ(rclcpp::QoS(10), some_qos);
   }
   // Empty <qos> element
@@ -52,7 +52,7 @@ TEST(TestQoS, ValidConstruction)
     sdf.SetFromString(sdf_str);
     gazebo_ros::QoS qos(sdf.Root()->GetElement("world")->GetElement("plugin"));
     // We should get the default QoS for an arbitrary topic
-    rclcpp::QoS some_qos = qos.get_publisher_qos("foo/bar/baz");
+    rclcpp::QoS some_qos = qos.get_publisher_qos("foo/bar/baz", rclcpp::QoS(10));
     EXPECT_EQ(rclcpp::QoS(10), some_qos);
   }
   // <qos> element with some content
@@ -84,7 +84,7 @@ TEST(TestQoS, ValidConstruction)
     rclcpp::QoS sub_qos = qos.get_subscription_qos("foo");
     EXPECT_EQ(expected_sub_qos, sub_qos);
     // Publisher should have default QoS
-    rclcpp::QoS pub_qos = qos.get_publisher_qos("foo");
+    rclcpp::QoS pub_qos = qos.get_publisher_qos("foo", rclcpp::QoS(10));
     EXPECT_EQ(rclcpp::QoS(10), pub_qos);
   }
   // <qos> element with all possible overrides
