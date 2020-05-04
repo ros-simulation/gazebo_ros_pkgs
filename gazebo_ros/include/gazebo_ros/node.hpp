@@ -89,12 +89,11 @@ public:
   /**
    * \details This will call rclcpp::init if it hasn't been called yet.
    * \details Forwards arguments to the constructor for rclcpp::Node
-   * \param[in] qos Quality of service profile for the node entities.
    * \param[in] args List of arguments to pass to <a href="http://docs.ros2.org/latest/api/rclcpp/classrclcpp_1_1_node.html">rclcpp::Node</a>
    * \return A shared pointer to a new #gazebo_ros::Node
    */
   template<typename ... Args>
-  static SharedPtr CreateWithArgs(gazebo_ros::QoS & qos, Args && ... args);
+  static SharedPtr CreateWithArgs(Args && ... args);
 
   /// Convert an sdf element to an rclcpp::Parameter
   /* \details SDF must have a type and name attribute
@@ -144,7 +143,7 @@ private:
 };
 
 template<typename ... Args>
-Node::SharedPtr Node::CreateWithArgs(gazebo_ros::QoS & qos, Args && ... args)
+Node::SharedPtr Node::CreateWithArgs(Args && ... args)
 {
   std::lock_guard<std::mutex> l(lock_);
 
@@ -158,9 +157,6 @@ Node::SharedPtr Node::CreateWithArgs(gazebo_ros::QoS & qos, Args && ... args)
   }
   node = std::make_shared<Node>(std::forward<Args>(args) ...);
   node->set_parameter(rclcpp::Parameter("use_sim_time", true));
-
-  // Store the QoS profile
-  node->qos_ = qos;
 
   // Store shared pointer to static executor in this object
   node->executor_ = static_executor_.lock();

@@ -94,15 +94,17 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     }
   }
 
-  // Parse qos tag
-  gazebo_ros::QoS qos(sdf);
-
   rclcpp::NodeOptions node_options;
   node_options.arguments(arguments);
   node_options.parameter_overrides(parameter_overrides);
 
   // Create node with parsed arguments
-  return CreateWithArgs(qos, name, ns, node_options);
+  std::shared_ptr<gazebo_ros::Node> node = CreateWithArgs(name, ns, node_options);
+
+  // Parse the qos tag
+  node->qos_ = gazebo_ros::QoS(sdf);
+
+  return node;
 }
 
 Node::SharedPtr Node::Get()
@@ -112,8 +114,7 @@ Node::SharedPtr Node::Get()
   if (!node) {
     rclcpp::NodeOptions node_options;
     node_options.allow_undeclared_parameters(true);
-    gazebo_ros::QoS qos;
-    node = CreateWithArgs(qos, "gazebo", "", node_options);
+    node = CreateWithArgs("gazebo", "", node_options);
     static_node_ = node;
   }
 
