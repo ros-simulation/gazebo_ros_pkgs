@@ -114,7 +114,7 @@ public:
    */
   static rclcpp::Parameter sdf_to_ros_parameter(sdf::ElementPtr const & _sdf);
 
-  inline gazebo_ros::QoS get_qos() const
+  inline gazebo_ros::QoS get_qos() const &
   {
     return this->qos_;
   }
