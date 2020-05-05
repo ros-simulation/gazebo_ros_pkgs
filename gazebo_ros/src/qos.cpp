@@ -47,7 +47,6 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
   static std::unordered_map<std::string, rmw_qos_liveliness_policy_t> liveliness_map = {
     {"system", RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT},
     {"automatic", RMW_QOS_POLICY_LIVELINESS_AUTOMATIC},
-    {"manual_by_node", RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE},
     {"manual_by_topic", RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC},
   };
 

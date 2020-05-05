@@ -91,8 +91,8 @@ public:
    * The <lifespan> element must contain a positive integer representing a duration in
    * milliseconds.
    *
-   * The <liveliness> element must contain one of the following: "automatic", "manual_by_node",
-   * "manual_by_topic", or "system".
+   * The <liveliness> element must contain one of the following: "automatic", "manual_by_topic",
+   * or "system".
    *
    * The <liveliness_lease_duration> element must contain a positive integer representing a
    * duration in milliseconds.

@@ -104,7 +104,7 @@ TEST(TestQoS, ValidConstruction)
     expected_sub_qos.deadline(std::chrono::milliseconds(321));
     expected_sub_qos.lifespan(std::chrono::milliseconds(24));
     expected_sub_qos.liveliness_lease_duration(std::chrono::milliseconds(1));
-    expected_sub_qos.liveliness(RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE);
+    expected_sub_qos.liveliness(RMW_QOS_POLICY_LIVELINESS_AUTOMATIC);
 
     auto sdf_str =
       "<?xml version='1.0' ?>"
@@ -129,7 +129,7 @@ TEST(TestQoS, ValidConstruction)
       "            <deadline>321</deadline>"
       "            <lifespan>24</lifespan>"
       "            <liveliness_lease_duration>1</liveliness_lease_duration>"
-      "            <liveliness>manual_by_node</liveliness>"
+      "            <liveliness>automatic</liveliness>"
       "          </subscription>"
       "        </topic>"
       "      </qos>"
