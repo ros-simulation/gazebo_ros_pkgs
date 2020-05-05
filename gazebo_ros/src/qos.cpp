@@ -18,7 +18,7 @@
 #include <rmw/types.h>
 
 #include <chrono>
-#include <map>
+#include <unordered_map>
 #include <sstream>
 #include <string>
 
@@ -29,22 +29,22 @@ namespace gazebo_ros
 QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
 {
   // Map strings to QoS policies
-  static std::map<std::string, rmw_qos_reliability_policy_t> reliability_map = {
+  static std::unordered_map<std::string, rmw_qos_reliability_policy_t> reliability_map = {
     {"system", RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT},
     {"reliable", RMW_QOS_POLICY_RELIABILITY_RELIABLE},
     {"best_effort", RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT},
   };
-  static std::map<std::string, rmw_qos_durability_policy_t> durability_map = {
+  static std::unordered_map<std::string, rmw_qos_durability_policy_t> durability_map = {
     {"system", RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT},
     {"volatile", RMW_QOS_POLICY_DURABILITY_VOLATILE},
     {"transient_local", RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL},
   };
-  static std::map<std::string, rmw_qos_history_policy_t> history_map = {
+  static std::unordered_map<std::string, rmw_qos_history_policy_t> history_map = {
     {"system", RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT},
     {"keep_last", RMW_QOS_POLICY_HISTORY_KEEP_LAST},
     {"keep_all", RMW_QOS_POLICY_HISTORY_KEEP_ALL},
   };
-  static std::map<std::string, rmw_qos_liveliness_policy_t> liveliness_map = {
+  static std::unordered_map<std::string, rmw_qos_liveliness_policy_t> liveliness_map = {
     {"system", RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT},
     {"automatic", RMW_QOS_POLICY_LIVELINESS_AUTOMATIC},
     {"manual_by_node", RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE},
