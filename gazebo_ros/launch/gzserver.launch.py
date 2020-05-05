@@ -19,6 +19,8 @@ from os import environ
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import ExecuteProcess
+from launch.actions import Shutdown
+from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PythonExpression
 
@@ -26,6 +28,31 @@ from scripts import GazeboRosPaths
 
 
 def generate_launch_description():
+    cmd = ['gzserver',
+           # Pass through arguments to gzserver
+           LaunchConfiguration('world'), ' ',
+           _boolean_command('version'), ' ',
+           _boolean_command('verbose'), ' ',
+           _boolean_command('help'), ' ',
+           _boolean_command('pause'), ' ',
+           _arg_command('physics'), ' ', LaunchConfiguration('physics'), ' ',
+           _arg_command('play'), ' ', LaunchConfiguration('play'), ' ',
+           _boolean_command('record'), ' ',
+           _arg_command('record_encoding'), ' ', LaunchConfiguration('record_encoding'), ' ',
+           _arg_command('record_path'), ' ', LaunchConfiguration('record_path'), ' ',
+           _arg_command('record_period'), ' ', LaunchConfiguration('record_period'), ' ',
+           _arg_command('record_filter'), ' ', LaunchConfiguration('record_filter'), ' ',
+           _arg_command('seed'), ' ', LaunchConfiguration('seed'), ' ',
+           _arg_command('iters'), ' ', LaunchConfiguration('iters'), ' ',
+           _boolean_command('minimal_comms'),
+           _plugin_command('init'), ' ',
+           _plugin_command('factory'), ' ',
+           # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
+           # _plugin_command('force_system'), ' ',
+           _arg_command('profile'), ' ', LaunchConfiguration('profile'),
+           LaunchConfiguration('extra_gazebo_args'),
+           ]
+
     model, plugin, media = GazeboRosPaths.get_paths()
 
     if 'GAZEBO_MODEL_PATH' in environ:
@@ -38,6 +65,12 @@ def generate_launch_description():
     env = {'GAZEBO_MODEL_PATH': model,
            'GAZEBO_PLUGIN_PATH': plugin,
            'GAZEBO_RESOURCE_PATH': media}
+
+    prefix = PythonExpression(['"gdb -ex run --args" if "true" == "',
+                               LaunchConfiguration('gdb'),
+                               '" else "valgrind" if "true" == "',
+                               LaunchConfiguration('valgrind'),
+                               '" else ""'])
 
     return LaunchDescription([
         DeclareLaunchArgument('world', default_value='',
@@ -91,41 +124,31 @@ def generate_launch_description():
         # DeclareLaunchArgument('force_system', default_value='true',
         #                       description='Set "false" not to load \
         #                                   "libgazebo_ros_force_system.so"'),
+        DeclareLaunchArgument('server_required', default_value='false',
+                              description='Set "true" to shut down launch script when server is terminated'),
 
+        # Execute node with on_exit=Shutdown if server_required is specified.
+        # See ros-simulation/gazebo_ros_pkgs#1086. Simplification of logic
+        # would be possible pending ros2/launch#290.
         ExecuteProcess(
-            cmd=['gzserver',
-                 # Pass through arguments to gzserver
-                 LaunchConfiguration('world'), ' ',
-                 _boolean_command('version'), ' ',
-                 _boolean_command('verbose'), ' ',
-                 _boolean_command('help'), ' ',
-                 _boolean_command('pause'), ' ',
-                 _arg_command('physics'), ' ', LaunchConfiguration('physics'), ' ',
-                 _arg_command('play'), ' ', LaunchConfiguration('play'), ' ',
-                 _boolean_command('record'), ' ',
-                 _arg_command('record_encoding'), ' ', LaunchConfiguration('record_encoding'), ' ',
-                 _arg_command('record_path'), ' ', LaunchConfiguration('record_path'), ' ',
-                 _arg_command('record_period'), ' ', LaunchConfiguration('record_period'), ' ',
-                 _arg_command('record_filter'), ' ', LaunchConfiguration('record_filter'), ' ',
-                 _arg_command('seed'), ' ', LaunchConfiguration('seed'), ' ',
-                 _arg_command('iters'), ' ', LaunchConfiguration('iters'), ' ',
-                 _boolean_command('minimal_comms'),
-                 _plugin_command('init'), ' ',
-                 _plugin_command('factory'), ' ',
-                 # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
-                 # _plugin_command('force_system'), ' ',
-                 _arg_command('profile'), ' ', LaunchConfiguration('profile'),
-                 LaunchConfiguration('extra_gazebo_args'),
-                 ],
+            cmd=cmd,
             output='screen',
             additional_env=env,
             shell=True,
-            prefix=PythonExpression(['"gdb -ex run --args" if "true" == "',
-                                     LaunchConfiguration('gdb'),
-                                     '" else "valgrind" if "true" == "',
-                                     LaunchConfiguration('valgrind'),
-                                     '" else ""']),
-        )
+            prefix=prefix,
+            on_exit=Shutdown(),
+            condition=IfCondition(LaunchConfiguration('server_required')),
+        ),
+
+        # Execute node with default on_exit if the node is not required
+        ExecuteProcess(
+            cmd=cmd,
+            output='screen',
+            additional_env=env,
+            shell=True,
+            prefix=prefix,
+            condition=UnlessCondition(LaunchConfiguration('server_required')),
+        ),
     ])
 
 
