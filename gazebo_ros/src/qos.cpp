@@ -60,7 +60,7 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
     if (find_result != reliability_map.end()) {
       qos_overrides.reliability = find_result->second;
     } else {
-      std::stringstream oss;
+      std::ostringstream oss;
       oss << "invalid setting for reliability '" << reliability << "'";
       throw InvalidQoSException(oss.str());
     }
@@ -73,7 +73,7 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
     if (find_result != durability_map.end()) {
       qos_overrides.durability = find_result->second;
     } else {
-      std::stringstream oss;
+      std::ostringstream oss;
       oss << "invalid setting for durability '" << durability << "'";
       throw InvalidQoSException(oss.str());
     }
@@ -88,14 +88,14 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
       qos_overrides.history = find_result->second;
       if (RMW_QOS_POLICY_HISTORY_KEEP_LAST == find_result->second) {
         if (!history_element->HasAttribute("depth")) {
-          std::stringstream oss;
+          std::ostringstream oss;
           oss << "'" << find_result->first << "' used without providing a depth";
           throw InvalidQoSException(oss.str());
         }
         qos_overrides.depth = history_element->Get<size_t>("depth");
       }
     } else {
-      std::stringstream oss;
+      std::ostringstream oss;
       oss << "invalid setting for history '" << history << "'";
       throw InvalidQoSException(oss.str());
     }
@@ -120,7 +120,7 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
     if (find_result != liveliness_map.end()) {
       qos_overrides.liveliness = find_result->second;
     } else {
-      std::stringstream oss;
+      std::ostringstream oss;
       oss << "invalid setting for liveliness '" << liveliness << "'";
       throw InvalidQoSException(oss.str());
     }
