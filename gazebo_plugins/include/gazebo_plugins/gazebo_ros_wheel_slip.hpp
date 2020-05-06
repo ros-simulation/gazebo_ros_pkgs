@@ -27,6 +27,17 @@ class GazeboRosWheelSlipPrivate;
 /// A plugin for adjusting wheel slip parameters in gazebo.
 /// The plugin can set separate longitudinal and lateral wheel slip compliance
 /// parameters for separate wheel links.
+///  1. slip_compliance_unitless_lateral
+///      - Type: double
+///      - Description: Unitless slip compliance (slip / friction) in the
+///           lateral direction. This value is applied to all wheels declared
+///           in the WheelSlipPlugin.
+///
+///  2. slip_compliance_unitless_longitudinal
+///      - Type: double
+///      - Description: Unitless slip compliance (slip / friction) in the
+///           longitudinal direction. This value is applied to all wheels declared
+///           in the WheelSlipPlugin.
 /// See the WheelSlipPlugin documentation at the following location for more details:
 /// http://osrf-distributions.s3.amazonaws.com/gazebo/api/11.0.0/classgazebo_1_1WheelSlipPlugin.html#details
 /**
