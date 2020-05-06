@@ -110,6 +110,61 @@ TEST(TestNode, GetSdf)
   // EXPECT_STREQ("node_3", node_3->get_name());
 }
 
+TEST(TestNode, RemapAndQoSOverride)
+{
+  // Remap topic 'foo' to 'bar' and 'bar' to 'baz'
+  // and override QoS for remapped topic 'bar' and 'baz'
+  auto sdf_str =
+    "<?xml version='1.0' ?>"
+    "<sdf version='1.6'>"
+    "  <world name='default'>"
+    "    <plugin name='node_1' filename='libnode_name.so'>"
+    "      <ros>"
+    "        <remapping>foo:=bar</remapping>"
+    "        <remapping>bar:=baz</remapping>"
+    "        <qos>"
+    "          <topic name='bar'>"
+    "            <subscription>"
+    "              <history depth='1234'>keep_last</history>"
+    "            </subscription>"
+    "          </topic>"
+    "          <topic name='baz'>"
+    "            <subscription>"
+    "              <history depth='5678'>keep_last</history>"
+    "            </subscription>"
+    "          </topic>"
+    "        </qos>"
+    "      </ros>"
+    "    </plugin>"
+    "  </world>"
+    "</sdf>";
+  sdf::SDF sdf;
+  sdf.SetFromString(sdf_str);
+  auto plugin_sdf = sdf.Root()->GetElement("world")->GetElement("plugin");
+
+  // Create node from SDF
+  auto node = gazebo_ros::Node::Get(plugin_sdf);
+  ASSERT_NE(nullptr, node);
+
+  // Get the QoS for the node
+  const gazebo_ros::QoS & qos = node->get_qos();
+
+  rclcpp::QoS expected_foo_qos(1234);
+  rclcpp::QoS expected_bar_qos(5678);
+
+  // Confirm passing the original topic name returns the QoS override
+  rclcpp::QoS foo_qos = qos.get_subscription_qos("foo", rclcpp::QoS(10));
+  EXPECT_EQ(expected_foo_qos, foo_qos);
+  rclcpp::QoS bar_qos = qos.get_subscription_qos("bar", rclcpp::QoS(10));
+  EXPECT_EQ(expected_bar_qos, bar_qos);
+
+  // A topic that wasn't remapped, but happens to collide with a remap rule will
+  // inherit the same QoS. This is an odd case, and should probably be avoided in practice.
+  // E.g. 'baz' gets the same QoS as 'bar' (which was remapped to 'baz').
+  rclcpp::QoS baz_qos = qos.get_subscription_qos("baz", rclcpp::QoS(10));
+  EXPECT_EQ(expected_bar_qos, baz_qos);
+}
+
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);

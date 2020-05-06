@@ -14,7 +14,9 @@
 
 #include <gazebo_ros/qos.hpp>
 
+#include <rclcpp/expand_topic_or_service_name.hpp>
 #include <rclcpp/qos.hpp>
+#include <rcl/remap.h>
 #include <rmw/types.h>
 
 #include <chrono>
@@ -134,7 +136,14 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
   return qos_overrides;
 }
 
-QoS::QoS(sdf::ElementPtr _sdf)
+QoS::QoS(
+  sdf::ElementPtr _sdf,
+  const std::string node_name,
+  const std::string node_namespace,
+  const rclcpp::NodeOptions & options)
+: node_name_(node_name),
+  node_namespace_(node_namespace),
+  node_options_(options)
 {
   // If there's no <qos> tag, then there's nothing to do
   if (!_sdf->HasElement("qos")) {
@@ -153,17 +162,22 @@ QoS::QoS(sdf::ElementPtr _sdf)
       throw InvalidQoSException("topic element missing required 'name' attribute");
     }
     auto topic_name = topic_sdf->Get<std::string>("name");
+    std::string fqn_topic_name = rclcpp::expand_topic_or_service_name(
+      topic_name,
+      this->node_name_,
+      this->node_namespace_,
+      false);  // false = not a service
 
     // For each topic, get the publisher QoS overrides
     if (topic_sdf->HasElement("publisher")) {
       publisher_qos_overrides_map_.emplace(
-        topic_name, QoS::get_qos_overrides_from_sdf(topic_sdf->GetElement("publisher")));
+        fqn_topic_name, QoS::get_qos_overrides_from_sdf(topic_sdf->GetElement("publisher")));
     }
 
     // For each topic, get the subscription QoS overrides
     if (topic_sdf->HasElement("subscription")) {
       subscription_qos_overrides_map_.emplace(
-        topic_name, QoS::get_qos_overrides_from_sdf(topic_sdf->GetElement("subscription")));
+        fqn_topic_name, QoS::get_qos_overrides_from_sdf(topic_sdf->GetElement("subscription")));
     }
 
     topic_sdf = topic_sdf->GetNextElement("topic");
@@ -209,7 +223,8 @@ rclcpp::QoS QoS::apply_overrides(const QoS::QoSOverrides & overrides, const rclc
 
 rclcpp::QoS QoS::get_publisher_qos(const std::string topic, rclcpp::QoS default_qos) const
 {
-  auto topic_overrides = publisher_qos_overrides_map_.find(topic);
+  const auto remapped_topic = this->get_remapped_topic_name(topic);
+  auto topic_overrides = publisher_qos_overrides_map_.find(remapped_topic);
   // If there is no profile override, return the default
   if (publisher_qos_overrides_map_.end() == topic_overrides) {
     return default_qos;
@@ -219,12 +234,57 @@ rclcpp::QoS QoS::get_publisher_qos(const std::string topic, rclcpp::QoS default_
 
 rclcpp::QoS QoS::get_subscription_qos(const std::string topic, rclcpp::QoS default_qos) const
 {
-  auto topic_overrides = subscription_qos_overrides_map_.find(topic);
+  const auto remapped_topic = this->get_remapped_topic_name(topic);
+  auto topic_overrides = subscription_qos_overrides_map_.find(remapped_topic);
   // If there is no profile override, return the default
   if (subscription_qos_overrides_map_.end() == topic_overrides) {
     return default_qos;
   }
   return QoS::apply_overrides(topic_overrides->second, default_qos);
+}
+
+std::string QoS::get_remapped_topic_name(const std::string topic) const
+{
+  // Get the node options
+  const auto * node_options = this->node_options_.get_rcl_node_options();
+  if (nullptr == node_options) {
+    throw std::runtime_error("invalid node options in get_remapped_topic_name()");
+  }
+
+  const rcl_arguments_t * global_args = nullptr;
+  if (node_options->use_global_arguments) {
+    const auto context = this->node_options_.context()->get_rcl_context();
+    if (nullptr != context) {
+      global_args = &(context->global_arguments);
+    }
+  }
+
+  const std::string fqn_topic_name = rclcpp::expand_topic_or_service_name(
+    topic,
+    this->node_name_,
+    this->node_namespace_,
+    false);  // false = not a service
+
+  std::string result = fqn_topic_name;
+
+  char * remapped_topic_name = nullptr;
+  rcl_ret_t ret = rcl_remap_topic_name(
+    &(node_options->arguments),
+    global_args,
+    fqn_topic_name.c_str(),
+    this->node_name_.c_str(),
+    this->node_namespace_.c_str(),
+    node_options->allocator,
+    &remapped_topic_name);
+  if (RCL_RET_OK != ret) {
+    throw std::runtime_error(
+            "failed to remap topic '" + topic + "': " + rcl_get_error_string().str);
+  }
+  if (nullptr != remapped_topic_name) {
+    result = remapped_topic_name;
+    node_options->allocator.deallocate(remapped_topic_name, node_options->allocator.state);
+  }
+  return result;
 }
 
 }  // namespace gazebo_ros

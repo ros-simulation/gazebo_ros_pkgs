@@ -17,6 +17,7 @@
 
 #include <sdf/sdf.hh>
 
+#include <rclcpp/node_options.hpp>
 #include <rclcpp/qos.hpp>
 
 #include <map>
@@ -100,11 +101,32 @@ public:
    * For any QoS setting that is not specified in the SDF, the default QoS object passed
    * to the getter methods is used.
    *
+   * The topic name should be the name expected after any remapping occurs.
+   * For example, if a <remapping> tag remaps a topic 'foo' to the name 'bar', then the <topic>
+   * tag's name attribute should have the value 'bar' to override any QoS settings:
+   *
+   * \code{.xml}
+   * <remapping>foo:=bar</remapping>
+   * <qos>
+   *   <topic name='bar'>
+   *   </topic>
+   * </qos>
+   * \endcode
+   *
    * \param[in] _sdf An SDF element in the style documented above
+   * \param[in] node_name The name of the node associated with these QoS settings.
+   * \param[in] node_namespace The namespace of the node associated with these QoS settings.
+   * \param[in] options Node options that were also passed to the node associated with these QoS
+   *   settings.
+   *   This contains the necessary information extracting the remappings.
    * \throws gazebo_ros::InvalidQoSException if there is an invalid QoS value or a topic element
    *   is missing a "name" attribute.
    */
-  explicit QoS(sdf::ElementPtr _sdf);
+  QoS(
+    sdf::ElementPtr _sdf,
+    const std::string node_name,
+    const std::string node_namespace,
+    const rclcpp::NodeOptions & options);
 
   /// Get the QoS for a publisher
   /*
@@ -156,10 +178,24 @@ private:
   static rclcpp::QoS apply_overrides(
     const QoSOverrides & overrides, const rclcpp::QoS default_qos);
 
+  /// Get the remapped name for a topic
+  std::string get_remapped_topic_name(const std::string topic) const;
+
   /// Map topic names to publisher QoS overrides
   std::map<std::string, QoSOverrides> publisher_qos_overrides_map_;
   /// Map topic names to subscription QoS overrides
   std::map<std::string, QoSOverrides> subscription_qos_overrides_map_;
+
+  // The following members are needed for getting topic remappings
+
+  /// The name of the node associated with the QoS settings
+  std::string node_name_;
+
+  /// The namespace of the node associated with the QoS settings
+  std::string node_namespace_;
+
+  /// The options of the node associated with the QoS settings
+  rclcpp::NodeOptions node_options_;
 };
 
 }  // namespace gazebo_ros

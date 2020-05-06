@@ -31,7 +31,7 @@ TEST(TestQoS, ValidConstruction)
       "</sdf>";
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
-    gazebo_ros::QoS qos(sdf.Root());
+    gazebo_ros::QoS qos(sdf.Root(), "test_node", "/", rclcpp::NodeOptions());
 
     // We should get the default QoS for an arbitrary topic
     rclcpp::QoS some_qos = qos.get_publisher_qos("some_random_test_topic", rclcpp::QoS(10));
@@ -50,7 +50,11 @@ TEST(TestQoS, ValidConstruction)
       "</sdf>";
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
-    gazebo_ros::QoS qos(sdf.Root()->GetElement("world")->GetElement("plugin"));
+    gazebo_ros::QoS qos(
+      sdf.Root()->GetElement("world")->GetElement("plugin"),
+      "test_node",
+      "/",
+      rclcpp::NodeOptions());
     // We should get the default QoS for an arbitrary topic
     rclcpp::QoS some_qos = qos.get_publisher_qos("foo/bar/baz", rclcpp::QoS(10));
     EXPECT_EQ(rclcpp::QoS(10), some_qos);
@@ -79,7 +83,11 @@ TEST(TestQoS, ValidConstruction)
       "</sdf>";
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
-    gazebo_ros::QoS qos(sdf.Root()->GetElement("world")->GetElement("plugin"));
+    gazebo_ros::QoS qos(
+      sdf.Root()->GetElement("world")->GetElement("plugin"),
+      "test_node",
+      "/",
+      rclcpp::NodeOptions());
 
     rclcpp::QoS sub_qos = qos.get_subscription_qos("foo");
     EXPECT_EQ(expected_sub_qos, sub_qos);
@@ -138,7 +146,11 @@ TEST(TestQoS, ValidConstruction)
       "</sdf>";
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
-    gazebo_ros::QoS qos(sdf.Root()->GetElement("world")->GetElement("plugin"));
+    gazebo_ros::QoS qos(
+      sdf.Root()->GetElement("world")->GetElement("plugin"),
+      "test_node",
+      "/",
+      rclcpp::NodeOptions());
 
     rclcpp::QoS pub_qos = qos.get_publisher_qos("foo");
     EXPECT_EQ(expected_pub_qos, pub_qos);
@@ -178,7 +190,11 @@ TEST(TestQoS, ValidConstruction)
       "</sdf>";
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
-    gazebo_ros::QoS qos(sdf.Root()->GetElement("world")->GetElement("plugin"));
+    gazebo_ros::QoS qos(
+      sdf.Root()->GetElement("world")->GetElement("plugin"),
+      "test_node",
+      "/",
+      rclcpp::NodeOptions());
 
     rclcpp::QoS sub_qos = qos.get_subscription_qos("foo");
     EXPECT_EQ(expected_sub_qos, sub_qos);
@@ -206,7 +222,11 @@ TEST(TestQoS, InvalidConstruction)
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
     EXPECT_THROW(
-      gazebo_ros::QoS qos(sdf.Root()->GetElement("world")->GetElement("plugin")),
+      gazebo_ros::QoS qos(
+        sdf.Root()->GetElement("world")->GetElement("plugin"),
+        "test_node",
+        "/",
+        rclcpp::NodeOptions()),
       gazebo_ros::InvalidQoSException);
   }
   // Invalid <reliability> value
@@ -229,7 +249,11 @@ TEST(TestQoS, InvalidConstruction)
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
     EXPECT_THROW(
-      gazebo_ros::QoS qos(sdf.Root()->GetElement("world")->GetElement("plugin")),
+      gazebo_ros::QoS qos(
+        sdf.Root()->GetElement("world")->GetElement("plugin"),
+        "test_node",
+        "/",
+        rclcpp::NodeOptions()),
       gazebo_ros::InvalidQoSException);
   }
   // Missing depth attribute
@@ -252,7 +276,11 @@ TEST(TestQoS, InvalidConstruction)
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
     EXPECT_THROW(
-      gazebo_ros::QoS qos(sdf.Root()->GetElement("world")->GetElement("plugin")),
+      gazebo_ros::QoS qos(
+        sdf.Root()->GetElement("world")->GetElement("plugin"),
+        "test_node",
+        "/",
+        rclcpp::NodeOptions()),
       gazebo_ros::InvalidQoSException);
   }
 }
