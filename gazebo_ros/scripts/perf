@@ -17,5 +17,5 @@ then
     final="$final -s `catkin_find --first-only libgazebo_ros_api_plugin.$EXT`"
 fi
 
-setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
+find_gazebo
 . $setup_path/setup.sh && /usr/bin/valgrind --tool=callgrind gzserver $final
