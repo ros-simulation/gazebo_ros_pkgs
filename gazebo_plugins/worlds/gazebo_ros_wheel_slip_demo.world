@@ -1,5 +1,18 @@
 <?xml version="1.0" ?>
+<!--
+  Gazebo ROS wheel slip plugin demo
 
+  Try for example:
+
+  To change slip compliance of a group of wheels:
+
+    ros2 param set /trisphere_cycle_slip0/wheel_slip_rear slip_compliance_unitless_longitudinal 1.0
+    ros2 param set /trisphere_cycle_slip1/wheel_slip_rear slip_compliance_unitless_longitudinal 0.0
+
+  To get the current slip compliance of a group of wheels:
+
+    ros2 param get /trisphere_cycle_slip1/wheel_slip_rear slip_compliance_unitless_longitudinal
+-->
 <sdf version="1.6">
   <world name="default">
     <gravity>-2 0 -9.8</gravity>
