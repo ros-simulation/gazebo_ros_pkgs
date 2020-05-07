@@ -23,11 +23,8 @@
 
   <build_depend>cmake_modules</build_depend>
   <build_depend>gazebo_dev</build_depend>
-  <!--
-    Need to use gazebo_dev since run script needs pkg-config
-    See: https://github.com/ros-simulation/gazebo_ros_pkgs/issues/323 for more info
-  -->
-  <exec_depend>gazebo_dev</exec_depend>
+
+  <exec_depend>gazebo</exec_depend>
   <depend>gazebo_msgs</depend>
   <depend>roslib</depend>
   <depend>roscpp</depend>
