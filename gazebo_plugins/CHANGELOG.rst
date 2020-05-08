@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.20 (2020-05-08)
+-------------------
 * Fix destructor of gazebo_ros_diff_drive.cpp (`#1019 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1019>`_)
 * Publish camera info in gazebo_ros_depth_camera plugin (`#798 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/798>`_)
 * Contributors: Ongun Kanat, RemiRigal

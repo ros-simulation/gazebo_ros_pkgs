@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.20 (2020-05-08)
+-------------------
 * Add required parameter to empty_world nodes (`#1074 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1074>`_)
 * Reorder fields initialization to match initialization order in .h file (`#987 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/987>`_)
   This change fixes -Wreorder warnings. More on -Wreorder:
