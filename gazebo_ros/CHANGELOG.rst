@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.4 (2020-05-08)
+------------------
 * wait for service with variable timeout (`#1090 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1090>`_)
 * Contributors: Karsten Knese, Louise Poubel
 
