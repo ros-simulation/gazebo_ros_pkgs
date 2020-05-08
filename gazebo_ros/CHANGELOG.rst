@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.5 (2020-05-08)
+------------------
 * fix pathsep for windows (`#1028 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1028>`_)
 * Contributors: Jonathan Noyola
 
