@@ -2,6 +2,12 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix destructor of gazebo_ros_diff_drive.cpp (`#1019 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1019>`_)
+* Publish camera info in gazebo_ros_depth_camera plugin (`#798 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/798>`_)
+* Contributors: Ongun Kanat, RemiRigal
+
 2.5.19 (2019-06-04)
 -------------------
 * Accept 0 and 1 as booleans to support URDF to SDF boolean conversion; establish function parity with melodic (`#928 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/928>`_)
