@@ -67,6 +67,9 @@ public:
   /// Frame transform name, should match name of reference link, or be world.
   std::string frame_name_{"world"};
 
+  /// TF Frame name of child in case it should be different from child link name.
+  std::string child_frame_name_{"odom"};
+
   /// Constant xyz and rpy offsets
   ignition::math::Pose3d offset_;
 
@@ -282,7 +285,7 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
 
   transform_msg.header.frame_id = frame_name_;
   transform_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
-  transform_msg.child_frame_id = link_->GetName();
+  transform_msg.child_frame_id = child_frame_name_;
   transform_msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose.Pos());
   transform_msg.transform.rotation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
 
