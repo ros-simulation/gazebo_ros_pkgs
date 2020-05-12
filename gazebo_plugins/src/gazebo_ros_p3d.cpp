@@ -31,6 +31,7 @@
 #include "tf2_msgs/msg/tf_message.hpp"
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
+#include "tf2_ros/qos.hpp"
 
 #include <string>
 #include <memory>
@@ -123,8 +124,9 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 
   impl_->pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
     impl_->topic_name_, rclcpp::SensorDataQoS());
-  // TODO: add actual QoS
-  impl_->tf_pub_ = impl_->ros_node_->create_publisher<tf2_msgs::msg::TFMessage>("/tf", 100);
+
+  impl_->tf_pub_ = impl_->ros_node_->create_publisher<tf2_msgs::msg::TFMessage>("/tf",
+    tf2_ros::DynamicBroadcasterQoS());
 
   impl_->topic_name_ = impl_->pub_->get_topic_name();
   RCLCPP_DEBUG(
