@@ -18,6 +18,7 @@
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_plugins/gazebo_ros_p3d.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/rclcpp.hpp>
 
@@ -27,6 +28,7 @@
 #endif
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include "tf2_msgs/msg/tf_message.hpp"
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 
@@ -54,6 +56,9 @@ public:
 
   /// Odometry publisher
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_{nullptr};
+
+  /// TF frame publisher
+  rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr tf_pub_{nullptr};
 
   /// Odom topic name
   std::string topic_name_{"odom"};
@@ -118,6 +123,9 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 
   impl_->pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
     impl_->topic_name_, rclcpp::SensorDataQoS());
+  // TODO: add actual QoS
+  impl_->tf_pub_ = impl_->ros_node_->create_publisher<tf2_msgs::msg::TFMessage>("/tf", 100);
+
   impl_->topic_name_ = impl_->pub_->get_topic_name();
   RCLCPP_DEBUG(
     impl_->ros_node_->get_logger(), "Publishing on topic [%s]", impl_->topic_name_.c_str());
@@ -265,8 +273,23 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
   pose_msg.twist.covariance[28] = gn2;
   pose_msg.twist.covariance[35] = gn2;
 
+
+  // Create TF Transform
+  geometry_msgs::msg::TransformStamped transform_msg;
+
+  transform_msg.header.frame_id = frame_name_;
+  transform_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
+  transform_msg.child_frame_id = link_->GetName();
+  transform_msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose.Pos());
+  transform_msg.transform.rotation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
+
+  tf2_msgs::msg::TFMessage tf_msg;
+
+  tf_msg.transforms.push_back(transform_msg);
+
   // Publish to ROS
   pub_->publish(pose_msg);
+  tf_pub_->publish(tf_msg);
 
   // Save last time stamp
   last_time_ = current_time;
