@@ -201,7 +201,8 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
   }
 
   // If we don't have any subscribers, don't bother composing and sending the message
-  if (ros_node_->count_subscribers(topic_name_) == 0) {
+  if (ros_node_->count_subscribers(topic_name_) == 0
+      && ros_node_->count_subscribers("/tf") == 0) {
     return;
   }
 
