@@ -119,6 +119,7 @@ protected:
   std::shared_ptr<controller_manager::ControllerManager> controller_manager_;
   std::shared_ptr<controller_interface::ControllerInterface> controller_;
   std::shared_ptr<controller_interface::ControllerInterface> controller2_;
+  std::shared_ptr<controller_interface::ControllerInterface> controller3_;
 
   // Timing
   rclcpp::Duration control_period_ = rclcpp::Duration(0);

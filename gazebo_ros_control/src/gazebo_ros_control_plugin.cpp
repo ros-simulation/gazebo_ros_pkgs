@@ -334,8 +334,6 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
       //load_params_from_yaml_node(lc_node, root_node, prefix);
     };
 
-    //controller_manager_->load_controller("joint_state_controller_spawner", "joint_state_controller/JointStateController");
-
     controller_ = controller_manager_->load_controller("coffeebot_arm_effort_controller",
       "joint_trajectory_controller/JointTrajectoryController");
     
@@ -343,6 +341,8 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
     controller2_ = controller_manager_->load_controller("coffeebot_gripper_effort_controller",
       "joint_trajectory_controller/JointTrajectoryController");
 
+    controller3_ = controller_manager_->load_controller("coffeebot_joint_state_controller",
+      "joint_state_controller/JointStateController");
     //feed coffeebot_controller/coffeebot_controllers.yaml into the controllers
     std::string param_file = 
       ament_index_cpp::get_package_share_directory("coffeebot_controller") +
