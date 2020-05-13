@@ -245,7 +245,7 @@ rclcpp::QoS QoS::get_subscription_qos(const std::string topic, rclcpp::QoS defau
   return QoS::apply_overrides(topic_overrides->second, default_qos);
 }
 
-// TODO(jacobperron): Use a rclcpp API for getting remapped topic names instead when one exists 
+// TODO(jacobperron): Use a rclcpp API for getting remapped topic names instead when one exists
 std::string QoS::get_remapped_topic_name(const std::string topic) const
 {
   // Get the node options
@@ -287,7 +287,15 @@ std::string QoS::get_remapped_topic_name(const std::string topic) const
     result = remapped_topic_name;
     node_options->allocator.deallocate(remapped_topic_name, node_options->allocator.state);
   }
-  return result;
+
+  // Validate remapped topic name
+  // There does not exist an rclcpp API for only validating a topic name,
+  // but expand_topic_or_service_name() will do the validation and throw if there's an issue.
+  return rclcpp::expand_topic_or_service_name(
+    result,
+    this->node_name_,
+    this->node_namespace_,
+    false);  // false = not a service
 }
 
 }  // namespace gazebo_ros
