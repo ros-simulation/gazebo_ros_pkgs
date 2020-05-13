@@ -113,7 +113,7 @@ TEST(TestNode, GetSdf)
 TEST(TestNode, RemapAndQoSOverride)
 {
   // Remap topic 'foo' to 'bar', 'bar' to 'baz', and '~/zoo' to 'foo/bar'
-  // and override QoS for remapped topic 'bar', 'baz', and 'zar'
+  // and override QoS for remapped topic 'bar', 'baz', and 'foo/bar'
   // The node namespace should not interfere with remaps or QoS overrides
   auto sdf_str =
     "<?xml version='1.0' ?>"
