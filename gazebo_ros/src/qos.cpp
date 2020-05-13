@@ -245,6 +245,7 @@ rclcpp::QoS QoS::get_subscription_qos(const std::string topic, rclcpp::QoS defau
   return QoS::apply_overrides(topic_overrides->second, default_qos);
 }
 
+// TODO(jacobperron): Use a rclcpp API for getting remapped topic names instead when one exists 
 std::string QoS::get_remapped_topic_name(const std::string topic) const
 {
   // Get the node options
