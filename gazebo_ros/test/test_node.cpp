@@ -112,16 +112,19 @@ TEST(TestNode, GetSdf)
 
 TEST(TestNode, RemapAndQoSOverride)
 {
-  // Remap topic 'foo' to 'bar' and 'bar' to 'baz'
-  // and override QoS for remapped topic 'bar' and 'baz'
+  // Remap topic 'foo' to 'bar', 'bar' to 'baz', and '~/zoo' to 'foo/bar'
+  // and override QoS for remapped topic 'bar', 'baz', and 'zar'
+  // The node namespace should not interfere with remaps or QoS overrides
   auto sdf_str =
     "<?xml version='1.0' ?>"
     "<sdf version='1.6'>"
     "  <world name='default'>"
     "    <plugin name='node_1' filename='libnode_name.so'>"
     "      <ros>"
+    "        <namespace>/my_test_namespace</namespace>"
     "        <remapping>foo:=bar</remapping>"
     "        <remapping>bar:=baz</remapping>"
+    "        <remapping>~/zoo:=foo/bar</remapping>"
     "        <qos>"
     "          <topic name='bar'>"
     "            <subscription>"
@@ -131,6 +134,11 @@ TEST(TestNode, RemapAndQoSOverride)
     "          <topic name='baz'>"
     "            <subscription>"
     "              <history depth='5678'>keep_last</history>"
+    "            </subscription>"
+    "          </topic>"
+    "          <topic name='foo/bar'>"
+    "            <subscription>"
+    "              <history depth='91011'>keep_last</history>"
     "            </subscription>"
     "          </topic>"
     "        </qos>"
@@ -151,12 +159,19 @@ TEST(TestNode, RemapAndQoSOverride)
 
   rclcpp::QoS expected_foo_qos(1234);
   rclcpp::QoS expected_bar_qos(5678);
+  rclcpp::QoS expected_zoo_qos(91011);
 
   // Confirm passing the original topic name returns the QoS override
   rclcpp::QoS foo_qos = qos.get_subscription_qos("foo", rclcpp::QoS(10));
   EXPECT_EQ(expected_foo_qos, foo_qos);
   rclcpp::QoS bar_qos = qos.get_subscription_qos("bar", rclcpp::QoS(10));
   EXPECT_EQ(expected_bar_qos, bar_qos);
+  rclcpp::QoS zoo_qos = qos.get_subscription_qos("~/zoo", rclcpp::QoS(10));
+  EXPECT_EQ(expected_zoo_qos, zoo_qos);
+  // Also try fully-expanded private name
+  rclcpp::QoS fqn_zoo_qos = qos.get_subscription_qos(
+    "/my_test_namespace/node_1/zoo", rclcpp::QoS(10));
+  EXPECT_EQ(expected_zoo_qos, fqn_zoo_qos);
 
   // A topic that wasn't remapped, but happens to collide with a remap rule will
   // inherit the same QoS. This is an odd case, and should probably be avoided in practice.
