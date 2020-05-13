@@ -16,10 +16,12 @@
 
 #include <rclcpp/expand_topic_or_service_name.hpp>
 #include <rclcpp/qos.hpp>
+#include <rcl/rcl.h>
 #include <rcl/remap.h>
 #include <rmw/types.h>
 
 #include <chrono>
+#include <memory>
 #include <unordered_map>
 #include <sstream>
 #include <string>
@@ -223,7 +225,7 @@ rclcpp::QoS QoS::apply_overrides(const QoS::QoSOverrides & overrides, const rclc
 
 rclcpp::QoS QoS::get_publisher_qos(const std::string topic, rclcpp::QoS default_qos) const
 {
-  const auto remapped_topic = this->get_remapped_topic_name(topic);
+  const std::string remapped_topic = this->get_remapped_topic_name(topic);
   auto topic_overrides = publisher_qos_overrides_map_.find(remapped_topic);
   // If there is no profile override, return the default
   if (publisher_qos_overrides_map_.end() == topic_overrides) {
@@ -234,7 +236,7 @@ rclcpp::QoS QoS::get_publisher_qos(const std::string topic, rclcpp::QoS default_
 
 rclcpp::QoS QoS::get_subscription_qos(const std::string topic, rclcpp::QoS default_qos) const
 {
-  const auto remapped_topic = this->get_remapped_topic_name(topic);
+  const std::string remapped_topic = this->get_remapped_topic_name(topic);
   auto topic_overrides = subscription_qos_overrides_map_.find(remapped_topic);
   // If there is no profile override, return the default
   if (subscription_qos_overrides_map_.end() == topic_overrides) {
@@ -246,14 +248,14 @@ rclcpp::QoS QoS::get_subscription_qos(const std::string topic, rclcpp::QoS defau
 std::string QoS::get_remapped_topic_name(const std::string topic) const
 {
   // Get the node options
-  const auto * node_options = this->node_options_.get_rcl_node_options();
+  const rcl_node_options_t * node_options = this->node_options_.get_rcl_node_options();
   if (nullptr == node_options) {
     throw std::runtime_error("invalid node options in get_remapped_topic_name()");
   }
 
   const rcl_arguments_t * global_args = nullptr;
   if (node_options->use_global_arguments) {
-    const auto context = this->node_options_.context()->get_rcl_context();
+    const std::shared_ptr<rcl_context_t> context = this->node_options_.context()->get_rcl_context();
     if (nullptr != context) {
       global_args = &(context->global_arguments);
     }
