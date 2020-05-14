@@ -107,16 +107,17 @@ class SimIfaceControl():
         time.sleep(0.001)
 
 def print_usage(exit_code = 0):
-    print('Commands:')
-    print('-update_rate <Hz> - update rate, default to 10 Hz')
-    print('-timeout <seconds> - test timeout in seconds. default to 1 seconds')
-    print('-x <x in meters>')
-    print('-y <y in meters>')
-    print('-z <z in meters>')
-    print('-R <roll in radians>')
-    print('-P <pitch in radians>')
-    print('-Y <yaw in radians>')
-    print('-t set wrench topic name')
+    print('''Commands:
+    -update_rate <Hz> - update rate, default to 10 Hz
+    -timeout <seconds> - test timeout in seconds. default to 1 seconds
+    -x <x in meters>
+    -y <y in meters>
+    -z <z in meters>
+    -R <roll in radians>
+    -P <pitch in radians>
+    -Y <yaw in radians>
+    -t set wrench topic name
+''')
 
 
 if __name__ == '__main__':

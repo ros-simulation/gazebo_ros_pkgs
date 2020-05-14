@@ -15,9 +15,10 @@ from gazebo_plugins.msg import GazeboModel
 from geometry_msgs.msg import Pose, Point, Quaternion
 
 def usage():
-    print('Commands:')
-    print('load [param|file] [urdf|gazebo] <param/file name> <model name> <initial pose: x y z r p y> <namespace> - Load model')
-    print('delete <model name>                                                        - Deletes the model named <model name>')
+    print('''Commands:
+    load [param|file] [urdf|gazebo] <param/file name> <model name> <initial pose: x y z r p y> <namespace> - Load model
+    delete <model name>                                                        - Deletes the model named <model name>
+    ''')
     sys.exit(1)
 
 if __name__ == "__main__":
