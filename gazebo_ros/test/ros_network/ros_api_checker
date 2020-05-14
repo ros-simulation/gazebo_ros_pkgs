@@ -22,8 +22,7 @@ class Tester(unittest.TestCase):
         po = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         out, err = po.communicate()
         self.assertEqual(po.returncode, 0, 'rostopic failed (%s). stdout: %s stderr: %s'%(cmd, out, err))
-        topics_actual = set(out.split(b'\n')) - set([b''])
-        topics_actual = set([x for x in topics_actual])
+        topics_actual = set(out.split('\n')) - set([''])
         topics_expected = set([x['topic'] for x in topics])
         topics_extra = topics_actual - topics_expected
         self.assertEqual(topics_extra, set([]))
@@ -33,8 +32,7 @@ class Tester(unittest.TestCase):
         po = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         out, err = po.communicate()
         self.assertEqual(po.returncode, 0, 'rosservice failed (%s). stdout: %s stderr: %s'%(cmd, out, err))
-        services_actual = set(out.split(b'\n')) - set([b''])
-        services_actual = set([x for x in services_actual])
+        services_actual = set(out.split('\n')) - set([''])
         services_expected = set([x['service'] for x in services])
         services_extra = services_actual - services_expected
         self.assertEqual(services_extra, set([]))
@@ -55,7 +53,7 @@ class Tester(unittest.TestCase):
         # Should probably do this through a library API instead...
 
         # Step 0: make sure we have enough output
-        outsplit = out.split(b'\n')
+        outsplit = out.split('\n')
         self.assertTrue(len(outsplit) >= 5)
 
         type_re = re.compile('\w*Type: (.*)')
@@ -103,7 +101,7 @@ class Tester(unittest.TestCase):
         # Should probably do this through a library API instead...
 
         # Step 0: make sure we have enough output
-        outsplit = out.split(b'\n')
+        outsplit = out.split('\n')
         self.assertTrue(len(outsplit) >= 4)
 
         type_re = re.compile('Type: (.*)')
