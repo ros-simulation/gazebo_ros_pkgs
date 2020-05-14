@@ -190,7 +190,7 @@ if __name__ == '__main__':
     # amount of time when we're downloading models.
     while rospy.Time.now().to_sec() == 0.0:
         print('Waiting for Gazebo to start...')
-        time.sleep(0.1)
+        time.sleep(1.0)
     # Take an extra nap, to allow plugins to be loaded
     time.sleep(5.0)
     print('OK, starting test.')
