@@ -19,6 +19,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_export_depend>libgazebo9-dev</build_export_depend>
-  <exec_depend>gazebo9</exec_depend>
+  <build_export_depend>libgazebo11-dev</build_export_depend>
+  <exec_depend>gazebo11</exec_depend>
 </package>
