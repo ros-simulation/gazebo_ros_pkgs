@@ -403,6 +403,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(set_model_state-test ${catkin_LIBRARIES})
 
   add_rostest(test/range/range_plugin.test)
+  add_rostest(test/block_laser_clipping.test)
 
   if (ENABLE_DISPLAY_TESTS)
     add_rostest_gtest(depth_camera-test
