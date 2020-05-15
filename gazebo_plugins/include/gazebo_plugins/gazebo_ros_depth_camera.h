@@ -181,6 +181,7 @@ namespace gazebo
     private: int depth_info_connect_count_;
     private: void DepthInfoConnect();
     private: void DepthInfoDisconnect();
+    private: bool use_depth_image_16UC1_format_;
 
     // overload with our own
     private: common::Time depth_sensor_update_time_;
