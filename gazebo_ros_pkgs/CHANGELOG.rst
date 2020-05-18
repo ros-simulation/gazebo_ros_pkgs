@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Bump CMake version to avoid CMP0048 warning (`#1066 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1066>`_)
+* Contributors: Alejandro Hernández Cordero
+
 2.8.5 (2019-06-04)
 ------------------
 * Remove extra angle bracket (`#895 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/895>`_)

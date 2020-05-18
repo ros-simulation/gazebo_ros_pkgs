@@ -2,6 +2,26 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [Noetic] changes to make it work with Python3 (`#1069 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1069>`_)
+  * Noetic - changes to make it work with Python3
+* add node required to noetic (`#1082 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1082>`_)
+* add additional light options to 'set_light_properties' service (`#874 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/874>`_)
+  The optional 'Light' properties 'cast_shadows', 'specular', 'direction',
+  and 'pose' are not optional any more. These properties are now set via the
+  corresponding fields in the ROS message. By default, this will be 0.
+  https://github.com/ros-simulation/gazebo_ros_pkgs/pull/874
+* spawn_model: Fix urlparse imports for Python 3
+* spawn_model: Ensure that "model_xml" is a string, required for Python 3
+* catkin_find gazebo plugin from bin folder. (`#993 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/993>`_)
+* [Windows][melodic-devel] more Windows build break fix (`#975 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/975>`_)
+  * Fix CMake install error for Windows build.
+  * conditionally include <sys/time.h>
+* provide Windows implemenation for setenv. (`#879 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/879>`_)
+* implement basic gazebo scripts to support launch file on Windows build. (`#880 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/880>`_)
+* Contributors: Alejandro Hernández Cordero, Christian Rauch, Kartik Mohta, Mabel Zhang, Sean Yen
+
 2.8.5 (2019-06-04)
 ------------------
 * Add output arg to launch files, plus some small fixes (melodic) (`#907 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/907>`_)

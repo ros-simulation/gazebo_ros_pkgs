@@ -2,6 +2,12 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Gazebo 11 for Noetic (`#1094 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1094>`_)
+* Bump CMake version to avoid CMP0048 warning (`#1066 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1066>`_)
+* Contributors: Alejandro Hernández Cordero, chapulina
+
 2.8.5 (2019-06-04)
 ------------------
 

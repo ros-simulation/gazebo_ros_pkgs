@@ -2,6 +2,16 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Bump CMake version to avoid CMP0048 warning (`#1066 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1066>`_)
+* add additional light options to 'set_light_properties' service (`#874 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/874>`_)
+  The optional 'Light' properties 'cast_shadows', 'specular', 'direction',
+  and 'pose' are not optional any more. These properties are now set via the
+  corresponding fields in the ROS message. By default, this will be 0.
+  https://github.com/ros-simulation/gazebo_ros_pkgs/pull/874
+* Contributors: Alejandro Hernández Cordero, Christian Rauch
+
 2.8.5 (2019-06-04)
 ------------------
 
