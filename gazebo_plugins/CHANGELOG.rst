@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2020-05-19)
+------------------
 * gazebo_ros_wheel_slip plugin (Noetic) (`#1081 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1081>`_)
   Uses dynamic_reconfigure to set wheel slip parameters.
   Requires gazebo 9.5.

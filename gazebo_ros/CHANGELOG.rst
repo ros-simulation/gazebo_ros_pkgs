@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2020-05-19)
+------------------
 * [Noetic] changes to make it work with Python3 (`#1069 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1069>`_)
   * Noetic - changes to make it work with Python3
 * add node required to noetic (`#1082 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1082>`_)
