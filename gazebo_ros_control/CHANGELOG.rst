@@ -2,6 +2,9 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.9.0 (2020-05-19)
 ------------------
 * restrict Windows header namespace. (`#1023 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1023>`_)

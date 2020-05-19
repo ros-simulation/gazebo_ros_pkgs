@@ -2,6 +2,9 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.9.0 (2020-05-19)
 ------------------
 * Bump CMake version to avoid CMP0048 warning (`#1066 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1066>`_)
