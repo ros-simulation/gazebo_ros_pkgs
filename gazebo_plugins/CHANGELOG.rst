@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.1 (2020-05-20)
+------------------
 * Noetic patch for Opencv libraries (`#1106 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1106>`_)
   * Need to include calib3d for undistort method
   * Add opencv cmake support where needed
