@@ -3,7 +3,7 @@ project(gazebo_plugins)
 
 option(ENABLE_DISPLAY_TESTS "Enable the building of tests that requires a display" OFF)
 
-find_package(catkin REQUIRED COMPONENTS 
+find_package(catkin REQUIRED COMPONENTS
   gazebo_dev
   message_generation
   gazebo_msgs
@@ -63,6 +63,11 @@ else()
 endif()
 
 find_package(Boost REQUIRED COMPONENTS thread)
+if (CATKIN_ENABLE_TESTING)
+  find_package(OpenCV COMPONENTS core imgproc calib3d highgui REQUIRED)
+else()
+  find_package(OpenCV COMPONENTS core highgui REQUIRED)
+endif()
 
 execute_process(COMMAND
   pkg-config --variable=plugindir OGRE
@@ -86,6 +91,7 @@ include_directories(include
   ${OGRE_INCLUDE_DIRS}
   ${OGRE-Terrain_INCLUDE_DIRS}
   ${OGRE-Paging_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 link_directories(
@@ -105,23 +111,23 @@ endif()
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES 
-  vision_reconfigure 
-  gazebo_ros_utils 
-  gazebo_ros_camera_utils 
-  gazebo_ros_camera 
+  LIBRARIES
+  vision_reconfigure
+  gazebo_ros_utils
+  gazebo_ros_camera_utils
+  gazebo_ros_camera
   gazebo_ros_triggered_camera
-  gazebo_ros_multicamera 
+  gazebo_ros_multicamera
   gazebo_ros_triggered_multicamera
-  gazebo_ros_depth_camera 
-  gazebo_ros_openni_kinect 
-  gazebo_ros_gpu_laser 
-  gazebo_ros_laser 
-  gazebo_ros_block_laser 
-  gazebo_ros_p3d 
-  gazebo_ros_imu 
+  gazebo_ros_depth_camera
+  gazebo_ros_openni_kinect
+  gazebo_ros_gpu_laser
+  gazebo_ros_laser
+  gazebo_ros_block_laser
+  gazebo_ros_p3d
+  gazebo_ros_imu
   gazebo_ros_imu_sensor
-  gazebo_ros_f3d 
+  gazebo_ros_f3d
   gazebo_ros_ft_sensor
   gazebo_ros_bumper
   gazebo_ros_template
@@ -270,7 +276,7 @@ target_link_libraries(gazebo_ros_projector ${Boost_LIBRARIES} ${catkin_LIBRARIES
 
 add_library(gazebo_ros_prosilica src/gazebo_ros_prosilica.cpp)
 add_dependencies(gazebo_ros_prosilica ${PROJECT_NAME}_gencfg)
-target_link_libraries(gazebo_ros_prosilica gazebo_ros_camera_utils CameraPlugin ${catkin_LIBRARIES})
+target_link_libraries(gazebo_ros_prosilica gazebo_ros_camera_utils CameraPlugin ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_library(gazebo_ros_force src/gazebo_ros_force.cpp)
 target_link_libraries(gazebo_ros_force ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -295,7 +301,7 @@ add_library(gazebo_ros_skid_steer_drive src/gazebo_ros_skid_steer_drive.cpp)
 target_link_libraries(gazebo_ros_skid_steer_drive ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_video src/gazebo_ros_video.cpp)
-target_link_libraries(gazebo_ros_video ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
+target_link_libraries(gazebo_ros_video ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OGRE_LIBRARIES} ${opencv_LIBRARIES})
 
 add_library(gazebo_ros_planar_move src/gazebo_ros_planar_move.cpp)
 target_link_libraries(gazebo_ros_planar_move ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -440,11 +446,11 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest_gtest(distortion_barrel_test
                       test/camera/distortion_barrel.test
                       test/camera/distortion_barrel.cpp)
-    target_link_libraries(distortion_barrel_test ${catkin_LIBRARIES})
+    target_link_libraries(distortion_barrel_test ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
     add_rostest_gtest(distortion_pincushion_test
                       test/camera/distortion_pincushion.test
                       test/camera/distortion_pincushion.cpp)
-    target_link_libraries(distortion_pincushion_test ${catkin_LIBRARIES})
+    target_link_libraries(distortion_pincushion_test ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
     add_rostest_gtest(triggered-camera-test
                       test/camera/triggered_camera.test
                       test/camera/triggered_camera.cpp)
