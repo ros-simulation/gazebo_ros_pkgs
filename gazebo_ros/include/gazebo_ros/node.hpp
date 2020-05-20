@@ -18,6 +18,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <gazebo_ros/executor.hpp>
+#include <gazebo_ros/node_visibility_control.h>
 
 #include <atomic>
 #include <memory>
@@ -33,7 +34,7 @@ namespace gazebo_ros
  * Wrapper around an rclcpp::Node which ensures all instances share an executor.
  * \include gazebo_ros/node.hpp
  */
-class Node : public rclcpp::Node
+class GAZEBO_ROS_NODE_PUBLIC Node : public rclcpp::Node
 {
 public:
   /// Shared pointer to a #gazebo_ros::Node
