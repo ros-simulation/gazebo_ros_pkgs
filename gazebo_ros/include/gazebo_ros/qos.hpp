@@ -21,6 +21,7 @@
 #include <rclcpp/qos.hpp>
 
 #include <map>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -36,6 +37,9 @@ public:
   {}
 };
 
+// Forward declare private implementation
+struct QoSPrivate;
+
 /// Quality of service profile for ROS node entities
 /**
  * \class QoS qos.hpp <gazebo_ros/qos.hpp>
@@ -50,7 +54,7 @@ public:
 class QoS
 {
 public:
-  QoS() = default;
+  QoS();
 
   /// Constructor with SDF
   /**
@@ -146,56 +150,27 @@ public:
   rclcpp::QoS get_subscription_qos(
     const std::string topic, rclcpp::QoS default_qos = rclcpp::QoS(10)) const;
 
+  /// QoS is copyable
+  // need explicit copy constructor due to `std::unique_ptr` `impl_`
+  QoS(const QoS & other);
+
+  /// QoS is movable
+  // this is needed due to rule of five
+  QoS(QoS && other);
+
+  /// QoS is copy assignable
+  // need explicit copy assignment due to `std::unique_ptr` `impl_`
+  QoS & operator=(const QoS & other);
+
+  /// QoS is move assignable
+  // this is needed due to rule of five
+  QoS & operator=(QoS && other);
+
+  // this is needed due to rule of five
+  ~QoS();
+
 private:
-  /// Storage container for QoS overrides for a single profile.
-  struct QoSOverrides
-  {
-    rmw_qos_reliability_policy_t reliability;
-    rmw_qos_durability_policy_t durability;
-    rmw_qos_history_policy_t history;
-    rmw_qos_liveliness_policy_t liveliness;
-    size_t depth;
-    std::chrono::milliseconds deadline;
-    std::chrono::milliseconds lifespan;
-    std::chrono::milliseconds liveliness_lease;
-
-    QoSOverrides()
-    : reliability(RMW_QOS_POLICY_RELIABILITY_UNKNOWN),
-      durability(RMW_QOS_POLICY_DURABILITY_UNKNOWN),
-      history(RMW_QOS_POLICY_HISTORY_UNKNOWN),
-      liveliness(RMW_QOS_POLICY_LIVELINESS_UNKNOWN),
-      depth(0),
-      deadline(0),
-      lifespan(0),
-      liveliness_lease(0)
-    {}
-  };
-
-  /// Helper function for parsing an SDF to get QoS overrides.
-  static QoSOverrides get_qos_overrides_from_sdf(sdf::ElementPtr _sdf);
-
-  /// Helper function for applying overrides on top of a default QoS profile.
-  static rclcpp::QoS apply_overrides(
-    const QoSOverrides & overrides, const rclcpp::QoS default_qos);
-
-  /// Get the remapped name for a topic
-  std::string get_remapped_topic_name(const std::string topic) const;
-
-  /// Map topic names to publisher QoS overrides
-  std::map<std::string, QoSOverrides> publisher_qos_overrides_map_;
-  /// Map topic names to subscription QoS overrides
-  std::map<std::string, QoSOverrides> subscription_qos_overrides_map_;
-
-  // The following members are needed for getting topic remappings
-
-  /// The name of the node associated with the QoS settings
-  std::string node_name_;
-
-  /// The namespace of the node associated with the QoS settings
-  std::string node_namespace_;
-
-  /// The options of the node associated with the QoS settings
-  rclcpp::NodeOptions node_options_;
+  std::unique_ptr<QoSPrivate> impl_;
 };
 
 }  // namespace gazebo_ros

@@ -15,6 +15,7 @@
 #include <gazebo_ros/qos.hpp>
 
 #include <rclcpp/expand_topic_or_service_name.hpp>
+#include <rclcpp/node_options.hpp>
 #include <rclcpp/qos.hpp>
 #include <rcl/rcl.h>
 #include <rcl/remap.h>
@@ -25,12 +26,66 @@
 #include <unordered_map>
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace gazebo_ros
 {
 
+/// Storage container for QoS overrides for a single profile.
+struct QoSOverrides
+{
+  rmw_qos_reliability_policy_t reliability;
+  rmw_qos_durability_policy_t durability;
+  rmw_qos_history_policy_t history;
+  rmw_qos_liveliness_policy_t liveliness;
+  size_t depth;
+  std::chrono::milliseconds deadline;
+  std::chrono::milliseconds lifespan;
+  std::chrono::milliseconds liveliness_lease;
+
+  QoSOverrides()
+  : reliability(RMW_QOS_POLICY_RELIABILITY_UNKNOWN),
+    durability(RMW_QOS_POLICY_DURABILITY_UNKNOWN),
+    history(RMW_QOS_POLICY_HISTORY_UNKNOWN),
+    liveliness(RMW_QOS_POLICY_LIVELINESS_UNKNOWN),
+    depth(0),
+    deadline(0),
+    lifespan(0),
+    liveliness_lease(0)
+  {}
+};
+
+struct QoSPrivate
+{
+  /// Helper function for parsing an SDF to get QoS overrides.
+  static QoSOverrides get_qos_overrides_from_sdf(sdf::ElementPtr _sdf);
+
+  /// Helper function for applying overrides on top of a default QoS profile.
+  static rclcpp::QoS apply_overrides(
+    const QoSOverrides & overrides, const rclcpp::QoS default_qos);
+
+  /// Get the remapped name for a topic
+  std::string get_remapped_topic_name(const std::string topic) const;
+
+  /// Map topic names to publisher QoS overrides
+  std::map<std::string, QoSOverrides> publisher_qos_overrides_map_;
+  /// Map topic names to subscription QoS overrides
+  std::map<std::string, QoSOverrides> subscription_qos_overrides_map_;
+
+  // The following members are needed for getting topic remappings
+
+  /// The name of the node associated with the QoS settings
+  std::string node_name_;
+
+  /// The namespace of the node associated with the QoS settings
+  std::string node_namespace_;
+
+  /// The options of the node associated with the QoS settings
+  rclcpp::NodeOptions node_options_;
+};
+
 /// Helper function for creating an rclcpp::QoS from SDF and a default QoS as a base.
-QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
+QoSOverrides QoSPrivate::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
 {
   // Map strings to QoS policies
   static std::unordered_map<std::string, rmw_qos_reliability_policy_t> reliability_map = {
@@ -54,7 +109,7 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
     {"manual_by_topic", RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC},
   };
 
-  QoS::QoSOverrides qos_overrides;
+  QoSOverrides qos_overrides;
 
   // Parse 'reliability' QoS
   if (_sdf->HasElement("reliability")) {
@@ -138,15 +193,38 @@ QoS::QoSOverrides QoS::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
   return qos_overrides;
 }
 
+QoS::QoS() : impl_(std::make_unique<QoSPrivate>()) {}
+
+// Cannot do this in header, due to QoSPrivate being an incomplete type.
+QoS::QoS(QoS && other) = default;
+QoS & QoS::operator=(QoS && other) = default;
+QoS::~QoS() = default;
+
+QoS::QoS(const QoS & other) : impl_(nullptr)
+{
+  if(!other.impl_) {
+    std::runtime_error("QoS object with null implementation");
+  }
+  impl_ = std::make_unique<QoSPrivate>(*other.impl_);
+}
+
+QoS & QoS::operator=(const QoS & other)
+{
+  QoS copy = other;
+  *this = std::move(copy);
+  return *this;
+}
+
 QoS::QoS(
   sdf::ElementPtr _sdf,
   const std::string node_name,
   const std::string node_namespace,
-  const rclcpp::NodeOptions & options)
-: node_name_(node_name),
-  node_namespace_(node_namespace),
-  node_options_(options)
+  const rclcpp::NodeOptions & options) : QoS()
 {
+  impl_->node_name_ = node_name;
+  impl_->node_namespace_ = node_namespace;
+  impl_->node_options_ = options;
+
   // If there's no <qos> tag, then there's nothing to do
   if (!_sdf->HasElement("qos")) {
     return;
@@ -166,27 +244,27 @@ QoS::QoS(
     auto topic_name = topic_sdf->Get<std::string>("name");
     std::string fqn_topic_name = rclcpp::expand_topic_or_service_name(
       topic_name,
-      this->node_name_,
-      this->node_namespace_,
+      this->impl_->node_name_,
+      this->impl_->node_namespace_,
       false);  // false = not a service
 
     // For each topic, get the publisher QoS overrides
     if (topic_sdf->HasElement("publisher")) {
-      publisher_qos_overrides_map_.emplace(
-        fqn_topic_name, QoS::get_qos_overrides_from_sdf(topic_sdf->GetElement("publisher")));
+      impl_->publisher_qos_overrides_map_.emplace(
+        fqn_topic_name, QoSPrivate::get_qos_overrides_from_sdf(topic_sdf->GetElement("publisher")));
     }
 
     // For each topic, get the subscription QoS overrides
     if (topic_sdf->HasElement("subscription")) {
-      subscription_qos_overrides_map_.emplace(
-        fqn_topic_name, QoS::get_qos_overrides_from_sdf(topic_sdf->GetElement("subscription")));
+      impl_->subscription_qos_overrides_map_.emplace(
+        fqn_topic_name, QoSPrivate::get_qos_overrides_from_sdf(topic_sdf->GetElement("subscription")));
     }
 
     topic_sdf = topic_sdf->GetNextElement("topic");
   }
 }
 
-rclcpp::QoS QoS::apply_overrides(const QoS::QoSOverrides & overrides, const rclcpp::QoS default_qos)
+rclcpp::QoS QoSPrivate::apply_overrides(const QoSOverrides & overrides, const rclcpp::QoS default_qos)
 {
   rclcpp::QoS qos = default_qos;
   if (overrides.reliability != RMW_QOS_POLICY_RELIABILITY_UNKNOWN) {
@@ -225,33 +303,33 @@ rclcpp::QoS QoS::apply_overrides(const QoS::QoSOverrides & overrides, const rclc
 
 rclcpp::QoS QoS::get_publisher_qos(const std::string topic, rclcpp::QoS default_qos) const
 {
-  const std::string remapped_topic = this->get_remapped_topic_name(topic);
-  auto topic_overrides = publisher_qos_overrides_map_.find(remapped_topic);
+  const std::string remapped_topic = this->impl_->get_remapped_topic_name(topic);
+  auto topic_overrides = impl_->publisher_qos_overrides_map_.find(remapped_topic);
   // If there is no profile override, return the default
-  if (publisher_qos_overrides_map_.end() == topic_overrides) {
+  if (impl_->publisher_qos_overrides_map_.end() == topic_overrides) {
     return default_qos;
   }
-  return QoS::apply_overrides(topic_overrides->second, default_qos);
+  return QoSPrivate::apply_overrides(topic_overrides->second, default_qos);
 }
 
 rclcpp::QoS QoS::get_subscription_qos(const std::string topic, rclcpp::QoS default_qos) const
 {
-  const std::string remapped_topic = this->get_remapped_topic_name(topic);
-  auto topic_overrides = subscription_qos_overrides_map_.find(remapped_topic);
+  const std::string remapped_topic = this->impl_->get_remapped_topic_name(topic);
+  auto topic_overrides = impl_->subscription_qos_overrides_map_.find(remapped_topic);
   // If there is no profile override, return the default
-  if (subscription_qos_overrides_map_.end() == topic_overrides) {
+  if (impl_->subscription_qos_overrides_map_.end() == topic_overrides) {
     return default_qos;
   }
-  return QoS::apply_overrides(topic_overrides->second, default_qos);
+  return QoSPrivate::apply_overrides(topic_overrides->second, default_qos);
 }
 
 // TODO(jacobperron): Use a rclcpp API for getting remapped topic names instead when one exists
-std::string QoS::get_remapped_topic_name(const std::string topic) const
+std::string QoSPrivate::get_remapped_topic_name(const std::string topic) const
 {
   // Get the node options
   const rcl_node_options_t * node_options = this->node_options_.get_rcl_node_options();
   if (nullptr == node_options) {
-    throw std::runtime_error("invalid node options in get_remapped_topic_name()");
+    throw std::runtime_error("invalid node options in impl_->get_remapped_topic_name()");
   }
 
   const rcl_arguments_t * global_args = nullptr;
