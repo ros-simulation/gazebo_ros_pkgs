@@ -22,6 +22,7 @@
 #include <rmw/types.h>
 
 #include <chrono>
+#include <map>
 #include <memory>
 #include <unordered_map>
 #include <sstream>
@@ -193,16 +194,18 @@ QoSOverrides QoSPrivate::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
   return qos_overrides;
 }
 
-QoS::QoS() : impl_(std::make_unique<QoSPrivate>()) {}
+QoS::QoS()
+: impl_(std::make_unique<QoSPrivate>()) {}
 
 // Cannot do this in header, due to QoSPrivate being an incomplete type.
 QoS::QoS(QoS && other) = default;
 QoS & QoS::operator=(QoS && other) = default;
 QoS::~QoS() = default;
 
-QoS::QoS(const QoS & other) : impl_(nullptr)
+QoS::QoS(const QoS & other)
+: impl_(nullptr)
 {
-  if(!other.impl_) {
+  if (!other.impl_) {
     std::runtime_error("QoS object with null implementation");
   }
   impl_ = std::make_unique<QoSPrivate>(*other.impl_);
@@ -219,7 +222,8 @@ QoS::QoS(
   sdf::ElementPtr _sdf,
   const std::string node_name,
   const std::string node_namespace,
-  const rclcpp::NodeOptions & options) : QoS()
+  const rclcpp::NodeOptions & options)
+: QoS()
 {
   impl_->node_name_ = node_name;
   impl_->node_namespace_ = node_namespace;
@@ -257,14 +261,16 @@ QoS::QoS(
     // For each topic, get the subscription QoS overrides
     if (topic_sdf->HasElement("subscription")) {
       impl_->subscription_qos_overrides_map_.emplace(
-        fqn_topic_name, QoSPrivate::get_qos_overrides_from_sdf(topic_sdf->GetElement("subscription")));
+        fqn_topic_name,
+        QoSPrivate::get_qos_overrides_from_sdf(topic_sdf->GetElement("subscription")));
     }
 
     topic_sdf = topic_sdf->GetNextElement("topic");
   }
 }
 
-rclcpp::QoS QoSPrivate::apply_overrides(const QoSOverrides & overrides, const rclcpp::QoS default_qos)
+rclcpp::QoS QoSPrivate::apply_overrides(
+  const QoSOverrides & overrides, const rclcpp::QoS default_qos)
 {
   rclcpp::QoS qos = default_qos;
   if (overrides.reliability != RMW_QOS_POLICY_RELIABILITY_UNKNOWN) {
