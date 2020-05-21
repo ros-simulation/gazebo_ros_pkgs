@@ -70,21 +70,23 @@ TEST(TestQoS, ValidConstruction)
       "<sdf version='1.6'>"
       "  <world name='default'>"
       "    <plugin name='node_1' filename='libnode_name.so'>"
-      "      <qos>"
-      "        <topic name='foo'>"
-      "          <subscription>"
-      "            <reliability>reliable</reliability>"
-      "            <durability>transient_local</durability>"
-      "          </subscription>"
-      "        </topic>"
-      "      </qos>"
+      "      <ros>"
+      "        <qos>"
+      "          <topic name='foo'>"
+      "            <subscription>"
+      "              <reliability>reliable</reliability>"
+      "              <durability>transient_local</durability>"
+      "            </subscription>"
+      "          </topic>"
+      "        </qos>"
+      "      </ros>"
       "    </plugin>"
       "  </world>"
       "</sdf>";
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
     gazebo_ros::QoS qos(
-      sdf.Root()->GetElement("world")->GetElement("plugin"),
+      sdf.Root()->GetElement("world")->GetElement("plugin")->GetElement("ros"),
       "test_node",
       "/",
       rclcpp::NodeOptions());
@@ -119,35 +121,37 @@ TEST(TestQoS, ValidConstruction)
       "<sdf version='1.6'>"
       "  <world name='default'>"
       "    <plugin name='node_1' filename='libnode_name.so'>"
-      "      <qos>"
-      "        <topic name='foo'>"
-      "          <publisher>"
-      "            <reliability>best_effort</reliability>"
-      "            <durability>transient_local</durability>"
-      "            <history>keep_all</history>"
-      "            <deadline>123</deadline>"
-      "            <lifespan>42</lifespan>"
-      "            <liveliness_lease_duration>1000</liveliness_lease_duration>"
-      "            <liveliness>manual_by_topic</liveliness>"
-      "          </publisher>"
-      "          <subscription>"
-      "            <reliability>reliable</reliability>"
-      "            <durability>volatile</durability>"
-      "            <history depth='3'>keep_last</history>"
-      "            <deadline>321</deadline>"
-      "            <lifespan>24</lifespan>"
-      "            <liveliness_lease_duration>1</liveliness_lease_duration>"
-      "            <liveliness>automatic</liveliness>"
-      "          </subscription>"
-      "        </topic>"
-      "      </qos>"
+      "      <ros>"
+      "        <qos>"
+      "          <topic name='foo'>"
+      "            <publisher>"
+      "              <reliability>best_effort</reliability>"
+      "              <durability>transient_local</durability>"
+      "              <history>keep_all</history>"
+      "              <deadline>123</deadline>"
+      "              <lifespan>42</lifespan>"
+      "              <liveliness_lease_duration>1000</liveliness_lease_duration>"
+      "              <liveliness>manual_by_topic</liveliness>"
+      "            </publisher>"
+      "            <subscription>"
+      "              <reliability>reliable</reliability>"
+      "              <durability>volatile</durability>"
+      "              <history depth='3'>keep_last</history>"
+      "              <deadline>321</deadline>"
+      "              <lifespan>24</lifespan>"
+      "              <liveliness_lease_duration>1</liveliness_lease_duration>"
+      "              <liveliness>automatic</liveliness>"
+      "            </subscription>"
+      "          </topic>"
+      "        </qos>"
+      "      </ros>"
       "    </plugin>"
       "  </world>"
       "</sdf>";
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
     gazebo_ros::QoS qos(
-      sdf.Root()->GetElement("world")->GetElement("plugin"),
+      sdf.Root()->GetElement("world")->GetElement("plugin")->GetElement("ros"),
       "test_node",
       "/",
       rclcpp::NodeOptions());
@@ -171,27 +175,29 @@ TEST(TestQoS, ValidConstruction)
       "<sdf version='1.6'>"
       "  <world name='default'>"
       "    <plugin name='node_1' filename='libnode_name.so'>"
-      "      <qos>"
-      "        <topic name='foo'>"
-      "          <subscription>"
-      "            <reliability>best_effort</reliability>"
-      "            <durability>volatile</durability>"
-      "          </subscription>"
-      "        </topic>"
-      "        <topic name='foo'>"
-      "          <publisher>"
-      "            <reliability>reliable</reliability>"
-      "            <durability>transient_local</durability>"
-      "          </publisher>"
-      "        </topic>"
-      "      </qos>"
+      "      <ros>"
+      "       <qos>"
+      "         <topic name='foo'>"
+      "           <subscription>"
+      "             <reliability>best_effort</reliability>"
+      "             <durability>volatile</durability>"
+      "           </subscription>"
+      "         </topic>"
+      "         <topic name='foo'>"
+      "           <publisher>"
+      "             <reliability>reliable</reliability>"
+      "             <durability>transient_local</durability>"
+      "           </publisher>"
+      "         </topic>"
+      "       </qos>"
+      "      </ros>"
       "    </plugin>"
       "  </world>"
       "</sdf>";
     sdf::SDF sdf;
     sdf.SetFromString(sdf_str);
     gazebo_ros::QoS qos(
-      sdf.Root()->GetElement("world")->GetElement("plugin"),
+      sdf.Root()->GetElement("world")->GetElement("plugin")->GetElement("ros"),
       "test_node",
       "/",
       rclcpp::NodeOptions());
