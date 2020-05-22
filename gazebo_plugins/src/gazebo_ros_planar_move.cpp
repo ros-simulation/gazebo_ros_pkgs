@@ -132,7 +132,7 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   // Get QoS profiles
-  const gazebo_ros::QoS qos = impl_->ros_node_->get_qos();
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
   // Odometry
   impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;

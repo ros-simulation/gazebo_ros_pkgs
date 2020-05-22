@@ -61,7 +61,7 @@ void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   // Get QoS profiles
-  const gazebo_ros::QoS qos = impl_->ros_node_->get_qos();
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
   impl_->sensor_ = std::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(_sensor);
   if (!impl_->sensor_) {

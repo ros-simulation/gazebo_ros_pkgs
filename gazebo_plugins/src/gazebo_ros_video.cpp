@@ -197,7 +197,7 @@ void GazeboRosVideo::Load(
   impl_->rosnode_ = gazebo_ros::Node::Get(_sdf);
 
   // Get QoS profiles
-  const gazebo_ros::QoS qos = impl_->rosnode_->get_qos();
+  const gazebo_ros::QoS & qos = impl_->rosnode_->get_qos();
 
   int height = _sdf->Get<int>("height", 240).first;
 

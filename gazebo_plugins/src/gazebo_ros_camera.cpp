@@ -148,7 +148,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   // Get QoS profiles
-  const gazebo_ros::QoS qos = impl_->ros_node_->get_qos();
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
   if (std::dynamic_pointer_cast<gazebo::sensors::MultiCameraSensor>(_sensor)) {
     impl_->sensor_type_ = GazeboRosCameraPrivate::MULTICAMERA;

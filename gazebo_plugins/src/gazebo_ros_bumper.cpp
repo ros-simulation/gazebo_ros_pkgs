@@ -81,7 +81,7 @@ void GazeboRosBumper::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   }
 
   // Get QoS profiles
-  const gazebo_ros::QoS qos = impl_->ros_node_->get_qos();
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
   // Contact state publisher
   impl_->pub_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::ContactsState>(

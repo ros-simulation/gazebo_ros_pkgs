@@ -110,7 +110,7 @@ void GazeboRosJointPoseTrajectory::Load(gazebo::physics::ModelPtr model, sdf::El
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
   // Get QoS profiles
-  const gazebo_ros::QoS qos = impl_->ros_node_->get_qos();
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
   // Update rate
   auto update_rate = sdf->Get<double>("update_rate", 100.0).first;

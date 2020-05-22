@@ -92,7 +92,7 @@ void GazeboRosFTSensor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _
   impl_->rosnode_ = gazebo_ros::Node::Get(_sdf);
 
   // Get QoS profiles
-  const gazebo_ros::QoS qos = impl_->rosnode_->get_qos();
+  const gazebo_ros::QoS & qos = impl_->rosnode_->get_qos();
 
   if (!_sdf->HasElement("update_rate")) {
     RCLCPP_DEBUG(
