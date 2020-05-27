@@ -91,6 +91,9 @@ void GazeboRosFTSensor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _
   // Initialize ROS node
   impl_->rosnode_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->rosnode_->get_qos();
+
   if (!_sdf->HasElement("update_rate")) {
     RCLCPP_DEBUG(
       impl_->rosnode_->get_logger(),
@@ -151,8 +154,7 @@ void GazeboRosFTSensor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _
   impl_->gaussian_noise_ = _sdf->Get<double>("gaussian_noise", 0.0).first;
 
   impl_->pub_ = impl_->rosnode_->create_publisher<geometry_msgs::msg::WrenchStamped>(
-    "wrench",
-    rclcpp::QoS(rclcpp::KeepLast(1)));
+    "wrench", qos.get_publisher_qos("wrench", rclcpp::QoS(1)));
 
   RCLCPP_INFO(
     impl_->rosnode_->get_logger(),

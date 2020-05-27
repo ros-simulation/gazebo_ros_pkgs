@@ -196,6 +196,9 @@ void GazeboRosVideo::Load(
 {
   impl_->rosnode_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->rosnode_->get_qos();
+
   int height = _sdf->Get<int>("height", 240).first;
 
   int width = _sdf->Get<int>("width", 320).first;
@@ -207,7 +210,7 @@ void GazeboRosVideo::Load(
   // Subscribe to the image topic
   impl_->camera_subscriber_ =
     impl_->rosnode_->create_subscription<sensor_msgs::msg::Image>(
-    "~/image_raw", rclcpp::QoS(rclcpp::KeepLast(1)),
+    "~/image_raw", qos.get_subscription_qos("~/image_raw", rclcpp::QoS(1)),
     std::bind(&GazeboRosVideoPrivate::processImage, impl_.get(), std::placeholders::_1));
 
   impl_->new_image_available_ = false;

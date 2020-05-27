@@ -147,6 +147,9 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   if (std::dynamic_pointer_cast<gazebo::sensors::MultiCameraSensor>(_sensor)) {
     impl_->sensor_type_ = GazeboRosCameraPrivate::MULTICAMERA;
     MultiCameraPlugin::Load(_sensor, _sdf);
@@ -174,9 +177,12 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   if (impl_->sensor_type_ != GazeboRosCameraPrivate::MULTICAMERA) {
     // Image publisher
     // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
+    const std::string camera_topic = impl_->camera_name_ + "/image_raw";
     impl_->image_pub_.push_back(
       image_transport::create_publisher(
-        impl_->ros_node_.get(), impl_->camera_name_ + "/image_raw"));
+        impl_->ros_node_.get(),
+        camera_topic,
+        qos.get_publisher_qos(camera_topic).get_rmw_qos_profile()));
 
     // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
     // full topic.
@@ -185,10 +191,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
     // Camera info publisher
     // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
+    const std::string camera_info_topic = impl_->camera_name_ + "/camera_info";
     impl_->camera_info_pub_.push_back(
       impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-        impl_->camera_name_ + "/camera_info",
-        rclcpp::SensorDataQoS()));
+        camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SensorDataQoS())));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
@@ -196,22 +202,25 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   } else {
     for (uint64_t i = 0; i < impl_->num_cameras_; ++i) {
+      const std::string camera_topic =
+        impl_->camera_name_ + "/" + MultiCameraPlugin::camera_[i]->Name() + "/image_raw";
       // Image publisher
       impl_->image_pub_.push_back(
         image_transport::create_publisher(
           impl_->ros_node_.get(),
-          impl_->camera_name_ + "/" + MultiCameraPlugin::camera_[i]->Name() + "/image_raw"));
+          camera_topic, qos.get_publisher_qos(camera_topic).get_rmw_qos_profile()));
 
       // RCLCPP_INFO(
       //   impl_->ros_node_->get_logger(), "Publishing %s camera images to [%s]",
       //   MultiCameraPlugin::camera_[i]->Name().c_str(),
       //   impl_->image_pub_.back().getTopic());
 
+      const std::string camera_info_topic =
+        impl_->camera_name_ + "/" + MultiCameraPlugin::camera_[i]->Name() + "/camera_info";
       // Camera info publisher
       impl_->camera_info_pub_.push_back(
         impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-          impl_->camera_name_ + "/" + MultiCameraPlugin::camera_[i]->Name() + "/camera_info",
-          rclcpp::SensorDataQoS()));
+          camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SensorDataQoS())));
 
       RCLCPP_INFO(
         impl_->ros_node_->get_logger(), "Publishing %s camera info to [%s]",
@@ -221,25 +230,30 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   }
 
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
+    const std::string depth_topic = impl_->camera_name_ + "/depth/image_raw";
     // Depth image publisher
     impl_->depth_image_pub_ = image_transport::create_publisher(
-      impl_->ros_node_.get(), impl_->camera_name_ + "/depth/image_raw");
+      impl_->ros_node_.get(),
+      depth_topic,
+      qos.get_publisher_qos(depth_topic).get_rmw_qos_profile());
 
     // RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing depth images to [%s]",
     //   impl_->depth_image_pub_.getTopic().c_str());
 
+    const std::string depth_info_topic = impl_->camera_name_ + "/depth/camera_info";
     // Depth info publisher
     impl_->depth_camera_info_pub_ =
       impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-      impl_->camera_name_ + "/depth/camera_info", rclcpp::QoS(rclcpp::KeepLast(1)));
+      depth_info_topic, qos.get_publisher_qos(depth_info_topic, rclcpp::QoS(1)));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Publishing depth camera info to [%s]",
       impl_->depth_camera_info_pub_->get_topic_name());
 
+    const std::string point_cloud_topic = impl_->camera_name_ + "/points";
     // Point cloud publisher
     impl_->point_cloud_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud2>(
-      impl_->camera_name_ + "/points", rclcpp::QoS(rclcpp::KeepLast(1)));
+      point_cloud_topic, qos.get_publisher_qos(point_cloud_topic, rclcpp::QoS(1)));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Publishing pointcloud to [%s]",
@@ -248,9 +262,9 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // Trigger
   if (_sdf->Get<bool>("triggered", false).first) {
+    const std::string trigger_topic = impl_->camera_name_ + "/image_trigger";
     impl_->trigger_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
-      impl_->camera_name_ + "/image_trigger",
-      rclcpp::QoS(rclcpp::KeepLast(1)),
+      trigger_topic, qos.get_subscription_qos(trigger_topic, rclcpp::QoS(1)),
       std::bind(&GazeboRosCamera::OnTrigger, this, std::placeholders::_1));
 
     RCLCPP_INFO(

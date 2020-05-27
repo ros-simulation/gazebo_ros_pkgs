@@ -103,6 +103,12 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   // Create ros_node configured from sdf
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
+  // Get QoS profile for the publisher
+  rclcpp::QoS pub_qos = qos.get_publisher_qos("~/out", rclcpp::SensorDataQoS());
+
   // Get tf frame for output
   impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf);
 
@@ -111,21 +117,21 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
     RCLCPP_WARN(
       impl_->ros_node_->get_logger(), "missing <output_type>, defaults to sensor_msgs/PointCloud2");
     impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud2>(
-      "~/out", rclcpp::SensorDataQoS());
+      "~/out", pub_qos);
   } else {
     std::string output_type_string = _sdf->Get<std::string>("output_type");
     if (output_type_string == "sensor_msgs/LaserScan") {
       impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::LaserScan>(
-        "~/out", rclcpp::SensorDataQoS());
+        "~/out", pub_qos);
     } else if (output_type_string == "sensor_msgs/PointCloud") {
       impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud>(
-        "~/out", rclcpp::SensorDataQoS());
+        "~/out", pub_qos);
     } else if (output_type_string == "sensor_msgs/PointCloud2") {
       impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud2>(
-        "~/out", rclcpp::SensorDataQoS());
+        "~/out", pub_qos);
     } else if (output_type_string == "sensor_msgs/Range") {
       impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::Range>(
-        "~/out", rclcpp::SensorDataQoS());
+        "~/out", pub_qos);
     } else {
       RCLCPP_ERROR(
         impl_->ros_node_->get_logger(), "Invalid <output_type> [%s]", output_type_string.c_str());

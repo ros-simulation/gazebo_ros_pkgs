@@ -131,6 +131,9 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Odometry
   impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
   impl_->robot_base_frame_ = _sdf->Get<std::string>("robot_base_frame", "base_footprint").first;
@@ -154,7 +157,7 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
   impl_->last_publish_time_ = impl_->world_->SimTime();
 
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
-    "cmd_vel", rclcpp::QoS(rclcpp::KeepLast(1)),
+    "cmd_vel", qos.get_subscription_qos("cmd_vel", rclcpp::QoS(1)),
     std::bind(&GazeboRosPlanarMovePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
   RCLCPP_INFO(
@@ -165,7 +168,7 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
   impl_->publish_odom_ = _sdf->Get<bool>("publish_odom", true).first;
   if (impl_->publish_odom_) {
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
-      "odom", rclcpp::QoS(rclcpp::KeepLast(1)));
+      "odom", qos.get_publisher_qos("odom", rclcpp::QoS(1)));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
