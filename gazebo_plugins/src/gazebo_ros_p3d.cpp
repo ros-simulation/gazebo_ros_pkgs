@@ -289,7 +289,7 @@ void GazeboRosP3D::UpdateChild()
         }
         else
         {
-          const math::Quaternion rot_inv = pose.rot.GetInverse();
+          const auto rot_inv = pose.Rot().Inverse();
           vpos = rot_inv.RotateVector(vpos);
           veul = rot_inv.RotateVector(veul);
         }
