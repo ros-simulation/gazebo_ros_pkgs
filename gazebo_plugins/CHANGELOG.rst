@@ -2,6 +2,15 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.4.4 (2020-05-08)
+------------------
+* Backport Gazebo11/Bionic fix for boost variant (`#1103 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1103>`_)
+* Measure IMU orientation with respect to world (`#1058 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1058>`_)
+  Report the IMU orientation from the sensor plugin with respect to the world frame.
+  This complies with convention documented in REP 145: https://www.ros.org/reps/rep-0145.html
+  In order to not break existing behavior, users should opt-in by adding a new SDF tag.
+* Contributors: Jose Luis Rivero, Steven Peters, Jacob Perron
+
 3.4.3 (2020-02-18)
 ------------------
 * Image publishers use SensorDataQoSProfile (`#1031 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1031>`_)
