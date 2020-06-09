@@ -349,10 +349,9 @@ void GazeboRosFactoryPrivate::AddNamespace(
 
         // Then we can add the element
         ns_elem = ros_elem->AddElement("namespace");
+        // Set namespace
+        ns_elem->Set<std::string>(_robot_namespace);
       }
-
-      // Set namespace
-      ns_elem->Set<std::string>(_robot_namespace);
     }
     AddNamespace(child_elem, _robot_namespace);
   }
