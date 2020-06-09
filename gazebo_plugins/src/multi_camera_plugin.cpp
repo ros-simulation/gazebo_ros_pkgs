@@ -81,10 +81,12 @@ void MultiCameraPlugin::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr
     depth_.push_back(camera_[i]->ImageDepth());
     format_.push_back(camera_[i]->ImageFormat());
 
-    impl_->new_frame_connection_.push_back(camera_[i]->ConnectNewImageFrame(
-        std::bind(&MultiCameraPlugin::OnNewMultiFrame,
-        this, std::placeholders::_1, std::placeholders::_2,
-        std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, i)));
+    impl_->new_frame_connection_.push_back(
+      camera_[i]->ConnectNewImageFrame(
+        std::bind(
+          &MultiCameraPlugin::OnNewMultiFrame,
+          this, std::placeholders::_1, std::placeholders::_2,
+          std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, i)));
   }
 
   parent_sensor_->SetActive(true);

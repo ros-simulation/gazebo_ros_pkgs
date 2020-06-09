@@ -73,17 +73,22 @@ void GazeboRosBumper::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   impl_->parent_sensor_ = std::dynamic_pointer_cast<gazebo::sensors::ContactSensor>(_sensor);
   if (!impl_->parent_sensor_) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Contact sensor parent is not of type ContactSensor. Aborting");
     impl_->ros_node_.reset();
     return;
   }
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Contact state publisher
   impl_->pub_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::ContactsState>(
-    "bumper_states", rclcpp::SensorDataQoS());
+    "bumper_states", qos.get_publisher_qos("bumper_states", rclcpp::SensorDataQoS()));
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing contact states to [%s]",
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(), "Publishing contact states to [%s]",
     impl_->pub_->get_topic_name());
 
   // Get tf frame for output

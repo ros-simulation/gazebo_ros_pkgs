@@ -147,6 +147,9 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   if (std::dynamic_pointer_cast<gazebo::sensors::MultiCameraSensor>(_sensor)) {
     impl_->sensor_type_ = GazeboRosCameraPrivate::MULTICAMERA;
     MultiCameraPlugin::Load(_sensor, _sdf);
@@ -158,7 +161,8 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     impl_->sensor_type_ = GazeboRosCameraPrivate::CAMERA;
     gazebo::CameraPlugin::Load(_sensor, _sdf);
   } else {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Plugin must be attached to sensor of type `camera`, `depth` or `multicamera`");
     impl_->ros_node_.reset();
     return;
@@ -173,78 +177,98 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   if (impl_->sensor_type_ != GazeboRosCameraPrivate::MULTICAMERA) {
     // Image publisher
     // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
-    impl_->image_pub_.push_back(image_transport::create_publisher(impl_->ros_node_.get(),
-      impl_->camera_name_ + "/image_raw"));
+    const std::string camera_topic = impl_->camera_name_ + "/image_raw";
+    impl_->image_pub_.push_back(
+      image_transport::create_publisher(
+        impl_->ros_node_.get(),
+        camera_topic,
+        qos.get_publisher_qos(camera_topic).get_rmw_qos_profile()));
 
     // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
     // full topic.
-    // RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing images to [%s]",
-    //  impl_->image_pub_.getTopic());
+    // RCLCPP_INFO(
+    //   impl_->ros_node_->get_logger(), "Publishing images to [%s]", impl_->image_pub_.getTopic());
 
     // Camera info publisher
     // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
+    const std::string camera_info_topic = impl_->camera_name_ + "/camera_info";
     impl_->camera_info_pub_.push_back(
       impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-        impl_->camera_name_ + "/camera_info",
-        rclcpp::SensorDataQoS()));
+        camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SensorDataQoS())));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
       impl_->camera_info_pub_.back()->get_topic_name());
 
   } else {
     for (uint64_t i = 0; i < impl_->num_cameras_; ++i) {
+      const std::string camera_topic =
+        impl_->camera_name_ + "/" + MultiCameraPlugin::camera_[i]->Name() + "/image_raw";
       // Image publisher
-      impl_->image_pub_.push_back(image_transport::create_publisher(impl_->ros_node_.get(),
-        impl_->camera_name_ + "/" + MultiCameraPlugin::camera_[i]->Name() + "/image_raw"));
+      impl_->image_pub_.push_back(
+        image_transport::create_publisher(
+          impl_->ros_node_.get(),
+          camera_topic, qos.get_publisher_qos(camera_topic).get_rmw_qos_profile()));
 
-      // RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing %s camera images to [%s]",
+      // RCLCPP_INFO(
+      //   impl_->ros_node_->get_logger(), "Publishing %s camera images to [%s]",
       //   MultiCameraPlugin::camera_[i]->Name().c_str(),
       //   impl_->image_pub_.back().getTopic());
 
+      const std::string camera_info_topic =
+        impl_->camera_name_ + "/" + MultiCameraPlugin::camera_[i]->Name() + "/camera_info";
       // Camera info publisher
       impl_->camera_info_pub_.push_back(
         impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-          impl_->camera_name_ + "/" + MultiCameraPlugin::camera_[i]->Name() + "/camera_info",
-          rclcpp::SensorDataQoS()));
+          camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SensorDataQoS())));
 
-      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing %s camera info to [%s]",
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(), "Publishing %s camera info to [%s]",
         MultiCameraPlugin::camera_[i]->Name().c_str(),
         impl_->camera_info_pub_[i]->get_topic_name());
     }
   }
 
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
+    const std::string depth_topic = impl_->camera_name_ + "/depth/image_raw";
     // Depth image publisher
-    impl_->depth_image_pub_ = image_transport::create_publisher(impl_->ros_node_.get(),
-        impl_->camera_name_ + "/depth/image_raw");
+    impl_->depth_image_pub_ = image_transport::create_publisher(
+      impl_->ros_node_.get(),
+      depth_topic,
+      qos.get_publisher_qos(depth_topic).get_rmw_qos_profile());
 
     // RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing depth images to [%s]",
     //   impl_->depth_image_pub_.getTopic().c_str());
 
+    const std::string depth_info_topic = impl_->camera_name_ + "/depth/camera_info";
     // Depth info publisher
     impl_->depth_camera_info_pub_ =
       impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-      impl_->camera_name_ + "/depth/camera_info", rclcpp::QoS(rclcpp::KeepLast(1)));
+      depth_info_topic, qos.get_publisher_qos(depth_info_topic, rclcpp::QoS(1)));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing depth camera info to [%s]",
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Publishing depth camera info to [%s]",
       impl_->depth_camera_info_pub_->get_topic_name());
 
+    const std::string point_cloud_topic = impl_->camera_name_ + "/points";
     // Point cloud publisher
     impl_->point_cloud_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud2>(
-      impl_->camera_name_ + "/points", rclcpp::QoS(rclcpp::KeepLast(1)));
+      point_cloud_topic, qos.get_publisher_qos(point_cloud_topic, rclcpp::QoS(1)));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Publishing pointcloud to [%s]",
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Publishing pointcloud to [%s]",
       impl_->point_cloud_pub_->get_topic_name());
   }
 
   // Trigger
   if (_sdf->Get<bool>("triggered", false).first) {
+    const std::string trigger_topic = impl_->camera_name_ + "/image_trigger";
     impl_->trigger_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
-      impl_->camera_name_ + "/image_trigger",
-      rclcpp::QoS(rclcpp::KeepLast(1)),
+      trigger_topic, qos.get_subscription_qos(trigger_topic, rclcpp::QoS(1)),
       std::bind(&GazeboRosCamera::OnTrigger, this, std::placeholders::_1));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Subscribed to [%s]",
       impl_->trigger_sub_->get_topic_name());
 
     SetCameraEnabled(false);
@@ -279,22 +303,26 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       impl_->img_encoding_.emplace_back(sensor_msgs::image_encodings::RGB16);
       impl_->img_step_.push_back(6);
     } else if (format == "BAYER_RGGB8") {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(),
         "bayer simulation may be computationally expensive.");
       impl_->img_encoding_.emplace_back(sensor_msgs::image_encodings::BAYER_RGGB8);
       impl_->img_step_.push_back(1);
     } else if (format == "BAYER_BGGR8") {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(),
         "bayer simulation may be computationally expensive.");
       impl_->img_encoding_.emplace_back(sensor_msgs::image_encodings::BAYER_BGGR8);
       impl_->img_step_.push_back(1);
     } else if (format == "BAYER_GBRG8") {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(),
         "bayer simulation may be computationally expensive.");
       impl_->img_encoding_.emplace_back(sensor_msgs::image_encodings::BAYER_GBRG8);
       impl_->img_step_.push_back(1);
     } else if (format == "BAYER_GRBG8") {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(),
         "bayer simulation may be computationally expensive.");
       impl_->img_encoding_.emplace_back(sensor_msgs::image_encodings::BAYER_GRBG8);
       impl_->img_step_.push_back(1);
@@ -338,7 +366,8 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     if (focal_length == 0) {
       focal_length = computed_focal_length;
     } else if (!ignition::math::equal(focal_length, computed_focal_length)) {
-      RCLCPP_WARN(impl_->ros_node_->get_logger(),
+      RCLCPP_WARN(
+        impl_->ros_node_->get_logger(),
         "The <focal_length> [%f] you have provided for camera [%s]"
         " is inconsistent with specified <image_width> [%d] and"
         " HFOV [%f]. Please double check to see that"
@@ -425,7 +454,8 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     camera_info_msg.p[11] = 0.0;
 
     // Initialize camera_info_manager
-    impl_->camera_info_manager_.push_back(std::make_shared<camera_info_manager::CameraInfoManager>(
+    impl_->camera_info_manager_.push_back(
+      std::make_shared<camera_info_manager::CameraInfoManager>(
         impl_->ros_node_.get(), impl_->camera_name_));
     impl_->camera_info_manager_.back()->setCameraInfo(camera_info_msg);
   }
@@ -485,7 +515,8 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
         std::string param_name = parameter.get_name();
         if (param_name == "update_rate") {
           if (nullptr != impl_->trigger_sub_) {
-            RCLCPP_WARN(impl_->ros_node_->get_logger(),
+            RCLCPP_WARN(
+              impl_->ros_node_->get_logger(),
               "Cannot set update rate for triggered camera");
             result.successful = false;
           } else {
@@ -502,14 +533,17 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
               }
 
               if (rate >= 0.0) {
-                RCLCPP_INFO(impl_->ros_node_->get_logger(),
+                RCLCPP_INFO(
+                  impl_->ros_node_->get_logger(),
                   "Camera update rate changed to [%.2f Hz]", rate);
               } else {
-                RCLCPP_WARN(impl_->ros_node_->get_logger(),
+                RCLCPP_WARN(
+                  impl_->ros_node_->get_logger(),
                   "Camera update rate should be positive. Setting to maximum");
               }
             } else {
-              RCLCPP_WARN(impl_->ros_node_->get_logger(),
+              RCLCPP_WARN(
+                impl_->ros_node_->get_logger(),
                 "Value for param [update_rate] has to be of double type.");
               result.successful = false;
             }
@@ -555,7 +589,8 @@ void GazeboRosCamera::NewFrame(
     sensor_update_time);
 
   // Copy from src to image_msg
-  sensor_msgs::fillImage(impl_->image_msg_, impl_->img_encoding_[_camera_num], _height, _width,
+  sensor_msgs::fillImage(
+    impl_->image_msg_, impl_->img_encoding_[_camera_num], _height, _width,
     impl_->img_step_[_camera_num] * _width, reinterpret_cast<const void *>(_image));
 
   impl_->image_pub_[_camera_num].publish(impl_->image_msg_);
@@ -708,10 +743,12 @@ void GazeboRosCamera::OnNewDepthFrame(
 
       if (impl_->image_msg_.data.size() == _width * _height * 3) {
         // color
-        std::memcpy(&impl_->cloud_msg_.data[cloud_index + 16],
+        std::memcpy(
+          &impl_->cloud_msg_.data[cloud_index + 16],
           &impl_->image_msg_.data[(i + j * _width) * 3], 3 * sizeof(uint8_t));
       } else if (impl_->image_msg_.data.size() == _height * _width) {
-        std::memcpy(&impl_->cloud_msg_.data[cloud_index + 16],
+        std::memcpy(
+          &impl_->cloud_msg_.data[cloud_index + 16],
           &impl_->image_msg_.data[i + j * _width], 3 * sizeof(uint8_t));
       } else {
         // no image

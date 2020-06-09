@@ -71,7 +71,8 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
       "</sdf>";
 
     auto response_future = spawn_client->async_send_request(request);
-    EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+    EXPECT_EQ(
+      rclcpp::executor::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -115,7 +116,8 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
       "</robot>";
 
     auto response_future = spawn_client->async_send_request(request);
-    EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+    EXPECT_EQ(
+      rclcpp::executor::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -131,7 +133,8 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
 
     // Check it was spawned with the correct name
     ASSERT_NE(nullptr, world->ModelByName("urdf_box"));
-    EXPECT_EQ(world->ModelByName("urdf_box")->WorldPose(),
+    EXPECT_EQ(
+      world->ModelByName("urdf_box")->WorldPose(),
       ignition::math::Pose3d(2, 4, 6, 0, 0, 0));
   }
 
@@ -152,7 +155,8 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
       "</sdf>";
 
     auto response_future = spawn_client->async_send_request(request);
-    EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+    EXPECT_EQ(
+      rclcpp::executor::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -161,7 +165,8 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
 
     // Check it was spawned with the correct name
     ASSERT_NE(nullptr, world->LightByName("dir"));
-    EXPECT_EQ(world->LightByName("dir")->WorldPose(),
+    EXPECT_EQ(
+      world->LightByName("dir")->WorldPose(),
       ignition::math::Pose3d(0, 0, 10, 0, 0, 0));
   }
 
@@ -175,7 +180,8 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
     request->name = "ground_plane";
 
     auto response_future = delete_client->async_send_request(request);
-    EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+    EXPECT_EQ(
+      rclcpp::executor::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -196,7 +202,8 @@ TEST_F(GazeboRosFactoryTest, SpawnDelete)
     request->name = "sun";
 
     auto response_future = delete_client->async_send_request(request);
-    EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+    EXPECT_EQ(
+      rclcpp::executor::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();

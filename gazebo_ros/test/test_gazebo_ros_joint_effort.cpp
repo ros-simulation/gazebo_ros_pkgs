@@ -54,7 +54,8 @@ TEST_F(GazeboRosJointEffortTest, JointEffortTest)
   apply_request->duration = rclcpp::Duration(-1, 0);
 
   auto apply_response_future = apply_joint_effort->async_send_request(apply_request);
-  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+  EXPECT_EQ(
+    rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, apply_response_future));
 
   auto apply_response = apply_response_future.get();
@@ -70,7 +71,8 @@ TEST_F(GazeboRosJointEffortTest, JointEffortTest)
   clear_request->joint_name = "upper_joint";
 
   auto clear_response_future = clear_joint_efforts->async_send_request(clear_request);
-  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+  EXPECT_EQ(
+    rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, clear_response_future));
 
   auto clear_response = clear_response_future.get();

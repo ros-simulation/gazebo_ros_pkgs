@@ -92,8 +92,12 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   // Configure the plugin from the SDF file
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   if (!sdf->HasElement("update_rate")) {
-    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "p3d plugin missing <update_rate>, defaults to 0.0"
+    RCLCPP_DEBUG(
+      impl_->ros_node_->get_logger(), "p3d plugin missing <update_rate>, defaults to 0.0"
       " (as fast as possible)");
   } else {
     impl_->update_rate_ = sdf->GetElement("update_rate")->Get<double>();
@@ -116,7 +120,7 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   }
 
   impl_->pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
-    impl_->topic_name_, rclcpp::SensorDataQoS());
+    impl_->topic_name_, qos.get_publisher_qos(impl_->topic_name_, rclcpp::SensorDataQoS()));
   impl_->topic_name_ = impl_->pub_->get_topic_name();
   RCLCPP_DEBUG(
     impl_->ros_node_->get_logger(), "Publishing on topic [%s]", impl_->topic_name_.c_str());
@@ -130,8 +134,8 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   if (!sdf->HasElement("rpy_offsets")) {
     RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <rpy_offsets>, defaults to 0s");
   } else {
-    impl_->offset_.Rot() = ignition::math::Quaterniond(sdf->GetElement(
-          "rpy_offsets")->Get<ignition::math::Vector3d>());
+    impl_->offset_.Rot() = ignition::math::Quaterniond(
+      sdf->GetElement("rpy_offsets")->Get<ignition::math::Vector3d>());
   }
 
   if (!sdf->HasElement("gaussian_noise")) {
@@ -157,7 +161,8 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   {
     impl_->reference_link_ = model->GetLink(impl_->frame_name_);
     if (!impl_->reference_link_) {
-      RCLCPP_WARN(impl_->ros_node_->get_logger(), "<frame_name> [%s] does not exist.",
+      RCLCPP_WARN(
+        impl_->ros_node_->get_logger(), "<frame_name> [%s] does not exist.",
         impl_->frame_name_.c_str());
     }
   }

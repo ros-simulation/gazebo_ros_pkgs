@@ -48,11 +48,11 @@ TEST_F(GazeboRosImuSensorTest, ImuMessageCorrect)
   ASSERT_NE(nullptr, node);
 
   sensor_msgs::msg::Imu::SharedPtr msg = nullptr;
-  auto sub =
-    node->create_subscription<sensor_msgs::msg::Imu>("/imu/data", rclcpp::SensorDataQoS(),
-      [&msg](sensor_msgs::msg::Imu::SharedPtr _msg) {
-        msg = _msg;
-      });
+  auto sub = node->create_subscription<sensor_msgs::msg::Imu>(
+    "/imu/data", rclcpp::SensorDataQoS(),
+    [&msg](sensor_msgs::msg::Imu::SharedPtr _msg) {
+      msg = _msg;
+    });
 
   // Step until an imu message will have been published
   int sleep{0};

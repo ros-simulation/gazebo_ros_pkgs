@@ -95,7 +95,8 @@ void GazeboRosStateTest::GetState(
   request->name = _entity;
 
   auto response_future = get_state_client_->async_send_request(request);
-  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+  EXPECT_EQ(
+    rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -135,7 +136,8 @@ void GazeboRosStateTest::SetState(
   request->state.twist.angular = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(_ang_vel);
 
   auto response_future = set_state_client_->async_send_request(request);
-  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+  EXPECT_EQ(
+    rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -151,11 +153,13 @@ TEST_F(GazeboRosStateTest, GetSet)
     this->GetState("boxes", ignition::math::Pose3d(0, 0, 0.5, 0, 0, 0));
 
     // Set new state
-    this->SetState("boxes", ignition::math::Pose3d(1.0, 2.0, 10.0, 0, 0, 0),
+    this->SetState(
+      "boxes", ignition::math::Pose3d(1.0, 2.0, 10.0, 0, 0, 0),
       ignition::math::Vector3d(4.0, 0, 0), ignition::math::Vector3d::Zero);
 
     // Check new state
-    this->GetState("boxes", ignition::math::Pose3d(1.0, 2.0, 10.0, 0, 0, 0),
+    this->GetState(
+      "boxes", ignition::math::Pose3d(1.0, 2.0, 10.0, 0, 0, 0),
       ignition::math::Vector3d(4.0, 0, 0), ignition::math::Vector3d::Zero);
   }
 
@@ -174,15 +178,18 @@ TEST_F(GazeboRosStateTest, GetSet)
   // Get / set link state
   {
     // Get initial state - note that is was moved with the model
-    this->GetState("boxes::top", ignition::math::Pose3d(1.0, 2.0, 11.25, 0, 0, 0),
+    this->GetState(
+      "boxes::top", ignition::math::Pose3d(1.0, 2.0, 11.25, 0, 0, 0),
       ignition::math::Vector3d(4.0, 0, 0), ignition::math::Vector3d::Zero);
 
     // Set new state
-    this->SetState("boxes::top", ignition::math::Pose3d(10, 20, 30, 0.1, 0, 0),
+    this->SetState(
+      "boxes::top", ignition::math::Pose3d(10, 20, 30, 0.1, 0, 0),
       ignition::math::Vector3d(1.0, 2.0, 3.0), ignition::math::Vector3d(0.0, 0.0, 4.0));
 
     // Check new state
-    this->GetState("boxes::top", ignition::math::Pose3d(10, 20, 30, 0.1, 0, 0),
+    this->GetState(
+      "boxes::top", ignition::math::Pose3d(10, 20, 30, 0.1, 0, 0),
       ignition::math::Vector3d(1.0, 2.0, 3.0), ignition::math::Vector3d(0.0, 0.0, 4.0));
   }
 

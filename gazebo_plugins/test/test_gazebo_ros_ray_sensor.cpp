@@ -94,7 +94,8 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
 
   // Convienence function to subscribe to a topic and store it to a variable
   #define SUBSCRIBE_SETTER(msg, topic) \
-  node->create_subscription<decltype(msg)::element_type>(topic, rclcpp::SensorDataQoS(), \
+  node->create_subscription<decltype(msg)::element_type>( \
+    topic, rclcpp::SensorDataQoS(), \
     [&msg](decltype(msg) _msg) { \
       msg = _msg; \
     })
@@ -167,8 +168,8 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   EXPECT_NEAR(ls->angle_max, 0.5236, ROUNDING_ERROR_TOL);
   EXPECT_NEAR(ls->range_min, 0.05, ROUNDING_ERROR_TOL);
   EXPECT_NEAR(ls->range_max, 50.0, ROUNDING_ERROR_TOL);
-  EXPECT_NEAR(ls->angle_increment, (ls->angle_max - ls->angle_min) / ls->ranges.size(),
-    ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(
+    ls->angle_increment, (ls->angle_max - ls->angle_min) / ls->ranges.size(), ROUNDING_ERROR_TOL);
 
   // Ensure each ground truth range is found in the laserscan
   for (size_t i = 0; i < ranges.size(); ++i) {
