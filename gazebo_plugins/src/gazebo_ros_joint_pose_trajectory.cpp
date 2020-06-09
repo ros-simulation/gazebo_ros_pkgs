@@ -109,6 +109,9 @@ void GazeboRosJointPoseTrajectory::Load(gazebo::physics::ModelPtr model, sdf::El
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Update rate
   auto update_rate = sdf->Get<double>("update_rate", 100.0).first;
   if (update_rate > 0.0) {
@@ -120,7 +123,7 @@ void GazeboRosJointPoseTrajectory::Load(gazebo::physics::ModelPtr model, sdf::El
 
   // Set Joint Trajectory Callback
   impl_->sub_ = impl_->ros_node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-    "set_joint_trajectory", rclcpp::QoS(rclcpp::KeepLast(1)),
+    "set_joint_trajectory", qos.get_subscription_qos("set_joint_trajectory", rclcpp::QoS(1)),
     std::bind(
       &GazeboRosJointPoseTrajectoryPrivate::SetJointTrajectory,
       impl_.get(), std::placeholders::_1));

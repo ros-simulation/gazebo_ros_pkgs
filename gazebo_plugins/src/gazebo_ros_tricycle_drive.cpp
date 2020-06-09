@@ -238,6 +238,9 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Odometry
   impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
   impl_->robot_base_frame_ = _sdf->Get<std::string>("robot_base_frame", "base_link").first;
@@ -326,7 +329,7 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->last_actuator_update_ = _model->GetWorld()->SimTime();
 
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
-    "cmd_vel", rclcpp::QoS(rclcpp::KeepLast(1)),
+    "cmd_vel", qos.get_subscription_qos("cmd_vel", rclcpp::QoS(1)),
     std::bind(&GazeboRosTricycleDrivePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
   RCLCPP_INFO(
@@ -337,7 +340,8 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->publish_wheel_joint_state_ = _sdf->Get<bool>("publish_wheel_joint_state", false).first;
   if (impl_->publish_wheel_joint_state_) {
     impl_->joint_state_publisher_ =
-      impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1000);
+      impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>(
+      "joint_states", qos.get_publisher_qos("joint_states", rclcpp::QoS(1000)));
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Advertise joint_states on [%s]",
       impl_->joint_state_publisher_->get_topic_name());
@@ -347,7 +351,7 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->publish_odom_ = _sdf->Get<bool>("publish_odom", false).first;
   if (impl_->publish_odom_) {
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
-      "odom", rclcpp::QoS(rclcpp::KeepLast(1)));
+      "odom", qos.get_publisher_qos("odom", rclcpp::QoS(1)));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",

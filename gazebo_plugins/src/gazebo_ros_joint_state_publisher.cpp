@@ -87,6 +87,9 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
   // ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Joints
   if (!sdf->HasElement("joint_name")) {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Plugin missing <joint_name>s");
@@ -136,7 +139,7 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
 
   // Joint state publisher
   impl_->joint_state_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>(
-    "joint_states", 1000);
+    "joint_states", qos.get_publisher_qos("joint_states", rclcpp::QoS(1000)));
 
   // Callback on every iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(

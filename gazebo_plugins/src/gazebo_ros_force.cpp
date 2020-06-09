@@ -96,8 +96,11 @@ void GazeboRosForce::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   // Subscribe to wrench messages
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   impl_->wrench_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Wrench>(
-    "gazebo_ros_force", rclcpp::SystemDefaultsQoS(),
+    "gazebo_ros_force", qos.get_subscription_qos("gazebo_ros_force", rclcpp::SystemDefaultsQoS()),
     std::bind(&GazeboRosForce::OnRosWrenchMsg, this, std::placeholders::_1));
 
   // Callback on every iteration

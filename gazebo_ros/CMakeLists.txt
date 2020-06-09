@@ -18,6 +18,7 @@ find_package(gazebo_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rcl REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rmw REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tinyxml_vendor REQUIRED)
 
@@ -31,6 +32,7 @@ ament_python_install_package(scripts/)
 add_library(gazebo_ros_node SHARED
   src/executor.cpp
   src/node.cpp
+  src/qos.cpp
 )
 target_include_directories(gazebo_ros_node
   PUBLIC
@@ -43,6 +45,7 @@ ament_target_dependencies(gazebo_ros_node
   "gazebo_dev"
   "rclcpp"
   "rcl"
+  "rmw"
 )
 ament_export_libraries(gazebo_ros_node)
 
