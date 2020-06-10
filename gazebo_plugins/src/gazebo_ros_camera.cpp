@@ -131,6 +131,9 @@ public:
 
   /// Number of cameras
   uint64_t num_cameras_{1};
+
+  /// Get rgb image if depth_only mode
+  bool rgb_image_;
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -152,6 +155,9 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
+  // Get rgb_image option
+  impl_->rgb_image_ = _sdf->Get<bool>("rgb_image", true).first;
 
   if (std::dynamic_pointer_cast<gazebo::sensors::MultiCameraSensor>(_sensor)) {
     impl_->sensor_type_ = GazeboRosCameraPrivate::MULTICAMERA;
@@ -183,7 +189,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   if (impl_->sensor_type_ != GazeboRosCameraPrivate::MULTICAMERA) {
     
-      if (impl_->sensor_type_ != GazeboRosCameraPrivate::DEPTH_ONLY){
+      if (impl_->rgb_image_){
       // Image publisher
       // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
       const std::string camera_topic = impl_->camera_name_ + "/image_raw";
@@ -207,7 +213,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
         camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SensorDataQoS())));
 
 
-      if (impl_->sensor_type_ != GazeboRosCameraPrivate::DEPTH_ONLY){
+      if (impl_->rgb_image_){
       // Image publisher
       // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
       impl_->image_pub_.push_back(
@@ -616,7 +622,7 @@ void GazeboRosCamera::NewFrame(
   std::lock_guard<std::mutex> image_lock(impl_->image_mutex_);
 
   // Publish image
-  if (impl_->sensor_type_ != GazeboRosCameraPrivate::DEPTH_ONLY) {
+  if (impl_->rgb_image_) {
   impl_->image_msg_.header.frame_id = impl_->frame_name_;
   impl_->image_msg_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
     sensor_update_time);
