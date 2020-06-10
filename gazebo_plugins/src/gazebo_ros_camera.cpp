@@ -50,9 +50,6 @@ public:
     /// Depth Camera
     DEPTH,
 
-    /// Depth only Camera (without image)
-    DEPTH_ONLY,
-
     /// Normal RGB Camera
     CAMERA,
 
@@ -132,8 +129,11 @@ public:
   /// Number of cameras
   uint64_t num_cameras_{1};
 
-  /// Get rgb image if depth_only mode
-  bool rgb_image_;
+  /// If set to true, no image_raw publication. Set to false by default.
+  bool depth_only_;
+
+  /// If set to false, pointcloud is xyz type. Set to true by default (xyz rgb type pointcloud).
+  bool rgb_pointcloud_;
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -156,19 +156,16 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
-  // Get rgb_image option
-  impl_->rgb_image_ = _sdf->Get<bool>("rgb_image", true).first;
+  // Get rgb_pointcloud and depth_only options
+  impl_->rgb_pointcloud_ = _sdf->Get<bool>("rgb_pointcloud", true).first;
+  impl_->depth_only_ = _sdf->Get<bool>("depth_only", false).first;
 
   if (std::dynamic_pointer_cast<gazebo::sensors::MultiCameraSensor>(_sensor)) {
     impl_->sensor_type_ = GazeboRosCameraPrivate::MULTICAMERA;
     MultiCameraPlugin::Load(_sensor, _sdf);
     impl_->num_cameras_ = MultiCameraPlugin::parent_sensor_->CameraCount();
   } else if (std::dynamic_pointer_cast<gazebo::sensors::DepthCameraSensor>(_sensor)) {
-    if (_sdf->Get<bool>("depth_only", false).first){
-      impl_->sensor_type_ = GazeboRosCameraPrivate::DEPTH_ONLY;
-    } else {
-      impl_->sensor_type_ = GazeboRosCameraPrivate::DEPTH;
-    }
+    impl_->sensor_type_ = GazeboRosCameraPrivate::DEPTH;
     gazebo::DepthCameraPlugin::Load(_sensor, _sdf);
   } else if (std::dynamic_pointer_cast<gazebo::sensors::CameraSensor>(_sensor)) {
     impl_->sensor_type_ = GazeboRosCameraPrivate::CAMERA;
@@ -189,7 +186,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   if (impl_->sensor_type_ != GazeboRosCameraPrivate::MULTICAMERA) {
     
-      if (impl_->rgb_image_){
+      if (!(impl_->depth_only_)){
       // Image publisher
       // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
       const std::string camera_topic = impl_->camera_name_ + "/image_raw";
@@ -213,7 +210,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
         camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SensorDataQoS())));
 
 
-      if (impl_->rgb_image_){
+      if (!(impl_->depth_only_)){
       // Image publisher
       // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
       impl_->image_pub_.push_back(
@@ -266,7 +263,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     }
   }
 
-  if ((impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) || (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY)) {
+  if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     const std::string depth_topic = impl_->camera_name_ + "/depth/image_raw";
     
     // Depth image publisher
@@ -318,7 +315,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   std::vector<std::string> image_format;
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
     image_format.push_back(CameraPlugin::format);
-  } else if ((impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) || (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY)) {
+  } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     image_format.push_back(DepthCameraPlugin::format);
   } else {
     image_format = MultiCameraPlugin::format_;
@@ -376,7 +373,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     width.push_back(CameraPlugin::width);
     height.push_back(CameraPlugin::height);
     impl_->camera_.push_back(CameraPlugin::camera);
-  } else if ((impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) || (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY)) {
+  } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     width.push_back(DepthCameraPlugin::width);
     height.push_back(DepthCameraPlugin::height);
     impl_->camera_.emplace_back(DepthCameraPlugin::depthCamera);
@@ -498,7 +495,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     impl_->camera_info_manager_.back()->setCameraInfo(camera_info_msg);
   }
 
-  if ((impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) || (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY)) {
+  if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     impl_->min_depth_ = _sdf->Get<double>("min_depth", 0.4).first;
     impl_->max_depth_ =
       _sdf->Get<double>("max_depth", std::numeric_limits<float>::infinity()).first;
@@ -529,7 +526,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
     impl_->ros_node_->declare_parameter(
       "update_rate", gazebo::CameraPlugin::parentSensor->UpdateRate());
-  } else if ((impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) || (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY)) {
+  } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     impl_->ros_node_->declare_parameter(
       "update_rate", gazebo::DepthCameraPlugin::parentSensor->UpdateRate());
   } else {
@@ -564,7 +561,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
               if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
                 gazebo::CameraPlugin::parentSensor->SetUpdateRate(rate);
-              } else if ((impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH)  || (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY)) {
+              } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
                 gazebo::DepthCameraPlugin::parentSensor->SetUpdateRate(rate);
               } else {
                 MultiCameraPlugin::parent_sensor_->SetUpdateRate(rate);
@@ -606,7 +603,7 @@ void GazeboRosCamera::NewFrame(
 
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
     sensor_update_time = CameraPlugin::parentSensor->LastMeasurementTime();
-  } else if ((impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) || (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY)) {
+  } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     sensor_update_time = DepthCameraPlugin::parentSensor->LastMeasurementTime();
   } else {
     sensor_update_time = MultiCameraPlugin::parent_sensor_->LastMeasurementTime();
@@ -622,7 +619,6 @@ void GazeboRosCamera::NewFrame(
   std::lock_guard<std::mutex> image_lock(impl_->image_mutex_);
 
   // Publish image
-  if (impl_->rgb_image_) {
   impl_->image_msg_.header.frame_id = impl_->frame_name_;
   impl_->image_msg_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
     sensor_update_time);
@@ -632,7 +628,8 @@ void GazeboRosCamera::NewFrame(
     impl_->image_msg_, impl_->img_encoding_[_camera_num], _height, _width,
     impl_->img_step_[_camera_num] * _width, reinterpret_cast<const void *>(_image));
 
-  impl_->image_pub_[_camera_num].publish(impl_->image_msg_);
+  if (!(impl_->depth_only_)) {
+    impl_->image_pub_[_camera_num].publish(impl_->image_msg_);
   }
 
   // Disable camera if it's a triggered camera
@@ -725,10 +722,10 @@ void GazeboRosCamera::OnNewDepthFrame(
   impl_->cloud_msg_.row_step = impl_->cloud_msg_.point_step * _width * _height;
 
   sensor_msgs::PointCloud2Modifier cloud_modifier(impl_->cloud_msg_);
-  if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY) {
-    cloud_modifier.setPointCloud2FieldsByString(1, "xyz");
-  } else{
+  if (impl_->rgb_pointcloud_) {
     cloud_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+  } else{
+    cloud_modifier.setPointCloud2FieldsByString(1, "xyz");
   }
   cloud_modifier.resize(_width * _height);
 
@@ -785,7 +782,7 @@ void GazeboRosCamera::OnNewDepthFrame(
         impl_->cloud_msg_.is_dense = false;
       }
 
-      if (impl_->sensor_type_ != GazeboRosCameraPrivate::DEPTH_ONLY) {
+      if (impl_->rgb_pointcloud_) {
         if (impl_->image_msg_.data.size() == _width * _height * 3) {
             // color
             std::memcpy(
@@ -831,7 +828,7 @@ void GazeboRosCamera::SetCameraEnabled(const bool _enabled)
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
     CameraPlugin::parentSensor->SetActive(_enabled);
     CameraPlugin::parentSensor->SetUpdateRate(_enabled ? 0.0 : ignition::math::MIN_D);
-  } else if ((impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) || (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH_ONLY)) {
+  } else if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     DepthCameraPlugin::parentSensor->SetActive(_enabled);
     DepthCameraPlugin::parentSensor->SetUpdateRate(_enabled ? 0.0 : ignition::math::MIN_D);
   } else {
