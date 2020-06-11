@@ -230,7 +230,7 @@ void GazeboRosFactoryPrivate::SpawnEntity(
 
   // Walk recursively through the entire file, and add <ros><namespace> tags to all plugins
   auto robot_namespace = req->robot_namespace;
-  if (robot_namespace.compare("/") != 0) {
+  if (!robot_namespace.empty()) {
     AddNamespace(entity_elem, robot_namespace);
   }
 
