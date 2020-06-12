@@ -143,7 +143,7 @@ INSTANTIATE_TEST_CASE_P(
         "test_cam/camera/raw_image_test",
         "test_cam/camera/depth_image_test",
         "test_cam/camera/points_test"})
-  ), );
+));
 
 int main(int argc, char ** argv)
 {
