@@ -18,12 +18,12 @@
 #include <gazebo/sensors/SensorTypes.hh>
 #include <ignition/math/Helpers.hh>
 
-#include <camera_info_manager/camera_info_manager.h>
+#include <camera_info_manager/camera_info_manager.hpp>
 #include <gazebo_plugins/gazebo_ros_camera.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
-#include <image_transport/image_transport.h>
+#include <image_transport/image_transport.hpp>
 #include <sensor_msgs/fill_image.hpp>
 #include <sensor_msgs/image_encodings.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
