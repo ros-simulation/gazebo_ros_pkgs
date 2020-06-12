@@ -182,7 +182,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       image_transport::create_publisher(
         impl_->ros_node_.get(),
         camera_topic,
-        qos.get_publisher_qos(camera_topic, rclcpp::SensorDataQos()).get_rmw_qos_profile()));
+        qos.get_publisher_qos(camera_topic, rclcpp::SensorDataQoS()).get_rmw_qos_profile()));
 
     // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
     // full topic.
