@@ -18,12 +18,12 @@
 #include <gazebo/sensors/SensorTypes.hh>
 #include <ignition/math/Helpers.hh>
 
-#include <camera_info_manager/camera_info_manager.h>
+#include <camera_info_manager/camera_info_manager.hpp>
 #include <gazebo_plugins/gazebo_ros_camera.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
-#include <image_transport/image_transport.h>
+#include <image_transport/image_transport.hpp>
 #include <sensor_msgs/fill_image.hpp>
 #include <sensor_msgs/image_encodings.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
@@ -534,17 +534,9 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       "update_rate", MultiCameraPlugin::parent_sensor_->UpdateRate());
   }
 
-  auto existing_callback = impl_->ros_node_->set_on_parameters_set_callback(nullptr);
   auto param_change_callback =
-    [this, existing_callback](std::vector<rclcpp::Parameter> parameters) {
+    [this](std::vector<rclcpp::Parameter> parameters) {
       auto result = rcl_interfaces::msg::SetParametersResult();
-      if (nullptr != existing_callback) {
-        result = existing_callback(parameters);
-        if (!result.successful) {
-          return result;
-        }
-      }
-
       result.successful = true;
       for (const auto & parameter : parameters) {
         std::string param_name = parameter.get_name();
@@ -588,7 +580,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       return result;
     };
 
-  impl_->ros_node_->set_on_parameters_set_callback(param_change_callback);
+  impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
 }
 
 void GazeboRosCamera::NewFrame(
