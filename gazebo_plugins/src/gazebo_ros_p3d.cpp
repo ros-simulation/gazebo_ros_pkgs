@@ -67,8 +67,8 @@ public:
   /// Frame transform name, should match name of reference link, or be world.
   std::string frame_name_{"world"};
 
-  /// TF Frame name of child in case it should be different from child link name.
-  std::string child_frame_name_{"odom"};
+  /// TF frame name, if set causes the tf transform of the "body_link" to "frame_name" to be broadcast with the specified name
+  std::string body_tf_name_;
 
   /// Constant xyz and rpy offsets
   ignition::math::Pose3d offset_;
@@ -157,12 +157,21 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 
   impl_->last_time_ = model->GetWorld()->SimTime();
 
+  if (!sdf->HasElement("body_tf_name")) {
+    RCLCPP_DEBUG(
+      impl_->ros_node_->get_logger(), "Missing <body_tf_name>. TF will not be broadcast");
+  } else {
+    impl_->body_tf_name_ = sdf->GetElement("body_tf_name")->Get<std::string>();
+  }
+
   if (!sdf->HasElement("frame_name")) {
     RCLCPP_DEBUG(
       impl_->ros_node_->get_logger(), "Missing <frame_name>, defaults to world");
   } else {
     impl_->frame_name_ = sdf->GetElement("frame_name")->Get<std::string>();
   }
+
+
 
   // If frame_name specified is "/world", "world", "/map" or "map" report
   // back inertial values in the gazebo world
@@ -285,7 +294,7 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
 
   transform_msg.header.frame_id = frame_name_;
   transform_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
-  transform_msg.child_frame_id = child_frame_name_;
+  transform_msg.child_frame_id = body_tf_name_;
   transform_msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose.Pos());
   transform_msg.transform.rotation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
 

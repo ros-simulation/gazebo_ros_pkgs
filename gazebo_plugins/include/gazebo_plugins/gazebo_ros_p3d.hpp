@@ -44,6 +44,9 @@ class GazeboRosP3DPrivate;
       <!-- Name of the link within this model whose pose will be published -->
       <body_name>box_link</body_name>
 
+      <!-- If set, broadcasts tf frame of body frame under name specified here. -->
+      <body_tf_name>box_link</body_tf_name>
+
       <!-- Name of another link within this model to use as a reference frame.
            Remove the tag to use the world as a reference. -->
       <frame_name>sphere_link</frame_name>
