@@ -112,7 +112,7 @@ INSTANTIATE_TEST_CASE_P(
       {"worlds/gazebo_ros_multicamera.world",
         "test_cam/camera/left/image_test",
         "test_cam/camera/right/image_test"})
-  ), );
+));
 
 int main(int argc, char ** argv)
 {
