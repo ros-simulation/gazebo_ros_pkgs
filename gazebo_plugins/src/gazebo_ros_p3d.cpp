@@ -288,23 +288,27 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
   pose_msg.twist.covariance[28] = gn2;
   pose_msg.twist.covariance[35] = gn2;
 
-
-  // Create TF Transform
-  geometry_msgs::msg::TransformStamped transform_msg;
-
-  transform_msg.header.frame_id = frame_name_;
-  transform_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
-  transform_msg.child_frame_id = body_tf_name_;
-  transform_msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose.Pos());
-  transform_msg.transform.rotation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
-
-  tf2_msgs::msg::TFMessage tf_msg;
-
-  tf_msg.transforms.push_back(transform_msg);
-
   // Publish to ROS
   pub_->publish(pose_msg);
-  tf_pub_->publish(tf_msg);
+
+  // Broadcast tf transform
+  if (!body_tf_name_.empty()) {
+    // Create TF Transform
+    geometry_msgs::msg::TransformStamped transform_msg;
+
+    transform_msg.header.frame_id = frame_name_;
+    transform_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
+    transform_msg.child_frame_id = body_tf_name_;
+    transform_msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose.Pos());
+    transform_msg.transform.rotation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
+
+    tf2_msgs::msg::TFMessage tf_msg;
+
+    tf_msg.transforms.push_back(transform_msg);
+
+    // Publish to ROS
+    tf_pub_->publish(tf_msg);
+  }
 
   // Save last time stamp
   last_time_ = current_time;
