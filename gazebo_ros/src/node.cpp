@@ -96,6 +96,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
 
   rclcpp::NodeOptions node_options;
   node_options.arguments(arguments);
+  node_options.automatically_declare_parameters_from_overrides(true);
   node_options.parameter_overrides(parameter_overrides);
 
   // Create node with parsed arguments
