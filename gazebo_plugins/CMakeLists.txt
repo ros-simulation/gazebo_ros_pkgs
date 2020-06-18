@@ -201,6 +201,7 @@ add_library(gazebo_ros_video SHARED
 target_include_directories(gazebo_ros_video PUBLIC include)
 ament_target_dependencies(gazebo_ros_video
   "gazebo_ros"
+  "image_transport"
   "sensor_msgs"
   "cv_bridge"
 )
