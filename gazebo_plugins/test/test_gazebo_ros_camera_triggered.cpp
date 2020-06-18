@@ -48,13 +48,14 @@ TEST_F(GazeboRosTriggeredCameraTest, CameraSubscribeTest)
   unsigned int msg_count{0};
   builtin_interfaces::msg::Time image_stamp;
 
-  auto sub = image_transport::create_subscription(node.get(),
-      "test_triggered_cam/image_raw_test",
-      [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
-        image_stamp = msg->header.stamp;
-        ++msg_count;
-      },
-      "raw");
+  auto sub = image_transport::create_subscription(
+    node.get(),
+    "test_triggered_cam/image_raw_test",
+    [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
+      image_stamp = msg->header.stamp;
+      ++msg_count;
+    },
+    "raw");
 
   // Step a bit and check that we do not get any messages
   world->Step(100);

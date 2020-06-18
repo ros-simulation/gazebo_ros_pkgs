@@ -70,8 +70,11 @@ class SpawnEntityNode(Node):
         parser.add_argument('-gazebo_namespace', type=str, default='',
                             help='ROS namespace of gazebo offered ROS interfaces. \
                             Default is without any namespace')
-        parser.add_argument('-robot_namespace', type=str, default=self.get_namespace(),
+        parser.add_argument('-robot_namespace', type=str, default='',
                             help='change ROS namespace of gazebo-plugins')
+        parser.add_argument('-timeout', type=float, default=30.0,
+                            help='Number of seconds to wait for the spawn and delete services to \
+                            become available')
         parser.add_argument('-unpause', action='store_true',
                             help='unpause physics after spawning entity')
         parser.add_argument('-wait', type=str, metavar='ENTITY_NAME',
@@ -234,7 +237,7 @@ class SpawnEntityNode(Node):
         # Unpause physics if user requested
         if self.args.unpause:
             client = self.create_client(Empty, '%s/unpause_physics' % self.args.gazebo_namespace)
-            if client.wait_for_service(timeout_sec=5.0):
+            if client.wait_for_service(timeout_sec=self.args.timeout):
                 self.get_logger().info(
                     'Calling service %s/unpause_physics' % self.args.gazebo_namespace)
                 client.call_async(Empty.Request())
@@ -257,7 +260,7 @@ class SpawnEntityNode(Node):
     def _spawn_entity(self, entity_xml, initial_pose):
         self.get_logger().info('Waiting for service %s/spawn_entity' % self.args.gazebo_namespace)
         client = self.create_client(SpawnEntity, '%s/spawn_entity' % self.args.gazebo_namespace)
-        if client.wait_for_service(timeout_sec=5.0):
+        if client.wait_for_service(timeout_sec=self.args.timeout):
             req = SpawnEntity.Request()
             req.name = self.args.entity
             req.xml = str(entity_xml, 'utf-8')
@@ -282,7 +285,7 @@ class SpawnEntityNode(Node):
         self.get_logger().info('Deleting entity [{}]'.format(self.args.entity))
         client = self.create_client(
             DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
-        if client.wait_for_service(timeout_sec=5.0):
+        if client.wait_for_service(timeout_sec=self.args.timeout):
             req = DeleteEntity.Request()
             req.name = self.args.entity
             self.get_logger().info(

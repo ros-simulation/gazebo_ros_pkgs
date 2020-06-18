@@ -109,6 +109,9 @@ void GazeboRosJointPoseTrajectory::Load(gazebo::physics::ModelPtr model, sdf::El
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Update rate
   auto update_rate = sdf->Get<double>("update_rate", 100.0).first;
   if (update_rate > 0.0) {
@@ -120,9 +123,10 @@ void GazeboRosJointPoseTrajectory::Load(gazebo::physics::ModelPtr model, sdf::El
 
   // Set Joint Trajectory Callback
   impl_->sub_ = impl_->ros_node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-    "set_joint_trajectory", rclcpp::QoS(rclcpp::KeepLast(1)),
-    std::bind(&GazeboRosJointPoseTrajectoryPrivate::SetJointTrajectory,
-    impl_.get(), std::placeholders::_1));
+    "set_joint_trajectory", qos.get_subscription_qos("set_joint_trajectory", rclcpp::QoS(1)),
+    std::bind(
+      &GazeboRosJointPoseTrajectoryPrivate::SetJointTrajectory,
+      impl_.get(), std::placeholders::_1));
 
   // Callback on every iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
@@ -149,7 +153,8 @@ void GazeboRosJointPoseTrajectoryPrivate::OnUpdate(const gazebo::common::UpdateI
   std::lock_guard<std::mutex> scoped_lock(lock_);
   if (has_trajectory_ && current_time >= trajectory_start_time_) {
     if (trajectory_index_ < points_.size()) {
-      RCLCPP_INFO(ros_node_->get_logger(), "time [%f] updating configuration [%d/%lu]",
+      RCLCPP_INFO(
+        ros_node_->get_logger(), "time [%f] updating configuration [%d/%lu]",
         current_time.Double(), trajectory_index_ + 1, points_.size());
 
       // get reference link pose before updates
@@ -176,7 +181,8 @@ void GazeboRosJointPoseTrajectoryPrivate::OnUpdate(const gazebo::common::UpdateI
           model_->SetWorldPose(reference_pose);
         }
       } else {
-        RCLCPP_ERROR(ros_node_->get_logger(),
+        RCLCPP_ERROR(
+          ros_node_->get_logger(),
           "point[%u] has different number of joint names[%u] and positions[%lu].",
           trajectory_index_ + 1, chain_size, points_[trajectory_index_].positions.size());
       }
@@ -213,12 +219,14 @@ void GazeboRosJointPoseTrajectoryPrivate::SetJointTrajectory(
       reference_link_ = boost::dynamic_pointer_cast<gazebo::physics::Link>(entity);
     }
     if (!reference_link_) {
-      RCLCPP_ERROR(ros_node_->get_logger(),
+      RCLCPP_ERROR(
+        ros_node_->get_logger(),
         "Plugin needs a reference link [%s] as frame_id, aborting.", reference_link_name.c_str());
       return;
     }
     model_ = reference_link_->GetParentModel();
-    RCLCPP_DEBUG(ros_node_->get_logger(),
+    RCLCPP_DEBUG(
+      ros_node_->get_logger(),
       "Update model pose by keeping link [%s] stationary inertially",
       reference_link_->GetName().c_str());
   }
@@ -229,7 +237,8 @@ void GazeboRosJointPoseTrajectoryPrivate::SetJointTrajectory(
   for (unsigned int i = 0; i < chain_size; ++i) {
     joints_[i] = model_->GetJoint(msg->joint_names[i]);
     if (!joints_[i]) {
-      RCLCPP_ERROR(ros_node_->get_logger(), "Joint [%s] not found. Trajectory not set.",
+      RCLCPP_ERROR(
+        ros_node_->get_logger(), "Joint [%s] not found. Trajectory not set.",
         msg->joint_names[i].c_str());
       return;
     }

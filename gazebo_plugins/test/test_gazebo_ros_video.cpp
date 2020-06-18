@@ -99,7 +99,8 @@ TEST_F(GazeboRosVideoTest, VideoSubscribeTest)
     gazebo::event::Events::postRender();
 
     EXPECT_NE(nullptr, scene->GetVisual("box_display"));
-    EXPECT_NE(nullptr, scene->GetVisual(
+    EXPECT_NE(
+      nullptr, scene->GetVisual(
         "box_display::base_link::visual::video_visual::display_video_controller"));
   }
 }

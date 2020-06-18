@@ -64,11 +64,12 @@ TEST_P(GazeboRosDepthCameraTest, DepthCameraSubscribeTest)
   unsigned int msg_count{0};
   builtin_interfaces::msg::Time image_stamp;
 
-  auto sub = image_transport::create_subscription(node.get(), GetParam().raw_image_topic,
-      [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
-        image_stamp = msg->header.stamp;
-        ++msg_count;
-      }, "raw");
+  auto sub = image_transport::create_subscription(
+    node.get(), GetParam().raw_image_topic,
+    [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
+      image_stamp = msg->header.stamp;
+      ++msg_count;
+    }, "raw");
 
   // Update rate is 0.5 Hz, so we step 3s sim time to be sure we get exactly 1 image at 2s
   world->Step(3000);
@@ -89,11 +90,12 @@ TEST_P(GazeboRosDepthCameraTest, DepthCameraSubscribeTest)
   unsigned int msg_count_depth{0};
   builtin_interfaces::msg::Time image_stamp_depth;
 
-  auto sub_depth = image_transport::create_subscription(node.get(), GetParam().depth_image_topic,
-      [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
-        image_stamp_depth = msg->header.stamp;
-        ++msg_count_depth;
-      }, "raw");
+  auto sub_depth = image_transport::create_subscription(
+    node.get(), GetParam().depth_image_topic,
+    [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
+      image_stamp_depth = msg->header.stamp;
+      ++msg_count_depth;
+    }, "raw");
 
   // Update rate is 0.5 Hz, so we step 3s sim time to be sure we get exactly 1 image at 2s
   world->Step(3000);
@@ -134,12 +136,14 @@ TEST_P(GazeboRosDepthCameraTest, DepthCameraSubscribeTest)
   EXPECT_EQ(8.0, image_stamp_pcl.sec);
 }
 
-INSTANTIATE_TEST_CASE_P(GazeboRosDepthCamera, GazeboRosDepthCameraTest, ::testing::Values(
-    TestParams({"worlds/gazebo_ros_depth_camera.world",
-      "test_cam/camera/raw_image_test",
-      "test_cam/camera/depth_image_test",
-      "test_cam/camera/points_test"})
-  ), );
+INSTANTIATE_TEST_CASE_P(
+  GazeboRosDepthCamera, GazeboRosDepthCameraTest, ::testing::Values(
+    TestParams(
+      {"worlds/gazebo_ros_depth_camera.world",
+        "test_cam/camera/raw_image_test",
+        "test_cam/camera/depth_image_test",
+        "test_cam/camera/points_test"})
+));
 
 int main(int argc, char ** argv)
 {

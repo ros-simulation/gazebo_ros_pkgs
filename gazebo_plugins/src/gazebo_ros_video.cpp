@@ -23,7 +23,7 @@
  */
 
 #include <cv_bridge/cv_bridge.h>
-#include <image_transport/image_transport.h>
+#include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.h>
 #include <opencv2/opencv.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -196,18 +196,21 @@ void GazeboRosVideo::Load(
 {
   impl_->rosnode_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->rosnode_->get_qos();
+
   int height = _sdf->Get<int>("height", 240).first;
 
   int width = _sdf->Get<int>("width", 320).first;
 
-  impl_->video_visual_ = std::make_shared<VideoVisual>(_parent->Name() + "::video_visual::" +
-      _sdf->Get<std::string>("name"), _parent, height, width);
+  impl_->video_visual_ = std::make_shared<VideoVisual>(
+    _parent->Name() + "::video_visual::" + _sdf->Get<std::string>("name"), _parent, height, width);
   _parent->GetScene()->AddVisual(impl_->video_visual_);
 
   // Subscribe to the image topic
   impl_->camera_subscriber_ =
     impl_->rosnode_->create_subscription<sensor_msgs::msg::Image>(
-    "~/image_raw", rclcpp::QoS(rclcpp::KeepLast(1)),
+    "~/image_raw", qos.get_subscription_qos("~/image_raw", rclcpp::QoS(1)),
     std::bind(&GazeboRosVideoPrivate::processImage, impl_.get(), std::placeholders::_1));
 
   impl_->new_image_available_ = false;
@@ -215,7 +218,8 @@ void GazeboRosVideo::Load(
   impl_->update_connection_ = gazebo::event::Events::ConnectPreRender(
     std::bind(&GazeboRosVideoPrivate::onUpdate, impl_.get()));
 
-  RCLCPP_INFO(impl_->rosnode_->get_logger(),
+  RCLCPP_INFO(
+    impl_->rosnode_->get_logger(),
     "GazeboRosVideo has started. Subscribed to [%s]",
     impl_->camera_subscriber_->get_topic_name());
 }

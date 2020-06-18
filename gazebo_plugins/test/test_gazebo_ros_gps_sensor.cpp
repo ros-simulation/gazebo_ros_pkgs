@@ -49,11 +49,11 @@ TEST_F(GazeboRosGpsSensorTest, GpsMessageCorrect)
   ASSERT_NE(nullptr, node);
 
   sensor_msgs::msg::NavSatFix::SharedPtr msg = nullptr;
-  auto sub =
-    node->create_subscription<sensor_msgs::msg::NavSatFix>("/gps/data", rclcpp::SensorDataQoS(),
-      [&msg](sensor_msgs::msg::NavSatFix::SharedPtr _msg) {
-        msg = _msg;
-      });
+  auto sub = node->create_subscription<sensor_msgs::msg::NavSatFix>(
+    "/gps/data", rclcpp::SensorDataQoS(),
+    [&msg](sensor_msgs::msg::NavSatFix::SharedPtr _msg) {
+      msg = _msg;
+    });
 
   world->Step(1);
   EXPECT_NEAR(0.0, box->WorldPose().Pos().X(), tol);
