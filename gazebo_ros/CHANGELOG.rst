@@ -2,6 +2,344 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.4.4 (2020-05-08)
+------------------
+* wait for service with variable timeout (`#1090 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1090>`_)
+* Contributors: Karsten Knese, Louise Poubel
+
+3.4.3 (2020-02-18)
+------------------
+* [backport][ros2] make transient local reliable (`#1033 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1033>`_) (`#1036 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1036>`_)
+  * [ros2] make transient local reliable (`#1033 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1033>`_)
+  * make transient local reliable
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * fix master
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * add launch test
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * make it actual latched
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * alpha sort
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * add launch_test dependency
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * more dependencies
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * remove debug print
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * is_initialized -> ok
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * Update gazebo_ros/test/entity_spawner.test.py
+  Co-Authored-By: chapulina <louise@openrobotics.org>
+  * use erase-remove idiom
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  * use ReadyToTest()
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+  Co-authored-by: chapulina <louise@openrobotics.org>
+  * Set timeout and call gzserver directly
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  Co-authored-by: chapulina <louise@openrobotics.org>
+* fix pathsep for windows (`#1028 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1028>`_)
+* Remove ROS-specific arguments before passing to argparse (`#994 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/994>`_)
+  This resolves argparse errors when trying to launch the spawn_entity script as a ROS node.
+  For example, a launch file like the following wouldn't work without this change:
+  <launch>
+  <arg name="model_urdf" default="$(find-pkg-share mymodels)/urdf/ball.urdf" />
+  <node
+  pkg="gazebo_ros"
+  exec="spawn_entity.py"
+  name="spawner"
+  args="-entity foo -file /path/to/my/model/foo.urdf" />
+  </launch>
+  Signed-off-by: Jacob Perron <jacob@openrobotics.org>
+* [ros2] Remove ported / deprecated (`#989 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/989>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* linter :sweat_smile:
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Uncommenting bond option on spawn_entity (wait Ctrl+C then remove entity) (`#986 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/986>`_)
+  * Uncommenting bond option on spawn_entity (wait Ctrl+C then remove entity)
+  Instead of waiting for a shutdown callback to be created in rclpy,
+  we can use the try/except to get the SIGINT signal, then delete the entity.
+  * Message formatting
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Conditional launch includes (`#979 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/979>`_)
+  * [ros2] Conditional launch includes
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * remove unused import
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Address reviews on `#868 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/868>`_ (`#972 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/972>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * [ros2] Migration of get/set world, model, joint, link, light properties
+  * Trying to pass CI test, try n1.
+  * clean up some linter warnings
+  * Requested changes in review, unfinished
+  * Fix uncrustify
+  * Address reviews
+  * more tests, joint types
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * Revert changes to GetModelProperties message
+  Document gazebo_ros_properties header
+  * Convert msgs pose to math pose and use it on SetCoG
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Spawn <plugin> without <ros> (`#983 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/983>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port spawn model to ROS2 (`#948 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/948>`_)
+  * [ros2] Port spawn model to ROS2
+  * Delete .ros1_unported files
+  * Fixes and add demo
+  Change spawn_model to spawn_entity
+  * Rename demo launch and add checks for service
+  * Fix reading xml file from param and model states
+  * remove diplicate
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * Use gazebo launch file
+  * Change topic behaviour
+* [ros2] Port gazebo launch scripts to ROS2 (`#962 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/962>`_)
+  * [ros2] Port gazebo launch scripts to ROS2
+  * Add gdb and valgrind option
+  * Use shell command for extra gazebo args
+* [ros2] Port joint pose trajectory to ROS2 (`#955 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/955>`_)
+  * [ros2] Port joint pose trajectory to ROS2
+  * Add conversion tests
+  Minor fixes
+* Merge pull request `#977 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/977>`_ from ros-simulation/backport
+  [backport] ros2 -> dashing
+* [ros2] Port Link states to ROS2 (`#969 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/969>`_)
+  * [ros2] Port model states to ROS2
+  * [ros2] Port link states to ROS2
+  * Change usage of body -> link
+  * Remove link_states from .ros1_unported
+* set gazebo library dirs (`#963 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/963>`_)
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+* [ros2] Port gazebo_ros_path plugin to ROS2 (`#925 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/925>`_)
+  * [ros2] Port gazebo_ros_path plugin
+  * Minor fixes
+  * Change plugin launch file to python script
+  * Fix for flake8 test
+* [ros2] Port bumper sensor to ROS2 (`#943 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/943>`_)
+  * [ros2] Port bumper sensor to ROS2
+  * Add author name
+  * Minor fixes and add contact msg conversion
+  * Remove unused header includes
+* [ros2] Fix tests on Dashing (`#953 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/953>`_)
+  * [ros2] Fix camera triggered test on Dashing
+  backport remove noe fix and re-enable distortion tests
+  * improve robustness of joint state pub test
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port model states to ROS2 (`#968 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/968>`_)
+  * [ros2] Port model states to ROS2
+  * remove unported code
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port hand of god to ROS2 (`#957 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/957>`_)
+  * [ros2] Port hand of god to ROS2
+  * Minor fixes
+* [ros2] Port planar move to ROS2 (`#958 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/958>`_)
+  * [ros2] Port planar move to ROS2
+  * Add test for pose conversion
+* use c_str() (`#950 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/950>`_) (`#954 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/954>`_)
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+* Contributors: Jacob Perron, Jonathan Noyola, Karsten Knese, Louise Poubel, Shivesh Khaitan, alexfneves, chapulina
+
+3.4.2 (2019-11-12)
+------------------
+* Merge branch 'ros2' into eloquent
+* Remove ROS-specific arguments before passing to argparse (`#994 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/994>`_) (`#1013 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1013>`_)
+  This resolves argparse errors when trying to launch the spawn_entity script as a ROS node.
+  For example, a launch file like the following wouldn't work without this change:
+  <launch>
+  <arg name="model_urdf" default="$(find-pkg-share mymodels)/urdf/ball.urdf" />
+  <node
+  pkg="gazebo_ros"
+  exec="spawn_entity.py"
+  name="spawner"
+  args="-entity foo -file /path/to/my/model/foo.urdf" />
+  </launch>
+  Signed-off-by: Jacob Perron <jacob@openrobotics.org>
+* [ros2] Add remapping tag (`#1011 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1011>`_)
+  * add --ros-args and a remapping element for ros arguments
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * keep backward compatibility
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * update docs and world file accordingly
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+  * remap all the things :fist_raised:
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* catch const ref to fix -Wcatch-value warnings (`#1012 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1012>`_)
+  Signed-off-by: Mikael Arguedas <mikael.arguedas@gmail.com>
+* Contributors: Jacob Perron, Louise Poubel, Mikael Arguedas
+
+3.4.1 (2019-10-10)
+------------------
+
+3.4.0 (2019-10-03)
+------------------
+* [ros2] Uncommenting bond option on spawn_entity (wait Ctrl+C then remove entity) (`#986 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/986>`_)
+  * Uncommenting bond option on spawn_entity (wait Ctrl+C then remove entity)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Conditional launch includes (`#979 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/979>`_)
+  * remove unused import
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Spawn <plugin> without <ros> (`#983 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/983>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Merge pull request `#980 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/980>`_ from shiveshkhaitan/forward_port
+  [forward_port] dashing -> ros2
+* [ros2] Port spawn model to ROS2 (`#948 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/948>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port gazebo launch scripts to ROS2 (`#962 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/962>`_)
+* [ros2] Port joint pose trajectory to ROS2 (`#955 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/955>`_)
+* [ros2] Port Link states to ROS2 (`#969 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/969>`_)
+* [ros2] Fix tests on Dashing (`#953 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/953>`_)
+  * [ros2] Fix camera triggered test on Dashing
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port model states to ROS2 (`#968 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/968>`_)
+  * [ros2] Port model states to ROS2
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port hand of god to ROS2 (`#957 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/957>`_)
+* [ros2] Port planar move to ROS2 (`#958 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/958>`_)
+* [ros2] Port apply/clear wrench and effort services (`#941 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/941>`_)
+* [ros2] Port gazebo_ros_path plugin to ROS2 (`#925 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/925>`_)
+* set gazebo library dirs (`#963 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/963>`_)
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+* [ros2] Port bumper sensor to ROS2 (`#943 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/943>`_)
+* Fix for multiple video plugins (`#898 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/898>`_) (`#937 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/937>`_)
+* use c_str() (`#950 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/950>`_)
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Karsten Knese, Louise Poubel, Shivesh Khaitan, alexfneves, chapulina
+
+3.3.5 (2020-05-08)
+------------------
+* fix pathsep for windows (`#1028 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1028>`_)
+* Contributors: Jonathan Noyola
+
+3.3.4 (2019-09-18)
+------------------
+* Remove ROS-specific arguments before passing to argparse (`#994 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/994>`_)
+  This resolves argparse errors when trying to launch the spawn_entity script as a ROS node.
+  For example, a launch file like the following wouldn't work without this change:
+  <launch>
+  <arg name="model_urdf" default="$(find-pkg-share mymodels)/urdf/ball.urdf" />
+  <node
+  pkg="gazebo_ros"
+  exec="spawn_entity.py"
+  name="spawner"
+  args="-entity foo -file /path/to/my/model/foo.urdf" />
+  </launch>
+  Signed-off-by: Jacob Perron <jacob@openrobotics.org>
+* [ros2] Remove ported / deprecated (`#989 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/989>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* linter :sweat_smile:
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Uncommenting bond option on spawn_entity (wait Ctrl+C then remove entity) (`#986 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/986>`_)
+  * Uncommenting bond option on spawn_entity (wait Ctrl+C then remove entity)
+  Instead of waiting for a shutdown callback to be created in rclpy,
+  we can use the try/except to get the SIGINT signal, then delete the entity.
+  * Message formatting
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Contributors: Jacob Perron, Louise Poubel, alexfneves, chapulina
+
+3.3.3 (2019-08-23)
+------------------
+* [ros2] Conditional launch includes (`#979 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/979>`_)
+  * [ros2] Conditional launch includes
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * remove unused import
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Address reviews on `#868 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/868>`_ (`#972 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/972>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * [ros2] Migration of get/set world, model, joint, link, light properties
+  * Trying to pass CI test, try n1.
+  * clean up some linter warnings
+  * Requested changes in review, unfinished
+  * Fix uncrustify
+  * Address reviews
+  * more tests, joint types
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * Revert changes to GetModelProperties message
+  Document gazebo_ros_properties header
+  * Convert msgs pose to math pose and use it on SetCoG
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Spawn <plugin> without <ros> (`#983 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/983>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port spawn model to ROS2 (`#948 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/948>`_)
+  * [ros2] Port spawn model to ROS2
+  * Delete .ros1_unported files
+  * Fixes and add demo
+  Change spawn_model to spawn_entity
+  * Rename demo launch and add checks for service
+  * Fix reading xml file from param and model states
+  * remove diplicate
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * Use gazebo launch file
+  * Change topic behaviour
+* [ros2] Port gazebo launch scripts to ROS2 (`#962 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/962>`_)
+  * [ros2] Port gazebo launch scripts to ROS2
+  * Add gdb and valgrind option
+  * Use shell command for extra gazebo args
+* [ros2] Port joint pose trajectory to ROS2 (`#955 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/955>`_)
+  * [ros2] Port joint pose trajectory to ROS2
+  * Add conversion tests
+  Minor fixes
+* Merge pull request `#977 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/977>`_ from ros-simulation/backport
+  [backport] ros2 -> dashing
+* [ros2] Port Link states to ROS2 (`#969 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/969>`_)
+  * [ros2] Port model states to ROS2
+  * [ros2] Port link states to ROS2
+  * Change usage of body -> link
+  * Remove link_states from .ros1_unported
+* set gazebo library dirs (`#963 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/963>`_)
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+* [ros2] Port gazebo_ros_path plugin to ROS2 (`#925 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/925>`_)
+  * [ros2] Port gazebo_ros_path plugin
+  * Minor fixes
+  * Change plugin launch file to python script
+  * Fix for flake8 test
+* [ros2] Port bumper sensor to ROS2 (`#943 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/943>`_)
+  * [ros2] Port bumper sensor to ROS2
+  * Add author name
+  * Minor fixes and add contact msg conversion
+  * Remove unused header includes
+* [ros2] Fix tests on Dashing (`#953 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/953>`_)
+  * [ros2] Fix camera triggered test on Dashing
+  backport remove noe fix and re-enable distortion tests
+  * improve robustness of joint state pub test
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port model states to ROS2 (`#968 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/968>`_)
+  * [ros2] Port model states to ROS2
+  * remove unported code
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port hand of god to ROS2 (`#957 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/957>`_)
+  * [ros2] Port hand of god to ROS2
+  * Minor fixes
+* Contributors: Karsten Knese, Shivesh Khaitan, chapulina
+
+3.3.2 (2019-07-31)
+------------------
+* [ros2] Port planar move to ROS2 (`#958 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/958>`_)
+  * [ros2] Port planar move to ROS2
+  * Add test for pose conversion
+* use c_str() (`#950 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/950>`_) (`#954 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/954>`_)
+  Signed-off-by: Karsten Knese <karsten@openrobotics.org>
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Shivesh Khaitan, chapulina
+
 3.3.1 (2019-05-30)
 ------------------
 * Declare parameters and use overrides (`#931 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/931>`_)

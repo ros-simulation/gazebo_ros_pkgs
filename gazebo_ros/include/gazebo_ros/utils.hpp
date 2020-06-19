@@ -18,6 +18,7 @@
 #include <gazebo/common/Time.hh>
 #include <gazebo/sensors/Noise.hh>
 #include <gazebo/sensors/Sensor.hh>
+#include <gazebo_ros/utils_visibility_control.h>
 
 #include <string>
 
@@ -37,12 +38,14 @@ namespace gazebo_ros
 /// \return If the model is Gaussian, return the square of the standard deviation.
 /// \return If the model is no noise, return 0.
 /// \return If the model is custom, return -1
+GAZEBO_ROS_UTILS_PUBLIC
 double NoiseVariance(const gazebo::sensors::Noise & _noise);
 
 /// Get the variance of a gazebo sensor noise model
 /// \param[in] _noise_ptr Shared pointer to the gazebo noise model
 /// \return If the pointer is nullptr, return 0.
 /// \return Otherwise, returns the same as @ref NoiseVariance(const gazebo::sensors::Noise &).
+GAZEBO_ROS_UTILS_PUBLIC
 double NoiseVariance(const gazebo::sensors::NoisePtr & _noise_ptr);
 
 /// Gets the base name of a gazebo scoped name
@@ -51,6 +54,7 @@ double NoiseVariance(const gazebo::sensors::NoisePtr & _noise_ptr);
 /// \return Input string with all base scopes removed, see example
 /// \todo Deprecate once with is implemented in gazebo/ignition/sdf.
 ///       See: https://bitbucket.org/osrf/gazebo/issues/1735/add-helper-functions-to-handle-scoped
+GAZEBO_ROS_UTILS_PUBLIC
 std::string ScopedNameBase(const std::string & str);
 
 /// Selects an appropriate tf frame id for a gazebo sensor
@@ -62,10 +66,11 @@ std::string ScopedNameBase(const std::string & str);
 /// \param[in] _sensor The gazebo sensor which the frame should be in
 /// \param[in] _sdf SDF pointer which may contain a tag to override the frame id
 /// \return The string representing the tf frame of the sensor
+GAZEBO_ROS_UTILS_PUBLIC
 std::string SensorFrameID(const gazebo::sensors::Sensor & _sensor, const sdf::Element & _sdf);
 
 /// Helper class used to throttle something to a given rate
-class Throttler
+class GAZEBO_ROS_UTILS_PUBLIC Throttler
 {
 public:
   /// Create a throttler with a frequency
