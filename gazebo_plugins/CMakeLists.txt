@@ -39,23 +39,13 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 
-include_directories(include
-  ${gazebo_dev_INCLUDE_DIRS}
-  ${gazebo_ros_INCLUDE_DIRS}
-  ${geometry_msgs_INCLUDE_DIRS}
-  ${image_transport_INCLUDE_DIRS}
-  ${cv_bridge_INCLUDE_DIRS}
-  ${nav_msgs_INCLUDE_DIRS}
-  ${sensor_msgs_INCLUDE_DIRS}
-  ${tf2_ros_INCLUDE_DIRS}
-  ${tf2_INCLUDE_DIRS}
-)
 link_directories(${gazebo_dev_LIBRARY_DIRS})
 
 # gazebo_ros_joint_state_publisher
 add_library(gazebo_ros_joint_state_publisher SHARED
   src/gazebo_ros_joint_state_publisher.cpp
 )
+target_include_directories(gazebo_ros_joint_state_publisher PUBLIC include)
 ament_target_dependencies(gazebo_ros_joint_state_publisher
   "gazebo_dev"
   "gazebo_ros"
@@ -68,6 +58,7 @@ ament_export_libraries(gazebo_ros_joint_state_publisher)
 add_library(gazebo_ros_diff_drive SHARED
   src/gazebo_ros_diff_drive.cpp
 )
+target_include_directories(gazebo_ros_diff_drive PUBLIC include)
 ament_target_dependencies(gazebo_ros_diff_drive
   "gazebo_dev"
   "gazebo_ros"
@@ -84,6 +75,7 @@ ament_export_libraries(gazebo_ros_diff_drive)
 add_library(gazebo_ros_force SHARED
   src/gazebo_ros_force.cpp
 )
+target_include_directories(gazebo_ros_force PUBLIC include)
 ament_target_dependencies(gazebo_ros_force
   "gazebo_dev"
   "gazebo_ros"
@@ -96,6 +88,7 @@ ament_export_libraries(gazebo_ros_force)
 add_library(gazebo_ros_template SHARED
   src/gazebo_ros_template.cpp
 )
+target_include_directories(gazebo_ros_template PUBLIC include)
 ament_target_dependencies(gazebo_ros_template
   "gazebo_dev"
   "gazebo_ros"
@@ -107,6 +100,7 @@ ament_export_libraries(gazebo_ros_template)
 add_library(multi_camera_plugin SHARED
   src/multi_camera_plugin.cpp
 )
+target_include_directories(multi_camera_plugin PUBLIC include)
 ament_target_dependencies(multi_camera_plugin
   "gazebo_dev"
 )
@@ -121,6 +115,7 @@ target_compile_definitions(multi_camera_plugin
 add_library(gazebo_ros_camera SHARED
   src/gazebo_ros_camera.cpp
 )
+target_include_directories(gazebo_ros_camera PUBLIC include)
 ament_target_dependencies(gazebo_ros_camera
   "camera_info_manager"
   "gazebo_dev"
@@ -141,6 +136,7 @@ ament_export_libraries(gazebo_ros_camera)
 add_library(gazebo_ros_imu_sensor SHARED
   src/gazebo_ros_imu_sensor.cpp
 )
+target_include_directories(gazebo_ros_imu_sensor PUBLIC include)
 ament_target_dependencies(gazebo_ros_imu_sensor
   "gazebo_ros"
   "sensor_msgs"
@@ -156,6 +152,7 @@ ament_export_libraries(gazebo_ros_imu_sensor)
 add_library(gazebo_ros_gps_sensor SHARED
   src/gazebo_ros_gps_sensor.cpp
 )
+target_include_directories(gazebo_ros_gps_sensor PUBLIC include)
 ament_target_dependencies(gazebo_ros_gps_sensor
   "gazebo_ros"
   "sensor_msgs"
@@ -167,6 +164,7 @@ ament_export_libraries(gazebo_ros_gps_sensor)
 add_library(gazebo_ros_ray_sensor SHARED
   src/gazebo_ros_ray_sensor.cpp
 )
+target_include_directories(gazebo_ros_ray_sensor PUBLIC include)
 ament_target_dependencies(gazebo_ros_ray_sensor
   "gazebo_ros"
   "sensor_msgs"
@@ -176,6 +174,7 @@ ament_export_libraries(gazebo_ros_ray_sensor)
 add_library(gazebo_ros_p3d SHARED
   src/gazebo_ros_p3d.cpp
 )
+target_include_directories(gazebo_ros_p3d PUBLIC include)
 ament_target_dependencies(gazebo_ros_p3d
   "gazebo_ros"
   "gazebo_dev"
@@ -192,6 +191,7 @@ ament_export_libraries(gazebo_ros_p3d)
 add_library(gazebo_ros_tricycle_drive SHARED
   src/gazebo_ros_tricycle_drive.cpp
 )
+target_include_directories(gazebo_ros_tricycle_drive PUBLIC include)
 ament_target_dependencies(gazebo_ros_tricycle_drive
   "gazebo_ros"
   "geometry_msgs"
@@ -208,8 +208,10 @@ ament_export_libraries(gazebo_ros_tricycle_drive)
 add_library(gazebo_ros_video SHARED
   src/gazebo_ros_video.cpp
 )
+target_include_directories(gazebo_ros_video PUBLIC include)
 ament_target_dependencies(gazebo_ros_video
   "gazebo_ros"
+  "image_transport"
   "sensor_msgs"
   "cv_bridge"
 )
@@ -219,6 +221,7 @@ ament_export_libraries(gazebo_ros_video)
 add_library(gazebo_ros_ft_sensor SHARED
   src/gazebo_ros_ft_sensor.cpp
 )
+target_include_directories(gazebo_ros_ft_sensor PUBLIC include)
 ament_target_dependencies(gazebo_ros_ft_sensor
   "gazebo_ros"
   "gazebo_dev"
@@ -231,6 +234,7 @@ ament_export_libraries(gazebo_ros_ft_sensor)
 add_library(gazebo_ros_bumper SHARED
   src/gazebo_ros_bumper.cpp
 )
+target_include_directories(gazebo_ros_bumper PUBLIC include)
 target_link_libraries(gazebo_ros_bumper
   ContactPlugin
 )
@@ -245,6 +249,7 @@ ament_export_libraries(gazebo_ros_bumper)
 add_library(gazebo_ros_harness SHARED
   src/gazebo_ros_harness.cpp
 )
+target_include_directories(gazebo_ros_harness PUBLIC include)
 ament_target_dependencies(gazebo_ros_harness
   "gazebo_dev"
   "gazebo_ros"
@@ -260,6 +265,7 @@ ament_export_libraries(gazebo_ros_harness)
 add_library(gazebo_ros_hand_of_god SHARED
   src/gazebo_ros_hand_of_god.cpp
 )
+target_include_directories(gazebo_ros_hand_of_god PUBLIC include)
 ament_target_dependencies(gazebo_ros_hand_of_god
   "gazebo_ros"
   "gazebo_dev"
@@ -274,6 +280,7 @@ ament_export_libraries(gazebo_ros_hand_of_god)
 add_library(gazebo_ros_ackermann_drive SHARED
   src/gazebo_ros_ackermann_drive.cpp
 )
+target_include_directories(gazebo_ros_ackermann_drive PUBLIC include)
 ament_target_dependencies(gazebo_ros_ackermann_drive
   "gazebo_dev"
   "gazebo_ros"
@@ -290,6 +297,7 @@ ament_export_libraries(gazebo_ros_ackermann_drive)
 add_library(gazebo_ros_elevator SHARED
   src/gazebo_ros_elevator.cpp
 )
+target_include_directories(gazebo_ros_elevator PUBLIC include)
 ament_target_dependencies(gazebo_ros_elevator
   "gazebo_ros"
   "gazebo_dev"
@@ -305,6 +313,7 @@ ament_export_libraries(gazebo_ros_elevator)
 add_library(gazebo_ros_vacuum_gripper SHARED
   src/gazebo_ros_vacuum_gripper.cpp
 )
+target_include_directories(gazebo_ros_vacuum_gripper PUBLIC include)
 ament_target_dependencies(gazebo_ros_vacuum_gripper
   "gazebo_ros"
   "gazebo_dev"
@@ -318,6 +327,7 @@ ament_export_libraries(gazebo_ros_vacuum_gripper)
 add_library(gazebo_ros_joint_pose_trajectory SHARED
   src/gazebo_ros_joint_pose_trajectory.cpp
 )
+target_include_directories(gazebo_ros_joint_pose_trajectory PUBLIC include)
 ament_target_dependencies(gazebo_ros_joint_pose_trajectory
   "gazebo_dev"
   "gazebo_ros"
@@ -330,6 +340,7 @@ ament_export_libraries(gazebo_ros_joint_pose_trajectory)
 add_library(gazebo_ros_planar_move SHARED
   src/gazebo_ros_planar_move.cpp
 )
+target_include_directories(gazebo_ros_planar_move PUBLIC include)
 ament_target_dependencies(gazebo_ros_planar_move
   "gazebo_dev"
   "gazebo_ros"
@@ -345,6 +356,7 @@ ament_export_libraries(gazebo_ros_planar_move)
 add_library(gazebo_ros_projector SHARED
   src/gazebo_ros_projector.cpp
 )
+target_include_directories(gazebo_ros_projector PUBLIC include)
 ament_target_dependencies(gazebo_ros_projector
   "gazebo_ros"
   "gazebo_dev"
