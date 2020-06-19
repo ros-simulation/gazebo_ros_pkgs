@@ -2,6 +2,46 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.4.4 (2020-05-08)
+------------------
+
+3.4.3 (2020-02-18)
+------------------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+
+3.4.2 (2019-11-12)
+------------------
+* Merge branch 'ros2' into eloquent
+* Remove TODO in package.xml (`#1010 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1010>`_)
+  As I understand, listing execution dependencies is the correct way to form a metapackage.
+  Signed-off-by: Jacob Perron <jacob@openrobotics.org>
+* Contributors: Jacob Perron, Louise Poubel
+
+3.4.1 (2019-10-10)
+------------------
+
+3.4.0 (2019-10-03)
+------------------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Contributors: chapulina
+
+3.3.5 (2020-05-08)
+------------------
+
+3.3.4 (2019-09-18)
+------------------
+
+3.3.3 (2019-08-23)
+------------------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Contributors: chapulina
+
+3.3.2 (2019-07-31)
+------------------
+
 3.3.1 (2019-05-30)
 ------------------
 

@@ -220,7 +220,7 @@ INSTANTIATE_TEST_CASE_P(
         "undistorted_image",
         "distorted_image",
         "distorted_info"})
-  ), );
+));
 
 int main(int argc, char ** argv)
 {

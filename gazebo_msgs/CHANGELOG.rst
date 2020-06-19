@@ -2,6 +2,96 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.4.4 (2020-05-08)
+------------------
+
+3.4.3 (2020-02-18)
+------------------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Address reviews on `#868 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/868>`_ (`#972 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/972>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * [ros2] Migration of get/set world, model, joint, link, light properties
+  * Trying to pass CI test, try n1.
+  * clean up some linter warnings
+  * Requested changes in review, unfinished
+  * Fix uncrustify
+  * Address reviews
+  * more tests, joint types
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * Revert changes to GetModelProperties message
+  Document gazebo_ros_properties header
+  * Convert msgs pose to math pose and use it on SetCoG
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port joint pose trajectory to ROS2 (`#955 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/955>`_)
+  * [ros2] Port joint pose trajectory to ROS2
+  * Add conversion tests
+* Contributors: Louise Poubel, Shivesh Khaitan, chapulina
+
+3.4.2 (2019-11-12)
+------------------
+
+3.4.1 (2019-10-10)
+------------------
+
+3.4.0 (2019-10-03)
+------------------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Merge pull request `#980 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/980>`_ from shiveshkhaitan/forward_port
+  [forward_port] dashing -> ros2
+* [ros2] Port joint pose trajectory to ROS2 (`#955 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/955>`_)
+* [ros2] Port apply/clear wrench and effort services (`#941 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/941>`_)
+  * Change gazebo_ros_effort to gazebo_ros_force_system. Change usage of body to link
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Shivesh Khaitan, chapulina
+
+3.3.5 (2020-05-08)
+------------------
+
+3.3.4 (2019-09-18)
+------------------
+
+3.3.3 (2019-08-23)
+------------------
+* Add maintainer (`#985 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/985>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* Address reviews on `#868 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/868>`_ (`#972 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/972>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * [ros2] Migration of get/set world, model, joint, link, light properties
+  * Trying to pass CI test, try n1.
+  * clean up some linter warnings
+  * Requested changes in review, unfinished
+  * Fix uncrustify
+  * Address reviews
+  * more tests, joint types
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+  * Revert changes to GetModelProperties message
+  Document gazebo_ros_properties header
+  * Convert msgs pose to math pose and use it on SetCoG
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* [ros2] Port joint pose trajectory to ROS2 (`#955 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/955>`_)
+  * [ros2] Port joint pose trajectory to ROS2
+  * Add conversion tests
+  Minor fixes
+* Contributors: Shivesh Khaitan, chapulina
+
+3.3.2 (2019-07-31)
+------------------
+* Crystal changes for dashing (`#933 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/933>`_)
+  * [ros2] World plugin to get/set entity state services (`#839 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/839>`_)
+  remove status_message
+  * [ros2] Port time commands (pause / reset) (`#866 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/866>`_)
+  * relative -> reference
+* Contributors: Shivesh Khaitan
+
 3.3.1 (2019-05-30)
 ------------------
 
