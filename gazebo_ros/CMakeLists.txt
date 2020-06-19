@@ -11,6 +11,16 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 endif()
 
+if(WIN32)
+  add_compile_definitions(
+    # For math constants
+    _USE_MATH_DEFINES
+    # Minimize Windows namespace collision
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN
+  )
+endif()
+
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(gazebo_dev REQUIRED)
@@ -40,6 +50,9 @@ target_include_directories(gazebo_ros_node
     $<INSTALL_INTERFACE:include>
     ${gazebo_dev_INCLUDE_DIRS}
 )
+if(WIN32)
+  target_compile_definitions(gazebo_ros_node PRIVATE "GAZEBO_ROS_NODE_BUILDING_DLL")
+endif()
 
 ament_target_dependencies(gazebo_ros_node
   "gazebo_dev"
@@ -58,6 +71,9 @@ target_include_directories(gazebo_ros_utils
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+if(WIN32)
+  target_compile_definitions(gazebo_ros_utils PRIVATE "GAZEBO_ROS_UTILS_BUILDING_DLL")
+endif()
 ament_target_dependencies(gazebo_ros_utils
   "gazebo_dev"
   "rclcpp"
@@ -94,6 +110,20 @@ target_link_libraries(gazebo_ros_factory
   gazebo_ros_utils
 )
 ament_export_libraries(gazebo_ros_factory)
+
+# gazebo_ros_properties
+add_library(gazebo_ros_properties SHARED
+  src/gazebo_ros_properties.cpp
+)
+ament_target_dependencies(gazebo_ros_properties
+  "rclcpp"
+  "gazebo_dev"
+  "gazebo_msgs"
+)
+target_link_libraries(gazebo_ros_properties
+  gazebo_ros_node
+)
+ament_export_libraries(gazebo_ros_properties)
 
 # gazebo_ros_state
 add_library(gazebo_ros_state SHARED
@@ -150,6 +180,7 @@ install(
     gazebo_ros_force_system
     gazebo_ros_init
     gazebo_ros_node
+    gazebo_ros_properties
     gazebo_ros_state
     gazebo_ros_utils
   ARCHIVE DESTINATION lib

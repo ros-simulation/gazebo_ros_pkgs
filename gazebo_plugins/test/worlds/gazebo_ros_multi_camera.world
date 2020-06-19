@@ -1,0 +1,65 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <model name="camera_model">
+      <static>true</static>
+      <link name="camera_link">
+        <sensor type="multicamera" name="camera1">
+          <update_rate>0.5</update_rate>
+          <camera name="left">
+            <horizontal_fov>1.3962634</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.02</near>
+              <far>300</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <!-- Noise is sampled independently per pixel on each frame.
+                   That pixel's noise value is added to each of its color
+                   channels, which at that point lie in the range [0,1]. -->
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+          </camera>
+          <camera name="right">
+            <horizontal_fov>1.3962634</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.02</near>
+              <far>300</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <!-- Noise is sampled independently per pixel on each frame.
+                   That pixel's noise value is added to each of its color
+                   channels, which at that point lie in the range [0,1]. -->
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+          </camera>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <ros>
+              <namespace>test_cam</namespace>
+              <remapping>camera1/left/image_raw:=camera/left/image_test</remapping>
+              <remapping>camera1/right/image_raw:=camera/right/image_test</remapping>
+              <remapping>camera1/left/camera_info:=camera/left/camera_info_test</remapping>
+              <remapping>camera1/right/camera_info:=camera/right/camera_info_test</remapping>
+            </ros>
+            <!-- camera_name>omit so it defaults to sensor name</camera_name-->
+            <!-- frame_name>omit so it defaults to link name</frame_name-->
+            <hack_baseline>0.07</hack_baseline>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>
