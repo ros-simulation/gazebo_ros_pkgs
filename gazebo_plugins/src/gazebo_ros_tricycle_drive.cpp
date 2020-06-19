@@ -238,6 +238,9 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Odometry
   impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
   impl_->robot_base_frame_ = _sdf->Get<std::string>("robot_base_frame", "base_link").first;
@@ -264,7 +267,8 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   auto steering_joint = _sdf->Get<std::string>("steering_joint", "front_steering_joint").first;
   impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING] = _model->GetJoint(steering_joint);
   if (!impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Steering joint [%s] not found, plugin will not work.", steering_joint.c_str());
     impl_->ros_node_.reset();
     return;
@@ -275,7 +279,8 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED] = _model->GetJoint(
     wheel_actuated_joint);
   if (!impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Wheel actuated joint [%s] not found, plugin will not work.",
       wheel_actuated_joint.c_str());
     impl_->ros_node_.reset();
@@ -287,7 +292,8 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ENCODER_LEFT] = _model->GetJoint(
     wheel_encoder_left_joint);
   if (!impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ENCODER_LEFT]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Left wheel encoder joint [%s] not found, plugin will not work.",
       wheel_encoder_left_joint.c_str());
     impl_->ros_node_.reset();
@@ -299,7 +305,8 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ENCODER_RIGHT] = _model->GetJoint(
     wheel_encoder_right_joint);
   if (!impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ENCODER_RIGHT]) {
-    RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(),
       "Right wheel encoder joint [%s] not found, plugin will not work.",
       wheel_encoder_right_joint.c_str());
     impl_->ros_node_.reset();
@@ -307,10 +314,10 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   }
 
   impl_->max_wheel_torque_ = _sdf->Get<double>("max_wheel_torque", 0.15).first;
-  impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]->SetParam("fmax", 0,
-    impl_->max_wheel_torque_);
-  impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam("fmax", 0,
-    impl_->max_wheel_torque_);
+  impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]->SetParam(
+    "fmax", 0, impl_->max_wheel_torque_);
+  impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam(
+    "fmax", 0, impl_->max_wheel_torque_);
 
   // Update rate
   auto update_rate = _sdf->Get<double>("update_rate", 100).first;
@@ -322,19 +329,21 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->last_actuator_update_ = _model->GetWorld()->SimTime();
 
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
-    "cmd_vel", rclcpp::QoS(rclcpp::KeepLast(1)),
+    "cmd_vel", qos.get_subscription_qos("cmd_vel", rclcpp::QoS(1)),
     std::bind(&GazeboRosTricycleDrivePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(),
-    "Subscribe to [%s]", impl_->cmd_vel_sub_->get_topic_name());
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(), "Subscribe to [%s]", impl_->cmd_vel_sub_->get_topic_name());
 
   impl_->publish_wheel_tf_ = _sdf->Get<bool>("publish_wheel_tf", false).first;
 
   impl_->publish_wheel_joint_state_ = _sdf->Get<bool>("publish_wheel_joint_state", false).first;
   if (impl_->publish_wheel_joint_state_) {
     impl_->joint_state_publisher_ =
-      impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1000);
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise joint_states on [%s]",
+      impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>(
+      "joint_states", qos.get_publisher_qos("joint_states", rclcpp::QoS(1000)));
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Advertise joint_states on [%s]",
       impl_->joint_state_publisher_->get_topic_name());
   }
 
@@ -342,9 +351,10 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->publish_odom_ = _sdf->Get<bool>("publish_odom", false).first;
   if (impl_->publish_odom_) {
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
-      "odom", rclcpp::QoS(rclcpp::KeepLast(1)));
+      "odom", qos.get_publisher_qos("odom", rclcpp::QoS(1)));
 
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
       impl_->odometry_pub_->get_topic_name());
   }
 
@@ -354,7 +364,8 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
       impl_->ros_node_);
 
     if (impl_->publish_odom_) {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(),
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(),
         "Publishing odom transforms between [%s] and [%s]", impl_->odometry_frame_.c_str(),
         impl_->robot_base_frame_.c_str());
     }
@@ -397,10 +408,10 @@ void GazeboRosTricycleDrive::Reset()
   {
     gazebo::common::Time current_time =
       impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->GetWorld()->SimTime();
-    impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]->SetParam("fmax", 0,
-      impl_->max_wheel_torque_);
-    impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam("fmax", 0,
-      impl_->max_wheel_torque_);
+    impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]->SetParam(
+      "fmax", 0, impl_->max_wheel_torque_);
+    impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam(
+      "fmax", 0, impl_->max_wheel_torque_);
     impl_->joints_[GazeboRosTricycleDrivePrivate::WHEEL_ACTUATED]->SetParam("vel", 0, 0.0);
     impl_->joints_[GazeboRosTricycleDrivePrivate::STEERING]->SetParam("vel", 0, 0.0);
     impl_->last_actuator_update_ = current_time;

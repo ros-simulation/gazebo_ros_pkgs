@@ -40,8 +40,8 @@ class GazeboRosVacuumGripperPrivate;
         <namespace>/demo</namespace>
 
         <!-- Remapping service and topic names -->
-        <argument>switch:=custom_switch</argument>
-        <argument>grasping:=custom_grasping</argument>
+        <remapping>switch:=custom_switch</remapping>
+        <remapping>grasping:=custom_grasping</remapping>
       </ros>
 
       <!-- Link associated with gripper -->

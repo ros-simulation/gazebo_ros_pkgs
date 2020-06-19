@@ -53,8 +53,11 @@ void GazeboRosElevator::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   impl_->sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::String>(
-    "elevator", rclcpp::QoS(rclcpp::KeepLast(1)),
+    "elevator", qos.get_subscription_qos("elevator", rclcpp::QoS(1)),
     std::bind(&GazeboRosElevator::OnElevator, this, std::placeholders::_1));
 
   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]", impl_->sub_->get_topic_name());

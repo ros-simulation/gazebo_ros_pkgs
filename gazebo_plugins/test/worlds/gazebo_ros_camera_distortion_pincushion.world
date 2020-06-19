@@ -39,8 +39,8 @@
           </camera>
           <plugin name="camera_distorted" filename="libgazebo_ros_camera.so">
             <ros>
-              <argument>distorted_camera/image_raw:=distorted_image</argument>
-              <argument>distorted_camera/camera_info:=distorted_info</argument>
+              <remapping>distorted_camera/image_raw:=distorted_image</remapping>
+              <remapping>distorted_camera/camera_info:=distorted_info</remapping>
             </ros>
             <camera_name>distorted_camera</camera_name>
             <frame_name>frame_name</frame_name>
@@ -79,7 +79,7 @@
           </camera>
           <plugin name="camera_undistorted" filename="libgazebo_ros_camera.so">
             <ros>
-              <argument>undistorted_camera/image_raw:=undistorted_image</argument>
+              <remapping>undistorted_camera/image_raw:=undistorted_image</remapping>
             </ros>
             <camera_name>undistorted_camera</camera_name>
             <frame_name>frame_name</frame_name>

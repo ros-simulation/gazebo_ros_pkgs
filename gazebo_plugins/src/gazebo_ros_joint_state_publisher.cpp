@@ -87,6 +87,9 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
   // ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Joints
   if (!sdf->HasElement("joint_name")) {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Plugin missing <joint_name>s");
@@ -103,7 +106,8 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
       RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Joint %s does not exist!", joint_name.c_str());
     } else {
       impl_->joints_.push_back(joint);
-      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Going to publish joint [%s]",
+      RCLCPP_INFO(
+        impl_->ros_node_->get_logger(), "Going to publish joint [%s]",
         joint_name.c_str() );
     }
 
@@ -119,8 +123,8 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
   // Update rate
   double update_rate = 100.0;
   if (!sdf->HasElement("update_rate")) {
-    RCLCPP_INFO(impl_->ros_node_->get_logger(), "Missing <update_rate>, defaults to %f",
-      update_rate);
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Missing <update_rate>, defaults to %f", update_rate);
   } else {
     update_rate = sdf->GetElement("update_rate")->Get<double>();
   }
@@ -135,7 +139,7 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
 
   // Joint state publisher
   impl_->joint_state_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::JointState>(
-    "joint_states", 1000);
+    "joint_states", qos.get_publisher_qos("joint_states", rclcpp::QoS(1000)));
 
   // Callback on every iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(

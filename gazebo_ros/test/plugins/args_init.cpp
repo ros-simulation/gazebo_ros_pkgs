@@ -60,18 +60,19 @@ void ProperInit::Load(int argc, char ** argv)
 
   // Run lambda every 1 second
   using namespace std::chrono_literals;
-  timer_ = node->create_wall_timer(1s,
-      [node, pub]() {
-        // Create string message
-        auto msg = std_msgs::msg::String();
-        msg.data = "Hello world";
+  timer_ = node->create_wall_timer(
+    1s,
+    [node, pub]() {
+      // Create string message
+      auto msg = std_msgs::msg::String();
+      msg.data = "Hello world";
 
-        // Warn with this node's name (to test logging)
-        RCLCPP_WARN(node->get_logger(), "Publishing");
+      // Warn with this node's name (to test logging)
+      RCLCPP_WARN(node->get_logger(), "Publishing");
 
-        // Publish message
-        pub->publish(msg);
-      });
+      // Publish message
+      pub->publish(msg);
+    });
 }
 
 GZ_REGISTER_SYSTEM_PLUGIN(ProperInit)

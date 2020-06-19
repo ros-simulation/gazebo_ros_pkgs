@@ -25,7 +25,7 @@
       <plugin name="gazebo_ros_ft_sensor" filename="libgazebo_ros_ft_sensor.so">
         <ros>
           <namespace>/test</namespace>
-          <argument>wrench:=ft_sensor_test</argument>
+          <remapping>wrench:=ft_sensor_test</remapping>
         </ros>
         <body_name>link</body_name>
         <frame_name>test_world</frame_name>

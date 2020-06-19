@@ -99,21 +99,23 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
 
   // Subscribe to undistorted image
   sensor_msgs::msg::Image::ConstSharedPtr cam_image_undistorted;
-  cam_sub_undistorted_ = image_transport::create_subscription(node.get(),
-      GetParam().undistorted_topic,
-      [&cam_image_undistorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
-        cam_image_undistorted = _msg;
-      },
-      "raw");
+  cam_sub_undistorted_ = image_transport::create_subscription(
+    node.get(),
+    GetParam().undistorted_topic,
+    [&cam_image_undistorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
+      cam_image_undistorted = _msg;
+    },
+    "raw");
 
   // Subscribe to distorted image
   sensor_msgs::msg::Image::ConstSharedPtr cam_image_distorted;
-  cam_sub_distorted_ = image_transport::create_subscription(node.get(),
-      GetParam().distorted_topic,
-      [&cam_image_distorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
-        cam_image_distorted = _msg;
-      },
-      "raw");
+  cam_sub_distorted_ = image_transport::create_subscription(
+    node.get(),
+    GetParam().distorted_topic,
+    [&cam_image_distorted](const sensor_msgs::msg::Image::ConstSharedPtr & _msg) {
+      cam_image_distorted = _msg;
+    },
+    "raw");
 
   // Subscribe to distorted camera info
   sensor_msgs::msg::CameraInfo::SharedPtr cam_info_distorted;
@@ -143,13 +145,15 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
   // Load camera coefficients from published ROS information
   auto intrinsic_distorted_matrix = cv::Mat(3, 3, CV_64F);
   if (cam_info_distorted->k.size() == 9) {
-    memcpy(intrinsic_distorted_matrix.data, cam_info_distorted->k.data(),
+    memcpy(
+      intrinsic_distorted_matrix.data, cam_info_distorted->k.data(),
       cam_info_distorted->k.size() * sizeof(double));
   }
 
   auto distortion_coeffs = cv::Mat(5, 1, CV_64F);
   if (cam_info_distorted->d.size() == 5) {
-    memcpy(distortion_coeffs.data, cam_info_distorted->d.data(),
+    memcpy(
+      distortion_coeffs.data, cam_info_distorted->d.data(),
       cam_info_distorted->d.size() * sizeof(double));
   }
 
@@ -204,17 +208,19 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
   }
 }
 
-INSTANTIATE_TEST_CASE_P(GazeboRosCameraDistortion, GazeboRosCameraDistortionTest,
-  ::testing::Values(
-    TestParams({"worlds/gazebo_ros_camera_distortion_barrel.world",
-      "undistorted_image",
-      "distorted_image",
-      "distorted_info"}),
-    TestParams({"worlds/gazebo_ros_camera_distortion_pincushion.world",
-      "undistorted_image",
-      "distorted_image",
-      "distorted_info"})
-  ), );
+INSTANTIATE_TEST_CASE_P(
+  GazeboRosCameraDistortion, GazeboRosCameraDistortionTest, ::testing::Values(
+    TestParams(
+      {"worlds/gazebo_ros_camera_distortion_barrel.world",
+        "undistorted_image",
+        "distorted_image",
+        "distorted_info"}),
+    TestParams(
+      {"worlds/gazebo_ros_camera_distortion_pincushion.world",
+        "undistorted_image",
+        "distorted_image",
+        "distorted_info"})
+));
 
 int main(int argc, char ** argv)
 {

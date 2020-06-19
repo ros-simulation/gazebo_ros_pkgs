@@ -18,6 +18,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <gazebo_ros/executor.hpp>
+#include <gazebo_ros/qos.hpp>
 
 #include <atomic>
 #include <memory>
@@ -55,7 +56,7 @@ public:
    * \details This will create a new node; the node's name will be the same as the name argument
    * on the <plugin> tag.
    * \details This will call rclcpp::init if it hasn't been called yet.
-   * \details Sets node name, namespace, remappings, and parameters from SDF.
+   * \details Sets node name, namespace, remappings, parameters, and quality of service from SDF.
    * SDF is in the form:
    * \code{.xml}
    * <!-- Node name will be the same as the plugin name -->
@@ -65,11 +66,17 @@ public:
    *    <!-- Namespace of the node -->
    *    <namespace>/my_ns</namespace>
    *    <!-- Command line arguments sent to Node's constructor for remappings -->
-   *    <argument>my_topic:=new_topic</argument>
    *    <argument>__name:=super_cool_node</argument>
+   *    <argument>__log_level:=debug</argument>
    *    <!-- Initial ROS params set for node -->
    *    <parameter name="max_velocity" type="int">55</parameter>
    *    <parameter name="publish_odom" type="bool">True</parameter>
+   *    <!-- Remapping rules for node -->
+   *    <remapping>my_topic:=new_topic</remapping>
+   *    <!-- QoS for node publishers and subscriptions -->
+   *    <qos>
+   *      <!-- See #gazebo_ros::QoS -->
+   *    </qos>
    *   </ros>
    * </plugin>
    * \endcode
@@ -106,6 +113,17 @@ public:
    */
   static rclcpp::Parameter sdf_to_ros_parameter(sdf::ElementPtr const & _sdf);
 
+  inline const gazebo_ros::QoS & get_qos() const &
+  {
+    return this->qos_;
+  }
+
+  // binds to everything else
+  inline gazebo_ros::QoS get_qos() &&
+  {
+    return this->qos_;
+  }
+
 private:
   /// Inherit constructor
   using rclcpp::Node::Node;
@@ -113,6 +131,9 @@ private:
   /// Points to #static_executor_, so that when all #gazebo_ros::Node instances are destroyed, the
   /// executor thread is too
   std::shared_ptr<Executor> executor_;
+
+  /// QoS for node entities
+  gazebo_ros::QoS qos_;
 
   /// Locks #initialized_ and #executor_
   static std::mutex lock_;
@@ -136,7 +157,7 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
   // TODO(chapulina): use rclcpp::is_initialized() once that's available, see
   // https://github.com/ros2/rclcpp/issues/518
   Node::SharedPtr node;
-  if (!rclcpp::is_initialized()) {
+  if (!rclcpp::ok()) {
     rclcpp::init(0, nullptr);
     RCLCPP_INFO(internal_logger(), "ROS was initialized without arguments.");
   }

@@ -110,8 +110,8 @@ void GazeboRosHandOfGod::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     auto link_name = _sdf->Get<std::string>("link_name");
     impl_->link_ = _model->GetLink(link_name);
     if (!impl_->link_) {
-      RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-        "Link [%s] not found. Aborting", link_name.c_str());
+      RCLCPP_ERROR(
+        impl_->ros_node_->get_logger(), "Link [%s] not found. Aborting", link_name.c_str());
       impl_->ros_node_.reset();
       return;
     }

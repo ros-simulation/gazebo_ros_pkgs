@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include <gazebo_ros/node.hpp>
+
+#include <rcl/arguments.h>
+
 #include <sdf/Param.hh>
 
 #include <memory>
@@ -35,7 +38,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
 {
   // Initialize arguments
   std::string name = "";
-  std::string ns = "";
+  std::string ns = "/";
   std::vector<std::string> arguments;
   std::vector<rclcpp::Parameter> parameter_overrides;
 
@@ -66,6 +69,19 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     }
   }
 
+  // Get list of remapping rules from SDF
+  if (sdf->HasElement("remapping")) {
+    sdf::ElementPtr argument_sdf = sdf->GetElement("remapping");
+
+    arguments.push_back(RCL_ROS_ARGS_FLAG);
+    while (argument_sdf) {
+      std::string argument = argument_sdf->Get<std::string>();
+      arguments.push_back(RCL_REMAP_FLAG);
+      arguments.push_back(argument);
+      argument_sdf = argument_sdf->GetNextElement("remapping");
+    }
+  }
+
   // Convert each parameter tag to a ROS parameter
   if (sdf->HasElement("parameter")) {
     sdf::ElementPtr parameter_sdf = sdf->GetElement("parameter");
@@ -83,7 +99,12 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   node_options.parameter_overrides(parameter_overrides);
 
   // Create node with parsed arguments
-  return CreateWithArgs(name, ns, node_options);
+  std::shared_ptr<gazebo_ros::Node> node = CreateWithArgs(name, ns, node_options);
+
+  // Parse the qos tag
+  node->qos_ = gazebo_ros::QoS(sdf, name, ns, node_options);
+
+  return node;
 }
 
 Node::SharedPtr Node::Get()
@@ -103,12 +124,14 @@ Node::SharedPtr Node::Get()
 rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)
 {
   if (!sdf->HasAttribute("name")) {
-    RCLCPP_WARN(internal_logger(),
+    RCLCPP_WARN(
+      internal_logger(),
       "Ignoring parameter because it has no attribute 'name'. Tag: %s", sdf->ToString("").c_str());
     return rclcpp::Parameter();
   }
   if (!sdf->HasAttribute("type")) {
-    RCLCPP_WARN(internal_logger(),
+    RCLCPP_WARN(
+      internal_logger(),
       "Ignoring parameter because it has no attribute 'type'. Tag: %s", sdf->ToString("").c_str());
     return rclcpp::Parameter();
   }
@@ -125,7 +148,8 @@ rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)
   } else if ("string" == type) {
     return rclcpp::Parameter(name, sdf->Get<std::string>());
   } else {
-    RCLCPP_WARN(internal_logger(),
+    RCLCPP_WARN(
+      internal_logger(),
       "Ignoring parameter because attribute 'type' is invalid. Tag: %s", sdf->ToString("").c_str());
     return rclcpp::Parameter();
   }

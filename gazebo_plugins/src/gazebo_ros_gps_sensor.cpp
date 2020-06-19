@@ -59,6 +59,9 @@ void GazeboRosGpsSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 {
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   impl_->sensor_ = std::dynamic_pointer_cast<gazebo::sensors::GpsSensor>(_sensor);
   if (!impl_->sensor_) {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Parent is not a GPS sensor. Exiting.");
@@ -66,7 +69,7 @@ void GazeboRosGpsSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   }
 
   impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::NavSatFix>(
-    "~/out", rclcpp::SensorDataQoS());
+    "~/out", qos.get_publisher_qos("~/out", rclcpp::SensorDataQoS()));
 
   // Create message to be reused
   auto msg = std::make_shared<sensor_msgs::msg::NavSatFix>();

@@ -39,7 +39,7 @@ class GazeboRosImuSensorPrivate;
         <ros>
           <!-- publish to /imu/data -->
           <namespace>/imu</namespace>
-          <argument>~/out:=data</argument>
+          <remapping>~/out:=data</remapping>
         </ros>
       </plugin>
     </sensor>

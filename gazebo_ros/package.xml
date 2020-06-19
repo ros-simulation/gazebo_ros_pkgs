@@ -25,8 +25,10 @@
   <depend>builtin_interfaces</depend>
   <depend>gazebo_dev</depend>
   <depend>gazebo_msgs</depend>
+  <depend>rcl</depend>
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
+  <depend>rmw</depend>
   <depend>std_srvs</depend>
   <depend>tinyxml_vendor</depend>
 
@@ -39,6 +41,8 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
   <test_depend>geometry_msgs</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>ros2run</test_depend>
   <test_depend>sensor_msgs</test_depend>
   <test_depend>std_msgs</test_depend>
 

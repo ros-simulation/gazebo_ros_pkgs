@@ -67,6 +67,9 @@ void GazeboRosProjector::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
   // Create gazebo transport node
   impl_->gazebo_node_ = boost::make_shared<gazebo::transport::Node>();
   impl_->gazebo_node_->Init(_model->GetWorld()->Name());
@@ -80,15 +83,16 @@ void GazeboRosProjector::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Create a Gazebo publisher to switch the projector
   impl_->projector_pub_ = impl_->gazebo_node_->Advertise<gazebo::msgs::Projector>(name);
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(),
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(),
     "Controlling projector at [%s]", impl_->projector_pub_->GetTopic().c_str());
 
   impl_->toggle_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Bool>(
-    "switch", rclcpp::QoS(rclcpp::KeepLast(1)),
+    "switch", qos.get_subscription_qos("switch", rclcpp::QoS(1)),
     std::bind(&GazeboRosProjectorPrivate::ToggleProjector, impl_.get(), std::placeholders::_1));
 
-  RCLCPP_INFO(impl_->ros_node_->get_logger(),
-    "Subscribed to [%s]", impl_->toggle_sub_->get_topic_name());
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(), "Subscribed to [%s]", impl_->toggle_sub_->get_topic_name());
 }
 
 void GazeboRosProjectorPrivate::ToggleProjector(const std_msgs::msg::Bool::SharedPtr switch_msg)

@@ -68,7 +68,8 @@ TEST_F(GazeboRosVacuumGripperTest, VacuumGripperServiceTest)
   auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
   request->data = true;
   auto response_future = client->async_send_request(request);
-  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+  EXPECT_EQ(
+    rclcpp::executor::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, response_future));
 
   unsigned int sleep = 0;

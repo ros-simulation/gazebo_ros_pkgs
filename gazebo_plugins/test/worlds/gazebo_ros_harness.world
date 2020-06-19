@@ -26,8 +26,8 @@
       <plugin name="harness" filename="libgazebo_ros_harness.so">
         <ros>
           <namespace>test</namespace>
-          <argument>box/harness/velocity:=velocity_test</argument>
-          <argument>box/harness/detach:=detach_test</argument>
+          <remapping>box/harness/velocity:=velocity_test</remapping>
+          <remapping>box/harness/detach:=detach_test</remapping>
         </ros>
         <joint name="joint1" type="prismatic">
           <pose>0 0 0 0 0 0</pose>

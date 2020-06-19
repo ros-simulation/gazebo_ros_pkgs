@@ -57,12 +57,13 @@ TEST_P(GazeboRosMultiCameraTest, CameraSubscribeTest)
   unsigned int msg_count_left{0};
   builtin_interfaces::msg::Time image_stamp_left;
 
-  auto sub_left = image_transport::create_subscription(node.get(), GetParam().left_topic,
-      [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
-        image_stamp_left = msg->header.stamp;
-        ++msg_count_left;
-      },
-      "raw");
+  auto sub_left = image_transport::create_subscription(
+    node.get(), GetParam().left_topic,
+    [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
+      image_stamp_left = msg->header.stamp;
+      ++msg_count_left;
+    },
+    "raw");
 
   // Update rate is 0.5 Hz, so we step 3s sim time to be sure we get exactly 1 image at 2s
   world->Step(3000);
@@ -81,12 +82,13 @@ TEST_P(GazeboRosMultiCameraTest, CameraSubscribeTest)
 
   unsigned int msg_count_right{0};
   builtin_interfaces::msg::Time image_stamp_right;
-  auto sub_right = image_transport::create_subscription(node.get(), GetParam().right_topic,
-      [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
-        image_stamp_right = msg->header.stamp;
-        ++msg_count_right;
-      },
-      "raw");
+  auto sub_right = image_transport::create_subscription(
+    node.get(), GetParam().right_topic,
+    [&](const sensor_msgs::msg::Image::ConstSharedPtr & msg) {
+      image_stamp_right = msg->header.stamp;
+      ++msg_count_right;
+    },
+    "raw");
 
   // Update rate is 0.5 Hz, so we step 3s sim time to be sure we get exactly 1 image at 4s
   world->Step(3000);
@@ -104,11 +106,13 @@ TEST_P(GazeboRosMultiCameraTest, CameraSubscribeTest)
   sub_right.shutdown();
 }
 
-INSTANTIATE_TEST_CASE_P(GazeboRosMultiCamera, GazeboRosMultiCameraTest, ::testing::Values(
-    TestParams({"worlds/gazebo_ros_multicamera.world",
-      "test_cam/camera/left/image_test",
-      "test_cam/camera/right/image_test"})
-  ), );
+INSTANTIATE_TEST_CASE_P(
+  GazeboRosMultiCamera, GazeboRosMultiCameraTest, ::testing::Values(
+    TestParams(
+      {"worlds/gazebo_ros_multicamera.world",
+        "test_cam/camera/left/image_test",
+        "test_cam/camera/right/image_test"})
+));
 
 int main(int argc, char ** argv)
 {
