@@ -20,6 +20,9 @@ Changelog for package gazebo_dev
   Signed-off-by: Louise Poubel <louise@openrobotics.org>
 * Contributors: chapulina
 
+3.3.5 (2020-05-08)
+------------------
+
 3.3.4 (2019-09-18)
 ------------------
 

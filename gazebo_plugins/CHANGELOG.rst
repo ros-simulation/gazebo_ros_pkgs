@@ -166,6 +166,16 @@ Changelog for package gazebo_plugins
   * relative -> reference
 * Contributors: Jonathan Noyola, Shivesh Khaitan, alexfneves, chapulina
 
+3.3.5 (2020-05-08)
+------------------
+* Backport Gazebo11/Bionic fix for boost variant (`#1102 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1102>`_)
+* Measure IMU orientation with respect to world (dashing) (`#1065 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1065>`_)
+  Report the IMU orientation from the sensor plugin with respect to the world frame.
+  This complies with convention documented in REP 145:
+  https://www.ros.org/reps/rep-0145.html
+  In order to not break existing behavior,users should opt-in by adding a new SDF tag.
+* Contributors: Jose Luis Rivero, Steven Peters, Jacob Perron
+
 3.3.4 (2019-09-18)
 ------------------
 * fix multi_camera_plugin on windows (`#999 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/999>`_)

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <boost/variant.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/variant.hpp>
 #include <gazebo/transport/transport.hh>

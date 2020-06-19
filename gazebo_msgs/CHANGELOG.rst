@@ -51,6 +51,9 @@ Changelog for package gazebo_msgs
   * relative -> reference
 * Contributors: Shivesh Khaitan, chapulina
 
+3.3.5 (2020-05-08)
+------------------
+
 3.3.4 (2019-09-18)
 ------------------
 

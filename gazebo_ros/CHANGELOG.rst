@@ -216,6 +216,11 @@ Changelog for package gazebo_ros
   * relative -> reference
 * Contributors: Karsten Knese, Louise Poubel, Shivesh Khaitan, alexfneves, chapulina
 
+3.3.5 (2020-05-08)
+------------------
+* fix pathsep for windows (`#1028 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1028>`_)
+* Contributors: Jonathan Noyola
+
 3.3.4 (2019-09-18)
 ------------------
 * Remove ROS-specific arguments before passing to argparse (`#994 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/994>`_)
