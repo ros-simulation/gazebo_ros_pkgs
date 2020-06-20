@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.0 (2020-06-19)
+------------------
 * Merge pull request `#1130 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1130>`_ from ros-simulation/foxy_tests
   Fix all Foxy tests
 * Merge pull request `#1129 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1129>`_ from ros-simulation/e_to_f_june_2020
