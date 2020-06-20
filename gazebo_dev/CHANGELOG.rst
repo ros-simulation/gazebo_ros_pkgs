@@ -2,6 +2,16 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#1129 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1129>`_ from ros-simulation/e_to_f_june_2020
+  Eloquent ➡️ Foxy
+* Dashing -> Eloquent
+* Gazebo 11 for Foxy (`#1093 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1093>`_)
+  * Gazebo 11 for Foxy
+* 3.3.5
+* Contributors: Jose Luis Rivero, Louise Poubel
+
 3.4.4 (2020-05-08)
 ------------------
 

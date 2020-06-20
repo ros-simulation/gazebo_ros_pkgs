@@ -2,6 +2,34 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#1130 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1130>`_ from ros-simulation/foxy_tests
+  Fix all Foxy tests
+* Merge pull request `#1129 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1129>`_ from ros-simulation/e_to_f_june_2020
+  Eloquent ➡️ Foxy
+* Dashing -> Eloquent
+* [ROS 2] Use "" as default in spawn_entity.py instead of self.get_namespace(). (`#1117 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1117>`_)
+* Fix flake8 failures (`#1110 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1110>`_)
+* Add gazebo_ros::QoS class (`#1091 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1091>`_)
+  Contains logic for parsing <qos> SDF elements and creating rclcpp::QoS objects for ROS publishers and subscriptions.
+  Co-authored-by: Ivan Santiago Paunovic <ivanpauno@ekumenlabs.com>
+* [eloquent] Fix Windows build. (`#1077 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1077>`_)
+* 3.3.5
+* [forward port to Foxy] Add node required parameter to launch (`#1074 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1074>`_)  (`#1086 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1086>`_)
+* Use configurable timeout in other wait for service calls (`#1073 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1073>`_)
+  * Use configurable timeout in other wait for service calls
+  Follow-up to `#1072 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1072>`_
+* Increase spawn entity wait for service timeout (`#1072 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1072>`_)
+  If we have a reaonsable complex launch file and lots of DDS discovery traffic, sometimes five seconds isn't enough.
+  This change makes the timeout configurable and changes the default timeout to thirty seconds.
+* Uncrustify (`#1060 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1060>`_)
+  Style changes to conform to the new default setting introduced in https://github.com/ament/ament_lint/pull/210.
+  Arguments that do not fit on one line must start on a new line.
+* [ros2] make transient local reliable (`#1033 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1033>`_)
+  Co-Authored-By: chapulina <louise@openrobotics.org>
+* Contributors: Alejandro Hernández Cordero, Ivan Santiago Paunovic, Jacob Perron, Jose Luis Rivero, Karsten Knese, Louise Poubel, Mabel Zhang, Sean Yen
+
 3.4.4 (2020-05-08)
 ------------------
 * wait for service with variable timeout (`#1090 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1090>`_)
