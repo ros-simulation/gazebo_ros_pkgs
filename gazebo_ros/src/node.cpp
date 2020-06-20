@@ -57,8 +57,9 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   if (sdf->HasElement("namespace")) {
     ns = sdf->GetElement("namespace")->Get<std::string>();
     // prevent exception: namespace must be absolute, it must lead with a '/'
-    if (ns.empty() || ns[0] != '/')
+    if (ns.empty() || ns[0] != '/') {
       ns = '/' + ns;
+    }
   }
 
   // Get list of arguments from SDF
