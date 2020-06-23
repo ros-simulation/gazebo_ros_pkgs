@@ -2,6 +2,63 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.5.0 (2020-06-19)
+------------------
+* Merge pull request `#1130 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1130>`_ from ros-simulation/foxy_tests
+  Fix all Foxy tests
+* Merge pull request `#1129 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1129>`_ from ros-simulation/e_to_f_june_2020
+  Eloquent ➡️ Foxy
+* Apply acceleration until both left and right reach targetspeed (`#1009 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1009>`_)
+  Co-authored-by: Louise Poubel <louise@openrobotics.org>
+* use target include directories (`#1040 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1040>`_)
+  Co-authored-by: Louise Poubel <louise@openrobotics.org>
+* Dashing -> Eloquent
+* [forward port] Image publishers use SensorDataQoSProfile (`#1031 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1031>`_) (`#1052 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1052>`_)
+  All other sensor publishers were updated previously to use the same profile (`#926 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/926>`_).
+  I'm not sure if the image publishers were overlooked or the image_transport API didn't
+  support setting the QoS profile at the time.
+* Fix cppcheck errors (`#1123 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1123>`_)
+  cppcheck 1.90 complains about syntax errors even though it is valid C++ code.
+  This refactoring fixes the reported errors.
+* Replace deprecated parameters callback API (`#1121 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1121>`_)
+  rclcpp::Node now supports multiple parameter callbacks, so we do not need to worry about overwriting an existing callback.
+  This change fixes compile time deprecation warnings since ROS Foxy.
+* Replace deprecated image_common headers (`#1122 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1122>`_)
+  This fixes compile-time deprecation warnings.
+* Measure IMU orientation with respect to world (ros2) (`#1064 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1064>`_)
+  * Measure IMU orientation with respect to world (`#1058 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1058>`_)
+  Report the IMU orientation from the sensor plugin with respect to the world frame.
+  This complies with convention documented in REP 145: https://www.ros.org/reps/rep-0145.html
+  In order to not break existing behavior, users should opt-in by adding a new SDF tag.
+  Co-authored-by: Jacob Perron <jacob@openrobotics.org>
+  * IMU sensor: comply with REP 145 by default
+  Change default value of initial_orientation_as_reference to false
+  and print deprecation warning if user explicitly sets it to true.
+  Co-authored-by: Jacob Perron <jacob@openrobotics.org>
+* Make QoS for publishers and subscriptions configurable  (`#1092 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1092>`_)
+  * Make QoS for publishers and subscriptions configurable
+  Whenever a plugin creates a ROS publisher or subscription, use the QoS profile provided by the node for the given topic.
+  This enables users to override the QoS settings in SDF.
+  Depends on https://github.com/ros-simulation/gazebo_ros_pkgs/pull/1091.
+* [eloquent] Fix Windows build. (`#1077 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1077>`_)
+  * Adding Windows bringup.
+* Gazebo 11 for Foxy (`#1093 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1093>`_)
+  * Gazebo 11 for Foxy
+* 3.3.5
+* Backport Gazebo11/Bionic fix for boost variant (`#1102 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1102>`_)
+* Measure IMU orientation with respect to world (dashing) (`#1065 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1065>`_)
+  Report the IMU orientation from the sensor plugin
+  with respect to the world frame.
+  This complies with convention documented in REP 145:
+  https://www.ros.org/reps/rep-0145.html
+  In order to not break existing behavior,
+  users should opt-in by adding a new SDF tag.
+  Co-authored-by: Jacob Perron <jacob@openrobotics.org>
+* Uncrustify (`#1060 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1060>`_)
+  Style changes to conform to the new default setting introduced in https://github.com/ament/ament_lint/pull/210.
+  Arguments that do not fit on one line must start on a new line.
+* Contributors: Jacob Perron, Jose Luis Rivero, Karsten Knese, Louise Poubel, Sean Yen, Steve Peters, Steven Peters, scgroot
+
 3.4.4 (2020-05-08)
 ------------------
 * Backport Gazebo11/Bionic fix for boost variant (`#1103 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1103>`_)
