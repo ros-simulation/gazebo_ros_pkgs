@@ -185,8 +185,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf);
 
   if (impl_->sensor_type_ != GazeboRosCameraPrivate::MULTICAMERA) {
-
-    if (!(impl_->depth_only_)){
+    if (!(impl_->depth_only_)) {
       // Image publisher
       // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
       const std::string camera_topic = impl_->camera_name_ + "/image_raw";
@@ -211,7 +210,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
         camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SensorDataQoS())));
 
 
-    if (!(impl_->depth_only_)){
+    if (!(impl_->depth_only_)) {
       // Image publisher
       // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
       impl_->image_pub_.push_back(
@@ -227,13 +226,13 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     // Camera info publisher
     // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
     impl_->camera_info_pub_.push_back(
-          impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-            impl_->camera_name_ + "/camera_info",
-            rclcpp::SensorDataQoS()));
+      impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
+        impl_->camera_name_ + "/camera_info",
+        rclcpp::SensorDataQoS()));
 
     RCLCPP_INFO(
-          impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
-          impl_->camera_info_pub_.back()->get_topic_name());
+      impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
+      impl_->camera_info_pub_.back()->get_topic_name());
 
   } else {
     for (uint64_t i = 0; i < impl_->num_cameras_; ++i) {
@@ -780,12 +779,12 @@ void GazeboRosCamera::OnNewDepthFrame(
         if (impl_->image_msg_.data.size() == _width * _height * 3) {
           // color
           std::memcpy(
-                &impl_->cloud_msg_.data[cloud_index + 16],
-              &impl_->image_msg_.data[(i + j * _width) * 3], 3 * sizeof(uint8_t));
+            &impl_->cloud_msg_.data[cloud_index + 16],
+            &impl_->image_msg_.data[(i + j * _width) * 3], 3 * sizeof(uint8_t));
         } else if (impl_->image_msg_.data.size() == _height * _width) {
           std::memcpy(
-                &impl_->cloud_msg_.data[cloud_index + 16],
-              &impl_->image_msg_.data[i + j * _width], 3 * sizeof(uint8_t));
+            &impl_->cloud_msg_.data[cloud_index + 16],
+            &impl_->image_msg_.data[i + j * _width], 3 * sizeof(uint8_t));
         } else {
           // no image
           std::memset(&impl_->cloud_msg_.data[cloud_index + 16], 0, 3 * sizeof(uint8_t));
