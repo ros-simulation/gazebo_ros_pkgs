@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if CUDA_ENABLED
+#include <gazebo_plugins/fill_depth.hpp>
+#endif
+
 #include <sdf/Element.hh>
 #include <gazebo/common/Events.hh>
 #include <gazebo/rendering/Distortion.hh>
@@ -128,6 +132,11 @@ public:
 
   /// Number of cameras
   uint64_t num_cameras_{1};
+
+  #if CUDA_ENABLED
+  /// FillDepth object
+  FillDepth fill_depth;
+  #endif
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -486,6 +495,11 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     impl_->cloud_msg_.fields[3].count = 1;
 
     impl_->cloud_msg_.header.frame_id = impl_->frame_name_;
+
+    #if CUDA_ENABLED
+    double fl = (static_cast<double>(width[0])) / (2.0 * tan(impl_->hfov_[0] / 2.0));
+    impl_->fill_depth.initialize(height[0], width[0], fl, impl_->min_depth_, impl_->max_depth_);
+    #endif
   }
 
   // Dynamic reconfigure
@@ -643,28 +657,6 @@ void GazeboRosCamera::OnNewDepthFrame(
   image_msg.data.resize(_width * _height * FLOAT_SIZE);
   image_msg.is_bigendian = 0;
 
-  int index = 0;
-
-  float pos_inf = std::numeric_limits<float>::infinity();
-  float neg_inf = -pos_inf;
-
-  // Copy from src to image_msg
-  for (uint32_t j = 0; j < _height; j++) {
-    for (uint32_t i = 0; i < _width; i++) {
-      index = i + j * _width;
-      float depth = _image[index];
-      if (impl_->min_depth_ < depth && depth < impl_->max_depth_) {
-        std::memcpy(&image_msg.data[index * FLOAT_SIZE], &depth, FLOAT_SIZE);
-      } else if (depth <= impl_->min_depth_) {
-        std::memcpy(&image_msg.data[index * FLOAT_SIZE], &neg_inf, FLOAT_SIZE);
-      } else {
-        std::memcpy(&image_msg.data[index * FLOAT_SIZE], &pos_inf, FLOAT_SIZE);
-      }
-    }
-  }
-
-  impl_->depth_image_pub_.publish(image_msg);
-
   // Publish camera info
   auto camera_info_msg = impl_->camera_info_manager_[0]->getCameraInfo();
   camera_info_msg.header.stamp = sensor_update_time;
@@ -683,12 +675,37 @@ void GazeboRosCamera::OnNewDepthFrame(
 
   impl_->cloud_msg_.is_dense = true;
 
+  std::lock_guard<std::mutex> image_lock(impl_->image_mutex_);
+
+  #if CUDA_ENABLED
+  impl_->cloud_msg_.is_dense = false;
+  impl_->fill_depth.compute(_image, &(impl_->image_msg_.data[0]),
+    reinterpret_cast<float *>(&(image_msg.data[0])),
+    reinterpret_cast<float *>(&(impl_->cloud_msg_.data[0])));
+  #else
+  int index = 0;
+
+  float pos_inf = std::numeric_limits<float>::infinity();
+  float neg_inf = -pos_inf;
+  // Copy from src to image_msg
+  for (uint32_t j = 0; j < _height; j++) {
+    for (uint32_t i = 0; i < _width; i++) {
+      index = i + j * _width;
+      float depth = _image[index];
+      if (impl_->min_depth_ < depth && depth < impl_->max_depth_) {
+        std::memcpy(&image_msg.data[index * FLOAT_SIZE], &depth, FLOAT_SIZE);
+      } else if (depth <= impl_->min_depth_) {
+        std::memcpy(&image_msg.data[index * FLOAT_SIZE], &neg_inf, FLOAT_SIZE);
+      } else {
+        std::memcpy(&image_msg.data[index * FLOAT_SIZE], &pos_inf, FLOAT_SIZE);
+      }
+    }
+  }
+
   int image_index = 0;
   int cloud_index = 0;
 
   double fl = (static_cast<double>(_width)) / (2.0 * tan(impl_->hfov_[0] / 2.0));
-
-  std::lock_guard<std::mutex> image_lock(impl_->image_mutex_);
 
   for (uint32_t j = 0; j < _height; j++) {
     double pAngle;
@@ -750,7 +767,9 @@ void GazeboRosCamera::OnNewDepthFrame(
       cloud_index += impl_->cloud_msg_.point_step;
     }
   }
+  #endif
 
+  impl_->depth_image_pub_.publish(image_msg);
   impl_->point_cloud_pub_->publish(impl_->cloud_msg_);
 
   // Disable camera if it's a triggered camera

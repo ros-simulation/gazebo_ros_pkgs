@@ -132,6 +132,20 @@ target_link_libraries(gazebo_ros_camera
 )
 ament_export_libraries(gazebo_ros_camera)
 
+find_package(CUDA)
+if((${CUDA_FOUND}) AND (${ENABLE_CUDA}))
+  include(FindCUDA)
+  add_definitions(-DCUDA_ENABLED=1)
+  cuda_add_library(fill_depth SHARED
+    include/gazebo_plugins/fill_depth.hpp
+    src/fill_depth.cu
+  )
+  target_link_libraries(gazebo_ros_camera
+    fill_depth
+  )
+  ament_export_libraries(fill_depth)
+endif()
+
 # gazebo_ros_imu_sensor
 add_library(gazebo_ros_imu_sensor SHARED
   src/gazebo_ros_imu_sensor.cpp
@@ -421,6 +435,14 @@ install(TARGETS
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
+
+if((${CUDA_FOUND}) AND (${ENABLE_CUDA}))
+  install(TARGETS
+      fill_depth
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
+endif()
 
 install(DIRECTORY
   worlds
