@@ -129,10 +129,10 @@ public:
   /// Number of cameras
   uint64_t num_cameras_{1};
 
-  /// If set to true, no image_raw publication. Set to false by default.
+  /// If set to true, no image raw publication. Set to false by default.
   bool depth_only_;
 
-  /// If set to false, pointcloud is xyz type. Set to true by default (xyz rgb type pointcloud).
+  /// If set to false, pointcloud is xyz type. Set to true by default (xyz rgb type).
   bool rgb_pointcloud_;
 };
 
