@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
   camera_info_manager
   std_msgs
+  moveit_msgs
 )
 
 include (FindPkgConfig)
@@ -137,6 +138,7 @@ catkin_package(
   rosconsole
   camera_info_manager
   std_msgs
+  moveit_msgs
 )
 add_dependencies(${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
@@ -218,6 +220,10 @@ target_link_libraries(gazebo_ros_laser RayPlugin ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_block_laser src/gazebo_ros_block_laser.cpp)
 target_link_libraries(gazebo_ros_block_laser RayPlugin ${catkin_LIBRARIES})
+
+add_library(gazebo_ros_moveit_planning_scene src/gazebo_ros_moveit_planning_scene.cpp)
+add_dependencies(gazebo_ros_moveit_planning_scene ${catkin_EXPORTED_TARGETS})
+target_link_libraries(gazebo_ros_moveit_planning_scene ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
 add_library(gazebo_ros_p3d src/gazebo_ros_p3d.cpp)
 target_link_libraries(gazebo_ros_p3d ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -311,6 +317,7 @@ install(TARGETS
   gazebo_ros_depth_camera
   gazebo_ros_openni_kinect
   gazebo_ros_laser
+  gazebo_ros_moveit_planning_scene
   gazebo_ros_block_laser
   gazebo_ros_p3d
   gazebo_ros_imu
