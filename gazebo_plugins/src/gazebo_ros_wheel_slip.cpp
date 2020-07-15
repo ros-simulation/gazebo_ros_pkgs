@@ -50,10 +50,6 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
-  // Set negative values by default, which are ignored by the callback.
-  impl_->ros_node_->declare_parameter("slip_compliance_unitless_lateral", -1.);
-  impl_->ros_node_->declare_parameter("slip_compliance_unitless_longitudinal", -1.);
-
   auto param_change_callback =
     [this, existing_callback](std::vector<rclcpp::Parameter> parameters) {
       auto result = rcl_interfaces::msg::SetParametersResult();
@@ -91,6 +87,12 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     };
 
   impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
+
+  // Declare parameters after adding callback so that callback will trigger immediately.
+  // Set negative values by default, which are ignored by the callback.
+  // This approach allows values specified in a launch file to override the SDF/URDF values.
+  impl_->ros_node_->declare_parameter("slip_compliance_unitless_lateral", -1.);
+  impl_->ros_node_->declare_parameter("slip_compliance_unitless_longitudinal", -1.);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosWheelSlip)
