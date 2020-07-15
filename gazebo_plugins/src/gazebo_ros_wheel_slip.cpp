@@ -51,15 +51,8 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   auto param_change_callback =
-    [this, existing_callback](std::vector<rclcpp::Parameter> parameters) {
+    [this](std::vector<rclcpp::Parameter> parameters) {
       auto result = rcl_interfaces::msg::SetParametersResult();
-      if (nullptr != existing_callback) {
-        result = existing_callback(parameters);
-        if (!result.successful) {
-          return result;
-        }
-      }
-
       result.successful = true;
       for (const auto & parameter : parameters) {
         std::string param_name = parameter.get_name();
