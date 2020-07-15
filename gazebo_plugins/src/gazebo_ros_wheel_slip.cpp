@@ -22,6 +22,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace gazebo_plugins
 {
