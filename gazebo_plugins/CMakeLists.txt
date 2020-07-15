@@ -422,7 +422,6 @@ install(TARGETS
     gazebo_ros_tricycle_drive
     gazebo_ros_vacuum_gripper
     gazebo_ros_video
-    gazebo_ros_wheel_slip
     multi_camera_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
