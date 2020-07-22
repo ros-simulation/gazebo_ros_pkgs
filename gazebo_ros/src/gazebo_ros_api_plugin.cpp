@@ -205,6 +205,11 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
 
   // Manage clock for simulated ros time
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
+
+  /// \brief advertise all services
+  if (enable_ros_network_)
+    advertiseServices();
+
   // set param for use_sim_time if not set by user already
   if(!(nh_->hasParam("/use_sim_time")))
     nh_->setParam("/use_sim_time", true);
@@ -215,10 +220,6 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
 #else
   last_pub_clock_time_ = world_->GetSimTime();
 #endif
-
-  /// \brief advertise all services
-  if (enable_ros_network_)
-    advertiseServices();
 
   // hooks for applying forces, publishing simtime on /clock
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
