@@ -203,10 +203,6 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   pub_link_states_connection_count_ = 0;
   pub_model_states_connection_count_ = 0;
 
-  /// \brief advertise all services
-  if (enable_ros_network_)
-    advertiseServices();
-
   // Manage clock for simulated ros time
   pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
   // set param for use_sim_time if not set by user already
@@ -219,6 +215,10 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
 #else
   last_pub_clock_time_ = world_->GetSimTime();
 #endif
+
+  /// \brief advertise all services
+  if (enable_ros_network_)
+    advertiseServices();
 
   // hooks for applying forces, publishing simtime on /clock
   wrench_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::wrenchBodySchedulerSlot,this));
@@ -247,9 +247,6 @@ void GazeboRosApiPlugin::advertiseServices()
     ROS_INFO_NAMED("api_plugin", "ROS gazebo topics/services are disabled");
     return;
   }
-
-  // publish clock for simulated ros time
-  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
 
   // Advertise spawn services on the custom queue
   std::string spawn_sdf_model_service_name("spawn_sdf_model");
@@ -528,19 +525,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                           boost::bind(&GazeboRosApiPlugin::resetWorld,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
   reset_world_service_ = nh_->advertiseService(reset_world_aso);
-
-
-  // set param for use_sim_time if not set by user already
-  if(!(nh_->hasParam("/use_sim_time")))
-    nh_->setParam("/use_sim_time", true);
-
-  // todo: contemplate setting environment variable ROBOT=sim here???
-  nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
-#if GAZEBO_MAJOR_VERSION >= 8
-  last_pub_clock_time_ = world_->SimTime();
-#else
-  last_pub_clock_time_ = world_->GetSimTime();
-#endif
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
