@@ -35,6 +35,8 @@
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/transport/transport.hh>
 
+#include <ignition/common/Profiler.hh>
+
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 
@@ -184,6 +186,9 @@ void GazeboRosLaser::LaserDisconnect()
 // Convert new Gazebo message to ROS message and publish it
 void GazeboRosLaser::OnScan(ConstLaserScanStampedPtr &_msg)
 {
+  IGN_PROFILE("GazeboRosLaser::OnScan");
+  IGN_PROFILE_BEGIN("fill ROS message");
+
   // We got a new message from the Gazebo sensor.  Stuff a
   // corresponding ROS message and publish it.
   sensor_msgs::LaserScan laser_msg;
@@ -205,5 +210,6 @@ void GazeboRosLaser::OnScan(ConstLaserScanStampedPtr &_msg)
             _msg->scan().intensities().end(),
             laser_msg.intensities.begin());
   this->pub_queue_->push(laser_msg, this->pub_);
+  IGN_PROFILE_END();
 }
 }

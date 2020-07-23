@@ -18,6 +18,7 @@
 #include <iostream>
 #include <gazebo/sensors/ImuSensor.hh>
 #include <gazebo/physics/World.hh>
+#include <ignition/common/Profiler.hh>
 #include <ignition/math/Rand.hh>
 
 GZ_REGISTER_SENSOR_PLUGIN(gazebo::GazeboRosImuSensor)
@@ -88,6 +89,7 @@ void gazebo::GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr sensor_, sdf::E
 
 void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/*_info*/)
 {
+  IGN_PROFILE("GazeboRosImuSensor::UpdateChild");
   common::Time current_time = sensor->LastUpdateTime();
 
   if(update_rate>0 && (current_time-last_time).Double() < 1.0/update_rate) //update rate check
@@ -95,6 +97,8 @@ void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/
 
   if(imu_data_publisher.getNumSubscribers() > 0)
   {
+    IGN_PROFILE_BEGIN("fill ROS message");
+
     orientation = offset.Rot()*sensor->Orientation(); //applying offsets to the orientation measurement
     accelerometer_data = sensor->LinearAcceleration();
     gyroscope_data = sensor->AngularVelocity();
@@ -129,9 +133,12 @@ void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/
     imu_msg.header.frame_id = body_name;
     imu_msg.header.stamp.sec = current_time.sec;
     imu_msg.header.stamp.nsec = current_time.nsec;
+    IGN_PROFILE_END();
 
     //publishing data
+    IGN_PROFILE_BEGIN("publish");
     imu_data_publisher.publish(imu_msg);
+    IGN_PROFILE_END();
 
     ros::spinOnce();
   }

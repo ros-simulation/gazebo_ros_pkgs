@@ -28,6 +28,8 @@
 
 #include "gazebo_plugins/gazebo_ros_multicamera.h"
 
+#include <ignition/common/Profiler.hh>
+
 namespace gazebo
 {
 // Register this plugin with the simulator
@@ -98,6 +100,8 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
 void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
     GazeboRosCameraUtils* util)
 {
+  IGN_PROFILE("GazeboRosMultiCamera::OnNewFrame");
+
 # if GAZEBO_MAJOR_VERSION >= 7
   common::Time sensor_update_time = util->parentSensor_->LastMeasurementTime();
 # else
@@ -108,8 +112,12 @@ void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
   {
     if (sensor_update_time - util->last_update_time_ >= util->update_period_)
     {
+      IGN_PROFILE_BEGIN("PutCameraData");
       util->PutCameraData(_image, sensor_update_time);
+      IGN_PROFILE_END();
+      IGN_PROFILE_BEGIN("PublishCameraInfo");
       util->PublishCameraInfo(sensor_update_time);
+      IGN_PROFILE_END();
       util->last_update_time_ = sensor_update_time;
     }
   }

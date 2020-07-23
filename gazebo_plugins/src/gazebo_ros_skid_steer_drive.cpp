@@ -42,6 +42,7 @@
 
 #include <gazebo_plugins/gazebo_ros_skid_steer_drive.h>
 
+#include <ignition/common/Profiler.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
@@ -334,7 +335,10 @@ namespace gazebo {
   }
 
   // Update the controller
-  void GazeboRosSkidSteerDrive::UpdateChild() {
+  void GazeboRosSkidSteerDrive::UpdateChild()
+  {
+    IGN_PROFILE("GazeboRosSkidSteerDrive::UpdateChild");
+
 #if GAZEBO_MAJOR_VERSION >= 8
     common::Time current_time = this->world->SimTime();
 #else
@@ -344,10 +348,15 @@ namespace gazebo {
       (current_time - last_update_time_).Double();
     if (seconds_since_last_update > update_period_) {
 
+      IGN_PROFILE_BEGIN("publishOdometry");
       publishOdometry(seconds_since_last_update);
+      IGN_PROFILE_END();
 
       // Update robot in case new velocities have been requested
+      IGN_PROFILE_BEGIN("getWheelVelocities");
       getWheelVelocities();
+      IGN_PROFILE_END();
+      IGN_PROFILE_BEGIN("SetVelocity");
 #if GAZEBO_MAJOR_VERSION > 2
       joints[LEFT_FRONT]->SetParam("vel", 0, wheel_speed_[LEFT_FRONT] / (wheel_diameter_ / 2.0));
       joints[RIGHT_FRONT]->SetParam("vel", 0, wheel_speed_[RIGHT_FRONT] / (wheel_diameter_ / 2.0));
@@ -359,7 +368,7 @@ namespace gazebo {
       joints[LEFT_REAR]->SetVelocity(0, wheel_speed_[LEFT_REAR] / (wheel_diameter_ / 2.0));
       joints[RIGHT_REAR]->SetVelocity(0, wheel_speed_[RIGHT_REAR] / (wheel_diameter_ / 2.0));
 #endif
-
+      IGN_PROFILE_END();
       last_update_time_+= common::Time(update_period_);
 
     }

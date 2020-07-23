@@ -21,8 +21,9 @@
  * Date: 26 July 2013
  */
 
-#include <gazebo_plugins/gazebo_ros_video.h>
 #include <boost/lexical_cast.hpp>
+#include <gazebo_plugins/gazebo_ros_video.h>
+#include <ignition/common/Profiler.hh>
 
 namespace gazebo
 {
@@ -224,10 +225,14 @@ namespace gazebo
   // Update the controller
   void GazeboRosVideo::UpdateChild()
   {
+    IGN_PROFILE("GazeboRosVideo::UpdateChild");
+
     boost::mutex::scoped_lock scoped_lock(m_image_);
     if (new_image_available_)
     {
+      IGN_PROFILE_BEGIN("render");
       video_visual_->render(image_->image);
+      IGN_PROFILE_END();
     }
     new_image_available_ = false;
   }

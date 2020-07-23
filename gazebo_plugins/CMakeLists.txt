@@ -64,6 +64,18 @@ endif()
 
 find_package(Boost REQUIRED COMPONENTS thread)
 
+option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
+if (ENABLE_PROFILER)
+  find_package(ignition-common3 QUIET)
+  if (ignition-common3_FOUND)
+    add_definitions("-DIGN_PROFILER_ENABLE=1" "-DIGN_PROFILER_REMOTERY=1")
+    message("Profiler is active")
+  else()
+    message("Can't find Ignition common3. Profiler will not be actived")
+    add_definitions("-DIGN_PROFILER_ENABLE=0" "-DIGN_PROFILER_REMOTERY=0")
+  endif()
+endif()
+
 execute_process(COMMAND
   pkg-config --variable=plugindir OGRE
   OUTPUT_VARIABLE OGRE_PLUGIN_PATH
@@ -105,23 +117,23 @@ endif()
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES 
-  vision_reconfigure 
-  gazebo_ros_utils 
-  gazebo_ros_camera_utils 
-  gazebo_ros_camera 
+  LIBRARIES
+  vision_reconfigure
+  gazebo_ros_utils
+  gazebo_ros_camera_utils
+  gazebo_ros_camera
   gazebo_ros_triggered_camera
-  gazebo_ros_multicamera 
+  gazebo_ros_multicamera
   gazebo_ros_triggered_multicamera
-  gazebo_ros_depth_camera 
-  gazebo_ros_openni_kinect 
-  gazebo_ros_gpu_laser 
-  gazebo_ros_laser 
-  gazebo_ros_block_laser 
-  gazebo_ros_p3d 
-  gazebo_ros_imu 
+  gazebo_ros_depth_camera
+  gazebo_ros_openni_kinect
+  gazebo_ros_gpu_laser
+  gazebo_ros_laser
+  gazebo_ros_block_laser
+  gazebo_ros_p3d
+  gazebo_ros_imu
   gazebo_ros_imu_sensor
-  gazebo_ros_f3d 
+  gazebo_ros_f3d
   gazebo_ros_ft_sensor
   gazebo_ros_bumper
   gazebo_ros_template
