@@ -4,5 +4,5 @@
 #   - https://colcon.readthedocs.io/en/released/user/configuration.html#colcon-pkg-files
 
 {
-  "build-dependencies": ["Gazebo"],
+  "dependencies": ["Gazebo"],
 }
