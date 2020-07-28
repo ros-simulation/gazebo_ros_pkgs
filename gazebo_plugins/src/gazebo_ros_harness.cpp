@@ -16,6 +16,7 @@
 */
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/Model.hh>
+#include <ignition/common/Profiler.hh>
 #include <sdf/sdf.hh>
 
 #include "gazebo_plugins/gazebo_ros_harness.h"
@@ -84,8 +85,11 @@ void GazeboRosHarness::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 /////////////////////////////////////////////////
 void GazeboRosHarness::OnVelocity(const std_msgs::Float32::ConstPtr &msg)
 {
+  IGN_PROFILE("GazeboRosHarness::OnVelocity");
   // Set the target winch velocity
+  IGN_PROFILE_BEGIN("process ROS message");
   this->SetWinchVelocity(msg->data);
+  IGN_PROFILE_END();
 }
 
 /////////////////////////////////////////////////

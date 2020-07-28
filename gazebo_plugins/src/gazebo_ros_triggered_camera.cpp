@@ -24,6 +24,8 @@
 #include <gazebo/sensors/CameraSensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
+#include <ignition/common/Profiler.hh>
+
 namespace gazebo
 {
 
@@ -89,14 +91,22 @@ void GazeboRosTriggeredCamera::OnNewFrame(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  IGN_PROFILE("GazeboRosTriggeredCamera::OnNewFrame");
+
   this->sensor_update_time_ = this->parentSensor_->LastMeasurementTime();
 
   if ((*this->image_connect_count_) > 0)
   {
+    IGN_PROFILE_BEGIN("PutCameraData");
     this->PutCameraData(_image);
+    IGN_PROFILE_END();
+    IGN_PROFILE_BEGIN("PublishCameraInfo");
     this->PublishCameraInfo();
+    IGN_PROFILE_END();
   }
+  IGN_PROFILE_BEGIN("SetCameraEnabled");
   this->SetCameraEnabled(false);
+  IGN_PROFILE_END();
 
   std::lock_guard<std::mutex> lock(this->mutex);
   this->triggered = std::max(this->triggered-1, 0);

@@ -26,7 +26,7 @@
 
 #include <std_msgs/Bool.h>
 #include <gazebo_plugins/gazebo_ros_vacuum_gripper.h>
-
+#include <ignition/common/Profiler.hh>
 
 namespace gazebo
 {
@@ -171,14 +171,19 @@ bool GazeboRosVacuumGripper::OffServiceCallback(std_srvs::Empty::Request &req,
 // Update the controller
 void GazeboRosVacuumGripper::UpdateChild()
 {
+  IGN_PROFILE("GazeboRosVacuumGripper::UpdateChild");
+
   std_msgs::Bool grasping_msg;
   grasping_msg.data = false;
   if (!status_) {
+    IGN_PROFILE_BEGIN("publish status");
     pub_.publish(grasping_msg);
+    IGN_PROFILE_END();
     return;
   }
   // apply force
   lock_.lock();
+  IGN_PROFILE_BEGIN("apply force");
 #if GAZEBO_MAJOR_VERSION >= 8
   ignition::math::Pose3d parent_pose = link_->WorldPose();
   physics::Model_V models = world_->Models();
@@ -225,7 +230,10 @@ void GazeboRosVacuumGripper::UpdateChild()
       }
     }
   }
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish grasping_msg");
   pub_.publish(grasping_msg);
+  IGN_PROFILE_END();
   lock_.unlock();
 }
 

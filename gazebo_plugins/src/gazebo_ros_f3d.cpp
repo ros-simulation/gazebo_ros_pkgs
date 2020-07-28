@@ -22,6 +22,7 @@
  */
 
 #include <gazebo_plugins/gazebo_ros_f3d.h>
+#include <ignition/common/Profiler.hh>
 #include <tf/tf.h>
 
 namespace gazebo
@@ -146,8 +147,12 @@ void GazeboRosF3D::F3DDisconnect()
 // Update the controller
 void GazeboRosF3D::UpdateChild()
 {
+  IGN_PROFILE("GazeboRosF3D::UpdateChild");
+
   if (this->f3d_connect_count_ == 0)
     return;
+
+  IGN_PROFILE_BEGIN("fill ROS message");
 
   ignition::math::Vector3d torque;
   ignition::math::Vector3d force;
@@ -178,8 +183,10 @@ void GazeboRosF3D::UpdateChild()
   this->wrench_msg_.wrench.torque.x   = torque.X();
   this->wrench_msg_.wrench.torque.y   = torque.Y();
   this->wrench_msg_.wrench.torque.z   = torque.Z();
-
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish");
   this->pub_.publish(this->wrench_msg_);
+  IGN_PROFILE_END();
   this->lock_.unlock();
 
 }

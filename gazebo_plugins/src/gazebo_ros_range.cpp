@@ -48,6 +48,8 @@
 #include <gazebo/sensors/RaySensor.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
+#include <ignition/common/Profiler.hh>
+
 #include <sdf/sdf.hh>
 #include <sdf/Param.hh>
 
@@ -241,6 +243,8 @@ void GazeboRosRange::RangeDisconnect()
 // Update the plugin
 void GazeboRosRange::OnNewLaserScans()
 {
+  IGN_PROFILE("GazeboRosRange::OnNewLaserScans");
+
   if (this->topic_name_ != "")
   {
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -258,7 +262,9 @@ void GazeboRosRange::OnNewLaserScans()
     {
       common::Time sensor_update_time =
         this->parent_sensor_->LastUpdateTime();
+      IGN_PROFILE_BEGIN("PutRangeData");
       this->PutRangeData(sensor_update_time);
+      IGN_PROFILE_END();
       this->last_update_time_ = cur_time;
     }
   }

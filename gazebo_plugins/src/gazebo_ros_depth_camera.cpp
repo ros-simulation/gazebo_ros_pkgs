@@ -31,6 +31,8 @@
 #include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
+#include <ignition/common/Profiler.hh>
+
 #include <sensor_msgs/point_cloud2_iterator.h>
 
 #include <tf/tf.h>
@@ -275,8 +277,11 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  IGN_PROFILE("GazeboRosDepthCamera::OnNewDepthFrame");
+
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
+  IGN_PROFILE_BEGIN("fill ROS message");
 
 # if GAZEBO_MAJOR_VERSION >= 7
   this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
@@ -312,6 +317,7 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
+  IGN_PROFILE_END();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,9 +326,11 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  IGN_PROFILE("GazeboRosDepthCamera::OnNewRGBPointCloud");
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
+  IGN_PROFILE_BEGIN("fill ROS message");
 # if GAZEBO_MAJOR_VERSION >= 7
   this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
 # else
@@ -380,6 +388,7 @@ void GazeboRosDepthCamera::OnNewRGBPointCloud(const float *_pcd,
       this->lock_.unlock();
     }
   }
+  IGN_PROFILE_END();
 }
 
 #if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
@@ -389,9 +398,12 @@ void GazeboRosDepthCamera::OnNewReflectanceFrame(const float *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  IGN_PROFILE("GazeboRosDepthCamera::OnNewReflectanceFrame");
 
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
+
+    IGN_PROFILE_BEGIN("fill ROS message");
 
   /// don't bother if there are no subscribers
   if (this->reflectance_connect_count_ > 0)
@@ -410,7 +422,7 @@ void GazeboRosDepthCamera::OnNewReflectanceFrame(const float *_image,
     // publish to ros
     this->reflectance_pub_.publish(this->reflectance_msg_);
   }
-
+  IGN_PROFILE_END();
 }
 #endif
 
@@ -420,9 +432,11 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  IGN_PROFILE("GazeboRosDepthCamera::OnNewImageFrame");
+
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
-
+  IGN_PROFILE_BEGIN("fill ROS message");
   //ROS_ERROR_NAMED("depth_camera", "camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
 # if GAZEBO_MAJOR_VERSION >= 7
   this->sensor_update_time_ = this->parentSensor->LastMeasurementTime();
@@ -445,6 +459,7 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
       // this->PublishCameraInfo(sensor_update_time);
     }
   }
+  IGN_PROFILE_END();
 }
 
 #if GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 12
@@ -452,8 +467,11 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
                unsigned int _width, unsigned int _height,
                unsigned int _depth, const std::string &_format)
 {
+  IGN_PROFILE("GazeboRosDepthCamera::OnNewNormalsFrame");
+
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
+  IGN_PROFILE_BEGIN("fill ROS message");
 
   visualization_msgs::MarkerArray m_array;
 
@@ -529,6 +547,7 @@ void GazeboRosDepthCamera::OnNewNormalsFrame(const float * _normals,
       this->normal_pub_.publish(m_array);
     }
   }
+  IGN_PROFILE_END();
 }
 #endif
 

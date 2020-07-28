@@ -22,6 +22,7 @@
 
 #include <gazebo_plugins/gazebo_ros_imu.h>
 #include <ignition/math/Rand.hh>
+#include <ignition/common/Profiler.hh>
 
 namespace gazebo
 {
@@ -216,6 +217,8 @@ bool GazeboRosIMU::ServiceCallback(std_srvs::Empty::Request &req,
 // Update the controller
 void GazeboRosIMU::UpdateChild()
 {
+  IGN_PROFILE("GazeboRosIMU::UpdateChild");
+
 #if GAZEBO_MAJOR_VERSION >= 8
   common::Time cur_time = this->world_->SimTime();
 #else
@@ -229,6 +232,7 @@ void GazeboRosIMU::UpdateChild()
 
   if ((this->pub_.getNumSubscribers() > 0 && this->topic_name_ != ""))
   {
+    IGN_PROFILE_BEGIN("fill ROS message");
     ignition::math::Pose3d pose;
     ignition::math::Quaterniond rot;
     ignition::math::Vector3d pos;
@@ -331,6 +335,7 @@ void GazeboRosIMU::UpdateChild()
 
     // save last time stamp
     this->last_time_ = cur_time;
+    IGN_PROFILE_END();
   }
 }
 

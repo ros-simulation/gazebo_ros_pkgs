@@ -69,6 +69,18 @@ else()
   find_package(OpenCV COMPONENTS core highgui REQUIRED)
 endif()
 
+option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
+if (ENABLE_PROFILER)
+  find_package(ignition-common3 QUIET)
+  if (ignition-common3_FOUND)
+    add_definitions("-DIGN_PROFILER_ENABLE=1" "-DIGN_PROFILER_REMOTERY=1")
+    message("Profiler is active")
+  else()
+    message("Can't find Ignition common3. Profiler will not be actived")
+    add_definitions("-DIGN_PROFILER_ENABLE=0" "-DIGN_PROFILER_REMOTERY=0")
+  endif()
+endif()
+
 execute_process(COMMAND
   pkg-config --variable=plugindir OGRE
   OUTPUT_VARIABLE OGRE_PLUGIN_PATH

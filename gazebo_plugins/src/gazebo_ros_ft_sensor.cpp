@@ -22,6 +22,7 @@
 
 #include <gazebo_plugins/gazebo_ros_ft_sensor.h>
 #include <tf/tf.h>
+#include <ignition/common/Profiler.hh>
 #include <ignition/math/Rand.hh>
 
 namespace gazebo
@@ -157,6 +158,9 @@ void GazeboRosFT::FTDisconnect()
 // Update the controller
 void GazeboRosFT::UpdateChild()
 {
+  IGN_PROFILE("GazeboRosFT::UpdateChild");
+  IGN_PROFILE_BEGIN("fill ROS message");
+
 #if GAZEBO_MAJOR_VERSION >= 8
   common::Time cur_time = this->world_->SimTime();
 #else
@@ -207,8 +211,10 @@ void GazeboRosFT::UpdateChild()
   this->wrench_msg_.wrench.torque.x = torque.X() + this->GaussianKernel(0, this->gaussian_noise_);
   this->wrench_msg_.wrench.torque.y = torque.Y() + this->GaussianKernel(0, this->gaussian_noise_);
   this->wrench_msg_.wrench.torque.z = torque.Z() + this->GaussianKernel(0, this->gaussian_noise_);
-
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish");
   this->pub_.publish(this->wrench_msg_);
+  IGN_PROFILE_END();
   this->lock_.unlock();
 
   // save last time stamp

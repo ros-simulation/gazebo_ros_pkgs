@@ -44,6 +44,7 @@
 
 #include <gazebo_plugins/gazebo_ros_tricycle_drive.h>
 
+#include <ignition/common/Profiler.hh>
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
@@ -210,7 +211,14 @@ void GazeboRosTricycleDrive::publishWheelTF()
 // Update the controller
 void GazeboRosTricycleDrive::UpdateChild()
 {
-    if ( odom_source_ == ENCODER ) UpdateOdometryEncoder();
+  IGN_PROFILE("GazeboRosTricycleDrive::UpdateChild");
+
+    if ( odom_source_ == ENCODER )
+    {
+      IGN_PROFILE_BEGIN("UpdateOdometryEncoder");
+      UpdateOdometryEncoder();
+      IGN_PROFILE_END();
+    }
 #if GAZEBO_MAJOR_VERSION >= 8
     common::Time current_time = parent->GetWorld()->SimTime();
 #else
@@ -219,9 +227,21 @@ void GazeboRosTricycleDrive::UpdateChild()
     double seconds_since_last_update = ( current_time - last_actuator_update_ ).Double();
     if ( seconds_since_last_update > update_period_ ) {
 
+        IGN_PROFILE_BEGIN("publishOdometry");
         publishOdometry ( seconds_since_last_update );
-        if ( publishWheelTF_ ) publishWheelTF();
-        if ( publishWheelJointState_ ) publishWheelJointState();
+        IGN_PROFILE_END();
+        if ( publishWheelTF_ )
+        {
+          IGN_PROFILE_BEGIN("publishWheelTF");
+          publishWheelTF();
+          IGN_PROFILE_END();
+        }
+        if ( publishWheelJointState_ )
+        {
+          IGN_PROFILE_BEGIN("publishWheelJointState");
+          publishWheelJointState();
+          IGN_PROFILE_END();
+        }
 
         double target_wheel_roation_speed = cmd_.speed / ( diameter_actuated_wheel_ / 2.0 );
         double target_steering_angle = cmd_.angle;

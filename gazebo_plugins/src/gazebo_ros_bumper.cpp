@@ -36,6 +36,8 @@
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 
+#include <ignition/common/Profiler.hh>
+
 #include <tf/tf.h>
 
 #include <gazebo_plugins/gazebo_ros_bumper.h>
@@ -132,9 +134,12 @@ void GazeboRosBumper::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 // Update the controller
 void GazeboRosBumper::OnContact()
 {
+  IGN_PROFILE("GazeboRosBumper::OnContact");
+
   if (this->contact_pub_.getNumSubscribers() <= 0)
     return;
 
+  IGN_PROFILE_BEGIN("fill message");
   msgs::Contacts contacts;
   contacts = this->parentSensor->Contacts();
   /// \TODO: need a time for each Contact in i-loop, they may differ
@@ -311,8 +316,11 @@ void GazeboRosBumper::OnContact()
     state.total_wrench = total_wrench;
     this->contact_state_msg_.states.push_back(state);
   }
+  IGN_PROFILE_END();
 
+  IGN_PROFILE_BEGIN("publish");
   this->contact_pub_.publish(this->contact_state_msg_);
+  IGN_PROFILE_END();
 }
 
 
