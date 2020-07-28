@@ -157,7 +157,7 @@ void GazeboRosProsilica::OnNewImageFrame(const unsigned char *_image,
           IGN_PROFILE_BEGIN("PutCameraData");
           this->PutCameraData(_image, sensor_update_time);
           IGN_PROFILE_END();
-          IGN_PROFILE_BEGIN("PutCameraData");
+          IGN_PROFILE_BEGIN("PublishCameraInfo");
           this->PublishCameraInfo(sensor_update_time);
           IGN_PROFILE_END();
           this->last_update_time_ = sensor_update_time;
