@@ -114,7 +114,7 @@ namespace gazebo
     cmd_timeout_ = -1;
     if (!sdf->HasElement("cmdTimeout"))
     {
-      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <odometryRate>, "
+      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <cmdTimeout>, "
           "defaults to %f",
           robot_namespace_.c_str(), cmd_timeout_);
     }
