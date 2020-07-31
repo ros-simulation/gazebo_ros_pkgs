@@ -103,8 +103,8 @@ void GazeboRosGpsSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 void GazeboRosGpsSensorPrivate::OnUpdate()
 {
   #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE("GazeboRosGpsSensorPrivate::OnUpdate");
-    IGN_PROFILE_BEGIN("fill ROS message");
+  IGN_PROFILE("GazeboRosGpsSensorPrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("fill ROS message");
   #endif
   // Fill message with latest sensor data
   msg_->header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
@@ -114,13 +114,13 @@ void GazeboRosGpsSensorPrivate::OnUpdate()
   msg_->altitude = sensor_->Altitude();
 
   #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_END();
-    IGN_PROFILE_BEGIN("publish");
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish");
   #endif
   // Publish message
   pub_->publish(*msg_);
   #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_END();
+  IGN_PROFILE_END();
   #endif
 }
 

@@ -443,7 +443,7 @@ void GazeboRosAckermannDrive::Reset()
 void GazeboRosAckermannDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
   #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE("GazeboRosAckermannDrivePrivate::OnUpdate");
+  IGN_PROFILE("GazeboRosAckermannDrivePrivate::OnUpdate");
   #endif
   std::lock_guard<std::mutex> lock(lock_);
 
@@ -544,7 +544,7 @@ void GazeboRosAckermannDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo &
 
   last_update_time_ = _info.simTime;
   #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_END();
+  IGN_PROFILE_END();
   #endif
 }
 
