@@ -41,6 +41,18 @@ find_package(trajectory_msgs REQUIRED)
 
 link_directories(${gazebo_dev_LIBRARY_DIRS})
 
+option(ENABLE_PROFILER "Enable Ignition Profiler" FALSE)
+if (ENABLE_PROFILER)
+  find_package(ignition-common3 QUIET COMPONENTS profiler)
+  if (ignition-common3_FOUND)
+    add_definitions("-DIGN_PROFILER_ENABLE=1" "-DIGN_PROFILER_REMOTERY=1")
+    message(STATUS "Profiler is active")
+  else()
+    message(WARNING "Can't find Ignition common3. Profiler will not be actived")
+    add_definitions("-DIGN_PROFILER_ENABLE=0" "-DIGN_PROFILER_REMOTERY=0")
+  endif()
+endif()
+
 # gazebo_ros_joint_state_publisher
 add_library(gazebo_ros_joint_state_publisher SHARED
   src/gazebo_ros_joint_state_publisher.cpp
@@ -53,6 +65,10 @@ ament_target_dependencies(gazebo_ros_joint_state_publisher
   "sensor_msgs"
 )
 ament_export_libraries(gazebo_ros_joint_state_publisher)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_joint_state_publisher PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_joint_state_publisher ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_diff_drive
 add_library(gazebo_ros_diff_drive SHARED
@@ -70,6 +86,10 @@ ament_target_dependencies(gazebo_ros_diff_drive
   "tf2_ros"
 )
 ament_export_libraries(gazebo_ros_diff_drive)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_diff_drive PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_diff_drive ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_force
 add_library(gazebo_ros_force SHARED
@@ -83,7 +103,10 @@ ament_target_dependencies(gazebo_ros_force
   "rclcpp"
 )
 ament_export_libraries(gazebo_ros_force)
-
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_force PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_force ${ignition-common3_LIBRARIES})
+endif()
 # gazebo_ros_template
 add_library(gazebo_ros_template SHARED
   src/gazebo_ros_template.cpp
@@ -131,6 +154,10 @@ target_link_libraries(gazebo_ros_camera
   multi_camera_plugin
 )
 ament_export_libraries(gazebo_ros_camera)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_camera PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_camera ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_imu_sensor
 add_library(gazebo_ros_imu_sensor SHARED
@@ -146,7 +173,10 @@ target_link_libraries(gazebo_ros_imu_sensor
   ImuSensorPlugin
 )
 ament_export_libraries(gazebo_ros_imu_sensor)
-
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_imu_sensor PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_imu_sensor ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_gps_sensor
 add_library(gazebo_ros_gps_sensor SHARED
@@ -159,6 +189,11 @@ ament_target_dependencies(gazebo_ros_gps_sensor
   "gazebo_dev"
 )
 ament_export_libraries(gazebo_ros_gps_sensor)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_gps_sensor PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_gps_sensor ${ignition-common3_LIBRARIES})
+endif()
+
 
 # gazebo_ros_ray_sensor
 add_library(gazebo_ros_ray_sensor SHARED
@@ -170,6 +205,10 @@ ament_target_dependencies(gazebo_ros_ray_sensor
   "sensor_msgs"
 )
 ament_export_libraries(gazebo_ros_ray_sensor)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_ray_sensor PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_ray_sensor ${ignition-common3_LIBRARIES})
+endif()
 
 add_library(gazebo_ros_p3d SHARED
   src/gazebo_ros_p3d.cpp
@@ -186,6 +225,10 @@ ament_target_dependencies(gazebo_ros_p3d
   "tf2_ros"
 )
 ament_export_libraries(gazebo_ros_p3d)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_p3d PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_p3d ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_tricycle_drive
 add_library(gazebo_ros_tricycle_drive SHARED
@@ -203,6 +246,10 @@ ament_target_dependencies(gazebo_ros_tricycle_drive
   "tf2_ros"
 )
 ament_export_libraries(gazebo_ros_tricycle_drive)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_tricycle_drive PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_tricycle_drive ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_video
 add_library(gazebo_ros_video SHARED
@@ -216,6 +263,10 @@ ament_target_dependencies(gazebo_ros_video
   "cv_bridge"
 )
 ament_export_libraries(gazebo_ros_video)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_video PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_video ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_ft_sensor
 add_library(gazebo_ros_ft_sensor SHARED
@@ -229,6 +280,10 @@ ament_target_dependencies(gazebo_ros_ft_sensor
   "geometry_msgs"
 )
 ament_export_libraries(gazebo_ros_ft_sensor)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_ft_sensor PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_ft_sensor ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_bumper
 add_library(gazebo_ros_bumper SHARED
@@ -244,6 +299,10 @@ ament_target_dependencies(gazebo_ros_bumper
   "geometry_msgs"
 )
 ament_export_libraries(gazebo_ros_bumper)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_bumper PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_bumper ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_harness
 add_library(gazebo_ros_harness SHARED
@@ -275,6 +334,10 @@ ament_target_dependencies(gazebo_ros_hand_of_god
   "tf2_ros"
 )
 ament_export_libraries(gazebo_ros_hand_of_god)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_hand_of_god PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_hand_of_god ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_ackermann_drive
 add_library(gazebo_ros_ackermann_drive SHARED
@@ -292,6 +355,10 @@ ament_target_dependencies(gazebo_ros_ackermann_drive
   "tf2_ros"
 )
 ament_export_libraries(gazebo_ros_ackermann_drive)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_ackermann_drive PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_ackermann_drive ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_elevator
 add_library(gazebo_ros_elevator SHARED
@@ -322,6 +389,10 @@ ament_target_dependencies(gazebo_ros_vacuum_gripper
   "std_srvs"
 )
 ament_export_libraries(gazebo_ros_vacuum_gripper)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_vacuum_gripper PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_vacuum_gripper ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_joint_pose_trajectory
 add_library(gazebo_ros_joint_pose_trajectory SHARED
@@ -335,6 +406,10 @@ ament_target_dependencies(gazebo_ros_joint_pose_trajectory
   "trajectory_msgs"
 )
 ament_export_libraries(gazebo_ros_joint_pose_trajectory)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_joint_pose_trajectory PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_joint_pose_trajectory ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_planar_move
 add_library(gazebo_ros_planar_move SHARED
@@ -351,6 +426,10 @@ ament_target_dependencies(gazebo_ros_planar_move
   "tf2_ros"
 )
 ament_export_libraries(gazebo_ros_planar_move)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_planar_move PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_planar_move ${ignition-common3_LIBRARIES})
+endif()
 
 # gazebo_ros_projector
 add_library(gazebo_ros_projector SHARED
@@ -364,6 +443,10 @@ ament_target_dependencies(gazebo_ros_projector
   "std_msgs"
 )
 ament_export_libraries(gazebo_ros_projector)
+if (ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_projector PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_projector ${ignition-common3_LIBRARIES})
+endif()
 
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)

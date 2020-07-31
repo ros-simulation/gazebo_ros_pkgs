@@ -29,6 +29,10 @@
 #include <gazebo_ros/utils.hpp>
 #include <geometry_msgs/msg/wrench.hpp>
 
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
+
 #include <memory>
 #include <string>
 
@@ -102,13 +106,25 @@ void GazeboRosBumper::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
 void GazeboRosBumperPrivate::OnUpdate()
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosBumperPrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("fill message");
+#endif
   gazebo::msgs::Contacts contacts;
   contacts = parent_sensor_->Contacts();
 
   auto contact_state_msg = gazebo_ros::Convert<gazebo_msgs::msg::ContactsState>(contacts);
   contact_state_msg.header.frame_id = frame_name_;
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+
+  IGN_PROFILE_BEGIN("publish");
+#endif
 
   pub_->publish(contact_state_msg);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 }
 
 GZ_REGISTER_SENSOR_PLUGIN(GazeboRosBumper)

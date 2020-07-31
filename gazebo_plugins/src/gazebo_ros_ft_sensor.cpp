@@ -29,6 +29,9 @@
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #include <geometry_msgs/msg/wrench_stamped.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 
 #include <string>
 #include <memory>
@@ -179,7 +182,10 @@ void GazeboRosFTSensorPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info
   if (update_rate_ > 0 && (current_time - last_time_).Double() < (1.0 / update_rate_)) {
     return;
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosFTSensorPrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   ignition::math::Vector3d torque;
   ignition::math::Vector3d force;
 
@@ -205,10 +211,15 @@ void GazeboRosFTSensorPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info
   wrench_msg_.wrench.torque.x = torque.X() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
   wrench_msg_.wrench.torque.y = torque.Y() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
   wrench_msg_.wrench.torque.z = torque.Z() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
   // Publish to ROS
+  IGN_PROFILE_BEGIN("publish");
+#endif
   pub_->publish(wrench_msg_);
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   // Save last time stamp
   last_time_ = current_time;
 }

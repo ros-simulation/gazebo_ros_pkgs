@@ -19,6 +19,9 @@
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 #include <geometry_msgs/msg/wrench.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <rclcpp/rclcpp.hpp>
 
 #include <memory>
@@ -120,6 +123,10 @@ void GazeboRosForce::OnRosWrenchMsg(const geometry_msgs::msg::Wrench::SharedPtr 
 
 void GazeboRosForce::OnUpdate()
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosForce::OnUpdate");
+  IGN_PROFILE_BEGIN("Aplly forces");
+#endif
   if (impl_->force_on_world_frame_) {
     impl_->link_->AddForce(
       gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.force));
@@ -131,6 +138,9 @@ void GazeboRosForce::OnUpdate()
     impl_->link_->AddRelativeTorque(
       gazebo_ros::Convert<ignition::math::Vector3d>(impl_->wrench_msg_.torque));
   }
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosForce)
