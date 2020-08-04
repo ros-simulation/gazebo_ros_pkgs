@@ -401,16 +401,16 @@ void GazeboRosMoveItPlanningScene::UpdateCB()
                     //gzwarn<<"TRIANGLES"<<std::endl;
                     shape_msgs::Mesh mesh_msg;
                     mesh_msg.vertices.resize(n_vertices);
-                    mesh_msg.triangles.resize(n_vertices/3);
+                    mesh_msg.triangles.resize(n_vertices/3+1);
 
                     for(size_t v=0; v < n_vertices; v++) {
 
                       const int index = submesh->GetIndex(v);
                       const ignition::math::Vector3d vertex = submesh->Vertex(v);
 
-                      mesh_msg.vertices[index].x = vertex.X() * scale.X();
-                      mesh_msg.vertices[index].y = vertex.Y() * scale.Y();
-                      mesh_msg.vertices[index].z = vertex.Z() * scale.Z();
+                      mesh_msg.vertices[v].x = vertex.X() * scale.X();
+                      mesh_msg.vertices[v].y = vertex.Y() * scale.Y();
+                      mesh_msg.vertices[v].z = vertex.Z() * scale.Z();
 
                       mesh_msg.triangles[v/3].vertex_indices[v%3] = index;
                     }
