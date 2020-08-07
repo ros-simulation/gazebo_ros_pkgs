@@ -31,6 +31,9 @@ class GazeboRosWheelSlipPrivate
 public:
   /// A pointer to the GazeboROS node.
   gazebo_ros::Node::SharedPtr ros_node_;
+
+  /// Handle to parameters callback
+  rclcpp::Node::OnSetParametersCallbackHandle::SharedPtr on_set_parameters_callback_handle_;
 };
 
 GazeboRosWheelSlip::GazeboRosWheelSlip()
@@ -80,7 +83,8 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       return result;
     };
 
-  impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
+  on_set_parameters_callback_handle_ = impl_->ros_node_->add_on_set_parameters_callback(
+    param_change_callback);
 
   // Declare parameters after adding callback so that callback will trigger immediately.
   // Set negative values by default, which are ignored by the callback.
