@@ -204,7 +204,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   pub_model_states_connection_count_ = 0;
 
   // Manage clock for simulated ros time
-  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
+  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock", 10);
 
   /// \brief advertise all services
   if (enable_ros_network_)
