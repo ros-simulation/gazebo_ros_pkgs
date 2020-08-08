@@ -83,7 +83,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       return result;
     };
 
-  on_set_parameters_callback_handle_ = impl_->ros_node_->add_on_set_parameters_callback(
+  impl_->on_set_parameters_callback_handle_ = impl_->ros_node_->add_on_set_parameters_callback(
     param_change_callback);
 
   // Declare parameters after adding callback so that callback will trigger immediately.
