@@ -192,7 +192,6 @@ void GazeboRosVacuumGripperPrivate::OnUpdate()
     }
   }
 #ifdef IGN_PROFILER_ENABLE
-  IGN_PROFILE_END();
   IGN_PROFILE_BEGIN("publish grasping_msg");
 #endif
   pub_->publish(grasping_msg);

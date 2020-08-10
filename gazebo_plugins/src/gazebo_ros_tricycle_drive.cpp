@@ -482,7 +482,7 @@ void GazeboRosTricycleDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & 
 
   if (publish_odom_) {
 #ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_BEGIN("IGN_PROFILE_BEGIN");
+    IGN_PROFILE_BEGIN("PublishOdometryMsg");
 #endif
     PublishOdometryMsg(current_time);
 #ifdef IGN_PROFILER_ENABLE
