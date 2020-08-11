@@ -231,6 +231,7 @@ void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
 void GazeboRosApiPlugin::onPerformanceMetrics(const boost::shared_ptr<gazebo::msgs::PerformanceMetrics const> &msg)
 {
   gazebo_msgs::PerformanceMetrics msg_ros;
+  msg_ros.header.stamp = ros::Time::now();
   msg_ros.real_time_factor = msg->real_time_factor();
   for (auto sensor: msg->sensor())
   {
