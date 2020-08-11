@@ -193,7 +193,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
-  response_sub_ = gazebonode_->Subscribe("/gazebo/gazebo/performance_metrics",
+  performance_metric_sub_ = gazebonode_->Subscribe("/gazebo/gazebo/performance_metrics",
     &GazeboRosApiPlugin::onPerformanceMetrics, this);
 
   // reset topic connection counts
@@ -632,7 +632,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
     if (pos1 != std::string::npos && pos2 != std::string::npos)
       model_xml.replace(pos1,pos2-pos1+2,std::string(""));
   }
-  
+
   // Remove comments from URDF
   {
     std::string open_comment("<!--");
