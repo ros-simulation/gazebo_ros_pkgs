@@ -193,6 +193,8 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
+  response_sub_ = gazebonode_->Subscribe("/gazebo/gazebo/performance_metrics",
+    &GazeboRosApiPlugin::onPerformanceMetrics, this);
 
   // reset topic connection counts
   pub_link_states_connection_count_ = 0;
@@ -224,6 +226,31 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
 void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
 {
 
+}
+
+void GazeboRosApiPlugin::onPerformanceMetrics(const boost::shared_ptr<gazebo::msgs::PerformanceMetrics const> &msg)
+{
+  gazebo_msgs::PerformanceMetrics msg_ros;
+  msg_ros.real_time_factor = msg->real_time_factor();
+  for (auto sensor: msg->sensor())
+  {
+    gazebo_msgs::SensorPerformanceMetric sensor_msgs;
+    sensor_msgs.sim_update_rate = sensor.sim_sensor_update_rate();
+    sensor_msgs.real_update_rate = sensor.real_sensor_update_rate();
+    sensor_msgs.sensor_name = sensor.sensor_name();
+
+    if (sensor.has_fps())
+    {
+      sensor_msgs.fps = sensor.fps();
+    }
+    else{
+      sensor_msgs.fps = -1;
+    }
+
+    msg_ros.sensors.push_back(sensor_msgs);
+  }
+
+  pub_performance_metrics_.publish(msg_ros);
 }
 
 void GazeboRosApiPlugin::gazeboQueueThread()
@@ -380,6 +407,9 @@ void GazeboRosApiPlugin::advertiseServices()
                                                             boost::bind(&GazeboRosApiPlugin::onModelStatesDisconnect,this),
                                                             ros::VoidPtr(), &gazebo_queue_);
   pub_model_states_ = nh_->advertise(pub_model_states_ao);
+
+  // publish performance metrics
+  pub_performance_metrics_ = nh_->advertise<gazebo_msgs::PerformanceMetrics>("performance_metrics", 10);
 
   // Advertise more services on the custom queue
   std::string set_link_properties_service_name("set_link_properties");
