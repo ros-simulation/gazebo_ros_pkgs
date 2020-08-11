@@ -23,7 +23,9 @@
 
 #include "gazebo_plugins/gazebo_ros_triggered_multicamera.h"
 
+#ifdef ENABLE_PROFILER
 #include <ignition/common/Profiler.hh>
+#endif
 
 namespace gazebo
 {
@@ -96,11 +98,17 @@ void GazeboRosTriggeredMultiCamera::OnNewFrameLeft(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+#ifdef ENABLE_PROFILER
   IGN_PROFILE("GazeboRosTriggeredMultiCamera::OnNewFrameLeft");
+#endif
   GazeboRosTriggeredCamera * cam = this->triggered_cameras[0];
+#ifdef ENABLE_PROFILER
   IGN_PROFILE_BEGIN("OnNewFrame");
+#endif
   cam->OnNewFrame(_image, _width, _height, _depth, _format);
+#ifdef ENABLE_PROFILER
   IGN_PROFILE_END();
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,10 +117,16 @@ void GazeboRosTriggeredMultiCamera::OnNewFrameRight(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+#ifdef ENABLE_PROFILER
   IGN_PROFILE("GazeboRosTriggeredMultiCamera::OnNewFrameRight");
+#endif
   GazeboRosTriggeredCamera * cam = this->triggered_cameras[1];
+#ifdef ENABLE_PROFILER
   IGN_PROFILE_BEGIN("OnNewFrame");
+#endif
   cam->OnNewFrame(_image, _width, _height, _depth, _format);
+#ifdef ENABLE_PROFILER
   IGN_PROFILE_END();
+#endif
 }
 }
