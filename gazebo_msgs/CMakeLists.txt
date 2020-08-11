@@ -29,6 +29,8 @@ set(msg_files
   "msg/ModelStates.msg"
   "msg/ODEJointProperties.msg"
   "msg/ODEPhysics.msg"
+  "msg/PerformanceMetrics.msg"
+  "msg/SensorPerformanceMetric.msg"
   "msg/WorldState.msg"
 )
 
