@@ -143,6 +143,10 @@ GazeboRosCamera::~GazeboRosCamera()
   for (auto pub : impl_->image_pub_) {
     pub.shutdown();
   }
+  if (param_change_callback_handler_) {
+    impl_->ros_node_->remove_on_set_parameters_callback(param_change_callback_handler_.get());
+  }
+  param_change_callback_handler_.reset();
 }
 
 void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
@@ -549,7 +553,8 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       return result;
     };
 
-  impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
+  param_change_callback_handler_ =
+    impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
 }
 
 void GazeboRosCamera::NewFrame(
