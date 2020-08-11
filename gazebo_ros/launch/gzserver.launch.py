@@ -35,6 +35,7 @@ def generate_launch_description():
         LaunchConfiguration('world'), ' ',
         _boolean_command('version'), ' ',
         _boolean_command('verbose'), ' ',
+        _boolean_command('lockstep'), ' ',
         _boolean_command('help'), ' ',
         _boolean_command('pause'), ' ',
         _arg_command('physics'), ' ', LaunchConfiguration('physics'), ' ',
@@ -90,6 +91,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'verbose', default_value='false',
             description='Set "true" to increase messages written to terminal.'
+        ),
+        DeclareLaunchArgument(
+            'lockstep', default_value='false',
+            description='Set "true" to respect update rates'
         ),
         DeclareLaunchArgument(
             'help', default_value='false',
