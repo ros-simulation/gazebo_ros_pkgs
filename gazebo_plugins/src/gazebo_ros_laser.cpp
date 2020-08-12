@@ -131,10 +131,6 @@ void GazeboRosLaser::LoadThread()
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 
   this->tf_prefix_ = tf::getPrefixParam(*this->rosnode_);
-  if(this->tf_prefix_.empty()) {
-      this->tf_prefix_ = this->robot_namespace_;
-      boost::trim_right_if(this->tf_prefix_,boost::is_any_of("/"));
-  }
   ROS_INFO_NAMED("laser", "Laser Plugin (ns = %s)  <tf_prefix_>, set to \"%s\"",
              this->robot_namespace_.c_str(), this->tf_prefix_.c_str());
 
