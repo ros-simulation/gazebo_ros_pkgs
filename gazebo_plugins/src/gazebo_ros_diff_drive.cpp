@@ -69,6 +69,10 @@
 #undef NO_ERROR
 #endif
 
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
+
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
@@ -429,6 +433,9 @@ void GazeboRosDiffDrive::Reset()
 
 void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosDiffDrivePrivate::OnUpdate");
+#endif
   // Update encoder even if we're going to skip this update
   if (odom_source_ == ENCODER) {
     UpdateOdometryEncoder(_info.simTime);
@@ -440,26 +447,43 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
     return;
   }
 
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("UpdateOdometryWorld");
+#endif
   // Update odom message if using ground truth
   if (odom_source_ == WORLD) {
     UpdateOdometryWorld();
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("PublishOdometryMsg");
+#endif
   if (publish_odom_) {
     PublishOdometryMsg(_info.simTime);
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("PublishWheelsTf");
+#endif
   if (publish_wheel_tf_) {
     PublishWheelsTf(_info.simTime);
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("PublishOdometryTf");
+#endif
   if (publish_odom_tf_) {
     PublishOdometryTf(_info.simTime);
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("UpdateWheelVelocities");
+#endif
   // Update robot in case new velocities have been requested
   UpdateWheelVelocities();
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   // Current speed
   std::vector<double> current_speed(2 * num_wheel_pairs_);
   for (unsigned int i = 0; i < num_wheel_pairs_; ++i) {

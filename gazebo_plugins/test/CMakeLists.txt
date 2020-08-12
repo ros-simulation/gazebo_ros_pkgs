@@ -72,5 +72,8 @@ foreach(test ${tests})
     "tf2_ros"
     "trajectory_msgs"
   )
+  if(ENABLE_PROFILER)
+    target_include_directories(${test} PUBLIC ${ignition-common3_INCLUDE_DIRS})
+    target_link_libraries(${test} ${ignition-common3_LIBRARIES})
+  endif()
 endforeach()
-

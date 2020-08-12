@@ -35,6 +35,8 @@
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/rendering/Camera.hh>
 
+#include <ignition/common/Profiler.hh>
+
 #include <sdf/sdf.hh>
 #include <sdf/Param.hh>
 
@@ -126,6 +128,8 @@ void GazeboRosProsilica::OnNewImageFrame(const unsigned char *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+  IGN_PROFILE("GazeboRosProsilica::OnNewImageFrame");
+
   if (!this->rosnode_->getParam(this->mode_param_name,this->mode_))
       this->mode_ = "streaming";
 
@@ -151,8 +155,12 @@ void GazeboRosProsilica::OnNewImageFrame(const unsigned char *_image,
       {
         if (sensor_update_time - this->last_update_time_ >= this->update_period_)
         {
+          IGN_PROFILE_BEGIN("PutCameraData");
           this->PutCameraData(_image, sensor_update_time);
+          IGN_PROFILE_END();
+          IGN_PROFILE_BEGIN("PublishCameraInfo");
           this->PublishCameraInfo(sensor_update_time);
+          IGN_PROFILE_END();
           this->last_update_time_ = sensor_update_time;
         }
       }

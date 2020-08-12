@@ -24,6 +24,9 @@
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <nav_msgs/msg/odometry.hpp>
 #include <std_msgs/msg/float32.hpp>
 #include <sdf/sdf.hh>
@@ -439,33 +442,68 @@ void GazeboRosAckermannDrive::Reset()
 
 void GazeboRosAckermannDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
+  #ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosAckermannDrivePrivate::OnUpdate");
+  #endif
   std::lock_guard<std::mutex> lock(lock_);
 
   double seconds_since_last_update = (_info.simTime - last_update_time_).Double();
 
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("UpdateOdometryWorld");
+#endif
   // Update odom
   UpdateOdometryWorld();
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   if (seconds_since_last_update < update_period_) {
     return;
   }
 
   if (publish_distance_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("publish distance");
+#endif
     distance_pub_->publish(distance_);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
   }
 
   if (publish_odom_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("PublishOdometryMsg");
+#endif
     PublishOdometryMsg(_info.simTime);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
   }
 
   if (publish_wheel_tf_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("PublishWheelsTf");
+#endif
     PublishWheelsTf(_info.simTime);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
   }
 
   if (publish_odom_tf_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("PublishOdometryTf");
+#endif
     PublishOdometryTf(_info.simTime);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
   }
 
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("update");
+#endif
   // Current speed assuming equal for left rear and right rear
   auto linear_vel = joints_[REAR_RIGHT]->GetVelocity(0);
   auto target_linear = ignition::math::clamp(target_linear_, -max_speed_, max_speed_);
@@ -505,6 +543,9 @@ void GazeboRosAckermannDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo &
   }
 
   last_update_time_ = _info.simTime;
+  #ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  #endif
 }
 
 void GazeboRosAckermannDrivePrivate::OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr _msg)

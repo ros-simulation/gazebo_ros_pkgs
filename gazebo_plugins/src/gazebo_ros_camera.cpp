@@ -16,6 +16,9 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/rendering/Distortion.hh>
 #include <gazebo/sensors/SensorTypes.hh>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <ignition/math/Helpers.hh>
 
 #include <camera_info_manager/camera_info_manager.hpp>
@@ -140,6 +143,10 @@ GazeboRosCamera::~GazeboRosCamera()
   for (auto pub : impl_->image_pub_) {
     pub.shutdown();
   }
+  if (param_change_callback_handler_) {
+    impl_->ros_node_->remove_on_set_parameters_callback(param_change_callback_handler_.get());
+  }
+  param_change_callback_handler_.reset();
 }
 
 void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
@@ -546,7 +553,8 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       return result;
     };
 
-  impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
+  param_change_callback_handler_ =
+    impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
 }
 
 void GazeboRosCamera::NewFrame(
@@ -605,7 +613,14 @@ void GazeboRosCamera::OnNewFrame(
   unsigned int /*_depth*/,
   const std::string & /*_format*/)
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosCamera::OnNewFrame");
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   NewFrame(_image, _width, _height, 0);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -627,6 +642,10 @@ void GazeboRosCamera::OnNewDepthFrame(
   unsigned int /*_depth*/,
   const std::string & /*_format*/)
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosCamera::OnNewDepthFrame");
+  IGN_PROFILE_BEGIN("fill ROS depth message");
+#endif
   // TODO(shivesh) Enable / disable sensor once SubscriberStatusCallback has been ported to ROS2
 
   auto sensor_update_time = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
@@ -662,15 +681,27 @@ void GazeboRosCamera::OnNewDepthFrame(
       }
     }
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish depth image");
+#endif
   impl_->depth_image_pub_.publish(image_msg);
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   // Publish camera info
   auto camera_info_msg = impl_->camera_info_manager_[0]->getCameraInfo();
   camera_info_msg.header.stamp = sensor_update_time;
 
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("publish camera depth info");
+#endif
   impl_->depth_camera_info_pub_->publish(camera_info_msg);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
 
+  IGN_PROFILE_BEGIN("fill ROS cloud point message");
+#endif
   // Publish point cloud
   impl_->cloud_msg_.header.stamp = sensor_update_time;
   impl_->cloud_msg_.width = _width;
@@ -750,9 +781,15 @@ void GazeboRosCamera::OnNewDepthFrame(
       cloud_index += impl_->cloud_msg_.point_step;
     }
   }
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
 
+  IGN_PROFILE_BEGIN("publish cloud point");
+#endif
   impl_->point_cloud_pub_->publish(impl_->cloud_msg_);
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   // Disable camera if it's a triggered camera
   if (nullptr != impl_->trigger_sub_) {
     SetCameraEnabled(false);

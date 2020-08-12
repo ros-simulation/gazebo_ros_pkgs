@@ -19,6 +19,9 @@
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 
 #include <iostream>
@@ -99,6 +102,10 @@ void GazeboRosGpsSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 
 void GazeboRosGpsSensorPrivate::OnUpdate()
 {
+  #ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosGpsSensorPrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("fill ROS message");
+  #endif
   // Fill message with latest sensor data
   msg_->header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
     sensor_->LastUpdateTime());
@@ -106,8 +113,15 @@ void GazeboRosGpsSensorPrivate::OnUpdate()
   msg_->longitude = sensor_->Longitude().Degree();
   msg_->altitude = sensor_->Altitude();
 
+  #ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish");
+  #endif
   // Publish message
   pub_->publish(*msg_);
+  #ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  #endif
 }
 
 GZ_REGISTER_SENSOR_PLUGIN(GazeboRosGpsSensor)

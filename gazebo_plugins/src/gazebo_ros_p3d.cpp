@@ -30,6 +30,10 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
+
 #include <string>
 #include <memory>
 
@@ -178,7 +182,9 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
   if (!link_) {
     return;
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosP3DPrivate::OnUpdate");
+#endif
   gazebo::common::Time current_time = info.simTime;
 
   if (current_time < last_time_) {
@@ -203,7 +209,9 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
   if (tmp_dt == 0) {
     return;
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   nav_msgs::msg::Odometry pose_msg;
 
   // Copy data into pose message
@@ -267,10 +275,15 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
   pose_msg.twist.covariance[21] = gn2;
   pose_msg.twist.covariance[28] = gn2;
   pose_msg.twist.covariance[35] = gn2;
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish");
+#endif
   // Publish to ROS
   pub_->publish(pose_msg);
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   // Save last time stamp
   last_time_ = current_time;
 }

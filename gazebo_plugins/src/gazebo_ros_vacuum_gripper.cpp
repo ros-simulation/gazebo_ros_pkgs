@@ -25,6 +25,9 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo_plugins/gazebo_ros_vacuum_gripper.hpp>
 #include <gazebo_ros/node.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <std_msgs/msg/bool.hpp>
 #include <std_srvs/srv/set_bool.hpp>
 #include <sdf/sdf.hh>
@@ -153,9 +156,18 @@ void GazeboRosVacuumGripper::Load(gazebo::physics::ModelPtr _model, sdf::Element
 
 void GazeboRosVacuumGripperPrivate::OnUpdate()
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosVacuumGripper::OnUpdate");
+#endif
   std_msgs::msg::Bool grasping_msg;
   if (!status_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("publish");
+#endif
     pub_->publish(grasping_msg);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
     return;
   }
 
@@ -179,7 +191,13 @@ void GazeboRosVacuumGripperPrivate::OnUpdate()
       grasping_msg.data = true;
     }
   }
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("publish grasping_msg");
+#endif
   pub_->publish(grasping_msg);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 }
 
 void GazeboRosVacuumGripperPrivate::OnSwitch(

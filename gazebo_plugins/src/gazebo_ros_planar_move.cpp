@@ -28,6 +28,9 @@
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/rclcpp.hpp>
 
@@ -228,7 +231,10 @@ void GazeboRosPlanarMovePrivate::OnUpdate(const gazebo::common::UpdateInfo & _in
   double seconds_since_last_update = (_info.simTime - last_update_time_).Double();
 
   std::lock_guard<std::mutex> scoped_lock(lock_);
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosPlanarMovePrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   if (seconds_since_last_update >= update_period_) {
     ignition::math::Pose3d pose = model_->WorldPose();
     auto yaw = static_cast<float>(pose.Rot().Yaw());
@@ -241,23 +247,41 @@ void GazeboRosPlanarMovePrivate::OnUpdate(const gazebo::common::UpdateInfo & _in
 
     last_update_time_ = _info.simTime;
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   if (publish_odom_ || publish_odom_tf_) {
     double seconds_since_last_publish = (_info.simTime - last_publish_time_).Double();
 
     if (seconds_since_last_publish < publish_period_) {
       return;
     }
-
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("UpdateOdometry");
+#endif
     UpdateOdometry(_info.simTime);
-
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
     if (publish_odom_) {
+#ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_BEGIN("publish odometry");
+#endif
       odometry_pub_->publish(odom_);
+#ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_END();
+#endif
+    }
+    if (publish_odom_tf_) {
+#ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_BEGIN("publish odometryTF");
+#endif
+      PublishOdometryTf(_info.simTime);
+#ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_END();
+#endif
     }
 
-    if (publish_odom_tf_) {
-      PublishOdometryTf(_info.simTime);
-    }
     last_publish_time_ = _info.simTime;
   }
 }

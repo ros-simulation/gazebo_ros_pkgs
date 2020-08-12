@@ -52,6 +52,9 @@
 #include <gazebo_ros/node.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <geometry_msgs/msg/pose2_d.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <ignition/math/Pose3.hh>
@@ -460,11 +463,17 @@ void GazeboRosTricycleDrivePrivate::PublishWheelsTf(const gazebo::common::Time &
 
 void GazeboRosTricycleDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosTricycleDrivePrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("UpdateOdometryEncoder");
+#endif
   gazebo::common::Time current_time = _info.simTime;
   if (odom_source_ == ENCODER) {
     UpdateOdometryEncoder(current_time);
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   double seconds_since_last_update = ( current_time - last_actuator_update_ ).Double();
 
   if (seconds_since_last_update < update_period_) {
@@ -472,15 +481,32 @@ void GazeboRosTricycleDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & 
   }
 
   if (publish_odom_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("PublishOdometryMsg");
+#endif
     PublishOdometryMsg(current_time);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
   }
 
   if (publish_wheel_tf_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("PublishWheelsTf");
+#endif
     PublishWheelsTf(current_time);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
   }
-
   if (publish_wheel_joint_state_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("PublishWheelJointState");
+#endif
     PublishWheelJointState(current_time);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
   }
 
   std::unique_lock<std::mutex> lock(lock_);
@@ -488,9 +514,14 @@ void GazeboRosTricycleDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & 
   double target_steering_angle = cmd_.angular.z;
   lock.unlock();
 
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("MotorController");
+#endif
   MotorController(
     target_wheel_rotation_speed, target_steering_angle, seconds_since_last_update);
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
   //  RCLCPP_INFO(ros_node_->get_logger(),
   //  "v = %f, w = %f ", target_wheel_rotation_speed, target_steering_angle);
 

@@ -26,6 +26,9 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo_plugins/gazebo_ros_projector.hpp>
 #include <gazebo_ros/node.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <std_msgs/msg/bool.hpp>
 
 #include <memory>
@@ -97,6 +100,10 @@ void GazeboRosProjector::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
 void GazeboRosProjectorPrivate::ToggleProjector(const std_msgs::msg::Bool::SharedPtr switch_msg)
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosProjectorPrivate::ToggleProjector");
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   if (switch_msg->data) {
     RCLCPP_INFO(ros_node_->get_logger(), "Switching on projector");
   } else {
@@ -106,7 +113,14 @@ void GazeboRosProjectorPrivate::ToggleProjector(const std_msgs::msg::Bool::Share
   gazebo::msgs::Projector msg;
   msg.set_name("texture_projector");
   msg.set_enabled(switch_msg->data);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish");
+#endif
   projector_pub_->Publish(msg);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosProjector)

@@ -20,6 +20,9 @@
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <sensor_msgs/msg/imu.hpp>
 
 #include <iostream>
@@ -122,6 +125,10 @@ void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 
 void GazeboRosImuSensorPrivate::OnUpdate()
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosImuSensorPrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   // Fill message with latest sensor data
   msg_->header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
     sensor_->LastUpdateTime());
@@ -131,9 +138,15 @@ void GazeboRosImuSensorPrivate::OnUpdate()
     sensor_->AngularVelocity());
   msg_->linear_acceleration = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(
     sensor_->LinearAcceleration());
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("Publish");
+#endif
   // Publish message
   pub_->publish(*msg_);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 }
 
 GZ_REGISTER_SENSOR_PLUGIN(GazeboRosImuSensor)

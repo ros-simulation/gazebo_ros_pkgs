@@ -34,6 +34,9 @@
 #include <gazebo/transport/TransportTypes.hh>
 #include <gazebo_plugins/gazebo_ros_video.hpp>
 #include <gazebo_ros/node.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 
 #include <memory>
 #include <string>
@@ -226,9 +229,18 @@ void GazeboRosVideo::Load(
 
 void GazeboRosVideoPrivate::onUpdate()
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosVideoPrivate::onUpdate");
+#endif
   std::lock_guard<std::mutex> scoped_lock(m_image_);
   if (new_image_available_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("render");
+#endif
     video_visual_->render(image_->image);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
   }
   new_image_available_ = false;
 }

@@ -28,6 +28,9 @@
 #include <gazebo_plugins/gazebo_ros_joint_pose_trajectory.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <rclcpp/rclcpp.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
@@ -149,7 +152,10 @@ void GazeboRosJointPoseTrajectoryPrivate::OnUpdate(const gazebo::common::UpdateI
   if (seconds_since_last_update < update_period_) {
     return;
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosJointPoseTrajectoryPrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("update");
+#endif
   std::lock_guard<std::mutex> scoped_lock(lock_);
   if (has_trajectory_ && current_time >= trajectory_start_time_) {
     if (trajectory_index_ < points_.size()) {
@@ -203,6 +209,9 @@ void GazeboRosJointPoseTrajectoryPrivate::OnUpdate(const gazebo::common::UpdateI
       has_trajectory_ = false;
     }
   }
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 }
 
 void GazeboRosJointPoseTrajectoryPrivate::SetJointTrajectory(

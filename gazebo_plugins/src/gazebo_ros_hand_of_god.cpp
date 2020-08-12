@@ -45,6 +45,9 @@
 #include <gazebo_plugins/gazebo_ros_hand_of_god.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 #include <sdf/sdf.hh>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -137,15 +140,25 @@ void GazeboRosHandOfGod::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
 void GazeboRosHandOfGodPrivate::OnUpdate()
 {
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboRosHandOfGodPrivate::OnUpdate");
+  IGN_PROFILE_BEGIN("lookupTransform");
+#endif
   // Get TF transform relative to the /world frame
   geometry_msgs::msg::TransformStamped hog_desired_tform;
   try {
     hog_desired_tform = buffer_->lookupTransform("world", frame_ + "_desired", tf2::TimePointZero);
   } catch (const tf2::TransformException & ex) {
     RCLCPP_WARN_ONCE(ros_node_->get_logger(), "%s", ex.what());
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
     return;
   }
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   // Convert TF transform to Gazebo Pose
   auto hog_desired = gazebo_ros::Convert<ignition::math::Pose3d>(hog_desired_tform.transform);
 
@@ -174,8 +187,14 @@ void GazeboRosHandOfGodPrivate::OnUpdate()
   hog_actual_tform.child_frame_id = frame_ + "_actual";
 
   hog_actual_tform.transform = gazebo_ros::Convert<geometry_msgs::msg::Transform>(world_pose);
-
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("sendTransform");
+#endif
   transform_broadcaster_->sendTransform(hog_actual_tform);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosHandOfGod)
