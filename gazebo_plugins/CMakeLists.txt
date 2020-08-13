@@ -448,6 +448,23 @@ if(ENABLE_PROFILER)
   target_link_libraries(gazebo_ros_projector ${ignition-common3_LIBRARIES})
 endif()
 
+# gazebo_ros_wheel_slip
+if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
+  add_library(gazebo_ros_wheel_slip SHARED
+    src/gazebo_ros_wheel_slip.cpp
+  )
+  ament_target_dependencies(gazebo_ros_wheel_slip
+    "gazebo_dev"
+    "gazebo_ros"
+    "rclcpp"
+    "std_msgs"
+  )
+  target_link_libraries(gazebo_ros_wheel_slip
+    WheelSlipPlugin
+  )
+  ament_export_libraries(gazebo_ros_wheel_slip)
+endif()
+
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(gazebo_dev)
@@ -504,6 +521,14 @@ install(TARGETS
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
+
+if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
+install(TARGETS
+    gazebo_ros_wheel_slip
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+endif()
 
 install(DIRECTORY
   worlds
