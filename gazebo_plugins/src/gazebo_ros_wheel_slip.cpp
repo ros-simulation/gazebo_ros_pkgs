@@ -63,19 +63,22 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
         if (param_name == "slip_compliance_unitless_lateral") {
           double slip = parameter.as_double();
           if (slip >= 0.) {
-            RCLCPP_INFO(impl_->ros_node_->get_logger(),
+            RCLCPP_INFO(
+              impl_->ros_node_->get_logger(),
               "New lateral slip compliance: %.3e", slip);
             this->SetSlipComplianceLateral(slip);
           }
         } else if (param_name == "slip_compliance_unitless_longitudinal") {
           double slip = parameter.as_double();
           if (slip >= 0.) {
-            RCLCPP_INFO(impl_->ros_node_->get_logger(),
+            RCLCPP_INFO(
+              impl_->ros_node_->get_logger(),
               "New longitudinal slip compliance: %.3e", slip);
             this->SetSlipComplianceLongitudinal(slip);
           }
         } else {
-          RCLCPP_WARN(impl_->ros_node_->get_logger(),
+          RCLCPP_WARN(
+            impl_->ros_node_->get_logger(),
             "Unrecognized parameter name[%s]", param_name);
           result.successful = false;
         }
