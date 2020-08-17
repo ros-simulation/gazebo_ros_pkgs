@@ -193,7 +193,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
-  performance_metric_sub_ = gazebonode_->Subscribe("/gazebo/gazebo/performance_metrics",
+  performance_metric_sub_ = gazebonode_->Subscribe("/gazebo/performance_metrics",
     &GazeboRosApiPlugin::onPerformanceMetrics, this);
 
   // reset topic connection counts
