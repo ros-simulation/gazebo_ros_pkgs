@@ -462,6 +462,7 @@ if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
   target_link_libraries(gazebo_ros_wheel_slip
     WheelSlipPlugin
   )
+  target_include_directories(gazebo_ros_wheel_slip PUBLIC include)
   ament_export_libraries(gazebo_ros_wheel_slip)
 endif()
 
