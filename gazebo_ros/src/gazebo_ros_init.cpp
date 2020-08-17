@@ -233,7 +233,7 @@ void GazeboRosInitPrivate::OnWorldCreated(const std::string & _world_name)
   gz_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   gz_node_->Init(world_->Name());
   performance_metric_sub_ = gz_node_->Subscribe(
-    "/gazebo/gazebo/performance_metrics",
+    "/gazebo/performance_metrics",
     &GazeboRosInitPrivate::onPerformanceMetrics, this);
 }
 
