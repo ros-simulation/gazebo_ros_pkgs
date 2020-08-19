@@ -79,7 +79,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
         } else {
           RCLCPP_WARN(
             impl_->ros_node_->get_logger(),
-            "Unrecognized parameter name[%s]", param_name);
+            "Unrecognized parameter name[%s]", param_name.c_str());
           result.successful = false;
         }
       }
