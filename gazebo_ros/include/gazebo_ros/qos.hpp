@@ -53,7 +53,7 @@ struct QoSPrivate;
  * For example, two publishers using the same topic will have the same QoS returned by this class.
  * \include gazebo_ros/qos.hpp
  */
-class GAZEBO_ROS_NODE_PUBLIC QoS
+class GAZEBO_ROS_NODE_PUBLIC_TYPE QoS
 {
 public:
   QoS();
