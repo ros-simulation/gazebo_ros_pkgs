@@ -96,7 +96,7 @@ void GazeboRosStateTest::GetState(
 
   auto response_future = get_state_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -137,7 +137,7 @@ void GazeboRosStateTest::SetState(
 
   auto response_future = set_state_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();

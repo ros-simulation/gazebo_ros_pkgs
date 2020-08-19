@@ -54,7 +54,7 @@ TEST_F(GazeboRosInitTest, Commands)
 
     auto response_future = unpause_physics_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -71,7 +71,7 @@ TEST_F(GazeboRosInitTest, Commands)
     // Request
     response_future = pause_physics_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     response = response_future.get();
@@ -100,7 +100,7 @@ TEST_F(GazeboRosInitTest, Commands)
 
     auto response_future = reset_simulation_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -127,7 +127,7 @@ TEST_F(GazeboRosInitTest, Commands)
 
     response_future = reset_world_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     response = response_future.get();

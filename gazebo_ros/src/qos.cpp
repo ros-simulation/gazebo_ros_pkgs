@@ -151,7 +151,7 @@ QoSOverrides QoSPrivate::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
           oss << "'" << find_result->first << "' used without providing a depth";
           throw InvalidQoSException(oss.str());
         }
-        qos_overrides.depth = history_element->Get<size_t>("depth");
+        qos_overrides.depth = history_element->Get<uint64_t>("depth");
       }
     } else {
       std::ostringstream oss;
@@ -162,13 +162,13 @@ QoSOverrides QoSPrivate::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
 
   // Parse 'deadline' QoS
   if (_sdf->HasElement("deadline")) {
-    auto deadline = _sdf->GetElement("deadline")->Get<size_t>();
+    auto deadline = _sdf->GetElement("deadline")->Get<uint64_t>();
     qos_overrides.deadline = std::chrono::milliseconds(deadline);
   }
 
   // Parse 'lifespan' QoS
   if (_sdf->HasElement("lifespan")) {
-    auto lifespan = _sdf->GetElement("lifespan")->Get<size_t>();
+    auto lifespan = _sdf->GetElement("lifespan")->Get<uint64_t>();
     qos_overrides.lifespan = std::chrono::milliseconds(lifespan);
   }
 
@@ -187,7 +187,7 @@ QoSOverrides QoSPrivate::get_qos_overrides_from_sdf(sdf::ElementPtr _sdf)
 
   // Parse 'liveliness_lease_duration' QoS
   if (_sdf->HasElement("liveliness_lease_duration")) {
-    auto lease = _sdf->GetElement("liveliness_lease_duration")->Get<size_t>();
+    auto lease = _sdf->GetElement("liveliness_lease_duration")->Get<uint64_t>();
     qos_overrides.liveliness_lease = std::chrono::milliseconds(lease);
   }
 
