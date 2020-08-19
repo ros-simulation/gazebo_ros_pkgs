@@ -167,7 +167,7 @@ void GazeboRosPropertiesTest::GetModelProperties(
 
   auto response_future = get_model_properties_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -215,7 +215,7 @@ void GazeboRosPropertiesTest::GetJointProperties(
 
   auto response_future = get_joint_properties_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -250,7 +250,7 @@ void GazeboRosPropertiesTest::SetJointProperties(
 
   auto response_future = set_joint_properties_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -274,7 +274,7 @@ void GazeboRosPropertiesTest::GetLinkProperties(
 
   auto response_future = get_link_properties_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -315,7 +315,7 @@ void GazeboRosPropertiesTest::SetLinkProperties(
 
   auto response_future = set_link_properties_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -335,7 +335,7 @@ void GazeboRosPropertiesTest::GetLightProperties(
 
   auto response_future = get_light_properties_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();
@@ -371,7 +371,7 @@ void GazeboRosPropertiesTest::SetLightProperties(
 
   auto response_future = set_light_properties_client_->async_send_request(request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node_, response_future));
 
   auto response = response_future.get();

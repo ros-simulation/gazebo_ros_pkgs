@@ -55,7 +55,7 @@ TEST_F(GazeboRosJointEffortTest, JointEffortTest)
 
   auto apply_response_future = apply_joint_effort->async_send_request(apply_request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, apply_response_future));
 
   auto apply_response = apply_response_future.get();
@@ -72,7 +72,7 @@ TEST_F(GazeboRosJointEffortTest, JointEffortTest)
 
   auto clear_response_future = clear_joint_efforts->async_send_request(clear_request);
   EXPECT_EQ(
-    rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::FutureReturnCode::SUCCESS,
     rclcpp::spin_until_future_complete(node, clear_response_future));
 
   auto clear_response = clear_response_future.get();

@@ -78,7 +78,7 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
 
     auto response_future1 = spawn_client->async_send_request(request1);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future1));
 
     auto response1 = response_future1.get();
@@ -112,7 +112,7 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
 
     auto response_future2 = spawn_client->async_send_request(request2);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future2));
 
     auto response2 = response_future2.get();
@@ -124,7 +124,7 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
 
     auto response_future3 = model_list_client->async_send_request(request3);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future3));
 
     auto response3 = response_future3.get();
@@ -164,7 +164,7 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
 
     auto response_future = spawn_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -209,7 +209,7 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
 
     auto response_future = spawn_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -248,7 +248,7 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
 
     auto response_future = spawn_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -273,7 +273,7 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
 
     auto response_future = delete_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
@@ -295,7 +295,7 @@ TEST_F(GazeboRosFactoryTest, SpawnDeleteList)
 
     auto response_future = delete_client->async_send_request(request);
     EXPECT_EQ(
-      rclcpp::executor::FutureReturnCode::SUCCESS,
+      rclcpp::FutureReturnCode::SUCCESS,
       rclcpp::spin_until_future_complete(node, response_future));
 
     auto response = response_future.get();
