@@ -160,6 +160,7 @@ catkin_package(
   rosconsole
   camera_info_manager
   std_msgs
+  moveit_msgs
 )
 add_dependencies(${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
