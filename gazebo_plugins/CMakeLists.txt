@@ -359,6 +359,7 @@ install(TARGETS
   gazebo_ros_force
   gazebo_ros_joint_state_publisher
   gazebo_ros_joint_pose_trajectory
+  gazebo_ros_moveit_planning_scene
   gazebo_ros_diff_drive
   gazebo_ros_tricycle_drive
   gazebo_ros_skid_steer_drive
