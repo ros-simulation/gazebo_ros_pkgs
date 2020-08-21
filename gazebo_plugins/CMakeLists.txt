@@ -136,6 +136,7 @@ catkin_package(
   gazebo_ros_planar_move
   gazebo_ros_range
   gazebo_ros_vacuum_gripper
+  gazebo_ros_moveit_planning_scene
 
   CATKIN_DEPENDS
   message_runtime
@@ -315,6 +316,10 @@ target_link_libraries(gazebo_ros_vacuum_gripper ${catkin_LIBRARIES} ${Boost_LIBR
 ##
 ## Add your new plugin here
 ##
+
+add_library(gazebo_ros_moveit_planning_scene src/gazebo_ros_moveit_planning_scene.cpp)
+add_dependencies(gazebo_ros_moveit_planning_scene ${catkin_EXPORTED_TARGETS})
+target_link_libraries(gazebo_ros_moveit_planning_scene ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
 ## Template
 add_library(gazebo_ros_template src/gazebo_ros_template.cpp)
