@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
   camera_info_manager
   std_msgs
+  moveit_msgs
 )
 
 # Through transitive dependencies in the packages above, gazebo_plugins depends

@@ -50,6 +50,7 @@
   <depend>diagnostic_updater</depend>
   <depend>camera_info_manager</depend>
   <depend>std_msgs</depend>
+  <depend>moveit_msgs</depend>
 
   <test_depend>rostest</test_depend>
 
