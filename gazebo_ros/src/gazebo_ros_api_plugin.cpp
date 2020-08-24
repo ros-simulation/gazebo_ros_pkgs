@@ -187,7 +187,6 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
 
   gazebonode_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   gazebonode_->Init(world_name);
-  //stat_sub_ = gazebonode_->Subscribe("~/world_stats", &GazeboRosApiPlugin::publishSimTime, this); // TODO: does not work in server plugin?
   factory_pub_ = gazebonode_->Advertise<gazebo::msgs::Factory>("~/factory");
   factory_light_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/factory/light");
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
@@ -198,12 +197,13 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   pub_link_states_connection_count_ = 0;
   pub_model_states_connection_count_ = 0;
 
+  // Manage clock for simulated ros time
+  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock", 10);
+
   /// \brief advertise all services
   if (enable_ros_network_)
     advertiseServices();
 
-  // Manage clock for simulated ros time
-  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
   // set param for use_sim_time if not set by user already
   if(!(nh_->hasParam("/use_sim_time")))
     nh_->setParam("/use_sim_time", true);
@@ -242,9 +242,6 @@ void GazeboRosApiPlugin::advertiseServices()
     ROS_INFO_NAMED("api_plugin", "ROS gazebo topics/services are disabled");
     return;
   }
-
-  // publish clock for simulated ros time
-  pub_clock_ = nh_->advertise<rosgraph_msgs::Clock>("/clock",10);
 
   // Advertise spawn services on the custom queue
   std::string spawn_sdf_model_service_name("spawn_sdf_model");
@@ -523,19 +520,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                           boost::bind(&GazeboRosApiPlugin::resetWorld,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
   reset_world_service_ = nh_->advertiseService(reset_world_aso);
-
-
-  // set param for use_sim_time if not set by user already
-  if(!(nh_->hasParam("/use_sim_time")))
-    nh_->setParam("/use_sim_time", true);
-
-  // todo: contemplate setting environment variable ROBOT=sim here???
-  nh_->getParam("pub_clock_frequency", pub_clock_frequency_);
-#if GAZEBO_MAJOR_VERSION >= 8
-  last_pub_clock_time_ = world_->SimTime();
-#else
-  last_pub_clock_time_ = world_->GetSimTime();
-#endif
 }
 
 void GazeboRosApiPlugin::onLinkStatesConnect()
@@ -2116,24 +2100,6 @@ void GazeboRosApiPlugin::forceJointSchedulerSlot()
   lock_.unlock();
 }
 
-void GazeboRosApiPlugin::publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg)
-{
-  ROS_ERROR_NAMED("api_plugin", "CLOCK2");
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::common::Time sim_time = world_->SimTime();
-#else
-  gazebo::common::Time sim_time = world_->GetSimTime();
-#endif
-  if (pub_clock_frequency_ > 0 && (sim_time - last_pub_clock_time_).Double() < 1.0/pub_clock_frequency_)
-    return;
-
-  gazebo::common::Time currentTime = gazebo::msgs::Convert( msg->sim_time() );
-  rosgraph_msgs::Clock ros_time_;
-  ros_time_.clock.fromSec(currentTime.Double());
-  //  publish time to ros
-  last_pub_clock_time_ = sim_time;
-  pub_clock_.publish(ros_time_);
-}
 void GazeboRosApiPlugin::publishSimTime()
 {
 #if GAZEBO_MAJOR_VERSION >= 8
