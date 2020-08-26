@@ -50,6 +50,7 @@ def generate_launch_description():
         _boolean_command('minimal_comms'),
         _plugin_command('init'), ' ',
         _plugin_command('factory'), ' ',
+        _plugin_command('force_system'), ' ',
         # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
         # _plugin_command('force_system'), ' ',
         _arg_command('profile'), ' ', LaunchConfiguration('profile'),
@@ -168,10 +169,10 @@ def generate_launch_description():
             'factory', default_value='true',
             description='Set "false" not to load "libgazebo_ros_factory.so"'
         ),
-        # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
-        # DeclareLaunchArgument('force_system', default_value='true',
-        #                       description='Set "false" not to load \
-        #                                   "libgazebo_ros_force_system.so"'),
+        DeclareLaunchArgument(
+            'force_system', default_value='true',
+            description='Set "false" not to load "libgazebo_ros_force_system.so"'
+        ),
         DeclareLaunchArgument(
             'server_required', default_value='false',
             description='Set "true" to shut down launch script when server is terminated'

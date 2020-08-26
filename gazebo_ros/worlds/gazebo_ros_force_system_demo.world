@@ -2,12 +2,17 @@
 <!--
   Gazebo ROS force system plugin demo
 
-  Try for example:
+  The force_system is automatically loaded when using the launch files on gazebo_ros.
+  Launch this world like this:
+
+      ros2 launch gazebo_ros gazebo.launch.py world:="gazebo_ros_pkgs/gazebo_ros/worlds/gazebo_ros_force_system_demo.world"
+
+  Then try for example:
 
     To apply wrench to a link:
 
       ros2 service call /apply_link_wrench gazebo_msgs/srv/ApplyLinkWrench '{link_name: \
-      "single_pendulum_with_base::base", wrench: { force: { x: 100 } }, duration: {sec: -1, nanosec: 0} }'
+      "single_pendulum_with_base::base", wrench: { force: { z: 110 } }, duration: {sec: -1, nanosec: 0} }'
 
     To clear wrenches on a link:
 
