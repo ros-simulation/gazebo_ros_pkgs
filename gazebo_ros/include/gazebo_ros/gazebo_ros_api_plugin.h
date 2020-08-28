@@ -292,9 +292,10 @@ private:
   /// \brief Unused
   void onResponse(ConstResponsePtr &response);
 
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
   /// \brief Subscriber callback for performance metrics. This will be send in the ROS network
   void onPerformanceMetrics(const boost::shared_ptr<gazebo::msgs::PerformanceMetrics const> &msg);
-
+#endif
   /// \brief utility for checking if string is in URDF format
   bool isURDF(std::string model_xml);
 
