@@ -20,6 +20,8 @@
 #include <rclcpp/node_options.hpp>
 #include <rclcpp/qos.hpp>
 
+#include <gazebo_ros/node_visibility_control.h>
+
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -51,7 +53,7 @@ struct QoSPrivate;
  * For example, two publishers using the same topic will have the same QoS returned by this class.
  * \include gazebo_ros/qos.hpp
  */
-class QoS
+class GAZEBO_ROS_NODE_PUBLIC_TYPE QoS
 {
 public:
   QoS();
