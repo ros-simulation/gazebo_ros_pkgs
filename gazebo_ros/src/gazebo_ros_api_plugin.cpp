@@ -789,6 +789,8 @@ bool GazeboRosApiPlugin::deleteModel(gazebo_msgs::DeleteModel::Request &req,
   // send delete model request
   gazebo::msgs::Request *msg = gazebo::msgs::CreateRequest("entity_delete",req.model_name);
   request_pub_->Publish(*msg,true);
+  delete msg;
+  msg = nullptr;
 
   ros::Duration model_spawn_timeout(60.0);
   ros::Time timeout = ros::Time::now() + model_spawn_timeout;
@@ -837,6 +839,8 @@ bool GazeboRosApiPlugin::deleteLight(gazebo_msgs::DeleteLight::Request &req,
   {
     gazebo::msgs::Request* msg = gazebo::msgs::CreateRequest("entity_delete", req.light_name);
     request_pub_->Publish(*msg, true);
+    delete msg;
+    msg = nullptr;
 
     res.success = false;
 
@@ -2608,6 +2612,8 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, const 
   // looking for Model to see if it exists already
   gazebo::msgs::Request *entity_info_msg = gazebo::msgs::CreateRequest("entity_info", model_name);
   request_pub_->Publish(*entity_info_msg,true);
+  delete entity_info_msg;
+  entity_info_msg = nullptr;
   // todo: should wait for response response_sub_, check to see that if _msg->response == "nonexistant"
 
 #if GAZEBO_MAJOR_VERSION >= 8
