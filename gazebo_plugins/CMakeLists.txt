@@ -208,7 +208,7 @@ add_definitions(-fPIC) # what is this for?
 ## Plugins
 add_library(gazebo_ros_camera_utils src/gazebo_ros_camera_utils.cpp)
 add_dependencies(gazebo_ros_camera_utils ${PROJECT_NAME}_gencfg)
-target_link_libraries(gazebo_ros_camera_utils ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(gazebo_ros_camera_utils ${catkin_LIBRARIES} ${Boost_LIBRARIES} CameraPlugin)
 
 add_library(MultiCameraPlugin src/MultiCameraPlugin.cpp)
 target_link_libraries(MultiCameraPlugin ${catkin_LIBRARIES} ${Boost_LIBRARIES})
