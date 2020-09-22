@@ -1,0 +1,13 @@
+repositories:
+  gazebo_ros_pkgs:
+    type: git
+    url: https://github.com/ros-simulation/gazebo_ros_pkgs.git
+    version: eloquent
+  image_common:
+    type: git
+    url: https://github.com/ros-perception/image_common.git
+    version: eloquent
+  vision_opencv:
+    type: git
+    url: https://github.com/ros-perception/vision_opencv.git
+    version: eloquent
