@@ -188,8 +188,8 @@ void GazeboRosInitPrivate::onPerformanceMetrics(
   msg_ros.real_time_factor = msg->real_time_factor();
   for (auto sensor : msg->sensor()) {
     gazebo_msgs::msg::SensorPerformanceMetric sensor_msgs;
-    sensor_msgs.sim_update_rate = sensor.sim_sensor_update_rate();
-    sensor_msgs.real_update_rate = sensor.real_sensor_update_rate();
+    sensor_msgs.sim_update_rate = sensor.sim_update_rate();
+    sensor_msgs.real_update_rate = sensor.real_update_rate();
     sensor_msgs.sensor_name = sensor.sensor_name();
 
     if (sensor.has_fps()) {
