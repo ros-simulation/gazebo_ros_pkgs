@@ -242,8 +242,9 @@ private:
   /// \brief
   void forceJointSchedulerSlot();
 
-  /// \brief
-  void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
+  /// \brief Callback to WorldUpdateBegin that publishes /clock.
+  /// If pub_clock_frequency_ <= 0 (default behavior), it publishes every time step.
+  /// Otherwise, it attempts to publish at that frequency in Hz.
   void publishSimTime();
 
   /// \brief

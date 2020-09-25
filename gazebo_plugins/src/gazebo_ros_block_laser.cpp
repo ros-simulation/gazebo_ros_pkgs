@@ -37,7 +37,9 @@
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/transport/Node.hh>
 
+#ifdef ENABLE_PROFILER
 #include <ignition/common/Profiler.hh>
+#endif
 
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/ChannelFloat32.h>
@@ -211,8 +213,9 @@ void GazeboRosBlockLaser::LaserDisconnect()
 // Update the controller
 void GazeboRosBlockLaser::OnNewLaserScans()
 {
+#ifdef ENABLE_PROFILER
   IGN_PROFILE("GazeboRosBlockLaser::OnNewLaserScans");
-
+#endif
   if (this->topic_name_ != "")
   {
     common::Time sensor_update_time = this->parent_sensor_->LastUpdateTime();
@@ -224,9 +227,13 @@ void GazeboRosBlockLaser::OnNewLaserScans()
 
     if (last_update_time_ < sensor_update_time)
     {
+#ifdef ENABLE_PROFILER
       IGN_PROFILE_BEGIN("PutLaserData");
+#endif
       this->PutLaserData(sensor_update_time);
+#ifdef ENABLE_PROFILER
       IGN_PROFILE_END();
+#endif
       last_update_time_ = sensor_update_time;
     }
   }
