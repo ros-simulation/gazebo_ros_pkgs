@@ -239,7 +239,7 @@ void GazeboRosApiPlugin::onPerformanceMetrics(const boost::shared_ptr<gazebo::ms
     gazebo_msgs::SensorPerformanceMetric sensor_msgs;
     sensor_msgs.sim_update_rate = sensor.sim_update_rate();
     sensor_msgs.real_update_rate = sensor.real_update_rate();
-    sensor_msgs.sensor_name = sensor.sensor_name();
+    sensor_msgs.name = sensor.name();
 
     if (sensor.has_fps())
     {
