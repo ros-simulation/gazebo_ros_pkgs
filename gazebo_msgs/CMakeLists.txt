@@ -21,6 +21,8 @@ add_message_files(
   ModelStates.msg
   ODEJointProperties.msg
   ODEPhysics.msg
+  PerformanceMetrics.msg
+  SensorPerformanceMetric.msg
   WorldState.msg
   )
 
