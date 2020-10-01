@@ -198,7 +198,10 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
-
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+  performance_metric_sub_ = gazebonode_->Subscribe("/gazebo/performance_metrics",
+    &GazeboRosApiPlugin::onPerformanceMetrics, this);
+#endif
   // reset topic connection counts
   pub_link_states_connection_count_ = 0;
   pub_model_states_connection_count_ = 0;
@@ -231,6 +234,33 @@ void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
 {
 
 }
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+void GazeboRosApiPlugin::onPerformanceMetrics(const boost::shared_ptr<gazebo::msgs::PerformanceMetrics const> &msg)
+{
+  gazebo_msgs::PerformanceMetrics msg_ros;
+  msg_ros.header.stamp = ros::Time::now();
+  msg_ros.real_time_factor = msg->real_time_factor();
+  for (auto sensor: msg->sensor())
+  {
+    gazebo_msgs::SensorPerformanceMetric sensor_msgs;
+    sensor_msgs.sim_update_rate = sensor.sim_update_rate();
+    sensor_msgs.real_update_rate = sensor.real_update_rate();
+    sensor_msgs.name = sensor.name();
+
+    if (sensor.has_fps())
+    {
+      sensor_msgs.fps = sensor.fps();
+    }
+    else{
+      sensor_msgs.fps = -1;
+    }
+
+    msg_ros.sensors.push_back(sensor_msgs);
+  }
+
+  pub_performance_metrics_.publish(msg_ros);
+}
+#endif
 
 void GazeboRosApiPlugin::gazeboQueueThread()
 {
@@ -383,6 +413,11 @@ void GazeboRosApiPlugin::advertiseServices()
                                                             boost::bind(&GazeboRosApiPlugin::onModelStatesDisconnect,this),
                                                             ros::VoidPtr(), &gazebo_queue_);
   pub_model_states_ = nh_->advertise(pub_model_states_ao);
+
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+  // publish performance metrics
+  pub_performance_metrics_ = nh_->advertise<gazebo_msgs::PerformanceMetrics>("performance_metrics", 10);
+#endif
 
   // Advertise more services on the custom queue
   std::string set_link_properties_service_name("set_link_properties");
@@ -592,7 +627,7 @@ bool GazeboRosApiPlugin::spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
     if (pos1 != std::string::npos && pos2 != std::string::npos)
       model_xml.replace(pos1,pos2-pos1+2,std::string(""));
   }
-  
+
   // Remove comments from URDF
   {
     std::string open_comment("<!--");
