@@ -87,6 +87,7 @@ add_library(gazebo_ros_init SHARED
 ament_target_dependencies(gazebo_ros_init
   "builtin_interfaces"
   "gazebo_dev"
+  "gazebo_msgs"
   "rclcpp"
   "std_srvs"
 )
