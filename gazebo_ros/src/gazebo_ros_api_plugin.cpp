@@ -188,7 +188,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
 #if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
-  performance_metric_sub_ = gazebonode_->Subscribe("/gazebo/performance_metrics",
+  performance_metric_sub_ = gazebonode_->Subscribe("~/performance_metrics",
     &GazeboRosApiPlugin::onPerformanceMetrics, this);
 #endif
   // reset topic connection counts
