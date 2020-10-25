@@ -81,6 +81,7 @@
 #include "gazebo_msgs/LinkState.h"
 #include "gazebo_msgs/ModelStates.h"
 #include "gazebo_msgs/LinkStates.h"
+#include "gazebo_msgs/PerformanceMetrics.h"
 
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Wrench.h"
@@ -292,6 +293,10 @@ private:
   /// \brief Unused
   void onResponse(ConstResponsePtr &response);
 
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+  /// \brief Subscriber callback for performance metrics. This will be send in the ROS network
+  void onPerformanceMetrics(const boost::shared_ptr<gazebo::msgs::PerformanceMetrics const> &msg);
+#endif
   /// \brief utility for checking if string is in URDF format
   bool isURDF(std::string model_xml);
 
@@ -321,6 +326,7 @@ private:
   gazebo::transport::PublisherPtr factory_pub_;
   gazebo::transport::PublisherPtr factory_light_pub_;
   gazebo::transport::PublisherPtr light_modify_pub_;
+  gazebo::transport::SubscriberPtr performance_metric_sub_;
   gazebo::transport::PublisherPtr request_pub_;
   gazebo::transport::SubscriberPtr response_sub_;
 
@@ -367,6 +373,7 @@ private:
   ros::Subscriber    set_model_state_topic_;
   ros::Publisher     pub_link_states_;
   ros::Publisher     pub_model_states_;
+  ros::Publisher     pub_performance_metrics_;
   int                pub_link_states_connection_count_;
   int                pub_model_states_connection_count_;
 
