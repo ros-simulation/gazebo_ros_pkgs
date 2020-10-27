@@ -208,7 +208,7 @@ TEST_P(GazeboRosCameraDistortionTest, CameraSubscribeTest)
   }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
   GazeboRosCameraDistortion, GazeboRosCameraDistortionTest, ::testing::Values(
     TestParams(
       {"worlds/gazebo_ros_camera_distortion_barrel.world",

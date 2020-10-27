@@ -106,7 +106,7 @@ TEST_P(GazeboRosMultiCameraTest, CameraSubscribeTest)
   sub_right.shutdown();
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
   GazeboRosMultiCamera, GazeboRosMultiCameraTest, ::testing::Values(
     TestParams(
       {"worlds/gazebo_ros_multi_camera.world",

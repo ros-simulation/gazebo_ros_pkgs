@@ -122,12 +122,12 @@ TEST_P(GazeboRosDiffDriveTest, Publishing)
   EXPECT_NEAR(0.1, vehicle->WorldAngularVel().Z(), tol);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
   GazeboRosDiffDrive, GazeboRosDiffDriveTest, ::testing::Values(
     TestParams({"worlds/gazebo_ros_diff_drive.world"}),
     TestParams({"worlds/gazebo_ros_skid_steer_drive.world"})
     // cppcheck-suppress syntaxError
-  ), );
+  ));
 
 int main(int argc, char ** argv)
 {
