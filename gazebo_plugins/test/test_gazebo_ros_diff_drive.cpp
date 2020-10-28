@@ -127,7 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
     TestParams({"worlds/gazebo_ros_diff_drive.world"}),
     TestParams({"worlds/gazebo_ros_skid_steer_drive.world"})
     // cppcheck-suppress syntaxError
-  ));
+));
 
 int main(int argc, char ** argv)
 {
