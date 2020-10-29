@@ -67,7 +67,7 @@ class SpawnEntityNode(Node):
         parser.add_argument('-reference_frame', type=str, default='',
                             help='Name of the model/body where initial pose is defined.\
                             If left empty or specified as "world", gazebo world frame is used')
-        parser.add_argument('-gazebo_namespace', type=str, default='',
+        parser.add_argument('-gazebo_namespace', type=str, default=self.get_namespace(),
                             help='ROS namespace of gazebo offered ROS interfaces. \
                             Default is without any namespace')
         parser.add_argument('-robot_namespace', type=str, default='',
