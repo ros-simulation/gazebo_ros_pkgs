@@ -67,7 +67,7 @@ TEST_P(TestPlugins, TestTopicsReceived)
   rclcpp::sleep_for(1s);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
   Plugins, TestPlugins, ::testing::Values(
     TestParams({{"-s", "./libargs_init.so"}, {"test"}}),
     TestParams({{"-s", "./libcreate_node_without_init.so"}, {"test"}}),
@@ -80,7 +80,7 @@ INSTANTIATE_TEST_CASE_P(
         "worlds/ros_world_plugin.world"}, {"test"}}),
     TestParams({{"-s", "libgazebo_ros_init.so", "worlds/sdf_node_plugin.world"}, {"/foo/my_topic"}})
     // cppcheck-suppress syntaxError
-  ), );
+));
 
 int main(int argc, char ** argv)
 {

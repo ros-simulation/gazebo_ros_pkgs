@@ -81,7 +81,7 @@ TEST_P(GazeboRosCameraTest, CameraSubscribeTest)
   sub.shutdown();
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
   GazeboRosCamera, GazeboRosCameraTest, ::testing::Values(
     TestParams({"worlds/gazebo_ros_camera.world", "test_cam/camera/image_test"}),
     TestParams({"worlds/gazebo_ros_camera_16bit.world", "test_cam_16bit/image_test_16bit"})

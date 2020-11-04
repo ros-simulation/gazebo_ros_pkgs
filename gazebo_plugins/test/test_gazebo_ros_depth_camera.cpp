@@ -136,7 +136,7 @@ TEST_P(GazeboRosDepthCameraTest, DepthCameraSubscribeTest)
   EXPECT_EQ(8.0, image_stamp_pcl.sec);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
   GazeboRosDepthCamera, GazeboRosDepthCameraTest, ::testing::Values(
     TestParams(
       {"worlds/gazebo_ros_depth_camera.world",
