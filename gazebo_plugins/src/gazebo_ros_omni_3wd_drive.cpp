@@ -325,20 +325,18 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
 
   // Get <wheel_separation> from sdf
-  auto wheel_separation = _sdf->GetElement("wheel_separation");
-  impl_->wheel_separation_ = wheel_separation->Get<double>();
+  auto wheel_separation = _sdf->Get<double>("wheel_separation",0.2).first;
+  impl_->wheel_separation_ = wheel_separation;
   RCLCPP_INFO(impl_->ros_node_->get_logger(),
       "Wheel separation set to [%fm]", impl_->wheel_separation_);
 
   // Get <wheel_diameter> from sdf
-  auto wheel_diameter = _sdf->GetElement("wheel_diameter");
-  impl_->wheel_diameter_ = wheel_diameter->Get<double>();
-     RCLCPP_INFO(impl_->ros_node_->get_logger(),
+  auto wheel_diameter = _sdf->Get<double>("wheel_diameter",0.15).first;
+  impl_->wheel_diameter_ = wheel_diameter;
+  RCLCPP_INFO(impl_->ros_node_->get_logger(),
        "Wheel  diameter set to [%fm]", impl_->wheel_diameter_);
 
-
-  //impl_->wheel_speed_instr_.assign(2 * impl_->num_wheel_pairs_, 0);
-  //impl_->desired_wheel_speed_.assign(2 * impl_->num_wheel_pairs_, 0);
+  // Initialize vectors. 3 is the number of wheels
   impl_->wheel_speed_instr_.assign(3, 0);
   impl_->desired_wheel_speed_.assign(3, 0);
 
