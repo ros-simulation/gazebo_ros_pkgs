@@ -30,8 +30,8 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_
-#define GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_
+#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_OMNI_3WD_DRIVE_HPP_
+#define GAZEBO_PLUGINS__GAZEBO_ROS_OMNI_3WD_DRIVE_HPP_
 
 #include <gazebo/common/Plugin.hh>
 
@@ -39,7 +39,7 @@
 
 namespace gazebo_plugins
 {
-class GazeboRosDiffDrivePrivate;
+class GazeboRosOmni3wdDrivePrivate;
 
 /// A differential drive plugin for gazebo. Based on the diffdrive plugin
 /*
@@ -50,10 +50,20 @@ class GazeboRosDiffDrivePrivate;
  *
  * $ Id: 06/21/2013 11:23:40 AM piyushk $
  */
+
+/* 
+ * 
+ * \brief A omnidirectional drive plugin for gazebo. It is based on the diff_drive
+ * developed by P. Khandelwal. The diff_drive plugin can be found in this package, as 
+ * gazebo_ros_diff_drive.cpp.
+ * \author   Enrico Sutera (enricosutera@outlook.com)
+ * \date 10th of November 2020
+ */
+
 /**
   Example Usage:
   \code{.xml}
-    <plugin name="gazebo_ros_diff_drive" filename="libgazebo_ros_diff_drive.so">
+    <plugin name="gazebo_omni_3wd_drive" filename="libgazebo_ros_omni_3wd_drive.so">
 
       <ros>
 
@@ -66,12 +76,13 @@ class GazeboRosDiffDrivePrivate;
       <update_rate>50</update_rate>
 
       <!-- wheels -->
-      <left_joint>left_wheel_joint</left_joint>
-      <right_joint>right_wheel_joint</right_joint>
+      <left_joint>wheel_joint_left</left_joint>
+      <right_joint>wheel_joint_right</right_joint>
+      <back_joint>wheel_joint_back</back_joint>
 
       <!-- kinematics -->
-      <wheel_separation>1.25</wheel_separation>
-      <wheel_diameter>0.6</wheel_diameter>
+      <wheel_separation>0.18</wheel_separation>
+      <wheel_diameter>0.1</wheel_diameter>
 
       <!-- limits -->
       <max_wheel_torque>20</max_wheel_torque>
@@ -92,14 +103,14 @@ class GazeboRosDiffDrivePrivate;
     </plugin>
   \endcode
 */
-class GazeboRosDiffDrive : public gazebo::ModelPlugin
+class GazeboRosOmni3wdDrive : public gazebo::ModelPlugin
 {
 public:
   /// Constructor
-  GazeboRosDiffDrive();
+  GazeboRosOmni3wdDrive();
 
   /// Destructor
-  ~GazeboRosDiffDrive();
+  ~GazeboRosOmni3wdDrive();
 
 protected:
   // Documentation inherited
@@ -110,8 +121,8 @@ protected:
 
 private:
   /// Private data pointer
-  std::unique_ptr<GazeboRosDiffDrivePrivate> impl_;
+  std::unique_ptr<GazeboRosOmni3wdDrivePrivate> impl_;
 };
 }  // namespace gazebo_plugins
 
-#endif  // GAZEBO_PLUGINS__GAZEBO_ROS_DIFF_DRIVE_HPP_
+#endif  // GAZEBO_PLUGINS__GAZEBO_ROS_OMNI_3WD_DRIVE_HPP_

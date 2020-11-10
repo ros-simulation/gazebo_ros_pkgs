@@ -90,7 +90,7 @@
 
 namespace gazebo_plugins
 {
-class GazeboRosDiffDrivePrivate
+class GazeboRosOmni3wdDrivePrivate
 {
 public:
   /// Indicates where the odometry info is coming from
@@ -244,18 +244,18 @@ public:
 };
 
 ///####################################################################################################
-GazeboRosDiffDrive::GazeboRosDiffDrive()
-: impl_(std::make_unique<GazeboRosDiffDrivePrivate>())
+GazeboRosOmni3wdDrive::GazeboRosOmni3wdDrive()
+: impl_(std::make_unique<GazeboRosOmni3wdDrivePrivate>())
 {
 }
 
-///####################################################################################################
-GazeboRosDiffDrive::~GazeboRosDiffDrive()
+/// OK
+GazeboRosOmni3wdDrive::~GazeboRosOmni3wdDrive()
 {
 }
 
-///####################################################################################################
-void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
+/// OK 
+void GazeboRosOmni3wdDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   impl_->model_ = _model;
 
@@ -310,8 +310,7 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   back_joint->SetParam("fmax", 0, impl_->max_wheel_torque_);
   back_joints.push_back(back_joint);
 
-
-/*if (left_joints.size() != right_joints.size() || left_joints.size() != impl_->num_wheel_pairs_) {
+  /*if (left_joints.size() != right_joints.size() || left_joints.size() != impl_->num_wheel_pairs_) {
     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
       "Inconsistent number of joints specified. Plugin will not work.");
     impl_->ros_node_.reset();
@@ -322,7 +321,6 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->joints_.push_back(right_joints[0]);
   impl_->joints_.push_back(left_joints[0]);
   impl_->joints_.push_back(back_joints[0]);
-
 
   // Get <wheel_separation> from sdf
   auto wheel_separation = _sdf->Get<double>("wheel_separation",0.2).first;
@@ -351,7 +349,7 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", rclcpp::QoS(rclcpp::KeepLast(1)),
-    std::bind(&GazeboRosDiffDrivePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
+    std::bind(&GazeboRosOmni3wdDrivePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Subscribed to [%s]",
     impl_->cmd_vel_sub_->get_topic_name());
@@ -359,7 +357,7 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Odometry
   impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
   impl_->robot_base_frame_ = _sdf->Get<std::string>("robot_base_frame", "base_footprint").first;
-  impl_->odom_source_ = static_cast<GazeboRosDiffDrivePrivate::OdomSource>(
+  impl_->odom_source_ = static_cast<GazeboRosOmni3wdDrivePrivate::OdomSource>(
     _sdf->Get<int>("odometry_source", 1).first);
 
   // Advertise odometry topic
@@ -391,9 +389,9 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       RCLCPP_INFO(impl_->ros_node_->get_logger(),
         "Publishing wheel transforms between [%s], [%s], [%s] and [%s]",
         impl_->robot_base_frame_.c_str(),
-        impl_->joints_[GazeboRosDiffDrivePrivate::LEFT]->GetName().c_str(),
-        impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT]->GetName().c_str(),
-        impl_->joints_[GazeboRosDiffDrivePrivate::BACK]->GetName().c_str());
+        impl_->joints_[GazeboRosOmni3wdDrivePrivate::LEFT]->GetName().c_str(),
+        impl_->joints_[GazeboRosOmni3wdDrivePrivate::RIGHT]->GetName().c_str(),
+        impl_->joints_[GazeboRosOmni3wdDrivePrivate::BACK]->GetName().c_str());
     }
   }
 
@@ -403,26 +401,26 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboRosDiffDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+    std::bind(&GazeboRosOmni3wdDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
   RCLCPP_INFO(impl_->ros_node_->get_logger(), "Load Finished");
 }
 
 // OK
-void GazeboRosDiffDrive::Reset()
+void GazeboRosOmni3wdDrive::Reset()
 {
   impl_->last_update_time_ =
-    impl_->joints_[GazeboRosDiffDrivePrivate::LEFT]->GetWorld()->SimTime();
+    impl_->joints_[GazeboRosOmni3wdDrivePrivate::LEFT]->GetWorld()->SimTime();
   //for (unsigned int i = 0; i < impl_->num_wheel_pairs_; ++i) {
   
-  if (impl_->joints_[GazeboRosDiffDrivePrivate::LEFT] &&
-    impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT]  &&
-    impl_->joints_[GazeboRosDiffDrivePrivate::BACK])
+  if (impl_->joints_[GazeboRosOmni3wdDrivePrivate::LEFT] &&
+    impl_->joints_[GazeboRosOmni3wdDrivePrivate::RIGHT]  &&
+    impl_->joints_[GazeboRosOmni3wdDrivePrivate::BACK])
   {
-    impl_->joints_[GazeboRosDiffDrivePrivate::LEFT]->SetParam(
+    impl_->joints_[GazeboRosOmni3wdDrivePrivate::LEFT]->SetParam(
       "fmax", 0, impl_->max_wheel_torque_);
-    impl_->joints_[GazeboRosDiffDrivePrivate::RIGHT]->SetParam(
+    impl_->joints_[GazeboRosOmni3wdDrivePrivate::RIGHT]->SetParam(
       "fmax", 0, impl_->max_wheel_torque_);
-    impl_->joints_[GazeboRosDiffDrivePrivate::BACK]->SetParam(
+    impl_->joints_[GazeboRosOmni3wdDrivePrivate::BACK]->SetParam(
       "fmax", 0, impl_->max_wheel_torque_);
   }
   
@@ -434,7 +432,8 @@ void GazeboRosDiffDrive::Reset()
   impl_->target_rot_ = 0;
 }
 
-void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
+// 
+void GazeboRosOmni3wdDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
   // TO DO
   // wheel_diameter to double
@@ -526,9 +525,8 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
   last_update_time_ = _info.simTime;
 }
 
-
 // OK
-void GazeboRosDiffDrivePrivate::UpdateWheelVelocities()
+void GazeboRosOmni3wdDrivePrivate::UpdateWheelVelocities()
 {
 
   std::lock_guard<std::mutex> scoped_lock(lock_);
@@ -536,20 +534,28 @@ void GazeboRosDiffDrivePrivate::UpdateWheelVelocities()
   double vy = target_y_;
   double va = target_rot_;
 
-  // V_left  =   vx * cos(30°) + vy * cos(60°) + L * w =
+  // Matrix
+  //  _       _     _                         _  _    _
+  // | V_left  |   |-L     cos(30)    -cos(60) ||  w   |
+  // |         |   |                           ||      |
+  // | V_right | = |-L     -cos(30)   -cos(60) ||  vx  |
+  // |         |   |                           ||      |
+  // |_V_back _|   |-L     0          1       _||_ vy _|
+
+  // V_left  =   vx * cos(30°) - vy * cos(60°) - L * w =
   //         =   vx * sqrt(3) / 2 + vy * 1/2
-  // V_right = - vx * cos(30°) + vy * cos(60°) + L * w=
+  // V_right = - vx * cos(30°) - vy * cos(60°) - L * w=
   //         = - vx * sqrt(3) / 2 + vy * 1/2
-  // V_back  = - vy + L * w
+  // V_back  = + vy - L * w
   // being L the distance of the wheels from the centre and w the target_rot_
 
-  desired_wheel_speed_[LEFT]  =   vx * sqrt(3) / 2 + vy * 1/2 + wheel_separation_ * va; 
-  desired_wheel_speed_[RIGHT] = - vx * sqrt(3) / 2 + vy * 1/2 + wheel_separation_ * va;
-  desired_wheel_speed_[BACK]  = - vy + wheel_separation_ * va;
+  desired_wheel_speed_[LEFT]  =   vx * sqrt(3) / 2 - vy * 1/2 - wheel_separation_ * va; 
+  desired_wheel_speed_[RIGHT] = - vx * sqrt(3) / 2 - vy * 1/2 - wheel_separation_ * va;
+  desired_wheel_speed_[BACK]  =                    + vy       - wheel_separation_ * va;
 }
 
 // OK
-void GazeboRosDiffDrivePrivate::OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr _msg)
+void GazeboRosOmni3wdDrivePrivate::OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr _msg)
 {
   std::lock_guard<std::mutex> scoped_lock(lock_);
   target_x_ = _msg->linear.x;
@@ -557,27 +563,42 @@ void GazeboRosDiffDrivePrivate::OnCmdVel(const geometry_msgs::msg::Twist::Shared
   target_rot_ = _msg->angular.z;
 }
 
-// NOT MODIFIED YET
-void GazeboRosDiffDrivePrivate::UpdateOdometryEncoder(const gazebo::common::Time & _current_time)
+
+void GazeboRosOmni3wdDrivePrivate::UpdateOdometryEncoder(const gazebo::common::Time & _current_time)
 {
+  // joints velocities (rad/s)
   double vl = joints_[LEFT]->GetVelocity(0);
   double vr = joints_[RIGHT]->GetVelocity(0);
+  double vb = joints_[BACK]->GetVelocity(0);
+
+  //inverse Matrix
+  // _    _         _                           _  _          _
+  // | w  |        |  -1/L        -1/L      -1/L ||  V_left   |
+  // |    |        |                             ||           |
+  // | vx | = 1/3  |  sqrt(3)     -sqrt(3)   0   ||  V_right  |
+  // |    |        |                             ||           |
+  // |_Vy_|        |_ -1          -1         2  _||_ V_back  _|
+  //
+  // Note that vl, vr, and vb are angular velocities, while 
+  // V_left etc.. are intended as linear (v*r)
 
   double seconds_since_last_update = (_current_time - last_encoder_update_).Double();
   last_encoder_update_ = _current_time;
 
-  double b = wheel_separation_;
+  double b = wheel_separation_; // is the L of the matrix
+  double r = wheel_diameter_ / 2.0;
 
-  // Book: Sigwart 2011 Autonompus Mobile Robots page:337
-  double sl = vl * (wheel_diameter_ / 2.0) * seconds_since_last_update;
-  double sr = vr * (wheel_diameter_ / 2.0) * seconds_since_last_update;
-  double ssum = sl + sr;
+  // theta is global
+  double dtheta = (1.0/3.0) * r * (-1.0/b) * (vl +vr +vb) * seconds_since_last_update;
 
-  double sdiff = sr - sl;
+  // dx_l and dy_l in local reference frame
+  double dx_l = (1.0/3.0) * r * (sqrt(3.0) * vl - sqrt(3.0) * vl) * seconds_since_last_update;
+  double dy_l = (1.0/3.0) * r * (-vl -vr + 2.0*vb) * seconds_since_last_update;
 
-  double dx = (ssum) / 2.0 * cos(pose_encoder_.theta + (sdiff) / (2.0 * b));
-  double dy = (ssum) / 2.0 * sin(pose_encoder_.theta + (sdiff) / (2.0 * b));
-  double dtheta = (sdiff) / b;
+  // dx and dy in global reference frame (rotation)
+  double approx_theta = pose_encoder_.theta + dtheta/2.0; 
+  double dx =   dx_l * cos(approx_theta) + dy_l * sin(approx_theta);
+  double dy = - dx_l * sin(approx_theta) + dy_l * cos(approx_theta);
 
   pose_encoder_.x += dx;
   pose_encoder_.y += dy;
@@ -605,8 +626,8 @@ void GazeboRosDiffDrivePrivate::UpdateOdometryEncoder(const gazebo::common::Time
   odom_.twist.twist.linear.y = 0;
 }
 
-// NOT MODIFIED YET
-void GazeboRosDiffDrivePrivate::UpdateOdometryWorld()
+
+void GazeboRosOmni3wdDrivePrivate::UpdateOdometryWorld()
 {
   auto pose = model_->WorldPose();
   odom_.pose.pose.position = gazebo_ros::Convert<geometry_msgs::msg::Point>(pose.Pos());
@@ -623,7 +644,7 @@ void GazeboRosDiffDrivePrivate::UpdateOdometryWorld()
 }
 
 // NOT MODIFIED YET
-void GazeboRosDiffDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
+void GazeboRosOmni3wdDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
 {
   geometry_msgs::msg::TransformStamped msg;
   msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
@@ -637,9 +658,9 @@ void GazeboRosDiffDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _
 }
 
 // NOT MODIFIED YET
-void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _current_time)
+void GazeboRosOmni3wdDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _current_time)
 {
-  for (unsigned int i = 0; i < 2 * num_wheel_pairs_; ++i) {
+  for (unsigned int i = 0; i < 3; ++i) { // 3 wheels
     auto pose_wheel = joints_[i]->GetChild()->RelativePose();
 
     geometry_msgs::msg::TransformStamped msg;
@@ -654,7 +675,7 @@ void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _cu
 }
 
 // NOT MODIFIED YET
-void GazeboRosDiffDrivePrivate::PublishOdometryMsg(const gazebo::common::Time & _current_time)
+void GazeboRosOmni3wdDrivePrivate::PublishOdometryMsg(const gazebo::common::Time & _current_time)
 {
   // Set covariance
   odom_.pose.covariance[0] = covariance_[0];
@@ -679,5 +700,5 @@ void GazeboRosDiffDrivePrivate::PublishOdometryMsg(const gazebo::common::Time & 
   // Publish
   odometry_pub_->publish(odom_);
 }
-GZ_REGISTER_MODEL_PLUGIN(GazeboRosDiffDrive)
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosOmni3wdDrive)
 }  // namespace gazebo_plugins
