@@ -50,12 +50,22 @@
  * \date 22th of May 2014
  */
 
+/* 
+ * \file gazebo_ros_omni_3wd_drive.cpp
+ * 
+ * \brief A omnidirectional drive plugin for gazebo. It is based on the diff_drive
+ * developed by P. Khandelwal and improved by G. Todoran and M. Bader
+ * (see above notes). The diff_drive plugin can be found in this package, as 
+ * gazebo_ros_diff_drive.cpp.
+ * \author   Enrico Sutera (enricosutera@outlook.com)
+ * \date 10th of November 2020
+ */
+
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
- ///####################################################################################################
 #include <gazebo_plugins/gazebo_ros_omni_3wd_drive.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
@@ -186,8 +196,7 @@ public:
   /// Linear velocity in X received on command (m/s).
   double target_x_{0.0};
 
-  ///####################################################################################################
-  /// Linear velocity in X received on command (m/s).
+  /// Linear velocity in Y received on command (m/s).
   double target_y_{0.0};
 
   /// Angular velocity in Z received on command (rad/s).
@@ -253,15 +262,6 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Initialize ROS node 
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
-  // Get number of wheel pairs in the model
-  //impl_->num_wheel_pairs_ = static_cast<unsigned int>(_sdf->Get<int>("num_wheel_pairs", 1).first);
-
-  //if (impl_->num_wheel_pairs_ < 1) {
-  //  impl_->num_wheel_pairs_ = 1;
-  //  RCLCPP_WARN(impl_->ros_node_->get_logger(),
-  //    "Drive requires at least one pair of wheels. Setting [num_wheel_pairs] to 1");
-  //}
-
   // Dynamic properties
   impl_->max_wheel_accel_ = _sdf->Get<double>("max_wheel_acceleration", 0.0).first;
   impl_->max_wheel_torque_ = _sdf->Get<double>("max_wheel_torque", 5.0).first;
@@ -269,7 +269,7 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Get joints and Kinematic properties
   std::vector<gazebo::physics::JointPtr> left_joints, right_joints, back_joints;
 
-
+  // Get left wheel joint from sdf
   auto left_joint_elem = _sdf->GetElement("left_joint");
   auto left_joint_name = left_joint_elem->Get<std::string>();
   auto left_joint = _model->GetJoint(left_joint_name);
@@ -282,22 +282,8 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   left_joint->SetParam("fmax", 0, impl_->max_wheel_torque_);
   left_joints.push_back(left_joint);
   RCLCPP_INFO(impl_->ros_node_->get_logger(),"Left wheel found");
-
-  // for (auto left_joint_elem = _sdf->GetElement("left_joint"); left_joint_elem != nullptr;
-  //   left_joint_elem = left_joint_elem->GetNextElement("left_joint"))
-  // {
-  //   auto left_joint_name = left_joint_elem->Get<std::string>();
-  //   auto left_joint = _model->GetJoint(left_joint_name);
-  //   if (!left_joint) {
-  //     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-  //       "Joint [%s] not found, plugin will not work.", left_joint_name.c_str());
-  //     impl_->ros_node_.reset();
-  //     return;
-  //   }
-  //   left_joint->SetParam("fmax", 0, impl_->max_wheel_torque_);
-  //   left_joints.push_back(left_joint);
-  // }
-
+  
+  // Get right wheel joint from sdf
   auto right_joint_elem = _sdf->GetElement("right_joint");
   auto right_joint_name = right_joint_elem->Get<std::string>();
   auto right_joint = _model->GetJoint(right_joint_name);
@@ -309,22 +295,9 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
    }
   right_joint->SetParam("fmax", 0, impl_->max_wheel_torque_);
   right_joints.push_back(right_joint);
-  RCLCPP_INFO(impl_->ros_node_->get_logger(),"Right wheel found");
-  // for (auto right_joint_elem = _sdf->GetElement("right_joint"); right_joint_elem != nullptr;
-  //   right_joint_elem = right_joint_elem->GetNextElement("right_joint"))
-  // {
-  //   auto right_joint_name = right_joint_elem->Get<std::string>();
-  //   auto right_joint = _model->GetJoint(right_joint_name);
-  //   if (!right_joint) {
-  //     RCLCPP_ERROR(impl_->ros_node_->get_logger(),
-  //       "Joint [%s] not found, plugin will not work.", right_joint_name.c_str());
-  //     impl_->ros_node_.reset();
-  //     return;
-  //   }
-  //   right_joint->SetParam("fmax", 0, impl_->max_wheel_torque_);
-  //   right_joints.push_back(right_joint);
-  // }
 
+
+  // Get back wheel joint from sdf
   auto back_joint_elem = _sdf->GetElement("back_joint");
   auto back_joint_name = back_joint_elem->Get<std::string>();
   auto back_joint = _model->GetJoint(back_joint_name);
@@ -336,7 +309,6 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
    }
   back_joint->SetParam("fmax", 0, impl_->max_wheel_torque_);
   back_joints.push_back(back_joint);
-  RCLCPP_INFO(impl_->ros_node_->get_logger(),"Back wheel found");
 
 
 /*if (left_joints.size() != right_joints.size() || left_joints.size() != impl_->num_wheel_pairs_) {
@@ -346,18 +318,19 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     return;
   }*/
 
+  // Add element to joints_ vector
   impl_->joints_.push_back(right_joints[0]);
   impl_->joints_.push_back(left_joints[0]);
   impl_->joints_.push_back(back_joints[0]);
 
 
-
-
+  // Get <wheel_separation> from sdf
   auto wheel_separation = _sdf->GetElement("wheel_separation");
   impl_->wheel_separation_ = wheel_separation->Get<double>();
   RCLCPP_INFO(impl_->ros_node_->get_logger(),
       "Wheel separation set to [%fm]", impl_->wheel_separation_);
 
+  // Get <wheel_diameter> from sdf
   auto wheel_diameter = _sdf->GetElement("wheel_diameter");
   impl_->wheel_diameter_ = wheel_diameter->Get<double>();
      RCLCPP_INFO(impl_->ros_node_->get_logger(),
@@ -556,13 +529,11 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
 }
 
 
-// 1 TO DO
+// OK
 void GazeboRosDiffDrivePrivate::UpdateWheelVelocities()
 {
-  // TO DO: 
-  // remove wheel separation as vector
-  std::lock_guard<std::mutex> scoped_lock(lock_);
 
+  std::lock_guard<std::mutex> scoped_lock(lock_);
   double vx = target_x_;
   double vy = target_y_;
   double va = target_rot_;
@@ -578,7 +549,6 @@ void GazeboRosDiffDrivePrivate::UpdateWheelVelocities()
   desired_wheel_speed_[RIGHT] = - vx * sqrt(3) / 2 + vy * 1/2 + wheel_separation_ * va;
   desired_wheel_speed_[BACK]  = - vy + wheel_separation_ * va;
 }
-
 
 // OK
 void GazeboRosDiffDrivePrivate::OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr _msg)
