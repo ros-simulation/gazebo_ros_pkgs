@@ -103,6 +103,13 @@ void GazeboRosForce::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
 
+  if (this->topic_name_.find(':') != std::string::npos)
+  {
+    std::string _topic_name = this->topic_name_;
+    std::replace(this->topic_name_.begin(), this->topic_name_.end(), ':', '_');
+    ROS_WARN_STREAM("Ros topic " << _topic_name << " has been renamed to " << this->topic_name_);
+  }
+
   // Custom Callback Queue
   ros::SubscribeOptions so = ros::SubscribeOptions::create<geometry_msgs::Wrench>(
     this->topic_name_,1,
