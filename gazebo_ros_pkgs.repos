@@ -2,7 +2,7 @@ repositories:
   gazebo_ros_pkgs:
     type: git
     url: https://github.com/ros-simulation/gazebo_ros_pkgs.git
-    version: ros2
+    version: foxy
   image_common:
     type: git
     url: https://github.com/ros-perception/image_common.git
