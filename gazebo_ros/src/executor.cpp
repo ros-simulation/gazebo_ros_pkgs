@@ -14,7 +14,13 @@
 
 #include <gazebo_ros/executor.hpp>
 
+#include <rclcpp/node.hpp>
+
+#include <chrono>
 #include <iostream>
+#include <memory>
+#include <mutex>
+#include <thread>
 
 namespace gazebo_ros
 {
@@ -34,9 +40,38 @@ Executor::~Executor()
   spin_thread_.join();
 }
 
+void
+Executor::add_node(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify)
+{
+  std::lock_guard<std::mutex> lock(spin_mutex_);
+  rclcpp::Executor::add_node(node_ptr, notify);
+}
+
+void
+Executor::add_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify)
+{
+  this->add_node(node_ptr->get_node_base_interface(), notify);
+}
+
+void
+Executor::remove_node(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify)
+{
+  std::lock_guard<std::mutex> lock(spin_mutex_);
+  rclcpp::Executor::remove_node(node_ptr, notify);
+}
+
+void
+Executor::remove_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify)
+{
+  this->remove_node(node_ptr->get_node_base_interface(), notify);
+}
+
 void Executor::run()
 {
-  spin();
+  while (rclcpp::ok()) {
+    std::lock_guard<std::mutex> lock(spin_mutex_);
+    spin_once(std::chrono::milliseconds(100));
+  }
 }
 
 void Executor::shutdown()

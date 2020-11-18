@@ -18,6 +18,10 @@
 #include <rclcpp/rclcpp.hpp>
 #include <gazebo/common/Events.hh>
 
+#include <memory>
+#include <mutex>
+#include <thread>
+
 namespace gazebo_ros
 {
 
@@ -34,7 +38,46 @@ public:
   /// Stops the internal executor and joins with the internal thread
   virtual ~Executor();
 
+  /// Add a node to the executor.
+  /**
+   * Thread-safe wrapper of rclcpp::Executor::add_node.
+   *
+   * \see rclcpp::Executor::add_node
+   */
+  virtual void
+  add_node(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify = true) override;
+
+  /// Convenience function which takes Node and forwards NodeBaseInterface.
+  /**
+   * Thread-safe wrapper of rclcpp::Executor::add_node.
+   *
+   * \see rclcpp::Executor::add_node
+   */
+  virtual void
+  add_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify = true) override;
+
+  /// Remove a node from the executor.
+  /**
+   * Thread-safe wrapper of rclcpp::Executor::remove_node.
+   *
+   * \see rclcpp::Executor::remove_node
+   */
+  virtual void
+  remove_node(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify = true) override;
+
+  /// Convenience function which takes Node and forwards NodeBaseInterface.
+  /**
+   * Thread-safe wrapper of rclcpp::Executor::remove_node.
+   *
+   * \see rclcpp::Executor::remove_node
+   */
+  virtual void
+  remove_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify = true) override;
+
 private:
+  /// Mutex to make adding/removing nodes to the executor in a thread-safe.
+  std::mutex spin_mutex_;
+
   /// Thread where the executor spins until destruction
   std::thread spin_thread_;
 
