@@ -145,4 +145,4 @@ Executor::run()
   }
 }
 
-} // namespace gazebo_ros
+}  // namespace gazebo_ros
