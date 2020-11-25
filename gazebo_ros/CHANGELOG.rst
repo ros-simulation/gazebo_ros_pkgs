@@ -2,6 +2,29 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* colcon.pkg: build gazebo first in colcon workspace (`#1192 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1192>`_)
+  Add a colcon.pkg file to gazebo_dev with gazebo's cmake project
+  name "Gazebo" listed as a dependency to support building
+  gazebo from source in a colcon workspace.
+  * Add colcon.pkg files for other packages
+  Copy colcon.pkg to gazebo_ros, gazebo_plugins, and
+  gazebo_ros_control so that --merge-install won't be required.
+  Signed-off-by: Steve Peters <scpeters@openrobotics.org>
+* Fixed Parameterized testing on Rolling (`#1184 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1184>`_)
+  Signed-off-by: ahcorde <ahcorde@gmail.com>
+* [ROS 2] Bridge to republish PerformanceMetrics in ROS 2 (`#1147 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1147>`_)
+  Signed-off-by: ahcorde <ahcorde@gmail.com>
+* [Windows] Add missing visibility control. (`#1150 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1150>`_)
+* [ros2] Enable the force system on launch files (`#1035 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1035>`_)
+  Signed-off-by: Louise Poubel <louise@openrobotics.org>
+* make compile wo/ warnings on osx (`#1149 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1149>`_)
+  Signed-off-by: Karsten Knese <Karsten1987@users.noreply.github.com>
+* Added lockstep argument to gzserver (`#1146 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1146>`_)
+  Signed-off-by: ahcorde <ahcorde@gmail.com>
+* Contributors: Alejandro Hernández Cordero, Karsten Knese, Louise Poubel, Sean Yen, Steve Peters
+
 3.5.0 (2020-06-19)
 ------------------
 * Merge pull request `#1130 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1130>`_ from ros-simulation/foxy_tests
