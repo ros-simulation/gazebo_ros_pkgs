@@ -543,7 +543,7 @@ void GazeboRosOmni3wdDrivePrivate::UpdateWheelVelocities()
   // |_V_back _|   |-L     0          1       _||_ vy _|
 
   // V_left  =   vx * cos(30°) - vy * cos(60°) - L * w =
-  //         =   vx * sqrt(3) / 2 + vy * 1/2
+  //         =   vx * sqrt(3) / 2 l vy * 1/2
   // V_right = - vx * cos(30°) - vy * cos(60°) - L * w=
   //         = - vx * sqrt(3) / 2 + vy * 1/2
   // V_back  = + vy - L * w
@@ -592,7 +592,7 @@ void GazeboRosOmni3wdDrivePrivate::UpdateOdometryEncoder(const gazebo::common::T
   double dtheta = (1.0/3.0) * r * (-1.0/b) * (vl +vr +vb) * seconds_since_last_update;
 
   // dx_l and dy_l in local reference frame
-  double dx_l = (1.0/3.0) * r * (sqrt(3.0) * vl - sqrt(3.0) * vl) * seconds_since_last_update;
+  double dx_l = (1.0/3.0) * r * (sqrt(3.0) * vl - sqrt(3.0) * vr) * seconds_since_last_update;
   double dy_l = (1.0/3.0) * r * (-vl -vr + 2.0*vb) * seconds_since_last_update;
 
   // dx and dy in global reference frame (rotation)
