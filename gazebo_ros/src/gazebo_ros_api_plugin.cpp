@@ -192,7 +192,7 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
-#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
   performance_metric_sub_ = gazebonode_->Subscribe("/gazebo/performance_metrics",
     &GazeboRosApiPlugin::onPerformanceMetrics, this);
 #endif
@@ -228,7 +228,7 @@ void GazeboRosApiPlugin::onResponse(ConstResponsePtr &response)
 {
 
 }
-#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
 void GazeboRosApiPlugin::onPerformanceMetrics(const boost::shared_ptr<gazebo::msgs::PerformanceMetrics const> &msg)
 {
   gazebo_msgs::PerformanceMetrics msg_ros;
@@ -408,7 +408,7 @@ void GazeboRosApiPlugin::advertiseServices()
                                                             ros::VoidPtr(), &gazebo_queue_);
   pub_model_states_ = nh_->advertise(pub_model_states_ao);
 
-#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
   // publish performance metrics
   pub_performance_metrics_ = nh_->advertise<gazebo_msgs::PerformanceMetrics>("performance_metrics", 10);
 #endif
