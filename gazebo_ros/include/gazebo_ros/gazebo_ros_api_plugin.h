@@ -101,6 +101,13 @@
 
 #include <boost/algorithm/string.hpp>
 
+#ifndef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || \
+    (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+#define GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+#endif
+#endif  // ifndef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+
 namespace gazebo
 {
 
@@ -292,7 +299,7 @@ private:
   /// \brief Unused
   void onResponse(ConstResponsePtr &response);
 
-#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
   /// \brief Subscriber callback for performance metrics. This will be send in the ROS network
   void onPerformanceMetrics(const boost::shared_ptr<gazebo::msgs::PerformanceMetrics const> &msg);
 #endif
