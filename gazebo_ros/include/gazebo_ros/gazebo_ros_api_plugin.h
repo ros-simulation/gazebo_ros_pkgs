@@ -138,16 +138,16 @@ public:
   /// \brief advertise services
   void advertiseServices();
 
-  /// \brief
+  /// \brief Callback for a subscriber connecting to LinkStates ros topic.
   void onLinkStatesConnect();
 
-  /// \brief
+  /// \brief Callback for a subscriber connecting to ModelStates ros topic.
   void onModelStatesConnect();
 
-  /// \brief
+  /// \brief Callback for a subscriber disconnecting from LinkStates ros topic.
   void onLinkStatesDisconnect();
 
-  /// \brief
+  /// \brief Callback for a subscriber disconnecting from ModelStates ros topic.
   void onModelStatesDisconnect();
 
   /// \brief Function for inserting a URDF into Gazebo from ROS Service Call
