@@ -568,7 +568,7 @@ void GazeboRosApiPlugin::onLinkStatesDisconnect()
   {
     pub_link_states_event_.reset();
     if (pub_link_states_connection_count_ < 0) // should not be possible
-      ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_link_states_ in gazebo_ros.cpp? something weird");
+      ROS_ERROR_NAMED("api_plugin", "One too many disconnect from pub_link_states_ in gazebo_ros.cpp? something weird");
   }
 }
 
@@ -579,7 +579,7 @@ void GazeboRosApiPlugin::onModelStatesDisconnect()
   {
     pub_model_states_event_.reset();
     if (pub_model_states_connection_count_ < 0) // should not be possible
-      ROS_ERROR_NAMED("api_plugin", "One too mandy disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
+      ROS_ERROR_NAMED("api_plugin", "One too many disconnect from pub_model_states_ in gazebo_ros.cpp? something weird");
   }
 }
 
