@@ -32,6 +32,7 @@ GazeboRosApiPlugin::GazeboRosApiPlugin() :
   stop_(false),
   pub_link_states_connection_count_(0),
   pub_model_states_connection_count_(0),
+  pub_performance_metrics_connection_count_(0),
   physics_reconfigure_initialized_(false),
   pub_clock_frequency_(0),
   world_created_(false)
@@ -187,13 +188,10 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
-#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
-  performance_metric_sub_ = gazebonode_->Subscribe("/gazebo/performance_metrics",
-    &GazeboRosApiPlugin::onPerformanceMetrics, this);
-#endif
   // reset topic connection counts
   pub_link_states_connection_count_ = 0;
   pub_model_states_connection_count_ = 0;
+  pub_performance_metrics_connection_count_ = 0;
 
   /// \brief advertise all services
   advertiseServices();
@@ -387,7 +385,13 @@ void GazeboRosApiPlugin::advertiseServices()
 
 #ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
   // publish performance metrics
-  pub_performance_metrics_ = nh_->advertise<gazebo_msgs::PerformanceMetrics>("performance_metrics", 10);
+  ros::AdvertiseOptions pub_performance_metrics_ao =
+    ros::AdvertiseOptions::create<gazebo_msgs::PerformanceMetrics>(
+                                                                   "performance_metrics",10,
+                                                                   boost::bind(&GazeboRosApiPlugin::onPerformanceMetricsConnect,this),
+                                                                   boost::bind(&GazeboRosApiPlugin::onPerformanceMetricsDisconnect,this),
+                                                                   ros::VoidPtr(), &gazebo_queue_);
+  pub_performance_metrics_ = nh_->advertise(pub_performance_metrics_ao);
 #endif
 
   // Advertise more services on the custom queue
@@ -560,6 +564,29 @@ void GazeboRosApiPlugin::onModelStatesConnect()
   if (pub_model_states_connection_count_ == 1) // connect on first subscriber
     pub_model_states_event_   = gazebo::event::Events::ConnectWorldUpdateBegin(boost::bind(&GazeboRosApiPlugin::publishModelStates,this));
 }
+
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+void GazeboRosApiPlugin::onPerformanceMetricsConnect()
+{
+  pub_performance_metrics_connection_count_++;
+  if (pub_performance_metrics_connection_count_ == 1) // connect on first subscriber
+  {
+    performance_metric_sub_ = gazebonode_->Subscribe("/gazebo/performance_metrics",
+      &GazeboRosApiPlugin::onPerformanceMetrics, this);
+  }
+}
+
+void GazeboRosApiPlugin::onPerformanceMetricsDisconnect()
+{
+  pub_performance_metrics_connection_count_--;
+  if (pub_performance_metrics_connection_count_ <= 0) // disconnect with no subscribers
+  {
+    performance_metric_sub_.reset();
+    if (pub_performance_metrics_connection_count_ < 0) // should not be possible
+      ROS_ERROR_NAMED("api_plugin", "One too many disconnect from pub_performance_metrics_ in gazebo_ros.cpp? something weird");
+  }
+}
+#endif
 
 void GazeboRosApiPlugin::onLinkStatesDisconnect()
 {

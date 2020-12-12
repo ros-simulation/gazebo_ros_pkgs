@@ -150,6 +150,14 @@ public:
   /// \brief Callback for a subscriber disconnecting from ModelStates ros topic.
   void onModelStatesDisconnect();
 
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+  /// \brief Callback for a subscriber connecting to PerformanceMetrics ros topic.
+  void onPerformanceMetricsConnect();
+
+  /// \brief Callback for a subscriber disconnecting from PerformanceMetrics ros topic.
+  void onPerformanceMetricsDisconnect();
+#endif
+
   /// \brief Function for inserting a URDF into Gazebo from ROS Service Call
   bool spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
                       gazebo_msgs::SpawnModel::Response &res);
@@ -382,6 +390,7 @@ private:
   ros::Publisher     pub_performance_metrics_;
   int                pub_link_states_connection_count_;
   int                pub_model_states_connection_count_;
+  int                pub_performance_metrics_connection_count_;
 
   // ROS comm
   boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;
