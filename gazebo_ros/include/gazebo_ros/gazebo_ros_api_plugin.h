@@ -391,7 +391,8 @@ private:
   ros::Publisher     pub_performance_metrics_;
   int                pub_link_states_connection_count_;
   int                pub_model_states_connection_count_;
-  int                pub_performance_metrics_connection_count_;
+  // use static variable to avoid ABI break
+  static int         pub_performance_metrics_connection_count_;
 
   // ROS comm
   boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;

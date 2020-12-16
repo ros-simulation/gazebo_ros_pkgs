@@ -29,12 +29,13 @@
 namespace gazebo
 {
 
+int GazeboRosApiPlugin::pub_performance_metrics_connection_count_ = 0;
+
 GazeboRosApiPlugin::GazeboRosApiPlugin() :
   plugin_loaded_(false),
   stop_(false),
   pub_link_states_connection_count_(0),
   pub_model_states_connection_count_(0),
-  pub_performance_metrics_connection_count_(0),
   physics_reconfigure_initialized_(false),
   pub_clock_frequency_(0),
   world_created_(false),
