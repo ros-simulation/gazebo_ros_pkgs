@@ -25,6 +25,7 @@ set(msg_files
   "msg/EntityState.msg"
   "msg/LinkState.msg"
   "msg/LinkStates.msg"
+  "msg/LogicalCameraImage.msg"
   "msg/ModelState.msg"
   "msg/ModelStates.msg"
   "msg/ODEJointProperties.msg"
