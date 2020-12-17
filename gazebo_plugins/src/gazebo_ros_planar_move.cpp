@@ -114,6 +114,17 @@ namespace gazebo
     {
       odometry_rate_ = sdf->GetElement("odometryRate")->Get<double>();
     }
+    cmd_timeout_ = -1;
+    if (!sdf->HasElement("cmdTimeout"))
+    {
+      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <cmdTimeout>, "
+          "defaults to %f",
+          robot_namespace_.c_str(), cmd_timeout_);
+    }
+    else
+    {
+      cmd_timeout_ = sdf->GetElement("cmdTimeout")->Get<double>();
+    }
 
 #if GAZEBO_MAJOR_VERSION >= 8
     last_odom_publish_time_ = parent_->GetWorld()->SimTime();
@@ -175,6 +186,15 @@ namespace gazebo
     IGN_PROFILE_BEGIN("fill ROS message");
 #endif
     boost::mutex::scoped_lock scoped_lock(lock);
+    if (cmd_timeout_>=0)
+    {
+      if ((ros::Time::now()-last_cmd_received_time_).toSec() > cmd_timeout_)
+      {
+        x_ = 0;
+        y_ = 0;
+        rot_ = 0;
+      }
+    }
 #if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Pose3d pose = parent_->WorldPose();
 #else
@@ -223,6 +243,7 @@ namespace gazebo
       const geometry_msgs::Twist::ConstPtr& cmd_msg)
   {
     boost::mutex::scoped_lock scoped_lock(lock);
+    last_cmd_received_time_ = ros::Time::now();
     x_ = cmd_msg->linear.x;
     y_ = cmd_msg->linear.y;
     rot_ = cmd_msg->angular.z;
