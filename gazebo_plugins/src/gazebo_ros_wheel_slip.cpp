@@ -46,20 +46,22 @@ GazeboRosWheelSlip::~GazeboRosWheelSlip()
 
 /////////////////////////////////////////////////
 void GazeboRosWheelSlip::configCallback(
-  gazebo_plugins::WheelSlipConfig &config, uint32_t level)
+  gazebo_plugins::WheelSlipConfig &config, uint32_t /*level*/)
 {
-  if (level == ~0)
+  if (config.slip_compliance_unitless_lateral >= 0)
   {
-    // don't overwrite initial parameters
-    return;
+    ROS_INFO_NAMED("wheel_slip", "Reconfigure request for the gazebo ros wheel_slip: %s. New lateral slip compliance: %.3e",
+             this->GetParentModel()->GetScopedName().c_str(),
+             config.slip_compliance_unitless_lateral);
+    this->SetSlipComplianceLateral(config.slip_compliance_unitless_lateral);
   }
-
-  ROS_INFO_NAMED("wheel_slip", "Reconfigure request for the gazebo ros wheel_slip: %s. New slip compliances, lateral: %.3e, longitudinal: %.3e",
-           this->GetParentModel()->GetScopedName().c_str(),
-           config.slip_compliance_unitless_lateral,
-           config.slip_compliance_unitless_longitudinal);
-  this->SetSlipComplianceLateral(config.slip_compliance_unitless_lateral);
-  this->SetSlipComplianceLongitudinal(config.slip_compliance_unitless_longitudinal);
+  if (config.slip_compliance_unitless_longitudinal >= 0)
+  {
+    ROS_INFO_NAMED("wheel_slip", "Reconfigure request for the gazebo ros wheel_slip: %s. New longitudinal slip compliance: %.3e",
+             this->GetParentModel()->GetScopedName().c_str(),
+             config.slip_compliance_unitless_longitudinal);
+    this->SetSlipComplianceLongitudinal(config.slip_compliance_unitless_longitudinal);
+  }
 }
 
 /////////////////////////////////////////////////

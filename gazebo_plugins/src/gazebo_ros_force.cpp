@@ -25,6 +25,9 @@
 #include <assert.h>
 
 #include <gazebo_plugins/gazebo_ros_force.h>
+#ifdef ENABLE_PROFILER
+#include <ignition/common/Profiler.hh>
+#endif
 
 namespace gazebo
 {
@@ -136,12 +139,19 @@ void GazeboRosForce::UpdateObjectForce(const geometry_msgs::Wrench::ConstPtr& _m
 // Update the controller
 void GazeboRosForce::UpdateChild()
 {
+#ifdef ENABLE_PROFILER
+  IGN_PROFILE("GazeboRosForce::OnNewFrame");
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   this->lock_.lock();
   ignition::math::Vector3d force(this->wrench_msg_.force.x,this->wrench_msg_.force.y,this->wrench_msg_.force.z);
   ignition::math::Vector3d torque(this->wrench_msg_.torque.x,this->wrench_msg_.torque.y,this->wrench_msg_.torque.z);
   this->link_->AddForce(force);
   this->link_->AddTorque(torque);
   this->lock_.unlock();
+#ifdef ENABLE_PROFILER
+  IGN_PROFILE_END();
+#endif
 }
 
 // Custom Callback Queue

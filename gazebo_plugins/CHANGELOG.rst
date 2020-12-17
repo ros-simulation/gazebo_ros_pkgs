@@ -2,6 +2,68 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.1 (2020-05-20)
+------------------
+* Noetic patch for Opencv libraries (`#1106 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1106>`_)
+  * Need to include calib3d for undistort method
+  * Add opencv cmake support where needed
+* Contributors: Jose Luis Rivero
+
+2.9.0 (2020-05-19)
+------------------
+* gazebo_ros_wheel_slip plugin (Noetic) (`#1081 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1081>`_)
+  Uses dynamic_reconfigure to set wheel slip parameters.
+  Requires gazebo 9.5.
+  * don't overwrite initial slip values
+  * Add test world using trisphere_cycles
+  * gazebo_ros_wheel_slip: remove unused member data
+* Fix bug in clipping of block laser depth values (`#902 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/902>`_)
+  * Fix bug in block laser with large min range
+  * Add block laser clipping test
+  * REP-117 clipping
+  Ranges were clipped to maxRange - minRange when they should have been
+  clipped to only maxRange
+* resolve marker orientation error, remove error mgss (`#1096 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1096>`_)
+* Add option to publish depth images in 16UC1 (`#862 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/862>`_)
+* [Noetic] changes to make it work with Python3 (`#1069 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1069>`_)
+* Generate normals with depth images (`#1095 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1095>`_)
+* [noetic] cherry-pick portable installation fixes. (`#1089 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1089>`_)
+  * cherry-pick portable installation fixes.
+  * removing pub_joint_trajectory_test
+* Adpated to OpenCV4 (`#1068 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1068>`_)
+* Include preprocessor conditions to avoid compile OnNewNormalsFrame and OnNewReflectanceFrame (`#1071 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1071>`_)
+* [Gazebo9] Added reflectance callback to publish reflectance image in ROS  (`#1046 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1046>`_)
+  * Added reflectance callback to publish reflectance image in ROS
+  * removed debug trace ros_depth_camera
+  * update reflectance_plugin tag from material to reflectance_map
+  * fixed index variable
+  * Added documentation and override
+  * updating reflectance_map tags
+* IMU sensor: comply with REP 145 by default
+  Change default value of initialOrientationAsReference to false
+  and print deprecation warning if user explicitly sets it to true.
+* Measure IMU orientation with respect to world (`#1051 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1051>`_)
+  Report the IMU orientation from the sensor plugin with respect to the world frame.
+  This complies with convention documented in REP 145: https://www.ros.org/reps/rep-0145.html
+  In order to not break existing behavior, users should opt-in by adding a new SDF tag.
+* [Gazebo 9] Created a MarkerArray to publish normals in ROS (`#1047 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1047>`_)
+  * created a MarkerArray to publish normals in ROS
+  * Added visualization msgs dependencie depthcamerasensor
+  * Added feedback
+  * populate point cloud when normals is activated
+  * argument to reduce the amount of normals to publish
+  * reduced computation in normals publisher
+* Fix a problem twice named with ros namespace. (`#920 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/920>`_)
+  gazebo_ros_imu_sensor: robotNamespace is no longer duplicate inside topics
+* gazebo_plugins: export plugin path in package.xml (`#923 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/923>`_)
+* Fix destructor of gazebo_ros_diff_drive.cpp (`#1021 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1021>`_)
+  Fix issue referenced in `#123 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/123>`_ where the destructor of ROS DiffDrive plugin causes gzserver to crash on model deletion.
+* [Windows][melodic-devel] more Windows build break fix (`#975 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/975>`_)
+  * Fix CMake install error for Windows build.
+  * conditionally include <sys/time.h>
+* Use ignition::math::Rand utility for portability. (`#878 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/878>`_)
+* Contributors: Alejandro Hernández Cordero, Ben Wolsieffer, Jacob Perron, RemiRigal, Sam Pfeiffer, Sean Yen, Shane Loretz, Steven Peters, deltaMASH, iche033
+
 2.8.5 (2019-06-04)
 ------------------
 * use C++11 std sleep instead of usleep. (`#877 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/877>`_)

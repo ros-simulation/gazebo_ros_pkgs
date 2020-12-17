@@ -23,6 +23,9 @@
  */
 
 #include <gazebo_plugins/gazebo_ros_planar_move.h>
+#ifdef ENABLE_PROFILER
+#include <ignition/common/Profiler.hh>
+#endif
 
 namespace gazebo
 {
@@ -178,6 +181,10 @@ namespace gazebo
   // Update the controller
   void GazeboRosPlanarMove::UpdateChild()
   {
+#ifdef ENABLE_PROFILER
+    IGN_PROFILE("GazeboRosPlanarMove::UpdateChild");
+    IGN_PROFILE_BEGIN("fill ROS message");
+#endif
     boost::mutex::scoped_lock scoped_lock(lock);
     if (cmd_timeout_>=0)
     {
@@ -199,6 +206,9 @@ namespace gazebo
           y_ * cosf(yaw) + x_ * sinf(yaw),
           0));
     parent_->SetAngularVel(ignition::math::Vector3d(0, 0, rot_));
+#ifdef ENABLE_PROFILER
+    IGN_PROFILE_END();
+#endif
     if (odometry_rate_ > 0.0) {
 #if GAZEBO_MAJOR_VERSION >= 8
       common::Time current_time = parent_->GetWorld()->SimTime();
@@ -208,7 +218,13 @@ namespace gazebo
       double seconds_since_last_update =
         (current_time - last_odom_publish_time_).Double();
       if (seconds_since_last_update > (1.0 / odometry_rate_)) {
+#ifdef ENABLE_PROFILER
+        IGN_PROFILE_BEGIN("publishOdometry");
+#endif
         publishOdometry(seconds_since_last_update);
+#ifdef ENABLE_PROFILER
+        IGN_PROFILE_END();
+#endif
         last_odom_publish_time_ = current_time;
       }
     }

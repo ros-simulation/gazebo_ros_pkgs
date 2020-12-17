@@ -32,6 +32,10 @@
 #include <sdf/sdf.hh>
 #include <gazebo/sensors/SensorTypes.hh>
 
+#ifdef ENABLE_PROFILER
+#include <ignition/common/Profiler.hh>
+#endif
+
 #include <sensor_msgs/point_cloud2_iterator.h>
 
 #include <tf/tf.h>
@@ -191,9 +195,14 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
     unsigned int _width, unsigned int _height, unsigned int _depth,
     const std::string &_format)
 {
+#ifdef ENABLE_PROFILER
+  IGN_PROFILE("GazeboRosOpenniKinect::OnNewDepthFrame");
+#endif
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
-
+#ifdef ENABLE_PROFILER
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
   this->depth_sensor_update_time_ = this->parentSensor->LastMeasurementTime();
   if (this->parentSensor->IsActive())
   {
@@ -219,7 +228,14 @@ void GazeboRosOpenniKinect::OnNewDepthFrame(const float *_image,
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
+#ifdef ENABLE_PROFILER
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("PublishCameraInfo");
+#endif
   PublishCameraInfo();
+#ifdef ENABLE_PROFILER
+  IGN_PROFILE_END();
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

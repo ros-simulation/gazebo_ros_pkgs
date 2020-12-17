@@ -81,6 +81,7 @@
 #include "gazebo_msgs/LinkState.h"
 #include "gazebo_msgs/ModelStates.h"
 #include "gazebo_msgs/LinkStates.h"
+#include "gazebo_msgs/PerformanceMetrics.h"
 
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Wrench.h"
@@ -99,6 +100,13 @@
 #include "gazebo_msgs/GetPhysicsProperties.h"
 
 #include <boost/algorithm/string.hpp>
+
+#ifndef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || \
+    (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+#define GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+#endif
+#endif  // ifndef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
 
 namespace gazebo
 {
@@ -130,17 +138,25 @@ public:
   /// \brief advertise services
   void advertiseServices();
 
-  /// \brief
+  /// \brief Callback for a subscriber connecting to LinkStates ros topic.
   void onLinkStatesConnect();
 
-  /// \brief
+  /// \brief Callback for a subscriber connecting to ModelStates ros topic.
   void onModelStatesConnect();
 
-  /// \brief
+  /// \brief Callback for a subscriber disconnecting from LinkStates ros topic.
   void onLinkStatesDisconnect();
 
-  /// \brief
+  /// \brief Callback for a subscriber disconnecting from ModelStates ros topic.
   void onModelStatesDisconnect();
+
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+  /// \brief Callback for a subscriber connecting to PerformanceMetrics ros topic.
+  void onPerformanceMetricsConnect();
+
+  /// \brief Callback for a subscriber disconnecting from PerformanceMetrics ros topic.
+  void onPerformanceMetricsDisconnect();
+#endif
 
   /// \brief Function for inserting a URDF into Gazebo from ROS Service Call
   bool spawnURDFModel(gazebo_msgs::SpawnModel::Request &req,
@@ -241,8 +257,9 @@ private:
   /// \brief
   void forceJointSchedulerSlot();
 
-  /// \brief
-  void publishSimTime(const boost::shared_ptr<gazebo::msgs::WorldStatistics const> &msg);
+  /// \brief Callback to WorldUpdateBegin that publishes /clock.
+  /// If pub_clock_frequency_ <= 0 (default behavior), it publishes every time step.
+  /// Otherwise, it attempts to publish at that frequency in Hz.
   void publishSimTime();
 
   /// \brief
@@ -291,6 +308,10 @@ private:
   /// \brief Unused
   void onResponse(ConstResponsePtr &response);
 
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+  /// \brief Subscriber callback for performance metrics. This will be send in the ROS network
+  void onPerformanceMetrics(const boost::shared_ptr<gazebo::msgs::PerformanceMetrics const> &msg);
+#endif
   /// \brief utility for checking if string is in URDF format
   bool isURDF(std::string model_xml);
 
@@ -320,6 +341,7 @@ private:
   gazebo::transport::PublisherPtr factory_pub_;
   gazebo::transport::PublisherPtr factory_light_pub_;
   gazebo::transport::PublisherPtr light_modify_pub_;
+  gazebo::transport::SubscriberPtr performance_metric_sub_;
   gazebo::transport::PublisherPtr request_pub_;
   gazebo::transport::SubscriberPtr response_sub_;
 
@@ -366,8 +388,10 @@ private:
   ros::Subscriber    set_model_state_topic_;
   ros::Publisher     pub_link_states_;
   ros::Publisher     pub_model_states_;
+  ros::Publisher     pub_performance_metrics_;
   int                pub_link_states_connection_count_;
   int                pub_model_states_connection_count_;
+  int                pub_performance_metrics_connection_count_;
 
   // ROS comm
   boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;
