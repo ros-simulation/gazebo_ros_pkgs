@@ -179,11 +179,14 @@ namespace gazebo
   void GazeboRosPlanarMove::UpdateChild()
   {
     boost::mutex::scoped_lock scoped_lock(lock);
-    if ((ros::Time::now()-last_cmd_received_time).toSec() > cmd_timeout_ && cmd_timeout_>=0)
+    if (cmd_timeout_>=0)
     {
-      x_ = 0;
-      y_ = 0;
-      rot_ = 0;
+      if ((ros::Time::now()-last_cmd_received_time_).toSec() > cmd_timeout_)
+      {
+        x_ = 0;
+        y_ = 0;
+        rot_ = 0;
+      }
     }
 #if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Pose3d pose = parent_->WorldPose();
@@ -224,7 +227,7 @@ namespace gazebo
       const geometry_msgs::Twist::ConstPtr& cmd_msg)
   {
     boost::mutex::scoped_lock scoped_lock(lock);
-    last_cmd_received_time = ros::Time::now();
+    last_cmd_received_time_ = ros::Time::now();
     x_ = cmd_msg->linear.x;
     y_ = cmd_msg->linear.y;
     rot_ = cmd_msg->angular.z;
