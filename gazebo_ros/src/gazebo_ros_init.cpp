@@ -243,12 +243,9 @@ void GazeboRosInitPrivate::OnWorldCreated(const std::string & _world_name)
       std::placeholders::_1, std::placeholders::_2));
 
 #ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
-  // Gazebo transport
+  // Initialize gazebo transport node
   gz_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   gz_node_->Init(world_->Name());
-  performance_metric_sub_ = gz_node_->Subscribe(
-    "/gazebo/performance_metrics",
-    &GazeboRosInitPrivate::onPerformanceMetrics, this);
 #endif
 }
 
@@ -266,6 +263,18 @@ void GazeboRosInitPrivate::PublishSimTime(const gazebo::common::UpdateInfo & _in
   rosgraph_msgs::msg::Clock clock;
   clock.clock = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_info.simTime);
   clock_pub_->publish(clock);
+
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+  if (!performance_metric_sub_ && performance_metrics_pub_->get_subscription_count() > 0) {
+    // Subscribe to gazebo performance_metrics topic if there are ros subscribers
+    performance_metric_sub_ = gz_node_->Subscribe(
+      "/gazebo/performance_metrics",
+      &GazeboRosInitPrivate::onPerformanceMetrics, this);
+  } else if (performance_metric_sub_ && performance_metrics_pub_->get_subscription_count() == 0) {
+    // Unsubscribe from gazebo performance_metrics topic if there are no more ros subscribers
+    performance_metric_sub_.reset();
+  }
+#endif
 }
 
 void GazeboRosInitPrivate::OnResetSimulation(
