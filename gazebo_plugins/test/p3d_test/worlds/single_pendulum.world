@@ -87,8 +87,8 @@
           <bodyName>link_1</bodyName>
           <topicName>/model_1/link_1/pose</topicName>
           <frameName>world</frameName>
-          <xyzOffsets>0 0 -2.1</xyzOffsets>
-          <rpyOffsets>0 0 0.0</rpyOffsets>
+          <xyzOffset>0 0 -2.1</xyzOffset>
+          <rpyOffset>0 0 0.0</rpyOffset>
       </plugin>
     </model>
 
