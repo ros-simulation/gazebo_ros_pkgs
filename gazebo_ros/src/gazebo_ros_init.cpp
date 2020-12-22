@@ -33,6 +33,13 @@
 #include <memory>
 #include <string>
 
+#ifndef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || \
+    (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION > 14)
+#define GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+#endif
+#endif  // ifndef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+
 namespace gazebo_ros
 {
 
@@ -78,8 +85,7 @@ public:
     std_srvs::srv::Empty::Request::SharedPtr req,
     std_srvs::srv::Empty::Response::SharedPtr res);
 
-#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && \
-  GAZEBO_MINOR_VERSION > 14)
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
   /// \brief Subscriber callback for performance metrics. This will be send in the ROS network
   /// \param[in] msg Received PerformanceMetrics message
   void onPerformanceMetrics(ConstPerformanceMetricsPtr & msg);
@@ -157,8 +163,7 @@ void GazeboRosInit::Load(int argc, char ** argv)
     "/clock",
     rclcpp::QoS(rclcpp::KeepLast(10)).transient_local());
 
-#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && \
-  GAZEBO_MINOR_VERSION > 14)
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
   impl_->performance_metrics_pub_ =
     impl_->ros_node_->create_publisher<gazebo_msgs::msg::PerformanceMetrics>(
     "performance_metrics", 10);
@@ -178,8 +183,7 @@ void GazeboRosInit::Load(int argc, char ** argv)
     std::bind(&GazeboRosInitPrivate::OnWorldCreated, impl_.get(), std::placeholders::_1));
 }
 
-#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && \
-  GAZEBO_MINOR_VERSION > 14)
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
 void GazeboRosInitPrivate::onPerformanceMetrics(
   ConstPerformanceMetricsPtr & msg)
 {
@@ -238,8 +242,7 @@ void GazeboRosInitPrivate::OnWorldCreated(const std::string & _world_name)
       &GazeboRosInitPrivate::OnUnpause, this,
       std::placeholders::_1, std::placeholders::_2));
 
-#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION > 1) || (GAZEBO_MAJOR_VERSION == 9 && \
-  GAZEBO_MINOR_VERSION > 14)
+#ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
   // Gazebo transport
   gz_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   gz_node_->Init(world_->Name());
