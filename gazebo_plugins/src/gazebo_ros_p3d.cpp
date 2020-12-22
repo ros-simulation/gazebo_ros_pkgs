@@ -129,17 +129,32 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
   RCLCPP_DEBUG(
     impl_->ros_node_->get_logger(), "Publishing on topic [%s]", impl_->topic_name_.c_str());
 
-  if (!sdf->HasElement("xyz_offsets")) {
-    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <xyz_offsets>, defaults to 0s");
-  } else {
+  if (sdf->HasElement("xyz_offsets")) {
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(), "<xyz_offsets> is deprecated, use <xyz_offset> instead.");
     impl_->offset_.Pos() = sdf->GetElement("xyz_offsets")->Get<ignition::math::Vector3d>();
   }
-
-  if (!sdf->HasElement("rpy_offsets")) {
-    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <rpy_offsets>, defaults to 0s");
+  if (!sdf->HasElement("xyz_offset")) {
+    if (!sdf->HasElement("xyz_offsets")) {
+      RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <xyz_offset>, defaults to 0s");
+    }
   } else {
+    impl_->offset_.Pos() = sdf->GetElement("xyz_offset")->Get<ignition::math::Vector3d>();
+  }
+
+  if (sdf->HasElement("rpy_offsets")) {
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(), "<rpy_offsets> is deprecated, use <rpy_offset> instead.");
     impl_->offset_.Rot() = ignition::math::Quaterniond(
       sdf->GetElement("rpy_offsets")->Get<ignition::math::Vector3d>());
+  }
+  if (!sdf->HasElement("rpy_offset")) {
+    if (!sdf->HasElement("rpy_offsets")) {
+      RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <rpy_offset>, defaults to 0s");
+    }
+  } else {
+    impl_->offset_.Rot() = ignition::math::Quaterniond(
+      sdf->GetElement("rpy_offset")->Get<ignition::math::Vector3d>());
   }
 
   if (!sdf->HasElement("gaussian_noise")) {
