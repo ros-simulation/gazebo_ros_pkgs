@@ -150,8 +150,8 @@
           <bodyName>link_1</bodyName>
           <topicName>/model_1/link_1/pose</topicName>
           <frameName>world</frameName>
-          <xyzOffsets>0 0 -2.1</xyzOffsets>
-          <rpyOffsets>0 0  0.0</rpyOffsets>
+          <xyzOffset>0 0 -2.1</xyzOffset>
+          <rpyOffset>0 0  0.0</rpyOffset>
       </plugin>
       <plugin name="p3d_link_2_controller" filename="libgazebo_ros_p3d.so">
           <alwaysOn>true</alwaysOn>
@@ -159,8 +159,8 @@
           <bodyName>link_2</bodyName>
           <topicName>/model_1/link_2/pose</topicName>
           <frameName>link_1</frameName>
-          <xyzOffsets>0 0  1.0</xyzOffsets>
-          <rpyOffsets>0 0  0.0</rpyOffsets>
+          <xyzOffset>0 0  1.0</xyzOffset>
+          <rpyOffset>0 0  0.0</rpyOffset>
       </plugin>
     </model>
 
@@ -297,8 +297,8 @@
           <bodyName>link_1</bodyName>
           <topicName>/model_2/link_1/pose</topicName>
           <frameName>world</frameName>
-          <xyzOffsets>0 -1.5 -2.1</xyzOffsets>
-          <rpyOffsets>0 0  0.0</rpyOffsets>
+          <xyzOffset>0 -1.5 -2.1</xyzOffset>
+          <rpyOffset>0 0  0.0</rpyOffset>
       </plugin>
       <plugin name="p3d_link_2_controller" filename="libgazebo_ros_p3d.so">
           <alwaysOn>true</alwaysOn>
@@ -306,8 +306,8 @@
           <bodyName>link_2</bodyName>
           <topicName>/model_2/link_2/pose</topicName>
           <frameName>link_1</frameName>
-          <xyzOffsets>0 0  1.0</xyzOffsets>
-          <rpyOffsets>0 0  0.0</rpyOffsets>
+          <xyzOffset>0 0  1.0</xyzOffset>
+          <rpyOffset>0 0  0.0</rpyOffset>
       </plugin>
     </model>
 
@@ -442,8 +442,8 @@
           <bodyName>link_1</bodyName>
           <topicName>/model_3/link_1/pose</topicName>
           <frameName>world</frameName>
-          <xyzOffsets>0 2 -2.1</xyzOffsets>
-          <rpyOffsets>0 0  0.0</rpyOffsets>
+          <xyzOffset>0 2 -2.1</xyzOffset>
+          <rpyOffset>0 0  0.0</rpyOffset>
       </plugin>
       <plugin name="p3d_link_2_controller" filename="libgazebo_ros_p3d.so">
           <alwaysOn>true</alwaysOn>
@@ -451,8 +451,8 @@
           <bodyName>link_2</bodyName>
           <topicName>/model_3/link_2/pose</topicName>
           <frameName>link_1</frameName>
-          <xyzOffsets>0 0  1.0</xyzOffsets>
-          <rpyOffsets>0 0  0.0</rpyOffsets>
+          <xyzOffset>0 0  1.0</xyzOffset>
+          <rpyOffset>0 0  0.0</rpyOffset>
       </plugin>
     </model>
   </world>
