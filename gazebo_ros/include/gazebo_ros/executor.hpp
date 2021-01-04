@@ -42,8 +42,8 @@ public:
    *
    * \see rclcpp::Executor::add_node
    */
-  virtual void
-  add_node(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify = true);
+  void add_node(
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify = true) override;
 
   /// Convenience function which takes Node and forwards NodeBaseInterface.
   /**
@@ -51,7 +51,7 @@ public:
    *
    * \see rclcpp::Executor::add_node
    */
-  virtual void add_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify = true);
+  void add_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify = true) override;
 
   /// Remove a node from the executor.
   /**
@@ -59,8 +59,8 @@ public:
    *
    * \see rclcpp::Executor::remove_node
    */
-  virtual void
-  remove_node(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify = true);
+  void remove_node(
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify = true) override;
 
   /// Convenience function which takes Node and forwards NodeBaseInterface.
   /**
@@ -68,7 +68,7 @@ public:
    *
    * \see rclcpp::Executor::remove_node
    */
-  virtual void remove_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify = true);
+  void remove_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify = true) override;
 
   /**
    * \sa rclcpp::Executor:spin() for more details
