@@ -87,8 +87,13 @@ private:
   std::thread spin_thread_;
 
   std::mutex wait_mutex_;
+  // Use three mutexes to give priority to threads adding/removing nodes
+  // This avoids delays due to quick spinning threads
+  std::mutex add_remove_node_mutex_;
+  std::mutex add_remove_node_high_priority_mutex_;
+  std::mutex add_remove_node_low_priority_mutex_;
+
   size_t number_of_threads_;
-  std::chrono::nanoseconds next_exec_timeout_;
   std::set<rclcpp::TimerBase::SharedPtr> scheduled_timers_;
 
   /// Connection to gazebo sigint event

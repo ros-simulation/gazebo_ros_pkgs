@@ -28,7 +28,6 @@ namespace gazebo_ros
 {
 
 Executor::Executor()
-: next_exec_timeout_(std::chrono::nanoseconds(100))
 {
   number_of_threads_ = std::thread::hardware_concurrency();
   if (number_of_threads_ == 0) {
@@ -58,7 +57,9 @@ void
 Executor::add_node(
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify)
 {
-  std::lock_guard<std::mutex> wait_lock(wait_mutex_);
+  add_remove_node_high_priority_mutex_.lock();
+  std::lock_guard<std::mutex> lock(add_remove_node_mutex_);
+  add_remove_node_high_priority_mutex_.unlock();
   rclcpp::Executor::add_node(node_ptr, notify);
 }
 
@@ -72,7 +73,9 @@ void
 Executor::remove_node(
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify)
 {
-  std::lock_guard<std::mutex> wait_lock(wait_mutex_);
+  add_remove_node_high_priority_mutex_.lock();
+  std::lock_guard<std::mutex> lock(add_remove_node_mutex_);
+  add_remove_node_high_priority_mutex_.unlock();
   rclcpp::Executor::remove_node(node_ptr, notify);
 }
 
@@ -109,31 +112,38 @@ Executor::run()
 {
   while (rclcpp::ok(this->context_) && spinning.load()) {
     rclcpp::AnyExecutable any_exec;
-    std::lock_guard<std::mutex> wait_lock(wait_mutex_);
-    if (!rclcpp::ok(this->context_) || !spinning.load()) {
-      return;
-    }
+    add_remove_node_high_priority_mutex_.lock();
+    std::lock_guard<std::mutex> add_remove_node_lp_lock(add_remove_node_low_priority_mutex_);
+    std::lock_guard<std::mutex> add_remove_node_lock(add_remove_node_mutex_);
+    add_remove_node_high_priority_mutex_.unlock();
+    {
+      std::lock_guard<std::mutex> wait_lock(wait_mutex_);
+      if (!rclcpp::ok(this->context_) || !spinning.load()) {
+        return;
+      }
 
-    if (!get_next_executable(any_exec, next_exec_timeout_)) {
-      continue;
-    }
-
-    if (any_exec.timer) {
-      // Guard against multiple threads getting the same timer.
-      if (scheduled_timers_.count(any_exec.timer) != 0) {
-        // Make sure that any_exec's callback group is reset before
-        // the lock is released.
-        if (any_exec.callback_group) {
-          any_exec.callback_group->can_be_taken_from().store(true);
-        }
+      if (!get_next_executable(any_exec, std::chrono::nanoseconds(0))) {
         continue;
       }
-      scheduled_timers_.insert(any_exec.timer);
+
+      if (any_exec.timer) {
+        // Guard against multiple threads getting the same timer.
+        if (scheduled_timers_.count(any_exec.timer) != 0) {
+          // Make sure that any_exec's callback group is reset before
+          // the lock is released.
+          if (any_exec.callback_group) {
+            any_exec.callback_group->can_be_taken_from().store(true);
+          }
+          continue;
+        }
+        scheduled_timers_.insert(any_exec.timer);
+      }
     }
 
     execute_any_executable(any_exec);
 
     if (any_exec.timer) {
+      std::lock_guard<std::mutex> wait_lock(wait_mutex_);
       auto it = scheduled_timers_.find(any_exec.timer);
       if (it != scheduled_timers_.end()) {
         scheduled_timers_.erase(it);
