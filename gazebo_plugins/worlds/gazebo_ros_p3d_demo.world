@@ -57,8 +57,8 @@
         <body_name>box_link</body_name>
         <frame_name>sphere_link</frame_name>
         <update_rate>1</update_rate>
-        <xyz_offsets>10 10 10</xyz_offsets>
-        <rpy_offsets>0.1 0.1 0.1</rpy_offsets>
+        <xyz_offset>10 10 10</xyz_offset>
+        <rpy_offset>0.1 0.1 0.1</rpy_offset>
         <gaussian_noise>0.01</gaussian_noise>
       </plugin>
     </model>

@@ -52,10 +52,10 @@ class GazeboRosP3DPrivate;
       <update_rate>1</update_rate>
 
       <!-- Translation offset to be added to the pose. -->
-      <xyz_offsets>10 10 10</xyz_offsets>
+      <xyz_offset>10 10 10</xyz_offset>
 
       <!-- Rotation offset to be added to the pose, in Euler angles. -->
-      <rpy_offsets>0.1 0.1 0.1</rpy_offsets>
+      <rpy_offset>0.1 0.1 0.1</rpy_offset>
 
       <!-- Standard deviation of the noise to be added to the reported velocities. -->
       <gaussian_noise>0.01</gaussian_noise>
