@@ -50,7 +50,19 @@
         <body_name>box_link</body_name>
         <frame_name>sphere_link</frame_name>
         <update_rate>0</update_rate>
-        <xyz_offsets>10 10 10</xyz_offsets>
+        <xyz_offset>10 10 10</xyz_offset>
+        <rpy_offset>0 0 0</rpy_offset>
+        <gaussian_noise>0</gaussian_noise>
+      </plugin>
+      <plugin name="gazebo_ros_p3d_deprecated" filename="libgazebo_ros_p3d.so">
+        <ros>
+          <namespace>/test_deprecated</namespace>
+          <remapping>odom:=p3d_test_deprecated</remapping>
+        </ros>
+        <body_name>box_link</body_name>
+        <frame_name>sphere_link</frame_name>
+        <update_rate>0</update_rate>
+        <xyz_offsets>5 5 5</xyz_offsets>
         <rpy_offsets>0 0 0</rpy_offsets>
         <gaussian_noise>0</gaussian_noise>
       </plugin>
