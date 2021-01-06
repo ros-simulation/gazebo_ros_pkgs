@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<!--
+  Gazebo ROS logical camera plugin demo
+
+  Try for example:
+
+  * Launch Gazebo and echo ros2 topic /ros_logical_camera/post/link/logical_camera/models
+
+-->
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="post">
+      <pose>0 0 3 0 0 3.14159</pose>
+      <static>true</static>
+      <link name="link">
+        <sensor name="logical_camera" type="logical_camera">
+          <logical_camera>
+            <near>0.55</near>
+            <far>8</far>
+            <horizontal_fov>1.05</horizontal_fov>
+            <aspect_ratio>1.8</aspect_ratio>
+          </logical_camera>
+
+          <visualize>true</visualize>
+          <always_on>true</always_on>
+          <update_rate>10</update_rate>
+
+          <plugin name="ros_logical_camera" filename="libgazebo_ros_logical_camera.so">
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+
+    <model name="target_box">
+      <static>true</static>
+      <pose>-8 0 1 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
