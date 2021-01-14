@@ -27,7 +27,7 @@ Executor::Executor()
   while (!this->spinning) {
     // TODO(ivanpauno): WARN Terrible hack here!!!!
     // We cannot call rclcpp::shutdown asynchronously, because it generates exceptions that
-    // cannot be caught properly
+    // cannot be caught properly (see https://github.com/ros2/rclcpp/issues/1139).
     // Executor::cancel() doesn't cause this problem, but it has a race.
     // Wait until the launched thread starts spinning to avoid the race ...
     std::this_thread::sleep_for(100ms);
