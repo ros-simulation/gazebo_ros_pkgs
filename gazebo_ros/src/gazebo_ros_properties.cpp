@@ -18,6 +18,7 @@
 #include <gazebo/physics/Light.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
+#include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/Collision.hh>
 #include <gazebo/transport/Node.hh>
@@ -34,6 +35,9 @@
 #include <gazebo_ros/node.hpp>
 
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "gazebo_ros/gazebo_ros_properties.hpp"
 
@@ -71,6 +75,14 @@ public:
     gazebo_msgs::srv::GetLightProperties::Request::SharedPtr _req,
     gazebo_msgs::srv::GetLightProperties::Response::SharedPtr _res);
 
+
+  /// \brief Callback for get physics properties service.
+  /// \param[in] req Request
+  /// \param[out] res Response
+  void GetPhysicsProperties(
+    gazebo_msgs::srv::GetPhysicsProperties::Request::SharedPtr _req,
+    gazebo_msgs::srv::GetPhysicsProperties::Response::SharedPtr _res);
+
   /// \brief Callback for set joint properties service.
   /// \param[in] req Request
   /// \param[out] res Response
@@ -92,6 +104,38 @@ public:
     gazebo_msgs::srv::SetLightProperties::Request::SharedPtr _req,
     gazebo_msgs::srv::SetLightProperties::Response::SharedPtr _res);
 
+  /// \brief Callback for set physics properties service.
+  /// \param[in] req Request
+  /// \param[out] res Response
+  void SetPhysicsProperties(
+    gazebo_msgs::srv::SetPhysicsProperties::Request::SharedPtr _req,
+    gazebo_msgs::srv::SetPhysicsProperties::Response::SharedPtr _res);
+
+  /// \brief Helper to declare floating point parameters
+  /// \param[in] name Parameter name
+  /// \param[in] descriptor Parameter description
+  /// \param[in] default_value Parameter default value
+  /// \param[in] min Parameter minimum value
+  /// \param[in] max Parameter maximum value
+  void DeclareParameter(
+    const std::string & name, std::string descriptor, float default_value, float min, float max);
+
+  /// \brief Helper to declare integer parameters
+  /// \param[in] name Parameter name
+  /// \param[in] descriptor Parameter description
+  /// \param[in] default_value Parameter default value
+  /// \param[in] min Parameter minimum value
+  /// \param[in] max Parameter maximum value
+  void DeclareParameter(
+    const std::string & name, std::string descriptor, int default_value, int min, int max);
+
+  /// \brief Helper to declare boolean parameters
+  /// \param[in] name Parameter name
+  /// \param[in] descriptor Parameter description
+  /// \param[in] default_value Parameter default value
+  void DeclareParameter(
+    const std::string & name, std::string descriptor, bool default_value);
+
   /// \brief World pointer from Gazebo.
   gazebo::physics::WorldPtr world_;
 
@@ -110,6 +154,10 @@ public:
   /// \brief ROS service to handle requests for light properties.
   rclcpp::Service<gazebo_msgs::srv::GetLightProperties>::SharedPtr get_light_properties_service_;
 
+  /// \brief ROS service to handle requests for physics properties.
+  rclcpp::Service<gazebo_msgs::srv::GetPhysicsProperties>::SharedPtr
+    get_physics_properties_service_;
+
   /// \brief ROS service to handle requests to set joint properties.
   rclcpp::Service<gazebo_msgs::srv::SetJointProperties>::SharedPtr set_joint_properties_service_;
 
@@ -118,6 +166,10 @@ public:
 
   /// \brief ROS service to handle requests to set light properties.
   rclcpp::Service<gazebo_msgs::srv::SetLightProperties>::SharedPtr set_light_properties_service_;
+
+  /// \brief ROS service to handle requests to set physics properties.
+  rclcpp::Service<gazebo_msgs::srv::SetPhysicsProperties>::SharedPtr
+    set_physics_properties_service_;
 
   /// Gazebo node for communication.
   gazebo::transport::NodePtr gz_node_;
@@ -161,6 +213,12 @@ void GazeboRosProperties::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr
     "get_light_properties", std::bind(&GazeboRosPropertiesPrivate::GetLightProperties, impl_.get(),
     std::placeholders::_1, std::placeholders::_2));
 
+  impl_->get_physics_properties_service_ =
+    impl_->ros_node_->create_service<gazebo_msgs::srv::GetPhysicsProperties>(
+    "get_physics_properties",
+    std::bind(&GazeboRosPropertiesPrivate::GetPhysicsProperties, impl_.get(),
+    std::placeholders::_1, std::placeholders::_2));
+
   impl_->set_joint_properties_service_ =
     impl_->ros_node_->create_service<gazebo_msgs::srv::SetJointProperties>(
     "set_joint_properties", std::bind(&GazeboRosPropertiesPrivate::SetJointProperties, impl_.get(),
@@ -176,11 +234,133 @@ void GazeboRosProperties::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr
     "set_light_properties", std::bind(&GazeboRosPropertiesPrivate::SetLightProperties, impl_.get(),
     std::placeholders::_1, std::placeholders::_2));
 
+  impl_->set_physics_properties_service_ =
+    impl_->ros_node_->create_service<gazebo_msgs::srv::SetPhysicsProperties>(
+    "set_physics_properties",
+    std::bind(&GazeboRosPropertiesPrivate::SetPhysicsProperties, impl_.get(),
+    std::placeholders::_1, std::placeholders::_2));
+
   // Gazebo transport
   impl_->gz_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   impl_->gz_node_->Init(_world->Name());
   impl_->gz_properties_light_pub_ =
     impl_->gz_node_->Advertise<gazebo::msgs::Light>("~/light/modify");
+
+  std::string description;
+  description = "Simulation world time step size in seconds,"
+    "smaller time steps produce lower, more stable simulation.";
+  impl_->DeclareParameter("time_step", description, 0.001f, 0.0f, 10.0f);
+
+  description = "Simulator max update rate, -1 unlimited, 1 restricts to real-time if possible.";
+  impl_->DeclareParameter("max_update_rate", description, 1.0f, -1.0f, 1000.0f);
+
+  description = "Simulated gravity in the X direction.";
+  impl_->DeclareParameter("gravity_x", description, 0.0f, -100.0f, 100.0f);
+
+  description = "Simulated gravity in the Y direction.";
+  impl_->DeclareParameter("gravity_y", description, 0.0f, -100.0f, 100.0f);
+
+  description = "Simulated gravity in the Z direction.";
+  impl_->DeclareParameter("gravity_z", description, -55.5f, -100.0f, 100.0f);
+
+  description = "Auto disable links in simulation if they are not moving.";
+  impl_->DeclareParameter("auto_disable", description, true);
+
+  description = "Number of preconditioning iterations for SOR PGS LCP as implemented in quickstep.";
+  impl_->DeclareParameter("precon_iters", description, 0, 0, 10000);
+
+  description = "Number of iterations for SOR PGS LCP as implemented in quickstep.";
+  impl_->DeclareParameter("iters", description, 20, 0, 10000);
+
+  description =
+    "Relaxation parameter for SOR PGS LCP, usually set to 1.3, but reduce to stabilize simulation.";
+  impl_->DeclareParameter("sor", description, 1.3f, 0.0f, 5.0f);
+
+  description = "The number of scans to skip between each measured scan";
+  impl_->DeclareParameter("sor_lcp_tolerance", description, -1, -1, 10000);
+
+  description = "Constraint Force Mixing per ODE's users manual.";
+  impl_->DeclareParameter("cfm", description, 0.0f, 0.0f, 10.0f);
+
+  description = "Error Reduction Parameter per ODE's users manual.";
+  impl_->DeclareParameter("erp", description, 0.2f, 0.0f, 10.0f);
+
+  description = "Margin for penetration for which restorative forces are not applied.";
+  impl_->DeclareParameter("contact_surface_layer", description, 0.001f, 0.0f, 10.0f);
+
+  description = "Maximum contact penetration correction velocity.";
+  impl_->DeclareParameter("contact_max_correcting_vel", description, 100.0f, 0.0f, 10000000.0f);
+
+  description = "Maximum number of contacts between any 2 links.";
+  impl_->DeclareParameter("max_contacts", description, 100.0f, 0.0f, 10000000.0f);
+
+  auto existing_callback = impl_->ros_node_->set_on_parameters_set_callback(nullptr);
+  auto param_change_callback =
+    [this, existing_callback](std::vector<rclcpp::Parameter> parameters) {
+      auto result = rcl_interfaces::msg::SetParametersResult();
+      if (nullptr != existing_callback) {
+        result = existing_callback(parameters);
+        if (!result.successful) {
+          return result;
+        }
+      }
+      bool is_paused = impl_->world_->IsPaused();
+      impl_->world_->SetPaused(true);
+
+      gazebo::physics::PhysicsEnginePtr pe = impl_->world_->Physics();
+      for (auto & parameter : parameters) {
+        const auto & name = parameter.get_name();
+        if (name == "time_step") {
+          pe->SetMaxStepSize(parameter.as_double());
+        } else if (name == "max_update_rate") {
+          pe->SetRealTimeUpdateRate(parameter.as_double());
+        }
+        if (pe->GetType() == "ode") {
+          // stuff only works in ODE right now
+          if (name == "auto_disable") {
+            pe->SetAutoDisableFlag(parameter.as_bool());
+          } else if (name == "precon_iters") {
+            pe->SetParam("precon_iters", parameter.as_int());
+          } else if (name == "iters") {
+            pe->SetParam("iters", parameter.as_int());
+          } else if (name == "sor") {
+            pe->SetParam("sor", parameter.as_double());
+          } else if (name == "sor_lcp_tolerance") {
+            pe->SetParam("sor_lcp_tolerance", parameter.as_double());
+          } else if (name == "cfm") {
+            pe->SetParam("cfm", parameter.as_double());
+          } else if (name == "erp") {
+            pe->SetParam("erp", parameter.as_double());
+          } else if (name == "contact_surface_layer") {
+            pe->SetParam("contact_surface_layer", parameter.as_double());
+          } else if (name == "contact_max_correcting_vel") {
+            pe->SetParam("contact_max_correcting_vel", parameter.as_double());
+          } else if (name == "max_contacts") {
+            pe->SetParam("max_contacts", parameter.as_int());
+          } else if (name == "gravity_x" || name == "gravity_y" || name == "gravity_z") {
+            auto gravity = impl_->world_->Gravity();
+            if (name == "gravity_x") {
+              gravity.X() = parameter.as_double();
+            } else if (name == "gravity_y") {
+              gravity.Y() = parameter.as_double();
+            } else {
+              gravity.Z() = parameter.as_double();
+            }
+            pe->SetGravity(gravity);
+          }
+          impl_->world_->SetPaused(is_paused);
+          result.successful = true;
+        } else {
+          RCLCPP_ERROR(impl_->ros_node_->get_logger(),
+            "Setting physics properties is not supported for physics engine [%s].",
+            pe->GetType().c_str());
+          result.successful = false;
+        }
+      }
+      return result;
+    };
+
+  impl_->ros_node_->set_on_parameters_set_callback(param_change_callback);
 }
 
 void GazeboRosPropertiesPrivate::GetModelProperties(
@@ -354,6 +534,41 @@ void GazeboRosPropertiesPrivate::GetLightProperties(
   }
 }
 
+void GazeboRosPropertiesPrivate::GetPhysicsProperties(
+  gazebo_msgs::srv::GetPhysicsProperties::Request::SharedPtr /*_req*/,
+  gazebo_msgs::srv::GetPhysicsProperties::Response::SharedPtr _res)
+{
+  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
+  _res->time_step = pe->GetMaxStepSize();
+  _res->pause = world_->IsPaused();
+  _res->max_update_rate = pe->GetRealTimeUpdateRate();
+  _res->gravity = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(world_->Gravity());
+
+  // Only ODE supported
+  if (pe->GetType() == "ode") {
+    _res->ode_config.auto_disable_bodies = pe->GetAutoDisableFlag();
+    _res->ode_config.sor_pgs_precon_iters = boost::any_cast<int>(pe->GetParam("precon_iters"));
+    _res->ode_config.sor_pgs_iters = boost::any_cast<int>(pe->GetParam("iters"));
+    _res->ode_config.sor_pgs_w = boost::any_cast<double>(pe->GetParam("sor"));
+    _res->ode_config.contact_surface_layer =
+      boost::any_cast<double>(pe->GetParam("contact_surface_layer"));
+    _res->ode_config.contact_max_correcting_vel =
+      boost::any_cast<double>(pe->GetParam("contact_max_correcting_vel"));
+    _res->ode_config.cfm = boost::any_cast<double>(pe->GetParam("cfm"));
+    _res->ode_config.erp = boost::any_cast<double>(pe->GetParam("erp"));
+    _res->ode_config.max_contacts = boost::any_cast<int>(pe->GetParam("max_contacts"));
+    _res->success = true;
+    _res->status_message = "GetPhysicsProperties: got properties";
+    return;
+  }
+
+  RCLCPP_ERROR(ros_node_->get_logger(),
+    "get_physics_properties service call does not yet support physics engine [%s].",
+    pe->GetType().c_str());
+  _res->success = false;
+  _res->status_message = "Physics engine [" + pe->GetType() + "]: not supported.";
+}
+
 void GazeboRosPropertiesPrivate::SetJointProperties(
   gazebo_msgs::srv::SetJointProperties::Request::SharedPtr _req,
   gazebo_msgs::srv::SetJointProperties::Response::SharedPtr _res)
@@ -455,6 +670,77 @@ void GazeboRosPropertiesPrivate::SetLightProperties(
 
     _res->success = true;
   }
+}
+
+void GazeboRosPropertiesPrivate::SetPhysicsProperties(
+  gazebo_msgs::srv::SetPhysicsProperties::Request::SharedPtr _req,
+  gazebo_msgs::srv::SetPhysicsProperties::Response::SharedPtr _res)
+{
+  // pause simulation if requested
+  bool is_paused = world_->IsPaused();
+  world_->SetPaused(true);
+  world_->SetGravity(gazebo_ros::Convert<ignition::math::Vector3d>(_req->gravity));
+
+  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
+  pe->SetMaxStepSize(_req->time_step);
+  pe->SetRealTimeUpdateRate(_req->max_update_rate);
+
+  if (pe->GetType() == "ode") {
+    // Only ODE supported
+    pe->SetAutoDisableFlag(_req->ode_config.auto_disable_bodies);
+    pe->SetParam("precon_iters", static_cast<int>(_req->ode_config.sor_pgs_precon_iters));
+    pe->SetParam("iters", static_cast<int>(_req->ode_config.sor_pgs_iters));
+    pe->SetParam("sor", _req->ode_config.sor_pgs_w);
+    pe->SetParam("cfm", _req->ode_config.cfm);
+    pe->SetParam("erp", _req->ode_config.erp);
+    pe->SetParam("contact_surface_layer", _req->ode_config.contact_surface_layer);
+    pe->SetParam("contact_max_correcting_vel", _req->ode_config.contact_max_correcting_vel);
+    pe->SetParam("max_contacts", static_cast<int>(_req->ode_config.max_contacts));
+
+    world_->SetPaused(is_paused);
+
+    _res->success = true;
+    _res->status_message = "physics engine updated";
+    return;
+  }
+  RCLCPP_ERROR(ros_node_->get_logger(),
+    "set_physics_properties service call does not yet support physics engine [%s].",
+    pe->GetType().c_str());
+  _res->success = false;
+  _res->status_message = "Physics engine [" + pe->GetType() + "] not supported.";
+}
+
+void GazeboRosPropertiesPrivate::DeclareParameter(
+  const std::string & name, std::string descriptor, float default_value, float min, float max)
+{
+  rcl_interfaces::msg::ParameterDescriptor parameter_descriptor;
+  parameter_descriptor.description = std::move(descriptor);
+  parameter_descriptor.floating_point_range.resize(1);
+  auto & floating_point_range = parameter_descriptor.floating_point_range.at(0);
+  floating_point_range.from_value = min;
+  floating_point_range.to_value = max;
+  ros_node_->declare_parameter(name, default_value, parameter_descriptor);
+}
+
+void GazeboRosPropertiesPrivate::DeclareParameter(
+  const std::string & name, std::string descriptor, int default_value, int min, int max)
+{
+  rcl_interfaces::msg::ParameterDescriptor parameter_descriptor;
+  parameter_descriptor.description = std::move(descriptor);
+  parameter_descriptor.integer_range.resize(1);
+  auto & integer_range = parameter_descriptor.integer_range.at(0);
+  integer_range.from_value = min;
+  integer_range.to_value = max;
+  ros_node_->declare_parameter(name, default_value, parameter_descriptor);
+}
+
+
+void GazeboRosPropertiesPrivate::DeclareParameter(
+  const std::string & name, std::string descriptor, bool default_value)
+{
+  rcl_interfaces::msg::ParameterDescriptor parameter_descriptor;
+  parameter_descriptor.description = std::move(descriptor);
+  ros_node_->declare_parameter(name, default_value, parameter_descriptor);
 }
 
 GZ_REGISTER_WORLD_PLUGIN(GazeboRosProperties)

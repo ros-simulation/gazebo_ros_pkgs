@@ -28,7 +28,6 @@ namespace gazebo
 {
 
 GazeboRosApiPlugin::GazeboRosApiPlugin() :
-  physics_reconfigure_initialized_(false),
   world_created_(false),
   stop_(false),
   plugin_loaded_(false),
@@ -66,10 +65,6 @@ GazeboRosApiPlugin::~GazeboRosApiPlugin()
   // Shutdown ROS queue
   gazebo_callback_queue_thread_->join();
   ROS_DEBUG_STREAM_NAMED("api_plugin","Callback Queue Joined");
-
-  // Physics Dynamic Reconfigure
-  physics_reconfigure_thread_->join();
-  ROS_DEBUG_STREAM_NAMED("api_plugin","Physics reconfigure joined");
 
   ROS_DEBUG_STREAM_NAMED("api_plugin","Unloaded");
 }
@@ -115,9 +110,6 @@ void GazeboRosApiPlugin::Load(int argc, char** argv)
 
   /// \brief setup custom callback queue
   gazebo_callback_queue_thread_.reset(new boost::thread( &GazeboRosApiPlugin::gazeboQueueThread, this) );
-
-  /// \brief start a thread for the physics dynamic reconfigure node
-  physics_reconfigure_thread_.reset(new boost::thread(boost::bind(&GazeboRosApiPlugin::physicsReconfigureThread, this)));
 
   // below needs the world to be created first
   load_gazebo_ros_api_plugin_event_ = gazebo::event::Events::ConnectWorldCreated(boost::bind(&GazeboRosApiPlugin::loadGazeboRosApiPlugin,this,_1));
@@ -165,24 +157,6 @@ void GazeboRosApiPlugin::gazeboQueueThread()
 void GazeboRosApiPlugin::advertiseServices()
 {
   // Advertise more services on the custom queue
-  std::string get_physics_properties_service_name("get_physics_properties");
-  ros::AdvertiseServiceOptions get_physics_properties_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::GetPhysicsProperties>(
-                                                                            get_physics_properties_service_name,
-                                                                            boost::bind(&GazeboRosApiPlugin::getPhysicsProperties,this,_1,_2),
-                                                                            ros::VoidPtr(), &gazebo_queue_);
-  get_physics_properties_service_ = nh_->advertiseService(get_physics_properties_aso);
-
-  // Advertise more services on the custom queue
-  std::string set_physics_properties_service_name("set_physics_properties");
-  ros::AdvertiseServiceOptions set_physics_properties_aso =
-    ros::AdvertiseServiceOptions::create<gazebo_msgs::SetPhysicsProperties>(
-                                                                            set_physics_properties_service_name,
-                                                                            boost::bind(&GazeboRosApiPlugin::setPhysicsProperties,this,_1,_2),
-                                                                            ros::VoidPtr(), &gazebo_queue_);
-  set_physics_properties_service_ = nh_->advertiseService(set_physics_properties_aso);
-
-  // Advertise more services on the custom queue
   std::string set_model_configuration_service_name("set_model_configuration");
   ros::AdvertiseServiceOptions set_model_configuration_aso =
     ros::AdvertiseServiceOptions::create<gazebo_msgs::SetModelConfiguration>(
@@ -190,105 +164,6 @@ void GazeboRosApiPlugin::advertiseServices()
                                                                              boost::bind(&GazeboRosApiPlugin::setModelConfiguration,this,_1,_2),
                                                                              ros::VoidPtr(), &gazebo_queue_);
   set_model_configuration_service_ = nh_->advertiseService(set_model_configuration_aso);
-}
-
-bool GazeboRosApiPlugin::setPhysicsProperties(gazebo_msgs::SetPhysicsProperties::Request &req,
-                                              gazebo_msgs::SetPhysicsProperties::Response &res)
-{
-  // pause simulation if requested
-  bool is_paused = world_->IsPaused();
-  world_->SetPaused(true);
-  world_->SetGravity(ignition::math::Vector3d(req.gravity.x,req.gravity.y,req.gravity.z));
-
-  // supported updates
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
-#else
-  gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
-#endif
-  pe->SetMaxStepSize(req.time_step);
-  pe->SetRealTimeUpdateRate(req.max_update_rate);
-
-  if (pe->GetType() == "ode")
-  {
-    // stuff only works in ODE right now
-    pe->SetAutoDisableFlag(req.ode_config.auto_disable_bodies);
-    pe->SetParam("precon_iters", int(req.ode_config.sor_pgs_precon_iters));
-    pe->SetParam("iters", int(req.ode_config.sor_pgs_iters));
-    pe->SetParam("sor", req.ode_config.sor_pgs_w);
-    pe->SetParam("cfm", req.ode_config.cfm);
-    pe->SetParam("erp", req.ode_config.erp);
-    pe->SetParam("contact_surface_layer",
-        req.ode_config.contact_surface_layer);
-    pe->SetParam("contact_max_correcting_vel",
-        req.ode_config.contact_max_correcting_vel);
-    pe->SetParam("max_contacts", int(req.ode_config.max_contacts));
-
-    world_->SetPaused(is_paused);
-
-    res.success = true;
-    res.status_message = "physics engine updated";
-  }
-  else
-  {
-    /// \TODO: add support for simbody, dart and bullet physics properties.
-    ROS_ERROR_NAMED("api_plugin", "ROS set_physics_properties service call does not yet support physics engine [%s].", pe->GetType().c_str());
-    res.success = false;
-    res.status_message = "Physics engine [" + pe->GetType() + "]: set_physics_properties not supported.";
-  }
-  return res.success;
-}
-
-bool GazeboRosApiPlugin::getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,
-                                              gazebo_msgs::GetPhysicsProperties::Response &res)
-{
-  // supported updates
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::PhysicsEnginePtr pe = (world_->Physics());
-#else
-  gazebo::physics::PhysicsEnginePtr pe = (world_->GetPhysicsEngine());
-#endif
-  res.time_step = pe->GetMaxStepSize();
-  res.pause = world_->IsPaused();
-  res.max_update_rate = pe->GetRealTimeUpdateRate();
-  ignition::math::Vector3d gravity = world_->Gravity();
-  res.gravity.x = gravity.X();
-  res.gravity.y = gravity.Y();
-  res.gravity.z = gravity.Z();
-
-  // stuff only works in ODE right now
-  if (pe->GetType() == "ode")
-  {
-    res.ode_config.auto_disable_bodies =
-      pe->GetAutoDisableFlag();
-    res.ode_config.sor_pgs_precon_iters = boost::any_cast<int>(
-      pe->GetParam("precon_iters"));
-    res.ode_config.sor_pgs_iters = boost::any_cast<int>(
-        pe->GetParam("iters"));
-    res.ode_config.sor_pgs_w = boost::any_cast<double>(
-        pe->GetParam("sor"));
-    res.ode_config.contact_surface_layer = boost::any_cast<double>(
-      pe->GetParam("contact_surface_layer"));
-    res.ode_config.contact_max_correcting_vel = boost::any_cast<double>(
-      pe->GetParam("contact_max_correcting_vel"));
-    res.ode_config.cfm = boost::any_cast<double>(
-        pe->GetParam("cfm"));
-    res.ode_config.erp = boost::any_cast<double>(
-        pe->GetParam("erp"));
-    res.ode_config.max_contacts = boost::any_cast<int>(
-      pe->GetParam("max_contacts"));
-
-    res.success = true;
-    res.status_message = "GetPhysicsProperties: got properties";
-  }
-  else
-  {
-    /// \TODO: add support for simbody, dart and bullet physics properties.
-    ROS_ERROR_NAMED("api_plugin", "ROS get_physics_properties service call does not yet support physics engine [%s].", pe->GetType().c_str());
-    res.success = false;
-    res.status_message = "Physics engine [" + pe->GetType() + "]: get_physics_properties not supported.";
-  }
-  return res.success;
 }
 
 bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguration::Request &req,
@@ -337,96 +212,6 @@ bool GazeboRosApiPlugin::setModelConfiguration(gazebo_msgs::SetModelConfiguratio
     res.status_message = "SetModelConfiguration: joint name and position list have different lengths";
     return true;
   }
-}
-
-void GazeboRosApiPlugin::physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level)
-{
-  if (!physics_reconfigure_initialized_)
-  {
-    gazebo_msgs::GetPhysicsProperties srv;
-    physics_reconfigure_get_client_.call(srv);
-
-    config.time_step                   = srv.response.time_step;
-    config.max_update_rate             = srv.response.max_update_rate;
-    config.gravity_x                   = srv.response.gravity.x;
-    config.gravity_y                   = srv.response.gravity.y;
-    config.gravity_z                   = srv.response.gravity.z;
-    config.auto_disable_bodies         = srv.response.ode_config.auto_disable_bodies;
-    config.sor_pgs_precon_iters        = srv.response.ode_config.sor_pgs_precon_iters;
-    config.sor_pgs_iters               = srv.response.ode_config.sor_pgs_iters;
-    config.sor_pgs_rms_error_tol       = srv.response.ode_config.sor_pgs_rms_error_tol;
-    config.sor_pgs_w                   = srv.response.ode_config.sor_pgs_w;
-    config.contact_surface_layer       = srv.response.ode_config.contact_surface_layer;
-    config.contact_max_correcting_vel  = srv.response.ode_config.contact_max_correcting_vel;
-    config.cfm                         = srv.response.ode_config.cfm;
-    config.erp                         = srv.response.ode_config.erp;
-    config.max_contacts                = srv.response.ode_config.max_contacts;
-    physics_reconfigure_initialized_ = true;
-  }
-  else
-  {
-    bool changed = false;
-    gazebo_msgs::GetPhysicsProperties srv;
-    physics_reconfigure_get_client_.call(srv);
-
-    // check for changes
-    if (config.time_step                      != srv.response.time_step)                                 changed = true;
-    if (config.max_update_rate                != srv.response.max_update_rate)                           changed = true;
-    if (config.gravity_x                      != srv.response.gravity.x)                                 changed = true;
-    if (config.gravity_y                      != srv.response.gravity.y)                                 changed = true;
-    if (config.gravity_z                      != srv.response.gravity.z)                                 changed = true;
-    if (config.auto_disable_bodies            != srv.response.ode_config.auto_disable_bodies)            changed = true;
-    if ((uint32_t)config.sor_pgs_precon_iters != srv.response.ode_config.sor_pgs_precon_iters)           changed = true;
-    if ((uint32_t)config.sor_pgs_iters        != srv.response.ode_config.sor_pgs_iters)                  changed = true;
-    if (config.sor_pgs_rms_error_tol          != srv.response.ode_config.sor_pgs_rms_error_tol)          changed = true;
-    if (config.sor_pgs_w                      != srv.response.ode_config.sor_pgs_w)                      changed = true;
-    if (config.contact_surface_layer          != srv.response.ode_config.contact_surface_layer)          changed = true;
-    if (config.contact_max_correcting_vel     != srv.response.ode_config.contact_max_correcting_vel)     changed = true;
-    if (config.cfm                            != srv.response.ode_config.cfm)                            changed = true;
-    if (config.erp                            != srv.response.ode_config.erp)                            changed = true;
-    if ((uint32_t)config.max_contacts         != srv.response.ode_config.max_contacts)                   changed = true;
-
-    if (changed)
-    {
-      // pause simulation if requested
-      gazebo_msgs::SetPhysicsProperties srv;
-      srv.request.time_step                             = config.time_step                   ;
-      srv.request.max_update_rate                       = config.max_update_rate             ;
-      srv.request.gravity.x                             = config.gravity_x                   ;
-      srv.request.gravity.y                             = config.gravity_y                   ;
-      srv.request.gravity.z                             = config.gravity_z                   ;
-      srv.request.ode_config.auto_disable_bodies        = config.auto_disable_bodies         ;
-      srv.request.ode_config.sor_pgs_precon_iters       = config.sor_pgs_precon_iters        ;
-      srv.request.ode_config.sor_pgs_iters              = config.sor_pgs_iters               ;
-      srv.request.ode_config.sor_pgs_rms_error_tol      = config.sor_pgs_rms_error_tol       ;
-      srv.request.ode_config.sor_pgs_w                  = config.sor_pgs_w                   ;
-      srv.request.ode_config.contact_surface_layer      = config.contact_surface_layer       ;
-      srv.request.ode_config.contact_max_correcting_vel = config.contact_max_correcting_vel  ;
-      srv.request.ode_config.cfm                        = config.cfm                         ;
-      srv.request.ode_config.erp                        = config.erp                         ;
-      srv.request.ode_config.max_contacts               = config.max_contacts                ;
-      physics_reconfigure_set_client_.call(srv);
-      ROS_INFO_NAMED("api_plugin", "physics dynamics reconfigure update complete");
-    }
-    ROS_INFO_NAMED("api_plugin", "physics dynamics reconfigure complete");
-  }
-}
-
-void GazeboRosApiPlugin::physicsReconfigureThread()
-{
-  physics_reconfigure_set_client_ = nh_->serviceClient<gazebo_msgs::SetPhysicsProperties>("set_physics_properties");
-  physics_reconfigure_get_client_ = nh_->serviceClient<gazebo_msgs::GetPhysicsProperties>("get_physics_properties");
-
-  // Wait until the rest of this plugin is loaded and the services are being offered
-  physics_reconfigure_set_client_.waitForExistence();
-  physics_reconfigure_get_client_.waitForExistence();
-
-  physics_reconfigure_srv_.reset(new dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>());
-
-  physics_reconfigure_callback_ = boost::bind(&GazeboRosApiPlugin::physicsReconfigureCallback, this, _1, _2);
-  physics_reconfigure_srv_->setCallback(physics_reconfigure_callback_);
-
-  ROS_INFO_NAMED("api_plugin", "Physics dynamic reconfigure ready.");
 }
 
 // Register this plugin with the simulator

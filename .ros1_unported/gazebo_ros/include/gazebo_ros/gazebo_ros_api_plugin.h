@@ -45,9 +45,6 @@
 // Services
 #include "std_srvs/Empty.h"
 
-#include "gazebo_msgs/SetPhysicsProperties.h"
-#include "gazebo_msgs/GetPhysicsProperties.h"
-
 // Topics
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Wrench.h"
@@ -58,12 +55,6 @@
 #include <ros/ros.h>
 #include <gazebo_msgs/SetModelConfiguration.h>
 #include <boost/shared_ptr.hpp>
-
-// For physics dynamics reconfigure
-#include <dynamic_reconfigure/server.h>
-#include <gazebo_ros/PhysicsConfig.h>
-#include "gazebo_msgs/SetPhysicsProperties.h"
-#include "gazebo_msgs/GetPhysicsProperties.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -98,24 +89,12 @@ public:
   void advertiseServices();
 
   /// \brief
-  bool setPhysicsProperties(gazebo_msgs::SetPhysicsProperties::Request &req,gazebo_msgs::SetPhysicsProperties::Response &res);
-
-  /// \brief
-  bool getPhysicsProperties(gazebo_msgs::GetPhysicsProperties::Request &req,gazebo_msgs::GetPhysicsProperties::Response &res);
-
-  /// \brief
   bool applyJointEffort(gazebo_msgs::ApplyJointEffort::Request &req,gazebo_msgs::ApplyJointEffort::Response &res);
 
   /// \brief
   bool setModelConfiguration(gazebo_msgs::SetModelConfiguration::Request &req,gazebo_msgs::SetModelConfiguration::Response &res);
 
 private:
-
-  /// \brief Used for the dynamic reconfigure callback function template
-  void physicsReconfigureCallback(gazebo_ros::PhysicsConfig &config, uint32_t level);
-
-  /// \brief waits for the rest of Gazebo to be ready before initializing the dynamic reconfigure services
-  void physicsReconfigureThread();
 
   /// \brief Connect to Gazebo via its plugin interface, get a pointer to the world, start events
   void loadGazeboRosApiPlugin(std::string world_name);
@@ -137,20 +116,10 @@ private:
   gazebo::event::ConnectionPtr time_update_event_;
   gazebo::event::ConnectionPtr load_gazebo_ros_api_plugin_event_;
 
-  ros::ServiceServer set_physics_properties_service_;
-  ros::ServiceServer get_physics_properties_service_;
   ros::ServiceServer set_model_configuration_service_;
 
   // ROS comm
   boost::shared_ptr<ros::AsyncSpinner> async_ros_spin_;
-
-  // physics dynamic reconfigure
-  boost::shared_ptr<boost::thread> physics_reconfigure_thread_;
-  bool physics_reconfigure_initialized_;
-  ros::ServiceClient physics_reconfigure_set_client_;
-  ros::ServiceClient physics_reconfigure_get_client_;
-  boost::shared_ptr< dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig> > physics_reconfigure_srv_;
-  dynamic_reconfigure::Server<gazebo_ros::PhysicsConfig>::CallbackType physics_reconfigure_callback_;
 
   bool world_created_;
 };

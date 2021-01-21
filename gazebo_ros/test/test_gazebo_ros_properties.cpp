@@ -66,6 +66,20 @@ public:
     const double & _attenuation_linear,
     const double & _attenuation_quadratic);
 
+  void GetPhysicsProperties(
+    const ignition::math::Vector3d & _gravity,
+    const double & _time_step,
+    const double & _max_update_rate,
+    const bool & _auto_disable_bodies,
+    const uint32_t & _sor_pgs_precon_iters,
+    const uint32_t & _sor_pgs_iters,
+    const double & _sor_pgs_w,
+    const double & _cfm,
+    const double & _erp,
+    const double & _contact_surface_layer,
+    const double & _contact_max_correcting_vel,
+    const uint32_t & _max_contacts);
+
   void SetJointProperties(
     const std::string & _joint_name,
     const double & _damping);
@@ -88,6 +102,20 @@ public:
     const double & _attenuation_linear,
     const double & _attenuation_quadratic);
 
+  void SetPhysicsProperties(
+    const ignition::math::Vector3d & _gravity,
+    const double & _time_step,
+    const double & _max_update_rate,
+    const bool & _auto_disable_bodies,
+    const uint32_t & _sor_pgs_precon_iters,
+    const uint32_t & _sor_pgs_iters,
+    const double & _sor_pgs_w,
+    const double & _cfm,
+    const double & _erp,
+    const double & _contact_surface_layer,
+    const bool & _contact_max_correcting_vel,
+    const uint32_t & _max_contacts);
+
   gazebo::physics::WorldPtr world_;
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetModelProperties>>
@@ -98,12 +126,16 @@ public:
   get_link_properties_client_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetLightProperties>>
   get_light_properties_client_;
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::GetPhysicsProperties>>
+  get_physics_properties_client_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetJointProperties>>
   set_joint_properties_client_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLinkProperties>>
   set_link_properties_client_;
   std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetLightProperties>>
   set_light_properties_client_;
+  std::shared_ptr<rclcpp::Client<gazebo_msgs::srv::SetPhysicsProperties>>
+  set_physics_properties_client_;
 };
 
 void GazeboRosPropertiesTest::SetUp()
@@ -139,6 +171,11 @@ void GazeboRosPropertiesTest::SetUp()
   ASSERT_NE(nullptr, get_light_properties_client_);
   EXPECT_TRUE(get_light_properties_client_->wait_for_service(std::chrono::seconds(1)));
 
+  get_physics_properties_client_ =
+    node_->create_client<gazebo_msgs::srv::GetPhysicsProperties>("test/get_physics_properties");
+  ASSERT_NE(nullptr, get_physics_properties_client_);
+  EXPECT_TRUE(get_physics_properties_client_->wait_for_service(std::chrono::seconds(1)));
+
   set_joint_properties_client_ =
     node_->create_client<gazebo_msgs::srv::SetJointProperties>("test/set_joint_properties");
   ASSERT_NE(nullptr, set_joint_properties_client_);
@@ -153,6 +190,11 @@ void GazeboRosPropertiesTest::SetUp()
     node_->create_client<gazebo_msgs::srv::SetLightProperties>("test/set_light_properties");
   ASSERT_NE(nullptr, set_light_properties_client_);
   EXPECT_TRUE(set_light_properties_client_->wait_for_service(std::chrono::seconds(1)));
+
+  set_physics_properties_client_ =
+    node_->create_client<gazebo_msgs::srv::SetPhysicsProperties>("test/set_physics_properties");
+  ASSERT_NE(nullptr, set_physics_properties_client_);
+  EXPECT_TRUE(set_physics_properties_client_->wait_for_service(std::chrono::seconds(1)));
 }
 
 void GazeboRosPropertiesTest::GetModelProperties(
@@ -372,6 +414,83 @@ void GazeboRosPropertiesTest::SetLightProperties(
   EXPECT_TRUE(response->success);
 }
 
+void GazeboRosPropertiesTest::GetPhysicsProperties(
+  const ignition::math::Vector3d & _gravity,
+  const double & _time_step,
+  const double & _max_update_rate,
+  const bool & _auto_disable_bodies,
+  const uint32_t & _sor_pgs_precon_iters,
+  const uint32_t & _sor_pgs_iters,
+  const double & _sor_pgs_w,
+  const double & _cfm,
+  const double & _erp,
+  const double & _contact_surface_layer,
+  const double & _contact_max_correcting_vel,
+  const uint32_t & _max_contacts)
+{
+  auto request = std::make_shared<gazebo_msgs::srv::GetPhysicsProperties::Request>();
+
+  auto response_future = get_physics_properties_client_->async_send_request(request);
+  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::spin_until_future_complete(node_, response_future));
+
+  auto response = response_future.get();
+  ASSERT_NE(nullptr, response);
+  EXPECT_TRUE(response->success);
+
+  EXPECT_DOUBLE_EQ(_gravity.X(), response->gravity.x);
+  EXPECT_DOUBLE_EQ(_gravity.Y(), response->gravity.y);
+  EXPECT_DOUBLE_EQ(_gravity.Z(), response->gravity.z);
+  EXPECT_DOUBLE_EQ(_time_step, response->time_step);
+  EXPECT_DOUBLE_EQ(_max_update_rate, response->max_update_rate);
+  EXPECT_EQ(_auto_disable_bodies, response->ode_config.auto_disable_bodies);
+  EXPECT_EQ(_sor_pgs_precon_iters, response->ode_config.sor_pgs_precon_iters);
+  EXPECT_EQ(_sor_pgs_iters, response->ode_config.sor_pgs_iters);
+  EXPECT_EQ(_sor_pgs_w, response->ode_config.sor_pgs_w);
+  EXPECT_EQ(_cfm, response->ode_config.cfm);
+  EXPECT_EQ(_erp, response->ode_config.erp);
+  EXPECT_EQ(_contact_surface_layer, response->ode_config.contact_surface_layer);
+  EXPECT_EQ(_contact_max_correcting_vel, response->ode_config.contact_max_correcting_vel);
+  EXPECT_EQ(_max_contacts, response->ode_config.max_contacts);
+}
+
+void GazeboRosPropertiesTest::SetPhysicsProperties(
+  const ignition::math::Vector3d & _gravity,
+  const double & _time_step,
+  const double & _max_update_rate,
+  const bool & _auto_disable_bodies,
+  const uint32_t & _sor_pgs_precon_iters,
+  const uint32_t & _sor_pgs_iters,
+  const double & _sor_pgs_w,
+  const double & _cfm,
+  const double & _erp,
+  const double & _contact_surface_layer,
+  const bool & _contact_max_correcting_vel,
+  const uint32_t & _max_contacts)
+{
+  auto request = std::make_shared<gazebo_msgs::srv::SetPhysicsProperties::Request>();
+  request->gravity = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(_gravity);
+  request->time_step = _time_step;
+  request->max_update_rate = _max_update_rate;
+  request->ode_config.auto_disable_bodies = _auto_disable_bodies;
+  request->ode_config.sor_pgs_precon_iters = _sor_pgs_precon_iters;
+  request->ode_config.sor_pgs_iters = _sor_pgs_iters;
+  request->ode_config.sor_pgs_w = _sor_pgs_w;
+  request->ode_config.cfm = _cfm;
+  request->ode_config.erp = _erp;
+  request->ode_config.contact_surface_layer = _contact_surface_layer;
+  request->ode_config.contact_max_correcting_vel = _contact_max_correcting_vel;
+  request->ode_config.max_contacts = _max_contacts;
+
+  auto response_future = set_physics_properties_client_->async_send_request(request);
+  EXPECT_EQ(rclcpp::executor::FutureReturnCode::SUCCESS,
+    rclcpp::spin_until_future_complete(node_, response_future));
+
+  auto response = response_future.get();
+  ASSERT_NE(nullptr, response);
+  EXPECT_TRUE(response->success);
+}
+
 TEST_F(GazeboRosPropertiesTest, GetSetProperties)
 {
   // Get model properties
@@ -419,6 +538,22 @@ TEST_F(GazeboRosPropertiesTest, GetSetProperties)
     rclcpp::sleep_for(std::chrono::milliseconds(500));
     this->GetLightProperties("sun", ignition::math::Color(0.7, 0.1, 0.5, 1.0),
       0.92, 0.0092, 0.002);
+  }
+
+  // Get / set physics properties
+  {
+    // Get initial physics properties
+    this->GetPhysicsProperties(ignition::math::Vector3d(0.0, 0.0, -9.8),
+      0.001, 1000.0, false, 0, 50, 1.3, false, 0.2, 0.001, 100, 20);
+
+    // Set physics properties
+    this->SetPhysicsProperties(ignition::math::Vector3d(0.0, 0.0, 0.0), 0.01, 100.0, false, 0, 50,
+      1.3, false, 0.2, 0.01, 1, 20);
+
+    // Check new physics properties. Wait for properties to be set first.
+    rclcpp::sleep_for(std::chrono::milliseconds(500));
+    this->GetPhysicsProperties(ignition::math::Vector3d(0.0, 0.0, 0.0), 0.01, 100.0, false, 0, 50,
+      1.3, false, 0.2, 0.01, 1, 20);
   }
 }
 
