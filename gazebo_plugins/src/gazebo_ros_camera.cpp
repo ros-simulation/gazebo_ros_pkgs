@@ -252,7 +252,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     // Depth info publisher
     impl_->depth_camera_info_pub_ =
       impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-      depth_info_topic, qos.get_publisher_qos(depth_info_topic, rclcpp::QoS(1)));
+      depth_info_topic, qos.get_publisher_qos(depth_info_topic, rclcpp::SystemDefaultsQoS()));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Publishing depth camera info to [%s]",
@@ -261,7 +261,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     const std::string point_cloud_topic = impl_->camera_name_ + "/points";
     // Point cloud publisher
     impl_->point_cloud_pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::PointCloud2>(
-      point_cloud_topic, qos.get_publisher_qos(point_cloud_topic, rclcpp::QoS(1)));
+      point_cloud_topic, qos.get_publisher_qos(point_cloud_topic, rclcpp::SystemDefaultsQoS()));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Publishing pointcloud to [%s]",
@@ -272,7 +272,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   if (_sdf->Get<bool>("triggered", false).first) {
     const std::string trigger_topic = impl_->camera_name_ + "/image_trigger";
     impl_->trigger_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
-      trigger_topic, qos.get_subscription_qos(trigger_topic, rclcpp::QoS(1)),
+      trigger_topic, qos.get_subscription_qos(trigger_topic, rclcpp::SystemDefaultsQoS()),
       std::bind(&GazeboRosCamera::OnTrigger, this, std::placeholders::_1));
 
     RCLCPP_INFO(
