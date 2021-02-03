@@ -22,15 +22,22 @@ namespace gazebo_ros
 Executor::Executor()
 : spin_thread_(std::bind(&Executor::run, this))
 {
+  using namespace std::chrono_literals;
   sigint_handle_ = gazebo::event::Events::ConnectSigInt(std::bind(&Executor::shutdown, this));
+  while (!this->spinning) {
+    // TODO(ivanpauno): WARN Terrible hack here!!!!
+    // We cannot call rclcpp::shutdown asynchronously, because it generates exceptions that
+    // cannot be caught properly (see https://github.com/ros2/rclcpp/issues/1139).
+    // Executor::cancel() doesn't cause this problem, but it has a race.
+    // Wait until the launched thread starts spinning to avoid the race ...
+    std::this_thread::sleep_for(100ms);
+  }
 }
 
 Executor::~Executor()
 {
   // If ros was not already shutdown by SIGINT handler, do it now
-  if (rclcpp::ok()) {
-    rclcpp::shutdown();
-  }
+  this->shutdown();
   spin_thread_.join();
 }
 
@@ -41,7 +48,9 @@ void Executor::run()
 
 void Executor::shutdown()
 {
-  rclcpp::shutdown();
+  if (this->spinning) {
+    this->cancel();
+  }
 }
 
 }  // namespace gazebo_ros
