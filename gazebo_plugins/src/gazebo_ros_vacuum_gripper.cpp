@@ -132,7 +132,7 @@ void GazeboRosVacuumGripper::Load(gazebo::physics::ModelPtr _model, sdf::Element
 
   // Initialize publisher
   impl_->pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Bool>(
-    "grasping", qos.get_publisher_qos("grasping", rclcpp::QoS(1)));
+    "grasping", qos.get_publisher_qos("grasping", rclcpp::SystemDefaultsQoS()));
 
   RCLCPP_INFO(
     impl_->ros_node_->get_logger(),

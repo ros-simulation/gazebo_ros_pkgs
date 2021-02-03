@@ -332,7 +332,7 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->last_actuator_update_ = _model->GetWorld()->SimTime();
 
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
-    "cmd_vel", qos.get_subscription_qos("cmd_vel", rclcpp::QoS(1)),
+    "cmd_vel", qos.get_subscription_qos("cmd_vel", rclcpp::SystemDefaultsQoS()),
     std::bind(&GazeboRosTricycleDrivePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
   RCLCPP_INFO(
@@ -354,7 +354,7 @@ void GazeboRosTricycleDrive::Load(gazebo::physics::ModelPtr _model, sdf::Element
   impl_->publish_odom_ = _sdf->Get<bool>("publish_odom", false).first;
   if (impl_->publish_odom_) {
     impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
-      "odom", qos.get_publisher_qos("odom", rclcpp::QoS(1)));
+      "odom", qos.get_publisher_qos("odom", rclcpp::SystemDefaultsQoS()));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",

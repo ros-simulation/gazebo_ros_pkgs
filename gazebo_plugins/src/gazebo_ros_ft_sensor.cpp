@@ -157,7 +157,7 @@ void GazeboRosFTSensor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _
   impl_->gaussian_noise_ = _sdf->Get<double>("gaussian_noise", 0.0).first;
 
   impl_->pub_ = impl_->rosnode_->create_publisher<geometry_msgs::msg::WrenchStamped>(
-    "wrench", qos.get_publisher_qos("wrench", rclcpp::QoS(1)));
+    "wrench", qos.get_publisher_qos("wrench", rclcpp::SystemDefaultsQoS()));
 
   RCLCPP_INFO(
     impl_->rosnode_->get_logger(),

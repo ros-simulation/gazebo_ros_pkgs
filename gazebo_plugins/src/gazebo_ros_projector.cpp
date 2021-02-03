@@ -91,7 +91,7 @@ void GazeboRosProjector::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     "Controlling projector at [%s]", impl_->projector_pub_->GetTopic().c_str());
 
   impl_->toggle_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Bool>(
-    "switch", qos.get_subscription_qos("switch", rclcpp::QoS(1)),
+    "switch", qos.get_subscription_qos("switch", rclcpp::SystemDefaultsQoS()),
     std::bind(&GazeboRosProjectorPrivate::ToggleProjector, impl_.get(), std::placeholders::_1));
 
   RCLCPP_INFO(

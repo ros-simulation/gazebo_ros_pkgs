@@ -66,7 +66,7 @@ void GazeboRosHarness::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _s
 
   const std::string velocity_topic = impl_->model_ + "/harness/velocity";
   impl_->vel_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Float32>(
-    velocity_topic, qos.get_subscription_qos(velocity_topic, rclcpp::QoS(1)),
+    velocity_topic, qos.get_subscription_qos(velocity_topic, rclcpp::SystemDefaultsQoS()),
     [this](const std_msgs::msg::Float32::ConstSharedPtr msg) {
       SetWinchVelocity(msg->data);
     });
@@ -76,7 +76,7 @@ void GazeboRosHarness::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _s
 
   const std::string detach_topic = impl_->model_ + "/harness/detach";
   impl_->detach_sub_ = impl_->ros_node_->create_subscription<std_msgs::msg::Empty>(
-    detach_topic, qos.get_subscription_qos(detach_topic, rclcpp::QoS(1)),
+    detach_topic, qos.get_subscription_qos(detach_topic, rclcpp::SystemDefaultsQoS()),
     std::bind(&GazeboRosHarness::OnDetach, this, std::placeholders::_1));
 
   RCLCPP_INFO(
