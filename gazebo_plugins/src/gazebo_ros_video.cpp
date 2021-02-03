@@ -213,7 +213,7 @@ void GazeboRosVideo::Load(
   // Subscribe to the image topic
   impl_->camera_subscriber_ =
     impl_->rosnode_->create_subscription<sensor_msgs::msg::Image>(
-    "~/image_raw", qos.get_subscription_qos("~/image_raw", rclcpp::QoS(1)),
+    "~/image_raw", qos.get_subscription_qos("~/image_raw", rclcpp::SystemDefaultsQoS()),
     std::bind(&GazeboRosVideoPrivate::processImage, impl_.get(), std::placeholders::_1));
 
   impl_->new_image_available_ = false;
