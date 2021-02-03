@@ -126,7 +126,8 @@ void GazeboRosJointPoseTrajectory::Load(gazebo::physics::ModelPtr model, sdf::El
 
   // Set Joint Trajectory Callback
   impl_->sub_ = impl_->ros_node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-    "set_joint_trajectory", qos.get_subscription_qos("set_joint_trajectory", rclcpp::SystemDefaultsQoS()),
+    "set_joint_trajectory",
+    qos.get_subscription_qos("set_joint_trajectory", rclcpp::SystemDefaultsQoS()),
     std::bind(
       &GazeboRosJointPoseTrajectoryPrivate::SetJointTrajectory,
       impl_.get(), std::placeholders::_1));

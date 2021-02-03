@@ -228,7 +228,8 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       // Camera info publisher
       impl_->camera_info_pub_.push_back(
         impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
-          camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SystemDefaultsQoS())));
+          camera_info_topic,
+          qos.get_publisher_qos(camera_info_topic, rclcpp::SystemDefaultsQoS())));
 
       RCLCPP_INFO(
         impl_->ros_node_->get_logger(), "Publishing %s camera info to [%s]",
