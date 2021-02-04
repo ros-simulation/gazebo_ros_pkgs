@@ -33,6 +33,7 @@
   <depend>tinyxml_vendor</depend>
 
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>python3-lxml</exec_depend>
 
   <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
