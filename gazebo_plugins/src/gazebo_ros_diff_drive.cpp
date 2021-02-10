@@ -93,6 +93,7 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameterBoolean ( publishOdomTF_, "publishOdomTF", true);
     gazebo_ros_->getParameterBoolean ( publishWheelJointState_, "publishWheelJointState", false );
     gazebo_ros_->getParameterBoolean ( legacy_mode_, "legacyMode", true );
+    gazebo_ros_->getParameterBoolean ( enable_braking_, "enableIdleBrake", false );
 
     if (!_sdf->HasElement("legacyMode"))
     {
@@ -121,7 +122,13 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     joints_[RIGHT] = gazebo_ros_->getJoint ( parent, "rightJoint", "right_joint" );
     joints_[LEFT]->SetParam ( "fmax", 0, wheel_torque );
     joints_[RIGHT]->SetParam ( "fmax", 0, wheel_torque );
-
+    if (enable_braking_)
+    {
+      brakes_applied_[LEFT] = false;
+      updateBrakeState(LEFT, true);
+      brakes_applied_[RIGHT] = false;
+      updateBrakeState(RIGHT, true);
+    }
 
 
     this->publish_tf_ = true;
@@ -203,6 +210,11 @@ void GazeboRosDiffDrive::Reset()
   rot_ = 0;
   joints_[LEFT]->SetParam ( "fmax", 0, wheel_torque );
   joints_[RIGHT]->SetParam ( "fmax", 0, wheel_torque );
+  if (enable_braking_)
+  {
+    updateBrakeState(LEFT, true);
+    updateBrakeState(RIGHT, true);
+  }
 }
 
 void GazeboRosDiffDrive::publishWheelJointState()
@@ -283,6 +295,7 @@ void GazeboRosDiffDrive::UpdateChild()
         getWheelVelocities();
 
         double current_speed[2];
+        double new_speed[2];
 
         current_speed[LEFT] = joints_[LEFT]->GetVelocity ( 0 )   * ( wheel_diameter_ / 2.0 );
         current_speed[RIGHT] = joints_[RIGHT]->GetVelocity ( 0 ) * ( wheel_diameter_ / 2.0 );
@@ -291,8 +304,10 @@ void GazeboRosDiffDrive::UpdateChild()
                 ( fabs ( wheel_speed_[LEFT] - current_speed[LEFT] ) < 0.01 ) ||
                 ( fabs ( wheel_speed_[RIGHT] - current_speed[RIGHT] ) < 0.01 ) ) {
             //if max_accel == 0, or target speed is reached
-            joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 ) );
+            new_speed[LEFT] = wheel_speed_[LEFT]/ ( wheel_diameter_ / 2.0 );
+            new_speed[RIGHT] = wheel_speed_[RIGHT]/ ( wheel_diameter_ / 2.0 );
+            joints_[LEFT]->SetParam ( "vel", 0, new_speed[LEFT] );
+            joints_[RIGHT]->SetParam ( "vel", 0, new_speed[RIGHT] );
         } else {
             if ( wheel_speed_[LEFT]>=current_speed[LEFT] )
                 wheel_speed_instr_[LEFT]+=fmin ( wheel_speed_[LEFT]-current_speed[LEFT],  wheel_accel * seconds_since_last_update );
@@ -307,9 +322,27 @@ void GazeboRosDiffDrive::UpdateChild()
             // ROS_INFO_NAMED("diff_drive", "actual wheel speed = %lf, issued wheel speed= %lf", current_speed[LEFT], wheel_speed_[LEFT]);
             // ROS_INFO_NAMED("diff_drive", "actual wheel speed = %lf, issued wheel speed= %lf", current_speed[RIGHT],wheel_speed_[RIGHT]);
 
-            joints_[LEFT]->SetParam ( "vel", 0, wheel_speed_instr_[LEFT] / ( wheel_diameter_ / 2.0 ) );
-            joints_[RIGHT]->SetParam ( "vel", 0, wheel_speed_instr_[RIGHT] / ( wheel_diameter_ / 2.0 ) );
+            new_speed[LEFT] = wheel_speed_instr_[LEFT]/ ( wheel_diameter_ / 2.0 );
+            new_speed[RIGHT] = wheel_speed_instr_[RIGHT]/ ( wheel_diameter_ / 2.0 );
+            joints_[LEFT]->SetParam ( "vel", 0, new_speed[LEFT] );
+            joints_[RIGHT]->SetParam ( "vel", 0, new_speed[RIGHT] );
         }
+
+        if (enable_braking_)
+        {
+          for (unsigned int i=0; i < joints_.size(); i++)
+          {
+            if (new_speed[i] == 0)
+            {
+              updateBrakeState(i, true);
+            }
+            else if (new_speed[i] != 0)
+            {
+              updateBrakeState(i, false);
+            }
+          }
+        }
+
         last_update_time_+= common::Time ( update_period_ );
     }
 }
@@ -493,6 +526,49 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
     odom_.child_frame_id = base_footprint_frame;
 
     odometry_publisher_.publish ( odom_ );
+}
+
+void GazeboRosDiffDrive::updateBrakeState(unsigned int which, bool engage)
+{
+  if (!enable_braking_)
+  {
+    return;
+  }
+
+  if (which >= sizeof(brakes_applied_)/sizeof(bool))
+  {
+    ROS_WARN_NAMED("diff_drive", "Invalid brake selection index %d", which);
+    return;
+  }
+
+  if (engage && !brakes_applied_[which])
+  {
+#if GAZEBO_MAJOR_VERSION >= 9
+    saved_upper_limit_[which] = joints_[which]->UpperLimit();
+    saved_lower_limit_[which] = joints_[which]->LowerLimit();
+    double current_position = joints_[which]->Position();
+    joints_[which]->SetUpperLimit(0, current_position);
+    joints_[which]->SetLowerLimit(0, current_position);
+#else
+    saved_upper_limit_[which] = joints_[which]->GetHighStop(0);
+    saved_lower_limit_[which] = joints_[which]->GetLowStop(0);
+    gazebo::math::Angle current_position = joints_[which]->GetAngle(0);
+    joints_[which]->SetHighStop(0, current_position);
+    joints_[which]->SetLowStop(0, current_position);
+#endif
+    brakes_applied_[which] = true;
+  }
+  else if (!engage && brakes_applied_[which])
+  {
+#if GAZEBO_MAJOR_VERSION >= 9
+    joints_[which]->SetUpperLimit(0, saved_upper_limit_[which]);
+    joints_[which]->SetLowerLimit(0, saved_lower_limit_[which]);
+#else
+    joints_[which]->SetHighStop(0, saved_upper_limit_[which]);
+    joints_[which]->SetLowStop(0, saved_lower_limit_[which]);
+#endif
+    brakes_applied_[which] = false;
+  }
 }
 
 GZ_REGISTER_MODEL_PLUGIN ( GazeboRosDiffDrive )

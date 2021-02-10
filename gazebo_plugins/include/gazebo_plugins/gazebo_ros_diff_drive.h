@@ -93,6 +93,7 @@ namespace gazebo {
       void publishWheelTF(); /// publishes the wheel tf's
       void publishWheelJointState();
       void UpdateOdometryEncoder();
+      void updateBrakeState(unsigned int which, bool engage);
 
 
       GazeboRosPtr gazebo_ros_;
@@ -105,6 +106,14 @@ namespace gazebo {
       double wheel_speed_[2];
 	  double wheel_accel;
       double wheel_speed_instr_[2];
+#if GAZEBO_MAJOR_VERSION >= 9
+      double saved_upper_limit_[2];
+      double saved_lower_limit_[2];
+#else
+      gazebo::math::Angle saved_upper_limit_[2];
+      gazebo::math::Angle saved_lower_limit_[2];
+#endif
+      bool brakes_applied_[2];
 
       std::vector<physics::JointPtr> joints_;
 
@@ -151,6 +160,7 @@ namespace gazebo {
     bool publishWheelTF_;
     bool publishOdomTF_;
     bool publishWheelJointState_;
+    bool enable_braking_;
 
   };
 
