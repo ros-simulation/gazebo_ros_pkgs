@@ -55,7 +55,9 @@ void SDFNode::Load(gazebo::physics::WorldPtr, sdf::ElementPtr _sdf)
   // If any of them fail, messages will not publish so test will fail
 
   // Create a publisher
-  auto pub = node->create_publisher<std_msgs::msg::String>("test", rclcpp::SystemDefaultsQoS());
+  auto pub = node->create_publisher<std_msgs::msg::String>(
+    "test",
+    rclcpp::QoS(rclcpp::KeepLast(1)).transient_local());
 
   {
     auto param = node->get_parameter("declared_string");

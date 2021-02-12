@@ -56,7 +56,9 @@ void ProperInit::Load(int argc, char ** argv)
   auto node = gazebo_ros::Node::Get();
 
   // Create a publisher
-  auto pub = node->create_publisher<std_msgs::msg::String>("test", rclcpp::SystemDefaultsQoS());
+  auto pub = node->create_publisher<std_msgs::msg::String>(
+    "test",
+    rclcpp::QoS(rclcpp::KeepLast(1)).transient_local());
 
   // Run lambda every 1 second
   using namespace std::chrono_literals;
