@@ -22,7 +22,7 @@ import math
 import os
 import sys
 from urllib.parse import SplitResult, urlsplit
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 
 from gazebo_msgs.msg import ModelStates
 from gazebo_msgs.srv import DeleteEntity
