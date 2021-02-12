@@ -56,14 +56,16 @@ TEST_F(GazeboRosJointStatePublisherTest, Publishing)
   executor.add_node(node);
 
   // Step a bit before starting
-  world->Step(500);
-  executor.spin_once(500ms);
+  for (unsigned int i = 0; i < 10; ++i) {
+    world->Step(1);
+    executor.spin_once(1ms);
+  }
   gazebo::common::Time::MSleep(100);
 
   // Create subscriber
   sensor_msgs::msg::JointState::SharedPtr latestMsg;
   auto sub = node->create_subscription<sensor_msgs::msg::JointState>(
-    "test/joint_states_test", rclcpp::SensorDataQoS(),
+    "test/joint_states_test", rclcpp::QoS(1),
     [&latestMsg](const sensor_msgs::msg::JointState::SharedPtr msg) {
       latestMsg = msg;
     });
