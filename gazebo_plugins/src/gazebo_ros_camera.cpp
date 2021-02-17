@@ -131,6 +131,12 @@ public:
 
   /// Number of cameras
   uint64_t num_cameras_{1};
+
+  /// If set to true, no image raw publication. Set to false by default.
+  bool depth_only_;
+
+  /// If set to false, pointcloud is xyz type. Set to true by default (xyz rgb type).
+  bool rgb_pointcloud_;
 };
 
 GazeboRosCamera::GazeboRosCamera()
@@ -157,6 +163,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
+  // Get rgb_pointcloud and depth_only options
+  impl_->rgb_pointcloud_ = _sdf->Get<bool>("rgb_pointcloud", true).first;
+  impl_->depth_only_ = _sdf->Get<bool>("depth_only", false).first;
+
   if (std::dynamic_pointer_cast<gazebo::sensors::MultiCameraSensor>(_sensor)) {
     impl_->sensor_type_ = GazeboRosCameraPrivate::MULTICAMERA;
     MultiCameraPlugin::Load(_sensor, _sdf);
@@ -182,14 +192,17 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf);
 
   if (impl_->sensor_type_ != GazeboRosCameraPrivate::MULTICAMERA) {
-    // Image publisher
-    // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
-    const std::string camera_topic = impl_->camera_name_ + "/image_raw";
-    impl_->image_pub_.push_back(
-      image_transport::create_publisher(
-        impl_->ros_node_.get(),
-        camera_topic,
-        qos.get_publisher_qos(camera_topic, rclcpp::SensorDataQoS()).get_rmw_qos_profile()));
+    if (!(impl_->depth_only_)) {
+      // Image publisher
+      // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
+      const std::string camera_topic = impl_->camera_name_ + "/image_raw";
+      impl_->image_pub_.push_back(
+        image_transport::create_publisher(
+          impl_->ros_node_.get(),
+          camera_topic,
+          qos.get_publisher_qos(camera_topic, rclcpp::SensorDataQoS()).get_rmw_qos_profile()));
+    }
+
 
     // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
     // full topic.
@@ -202,6 +215,27 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     impl_->camera_info_pub_.push_back(
       impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
         camera_info_topic, qos.get_publisher_qos(camera_info_topic, rclcpp::SensorDataQoS())));
+
+
+    if (!(impl_->depth_only_)) {
+      // Image publisher
+      // TODO(louise) Migrate image_connect logic once SubscriberStatusCallback is ported to ROS2
+      impl_->image_pub_.push_back(
+        image_transport::create_publisher(
+          impl_->ros_node_.get(), impl_->camera_name_ + "/image_raw"));
+    }
+
+    // TODO(louise) Uncomment this once image_transport::Publisher has a function to return the
+    // full topic.
+    // RCLCPP_INFO(
+    //   impl_->ros_node_->get_logger(), "Publishing images to [%s]", impl_->image_pub_.getTopic());
+
+    // Camera info publisher
+    // TODO(louise) Migrate ImageConnect logic once SubscriberStatusCallback is ported to ROS2
+    impl_->camera_info_pub_.push_back(
+      impl_->ros_node_->create_publisher<sensor_msgs::msg::CameraInfo>(
+        impl_->camera_name_ + "/camera_info",
+        rclcpp::SensorDataQoS()));
 
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Publishing camera info to [%s]",
@@ -239,6 +273,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::DEPTH) {
     const std::string depth_topic = impl_->camera_name_ + "/depth/image_raw";
+
     // Depth image publisher
     impl_->depth_image_pub_ = image_transport::create_publisher(
       impl_->ros_node_.get(),
@@ -594,7 +629,9 @@ void GazeboRosCamera::NewFrame(
     impl_->image_msg_, impl_->img_encoding_[_camera_num], _height, _width,
     impl_->img_step_[_camera_num] * _width, reinterpret_cast<const void *>(_image));
 
-  impl_->image_pub_[_camera_num].publish(impl_->image_msg_);
+  if (!(impl_->depth_only_)) {
+    impl_->image_pub_[_camera_num].publish(impl_->image_msg_);
+  }
 
   // Disable camera if it's a triggered camera
   if (nullptr != impl_->trigger_sub_) {
@@ -709,7 +746,11 @@ void GazeboRosCamera::OnNewDepthFrame(
   impl_->cloud_msg_.row_step = impl_->cloud_msg_.point_step * _width * _height;
 
   sensor_msgs::PointCloud2Modifier cloud_modifier(impl_->cloud_msg_);
-  cloud_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+  if (impl_->rgb_pointcloud_) {
+    cloud_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+  } else {
+    cloud_modifier.setPointCloud2FieldsByString(1, "xyz");
+  }
   cloud_modifier.resize(_width * _height);
 
   impl_->cloud_msg_.is_dense = true;
@@ -765,18 +806,20 @@ void GazeboRosCamera::OnNewDepthFrame(
         impl_->cloud_msg_.is_dense = false;
       }
 
-      if (impl_->image_msg_.data.size() == _width * _height * 3) {
-        // color
-        std::memcpy(
-          &impl_->cloud_msg_.data[cloud_index + 16],
-          &impl_->image_msg_.data[(i + j * _width) * 3], 3 * sizeof(uint8_t));
-      } else if (impl_->image_msg_.data.size() == _height * _width) {
-        std::memcpy(
-          &impl_->cloud_msg_.data[cloud_index + 16],
-          &impl_->image_msg_.data[i + j * _width], 3 * sizeof(uint8_t));
-      } else {
-        // no image
-        std::memset(&impl_->cloud_msg_.data[cloud_index + 16], 0, 3 * sizeof(uint8_t));
+      if (impl_->rgb_pointcloud_) {
+        if (impl_->image_msg_.data.size() == _width * _height * 3) {
+          // color
+          std::memcpy(
+            &impl_->cloud_msg_.data[cloud_index + 16],
+            &impl_->image_msg_.data[(i + j * _width) * 3], 3 * sizeof(uint8_t));
+        } else if (impl_->image_msg_.data.size() == _height * _width) {
+          std::memcpy(
+            &impl_->cloud_msg_.data[cloud_index + 16],
+            &impl_->image_msg_.data[i + j * _width], 3 * sizeof(uint8_t));
+        } else {
+          // no image
+          std::memset(&impl_->cloud_msg_.data[cloud_index + 16], 0, 3 * sizeof(uint8_t));
+        }
       }
       cloud_index += impl_->cloud_msg_.point_step;
     }
