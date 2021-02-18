@@ -93,7 +93,7 @@ void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   }
 
   impl_->pub_ = impl_->ros_node_->create_publisher<sensor_msgs::msg::Imu>(
-    "~/out", qos.get_publisher_qos("~/out", rclcpp::SensorDataQoS()));
+    "~/out", qos.get_publisher_qos("~/out", rclcpp::SensorDataQoS().reliable()));
 
   // Create message to be reused
   auto msg = std::make_shared<sensor_msgs::msg::Imu>();
