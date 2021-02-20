@@ -80,7 +80,7 @@ class SpawnEntityNode(Node):
         parser.add_argument('-wait', type=str, metavar='ENTITY_NAME',
                             help='Wait for entity to exist')
         parser.add_argument('-spawn_service_timeout', type=float, metavar='TIMEOUT',
-                            default=5.0, help='Spawn service wait timeout in seconds')
+                            help="DEPRECATED: Use '-timeout' instead.")
         parser.add_argument('-x', type=float, default=0,
                             help='x component of initial position, meters')
         parser.add_argument('-y', type=float, default=0,
@@ -220,7 +220,12 @@ class SpawnEntityNode(Node):
         initial_pose.orientation.y = q[2]
         initial_pose.orientation.z = q[3]
 
-        success = self._spawn_entity(entity_xml, initial_pose, self.args.spawn_service_timeout)
+        spawn_service_timeout = self.args.timeout 
+        if self.args.spawn_service_timeout is not None:
+            self.get_logger().warning(
+                "'-spawn_service_timeout' is deprecated, use '-timeout' instead")
+            spawn_service_timeout = self.args.spawn_service_timeout
+        success = self._spawn_entity(entity_xml, initial_pose, spawn_service_timeout)
         if not success:
             self.get_logger().error('Spawn service failed. Exiting.')
             return 1
