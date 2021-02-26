@@ -292,7 +292,7 @@ void GazeboRosP3D::UpdateChild()
         // apply xyz offsets and get position and rotation components
         pose.Pos() = pose.Pos() + this->offset_.Pos();
         // apply rpy offsets
-        pose.Rot() = this->offset_.Rot()*pose.Rot();
+        pose.Rot() = pose.Rot()*this->offset_.Rot();
         pose.Rot().Normalize();
 
         // compute accelerations (not used)

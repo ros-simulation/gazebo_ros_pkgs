@@ -244,7 +244,7 @@ void GazeboRosIMU::UpdateChild()
     rot = pose.Rot();
 
     // apply rpy offsets
-    rot = this->offset_.Rot()*rot;
+    rot = rot*this->offset_.Rot();
     rot.Normalize();
 
     // get Rates
