@@ -518,7 +518,7 @@ void GazeboRosCameraUtils::Init()
                " is inconsistent with specified image_width [%d] and"
                " HFOV [%f].   Please double check to see that"
                " focal_length = width_ / (2.0 * tan(HFOV/2.0)),"
-               " the explected focal_lengtth value is [%f],"
+               " the expected focal_length value is [%f],"
                " please update your camera_ model description accordingly.",
                 this->focal_length_, this->parentSensor_->Name().c_str(),
                 this->width_, hfov,
