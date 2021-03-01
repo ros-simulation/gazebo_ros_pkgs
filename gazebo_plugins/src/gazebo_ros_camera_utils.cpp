@@ -309,7 +309,7 @@ void GazeboRosCameraUtils::LoadThread()
   else
   {
     ROS_WARN_NAMED("camera_utils", "dynamic reconfigure is not enabled for this image topic [%s]"
-             " becuase <cameraName> is not specified",
+             " because <cameraName> is not specified",
              this->image_topic_name_.c_str());
   }
 
@@ -323,7 +323,7 @@ void GazeboRosCameraUtils::LoadThread()
   // publish rates.
   // If someone connects to camera_info, sensor will be activated
   // and camera_info will be published alongside image_raw with the
-  // same timestamps.  This incurrs additional computational cost when
+  // same timestamps.  This incurs additional computational cost when
   // there are subscribers to camera_info, but better mimics behavior
   // of image_pipeline.
   ros::AdvertiseOptions cio =
@@ -518,7 +518,7 @@ void GazeboRosCameraUtils::Init()
                " is inconsistent with specified image_width [%d] and"
                " HFOV [%f].   Please double check to see that"
                " focal_length = width_ / (2.0 * tan(HFOV/2.0)),"
-               " the explected focal_lengtth value is [%f],"
+               " the expected focal_length value is [%f],"
                " please update your camera_ model description accordingly.",
                 this->focal_length_, this->parentSensor_->Name().c_str(),
                 this->width_, hfov,
@@ -539,7 +539,7 @@ void GazeboRosCameraUtils::Init()
   camera_info_msg.D.resize(5);
 #endif
   // Allow the user to disable automatic cropping (used to remove barrel
-  // distortion black border. The crop can be useful, but also skewes
+  // distortion black border. The crop can be useful, but also skews
   // the lens distortion, making the supplied k and t values incorrect.
   if(this->camera_->LensDistortion())
   {
