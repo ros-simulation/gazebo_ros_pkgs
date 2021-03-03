@@ -19,6 +19,8 @@
 #include <tf/tf.h>
 #include <stdlib.h>
 
+#include <sdf/sdf_config.h>
+
 #include "gazebo_plugins/gazebo_ros_p3d.h"
 #include <ignition/math/Rand.hh>
 
@@ -292,6 +294,13 @@ void GazeboRosP3D::UpdateChild()
         // apply xyz offsets and get position and rotation components
         pose.Pos() = pose.Pos() + this->offset_.Pos();
         // apply rpy offsets
+        // rotation calculation needs to be reversed for sdformat versions
+        // > 6.2.0, see https://github.com/osrf/sdformat/pull/500
+#if SDF_MAJOR_VERSION < 6 || (SDF_MAJOR_VERSION == 6 && SDF_MINOR_VERSION <= 2)
+        pose.Rot() = this->offset_.Rot()*pose.Rot();
+#else
+        pose.Rot() = pose.Rot()*this->offset_.Rot();
+#endif
         pose.Rot() = pose.Rot()*this->offset_.Rot();
         pose.Rot().Normalize();
 

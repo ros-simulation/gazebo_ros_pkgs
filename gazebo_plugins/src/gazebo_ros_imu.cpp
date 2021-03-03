@@ -20,6 +20,8 @@
  * Date: 1 June 2008
  */
 
+#include <sdf/sdf_config.h>
+
 #include <gazebo_plugins/gazebo_ros_imu.h>
 #include <ignition/math/Rand.hh>
 
@@ -244,7 +246,13 @@ void GazeboRosIMU::UpdateChild()
     rot = pose.Rot();
 
     // apply rpy offsets
+    // rotation calculation needs to be reversed for sdformat versions > 6.2.0,
+    // see https://github.com/osrf/sdformat/pull/500
+#if SDF_MAJOR_VERSION < 6 || (SDF_MAJOR_VERSION == 6 && SDF_MINOR_VERSION <= 2)
+    rot = this->offset_.Rot()*rot;
+#else
     rot = rot*this->offset_.Rot();
+#endif
     rot.Normalize();
 
     // get Rates
