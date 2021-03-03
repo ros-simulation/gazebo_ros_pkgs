@@ -5,7 +5,7 @@
 As detailed in the CONTRIBUITON.md guide, Gazebo ROS packages are a wrapper that
 connects upstream Gazebo simulations with the ROS framework. Ideally all the
 plugins in this repository should implement the ROS wrapper over a gazebo plugin
-(plugin code in the [upstream gazebo repository](https://bitbucket.org/osrf/gazebo/)).
+(plugin code in the [upstream gazebo repository](https://github.com/osrf/gazebo)).
 
 ## Sensors
 
