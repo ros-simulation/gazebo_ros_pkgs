@@ -53,7 +53,14 @@ namespace gazebo
     private: sensors::ImuSensorPtr imu_sensor_;
     private: event::ConnectionPtr imu_connection_;
     
+    private: physics::WorldPtr world_;
     private: physics::EntityPtr link_;
+    
+    // A bug in Gazebo wrongly calulates spherical positions
+    // Some worlds may use a workaround while other don't so
+    // use a parameter to idicate is the plugin should compensate
+    // https://github.com/osrf/gazebo/issues/2022
+    private: bool fix_gazebo_wsu_bug_;
     
     private: GazeboRosPtr gazebo_ros_;
     private: ros::Publisher position_publisher_;

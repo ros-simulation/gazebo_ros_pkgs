@@ -36,9 +36,9 @@ void gazebo::GazeboRosMRU::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf
     return;
   }
 
-  physics::WorldPtr world = physics::get_world(_sensor->WorldName());
-  if(world)
-    link_ = world->EntityByName(_sensor->ParentName());
+  world_ = physics::get_world(_sensor->WorldName());
+  if(world_)
+    link_ = world_->EntityByName(_sensor->ParentName());
   if (!link_)
   {
     ROS_WARN_STREAM("gazebo_ros_mru plugin did not find link entity.");
@@ -48,6 +48,10 @@ void gazebo::GazeboRosMRU::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf
   // Look for the name of the optional IMU. 
   if (_sdf->HasElement("imuSensorName"))
     imu_sensor_name_ = _sdf->Get<std::string>("imuSensorName");
+  
+  fix_gazebo_wsu_bug_ = true;
+  if (_sdf->HasElement("fixWSUBug"))
+    imu_sensor_name_ = _sdf->Get<bool>("fixWSUBug");
   
   // Initialize ROS
   gazebo_ros_ = GazeboRosPtr ( new GazeboRos ( _sensor, _sdf, "MRU" ) );
@@ -115,6 +119,9 @@ void gazebo::GazeboRosMRU::LookForIMU()
           imu_sensor_->SetUpdateRate(gps_sensor_->UpdateRate());
         }
         
+        // make sure we are getting world referenced data
+        imu_sensor_->SetWorldToReferenceOrientation(ignition::math::Quaterniond::Identity);
+        
         orientation_message_.angular_velocity_covariance[0] = EstimateVariance(imu_sensor_->Noise(sensors::IMU_ANGVEL_X_NOISE_RADIANS_PER_S));
         orientation_message_.angular_velocity_covariance[4] = EstimateVariance(imu_sensor_->Noise(sensors::IMU_ANGVEL_Y_NOISE_RADIANS_PER_S));
         orientation_message_.angular_velocity_covariance[8] = EstimateVariance(imu_sensor_->Noise(sensors::IMU_ANGVEL_Z_NOISE_RADIANS_PER_S));
@@ -136,21 +143,33 @@ void gazebo::GazeboRosMRU::OnGpsUpdate()
   common::Time current_time = gps_sensor_->LastUpdateTime();
   position_message_.header.stamp.sec = current_time.sec;
   position_message_.header.stamp.nsec = current_time.nsec;
-  position_message_.latitude = gps_sensor_->Latitude().Degree();
-  position_message_.longitude = gps_sensor_->Longitude().Degree();
+  if(fix_gazebo_wsu_bug_)
+  {
+    common::SphericalCoordinatesPtr spherical_coords = world_->SphericalCoords();
+    auto delta_lat = gps_sensor_->Latitude() - spherical_coords->LatitudeReference();
+    auto delta_lon = gps_sensor_->Longitude() - spherical_coords->LongitudeReference();
+    position_message_.latitude = (spherical_coords->LatitudeReference()-delta_lat).Degree();
+    position_message_.longitude = (spherical_coords->LongitudeReference()-delta_lon).Degree();
+  }
+  else
+  {
+    position_message_.latitude = gps_sensor_->Latitude().Degree();
+    position_message_.longitude = gps_sensor_->Longitude().Degree();
+  }
   position_message_.altitude = gps_sensor_->Altitude();
   
   position_publisher_.publish(position_message_);
   
-  ignition::math::Vector3d velocity_enu = gps_sensor_->VelocityENU();
-  ignition::math::Pose3d world_pose = link_->WorldPose();
-  ignition::math::Vector3d velocity_base = world_pose.Rot().RotateVector(velocity_enu);
-  
   velocity_message_.header.stamp.sec = current_time.sec;
   velocity_message_.header.stamp.nsec = current_time.nsec;
-  velocity_message_.twist.twist.linear.x = velocity_base.X();
-  velocity_message_.twist.twist.linear.y = velocity_base.Y();
-  velocity_message_.twist.twist.linear.z = velocity_base.Z();
+  velocity_message_.twist.twist.linear.x = gps_sensor_->VelocityEast();
+  velocity_message_.twist.twist.linear.y = gps_sensor_->VelocityNorth();
+  if(fix_gazebo_wsu_bug_)
+  {
+    velocity_message_.twist.twist.linear.x = -velocity_message_.twist.twist.linear.x;
+    velocity_message_.twist.twist.linear.y = -velocity_message_.twist.twist.linear.y;
+  }
+  velocity_message_.twist.twist.linear.z = gps_sensor_->VelocityUp();
   
   if(imu_sensor_)
   {
