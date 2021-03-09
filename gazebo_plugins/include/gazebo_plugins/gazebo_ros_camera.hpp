@@ -18,7 +18,6 @@
 #include <gazebo/plugins/CameraPlugin.hh>
 #include <gazebo/plugins/DepthCameraPlugin.hh>
 #include <gazebo_plugins/multi_camera_plugin.hpp>
-#include <gazebo_ros/node.hpp>
 #include <std_msgs/msg/empty.hpp>
 
 #include <memory>
@@ -165,9 +164,6 @@ protected:
 
   // Get pointer to the cameras
   const std::vector<gazebo::rendering::CameraPtr> GetCameras() const;
-
-  // Get pointer to the ros node
-  const gazebo_ros::Node::SharedPtr GetRosNode() const;
 
   // Get camera name
   const std::string GetCameraName() const;

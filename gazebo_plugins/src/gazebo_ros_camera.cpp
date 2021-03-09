@@ -843,11 +843,6 @@ const std::vector<gazebo::rendering::CameraPtr> GazeboRosCamera::GetCameras() co
   return impl_->camera_;
 }
 
-const gazebo_ros::Node::SharedPtr GazeboRosCamera::GetRosNode() const
-{
-  return impl_->ros_node_;
-}
-
 const std::string GazeboRosCamera::GetCameraName() const
 {
   return impl_->camera_name_;
