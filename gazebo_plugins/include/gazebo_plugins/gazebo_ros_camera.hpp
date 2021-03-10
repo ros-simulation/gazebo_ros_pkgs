@@ -22,6 +22,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace gazebo_plugins
 {
@@ -163,10 +164,10 @@ protected:
   void SetCameraEnabled(const bool _enabled);
 
   // Get pointer to the cameras
-  const std::vector<gazebo::rendering::CameraPtr> GetCameras() const;
+  std::vector<gazebo::rendering::CameraPtr> GetCameras() const;
 
   // Get camera name
-  const std::string GetCameraName() const;
+  std::string GetCameraName() const;
 
   // Get number of cameras
   uint64_t GetNumCameras() const;

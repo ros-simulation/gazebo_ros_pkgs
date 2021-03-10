@@ -838,12 +838,12 @@ void GazeboRosCamera::OnTrigger(const std_msgs::msg::Empty::SharedPtr)
   impl_->triggered++;
 }
 
-const std::vector<gazebo::rendering::CameraPtr> GazeboRosCamera::GetCameras() const
+std::vector<gazebo::rendering::CameraPtr> GazeboRosCamera::GetCameras() const
 {
   return impl_->camera_;
 }
 
-const std::string GazeboRosCamera::GetCameraName() const
+std::string GazeboRosCamera::GetCameraName() const
 {
   return impl_->camera_name_;
 }
