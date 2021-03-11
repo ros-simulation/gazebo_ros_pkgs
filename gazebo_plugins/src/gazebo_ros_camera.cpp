@@ -838,6 +838,21 @@ void GazeboRosCamera::OnTrigger(const std_msgs::msg::Empty::SharedPtr)
   impl_->triggered++;
 }
 
+std::vector<gazebo::rendering::CameraPtr> GazeboRosCamera::GetCameras() const
+{
+  return impl_->camera_;
+}
+
+std::string GazeboRosCamera::GetCameraName() const
+{
+  return impl_->camera_name_;
+}
+
+uint64_t GazeboRosCamera::GetNumCameras() const
+{
+  return impl_->num_cameras_;
+}
+
 extern "C" GZ_PLUGIN_VISIBLE gazebo::SensorPlugin * RegisterPlugin();
 gazebo::SensorPlugin * RegisterPlugin()
 {
