@@ -25,7 +25,7 @@ from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PythonExpression
 
-from scripts import GazeboRosPaths
+from gazebo_ros import GazeboRosPaths
 
 
 def generate_launch_description():

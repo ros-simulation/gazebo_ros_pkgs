@@ -54,7 +54,7 @@ class TestTerminatingProc(unittest.TestCase):
         """Test terminating_proc without command line arguments."""
         print('Running spawn entity test on /mock_robot_description topic')
         entity_spawner_action = launch.actions.ExecuteProcess(
-            cmd=['ros2', 'run', 'gazebo_ros', 'spawn_entity.py', '-entity',
+            cmd=['ros2', 'run', 'gazebo_ros', 'spawn_entity', '-entity',
                  'mock_robot_state_entity', '-topic', '/mock_robot_description'],
             output='screen'
         )
