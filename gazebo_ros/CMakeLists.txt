@@ -36,7 +36,9 @@ link_directories(
   ${gazebo_dev_LIBRARY_DIRS}
 )
 
-ament_python_install_package(scripts/)
+ament_python_install_package(${PROJECT_NAME}
+  SCRIPTS_DESTINATION lib/${PROJECT_NAME}
+)
 
 # gazebo_ros_node
 add_library(gazebo_ros_node SHARED
@@ -170,12 +172,6 @@ install(DIRECTORY include/
         DESTINATION include)
 
 install(
-  PROGRAMS
-    scripts/gazebo_ros_paths.py
-    DESTINATION lib/${PROJECT_NAME}/
-)
-
-install(
   TARGETS
     gazebo_ros_factory
     gazebo_ros_force_system
@@ -187,12 +183,6 @@ install(
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
-
-install(
-  PROGRAMS
-    scripts/spawn_entity.py
-    DESTINATION lib/${PROJECT_NAME}/
-)
 
 install(DIRECTORY
   launch
