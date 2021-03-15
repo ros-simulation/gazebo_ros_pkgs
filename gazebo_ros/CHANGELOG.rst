@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.2 (2021-03-15)
+------------------
 * Remove slash from gazebo_ros scripts Python package name (`#1251 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1251>`_)
 * Fix line length in gazebo_ros/test/CMakeLists.txt (`#1249 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1249>`_)
 * gazebo_ros: use lxml in spawn_entity.py (`#1221 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1221>`_)

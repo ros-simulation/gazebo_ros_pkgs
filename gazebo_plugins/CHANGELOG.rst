@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.2 (2021-03-15)
+------------------
 * gazebo_ros_camera: Added accessor methods for camera properties (`#1246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1246>`_)
   * Added accessor methods to gazebo_ros_camera for subclass access to camera properties.
   * Removed ros node accessor; no longer needed
