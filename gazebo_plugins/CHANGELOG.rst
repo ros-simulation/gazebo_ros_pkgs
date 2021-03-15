@@ -2,6 +2,30 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_ros_camera: Added accessor methods for camera properties (`#1246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1246>`_)
+  * Added accessor methods to gazebo_ros_camera for subclass access to camera properties.
+  * Removed ros node accessor; no longer needed
+  * Removed const return types and added vector include to header
+  Co-authored-by: kbjeppes <kaden.b.jeppesen@nasa.gov>
+* Fix tests for cyclonedds (`#1228
+  <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1228>`_) The
+  default RMW implementation changed recently and some tests are now failing.
+  This fixes the tests.  * Use KeepLast(1) with transient_local in tests There
+  are some QoS incompatibilities in some tests that use SystemDefaultsQoS, so
+  this changes them to use KeepLast(1) with transient_local instead. This fixes
+  some of the test failures but not all.  * test_sim_time: allow more startup
+  messages * Fix QoS and initialization of joint state pub test
+* Make p3d offset element names singular (`#1210 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1210>`_)
+  * Make p3d offset element names singular
+  - <xyz_offsets> is renamed to <xyz_offset>
+  - <rpy_offsets> is renamed to <rpy_offsets>
+  The old names can still be used, but are deprecated.
+  This is more consistent with the naming convention used in ROS 1 versions.
+  * Add test for deprecated functionality
+* Contributors: Jacob Perron, Steve Peters, kjeppesen1
+
 3.5.1 (2020-11-25)
 ------------------
 * colcon.pkg: build gazebo first in colcon workspace (`#1192 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1192>`_)

@@ -2,6 +2,41 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove slash from gazebo_ros scripts Python package name (`#1251 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1251>`_)
+* Fix line length in gazebo_ros/test/CMakeLists.txt (`#1249 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1249>`_)
+* gazebo_ros: use lxml in spawn_entity.py (`#1221 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1221>`_)
+  The python xml.etree.ElementTree library does not handle xml namespaces well,
+  replacing namespaces of prefixed elements with ns0, ns1, etc. This switches
+  to using lxml instead, which has the same syntax and is already used by other
+  ros2 packages.  * Add a test
+* Fix tests for cyclonedds (`#1228 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1228>`_)
+  The default RMW implementation changed recently and some tests are now
+  failing. This fixes the tests.  * Use KeepLast(1) with transient_local in
+  tests There are some QoS incompatibilities in some tests that use
+  SystemDefaultsQoS, so this changes them to use KeepLast(1) with
+  transient_local instead. This fixes some of the test failures but not all.
+  * test_sim_time: allow more startup messages
+  * Fix QoS and initialization of joint state pub test
+* Fix executor to avoid random exceptions when shutting down (`#1212 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1212>`_)
+  * Fix executor to avoid random exceptions when shutting down
+  * Add link to related issue in rclcpp
+* ros2: Only subscribe to /gazebo/performance_metrics when necessary (`#1205 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1205>`_)
+  We are currently subscribing to the /gazebo/performance_metrics topic
+  even if there are no subscribers to the ROS topic forwarding this data.
+  This changes gazebo_ros_init to only subscribe to the gazebo topic
+  if there are any subscribers to the corresponding ROS topic.
+  While advertiser callbacks are used in ROS 1 but are not yet in ROS2,
+  here we use polling in the GazeboRosInitPrivate::PublishSimTime
+  callback to check for subscribers since it is called for each Gazebo
+  time step.
+  This also helps workaround the deadlock documented in `#1175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1175>`_ and
+  `osrf/gazebo#2902 <https://github.com/osrf/gazebo/issues/2902>`_.
+  This also adds a macro to reduce duplication of the version checking
+  logic.
+* Contributors: Ivan Santiago Paunovic, Michel Hidalgo, Steve Peters
+
 3.5.1 (2020-11-25)
 ------------------
 * colcon.pkg: build gazebo first in colcon workspace (`#1192 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1192>`_)
