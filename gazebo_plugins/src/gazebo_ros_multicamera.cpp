@@ -80,10 +80,10 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     double hackBaseline = 0.0;
     if (_sdf->HasElement("hackBaseline"))
       hackBaseline = _sdf->Get<double>("hackBaseline");
-    if (!this->_sdf->HasElement(std::to_string(this->camera[i]->Name())))
+    if (!this->_sdf->HasElement("camera name"))
     {
       // User specified a camera name
-      std::string str_ = "/" + std::to_string(this->camera[i]->Name())
+      std::string str_ = "/" + this->camera[i]->Name()
       util->Load(_parent, _sdf, str_, hackBaseline);
     }
     else
