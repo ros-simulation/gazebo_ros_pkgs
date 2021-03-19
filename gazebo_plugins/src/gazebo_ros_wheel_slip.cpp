@@ -76,11 +76,6 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
               "New longitudinal slip compliance: %.3e", slip);
             this->SetSlipComplianceLongitudinal(slip);
           }
-        } else {
-          RCLCPP_WARN(
-            impl_->ros_node_->get_logger(),
-            "Unrecognized parameter name[%s]", param_name.c_str());
-          result.successful = false;
         }
       }
       return result;
