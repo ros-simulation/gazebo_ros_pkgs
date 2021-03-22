@@ -17,6 +17,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 
+#include <chrono>
 #include <memory>
 
 #define tol 10e-10
@@ -55,13 +56,6 @@ TEST_F(GazeboRosJointStatePublisherTest, Publishing)
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
-  // Step a bit before starting
-  for (unsigned int i = 0; i < 10; ++i) {
-    world->Step(1);
-    executor.spin_once(1ms);
-  }
-  gazebo::common::Time::MSleep(100);
-
   // Create subscriber
   sensor_msgs::msg::JointState::SharedPtr latestMsg;
   auto sub = node->create_subscription<sensor_msgs::msg::JointState>(
@@ -70,24 +64,26 @@ TEST_F(GazeboRosJointStatePublisherTest, Publishing)
       latestMsg = msg;
     });
 
-  // Check that we receive the latest joint state
-  for (unsigned int i = 0; i < 10; ++i) {
+  // Spin until we get a message or timeout
+  auto startTime = std::chrono::steady_clock::now();
+  while (latestMsg == nullptr &&
+    (std::chrono::steady_clock::now() - startTime) < std::chrono::seconds(2))
+  {
     world->Step(100);
     executor.spin_once(100ms);
     gazebo::common::Time::MSleep(100);
-
-    ASSERT_NE(nullptr, latestMsg) << "Iteration: " << i;
-
-    ASSERT_EQ(1u, latestMsg->name.size());
-    ASSERT_EQ(1u, latestMsg->position.size());
-    ASSERT_EQ(1u, latestMsg->velocity.size());
-
-    EXPECT_EQ("hinge", latestMsg->name[0]);
-    EXPECT_NEAR(hinge->Position(), latestMsg->position[0], tol);
-    EXPECT_NEAR(hinge->GetVelocity(0), latestMsg->velocity[0], tol);
-
-    latestMsg.reset();
   }
+
+  // Check that we receive the latest joint state
+  ASSERT_NE(nullptr, latestMsg);
+
+  ASSERT_EQ(1u, latestMsg->name.size());
+  ASSERT_EQ(1u, latestMsg->position.size());
+  ASSERT_EQ(1u, latestMsg->velocity.size());
+
+  EXPECT_EQ("hinge", latestMsg->name[0]);
+  EXPECT_NEAR(hinge->Position(), latestMsg->position[0], tol);
+  EXPECT_NEAR(hinge->GetVelocity(0), latestMsg->velocity[0], tol);
 }
 
 int main(int argc, char ** argv)
