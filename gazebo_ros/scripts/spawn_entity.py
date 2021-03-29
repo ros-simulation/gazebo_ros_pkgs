@@ -220,7 +220,7 @@ class SpawnEntityNode(Node):
         initial_pose.orientation.y = q[2]
         initial_pose.orientation.z = q[3]
 
-        spawn_service_timeout = self.args.timeout 
+        spawn_service_timeout = self.args.timeout
         if self.args.spawn_service_timeout is not None:
             self.get_logger().warning(
                 "'-spawn_service_timeout' is deprecated, use '-timeout' instead")
