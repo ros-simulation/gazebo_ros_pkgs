@@ -49,14 +49,54 @@ def generate_test_description():
 class TestTerminatingProc(unittest.TestCase):
 
     def test_spawn_entity(self, launch_service, proc_info, proc_output):
-        """Test terminating_proc without command line arguments."""
-        print('Running spawn entity test on /mock_robot_description topic')
+        """Test spawn entity from topic."""
         entity_spawner_action = launch.actions.ExecuteProcess(
-            cmd=['ros2', 'run', 'gazebo_ros', 'spawn_entity.py', '-entity',
-                 'mock_robot_state_entity', '-topic', '/mock_robot_description'],
+            cmd=['ros2', 'run', 'gazebo_ros', 'spawn_entity.py',
+                 '-entity', 'mock_entity_test_spawn_entity', '-topic', '/mock_robot_description'],
             output='screen'
         )
         with launch_testing.tools.launch_process(
               launch_service, entity_spawner_action, proc_info, proc_output) as command:
             assert command.wait_for_shutdown(timeout=10)
         assert command.exit_code == launch_testing.asserts.EXIT_OK
+
+    def test_spawn_entity_timeout(self, launch_service, proc_info, proc_output):
+        """Test spawn entity from topic and output with -timeout option."""
+        entity_spawner_action = launch.actions.ExecuteProcess(
+            cmd=['ros2', 'run', 'gazebo_ros', 'spawn_entity.py',
+                 '-entity', 'mock_entity_test_spawn_entity_timeout',
+                 '-topic', '/mock_robot_description',
+                 '-timeout', '10'],
+            output='screen'
+        )
+        with launch_testing.tools.launch_process(
+              launch_service, entity_spawner_action, proc_info, proc_output) as command:
+            assert command.wait_for_shutdown(timeout=10)
+        assert command.exit_code == launch_testing.asserts.EXIT_OK
+        assert launch_testing.tools.expect_output(
+            expected_lines=['Waiting for service /spawn_entity, timeout = 10'],
+            text=command.output,
+            strict=False
+        )
+
+    def test_spawn_entity_deprecated_timeout(self, launch_service, proc_info, proc_output):
+        """Test spawn entity from topic and deprecation with -spawn_service_timeout option."""
+        entity_spawner_action = launch.actions.ExecuteProcess(
+            cmd=['ros2', 'run', 'gazebo_ros', 'spawn_entity.py',
+                 '-entity', 'mock_entity_test_spawn_entity_deprecated_timeout',
+                 '-topic', '/mock_robot_description',
+                 '-spawn_service_timeout', '10'],
+            output='screen'
+        )
+        with launch_testing.tools.launch_process(
+              launch_service, entity_spawner_action, proc_info, proc_output) as command:
+            assert command.wait_for_shutdown(timeout=10)
+        assert command.exit_code == launch_testing.asserts.EXIT_OK
+        assert launch_testing.tools.expect_output(
+            expected_lines=[
+                "'-spawn_service_timeout' is deprecated, use '-timeout' instead",
+                'Waiting for service /spawn_entity, timeout = 10',
+            ],
+            text=command.output,
+            strict=False
+        )
