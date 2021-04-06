@@ -116,6 +116,7 @@ catkin_package(
   gazebo_ros_planar_move
   gazebo_ros_range
   gazebo_ros_vacuum_gripper
+  gazebo_ros_sonar
 
   CATKIN_DEPENDS
   message_runtime
@@ -295,6 +296,9 @@ target_link_libraries(gazebo_ros_range ${catkin_LIBRARIES} ${Boost_LIBRARIES} Ra
 add_library(gazebo_ros_vacuum_gripper src/gazebo_ros_vacuum_gripper.cpp)
 target_link_libraries(gazebo_ros_vacuum_gripper ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_library(gazebo_ros_sonar src/gazebo_ros_sonar.cpp)
+target_link_libraries(gazebo_ros_sonar ${catkin_LIBRARIES} ${Boost_LIBRARIES} SonarPlugin)
+
 ##
 ## Add your new plugin here
 ##
@@ -342,6 +346,7 @@ install(TARGETS
   pub_joint_trajectory_test
   gazebo_ros_gpu_laser
   gazebo_ros_range
+  gazebo_ros_sonar
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
