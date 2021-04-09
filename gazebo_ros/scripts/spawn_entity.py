@@ -38,6 +38,7 @@ from std_srvs.srv import Empty
 
 DEFAULT_TIMEOUT = 30.0
 
+
 class SpawnEntityNode(Node):
     # Node to spawn an entity in Gazebo.
     MODEL_DATABASE_TEMPLATE = """\
