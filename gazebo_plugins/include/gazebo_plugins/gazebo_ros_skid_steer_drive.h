@@ -78,7 +78,9 @@ namespace gazebo {
 
     private:
       void publishOdometry(double step_time);
+      void publishGroundTruth(double step_time);
       void getWheelVelocities();
+      double GaussianKernel(double mu, double sigma);
 
       physics::WorldPtr world;
       physics::ModelPtr parent;
@@ -99,9 +101,11 @@ namespace gazebo {
       // ROS STUFF
       ros::NodeHandle* rosnode_;
       ros::Publisher odometry_publisher_;
+      ros::Publisher ground_truth_publisher_;
       ros::Subscriber cmd_vel_subscriber_;
       tf::TransformBroadcaster *transform_broadcaster_;
       nav_msgs::Odometry odom_;
+      nav_msgs::Odometry ground_truth_;
       std::string tf_prefix_;
       bool broadcast_tf_;
 
@@ -111,6 +115,8 @@ namespace gazebo {
       std::string command_topic_;
       std::string odometry_topic_;
       std::string odometry_frame_;
+      std::string ground_truth_frame_;
+      std::string ground_truth_topic_;
       std::string robot_base_frame_;
 
       // Custom Callback Queue
@@ -123,7 +129,14 @@ namespace gazebo {
 
       double x_;
       double rot_;
+
       bool alive_;
+      unsigned int seed;
+
+      double x_error, y_error, yaw_error;
+
+      // noise
+      double gaussian_noise_;
 
       // Update Rate
       double update_rate_;
