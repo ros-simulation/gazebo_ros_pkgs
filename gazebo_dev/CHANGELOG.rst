@@ -2,8 +2,8 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.3 (2021-04-15)
+------------------
 * colcon.pkg: build gazebo first in colcon workspace (`#1192 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1192>`_)
   Add a colcon.pkg file to gazebo_dev with gazebo's cmake project
   name "Gazebo" listed as a dependency to support building

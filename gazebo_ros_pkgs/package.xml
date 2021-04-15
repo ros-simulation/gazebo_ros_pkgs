@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>gazebo_ros_pkgs</name>
-  <version>3.5.0</version>
+  <version>3.5.3</version>
   <description>Interface for using ROS with the <a href="http://gazebosim.org/">Gazebo</a> simulator.</description>
 
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>

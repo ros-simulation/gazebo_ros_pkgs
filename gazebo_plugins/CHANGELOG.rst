@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.3 (2021-04-15)
+------------------
 * Make p3d offset element names singular (`#1210 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1210>`_)
   * Make p3d offset element names singular
   - <xyz_offsets> is renamed to <xyz_offset>

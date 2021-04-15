@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.3 (2021-04-15)
+------------------
 * Update default spawn_service_timeout to be consistent with other ROS2 distros (`#1264 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1264>`_)
   * update default timeout value to be consistent with other ROS2 distros
   * define timeout as a constant
