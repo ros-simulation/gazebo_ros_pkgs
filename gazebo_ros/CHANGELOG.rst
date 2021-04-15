@@ -2,6 +2,41 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update default spawn_service_timeout to be consistent with other ROS2 distros (`#1264 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1264>`_)
+  * update default timeout value to be consistent with other ROS2 distros
+  * define timeout as a constant
+* Fix executor to avoid random exceptions when shutting down (`#1212 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1212>`_)
+  * Fix executor to avoid random exceptions when shutting down
+  * Add link to related issue in rclcpp
+* ros2: Only subscribe to /gazebo/performance_metrics when necessary (`#1205 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1205>`_)
+  We are currently subscribing to the /gazebo/performance_metrics topic
+  even if there are no subscribers to the ROS topic forwarding this data.
+  This changes gazebo_ros_init to only subscribe to the gazebo topic
+  if there are any subscribers to the corresponding ROS topic.
+  While advertiser callbacks are used in ROS 1 but are not yet in ROS2,
+  here we use polling in the GazeboRosInitPrivate::PublishSimTime
+  callback to check for subscribers since it is called for each Gazebo
+  time step.
+  This also helps workaround the deadlock documented in `#1175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1175>`_ and
+  `osrf/gazebo#2902 <https://github.com/osrf/gazebo/issues/2902>`_.
+  This also adds a macro to reduce duplication of the version checking
+  logic.
+* colcon.pkg: build gazebo first in colcon workspace (`#1192 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1192>`_)
+  Add a colcon.pkg file to gazebo_dev with gazebo's cmake project
+  name "Gazebo" listed as a dependency to support building
+  gazebo from source in a colcon workspace.
+  * Add colcon.pkg files for other packages
+  Copy colcon.pkg to gazebo_ros, gazebo_plugins, and
+  gazebo_ros_control so that --merge-install won't be required.
+* [ROS 2] Bridge to republish PerformanceMetrics in ROS 2 (`#1147 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1147>`_)
+* [Windows] Add missing visibility control. (`#1150 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1150>`_)
+* [ros2] Enable the force system on launch files (`#1035 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1035>`_)
+* make compile wo/ warnings on osx (`#1149 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1149>`_)
+* Added lockstep argument to gzserver (`#1146 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1146>`_)
+* Contributors: Alejandro Hernández Cordero, Ivan Santiago Paunovic, Karsten Knese, Louise Poubel, M. Mei, Sean Yen, Steve Peters
+
 3.5.0 (2020-06-19)
 ------------------
 * Merge pull request `#1130 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1130>`_ from ros-simulation/foxy_tests

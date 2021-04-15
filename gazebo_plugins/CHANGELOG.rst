@@ -2,6 +2,48 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Make p3d offset element names singular (`#1210 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1210>`_)
+  * Make p3d offset element names singular
+  - <xyz_offsets> is renamed to <xyz_offset>
+  - <rpy_offsets> is renamed to <rpy_offsets>
+  The old names can still be used, but are deprecated.
+  This is more consistent with the naming convention used in ROS 1 versions.
+  * Add test for deprecated functionality
+* colcon.pkg: build gazebo first in colcon workspace (`#1192 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1192>`_)
+  Add a colcon.pkg file to gazebo_dev with gazebo's cmake project
+  name "Gazebo" listed as a dependency to support building
+  gazebo from source in a colcon workspace.
+  * Add colcon.pkg files for other packages
+  Copy colcon.pkg to gazebo_ros, gazebo_plugins, and
+  gazebo_ros_control so that --merge-install won't be required.
+* publish with QoS reliable as default (`#1224 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1224>`_)
+  * default to reliable publishers
+* adding buffer to gzebo ros hand of god plugin (`#1179 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1179>`_)
+  Fixes `#1178 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1178>`_.
+* [gazebo_plugins] address warnings (`#1151 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1151>`_)
+  * use .c_str() for variadic template
+  * silence warnings
+  Co-authored-by: Steve Peters <scpeters@openrobotics.org>
+* Port wheel slip plugin to ros2 (forward port from eloquent) (`#1148 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1148>`_)
+  Forward port of wheel slip plugin from eloquent (`#1099 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1099>`_)
+  to foxy.
+  It includes a similar change to `#1111 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1111>`_, which moved the
+  WheelSlipPlugin::Load call before the parameter callback
+  so that the values from SDF/URDF are set first.
+  Then the callback is changed to ignore negative values, and the
+  default slip parameter values are set to -1, so that the SDF/URDF
+  values are still preferred unless a different parameter value
+  is specified in a launch file.
+  Co-authored-by: Jacob Perron <jacob@openrobotics.org>
+* Added ignition common profiler to ros2 (`#1141 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1141>`_)
+  * Added ignition common profiler to ros2
+  * Make linters happy
+  * minor fixes
+  * Removed warning: handler for the param change callback
+* Contributors: Alejandro Hernández Cordero, Brett Downing, Jacob Perron, Karsten Knese, Steve Macenski, Steve Peters
+
 3.5.0 (2020-06-19)
 ------------------
 * Merge pull request `#1130 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1130>`_ from ros-simulation/foxy_tests
