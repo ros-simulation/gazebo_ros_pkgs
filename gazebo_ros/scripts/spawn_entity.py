@@ -36,6 +36,8 @@ from rclpy.qos import QoSProfile
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 
+DEFAULT_TIMEOUT = 30.0
+
 
 class SpawnEntityNode(Node):
     # Node to spawn an entity in Gazebo.
@@ -72,7 +74,7 @@ class SpawnEntityNode(Node):
                             Default is without any namespace')
         parser.add_argument('-robot_namespace', type=str, default='',
                             help='change ROS namespace of gazebo-plugins')
-        parser.add_argument('-timeout', type=float, default=30.0,
+        parser.add_argument('-timeout', type=float, default=DEFAULT_TIMEOUT,
                             help='Number of seconds to wait for the spawn and delete services to \
                             become available')
         parser.add_argument('-unpause', action='store_true',
@@ -80,7 +82,7 @@ class SpawnEntityNode(Node):
         parser.add_argument('-wait', type=str, metavar='ENTITY_NAME',
                             help='Wait for entity to exist')
         parser.add_argument('-spawn_service_timeout', type=float, metavar='TIMEOUT',
-                            default=5.0, help='Spawn service wait timeout in seconds')
+                            default=DEFAULT_TIMEOUT, help='Spawn service wait timeout in seconds')
         parser.add_argument('-x', type=float, default=0,
                             help='x component of initial position, meters')
         parser.add_argument('-y', type=float, default=0,
@@ -259,7 +261,7 @@ class SpawnEntityNode(Node):
 
         return 0
 
-    def _spawn_entity(self, entity_xml, initial_pose, timeout=5.0):
+    def _spawn_entity(self, entity_xml, initial_pose, timeout=DEFAULT_TIMEOUT):
         if timeout < 0:
             self.get_logger().error('spawn_entity timeout must be greater than zero')
             return False
