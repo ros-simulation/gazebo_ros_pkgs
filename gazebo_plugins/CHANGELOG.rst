@@ -2,8 +2,8 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.2 (2021-04-21)
+------------------
 * gazebo_ros_utils: don't set tf_prefix if empty (`#1173 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1173>`_)
   Similar changes were made in `#1143 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1143>`_ to address `#554 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/554>`_,
   but this class wasn't included.

@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.2 (2021-04-21)
+------------------
 * Only subscribe to /gazebo/performance_metrics when necessary (`#1202 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1202>`_)
   We are currently subscribing to the /gazebo/performance_metrics topic
   even if there are no subscribers to the ROS topic forwarding this data.

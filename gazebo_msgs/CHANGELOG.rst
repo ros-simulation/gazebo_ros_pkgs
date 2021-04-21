@@ -2,8 +2,8 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.2 (2021-04-21)
+------------------
 * [Noetic] Bridge to republish PerformanceMetrics in ROS (`#1145 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1145>`_)
   Co-authored-by: Ian Chen <ichen@osrfoundation.org>
 * Contributors: Alejandro Hernández Cordero
