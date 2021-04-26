@@ -2,6 +2,38 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.2 (2021-04-21)
+------------------
+* gazebo_ros_utils: don't set tf_prefix if empty (`#1173 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1173>`_)
+  Similar changes were made in `#1143 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1143>`_ to address `#554 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/554>`_,
+  but this class wasn't included.
+* Update test worlds to use the correct element names for xyzOffset and rpyOffset (`#1206 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1206>`_)
+  The test worlds add an extra 's' character, but the real names are singular.
+* [noetic][planar_move_controller] add cmdTimeout param (`#1133 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1133>`_)
+  Co-authored-by: Alejandro Hernández Cordero <ahcorde@gmail.com>
+* [noetic][Windows] Removing extra CameraPlugin header inclusion from gazebo_ros_camera_utils (`#1161 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1161>`_)
+* multi roboti example updated for noetic (`#1154 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1154>`_)
+* Leave empty tf_prefix values unset (`#1143 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1143>`_)
+  As reported in `#554 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/554>`_, tf_prefix has been long deprecated,
+  so if it is unset, leave it empty instead of giving a default value.
+  Fixes `#554 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/554>`_.
+* Added directives if profiler is not installed (`#1144 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1144>`_)
+* colcon.pkg: build gazebo first in colcon workspace (`#1135 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1135>`_)
+  Add a colcon.pkg file to gazebo_dev with gazebo's cmake project  name "Gazebo" listed as a dependency to support building
+  gazebo from source in a colcon workspace. Add colcon.pkg files for other packages
+  Copy colcon.pkg to gazebo_ros, gazebo_plugins, and  gazebo_ros_control so that --merge-install won't be required.
+* [Noetic] Added Ignition common profiler to gazebo_plugins (`#1139 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1139>`_)
+  * Added Ignition common profiler
+  * Fixed typo
+* WheelSlip.cfg: ignore default parameter values (`#1126 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1126>`_)
+  The WheelSlipPlugin already has default values for the slip
+  compliance parameters, so ignore the default values set in
+  WheelSlip.cfg by making them negative and instruct the
+  callback to ignore negative values.
+  Also, ignore the `level` variable in callback so that
+  parameters set in launch file will not be ignored.
+* Contributors: Alejandro Hernández Cordero, G.Doisy, Jacob Perron, Markus Bader, Sean Yen, Steve Peters
+
 2.9.1 (2020-05-20)
 ------------------
 * Noetic patch for Opencv libraries (`#1106 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1106>`_)

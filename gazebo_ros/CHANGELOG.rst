@@ -2,6 +2,40 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.9.2 (2021-04-21)
+------------------
+* Only subscribe to /gazebo/performance_metrics when necessary (`#1202 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1202>`_)
+  We are currently subscribing to the /gazebo/performance_metrics topic
+  even if there are no subscribers to the ROS topic forwarding this data.
+  The link_states and model_states topics currently use an advertise
+  mechanism with callbacks when a subscriber connects or disconnects,
+  so I've used that same pattern for the performance_metrics topic.
+  This also helps workaround the deadlock documented in `#1175 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1175>`_ and
+  `osrf/gazebo#2902 <https://github.com/osrf/gazebo/issues/2902>`_.
+  This also adds a GAZEBO_ROS_HAS_PERFORMANCE_METRICS
+  macro that reduces duplication of the version checking logic for
+  performance metrics in gazebo and adds fixes some doc-string and
+  typos in existing code
+* [Noetic] Bridge to republish PerformanceMetrics in ROS (`#1145 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1145>`_)
+  Co-authored-by: Ian Chen <ichen@osrfoundation.org>
+* delete request msgs (`#1160 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1160>`_)
+* gazebo_ros_api_plugin cleanup (`#1137 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1137>`_)
+  Remove an unused overload of publishSimTime and add doxygen
+  for the remaining publishSimTime function.
+  * Remove duplicate code for /clock advertisement
+  The /clock topic is advertised in both loadGazeboRosApiPlugin
+  and advertiseServices. This removes the code from advertiseServices
+  and moves it earlier in loadGazeboRosApiPlugin.
+  Co-authored-by: Alejandro Hernández Cordero <ahcorde@gmail.com>
+* colcon.pkg: build gazebo first in colcon workspace (`#1135 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1135>`_)
+  Add a colcon.pkg file to gazebo_dev with gazebo's cmake project
+  name "Gazebo" listed as a dependency to support building
+  gazebo from source in a colcon workspace.
+  * Add colcon.pkg files for other packages
+  Copy colcon.pkg to gazebo_ros, gazebo_plugins, and
+  gazebo_ros_control so that --merge-install won't be required.
+* Contributors: Alejandro Hernández Cordero, Ian Chen, Steve Peters
+
 2.9.1 (2020-05-20)
 ------------------
 
