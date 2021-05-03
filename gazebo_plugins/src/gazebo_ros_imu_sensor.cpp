@@ -96,8 +96,12 @@ void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/
 #endif
   common::Time current_time = sensor->LastUpdateTime();
 
-  if(update_rate>0 && (current_time-last_time).Double() < 1.0/update_rate) //update rate check
+  if(update_rate>0 && (current_time-last_time).Double() < 1.0/update_rate) { //update rate check
+    // last_time could be outdated when the world is reset
+    if (current_time < last_time)
+      last_time = common::Time(0, 0);
     return;
+  }
 
   if(imu_data_publisher.getNumSubscribers() > 0)
   {
