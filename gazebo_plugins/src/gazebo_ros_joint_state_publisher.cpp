@@ -95,7 +95,6 @@ void GazeboRosJointStatePublisher::Load ( physics::ModelPtr _parent, sdf::Elemen
 
     ROS_INFO_NAMED("joint_state_publisher", "Starting GazeboRosJointStatePublisher Plugin (ns = %s)!, parent name: %s", this->robot_namespace_.c_str(), parent_->GetName ().c_str() );
 
-    tf_prefix_ = tf::getPrefixParam ( *rosnode_ );
     joint_state_publisher_ = rosnode_->advertise<sensor_msgs::JointState> ( "joint_states",1000 );
 
 #if GAZEBO_MAJOR_VERSION >= 8

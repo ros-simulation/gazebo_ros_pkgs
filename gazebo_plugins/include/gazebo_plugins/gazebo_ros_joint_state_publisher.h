@@ -72,7 +72,6 @@ private:
     boost::shared_ptr<ros::NodeHandle> rosnode_;
     sensor_msgs::JointState joint_state_;
     ros::Publisher joint_state_publisher_;
-    std::string tf_prefix_;
     std::string robot_namespace_;
     std::vector<std::string> joint_names_;
 
