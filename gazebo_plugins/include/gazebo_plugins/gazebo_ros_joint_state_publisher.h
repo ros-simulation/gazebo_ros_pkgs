@@ -30,15 +30,17 @@
 #ifndef JOINT_STATE_PUBLISHER_PLUGIN_HH
 #define JOINT_STATE_PUBLISHER_PLUGIN_HH
 
-#include <boost/bind.hpp>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
+#include <string>
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
+
 #include <gazebo/common/common.hh>
-#include <stdio.h>
+#include <gazebo/physics/physics.hh>
 
 // ROS
-#include <ros/ros.h>
-#include <tf/transform_broadcaster.h>
+#include <ros/node_handle.h>
+#include <ros/publisher.h>
 #include <sensor_msgs/JointState.h>
 
 // Usage in URDF:
