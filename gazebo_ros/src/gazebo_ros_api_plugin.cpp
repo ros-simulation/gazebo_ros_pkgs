@@ -23,6 +23,7 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/gazebo_config.h>
 #include <gazebo_ros/gazebo_ros_api_plugin.h>
+#include <boost/format.hpp>
 #include <chrono>
 #include <thread>
 
@@ -1748,12 +1749,24 @@ bool GazeboRosApiPlugin::unpausePhysics(std_srvs::Empty::Request &req,std_srvs::
 bool GazeboRosApiPlugin::stepControl(gazebo_msgs::StepControl::Request &req, gazebo_msgs::StepControl::Response &res)
 {
   gazebo::msgs::WorldControl step_msg;
-  step_msg.set_pause(req.pause);
-  step_msg.set_step(req.step);
-  step_msg.set_multi_step(req.multi_step);
+
+  // Unpause for 0 steps / Pause for >=1 steps
+  bool to_pause = (req.steps >= 1);
+  step_msg.set_pause(to_pause);
+
+  if (req.steps > 1)
+  { // Multi-step:
+    step_msg.set_multi_step(req.steps);
+  }
+  else
+  { // One-step:
+    step_msg.set_step(req.steps == 1);
+  }
+
   world_control_pub_->Publish(step_msg);
+
   res.success = true;
-  res.status_message = "StepControl: stepped";
+  res.status_message = boost::str(boost::format("StepControl: %1% steps (%2%)") % req.steps % (to_pause ? "Paused" : "Unpaused"));
   return true;
 }
 

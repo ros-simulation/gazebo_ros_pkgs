@@ -1,6 +1,13 @@
-bool pause                  # Pause state of the simulation
-bool step                   # Step the simulation if paused
-uint32 multi_step           # Multi-step the simulation
+#
+# Simulation Step Control:
+#
+#   Pauses and advances the Gazebo simulation a given number of steps. The simulated time duration of each step is the
+#   'max_step_size' value specified in Gazebo's Physics properties (Default is 0.001 seconds).
+#
+
+uint32  steps               # Number of steps to advance the simulator.
+                            # 0     : unpause the simulator (equivalent to /unpause_physics)
+                            # >= 1  : advance given # of steps and pause the simulator
 
 ---
 bool success                # return true if spawn successful
