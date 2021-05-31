@@ -1,0 +1,7 @@
+bool pause                  # Pause state of the simulation
+bool step                   # Step the simulation if paused
+uint32 multi_step           # Multi-step the simulation
+
+---
+bool success                # return true if spawn successful
+string status_message       # comments if available

@@ -193,6 +193,8 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
+  world_control_pub_ = gazebonode_->Advertise<gazebo::msgs::WorldControl>("~/world_control");
+
   // reset topic connection counts
   pub_link_states_connection_count_ = 0;
   pub_model_states_connection_count_ = 0;
@@ -505,6 +507,15 @@ void GazeboRosApiPlugin::advertiseServices()
                                                           boost::bind(&GazeboRosApiPlugin::unpausePhysics,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
   unpause_physics_service_ = nh_->advertiseService(unpause_physics_aso);
+
+  // Advertise step control service (for one-step simulation)
+  std::string step_control_service_name("step_control");
+  ros::AdvertiseServiceOptions step_control_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::StepControl>(
+                                                          step_control_service_name,
+                                                          boost::bind(&GazeboRosApiPlugin::stepControl,this,_1,_2),
+                                                          ros::VoidPtr(), &gazebo_queue_);
+  step_control_service_ = nh_->advertiseService(step_control_aso);
 
   // Advertise more services on the custom queue
   std::string apply_body_wrench_service_name("apply_body_wrench");
@@ -1731,6 +1742,18 @@ bool GazeboRosApiPlugin::pausePhysics(std_srvs::Empty::Request &req,std_srvs::Em
 bool GazeboRosApiPlugin::unpausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
 {
   world_->SetPaused(false);
+  return true;
+}
+
+bool GazeboRosApiPlugin::stepControl(gazebo_msgs::StepControl::Request &req, gazebo_msgs::StepControl::Response &res)
+{
+  gazebo::msgs::WorldControl step_msg;
+  step_msg.set_pause(req.pause);
+  step_msg.set_step(req.step);
+  step_msg.set_multi_step(req.multi_step);
+  world_control_pub_->Publish(step_msg);
+  res.success = true;
+  res.status_message = "StepControl: stepped";
   return true;
 }
 

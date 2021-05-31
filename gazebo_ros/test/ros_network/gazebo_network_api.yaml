@@ -85,6 +85,9 @@ services:
   - service: /gazebo/pause_physics
     type: std_srvs/Empty
 
+  - service: /gazebo/step_control
+    type: gazebo_msgs/StepControl
+
   - service: /gazebo/get_joint_properties
     type: gazebo_msgs/GetJointProperties
 
