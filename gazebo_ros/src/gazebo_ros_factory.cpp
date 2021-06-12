@@ -14,6 +14,8 @@
 
 #include "gazebo_ros/gazebo_ros_factory.hpp"
 
+#include <ament_index_cpp/get_package_prefix.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <gazebo/common/Events.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/Entity.hh>
@@ -30,7 +32,7 @@
 #include <gazebo_ros/utils.hpp>
 #include <rosgraph_msgs/msg/clock.hpp>
 
-#include <tinyxml.h>
+#include <tinyxml2.h>
 #include <algorithm>
 #include <memory>
 #include <sstream>
@@ -53,6 +55,12 @@ public:
   void GetModelList(
     gazebo_msgs::srv::GetModelList::Request::SharedPtr,
     gazebo_msgs::srv::GetModelList::Response::SharedPtr res);
+
+  /// Recursively iterate over elements of XML document and substitute all attribute values
+  /// that start with package:// with the resolved absolute path to the file.
+  /// \param[in] elem The root element of the document
+  /// \returns True on success, false on error.
+  bool SubstPackage(tinyxml2::XMLElement * elem);
 
   /// \brief Function for inserting an entity into Gazebo from ROS Service Call.
   /// Supported formats are SDF and URDF and works with both models and lights.
@@ -177,14 +185,75 @@ void GazeboRosFactoryPrivate::GetModelList(
   res->success = true;
 }
 
+bool GazeboRosFactoryPrivate::SubstPackage(tinyxml2::XMLElement * element)
+{
+  if (!element) {
+    return true;
+  }
+
+  for (auto attribute = element->FirstAttribute(); attribute != nullptr;
+    attribute = attribute->Next())
+  {
+    std::string attr(attribute->Value());
+    if (attr.rfind("package://", 0) == 0) {
+      attr.erase(0, strlen("package://"));
+      size_t pos = attr.find("/");
+      if (pos == std::string::npos) {
+        return false;
+      }
+
+      std::string package = attr.substr(0, pos);
+      attr.erase(0, pos);
+
+      std::string package_path;
+      try {
+        package_path = ament_index_cpp::get_package_share_directory(package);
+      } catch (const ament_index_cpp::PackageNotFoundError &) {
+        return false;
+      }
+
+      element->SetAttribute(attribute->Name(), (package_path + attr).c_str());
+    }
+  }
+
+  // Recursively call the function for child elements
+  if (!SubstPackage(element->FirstChildElement())) {
+    return false;
+  }
+
+  return SubstPackage(element->NextSiblingElement());
+}
+
 void GazeboRosFactoryPrivate::SpawnEntity(
   gazebo_msgs::srv::SpawnEntity::Request::SharedPtr req,
   gazebo_msgs::srv::SpawnEntity::Response::SharedPtr res)
 {
+  tinyxml2::XMLDocument xmlDoc(true, tinyxml2::COLLAPSE_WHITESPACE);
+
+  // Parse XML string into doc
+  xmlDoc.Parse(req->xml.c_str());
+  if (xmlDoc.Error()) {
+    res->status_message = "Error parsing XML from string: " + std::string(xmlDoc.ErrorStr());
+    res->success = false;
+    return;
+  }
+
+  // Replace attribute values that start with package://xxx with the full paths
+  if (!SubstPackage(xmlDoc.FirstChildElement())) {
+    res->status_message = "Error converting package:// urls";
+    res->success = false;
+    return;
+  }
+
+  // Convert the XML document back to string
+  tinyxml2::XMLPrinter printer;
+  xmlDoc.Accept(&printer);
+  std::string xmlString(printer.CStr());
+
   // Parse XML string into SDF
   factory_sdf_->Root()->ClearElements();
-  if (!sdf::readString(req->xml, factory_sdf_)) {
-    res->status_message = "Failed to parse XML string: \n" + req->xml;
+  if (!sdf::readString(xmlString, factory_sdf_)) {
+    res->status_message = "Failed to populate SDF values from XML string: \n" + req->xml;
     res->success = false;
     return;
   }
