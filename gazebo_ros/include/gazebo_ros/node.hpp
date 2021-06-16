@@ -125,6 +125,21 @@ public:
     return this->qos_;
   }
 
+  inline bool use_sim_time() const
+  {
+    rclcpp::Parameter param("use_sim_time", false);
+    if (get_parameter("use_sim_time", param)) {
+      return param.as_bool();
+    }
+
+    return true;
+  }
+
+  inline builtin_interfaces::msg::Time stamp_now() const
+  {
+    return now();
+  }
+
 private:
   /// Inherit constructor
   using rclcpp::Node::Node;
