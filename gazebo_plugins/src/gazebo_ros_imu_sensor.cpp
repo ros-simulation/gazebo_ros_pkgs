@@ -130,8 +130,9 @@ void GazeboRosImuSensorPrivate::OnUpdate()
   IGN_PROFILE_BEGIN("fill ROS message");
 #endif
   // Fill message with latest sensor data
-  msg_->header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
-    sensor_->LastUpdateTime());
+  msg_->header.stamp = ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(sensor_->LastUpdateTime()) :
+    ros_node_->stamp_now();
   msg_->orientation =
     gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(sensor_->Orientation());
   msg_->angular_velocity = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(

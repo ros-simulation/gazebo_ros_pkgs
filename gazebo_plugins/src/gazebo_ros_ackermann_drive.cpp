@@ -596,7 +596,9 @@ void GazeboRosAckermannDrivePrivate::UpdateOdometryWorld()
 void GazeboRosAckermannDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
 {
   geometry_msgs::msg::TransformStamped msg;
-  msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+  msg.header.stamp = ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time) :
+    ros_node_->stamp_now();
   msg.header.frame_id = odometry_frame_;
   msg.child_frame_id = robot_base_frame_;
   msg.transform.translation =
@@ -612,7 +614,9 @@ void GazeboRosAckermannDrivePrivate::PublishWheelsTf(const gazebo::common::Time 
     auto pose = joint->GetChild()->WorldPose() - model_->WorldPose();
 
     geometry_msgs::msg::TransformStamped msg;
-    msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+    msg.header.stamp = ros_node_->use_sim_time() ?
+      gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time) :
+      ros_node_->stamp_now();
     msg.header.frame_id = robot_base_frame_;
     msg.child_frame_id = joint->GetChild()->GetName();
     msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose.Pos());
@@ -642,7 +646,9 @@ void GazeboRosAckermannDrivePrivate::PublishOdometryMsg(const gazebo::common::Ti
   // Set header
   odom_.header.frame_id = odometry_frame_;
   odom_.child_frame_id = robot_base_frame_;
-  odom_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+  odom_.header.stamp = ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time) :
+    ros_node_->stamp_now();
 
   // Publish
   odometry_pub_->publish(odom_);

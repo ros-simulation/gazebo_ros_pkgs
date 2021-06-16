@@ -307,13 +307,17 @@ void GazeboRosPlanarMovePrivate::UpdateOdometry(const gazebo::common::Time & _cu
   odom_.twist.twist.linear.y = cosf(yaw) * linear.Y() - sinf(yaw) * linear.X();
 
   // Set timestamp
-  odom_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+  odom_.header.stamp = ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time) :
+    ros_node_->stamp_now();
 }
 
 void GazeboRosPlanarMovePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
 {
   geometry_msgs::msg::TransformStamped msg;
-  msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+  msg.header.stamp = ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time) :
+    ros_node_->stamp_now();
   msg.header.frame_id = odometry_frame_;
   msg.child_frame_id = robot_base_frame_;
   msg.transform = gazebo_ros::Convert<geometry_msgs::msg::Transform>(odom_.pose.pose);

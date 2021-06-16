@@ -175,7 +175,9 @@ void GazeboRosJointStatePublisherPrivate::OnUpdate(const gazebo::common::UpdateI
   // Populate message
   sensor_msgs::msg::JointState joint_state;
 
-  joint_state.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
+  joint_state.header.stamp = ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time) :
+    ros_node_->stamp_now();
   joint_state.name.resize(joints_.size());
   joint_state.position.resize(joints_.size());
   joint_state.velocity.resize(joints_.size());
