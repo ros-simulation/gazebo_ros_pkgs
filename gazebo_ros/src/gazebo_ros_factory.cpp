@@ -56,12 +56,6 @@ public:
     gazebo_msgs::srv::GetModelList::Request::SharedPtr,
     gazebo_msgs::srv::GetModelList::Response::SharedPtr res);
 
-  /// Recursively iterate over elements of XML document and substitute all attribute values
-  /// that start with package:// with the resolved absolute path to the file.
-  /// \param[in] elem The root element of the document
-  /// \returns True on success, false on error.
-  bool SubstPackage(tinyxml2::XMLElement * elem);
-
   /// \brief Function for inserting an entity into Gazebo from ROS Service Call.
   /// Supported formats are SDF and URDF and works with both models and lights.
   /// \param[in] req Request
@@ -76,6 +70,15 @@ public:
   void DeleteEntity(
     gazebo_msgs::srv::DeleteEntity::Request::SharedPtr req,
     gazebo_msgs::srv::DeleteEntity::Response::SharedPtr res);
+
+  /// Recursively iterate over elements of XML document and substitute all attribute and
+  /// text values that start with package:// with the resolved absolute path to the file.
+  /// \param[in] elem The root element of the document
+  void SubstPackage(tinyxml2::XMLElement * elem);
+
+  /// \brief Resolve single package:// url.
+  /// \returns A new text with the resolved url.
+  std::string ResolvePackage(std::string text);
 
   /// Iterate over all child elements and add <ros><namespace> tags to the <plugin> tags.
   /// \param[out] _elem SDF element.
@@ -185,45 +188,6 @@ void GazeboRosFactoryPrivate::GetModelList(
   res->success = true;
 }
 
-bool GazeboRosFactoryPrivate::SubstPackage(tinyxml2::XMLElement * element)
-{
-  if (!element) {
-    return true;
-  }
-
-  for (auto attribute = element->FirstAttribute(); attribute != nullptr;
-    attribute = attribute->Next())
-  {
-    std::string attr(attribute->Value());
-    if (attr.rfind("package://", 0) == 0) {
-      attr.erase(0, strlen("package://"));
-      size_t pos = attr.find("/");
-      if (pos == std::string::npos) {
-        return false;
-      }
-
-      std::string package = attr.substr(0, pos);
-      attr.erase(0, pos);
-
-      std::string package_path;
-      try {
-        package_path = ament_index_cpp::get_package_share_directory(package);
-      } catch (const ament_index_cpp::PackageNotFoundError &) {
-        return false;
-      }
-
-      element->SetAttribute(attribute->Name(), (package_path + attr).c_str());
-    }
-  }
-
-  // Recursively call the function for child elements
-  if (!SubstPackage(element->FirstChildElement())) {
-    return false;
-  }
-
-  return SubstPackage(element->NextSiblingElement());
-}
-
 void GazeboRosFactoryPrivate::SpawnEntity(
   gazebo_msgs::srv::SpawnEntity::Request::SharedPtr req,
   gazebo_msgs::srv::SpawnEntity::Response::SharedPtr res)
@@ -238,9 +202,11 @@ void GazeboRosFactoryPrivate::SpawnEntity(
     return;
   }
 
-  // Replace attribute values that start with package://xxx with the full paths
-  if (!SubstPackage(xmlDoc.FirstChildElement())) {
-    res->status_message = "Error converting package:// urls";
+  try {
+    // Replace attribute and text values that start with package://xxx with the full paths
+    SubstPackage(xmlDoc.FirstChildElement());
+  } catch (const std::logic_error & e) {
+    res->status_message = "Error converting package:// urls: " + std::string(e.what());
     res->success = false;
     return;
   }
@@ -411,6 +377,49 @@ void GazeboRosFactoryPrivate::DeleteEntity(
 
   res->success = true;
   res->status_message = "Successfully deleted entity [" + req->name + "]";
+}
+
+void GazeboRosFactoryPrivate::SubstPackage(tinyxml2::XMLElement * element)
+{
+  if (!element) {
+    return;
+  }
+
+  for (auto attribute = element->FirstAttribute(); attribute != nullptr;
+    attribute = attribute->Next())
+  {
+    element->SetAttribute(attribute->Name(), ResolvePackage(attribute->Value()).c_str());
+  }
+
+  const char * text = element->GetText();
+  if (text) {
+    element->SetText(ResolvePackage(text).c_str());
+  }
+
+  // Recursively call the function for child elements
+  SubstPackage(element->FirstChildElement());
+
+  return SubstPackage(element->NextSiblingElement());
+}
+
+std::string GazeboRosFactoryPrivate::ResolvePackage(std::string text)
+{
+  if (text.rfind("package://", 0) != 0) {
+    return text;
+  }
+
+  text.erase(0, strlen("package://"));
+  size_t pos = text.find("/");
+  if (pos == std::string::npos) {
+    throw std::invalid_argument("Invalid package:// url format");
+  }
+
+  std::string package = text.substr(0, pos);
+  text.erase(0, pos);
+
+  std::string package_path = ament_index_cpp::get_package_share_directory(package);
+
+  return package_path + text;
 }
 
 void GazeboRosFactoryPrivate::AddNamespace(
