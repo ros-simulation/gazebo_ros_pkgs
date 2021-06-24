@@ -142,6 +142,10 @@ namespace gazebo {
       double update_period_;
       common::Time last_update_time_;
 
+      double covariance_x_;
+      double covariance_y_;
+      double covariance_yaw_;
+
       OdomSource odom_source_;
       geometry_msgs::Pose2D pose_encoder_;
       common::Time last_odom_update_;
