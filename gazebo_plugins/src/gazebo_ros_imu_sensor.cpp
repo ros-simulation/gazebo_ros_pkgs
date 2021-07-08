@@ -77,19 +77,19 @@ void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/
     accelerometer_data = sensor->LinearAcceleration();
     gyroscope_data = sensor->AngularVelocity();
 
-    //Guassian noise is applied to all measurements
-    imu_msg.orientation.x = orientation.X() + GuassianKernel(0,gaussian_noise);
-    imu_msg.orientation.y = orientation.Y() + GuassianKernel(0,gaussian_noise);
-    imu_msg.orientation.z = orientation.Z() + GuassianKernel(0,gaussian_noise);
-    imu_msg.orientation.w = orientation.W() + GuassianKernel(0,gaussian_noise);
+    //Gaussian noise is applied to all measurements
+    imu_msg.orientation.x = orientation.X() + GaussianKernel(0,gaussian_noise);
+    imu_msg.orientation.y = orientation.Y() + GaussianKernel(0,gaussian_noise);
+    imu_msg.orientation.z = orientation.Z() + GaussianKernel(0,gaussian_noise);
+    imu_msg.orientation.w = orientation.W() + GaussianKernel(0,gaussian_noise);
 
-    imu_msg.linear_acceleration.x = accelerometer_data.X() + GuassianKernel(0,gaussian_noise);
-    imu_msg.linear_acceleration.y = accelerometer_data.Y() + GuassianKernel(0,gaussian_noise);
-    imu_msg.linear_acceleration.z = accelerometer_data.Z() + GuassianKernel(0,gaussian_noise);
+    imu_msg.linear_acceleration.x = accelerometer_data.X() + GaussianKernel(0,gaussian_noise);
+    imu_msg.linear_acceleration.y = accelerometer_data.Y() + GaussianKernel(0,gaussian_noise);
+    imu_msg.linear_acceleration.z = accelerometer_data.Z() + GaussianKernel(0,gaussian_noise);
 
-    imu_msg.angular_velocity.x = gyroscope_data.X() + GuassianKernel(0,gaussian_noise);
-    imu_msg.angular_velocity.y = gyroscope_data.Y() + GuassianKernel(0,gaussian_noise);
-    imu_msg.angular_velocity.z = gyroscope_data.Z() + GuassianKernel(0,gaussian_noise);
+    imu_msg.angular_velocity.x = gyroscope_data.X() + GaussianKernel(0,gaussian_noise);
+    imu_msg.angular_velocity.y = gyroscope_data.Y() + GaussianKernel(0,gaussian_noise);
+    imu_msg.angular_velocity.z = gyroscope_data.Z() + GaussianKernel(0,gaussian_noise);
 
     //covariance is related to the Gaussian noise
     double gn2 = gaussian_noise*gaussian_noise;
@@ -117,7 +117,7 @@ void gazebo::GazeboRosImuSensor::UpdateChild(const gazebo::common::UpdateInfo &/
   last_time = current_time;
 }
 
-double gazebo::GazeboRosImuSensor::GuassianKernel(double mu, double sigma)
+double gazebo::GazeboRosImuSensor::GaussianKernel(double mu, double sigma)
 {
   // generation of two normalized uniform random variables
   double U1 = static_cast<double>(rand_r(&seed)) / static_cast<double>(RAND_MAX);

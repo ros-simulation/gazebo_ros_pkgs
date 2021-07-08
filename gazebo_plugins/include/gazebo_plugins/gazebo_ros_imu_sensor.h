@@ -61,7 +61,7 @@ namespace gazebo
     /// \brief Gaussian noise generator.
     /// \param mu offset value.
     /// \param sigma scaling value.
-    double GuassianKernel(double mu, double sigma);
+    double GaussianKernel(double mu, double sigma);
     
     /// \brief Ros NodeHandle pointer.
     ros::NodeHandle* node;
