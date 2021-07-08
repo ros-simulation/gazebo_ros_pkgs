@@ -211,9 +211,9 @@ void GazeboRosInitPrivate::onPerformanceMetrics(
   }
 
   // Check if parameter was enabled
-  bool check_enable_performance_metrics ;
+  bool check_enable_performance_metrics;
   this->ros_node_->get_parameter("enable_performance_metrics", check_enable_performance_metrics);
-  if (check_enable_performance_metrics){
+  if (check_enable_performance_metrics) {
     performance_metrics_pub_->publish(msg_ros);
   }
 }
