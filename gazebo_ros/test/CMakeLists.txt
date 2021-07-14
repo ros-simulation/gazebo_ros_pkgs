@@ -94,3 +94,4 @@ add_launch_test(mock_entity_spawner.test.py
     "mock_robot_state_publisher:=${CMAKE_CURRENT_BINARY_DIR}/mock_robot_state_publisher"
     "mock_gazebo_ros_factory:=${CMAKE_CURRENT_BINARY_DIR}/mock_gazebo_ros_factory"
 )
+add_launch_test(disable_perf_metrics.test.py)
