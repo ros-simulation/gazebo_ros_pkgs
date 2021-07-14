@@ -20,10 +20,12 @@ import launch.actions
 import launch_testing
 import launch_testing.asserts
 import pytest
+import os
 
 
 @pytest.mark.launch_test
 def generate_test_description():
+    os.chdir(os.path.dirname(__file__))
     return launch.LaunchDescription([
         launch.actions.ExecuteProcess(
             cmd=['gzserver', '-s', 'libgazebo_ros_factory.so', '-s', 'libgazebo_ros_init.so'],
