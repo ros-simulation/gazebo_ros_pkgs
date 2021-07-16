@@ -109,6 +109,9 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   else
     this->offset_.Rot() = ignition::math::Quaterniond(_sdf->GetElement("rpyOffset")->Get<ignition::math::Vector3d>());
 
+  if (!_sdf->HasElement("ignition::corrected_offsets"))
+    this->correctedOffsets_ = _sdf->Get<bool>("ignition::corrected_offsets");
+
   if (!_sdf->HasElement("gaussianNoise"))
   {
     ROS_DEBUG_NAMED("p3d", "p3d plugin missing <gaussianNoise>, defaults to 0.0");
@@ -296,12 +299,11 @@ void GazeboRosP3D::UpdateChild()
         // apply rpy offsets
         // rotation calculation needs to be reversed for sdformat versions
         // > 6.2.0, see https://github.com/osrf/sdformat/pull/500
-#if SDF_MAJOR_VERSION < 6 || (SDF_MAJOR_VERSION == 6 && SDF_MINOR_VERSION <= 2)
-        pose.Rot() = this->offset_.Rot()*pose.Rot();
-#else
-        pose.Rot() = pose.Rot()*this->offset_.Rot();
-#endif
-        pose.Rot() = pose.Rot()*this->offset_.Rot();
+        if (this->correctedOffsets_)
+          pose.Rot() = pose.Rot()*this->offset_.Rot();
+        else
+          pose.Rot() = this->offset_.Rot()*pose.Rot();
+
         pose.Rot().Normalize();
 
         // compute accelerations (not used)
