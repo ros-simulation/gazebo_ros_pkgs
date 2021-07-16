@@ -115,7 +115,7 @@ void GazeboRosIMU::LoadThread()
   else
     this->offset_.Rot() = ignition::math::Quaterniond(this->sdf->Get<ignition::math::Vector3d>("rpyOffset"));
 
-  if (!this->sdf->HasElement("ignition::corrected_offsets"))
+  if (this->sdf->HasElement("ignition::corrected_offsets"))
     this->correctedOffsets_ = this->sdf->Get<bool>("ignition::corrected_offsets");
 
   if (!this->sdf->HasElement("updateRate"))

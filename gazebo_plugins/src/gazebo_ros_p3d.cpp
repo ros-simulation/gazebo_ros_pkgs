@@ -19,8 +19,6 @@
 #include <tf/tf.h>
 #include <stdlib.h>
 
-#include <sdf/sdf_config.h>
-
 #include "gazebo_plugins/gazebo_ros_p3d.h"
 #include <ignition/math/Rand.hh>
 
@@ -109,7 +107,7 @@ void GazeboRosP3D::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   else
     this->offset_.Rot() = ignition::math::Quaterniond(_sdf->GetElement("rpyOffset")->Get<ignition::math::Vector3d>());
 
-  if (!_sdf->HasElement("ignition::corrected_offsets"))
+  if (_sdf->HasElement("ignition::corrected_offsets"))
     this->correctedOffsets_ = _sdf->Get<bool>("ignition::corrected_offsets");
 
   if (!_sdf->HasElement("gaussianNoise"))
