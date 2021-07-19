@@ -125,6 +125,17 @@ void GazeboRosImuSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 
 void GazeboRosImuSensorPrivate::OnUpdate()
 {
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      this->ros_node_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
+
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE("GazeboRosImuSensorPrivate::OnUpdate");
   IGN_PROFILE_BEGIN("fill ROS message");

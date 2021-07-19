@@ -619,6 +619,17 @@ void GazeboRosDiffDrivePrivate::UpdateOdometryWorld()
 
 void GazeboRosDiffDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
 {
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      this->ros_node_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
+
   geometry_msgs::msg::TransformStamped msg;
   msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
   msg.header.frame_id = odometry_frame_;
@@ -632,6 +643,17 @@ void GazeboRosDiffDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _
 
 void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _current_time)
 {
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      this->ros_node_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
+
   for (unsigned int i = 0; i < 2 * num_wheel_pairs_; ++i) {
     auto pose_wheel = joints_[i]->GetChild()->RelativePose();
 
@@ -648,6 +670,17 @@ void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _cu
 
 void GazeboRosDiffDrivePrivate::PublishOdometryMsg(const gazebo::common::Time & _current_time)
 {
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      this->ros_node_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
+
   // Set covariance
   odom_.pose.covariance[0] = covariance_[0];
   odom_.pose.covariance[7] = covariance_[1];

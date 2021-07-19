@@ -294,6 +294,17 @@ void GazeboRosPlanarMovePrivate::OnCmdVel(const geometry_msgs::msg::Twist::Share
 
 void GazeboRosPlanarMovePrivate::UpdateOdometry(const gazebo::common::Time & _current_time)
 {
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      this->ros_node_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
+
   auto pose = model_->WorldPose();
   odom_.pose.pose = gazebo_ros::Convert<geometry_msgs::msg::Pose>(pose);
 
@@ -312,6 +323,17 @@ void GazeboRosPlanarMovePrivate::UpdateOdometry(const gazebo::common::Time & _cu
 
 void GazeboRosPlanarMovePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
 {
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      this->ros_node_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
+
   geometry_msgs::msg::TransformStamped msg;
   msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
   msg.header.frame_id = odometry_frame_;

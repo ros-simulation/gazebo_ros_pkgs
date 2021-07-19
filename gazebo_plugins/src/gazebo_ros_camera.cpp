@@ -563,6 +563,16 @@ void GazeboRosCamera::NewFrame(
   const int _camera_num)
 {
   // TODO(shivesh) Enable / disable sensor once SubscriberStatusCallback has been ported to ROS2
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  impl_->ros_node_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    impl_->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
 
   gazebo::common::Time sensor_update_time;
 
@@ -646,6 +656,17 @@ void GazeboRosCamera::OnNewDepthFrame(
   IGN_PROFILE_BEGIN("fill ROS depth message");
 #endif
   // TODO(shivesh) Enable / disable sensor once SubscriberStatusCallback has been ported to ROS2
+
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  impl_->ros_node_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    impl_->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
 
   auto sensor_update_time = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
     DepthCameraPlugin::parentSensor->LastMeasurementTime());

@@ -171,6 +171,17 @@ void GazeboRosFTSensor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _
 
 void GazeboRosFTSensorPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
+  // Add warning for use_sim_time parameter
+  bool check_sim_time;
+  this->rosnode_->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      this->rosnode_->get_logger(),
+      "Setting use_sim_time to false is not allowed, "
+      "messages will continue to use simulation timestamps");
+    this->rosnode_->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
+
   gazebo::common::Time current_time = _info.simTime;
 
   if (current_time < last_time_) {
