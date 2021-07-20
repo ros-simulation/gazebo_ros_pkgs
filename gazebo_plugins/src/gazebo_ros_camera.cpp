@@ -512,6 +512,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       result.successful = true;
       for (const auto & parameter : parameters) {
         std::string param_name = parameter.get_name();
+        if (param_name == "use_sim_time") {
+          RCLCPP_WARN(impl_->ros_node_->get_logger(), "use_sim_time will be ignored and messages will " 
+          "continue to use simulation timestamps");
+        }
         if (param_name == "update_rate") {
           if (nullptr != impl_->trigger_sub_) {
             RCLCPP_WARN(
@@ -563,17 +567,6 @@ void GazeboRosCamera::NewFrame(
   const int _camera_num)
 {
   // TODO(shivesh) Enable / disable sensor once SubscriberStatusCallback has been ported to ROS2
-  // Add warning for use_sim_time parameter
-  bool check_sim_time;
-  impl_->ros_node_->get_parameter("use_sim_time", check_sim_time);
-  if (!check_sim_time) {
-    RCLCPP_WARN(
-      impl_->ros_node_->get_logger(),
-      "Setting use_sim_time to false is not allowed, "
-      "messages will continue to use simulation timestamps");
-    impl_->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
-  }
-
   gazebo::common::Time sensor_update_time;
 
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {
@@ -656,17 +649,6 @@ void GazeboRosCamera::OnNewDepthFrame(
   IGN_PROFILE_BEGIN("fill ROS depth message");
 #endif
   // TODO(shivesh) Enable / disable sensor once SubscriberStatusCallback has been ported to ROS2
-
-  // Add warning for use_sim_time parameter
-  bool check_sim_time;
-  impl_->ros_node_->get_parameter("use_sim_time", check_sim_time);
-  if (!check_sim_time) {
-    RCLCPP_WARN(
-      impl_->ros_node_->get_logger(),
-      "Setting use_sim_time to false is not allowed, "
-      "messages will continue to use simulation timestamps");
-    impl_->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
-  }
 
   auto sensor_update_time = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
     DepthCameraPlugin::parentSensor->LastMeasurementTime());

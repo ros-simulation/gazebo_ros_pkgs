@@ -99,6 +99,10 @@ GazeboRosHandOfGod::GazeboRosHandOfGod()
 
 GazeboRosHandOfGod::~GazeboRosHandOfGod()
 {
+  if (param_change_callback_handler_) {
+    impl_->ros_node_->remove_on_set_parameters_callback(param_change_callback_handler_.get());
+  }
+  param_change_callback_handler_.reset();
 }
 
 void GazeboRosHandOfGod::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
@@ -138,21 +142,30 @@ void GazeboRosHandOfGod::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosHandOfGodPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+
+  // Parameter change callback
+  auto param_change_callback =
+  [this](std::vector<rclcpp::Parameter> parameters) {
+    auto result = rcl_interfaces::msg::SetParametersResult();
+    result.successful = true;
+
+    for (const auto & parameter : parameters){
+      auto param_name = parameter.get_name();
+      if (param_name == "use_sim_time"){
+        RCLCPP_WARN(impl_->ros_node_->get_logger(), "use_sim_time will be ignored and messages will " 
+        "continue to use simulation timestamps");
+      }
+    }
+    
+    return result;
+  };
+
+  param_change_callback_handler_ =
+    impl_->ros_node_->add_on_set_parameters_callback(param_change_callback); 
 }
 
 void GazeboRosHandOfGodPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
 {
-  // Add warning for use_sim_time parameter
-  bool check_sim_time;
-  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
-  if (!check_sim_time) {
-    RCLCPP_WARN(
-      this->ros_node_->get_logger(),
-      "Setting use_sim_time to false is not allowed, "
-      "messages will continue to use simulation timestamps");
-    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
-  }
-
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE("GazeboRosHandOfGodPrivate::OnUpdate");
   IGN_PROFILE_BEGIN("lookupTransform");

@@ -231,6 +231,10 @@ GazeboRosDiffDrive::GazeboRosDiffDrive()
 
 GazeboRosDiffDrive::~GazeboRosDiffDrive()
 {
+  if (param_change_callback_handler_) {
+    impl_->ros_node_->remove_on_set_parameters_callback(param_change_callback_handler_.get());
+  }
+  param_change_callback_handler_.reset();
 }
 
 void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
@@ -408,6 +412,26 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosDiffDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+
+  // Parameter change callback
+  auto param_change_callback =
+  [this](std::vector<rclcpp::Parameter> parameters) {
+    auto result = rcl_interfaces::msg::SetParametersResult();
+    result.successful = true;
+
+    for (const auto & parameter : parameters){
+      auto param_name = parameter.get_name();
+      if (param_name == "use_sim_time"){
+        RCLCPP_WARN(impl_->ros_node_->get_logger(), "use_sim_time will be ignored and messages will " 
+        "continue to use simulation timestamps");
+      }
+    }
+    
+    return result;
+  };
+
+  param_change_callback_handler_ =
+    impl_->ros_node_->add_on_set_parameters_callback(param_change_callback); 
 }
 
 void GazeboRosDiffDrive::Reset()
@@ -619,17 +643,6 @@ void GazeboRosDiffDrivePrivate::UpdateOdometryWorld()
 
 void GazeboRosDiffDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
 {
-  // Add warning for use_sim_time parameter
-  bool check_sim_time;
-  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
-  if (!check_sim_time) {
-    RCLCPP_WARN(
-      this->ros_node_->get_logger(),
-      "Setting use_sim_time to false is not allowed, "
-      "messages will continue to use simulation timestamps");
-    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
-  }
-
   geometry_msgs::msg::TransformStamped msg;
   msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
   msg.header.frame_id = odometry_frame_;
@@ -643,17 +656,6 @@ void GazeboRosDiffDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _
 
 void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _current_time)
 {
-  // Add warning for use_sim_time parameter
-  bool check_sim_time;
-  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
-  if (!check_sim_time) {
-    RCLCPP_WARN(
-      this->ros_node_->get_logger(),
-      "Setting use_sim_time to false is not allowed, "
-      "messages will continue to use simulation timestamps");
-    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
-  }
-
   for (unsigned int i = 0; i < 2 * num_wheel_pairs_; ++i) {
     auto pose_wheel = joints_[i]->GetChild()->RelativePose();
 
@@ -670,17 +672,6 @@ void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _cu
 
 void GazeboRosDiffDrivePrivate::PublishOdometryMsg(const gazebo::common::Time & _current_time)
 {
-  // Add warning for use_sim_time parameter
-  bool check_sim_time;
-  this->ros_node_->get_parameter("use_sim_time", check_sim_time);
-  if (!check_sim_time) {
-    RCLCPP_WARN(
-      this->ros_node_->get_logger(),
-      "Setting use_sim_time to false is not allowed, "
-      "messages will continue to use simulation timestamps");
-    this->ros_node_->set_parameter(rclcpp::Parameter("use_sim_time", true));
-  }
-
   // Set covariance
   odom_.pose.covariance[0] = covariance_[0];
   odom_.pose.covariance[7] = covariance_[1];
