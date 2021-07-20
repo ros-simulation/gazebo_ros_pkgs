@@ -19,7 +19,6 @@
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
-#include <rclcpp/rclcpp.hpp>
 #ifdef IGN_PROFILER_ENABLE
 #include <ignition/common/Profiler.hh>
 #endif
@@ -28,7 +27,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace gazebo_plugins
 {
@@ -58,10 +56,6 @@ GazeboRosGpsSensor::GazeboRosGpsSensor()
 
 GazeboRosGpsSensor::~GazeboRosGpsSensor()
 {
-  if (param_change_callback_handler_) {
-    impl_->ros_node_->remove_on_set_parameters_callback(param_change_callback_handler_.get());
-  }
-  param_change_callback_handler_.reset();
 }
 
 void GazeboRosGpsSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
@@ -104,28 +98,6 @@ void GazeboRosGpsSensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 
   impl_->sensor_update_event_ = impl_->sensor_->ConnectUpdated(
     std::bind(&GazeboRosGpsSensorPrivate::OnUpdate, impl_.get()));
-
-  // Parameter change callback
-  auto param_change_callback =
-    [this](std::vector<rclcpp::Parameter> parameters) {
-      auto result = rcl_interfaces::msg::SetParametersResult();
-      result.successful = true;
-
-      for (const auto & parameter : parameters) {
-        auto param_name = parameter.get_name();
-        if (param_name == "use_sim_time") {
-          RCLCPP_WARN(
-            impl_->ros_node_->get_logger(),
-            "use_sim_time will be ignored and messages will "
-            "continue to use simulation timestamps");
-        }
-      }
-
-      return result;
-    };
-
-  param_change_callback_handler_ =
-    impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
 }
 
 void GazeboRosGpsSensorPrivate::OnUpdate()
@@ -134,7 +106,6 @@ void GazeboRosGpsSensorPrivate::OnUpdate()
   IGN_PROFILE("GazeboRosGpsSensorPrivate::OnUpdate");
   IGN_PROFILE_BEGIN("fill ROS message");
   #endif
-
   // Fill message with latest sensor data
   msg_->header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
     sensor_->LastUpdateTime());

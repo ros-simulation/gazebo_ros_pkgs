@@ -34,7 +34,6 @@
 #define GAZEBO_PLUGINS__GAZEBO_ROS_JOINT_STATE_PUBLISHER_HPP_
 
 #include <gazebo/common/Plugin.hh>
-#include <rclcpp/rclcpp.hpp>
 
 #include <memory>
 
@@ -90,9 +89,6 @@ private:
   /// Callback to be called at every simulation iteration.
   /// Private data pointer
   std::unique_ptr<GazeboRosJointStatePublisherPrivate> impl_;
-
-  // A handler for the param change callback.
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;
 };
 }  // namespace gazebo_plugins
 #endif  // GAZEBO_PLUGINS__GAZEBO_ROS_JOINT_STATE_PUBLISHER_HPP_

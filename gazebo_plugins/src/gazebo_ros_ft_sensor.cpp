@@ -35,7 +35,6 @@
 
 #include <string>
 #include <memory>
-#include <vector>
 
 namespace gazebo_plugins
 {
@@ -88,11 +87,6 @@ GazeboRosFTSensor::GazeboRosFTSensor()
 GazeboRosFTSensor::~GazeboRosFTSensor()
 {
   impl_->update_connection_.reset();
-
-  if (param_change_callback_handler_) {
-    impl_->rosnode_->remove_on_set_parameters_callback(param_change_callback_handler_.get());
-  }
-  param_change_callback_handler_.reset();
 }
 
 void GazeboRosFTSensor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
@@ -173,28 +167,6 @@ void GazeboRosFTSensor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _
 
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosFTSensorPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
-
-  // Parameter change callback
-  auto param_change_callback =
-    [this](std::vector<rclcpp::Parameter> parameters) {
-      auto result = rcl_interfaces::msg::SetParametersResult();
-      result.successful = true;
-
-      for (const auto & parameter : parameters) {
-        auto param_name = parameter.get_name();
-        if (param_name == "use_sim_time") {
-          RCLCPP_WARN(
-            impl_->rosnode_->get_logger(),
-            "use_sim_time will be ignored and messages will "
-            "continue to use simulation timestamps");
-        }
-      }
-
-      return result;
-    };
-
-  param_change_callback_handler_ =
-    impl_->rosnode_->add_on_set_parameters_callback(param_change_callback);
 }
 
 void GazeboRosFTSensorPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)

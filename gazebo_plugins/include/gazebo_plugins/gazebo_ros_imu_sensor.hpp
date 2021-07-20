@@ -18,7 +18,6 @@
 
 #include <gazebo/plugins/ImuSensorPlugin.hh>
 #include <sensor_msgs/msg/imu.hpp>
-#include <rclcpp/rclcpp.hpp>
 
 #include <string>
 #include <memory>
@@ -60,9 +59,6 @@ public:
 private:
   /// Private data pointer
   std::unique_ptr<GazeboRosImuSensorPrivate> impl_;
-
-  // A handler for the param change callback.
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;
 };
 
 }  // namespace gazebo_plugins

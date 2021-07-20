@@ -16,7 +16,6 @@
 #define GAZEBO_PLUGINS__GAZEBO_ROS_ACKERMANN_DRIVE_HPP_
 
 #include <gazebo/common/Plugin.hh>
-#include <rclcpp/rclcpp.hpp>
 
 #include <memory>
 
@@ -98,9 +97,6 @@ protected:
 private:
   /// Private data pointer
   std::unique_ptr<GazeboRosAckermannDrivePrivate> impl_;
-
-  // A handler for the param change callback.
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;
 };
 }  // namespace gazebo_plugins
 

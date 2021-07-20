@@ -19,7 +19,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/sensors/GpsSensor.hh>
 #include <gazebo/common/Events.hh>
-#include <rclcpp/rclcpp.hpp>
+
 #include <memory>
 
 namespace gazebo_plugins
@@ -59,9 +59,6 @@ public:
 private:
   /// Private data pointer
   std::unique_ptr<GazeboRosGpsSensorPrivate> impl_;
-
-  // A handler for the param change callback.
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;
 };
 
 }  // namespace gazebo_plugins

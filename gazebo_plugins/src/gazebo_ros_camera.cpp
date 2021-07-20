@@ -512,12 +512,6 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       result.successful = true;
       for (const auto & parameter : parameters) {
         std::string param_name = parameter.get_name();
-        if (param_name == "use_sim_time") {
-          RCLCPP_WARN(
-            impl_->ros_node_->get_logger(),
-            "use_sim_time will be ignored and messages will "
-            "continue to use simulation timestamps");
-        }
         if (param_name == "update_rate") {
           if (nullptr != impl_->trigger_sub_) {
             RCLCPP_WARN(
@@ -569,6 +563,7 @@ void GazeboRosCamera::NewFrame(
   const int _camera_num)
 {
   // TODO(shivesh) Enable / disable sensor once SubscriberStatusCallback has been ported to ROS2
+
   gazebo::common::Time sensor_update_time;
 
   if (impl_->sensor_type_ == GazeboRosCameraPrivate::CAMERA) {

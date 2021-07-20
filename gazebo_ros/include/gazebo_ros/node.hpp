@@ -129,6 +129,9 @@ private:
   /// Inherit constructor
   using rclcpp::Node::Node;
 
+  // A handler for the param change callback.
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler;
+
   /// Points to #static_executor_, so that when all #gazebo_ros::Node instances are destroyed, the
   /// executor thread is too
   std::shared_ptr<Executor> executor_;
@@ -176,6 +179,27 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
 
   // Add new node to the executor so its callbacks are called
   node->executor_->add_node(node);
+
+  // Parameter change callback
+  auto param_change_callback =
+    [node](std::vector<rclcpp::Parameter> parameters) {
+      auto result = rcl_interfaces::msg::SetParametersResult();
+      result.successful = true;
+
+      for (const auto & parameter : parameters) {
+        auto param_name = parameter.get_name();
+        if (param_name == "use_sim_time") {
+          RCLCPP_WARN(
+            node->get_logger(),
+            "use_sim_time will be ignored and messages will "
+            "continue to use simulation timestamps");
+        }
+      }
+      return result;
+    };
+
+  node->param_change_callback_handler =
+    node->add_on_set_parameters_callback(param_change_callback);
 
   return node;
 }

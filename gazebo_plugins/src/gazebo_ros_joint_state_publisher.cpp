@@ -83,10 +83,6 @@ GazeboRosJointStatePublisher::GazeboRosJointStatePublisher()
 
 GazeboRosJointStatePublisher::~GazeboRosJointStatePublisher()
 {
-  if (param_change_callback_handler_) {
-    impl_->ros_node_->remove_on_set_parameters_callback(param_change_callback_handler_.get());
-  }
-  param_change_callback_handler_.reset();
 }
 
 void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
@@ -151,28 +147,6 @@ void GazeboRosJointStatePublisher::Load(gazebo::physics::ModelPtr model, sdf::El
   // Callback on every iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosJointStatePublisherPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
-
-  // Parameter change callback
-  auto param_change_callback =
-    [this](std::vector<rclcpp::Parameter> parameters) {
-      auto result = rcl_interfaces::msg::SetParametersResult();
-      result.successful = true;
-
-      for (const auto & parameter : parameters) {
-        auto param_name = parameter.get_name();
-        if (param_name == "use_sim_time") {
-          RCLCPP_WARN(
-            impl_->ros_node_->get_logger(),
-            "use_sim_time will be ignored and messages will "
-            "continue to use simulation timestamps");
-        }
-      }
-
-      return result;
-    };
-
-  param_change_callback_handler_ =
-    impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
 }
 
 void GazeboRosJointStatePublisherPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
