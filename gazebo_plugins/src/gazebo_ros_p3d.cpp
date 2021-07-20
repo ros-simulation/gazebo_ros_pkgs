@@ -36,6 +36,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace gazebo_plugins
 {
@@ -204,16 +205,17 @@ void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
     for (const auto & parameter : parameters){
       auto param_name = parameter.get_name();
       if (param_name == "use_sim_time"){
-        RCLCPP_WARN(impl_->ros_node_->get_logger(), "use_sim_time will be ignored and messages will " 
+        RCLCPP_WARN(impl_->ros_node_->get_logger(),
+        "use_sim_time will be ignored and messages will "
         "continue to use simulation timestamps");
       }
     }
-    
+
     return result;
   };
 
   param_change_callback_handler_ =
-    impl_->ros_node_->add_on_set_parameters_callback(param_change_callback); 
+    impl_->ros_node_->add_on_set_parameters_callback(param_change_callback);
 }
 
 // Update the controller

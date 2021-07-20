@@ -78,7 +78,7 @@ public:
 private:
   /// Private data pointer
   std::unique_ptr<GazeboRosP3DPrivate> impl_;
-  
+
   // A handler for the param change callback.
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;
 };

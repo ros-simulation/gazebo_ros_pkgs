@@ -513,8 +513,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       for (const auto & parameter : parameters) {
         std::string param_name = parameter.get_name();
         if (param_name == "use_sim_time") {
-          RCLCPP_WARN(impl_->ros_node_->get_logger(), "use_sim_time will be ignored and messages will " 
-          "continue to use simulation timestamps");
+          RCLCPP_WARN(
+            impl_->ros_node_->get_logger(),
+            "use_sim_time will be ignored and messages will "
+            "continue to use simulation timestamps");
         }
         if (param_name == "update_rate") {
           if (nullptr != impl_->trigger_sub_) {

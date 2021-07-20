@@ -443,11 +443,12 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
     for (const auto & parameter : parameters){
       auto param_name = parameter.get_name();
       if (param_name == "use_sim_time"){
-        RCLCPP_WARN(impl_->ros_node_->get_logger(), "use_sim_time will be ignored and messages will " 
+        RCLCPP_WARN(impl_->ros_node_->get_logger(),
+        "use_sim_time will be ignored and messages will "
         "continue to use simulation timestamps");
       }
     }
-    
+
     return result;
   };
 

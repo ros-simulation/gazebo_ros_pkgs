@@ -70,7 +70,7 @@ private:
   std::unique_ptr<GazeboRosHandOfGodPrivate> impl_;
 
   // A handler for the param change callback.
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;  
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;
 };
 }  // namespace gazebo_plugins
 
