@@ -108,15 +108,6 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   // Parse the qos tag
   node->qos_ = gazebo_ros::QoS(sdf, name, ns, node_options);
 
-  // Generate warning on start up if use_sim_time parameter is set
-  bool check_sim_time;
-  node->get_parameter("use_sim_time", check_sim_time);
-  if (!check_sim_time) {
-    RCLCPP_WARN(
-      node->get_logger(), "Startup warning: use_sim_time will be ignored and messages "
-      "will continue to use simulation timestamps");
-  }
-
   return node;
 }
 

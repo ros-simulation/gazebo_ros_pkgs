@@ -178,8 +178,14 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
     static_executor_ = node->executor_;
   }
 
-  // Add new node to the executor so its callbacks are called
-  node->executor_->add_node(node);
+  // Generate warning on start up if use_sim_time parameter is set to false
+  bool check_sim_time;
+  node->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      node->get_logger(), "Startup warning: use_sim_time parameter will be ignored "
+      "by default plugins and ROS messages will continue to use simulation timestamps");
+  }
 
   // Parameter change callback
   auto param_change_callback =
@@ -192,8 +198,8 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
         if (param_name == "use_sim_time") {
           RCLCPP_WARN(
             node->get_logger(),
-            "use_sim_time will be ignored and messages will "
-            "continue to use simulation timestamps");
+            "use_sim_time parameter will be ignored by default plugins "
+            "and ROS messages will continue to use simulation timestamps");
         }
       }
       return result;
@@ -201,6 +207,9 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
 
   node->param_change_callback_handler =
     node->add_on_set_parameters_callback(param_change_callback);
+
+  // Add new node to the executor so its callbacks are called
+  node->executor_->add_node(node);
 
   return node;
 }
