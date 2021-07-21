@@ -852,6 +852,11 @@ uint64_t GazeboRosCamera::GetNumCameras() const
   return impl_->num_cameras_;
 }
 
+gazebo_ros::Node::SharedPtr GazeboRosCamera::GetRosNode() const
+{
+  return impl_->ros_node_;
+}
+
 extern "C" GZ_PLUGIN_VISIBLE gazebo::SensorPlugin * RegisterPlugin();
 gazebo::SensorPlugin * RegisterPlugin()
 {
