@@ -22,46 +22,105 @@ import launch_testing.asserts
 import pytest
 import os
 
+import rclpy
+from gazebo_msgs.msg import PerformanceMetrics
+from rclpy.node import Node
+from rcl_interfaces.msg import Parameter, ParameterValue
+from ros2param.api import call_set_parameters
+import time
+from threading import Thread
+
 
 @pytest.mark.launch_test
 def generate_test_description():
     os.chdir(os.path.dirname(__file__))
     return launch.LaunchDescription([
         launch.actions.ExecuteProcess(
-            cmd=['gzserver', '-s', 'libgazebo_ros_factory.so', '-s', 'libgazebo_ros_init.so'],
+            cmd=['gzserver', '-s', 'libgazebo_ros_init.so'],
             output='screen',
             sigterm_timeout='20',
             sigkill_timeout='20'
-        ),
-        launch.actions.TimerAction(
-            period=2.0,
-            actions=[
-                launch.actions.ExecuteProcess(
-                    cmd=['ros2', 'param', 'set', '/gazebo', 'enable_performance_metrics', 'false'],
-                    output='screen'
-                )
-            ]
-        ),
-        launch.actions.TimerAction(
-            period=7.0,
-            actions=[
-                launch.actions.ExecuteProcess(
-                    cmd=['python3', 'perf_metrics_subscriber.py'],
-                    additional_env={'PYTHONUNBUFFERED': '1'},
-                    output='screen',
-                    sigterm_timeout='1'
-                )
-            ]
         ),
         launch_testing.actions.ReadyToTest()
     ])
 
 
-class TestGoodProcess(unittest.TestCase):
-    def test_disable_performance_metrics(self, proc_output):
-        """ Verify that the parameter can be set  """
-        proc_output.assertWaitFor('Set parameter successful', timeout=10, stream='stdout')
+class MyTestingClass(unittest.TestCase):
+    def test_routine(self):
+        rclpy.init()
+        node = MakeTestNode()
+        node_found = node.wait_for_gazebo_node()
 
-    def test_topic_does_not_publish(self, proc_output):
-        """ Verify that /performance_metrics does not publish anything"""
-        proc_output.assertWaitFor('No messages were published', timeout=10, stream='stdout')
+        if node_found:
+            response = node.set_parameter(False)
+            if response.successful:
+                print("enable_performance_metrics successfully set to false !")
+                node.start_subscriber()
+                time.sleep(2.5)
+
+                if node.msg_count > 0:
+                    print("Received {} messages, test failed".format(node.msg_count))
+                    rclpy.shutdown()
+                    assert False
+                else:
+                    print("No messages were published")
+                    rclpy.shutdown()
+                    assert True
+            else:
+                print("Parameter could not be set, exiting")
+                rclpy.shutdown()
+                assert False
+        else:
+            print("Could not find Gazebo node, exiting")
+            rclpy.shutdown()
+            assert False
+
+
+class MakeTestNode(Node):
+    def __init__(self):
+        super().__init__('testing_node')
+        self.flag_gazebo_node = False
+        self.msg_count = 0
+
+    def wait_for_gazebo_node(self):
+        start = time.time()
+        print("Waiting to find Gazebo Node...")
+        while time.time() - start < 5 and not self.flag_gazebo_node:
+            active_nodes = self.get_node_names()
+            if 'gazebo' in active_nodes:
+                self.flag_gazebo_node = True
+                print("Found the gazebo node !")
+                time.sleep(0.1)
+
+        if not self.flag_gazebo_node:
+            print("Gazebo node was not found !")
+        return self.flag_gazebo_node
+
+    # Set enable_performance_metrics parameter to false
+    def set_parameter(self, state=False):
+        parameter = Parameter()
+        parameter.name = 'enable_performance_metrics'
+
+        temp_value = ParameterValue()
+        temp_value.bool_value = state
+        temp_value.type = 1
+        parameter.value = temp_value
+
+        return call_set_parameters(node=self, node_name="gazebo",
+                                    parameters=[parameter]).results[0]
+
+    # Start listening on messages
+    def start_subscriber(self):
+        self.subscription = self.create_subscription(
+            PerformanceMetrics,
+            'performance_metrics',
+            self.subscriber_callback,
+            10)
+        self.subscription
+
+        # Add a spin thread
+        self.ros_spin_thread = Thread(target=lambda node: rclpy.spin(node), args=(self,))
+        self.ros_spin_thread.start()
+
+    def subscriber_callback(self, data):
+        self.msg_count += 1
