@@ -265,6 +265,9 @@ void GazeboRosBlockLaser::PutLaserData(common::Time &_updateTime)
   this->cloud_msg_.channels.clear();
   this->cloud_msg_.channels.push_back(sensor_msgs::ChannelFloat32());
 
+		// name the channel one for "intensity"
+		this->cloud_msg_.channels[0].name = "intensity";
+
   /***************************************************************/
   /*                                                             */
   /*  point scan from laser                                      */
