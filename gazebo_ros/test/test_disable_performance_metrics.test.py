@@ -56,8 +56,12 @@ class TestPerformanceMetricsParam_disable(unittest.TestCase):
         rclpy.shutdown()
 
     def test_parameter_disable(self):
-        """Checks if /performance_metrics topic stops publishing if\
-        enable_performance_metrics parameter is set to False."""
+        """
+        Test function to set parameter to false.
+
+        Checks if /performance_metrics topic stops publishing if
+        enable_performance_metrics parameter is set to False.
+        """
         node = MakeTestNode('performance_metrics_disable_testing_node')
 
         assert node.wait_for_gazebo_node(timeout_sec=5.0),\
@@ -83,8 +87,12 @@ class TestPerformanceMetricsParam_enable(unittest.TestCase):
         rclpy.shutdown()
 
     def test_parameter_enable(self):
-        """Checks if /performance_metrics topic starts publishing if\
-        enable_performance_metrics is set to True."""
+        """
+        Test function to set parameter to true.
+
+        Checks if /performance_metrics topic starts publishing if
+        enable_performance_metrics is set to True.
+        """
         node = MakeTestNode('performance_metrics_enable_testing_node')
 
         assert node.wait_for_gazebo_node(timeout_sec=5.0),\
@@ -143,8 +151,12 @@ class MakeTestNode(Node):
         return response.results[0]
 
     def start_subscriber(self):
-        """Start listening for messages on /performance_metrics topic,
-        run rclpy.spin() on a separate thread."""
+        """
+        Create a subscriber.
+
+        Start listening for messages on /performance_metrics topic
+        and run rclpy.spin() on a separate thread.
+        """
         self.subscription = self.create_subscription(
             PerformanceMetrics,
             'performance_metrics',
