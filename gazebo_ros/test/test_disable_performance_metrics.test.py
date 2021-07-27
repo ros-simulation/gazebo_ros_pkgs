@@ -28,7 +28,7 @@ from rclpy.node import Node
 from rcl_interfaces.msg import Parameter, ParameterType
 from rcl_interfaces.srv import SetParameters
 import time
-from threading import Thread
+from threading import Thread, Event
 
 
 @pytest.mark.launch_test
@@ -71,8 +71,8 @@ class TestPerformanceMetricsParam_disable(unittest.TestCase):
         assert response.successful, 'Parameter could not be set to False'
 
         node.start_subscriber()
-        time.sleep(2.5)
-        assert node.msg_count == 0, f'Received {node.msg_count} messages after\
+        msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
+        assert not msgs_received_flag, f'Received {node.msg_count} messages after\
             setting enable_performance_metrics parameter to False, test failed'
 
 
@@ -102,8 +102,8 @@ class TestPerformanceMetricsParam_enable(unittest.TestCase):
         assert response.successful, 'Parameter could not be set to True'
 
         node.start_subscriber()
-        time.sleep(2.5)
-        assert node.msg_count != 0, 'Did not receive any messages after\
+        msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
+        assert msgs_received_flag, 'Did not receive any messages after\
             setting enable_performance_metrics to True, test failed'
 
 
@@ -112,7 +112,7 @@ class MakeTestNode(Node):
         """Initialize node and counters."""
         super().__init__(name)
         self.flag_gazebo_node = False
-        self.msg_count = 0
+        self.msg_event_object = Event()
 
     def wait_for_gazebo_node(self, timeout_sec=5.0):
         """Wait for 'timeout_sec' seconds to detect a running gazebo node."""
@@ -167,5 +167,5 @@ class MakeTestNode(Node):
         self.ros_spin_thread.start()
 
     def subscriber_callback(self, data):
-        """Maintain a count of the messages received since self.start_subscriber() ran."""
-        self.msg_count += 1
+        """Set the event object when the a message is received."""
+        self.msg_event_object.set()
