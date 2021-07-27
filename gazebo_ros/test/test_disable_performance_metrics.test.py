@@ -34,7 +34,6 @@ from threading import Thread
 @pytest.mark.launch_test
 def generate_test_description():
     """Launch a gzserver node."""
-    os.chdir(os.path.dirname(__file__))
     return launch.LaunchDescription([
         launch.actions.ExecuteProcess(
             cmd=['gzserver', '-s', 'libgazebo_ros_init.so'],
