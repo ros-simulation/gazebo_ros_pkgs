@@ -30,6 +30,10 @@ from rcl_interfaces.srv import SetParameters
 import time
 from threading import Thread, Event
 
+# Global varibales to track interval between messages
+msg_interval = None
+start_time = None
+
 
 @pytest.mark.launch_test
 def generate_test_description():
@@ -45,38 +49,9 @@ def generate_test_description():
     ])
 
 
-class TestPerformanceMetricsParam_disable(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        rclpy.init()
+class TestPerformanceMetricsParam_1(unittest.TestCase):
+    """Test to set parameter to true."""
 
-    @classmethod
-    def tearDownClass(cls):
-        rclpy.shutdown()
-
-    def test_parameter_disable(self):
-        """
-        Test function to set parameter to false.
-
-        Checks if /performance_metrics topic stops publishing if
-        enable_performance_metrics parameter is set to False.
-        """
-        node = MakeTestNode('performance_metrics_disable_testing_node')
-
-        assert node.wait_for_gazebo_node(timeout_sec=5.0),\
-            'Gazebo node not found, parameter could not be set'
-
-        # Set enable_performance_metrics parameter to False and listen for messages
-        response = node.set_parameter(state=False)
-        assert response.successful, 'Parameter could not be set to False'
-
-        node.start_subscriber()
-        msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
-        assert not msgs_received_flag, f'Received {node.msg_count} messages after\
-            setting enable_performance_metrics parameter to False, test failed'
-
-
-class TestPerformanceMetricsParam_enable(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         rclpy.init()
@@ -103,8 +78,45 @@ class TestPerformanceMetricsParam_enable(unittest.TestCase):
 
         node.start_subscriber()
         msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
+        global msg_interval
         assert msgs_received_flag, 'Did not receive any messages after\
             setting enable_performance_metrics to True, test failed'
+
+
+class TestPerformanceMetricsParam_2(unittest.TestCase):
+    """Test to set parameter to false."""
+
+    @classmethod
+    def setUpClass(cls):
+        rclpy.init()
+
+    @classmethod
+    def tearDownClass(cls):
+        rclpy.shutdown()
+
+    def test_parameter_disable(self):
+        """
+        Test function to set parameter to false.
+
+        Checks if /performance_metrics topic stops publishing if
+        enable_performance_metrics parameter is set to False.
+        """
+        global msg_interval
+        msg_receive_timeout = 10 * msg_interval
+        node = MakeTestNode('performance_metrics_disable_testing_node')
+
+        assert node.wait_for_gazebo_node(timeout_sec=5.0),\
+            'Gazebo node not found, parameter could not be set'
+
+        # Set enable_performance_metrics parameter to False and listen for messages
+        response = node.set_parameter(state=False)
+        assert response.successful, 'Parameter could not be set to False'
+
+        node.start_subscriber()
+        print('Timeout to receive messages:', round(msg_receive_timeout, 3), ' seconds')
+        msgs_received_flag = node.msg_event_object.wait(timeout=msg_receive_timeout)
+        assert not msgs_received_flag, f'Received {node.msg_count} messages after\
+            setting enable_performance_metrics parameter to False, test failed'
 
 
 class MakeTestNode(Node):
@@ -156,6 +168,7 @@ class MakeTestNode(Node):
         Start listening for messages on /performance_metrics topic
         and run rclpy.spin() on a separate thread.
         """
+        global start_time
         self.subscription = self.create_subscription(
             PerformanceMetrics,
             'performance_metrics',
@@ -165,7 +178,13 @@ class MakeTestNode(Node):
         # Add a spin thread
         self.ros_spin_thread = Thread(target=lambda node: rclpy.spin(node), args=(self,))
         self.ros_spin_thread.start()
+        if start_time is None:
+            start_time = time.time()
 
     def subscriber_callback(self, data):
         """Set the event object when the a message is received."""
+        global msg_interval
+        global start_time
+        if msg_interval is None:
+            msg_interval = time.time() - start_time
         self.msg_event_object.set()
