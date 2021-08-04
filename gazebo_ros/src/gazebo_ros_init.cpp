@@ -176,6 +176,13 @@ void GazeboRosInit::Load(int argc, char ** argv)
     rclcpp::ParameterValue(GazeboRosInitPrivate::DEFAULT_PUBLISH_FREQUENCY));
   impl_->throttler_ = Throttler(rate_param.get<double>());
 
+  // PerformanceMetrics parameter
+  auto description_msg = rcl_interfaces::msg::ParameterDescriptor();
+  description_msg.description =
+    "If set to true, performance metrics are published to the topic /performance_metrics";
+
+  impl_->ros_node_->declare_parameter<bool>("enable_performance_metrics", true, description_msg);
+
   impl_->world_update_event_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosInitPrivate::PublishSimTime, impl_.get(), std::placeholders::_1));
 
@@ -188,6 +195,13 @@ void GazeboRosInit::Load(int argc, char ** argv)
 void GazeboRosInitPrivate::onPerformanceMetrics(
   ConstPerformanceMetricsPtr & msg)
 {
+  // Check if performance metrics parameter was enabled
+  bool check_enable_performance_metrics;
+  this->ros_node_->get_parameter("enable_performance_metrics", check_enable_performance_metrics);
+  if (!check_enable_performance_metrics) {
+    return;
+  }
+
   gazebo_msgs::msg::PerformanceMetrics msg_ros;
   msg_ros.header.stamp = Convert<builtin_interfaces::msg::Time>(world_->SimTime());
   msg_ros.real_time_factor = msg->real_time_factor();
@@ -202,7 +216,6 @@ void GazeboRosInitPrivate::onPerformanceMetrics(
     } else {
       sensor_msgs.fps = -1;
     }
-
     msg_ros.sensors.push_back(sensor_msgs);
   }
 
