@@ -20,7 +20,6 @@ import launch.actions
 import launch_testing
 import launch_testing.asserts
 import pytest
-import os
 
 import rclpy
 from gazebo_msgs.msg import PerformanceMetrics
