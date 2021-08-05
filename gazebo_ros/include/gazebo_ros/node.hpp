@@ -189,7 +189,7 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
 
   // Parameter change callback
   auto param_change_callback =
-    [node](std::vector<rclcpp::Parameter> parameters) {
+    [&node](std::vector<rclcpp::Parameter> parameters) {
       auto result = rcl_interfaces::msg::SetParametersResult();
       result.successful = true;
 
