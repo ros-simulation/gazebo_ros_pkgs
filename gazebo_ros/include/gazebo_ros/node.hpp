@@ -187,19 +187,23 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
       "by default plugins and ROS messages will continue to use simulation timestamps");
   }
 
+  std::weak_ptr<gazebo_ros::Node> node_weak_ptr;
+  node_weak_ptr = node;
   // Parameter change callback
   auto param_change_callback =
-    [&node](std::vector<rclcpp::Parameter> parameters) {
+    [&node_weak_ptr](std::vector<rclcpp::Parameter> parameters) {
       auto result = rcl_interfaces::msg::SetParametersResult();
       result.successful = true;
 
       for (const auto & parameter : parameters) {
         auto param_name = parameter.get_name();
         if (param_name == "use_sim_time") {
-          RCLCPP_WARN(
-            node->get_logger(),
-            "use_sim_time parameter will be ignored by default plugins "
-            "and ROS messages will continue to use simulation timestamps");
+          if (auto node_shared_ptr = node_weak_ptr.lock()) {
+            RCLCPP_WARN(
+              node_shared_ptr->get_logger(),
+              "use_sim_time parameter will be ignored by default plugins "
+              "and ROS messages will continue to use simulation timestamps");
+          }
         }
       }
       return result;
