@@ -131,7 +131,7 @@ private:
   using rclcpp::Node::Node;
 
   // A handler for the param change callback.
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler;
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;
 
   /// Points to #static_executor_, so that when all #gazebo_ros::Node instances are destroyed, the
   /// executor thread is too
@@ -205,7 +205,7 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
       return result;
     };
 
-  node->param_change_callback_handler =
+  node->param_change_callback_handler_ =
     node->add_on_set_parameters_callback(param_change_callback);
 
   // Add new node to the executor so its callbacks are called
