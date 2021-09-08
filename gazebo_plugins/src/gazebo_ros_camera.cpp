@@ -15,7 +15,9 @@
 #include <sdf/Element.hh>
 #include <gazebo/common/Events.hh>
 #include <gazebo/rendering/Distortion.hh>
+#include <gazebo/rendering/WideAngleCamera.hh>
 #include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/sensors/WideAngleCameraSensor.hh>
 #ifdef IGN_PROFILER_ENABLE
 #include <ignition/common/Profiler.hh>
 #endif
@@ -62,6 +64,10 @@ public:
 
   /// Depth, Normal or Multi Camera
   SensorType sensor_type_;
+
+  /// WideAngleCameraSensor is a specialization of CameraSensor and uses CameraPlugin,
+  /// so it's simpler use a bool instead of adding it to the SensorType enum.
+  bool is_wide_angle_camera_type_{false};
 
   /// A pointer to the GazeboROS node.
   gazebo_ros::Node::SharedPtr ros_node_{nullptr};
@@ -167,6 +173,9 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   } else if (std::dynamic_pointer_cast<gazebo::sensors::CameraSensor>(_sensor)) {
     impl_->sensor_type_ = GazeboRosCameraPrivate::CAMERA;
     gazebo::CameraPlugin::Load(_sensor, _sdf);
+    if (std::dynamic_pointer_cast<gazebo::sensors::WideAngleCameraSensor>(_sensor)) {
+      impl_->is_wide_angle_camera_type_ = true;
+    }
   } else {
     RCLCPP_ERROR(
       impl_->ros_node_->get_logger(),
@@ -397,6 +406,31 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
           "Unable to get an Ogre::Camera pointer for camera [%s]"
           " to set <lod_bias> parameter.",
           _sensor->Name().c_str());
+      }
+      // Set lod_bias on each env camera if this is a wide-angle camera.
+      if (impl_->is_wide_angle_camera_type_) {
+        auto wide_angle_camera =
+            boost::dynamic_pointer_cast<gazebo::rendering::WideAngleCamera>(impl_->camera_[i]);
+        if (wide_angle_camera) {
+          auto env_cameras = wide_angle_camera->OgreEnvCameras();
+          for (auto & env_camera : env_cameras) {
+            if (env_camera) {
+              env_camera->setLodBias(lod_bias);
+            } else {
+              RCLCPP_WARN(
+                impl_->ros_node_->get_logger(),
+                "Unable to get an Ogre::Camera pointer for a wide-angle env camera of [%s]"
+                " to set <lod_bias> parameter.",
+                _sensor->Name().c_str());
+            }
+          }
+        } else {
+          RCLCPP_WARN(
+            impl_->ros_node_->get_logger(),
+            "Unable to get a gazebo::sensors::WideAngleCameraSensor pointer for [%s]"
+            " to set <lod_bias> parameter.",
+            _sensor->Name().c_str());
+        }
       }
     }
 
