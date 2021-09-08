@@ -50,6 +50,20 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Initialize the WheelSlipPlugin first so its values are preferred unless the ros
   // parameters are overridden by a launch file.
   WheelSlipPlugin::Load(_model, _sdf);
+  double slip_lateral_default = -1.0;
+  double slip_longitudinal_default = -1.0;
+
+  std::cout << "Plugin name: " << _sdf->Get<std::string>("name") << std::endl;
+
+  if (_sdf->HasElement("wheel")) {
+    auto wheel_element = _sdf->GetElement("wheel");
+    while (wheel_element) {
+      // auto wheel_name = wheel_element->Get<std::string>("link_name");
+      slip_lateral_default = wheel_element->Get<double>("slip_compliance_lateral");
+      slip_longitudinal_default = wheel_element->Get<double>("slip_compliance_longitudinal");
+      wheel_element = wheel_element->GetNextElement("wheel");
+    }
+  }
 
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
@@ -87,8 +101,10 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Declare parameters after adding callback so that callback will trigger immediately.
   // Set negative values by default, which are ignored by the callback.
   // This approach allows values specified in a launch file to override the SDF/URDF values.
-  impl_->ros_node_->declare_parameter("slip_compliance_unitless_lateral", -1.);
-  impl_->ros_node_->declare_parameter("slip_compliance_unitless_longitudinal", -1.);
+  impl_->ros_node_->declare_parameter("slip_compliance_unitless_lateral", slip_lateral_default);
+  impl_->ros_node_->declare_parameter(
+    "slip_compliance_unitless_longitudinal",
+    slip_longitudinal_default);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosWheelSlip)
