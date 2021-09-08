@@ -384,6 +384,22 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
         focal_length, _sensor->Name().c_str(), width[i], impl_->hfov_[i], computed_focal_length);
     }
 
+    // Allow the user to override the level-of-detail (LOD) bias factor for
+    // the camera.
+    if (_sdf->HasElement("lod_bias")) {
+      auto lod_bias = _sdf->Get<bool>("lod_bias", 1.0).first;
+      auto ogre_camera = impl_->camera_[i]->OgreCamera();
+      if (ogre_camera) {
+        ogre_camera->setLodBias(lod_bias);
+      } else {
+        RCLCPP_WARN(
+          impl_->ros_node_->get_logger(),
+          "Unable to get an Ogre::Camera pointer for camera [%s]"
+          " to set <lod_bias> parameter.",
+          _sensor->Name().c_str());
+      }
+    }
+
     // CameraInfo
     sensor_msgs::msg::CameraInfo camera_info_msg;
     camera_info_msg.header.frame_id = impl_->frame_name_;
