@@ -53,12 +53,9 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   double slip_lateral_default = -1.0;
   double slip_longitudinal_default = -1.0;
 
-  std::cout << "Plugin name: " << _sdf->Get<std::string>("name") << std::endl;
-
   if (_sdf->HasElement("wheel")) {
     auto wheel_element = _sdf->GetElement("wheel");
     while (wheel_element) {
-      // auto wheel_name = wheel_element->Get<std::string>("link_name");
       slip_lateral_default = wheel_element->Get<double>("slip_compliance_lateral");
       slip_longitudinal_default = wheel_element->Get<double>("slip_compliance_longitudinal");
       wheel_element = wheel_element->GetNextElement("wheel");
