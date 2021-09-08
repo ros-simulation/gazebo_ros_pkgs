@@ -396,7 +396,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     // Allow the user to override the level-of-detail (LOD) bias factor for
     // the camera.
     if (_sdf->HasElement("lod_bias")) {
-      auto lod_bias = _sdf->Get<bool>("lod_bias", 1.0).first;
+      auto lod_bias = _sdf->Get<double>("lod_bias", 1.0).first;
       auto ogre_camera = impl_->camera_[i]->OgreCamera();
       if (ogre_camera) {
         ogre_camera->setLodBias(lod_bias);
