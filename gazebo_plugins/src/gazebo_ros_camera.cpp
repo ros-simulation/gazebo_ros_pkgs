@@ -410,7 +410,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       // Set lod_bias on each env camera if this is a wide-angle camera.
       if (impl_->is_wide_angle_camera_type_) {
         auto wide_angle_camera =
-            boost::dynamic_pointer_cast<gazebo::rendering::WideAngleCamera>(impl_->camera_[i]);
+          boost::dynamic_pointer_cast<gazebo::rendering::WideAngleCamera>(impl_->camera_[i]);
         if (wide_angle_camera) {
           auto env_cameras = wide_angle_camera->OgreEnvCameras();
           for (auto & env_camera : env_cameras) {
