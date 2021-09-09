@@ -86,6 +86,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             this->SetSlipComplianceLateral(slip);
           } else {
             result.successful = false;
+            result.reason = "Slip compliance values cannot be negative";
           }
         } else if (param_name == "slip_compliance_unitless_longitudinal") {
           double slip = parameter.as_double();
@@ -96,6 +97,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             this->SetSlipComplianceLongitudinal(slip);
           } else {
             result.successful = false;
+            result.reason = "Slip compliance values cannot be negative";
           }
         }
       }
