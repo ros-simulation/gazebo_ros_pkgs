@@ -50,6 +50,23 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Initialize the WheelSlipPlugin first so its values are preferred unless the ros
   // parameters are overridden by a launch file.
   WheelSlipPlugin::Load(_model, _sdf);
+  double slip_lateral_default = 0.0;
+  double slip_longitudinal_default = 0.0;
+
+  if (_sdf->HasElement("wheel")) {
+    auto wheel_element = _sdf->GetElement("wheel");
+    while (wheel_element) {
+      double slip_lateral = wheel_element->Get<double>("slip_compliance_lateral");
+      if (slip_lateral >= 0.) {
+        slip_lateral_default = slip_lateral;
+      }
+      double slip_longitudinal = wheel_element->Get<double>("slip_compliance_longitudinal");
+      if (slip_longitudinal >= 0.) {
+        slip_longitudinal_default = slip_longitudinal;
+      }
+      wheel_element = wheel_element->GetNextElement("wheel");
+    }
+  }
 
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
@@ -67,6 +84,9 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
               impl_->ros_node_->get_logger(),
               "New lateral slip compliance: %.3e", slip);
             this->SetSlipComplianceLateral(slip);
+          } else {
+            result.successful = false;
+            result.reason = "Slip compliance values cannot be negative";
           }
         } else if (param_name == "slip_compliance_unitless_longitudinal") {
           double slip = parameter.as_double();
@@ -75,6 +95,9 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
               impl_->ros_node_->get_logger(),
               "New longitudinal slip compliance: %.3e", slip);
             this->SetSlipComplianceLongitudinal(slip);
+          } else {
+            result.successful = false;
+            result.reason = "Slip compliance values cannot be negative";
           }
         }
       }
@@ -87,8 +110,10 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Declare parameters after adding callback so that callback will trigger immediately.
   // Set negative values by default, which are ignored by the callback.
   // This approach allows values specified in a launch file to override the SDF/URDF values.
-  impl_->ros_node_->declare_parameter("slip_compliance_unitless_lateral", -1.);
-  impl_->ros_node_->declare_parameter("slip_compliance_unitless_longitudinal", -1.);
+  impl_->ros_node_->declare_parameter("slip_compliance_unitless_lateral", slip_lateral_default);
+  impl_->ros_node_->declare_parameter(
+    "slip_compliance_unitless_longitudinal",
+    slip_longitudinal_default);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosWheelSlip)
