@@ -50,8 +50,8 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Initialize the WheelSlipPlugin first so its values are preferred unless the ros
   // parameters are overridden by a launch file.
   WheelSlipPlugin::Load(_model, _sdf);
-  double slip_lateral_default = -1.0;
-  double slip_longitudinal_default = -1.0;
+  double slip_lateral_default = 0.0;
+  double slip_longitudinal_default = 0.0;
 
   if (_sdf->HasElement("wheel")) {
     auto wheel_element = _sdf->GetElement("wheel");
@@ -84,6 +84,8 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
               impl_->ros_node_->get_logger(),
               "New lateral slip compliance: %.3e", slip);
             this->SetSlipComplianceLateral(slip);
+          } else {
+            result.successful = false;
           }
         } else if (param_name == "slip_compliance_unitless_longitudinal") {
           double slip = parameter.as_double();
@@ -92,6 +94,8 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
               impl_->ros_node_->get_logger(),
               "New longitudinal slip compliance: %.3e", slip);
             this->SetSlipComplianceLongitudinal(slip);
+          } else {
+            result.successful = false;
           }
         }
       }
