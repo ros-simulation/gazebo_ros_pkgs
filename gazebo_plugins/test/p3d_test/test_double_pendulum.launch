@@ -1,5 +1,5 @@
 <launch>
-  <node name="pendulums" pkg="gazebo" type="gazebo" args="$(find gazebo_plugins)/test/p3d_test/worlds/double_pendulum.world"/>
+  <node name="pendulums" pkg="gazebo_ros" type="gazebo" args="$(find gazebo_plugins)/test/p3d_test/worlds/double_pendulum.world"/>
   <test test-name="test_double_pendulum_link_1_errors" pkg="gazebo_plugins" type="test_link_pose.py">
     <param name="link_pose_topic_name" value="/model_1/link_1/pose"/>
   </test>
