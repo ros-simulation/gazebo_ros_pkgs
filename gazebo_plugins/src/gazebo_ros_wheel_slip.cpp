@@ -156,14 +156,11 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       return result;
     };
 
-
   impl_->on_set_parameters_callback_handle_ = impl_->ros_node_->add_on_set_parameters_callback(
     param_change_callback);
 
-
   // Declare parameters after adding callback so that callback will trigger immediately.
-  // Set negative values by default, which are ignored by the callback.
-  // This approach allows values specified in a launch file to override the SDF/URDF values.
+  // Default values are taken from the sdf.
   impl_->ros_node_->declare_parameter(
     "slip_compliance_unitless_lateral",
     impl_->default_slip_lateral);
