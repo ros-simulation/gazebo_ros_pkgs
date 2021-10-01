@@ -37,9 +37,11 @@ public:
   /// Handle to parameters callback
   rclcpp::Node::OnSetParametersCallbackHandle::SharedPtr on_set_parameters_callback_handle_;
 
-  // Container to hold default values of slip parameters
+  // Containers to hold default values of slip parameters
   std::map<std::string, double> mapSlipLateralDefault;
+  double default_slip_lateral;
   std::map<std::string, double> mapSlipLongitudinalDefault;
+  double default_slip_longitudinal;
 };
 
 GazeboRosWheelSlip::GazeboRosWheelSlip()
@@ -66,10 +68,12 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       double slip_lateral = wheel_element->Get<double>("slip_compliance_lateral");
       double default_slip_lateral = std::max(slip_lateral, 0.);
       this->impl_->mapSlipLateralDefault[wheel_name] = default_slip_lateral;
+      this->impl_->default_slip_lateral = default_slip_lateral;
 
       double slip_longitudinal = wheel_element->Get<double>("slip_compliance_longitudinal");
       double default_slip_longitudinal = std::max(slip_longitudinal, 0.);
       this->impl_->mapSlipLongitudinalDefault[wheel_name] = default_slip_longitudinal;
+      this->impl_->default_slip_longitudinal = default_slip_longitudinal;
     }
   }
 
@@ -92,7 +96,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             if (slip >= 0.) {
               RCLCPP_INFO(
                 impl_->ros_node_->get_logger(),
-                "New lateral slip compliance: %.3e", slip);
+                "New lateral slip compliance for %s: %.3e", wheel_name.c_str(), slip);
               this->SetSlipComplianceLateral(wheel_name, slip);
             } else {
               result.successful = false;
@@ -109,7 +113,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             if (slip >= 0.) {
               RCLCPP_INFO(
                 impl_->ros_node_->get_logger(),
-                "New longitudinal slip compliance : %.3e", slip);
+                "New longitudinal slip compliance for %s: %.3e", wheel_name.c_str(), slip);
               this->SetSlipComplianceLongitudinal(wheel_name, slip);
             } else {
               result.successful = false;
@@ -153,8 +157,12 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Declare parameters after adding callback so that callback will trigger immediately.
   // Set negative values by default, which are ignored by the callback.
   // This approach allows values specified in a launch file to override the SDF/URDF values.
-  impl_->ros_node_->declare_parameter("slip_compliance_unitless_lateral", 0.);
-  impl_->ros_node_->declare_parameter("slip_compliance_unitless_longitudinal", 0.);
+  impl_->ros_node_->declare_parameter(
+    "slip_compliance_unitless_lateral",
+    impl_->default_slip_lateral);
+  impl_->ros_node_->declare_parameter(
+    "slip_compliance_unitless_longitudinal",
+    impl_->default_slip_longitudinal);
 
   for (auto & wheel_parameter : impl_->mapSlipLateralDefault) {
     impl_->ros_node_->declare_parameter(
