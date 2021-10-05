@@ -20,8 +20,7 @@
 #include <gazebo_ros/node.hpp>
 #include <std_msgs/msg/bool.hpp>
 
-#include <algorithm>
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -38,15 +37,15 @@ public:
   rclcpp::Node::OnSetParametersCallbackHandle::SharedPtr on_set_parameters_callback_handle_;
 
   // Containers to hold default values of slip parameters
-  std::map<std::string, double> mapSlipLateralDefault;
-  double default_slip_lateral;
-  std::map<std::string, double> mapSlipLongitudinalDefault;
-  double default_slip_longitudinal;
+  std::unordered_map<std::string, double> map_slip_lateral_default_;
+  double default_slip_lateral_;
+  std::unordered_map<std::string, double> map_slip_longitudinal_default_;
+  double default_slip_longitudinal_;
 
   // Event handler to set slip compliance values for individual wheels based
-  std::shared_ptr<rclcpp::ParameterEventHandler> parameter_subscriber;
-  rclcpp::ParameterCallbackHandle::SharedPtr global_parameter_callback_handle_lateral;
-  rclcpp::ParameterCallbackHandle::SharedPtr global_parameter_callback_handle_longitudinal;
+  std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
+  rclcpp::ParameterCallbackHandle::SharedPtr global_parameter_callback_handle_lateral_;
+  rclcpp::ParameterCallbackHandle::SharedPtr global_parameter_callback_handle_longitudinal_;
 };
 
 GazeboRosWheelSlip::GazeboRosWheelSlip()
@@ -63,6 +62,8 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Initialize the WheelSlipPlugin first so its values are preferred unless the ros
   // parameters are overridden by a launch file.
   WheelSlipPlugin::Load(_model, _sdf);
+  // Initialize ROS node
+  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   // Read slip values from the sdf file and set them as default
   if (_sdf->HasElement("wheel")) {
@@ -71,19 +72,34 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     {
       auto wheel_name = wheel_element->Get<std::string>("link_name");
       double slip_lateral = wheel_element->Get<double>("slip_compliance_lateral");
-      double default_slip_lateral = std::max(slip_lateral, 0.);
-      this->impl_->mapSlipLateralDefault[wheel_name] = default_slip_lateral;
-      this->impl_->default_slip_lateral = default_slip_lateral;
+
+      if (slip_lateral >= 0.){
+        this->impl_->default_slip_lateral_ = slip_lateral;
+        this->impl_->map_slip_lateral_default_[wheel_name] = slip_lateral;
+      } else {
+        this->impl_->default_slip_lateral_ = 0.0;
+        this->impl_->map_slip_lateral_default_[wheel_name] = 0.0;
+        RCLCPP_INFO(
+            this->impl_->ros_node_->get_logger(),
+            "Negative slip lateral compliance value found in sdf for %s, will be set to 0.0", wheel_name.c_str()
+          );
+      }
 
       double slip_longitudinal = wheel_element->Get<double>("slip_compliance_longitudinal");
-      double default_slip_longitudinal = std::max(slip_longitudinal, 0.);
-      this->impl_->mapSlipLongitudinalDefault[wheel_name] = default_slip_longitudinal;
-      this->impl_->default_slip_longitudinal = default_slip_longitudinal;
+
+      if (slip_longitudinal >= 0.){
+        this->impl_->default_slip_longitudinal_ = slip_longitudinal;
+        this->impl_->map_slip_longitudinal_default_[wheel_name] = slip_longitudinal;
+      } else {
+        this->impl_->default_slip_longitudinal_ = 0.0;
+        this->impl_->map_slip_longitudinal_default_[wheel_name] = 0.0;
+        RCLCPP_INFO(
+            this->impl_->ros_node_->get_logger(),
+            "Negative slip longitudinal compliance value found in sdf for %s, will be set to 0.0", wheel_name.c_str()
+          );
+      }
     }
   }
-
-  // Initialize ROS node
-  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
   auto param_change_callback =
     [this](std::vector<rclcpp::Parameter> parameters) {
@@ -95,7 +111,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
         if (param_name.find("slip_compliance_unitless_lateral/") != std::string::npos) {
           auto wheel_name = param_name.substr(param_name.find("/") + 1);
-          if (impl_->mapSlipLateralDefault.count(wheel_name) == 1) {
+          if (impl_->map_slip_lateral_default_.count(wheel_name) == 1) {
             // The parameter has a valid name
             double slip = parameter.as_double();
             if (slip >= 0.) {
@@ -112,7 +128,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
         if (param_name.find("slip_compliance_unitless_longitudinal/") != std::string::npos) {
           auto wheel_name = param_name.substr(param_name.find("/") + 1);
-          if (impl_->mapSlipLongitudinalDefault.count(wheel_name) == 1) {
+          if (impl_->map_slip_longitudinal_default_.count(wheel_name) == 1) {
             // The parameter has a valid name
             double slip = parameter.as_double();
             if (slip >= 0.) {
@@ -130,9 +146,6 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
         if (param_name == "slip_compliance_unitless_lateral") {
           double slip = parameter.as_double();
           if (slip >= 0.) {
-            RCLCPP_INFO(
-              impl_->ros_node_->get_logger(),
-              "New lateral slip compliance for all wheels: %.3e", slip);
             this->SetSlipComplianceLateral(slip);
           } else {
             result.successful = false;
@@ -143,9 +156,6 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
         if (param_name == "slip_compliance_unitless_longitudinal") {
           double slip = parameter.as_double();
           if (slip >= 0.) {
-            RCLCPP_INFO(
-              impl_->ros_node_->get_logger(),
-              "New longitudinal slip compliance for all wheels: %.3e", slip);
             this->SetSlipComplianceLongitudinal(slip);
           } else {
             result.successful = false;
@@ -163,19 +173,19 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Default values are taken from the sdf.
   impl_->ros_node_->declare_parameter(
     "slip_compliance_unitless_lateral",
-    impl_->default_slip_lateral);
+    impl_->default_slip_lateral_);
   impl_->ros_node_->declare_parameter(
     "slip_compliance_unitless_longitudinal",
-    impl_->default_slip_longitudinal);
+    impl_->default_slip_longitudinal_);
 
-  for (auto & wheel_parameter : impl_->mapSlipLateralDefault) {
+  for (auto & wheel_parameter : impl_->map_slip_lateral_default_) {
     impl_->ros_node_->declare_parameter(
       "slip_compliance_unitless_lateral/" + wheel_parameter.first,
       wheel_parameter.second
     );
   }
 
-  for (auto & wheel_parameter : impl_->mapSlipLongitudinalDefault) {
+  for (auto & wheel_parameter : impl_->map_slip_longitudinal_default_) {
     impl_->ros_node_->declare_parameter(
       "slip_compliance_unitless_longitudinal/" + wheel_parameter.first,
       wheel_parameter.second
@@ -190,7 +200,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       );
 
       // Iterate over wheels
-      for (auto & wheel_parameter : this->impl_->mapSlipLateralDefault) {
+      for (auto & wheel_parameter : this->impl_->map_slip_lateral_default_) {
         auto param_name = "slip_compliance_unitless_lateral/" + wheel_parameter.first;
         this->impl_->ros_node_->set_parameter(rclcpp::Parameter(param_name, p.as_double()));
       }
@@ -203,21 +213,21 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       );
 
       // Iterate over wheels
-      for (auto & wheel_parameter : this->impl_->mapSlipLongitudinalDefault) {
+      for (auto & wheel_parameter : this->impl_->map_slip_longitudinal_default_) {
         auto param_name = "slip_compliance_unitless_longitudinal/" + wheel_parameter.first;
         this->impl_->ros_node_->set_parameter(rclcpp::Parameter(param_name, p.as_double()));
       }
     };
 
-  impl_->parameter_subscriber = std::make_shared<rclcpp::ParameterEventHandler>(impl_->ros_node_);
+  impl_->parameter_event_handler_ = std::make_shared<rclcpp::ParameterEventHandler>(impl_->ros_node_);
 
-  impl_->global_parameter_callback_handle_lateral =
-    impl_->parameter_subscriber->add_parameter_callback(
+  impl_->global_parameter_callback_handle_lateral_ =
+    impl_->parameter_event_handler_->add_parameter_callback(
     "slip_compliance_unitless_lateral",
     global_slip_parameter_callback_lateral);
 
-  impl_->global_parameter_callback_handle_longitudinal =
-    impl_->parameter_subscriber->add_parameter_callback(
+  impl_->global_parameter_callback_handle_longitudinal_ =
+    impl_->parameter_event_handler_->add_parameter_callback(
     "slip_compliance_unitless_longitudinal",
     global_slip_parameter_callback_longitudinal);
 }
