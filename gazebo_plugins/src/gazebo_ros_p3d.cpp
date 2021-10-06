@@ -94,7 +94,7 @@ GazeboRosP3D::~GazeboRosP3D()
 void GazeboRosP3D::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
   // Configure the plugin from the SDF file
-  impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get(sdf, model);
 
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();

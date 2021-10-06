@@ -103,7 +103,7 @@ GazeboRosHandOfGod::~GazeboRosHandOfGod()
 void GazeboRosHandOfGod::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   // Initialize ROS node
-  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf, _model);
 
   impl_->frame_ = _sdf->Get<std::string>("frame_id", "world").first;
 

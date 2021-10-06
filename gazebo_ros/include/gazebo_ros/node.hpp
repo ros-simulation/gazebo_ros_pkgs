@@ -17,6 +17,9 @@
 
 #include <rclcpp/rclcpp.hpp>
 
+#include <gazebo/physics/Model.hh>
+#include <gazebo/sensors/Sensor.hh>
+
 #include <gazebo_ros/executor.hpp>
 #include <gazebo_ros/node_visibility_control.h>
 #include <gazebo_ros/qos.hpp>
@@ -85,6 +88,27 @@ public:
    * \return A shared pointer to a new #gazebo_ros::Node
    */
   static SharedPtr Get(sdf::ElementPtr _sdf);
+
+  /// Get reference to a #gazebo_ros::Node and add it to the global
+  /// #gazebo_ros::Executor.
+  /// This overloaded function allows users to specify a default namespace if
+  /// <namespace> is not present
+  static SharedPtr Get(sdf::ElementPtr _sdf,
+      const std::string &_defaultNamespace);
+
+  /// Get reference to a #gazebo_ros::Node and add it to the global
+  /// #gazebo_ros::Executor.
+  /// This overloaded function sets the node namespace to the parent model name
+  /// if <namespace> is not present
+  static SharedPtr Get(sdf::ElementPtr _sdf,
+      const gazebo::physics::ModelPtr &parent);
+
+  /// Get reference to a #gazebo_ros::Node and add it to the global
+  /// #gazebo_ros::Executor.
+  /// This overloaded function sets the node namespace to the name of the
+  /// parent model containing this sensor if <namespace> is not present
+  static SharedPtr Get(sdf::ElementPtr _sdf,
+      const gazebo::sensors::SensorPtr &parent);
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
