@@ -69,6 +69,10 @@ public:
    *   <ros>
    *    <!-- Namespace of the node -->
    *    <namespace>/my_ns</namespace>
+   *    <!-- Legacy namespace behavior. True to default to the root namespace
+   *         if <namespace> is not specified, otherwise false to default
+   *         namespace to the the model name -->
+   *    <legacy_namespace>true</legacy_namespace>
    *    <!-- Command line arguments sent to Node's constructor for remappings -->
    *    <argument>__name:=super_cool_node</argument>
    *    <argument>__log_level:=debug</argument>
@@ -93,21 +97,24 @@ public:
   /// #gazebo_ros::Executor.
   /// This overloaded function allows users to specify a default namespace if
   /// <namespace> is not present
-  static SharedPtr Get(sdf::ElementPtr _sdf,
+  static SharedPtr Get(
+      sdf::ElementPtr _sdf,
       const std::string &_defaultNamespace);
 
   /// Get reference to a #gazebo_ros::Node and add it to the global
   /// #gazebo_ros::Executor.
   /// This overloaded function sets the node namespace to the parent model name
   /// if <namespace> is not present
-  static SharedPtr Get(sdf::ElementPtr _sdf,
+  static SharedPtr Get(
+      sdf::ElementPtr _sdf,
       const gazebo::physics::ModelPtr &parent);
 
   /// Get reference to a #gazebo_ros::Node and add it to the global
   /// #gazebo_ros::Executor.
   /// This overloaded function sets the node namespace to the name of the
   /// parent model containing this sensor if <namespace> is not present
-  static SharedPtr Get(sdf::ElementPtr _sdf,
+  static SharedPtr Get(
+      sdf::ElementPtr _sdf,
       const gazebo::sensors::SensorPtr &parent);
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
