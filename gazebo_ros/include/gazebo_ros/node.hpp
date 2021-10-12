@@ -98,24 +98,24 @@ public:
   /// This overloaded function allows users to specify a default namespace if
   /// <namespace> is not present
   static SharedPtr Get(
-      sdf::ElementPtr _sdf,
-      const std::string &_defaultNamespace);
+    sdf::ElementPtr _sdf,
+    const std::string & _defaultNamespace);
 
   /// Get reference to a #gazebo_ros::Node and add it to the global
   /// #gazebo_ros::Executor.
   /// This overloaded function sets the node namespace to the parent model name
   /// if <namespace> is not present
   static SharedPtr Get(
-      sdf::ElementPtr _sdf,
-      const gazebo::physics::ModelPtr &parent);
+    sdf::ElementPtr _sdf,
+    const gazebo::physics::ModelPtr & parent);
 
   /// Get reference to a #gazebo_ros::Node and add it to the global
   /// #gazebo_ros::Executor.
   /// This overloaded function sets the node namespace to the name of the
   /// parent model containing this sensor if <namespace> is not present
   static SharedPtr Get(
-      sdf::ElementPtr _sdf,
-      const gazebo::sensors::SensorPtr &parent);
+    sdf::ElementPtr _sdf,
+    const gazebo::sensors::SensorPtr & parent);
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**

@@ -42,26 +42,27 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
 }
 
 Node::SharedPtr Node::Get(
-    sdf::ElementPtr sdf,
-    const gazebo::physics::ModelPtr &parent)
+  sdf::ElementPtr sdf,
+  const gazebo::physics::ModelPtr & parent)
 {
   std::string modelName;
-  if (parent)
+  if (parent) {
     modelName = parent->GetName();
+  }
 
   return Get(sdf, "/" + modelName);
 }
 
 Node::SharedPtr Node::Get(
-    sdf::ElementPtr sdf,
-    const gazebo::sensors::SensorPtr &parent)
+  sdf::ElementPtr sdf,
+  const gazebo::sensors::SensorPtr & parent)
 {
   std::string modelName;
   std::vector<std::string> values;
   std::string scopedName = parent->ScopedName();
   values = gazebo::common::split(scopedName, "::");
   if (values.size() < 2) {
-      modelName = "";
+    modelName = "";
   } else {
     // the second element is the model name; the first one is the world name
     modelName = values[1];
@@ -71,8 +72,8 @@ Node::SharedPtr Node::Get(
 }
 
 Node::SharedPtr Node::Get(
-    sdf::ElementPtr sdf,
-    const std::string &defaultNamespace)
+  sdf::ElementPtr sdf,
+  const std::string & defaultNamespace)
 {
   // Initialize arguments
   std::string name = "";
@@ -96,13 +97,12 @@ Node::SharedPtr Node::Get(
   // specified.
   // todo(anyone) change this to false in humble
   bool legacyNamespace = true;
-  if (sdf->HasElement("legacy_namespace"))
-  {
+  if (sdf->HasElement("legacy_namespace")) {
     legacyNamespace = sdf->Get<bool>("legacy_namespace");
   }
   std::string ns =
-      (legacyNamespace || defaultNamespace.empty() ||
-      defaultNamespace[0] != '/') ? "/" : defaultNamespace;
+    (legacyNamespace || defaultNamespace.empty() ||
+    defaultNamespace[0] != '/') ? "/" : defaultNamespace;
 
   // Set namespace if tag is present
   if (sdf->HasElement("namespace")) {
