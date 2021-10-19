@@ -57,9 +57,6 @@ TEST_F(GazeboRosWheelSlipTest, SetSlipCompliance)
 
   int counter = 0;
   while (!parameters_client_rear->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      rclcpp::shutdown();
-    }
     std::cout << "service not available, waiting again..." << std::endl;
     counter++;
     if (counter > 5) {FAIL();}
@@ -97,6 +94,8 @@ TEST_F(GazeboRosWheelSlipTest, SetSlipCompliance)
   ASSERT_TRUE(result[0].successful);
   ASSERT_TRUE(result[1].successful);
 
+  // slip compliance parameters for individual wheels are set after the global ones
+  // This takes time, and the sleep_for() below allows them to be set.
   std::this_thread::sleep_for(2s);
   parameters_rear = parameters_client_rear->get_parameters(parameters_rear_names);
   for (auto & parameter : parameters_rear) {
