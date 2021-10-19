@@ -97,6 +97,7 @@ TEST_F(GazeboRosWheelSlipTest, SetSlipCompliance)
   ASSERT_TRUE(result[0].successful);
   ASSERT_TRUE(result[1].successful);
 
+  std::this_thread::sleep_for(2s);
   parameters_rear = parameters_client_rear->get_parameters(parameters_rear_names);
   for (auto & parameter : parameters_rear) {
     if (parameter.get_name().find("slip_compliance_unitless_lateral") != std::string::npos) {
