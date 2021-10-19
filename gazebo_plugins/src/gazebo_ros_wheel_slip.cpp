@@ -126,7 +126,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->on_set_parameters_callback_handle_ = impl_->ros_node_->add_on_set_parameters_callback(
     param_validation_callback);
 
-  // // Add hook from global slip compliance parameter to the individual wheels
+  // Add hook from global slip compliance parameter to the individual wheels
   auto parameter_set_callback_function = [this](const rcl_interfaces::msg::ParameterEvent & event) {
       // Only care about this node
       std::string node_namespace = this->impl_->ros_node_->get_namespace();
