@@ -73,6 +73,18 @@ Node::SharedPtr Node::Get(
 
 Node::SharedPtr Node::Get(
   sdf::ElementPtr sdf,
+  const gazebo::rendering::VisualPtr & parent)
+{
+  std::string modelName;
+  if (parent) {
+    modelName = parent->GetRootVisual()->Name();
+  }
+
+  return Get(sdf, "/" + modelName);
+}
+
+Node::SharedPtr Node::Get(
+  sdf::ElementPtr sdf,
   const std::string & defaultNamespace)
 {
   // Initialize arguments

@@ -18,6 +18,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <gazebo/physics/Model.hh>
+#include <gazebo/rendering/Visual.hh>
 #include <gazebo/sensors/Sensor.hh>
 
 #include <gazebo_ros/executor.hpp>
@@ -72,6 +73,12 @@ public:
    *    <!-- Legacy namespace behavior. True to default to the root namespace
    *         if <namespace> is not specified, otherwise false to default
    *         namespace to the the model name -->
+   *    <!-- Legacy behavior for setting namespace when <namespace> is not
+   *         specified.
+   *         When <legacy_namespace> is unspecified or set to true, the root
+   *         namespace `/` is the default.
+   *         When <legacy_namespace> is set to false, the default namespace is
+   *         the model name.
    *    <legacy_namespace>true</legacy_namespace>
    *    <!-- Command line arguments sent to Node's constructor for remappings -->
    *    <argument>__name:=super_cool_node</argument>
@@ -116,6 +123,15 @@ public:
   static SharedPtr Get(
     sdf::ElementPtr _sdf,
     const gazebo::sensors::SensorPtr & parent);
+
+  /// Get reference to a #gazebo_ros::Node and add it to the global
+  /// #gazebo_ros::Executor.
+  /// This overloaded function sets the node namespace to the name of the
+  /// parent model containing this visual if <namespace> is not present
+  /// if <namespace> is not present
+  static SharedPtr Get(
+    sdf::ElementPtr _sdf,
+    const gazebo::rendering::VisualPtr & parent);
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**

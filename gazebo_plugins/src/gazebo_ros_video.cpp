@@ -197,9 +197,7 @@ void GazeboRosVideo::Load(
   gazebo::rendering::VisualPtr _parent,
   sdf::ElementPtr _sdf)
 {
-  impl_->rosnode_ = gazebo_ros::Node::Get(
-    _sdf,
-    _parent->GetRootVisual()->Name());
+  impl_->rosnode_ = gazebo_ros::Node::Get(_sdf, _parent);
 
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->rosnode_->get_qos();
