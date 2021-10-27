@@ -114,6 +114,8 @@ public:
 
   /// True to publish odom-to-world transforms.
   bool publish_odom_tf_;
+
+  std::string multi_robot_namespace_divider;
 };
 
 GazeboRosPlanarMove::GazeboRosPlanarMove()
@@ -134,12 +136,21 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
-  // Get QoS profiles
+    // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
   // Odometry
-  impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
-  impl_->robot_base_frame_ = _sdf->Get<std::string>("robot_base_frame", "base_footprint").first;
+  if (*impl_->ros_node_->get_namespace() == '/') {
+    impl_->odometry_frame_ = _sdf->Get<std::string>("odometry_frame", "odom").first;
+    impl_->robot_base_frame_ = _sdf->Get<std::string>("robot_base_frame", "base_footprint").first;  
+  }
+  
+  else {
+    impl_->odometry_frame_ = *impl_->ros_node_->get_namespace() + "/" + 
+      _sdf->Get<std::string>("odometry_frame", "odom").first;
+    impl_->robot_base_frame_ = *impl_->ros_node_->get_namespace() + "/" + 
+      _sdf->Get<std::string>("robot_base_frame", "base_footprint").first;
+  }
 
   // Update rate
   auto update_rate = _sdf->Get<double>("update_rate", 20.0).first;
@@ -313,11 +324,12 @@ void GazeboRosPlanarMovePrivate::UpdateOdometry(const gazebo::common::Time & _cu
 void GazeboRosPlanarMovePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
 {
   geometry_msgs::msg::TransformStamped msg;
+  multi_robot_namespace_divider = ros_node_->get_namespace();
+  multi_robot_namespace_divider += "/";
   msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
-  msg.header.frame_id = odometry_frame_;
-  msg.child_frame_id = robot_base_frame_;
+  msg.header.frame_id =  multi_robot_namespace_divider + odometry_frame_;
+  msg.child_frame_id =  multi_robot_namespace_divider + robot_base_frame_;
   msg.transform = gazebo_ros::Convert<geometry_msgs::msg::Transform>(odom_.pose.pose);
-
   transform_broadcaster_->sendTransform(msg);
 }
 
