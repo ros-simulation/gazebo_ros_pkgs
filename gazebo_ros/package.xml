@@ -32,8 +32,13 @@
   <depend>std_srvs</depend>
   <depend>tinyxml_vendor</depend>
 
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>python3-catkin-pkg</exec_depend>
   <exec_depend>python3-lxml</exec_depend>
+  <exec_depend>ros2pkg</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
 
   <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
