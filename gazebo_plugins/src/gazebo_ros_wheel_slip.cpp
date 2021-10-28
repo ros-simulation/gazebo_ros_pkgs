@@ -52,7 +52,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   WheelSlipPlugin::Load(_model, _sdf);
 
   // Initialize ROS node
-  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf, _model);
 
   auto param_change_callback =
     [this](std::vector<rclcpp::Parameter> parameters) {

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <gazebo/common/CommonIface.hh>
+
 #include <gazebo_ros/node.hpp>
 
 #include <rcl/arguments.h>
@@ -36,9 +38,57 @@ Node::~Node()
 
 Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
 {
+  return Get(sdf, "/");
+}
+
+Node::SharedPtr Node::Get(
+  sdf::ElementPtr sdf,
+  const gazebo::physics::ModelPtr & parent)
+{
+  std::string modelName;
+  if (parent) {
+    modelName = parent->GetName();
+  }
+
+  return Get(sdf, "/" + modelName);
+}
+
+Node::SharedPtr Node::Get(
+  sdf::ElementPtr sdf,
+  const gazebo::sensors::SensorPtr & parent)
+{
+  std::string modelName;
+  std::vector<std::string> values;
+  std::string scopedName = parent->ScopedName();
+  values = gazebo::common::split(scopedName, "::");
+  if (values.size() < 2) {
+    modelName = "";
+  } else {
+    // the second element is the model name; the first one is the world name
+    modelName = values[1];
+  }
+
+  return Get(sdf, "/" + modelName);
+}
+
+Node::SharedPtr Node::Get(
+  sdf::ElementPtr sdf,
+  const gazebo::rendering::VisualPtr & parent)
+{
+  std::string modelName;
+  if (parent) {
+    modelName = parent->GetRootVisual()->Name();
+  }
+
+  return Get(sdf, "/" + modelName);
+}
+
+Node::SharedPtr Node::Get(
+  sdf::ElementPtr sdf,
+  const std::string & defaultNamespace)
+{
   // Initialize arguments
   std::string name = "";
-  std::string ns = "/";
   std::vector<std::string> arguments;
   std::vector<rclcpp::Parameter> parameter_overrides;
 
@@ -52,6 +102,19 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   if (sdf->HasElement("ros")) {
     sdf = sdf->GetElement("ros");
   }
+
+  // Legacy namespace
+  // True to default to the root (/) namespace if <namespace> is not specified
+  // False to use the model name as the namespace if <namespace> is not
+  // specified.
+  // todo(anyone) change this to false in humble
+  bool legacyNamespace = true;
+  if (sdf->HasElement("legacy_namespace")) {
+    legacyNamespace = sdf->Get<bool>("legacy_namespace");
+  }
+  std::string ns =
+    (legacyNamespace || defaultNamespace.empty() ||
+    defaultNamespace[0] != '/') ? "/" : defaultNamespace;
 
   // Set namespace if tag is present
   if (sdf->HasElement("namespace")) {

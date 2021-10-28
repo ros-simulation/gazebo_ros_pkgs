@@ -110,7 +110,7 @@ void GazeboRosJointPoseTrajectory::Load(gazebo::physics::ModelPtr model, sdf::El
   impl_->world_ = model->GetWorld();
 
   // Initialize ROS node
-  impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get(sdf, model);
 
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();

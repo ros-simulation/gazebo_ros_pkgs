@@ -57,7 +57,7 @@ void GazeboRosHarness::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _s
   gazebo::HarnessPlugin::Load(_model, _sdf);
 
   // Initialize ROS node
-  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf, _model);
 
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();

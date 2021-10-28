@@ -73,7 +73,7 @@ GazeboRosBumper::~GazeboRosBumper()
 void GazeboRosBumper::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
 {
   // Initialize ROS node
-  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf, _sensor);
 
   impl_->parent_sensor_ = std::dynamic_pointer_cast<gazebo::sensors::ContactSensor>(_sensor);
   if (!impl_->parent_sensor_) {
