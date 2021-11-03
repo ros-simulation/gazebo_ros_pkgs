@@ -127,7 +127,7 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   ASSERT_NE(range, nullptr);
 
   // Range message verification
-  EXPECT_EQ(range->header.frame_id, "ray_link");
+  EXPECT_EQ(range->header.frame_id, "ray/ray_link");
   EXPECT_EQ(range->radiation_type, sensor_msgs::msg::Range::INFRARED);
   EXPECT_NEAR(range->field_of_view, 1.0472, ROUNDING_ERROR_TOL);
   EXPECT_NEAR(range->min_range, 0.05, ROUNDING_ERROR_TOL);
@@ -135,7 +135,7 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   EXPECT_NEAR(range->range, min_range, ROUNDING_ERROR_TOL);
 
   // PointCloud verification
-  EXPECT_EQ(pc->header.frame_id, "ray_link");
+  EXPECT_EQ(pc->header.frame_id, "ray/ray_link");
   ASSERT_EQ(pc->channels.size(), 1u);
   ASSERT_EQ(pc->points.size(), pc->channels[0].values.size());
   auto point = pc->points.begin();
@@ -148,7 +148,7 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   }
 
   // PointCloud2 verification
-  EXPECT_EQ(pc2->header.frame_id, "ray_link");
+  EXPECT_EQ(pc2->header.frame_id, "ray/ray_link");
   auto pc2_iter_x = sensor_msgs::PointCloud2Iterator<float>(*pc2, "x");
   auto pc2_iter_y = sensor_msgs::PointCloud2Iterator<float>(*pc2, "y");
   auto pc2_iter_z = sensor_msgs::PointCloud2Iterator<float>(*pc2, "z");
@@ -163,7 +163,7 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   }
 
   // LaserScan verification
-  EXPECT_EQ(ls->header.frame_id, "ray_link");
+  EXPECT_EQ(ls->header.frame_id, "ray/ray_link");
   EXPECT_NEAR(ls->angle_min, -0.5236, ROUNDING_ERROR_TOL);
   EXPECT_NEAR(ls->angle_max, 0.5236, ROUNDING_ERROR_TOL);
   EXPECT_NEAR(ls->range_min, 0.05, ROUNDING_ERROR_TOL);

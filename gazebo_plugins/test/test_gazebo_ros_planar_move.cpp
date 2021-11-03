@@ -100,7 +100,7 @@ TEST_F(GazeboRosPlanarMoveTest, Publishing)
 
   // Check message
   ASSERT_NE(nullptr, latestMsg);
-  EXPECT_EQ("odom_frame_test", latestMsg->header.frame_id);
+  EXPECT_EQ("test/odom_frame_test", latestMsg->header.frame_id);
   EXPECT_LT(0.0, latestMsg->pose.pose.position.x);
   EXPECT_LT(0.0, latestMsg->pose.pose.orientation.z);
 
