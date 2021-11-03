@@ -81,6 +81,9 @@ public:
 
   /// Gazebo subscribe to parent sensor's laser scan
   gazebo::transport::SubscriberPtr laser_scan_sub_;
+
+  /// Variable to split the namespaces and the frames
+  std::string multi_robot_namespace_divider;
 };
 
 GazeboRosRaySensor::GazeboRosRaySensor()
@@ -106,11 +109,16 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
+  impl_->multi_robot_namespace_divider = impl_->ros_node_->get_namespace();
+  impl_->multi_robot_namespace_divider.erase(0, 1);
+  impl_->multi_robot_namespace_divider += "/";
+
   // Get QoS profile for the publisher
   rclcpp::QoS pub_qos = qos.get_publisher_qos("~/out", rclcpp::SensorDataQoS().reliable());
 
   // Get tf frame for output
-  impl_->frame_name_ = gazebo_ros::SensorFrameID(*_sensor, *_sdf);
+  impl_->frame_name_ = impl_->multi_robot_namespace_divider +
+    gazebo_ros::SensorFrameID(*_sensor, *_sdf);
 
   // Get output type from sdf if provided
   if (!_sdf->HasElement("output_type")) {
@@ -197,13 +205,9 @@ void GazeboRosRaySensorPrivate::SubscribeGazeboLaserScan()
 void GazeboRosRaySensorPrivate::PublishLaserScan(ConstLaserScanStampedPtr & _msg)
 {
   // Convert Laser scan to ROS LaserScan
-  std::string multi_robot_namespace_divider;
-  multi_robot_namespace_divider = ros_node_->get_namespace();
-  multi_robot_namespace_divider.erase(0,1);
-  multi_robot_namespace_divider += "/";
   auto ls = gazebo_ros::Convert<sensor_msgs::msg::LaserScan>(*_msg);
   // Set tf frame
-  ls.header.frame_id = multi_robot_namespace_divider + frame_name_;
+  ls.header.frame_id = frame_name_;
   // Publish output
   boost::get<LaserScanPub>(pub_)->publish(ls);
 }
@@ -211,14 +215,9 @@ void GazeboRosRaySensorPrivate::PublishLaserScan(ConstLaserScanStampedPtr & _msg
 void GazeboRosRaySensorPrivate::PublishPointCloud(ConstLaserScanStampedPtr & _msg)
 {
   // Convert Laser scan to PointCloud
-  std::string multi_robot_namespace_divider;
-  multi_robot_namespace_divider = ros_node_->get_namespace();
-  std::cout<<multi_robot_namespace_divider<<std::endl;
-  multi_robot_namespace_divider.erase(0,1);
-  multi_robot_namespace_divider += "/";
   auto pc = gazebo_ros::Convert<sensor_msgs::msg::PointCloud>(*_msg, min_intensity_);
   // Set tf frame
-  pc.header.frame_id = multi_robot_namespace_divider + frame_name_;
+  pc.header.frame_id = frame_name_;
   // Publish output
   boost::get<PointCloudPub>(pub_)->publish(pc);
 }
@@ -226,13 +225,9 @@ void GazeboRosRaySensorPrivate::PublishPointCloud(ConstLaserScanStampedPtr & _ms
 void GazeboRosRaySensorPrivate::PublishPointCloud2(ConstLaserScanStampedPtr & _msg)
 {
   // Convert Laser scan to PointCloud2
-  std::string multi_robot_namespace_divider;
-  multi_robot_namespace_divider = ros_node_->get_namespace();
-  multi_robot_namespace_divider.erase(0,1);
-  multi_robot_namespace_divider += "/";
   auto pc2 = gazebo_ros::Convert<sensor_msgs::msg::PointCloud2>(*_msg, min_intensity_);
   // Set tf frame
-  pc2.header.frame_id = multi_robot_namespace_divider + frame_name_;
+  pc2.header.frame_id = frame_name_;
   // Publish output
   boost::get<PointCloud2Pub>(pub_)->publish(pc2);
 }
@@ -240,15 +235,9 @@ void GazeboRosRaySensorPrivate::PublishPointCloud2(ConstLaserScanStampedPtr & _m
 void GazeboRosRaySensorPrivate::PublishRange(ConstLaserScanStampedPtr & _msg)
 {
   // Convert Laser scan to range
-  std::string multi_robot_namespace_divider;
-  multi_robot_namespace_divider = ros_node_->get_namespace();
-  multi_robot_namespace_divider.erase(0,1);
-  std::cout<<multi_robot_namespace_divider<<std::endl;
-
-  multi_robot_namespace_divider += "/";
   auto range_msg = gazebo_ros::Convert<sensor_msgs::msg::Range>(*_msg);
   // Set tf frame
-  range_msg.header.frame_id = multi_robot_namespace_divider + frame_name_;
+  range_msg.header.frame_id = frame_name_;
   // Set radiation type from sdf
   range_msg.radiation_type = range_radiation_type_;
   // Publish output
