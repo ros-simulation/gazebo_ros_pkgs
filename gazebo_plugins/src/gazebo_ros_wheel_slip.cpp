@@ -147,15 +147,13 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
           // This does not set the actual parameter in gazebo
           if (parameter.name == "slip_compliance_unitless_lateral") {
             double slip = temp_param.as_double();
-            if (slip >= 0.) {
-              RCLCPP_INFO(
-                this->impl_->ros_node_->get_logger(),
-                "Setting lateral slip compliance for all wheels: %.3e", slip);
-              // Iterate over all wheels
-              for (auto & wheel_parameter : this->impl_->map_slip_lateral_default_) {
-                auto param_name = parameter.name + "/" + wheel_parameter.first;
-                this->impl_->ros_node_->set_parameter(rclcpp::Parameter(param_name, slip));
-              }
+            RCLCPP_INFO(
+              this->impl_->ros_node_->get_logger(),
+              "Setting lateral slip compliance for all wheels: %.3e", slip);
+            // Iterate over all wheels
+            for (auto & wheel_parameter : this->impl_->map_slip_lateral_default_) {
+              auto param_name = parameter.name + "/" + wheel_parameter.first;
+              this->impl_->ros_node_->set_parameter(rclcpp::Parameter(param_name, slip));
             }
           }
 
@@ -163,15 +161,13 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
           // This does not set the actual parameter in gazebo
           if (parameter.name == "slip_compliance_unitless_longitudinal") {
             double slip = temp_param.as_double();
-            if (slip >= 0.) {
-              RCLCPP_INFO(
-                this->impl_->ros_node_->get_logger(),
-                "Setting longitudinal slip compliance for all wheels: %.3e", slip);
-              // Iterate over all wheels
-              for (auto & wheel_parameter : this->impl_->map_slip_longitudinal_default_) {
-                auto param_name = parameter.name + "/" + wheel_parameter.first;
-                this->impl_->ros_node_->set_parameter(rclcpp::Parameter(param_name, slip));
-              }
+            RCLCPP_INFO(
+              this->impl_->ros_node_->get_logger(),
+              "Setting longitudinal slip compliance for all wheels: %.3e", slip);
+            // Iterate over all wheels
+            for (auto & wheel_parameter : this->impl_->map_slip_longitudinal_default_) {
+              auto param_name = parameter.name + "/" + wheel_parameter.first;
+              this->impl_->ros_node_->set_parameter(rclcpp::Parameter(param_name, slip));
             }
           }
 
@@ -182,12 +178,10 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             if (this->impl_->map_slip_lateral_default_.count(wheel_name) == 1) {
               // The parameter has a valid name
               double slip = temp_param.as_double();
-              if (slip >= 0.) {
-                RCLCPP_INFO(
-                  this->impl_->ros_node_->get_logger(),
-                  "New lateral slip compliance for %s: %.3e", wheel_name.c_str(), slip);
-                this->SetSlipComplianceLateral(wheel_name, slip);
-              }
+              RCLCPP_INFO(
+                this->impl_->ros_node_->get_logger(),
+                "New lateral slip compliance for %s: %.3e", wheel_name.c_str(), slip);
+              this->SetSlipComplianceLateral(wheel_name, slip);
             }
           }
 
@@ -198,12 +192,10 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             if (this->impl_->map_slip_longitudinal_default_.count(wheel_name) == 1) {
               // The parameter has a valid name
               double slip = temp_param.as_double();
-              if (slip >= 0.) {
-                RCLCPP_INFO(
-                  this->impl_->ros_node_->get_logger(),
-                  "New longitudinal slip compliance for %s: %.3e", wheel_name.c_str(), slip);
-                this->SetSlipComplianceLongitudinal(wheel_name, slip);
-              }
+              RCLCPP_INFO(
+                this->impl_->ros_node_->get_logger(),
+                "New longitudinal slip compliance for %s: %.3e", wheel_name.c_str(), slip);
+              this->SetSlipComplianceLongitudinal(wheel_name, slip);
             }
           }
         }
