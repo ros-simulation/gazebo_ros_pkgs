@@ -111,7 +111,11 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
 
   impl_->multi_robot_namespace_divider = impl_->ros_node_->get_namespace();
   impl_->multi_robot_namespace_divider.erase(0, 1);
-  impl_->multi_robot_namespace_divider += "/";
+
+  // Check if the namespace is empty
+  if (impl_->multi_robot_namespace_divider != "") {
+    impl_->multi_robot_namespace_divider += "/";
+  }
 
   // Get QoS profile for the publisher
   rclcpp::QoS pub_qos = qos.get_publisher_qos("~/out", rclcpp::SensorDataQoS().reliable());
