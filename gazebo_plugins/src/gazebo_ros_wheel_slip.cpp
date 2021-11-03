@@ -241,6 +241,29 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       wheel_parameter.second
     );
   }
+
+  // If the world file contains global wheelslip ros parameters, these should be set now
+  if (_sdf->HasElement("ros")) {
+    auto ros_element = _sdf->GetElement("ros");
+    if (ros_element->HasElement("parameter")) {
+      // Iterate over parameter tags
+      for (auto param_element = ros_element->GetElement("parameter"); param_element;
+        param_element = param_element->GetNextElement("parameter"))
+      {
+        auto param_name = param_element->Get<std::string>("name");
+        if (param_name == "slip_compliance_unitless_lateral" ||
+          param_name == "slip_compliance_unitless_longitudinal")
+        {
+          // Global wheelslip ros parameters were declared
+          double value = param_element->Get<double>();
+          this->impl_->ros_node_->set_parameter(rclcpp::Parameter(param_name, value));
+          RCLCPP_INFO(
+            this->impl_->ros_node_->get_logger(),
+            "Global wheelslip parameter found in world file, overriding sdf parameters..");
+        }
+      }
+    }
+  }
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosWheelSlip)
