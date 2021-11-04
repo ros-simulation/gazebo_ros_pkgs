@@ -30,24 +30,108 @@ class GazeboRosWheelSlipTest : public gazebo::ServerFixture
 {
 };
 
-TEST_F(GazeboRosWheelSlipTest, SetSlipCompliance)
+#define LoadWorld(world_file)\
+  this->Load(world_file, true);\
+  auto world = gazebo::physics::get_world();\
+  ASSERT_NE(nullptr, world);\
+  auto node = std::make_shared<rclcpp::Node>("test_gazebo_ros_wheelslip");\
+  ASSERT_NE(nullptr, node);\
+
+#define VerifyParameters()\
+  int counter = 0;\
+  while (!parameters_client->wait_for_service(1s)) {\
+    std::cout << "service not available, waiting again..." << std::endl;\
+    counter++;\
+    if (counter > 5) {FAIL();}\
+  }\
+  std::vector<std::string> parameter_names;\
+  for (auto & element : parameter_pairs) {\
+    parameter_names.push_back(element.first);\
+  }\
+  auto parameters_received = parameters_client->get_parameters(parameter_names);\
+  for (auto & parameter : parameters_received) {\
+    ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());\
+  }\
+
+TEST_F(GazeboRosWheelSlipTest, TestWorldFile_2)
 {
-  // Load test world and start paused
-  this->Load("worlds/gazebo_ros_wheelslip.world", true);
+  // We have global ROS parameters and sdf parameters in the world file
+  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_2.world")
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
+    node,
+    "trisphere_cycle_slip0/wheel_slip_front");
 
-  // World
-  auto world = gazebo::physics::get_world();
-  ASSERT_NE(nullptr, world);
+  std::map<std::string, double> parameter_pairs = {
+    {"slip_compliance_unitless_lateral", 10.0},
+    {"slip_compliance_unitless_lateral/wheel_front", 10.0},
+    {"slip_compliance_unitless_longitudinal", 11.0},
+    {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
 
-  // Create node
-  auto node = std::make_shared<rclcpp::Node>("test_gazebo_ros_wheelslip");
-  ASSERT_NE(nullptr, node);
+  VerifyParameters()
+}
 
-  auto parameters_client_rear = std::make_shared<rclcpp::SyncParametersClient>(
+TEST_F(GazeboRosWheelSlipTest, TestWorldFile_3)
+{
+  // We have only global ROS parameters in the world file
+  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_3.world")
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
+    node,
+    "trisphere_cycle_slip0/wheel_slip_front");
+
+  std::map<std::string, double> parameter_pairs = {
+    {"slip_compliance_unitless_lateral", 10.0},
+    {"slip_compliance_unitless_lateral/wheel_front", 10.0},
+    {"slip_compliance_unitless_longitudinal", 11.0},
+    {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
+
+  VerifyParameters()
+}
+
+
+TEST_F(GazeboRosWheelSlipTest, TestWorldFile_4)
+{
+  // We have local ROS parameters and sdf parameters in the world file
+  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_4.world")
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
+    node,
+    "trisphere_cycle_slip0/wheel_slip_front");
+
+  std::map<std::string, double> parameter_pairs = {
+    {"slip_compliance_unitless_lateral", 1.0},
+    {"slip_compliance_unitless_lateral/wheel_front", 10.0},
+    {"slip_compliance_unitless_longitudinal", 2.0},
+    {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
+
+  VerifyParameters()
+}
+
+TEST_F(GazeboRosWheelSlipTest, TestWorldFile_5)
+{
+  // We have global, local ROS params as well as sdf params in the world file
+  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_5.world")
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
     node,
     "trisphere_cycle_slip0/wheel_slip_rear");
 
-  std::map<std::string, double> parameters_rear_pairs = {
+  std::map<std::string, double> parameter_pairs = {
+    {"slip_compliance_unitless_lateral", 100.5},
+    {"slip_compliance_unitless_lateral/wheel_rear_left", 100.5},
+    {"slip_compliance_unitless_lateral/wheel_rear_right", 100.5},
+    {"slip_compliance_unitless_longitudinal", 200.67},
+    {"slip_compliance_unitless_longitudinal/wheel_rear_left", 200.67},
+    {"slip_compliance_unitless_longitudinal/wheel_rear_right", 200.67}};
+
+  VerifyParameters()
+}
+
+TEST_F(GazeboRosWheelSlipTest, SetSlipCompliance)
+{
+  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_1.world")
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
+    node,
+    "trisphere_cycle_slip0/wheel_slip_rear");
+
+  std::map<std::string, double> parameter_pairs = {
     {"slip_compliance_unitless_lateral", 5},
     {"slip_compliance_unitless_lateral/wheel_rear_left", 0.0},
     {"slip_compliance_unitless_lateral/wheel_rear_right", 5},
@@ -55,50 +139,35 @@ TEST_F(GazeboRosWheelSlipTest, SetSlipCompliance)
     {"slip_compliance_unitless_longitudinal/wheel_rear_left", 4},
     {"slip_compliance_unitless_longitudinal/wheel_rear_right", 6}};
 
-  int counter = 0;
-  while (!parameters_client_rear->wait_for_service(1s)) {
-    std::cout << "service not available, waiting again..." << std::endl;
-    counter++;
-    if (counter > 5) {FAIL();}
-  }
+  // TEST 1 : Verify parameters were set as per the SDF, negative values should be replaced by 0
+  VerifyParameters()
 
-  std::vector<std::string> parameters_rear_names;
-  for (auto & element : parameters_rear_pairs) {
-    parameters_rear_names.push_back(element.first);
-  }
-
-  // Verify parameters were set as per the SDF, negative values should be replaced by 0
-  auto parameters_rear = parameters_client_rear->get_parameters(parameters_rear_names);
-  for (auto & parameter : parameters_rear) {
-    ASSERT_EQ(parameters_rear_pairs[parameter.get_name()], parameter.as_double());
-  }
-
-  // Set slip compliance for one wheel, verify others remain unchanged
-  parameters_rear_pairs["slip_compliance_unitless_lateral/wheel_rear_left"] = 3.0;
+  // TEST 2 : Set slip compliance for one wheel, verify others remain unchanged
+  parameter_pairs["slip_compliance_unitless_lateral/wheel_rear_left"] = 3.0;
   std::vector<rclcpp::Parameter> change_param = {
     rclcpp::Parameter("slip_compliance_unitless_lateral/wheel_rear_left", 3.0)};
-  auto result = parameters_client_rear->set_parameters(change_param);
+  auto result = parameters_client->set_parameters(change_param);
   ASSERT_TRUE(result[0].successful);
 
-  parameters_rear = parameters_client_rear->get_parameters(parameters_rear_names);
-  for (auto & parameter : parameters_rear) {
-    ASSERT_EQ(parameters_rear_pairs[parameter.get_name()], parameter.as_double());
+  parameters_received = parameters_client->get_parameters(parameter_names);
+  for (auto & parameter : parameters_received) {
+    ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
   }
 
-  // Set global slip compliance parameters, which should override the ones for wheels
+  // TEST 3 : Set global slip compliance parameters, which should override the ones for wheels
   std::vector<rclcpp::Parameter> change_params_global = {
     rclcpp::Parameter("slip_compliance_unitless_lateral", 10.0),
     rclcpp::Parameter("slip_compliance_unitless_longitudinal", 11.0)
   };
-  result = parameters_client_rear->set_parameters(change_params_global);
+  result = parameters_client->set_parameters(change_params_global);
   ASSERT_TRUE(result[0].successful);
   ASSERT_TRUE(result[1].successful);
 
   // slip compliance parameters for individual wheels are set after the global ones
   // This takes time, and the sleep_for() below allows them to be set.
   std::this_thread::sleep_for(2s);
-  parameters_rear = parameters_client_rear->get_parameters(parameters_rear_names);
-  for (auto & parameter : parameters_rear) {
+  parameters_received = parameters_client->get_parameters(parameter_names);
+  for (auto & parameter : parameters_received) {
     if (parameter.get_name().find("slip_compliance_unitless_lateral") != std::string::npos) {
       ASSERT_EQ(parameter.as_double(), 10.0);
     } else {
