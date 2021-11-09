@@ -736,20 +736,21 @@ void GazeboRosCamera::OnNewDepthFrame(
         yAngle = 0.0;
       }
 
-      // in optical frame
-      // hardcoded rotation rpy(-M_PI/2, 0, -M_PI/2) is built-in
-      // to urdf, where the *_optical_frame should have above relative
-      // rotation from the physical camera *_frame
+      // 1- No more correction is needed in URDF as before: rpy(-M_PI/2, 0, -M_PI/2)
+      // 2- No more optical frame must be included if the camera link X axis is pointed forward
+      // 3- x-forward z-up frame for pointcloud 
+      // 4- The X axis of camera frame must be pointed to the depth direction
 
       float depth = _image[image_index++];
 
       if (depth > impl_->min_depth_ && depth < impl_->max_depth_) {
-        auto x = static_cast<float>(depth * tan(yAngle));
-        auto y = static_cast<float>(depth * tan(pAngle));
+        auto x = static_cast<float>(depth);
+        auto y = static_cast<float>(-depth * tan(yAngle));
+        auto z = static_cast<float>(-depth * tan(pAngle));
 
         std::memcpy(&impl_->cloud_msg_.data[cloud_index], &x, FLOAT_SIZE);
         std::memcpy(&impl_->cloud_msg_.data[cloud_index + 4], &y, FLOAT_SIZE);
-        std::memcpy(&impl_->cloud_msg_.data[cloud_index + 8], &depth, FLOAT_SIZE);
+        std::memcpy(&impl_->cloud_msg_.data[cloud_index + 8], &z, FLOAT_SIZE);
       } else if (depth <= impl_->min_depth_) {
         // point before valid range
         std::memcpy(&impl_->cloud_msg_.data[cloud_index], &neg_inf, FLOAT_SIZE);
