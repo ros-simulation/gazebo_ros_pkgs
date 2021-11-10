@@ -323,10 +323,10 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
     std::map<std::string, ignition::math::Vector3d> slips;
     this->GetSlips(slips);
-    for(const auto& elem : slips)
+    for(const auto& wheel : slips)
     {
-      auto name = elem.first;
-      auto slip = elem.second;
+      auto name = wheel.first;
+      auto slip = wheel.second;
       auto spin_speed = slip.Z();
       auto long_vel = slip.X() + slip.Z();
       auto lat_vel = slip.Y();
