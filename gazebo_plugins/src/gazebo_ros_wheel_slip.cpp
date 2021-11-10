@@ -28,8 +28,6 @@
 #include <vector>
 #include <cmath>
 
-#define PI 3.14159265
-
 using namespace std::chrono_literals;
 
 namespace gazebo_plugins
@@ -338,7 +336,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       } else {
         long_slip = (long_vel-spin_speed) / spin_speed;
       }
-      auto lat_slip = atan2(lat_vel, long_vel) * 180 / PI;
+      auto lat_slip = atan2(lat_vel, long_vel);
       slip_msg.name.push_back(name);
       slip_msg.lateral_slip.push_back(lat_slip);
       slip_msg.longitudinal_slip.push_back(long_slip);
