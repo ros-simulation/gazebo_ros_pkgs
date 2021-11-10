@@ -19,11 +19,18 @@
 #include <gazebo_plugins/gazebo_ros_wheel_slip.hpp>
 #include <gazebo_ros/node.hpp>
 #include <std_msgs/msg/bool.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include "gazebo_msgs/msg/instant_slip.hpp"
 
 #include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <cmath>
+
+#define PI 3.14159265
+
+using namespace std::chrono_literals;
 
 namespace gazebo_plugins
 {
@@ -45,6 +52,17 @@ public:
   // Event handler to set slip compliance values for individual wheels based
   std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
   rclcpp::ParameterEventCallbackHandle::SharedPtr parameter_set_event_callback_;
+  // Publish wheel slip
+  rclcpp::Publisher<gazebo_msgs::msg::InstantSlip>::SharedPtr slip_publisher_;
+
+  /// Period in seconds
+  double update_period_;
+
+  /// Keep last time an update was published
+  gazebo::common::Time last_update_time_;
+
+  /// Pointer to the update event connection.
+  gazebo::event::ConnectionPtr update_connection_;
 };
 
 GazeboRosWheelSlip::GazeboRosWheelSlip()
@@ -256,6 +274,94 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       }
     }
   }
+    slip_longitudinal_default);
+
+  // Update rate
+  double update_rate = 100.0;
+  if (!_sdf->HasElement("update_rate")) {
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Missing <update_rate>, defaults to %f", update_rate);
+  } else {
+    update_rate = _sdf->GetElement("update_rate")->Get<double>();
+  }
+
+  if (update_rate > 0.0) {
+    impl_->update_period_ = 1.0 / update_rate;
+  } else {
+    impl_->update_period_ = 0.0;
+  }
+
+  impl_->last_update_time_ = _model->GetWorld()->SimTime();
+
+  impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::InstantSlip>("wheelslip", 10);
+
+  auto on_update_callback = [this](const gazebo::common::UpdateInfo & info) {
+
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE("instant slip callback");
+    #endif
+
+    gazebo::common::Time current_time = info.simTime;
+
+    // If the world is reset, for example
+    if (current_time < impl_->last_update_time_) {
+      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Negative sim time difference detected.");
+      impl_->last_update_time_ = current_time;
+    }
+
+    // Check period
+    double seconds_since_last_update = (current_time - impl_->last_update_time_).Double();
+
+    if (seconds_since_last_update < impl_->update_period_) {
+      return;
+    }
+
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_BEGIN("fill ROS message");
+    #endif
+
+    // Populate message
+    auto slip_msg = gazebo_msgs::msg::InstantSlip();
+
+    std::map<std::string, ignition::math::Vector3d> slips;
+    this->GetSlips(slips);
+    for(const auto& elem : slips)
+    {
+      auto name = elem.first;
+      auto slip = elem.second;
+      auto spin_speed = slip.Z();
+      auto long_vel = slip.X() + slip.Z();
+      auto lat_vel = slip.Y();
+      double long_slip;
+      if (spin_speed == 0) {
+        long_slip = 0;
+      } else {
+        long_slip = (long_vel-spin_speed) / spin_speed;
+      }
+      auto lat_slip = atan2(lat_vel, long_vel) * 180 / PI;
+      slip_msg.name.push_back(name);
+      slip_msg.lateral_slip.push_back(lat_slip);
+      slip_msg.longitudinal_slip.push_back(long_slip);
+    }
+
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_END();
+      IGN_PROFILE_BEGIN("publish");
+    #endif
+
+    // Publish
+    impl_->slip_publisher_->publish(slip_msg);
+
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_END();
+    #endif
+
+    // Update time
+    impl_->last_update_time_ = current_time;
+  };
+
+  // Callback on every iteration
+  impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(on_update_callback);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosWheelSlip)
