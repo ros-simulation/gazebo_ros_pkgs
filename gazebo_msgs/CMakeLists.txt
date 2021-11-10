@@ -23,6 +23,7 @@ set(msg_files
   "msg/ContactState.msg"
   "msg/ContactsState.msg"
   "msg/EntityState.msg"
+  "msg/InstantSlip.msg"
   "msg/LinkState.msg"
   "msg/LinkStates.msg"
   "msg/ModelState.msg"
