@@ -274,7 +274,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   }
     slip_longitudinal_default);
 
-  double zero_wheel_spin_tolerance = 1.0e-6;
+  double zero_wheel_spin_tolerance = 1.0e-3;
   if (!_sdf->HasElement("zero_wheel_spin_tolerance")) {
     RCLCPP_INFO(
       impl_->ros_node_->get_logger(), "Missing <zero_wheel_spin_tolerance>, defaults to %f", zero_wheel_spin_tolerance);
