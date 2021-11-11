@@ -738,7 +738,7 @@ void GazeboRosCamera::OnNewDepthFrame(
 
       // 1- No more correction is needed in URDF as before: rpy(-M_PI/2, 0, -M_PI/2)
       // 2- No more optical frame must be included if the camera link X axis is pointed forward
-      // 3- x-forward z-up frame for pointcloud 
+      // 3- x-forward z-up frame for pointcloud
       // 4- The X axis of camera frame must be pointed to the depth direction
 
       float depth = _image[image_index++];
