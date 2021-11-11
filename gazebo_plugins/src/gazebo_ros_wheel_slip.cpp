@@ -14,19 +14,20 @@
 
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
-
 #include <gazebo/transport/transport.hh>
-#include <gazebo_plugins/gazebo_ros_wheel_slip.hpp>
-#include <gazebo_ros/node.hpp>
-#include <std_msgs/msg/bool.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include "gazebo_msgs/msg/instant_slip.hpp"
 
-#include <unordered_map>
+#include <gazebo_plugins/gazebo_ros_wheel_slip.hpp>
+#include <gazebo_msgs/msg/instant_slip.hpp>
+#include <gazebo_ros/node.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/bool.hpp>
+
+#include <cmath>
+#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
-#include <cmath>
 
 using namespace std::chrono_literals;
 
@@ -277,7 +278,8 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   double zero_wheel_spin_tolerance = 1.0e-3;
   if (!_sdf->HasElement("zero_wheel_spin_tolerance")) {
     RCLCPP_INFO(
-      impl_->ros_node_->get_logger(), "Missing <zero_wheel_spin_tolerance>, defaults to %f", zero_wheel_spin_tolerance);
+      impl_->ros_node_->get_logger(), "Missing <zero_wheel_spin_tolerance>, defaults to %f",
+      zero_wheel_spin_tolerance);
   } else {
     zero_wheel_spin_tolerance = _sdf->GetElement("zero_wheel_spin_tolerance")->Get<double>();
   }
@@ -298,9 +300,11 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
   impl_->last_update_time_ = _model->GetWorld()->SimTime();
 
-  impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::InstantSlip>("wheelslip", 10);
+  impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::InstantSlip>(
+    "wheelslip", 10);
 
-  auto on_update_callback = [this, zero_wheel_spin_tolerance](const gazebo::common::UpdateInfo & info) {
+  auto on_update_callback = [this, zero_wheel_spin_tolerance](
+    const gazebo::common::UpdateInfo & info) {
 
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE("instant slip callback");
