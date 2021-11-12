@@ -341,7 +341,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
         auto long_vel = slip.X() + slip.Z();
         auto lat_vel = slip.Y();
         double long_slip;
-        if (abs(spin_speed) < zero_wheel_spin_tolerance) {
+        if (fabs(spin_speed) < zero_wheel_spin_tolerance) {
           long_slip = 0;
         } else {
           long_slip = (long_vel - spin_speed) / spin_speed;
