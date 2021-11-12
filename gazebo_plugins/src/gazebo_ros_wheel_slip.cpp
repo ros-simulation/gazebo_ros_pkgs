@@ -310,64 +310,63 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       IGN_PROFILE("instant slip callback");
     #endif
 
-    gazebo::common::Time current_time = info.simTime;
+      gazebo::common::Time current_time = info.simTime;
 
-    // If the world is reset, for example
-    if (current_time < impl_->last_update_time_) {
-      RCLCPP_INFO(impl_->ros_node_->get_logger(), "Negative sim time difference detected.");
-      impl_->last_update_time_ = current_time;
-    }
+      // If the world is reset, for example
+      if (current_time < impl_->last_update_time_) {
+        RCLCPP_INFO(impl_->ros_node_->get_logger(), "Negative sim time difference detected.");
+        impl_->last_update_time_ = current_time;
+      }
 
-    // Check period
-    double seconds_since_last_update = (current_time - impl_->last_update_time_).Double();
+      // Check period
+      double seconds_since_last_update = (current_time - impl_->last_update_time_).Double();
 
-    if (seconds_since_last_update < impl_->update_period_) {
-      return;
-    }
+      if (seconds_since_last_update < impl_->update_period_) {
+        return;
+      }
 
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE_BEGIN("fill ROS message");
     #endif
 
-    // Populate message
-    auto slip_msg = gazebo_msgs::msg::InstantSlip();
+      // Populate message
+      auto slip_msg = gazebo_msgs::msg::InstantSlip();
 
-    std::map<std::string, ignition::math::Vector3d> slips;
-    this->GetSlips(slips);
-    for(const auto& wheel : slips)
-    {
-      auto name = wheel.first;
-      auto slip = wheel.second;
-      auto spin_speed = slip.Z();
-      auto long_vel = slip.X() + slip.Z();
-      auto lat_vel = slip.Y();
-      double long_slip;
-      if (abs(spin_speed) < zero_wheel_spin_tolerance) {
-        long_slip = 0;
-      } else {
-        long_slip = (long_vel-spin_speed) / spin_speed;
+      std::map<std::string, ignition::math::Vector3d> slips;
+      this->GetSlips(slips);
+      for (const auto & wheel : slips) {
+        auto name = wheel.first;
+        auto slip = wheel.second;
+        auto spin_speed = slip.Z();
+        auto long_vel = slip.X() + slip.Z();
+        auto lat_vel = slip.Y();
+        double long_slip;
+        if (abs(spin_speed) < zero_wheel_spin_tolerance) {
+          long_slip = 0;
+        } else {
+          long_slip = (long_vel - spin_speed) / spin_speed;
+        }
+        auto lat_slip = atan2(lat_vel, long_vel);
+        slip_msg.name.push_back(name);
+        slip_msg.lateral_slip.push_back(lat_slip);
+        slip_msg.longitudinal_slip.push_back(long_slip);
       }
-      auto lat_slip = atan2(lat_vel, long_vel);
-      slip_msg.name.push_back(name);
-      slip_msg.lateral_slip.push_back(lat_slip);
-      slip_msg.longitudinal_slip.push_back(long_slip);
-    }
 
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE_END();
       IGN_PROFILE_BEGIN("publish");
     #endif
 
-    // Publish
-    impl_->slip_publisher_->publish(slip_msg);
+      // Publish
+      impl_->slip_publisher_->publish(slip_msg);
 
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE_END();
     #endif
 
-    // Update time
-    impl_->last_update_time_ = current_time;
-  };
+      // Update time
+      impl_->last_update_time_ = current_time;
+    };
 
   // Callback on every iteration
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(on_update_callback);
