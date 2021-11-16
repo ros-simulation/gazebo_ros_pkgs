@@ -28,91 +28,97 @@ using namespace std::chrono_literals;
 /// Tests the gazebo_ros_wheelslip plugin
 class GazeboRosWheelSlipTest : public gazebo::ServerFixture
 {
+public:
+  void TestParameters(
+    std::string world_file,
+    std::string node_name,
+    std::map<std::string, double> parameter_pairs)
+  {
+    // Load the world
+    this->Load(world_file, true);
+    auto world = gazebo::physics::get_world();
+    ASSERT_NE(nullptr, world);
+    auto node = std::make_shared<rclcpp::Node>("test_gazebo_ros_wheelslip");
+    ASSERT_NE(nullptr, node);
+
+    // Create parameters client
+    auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
+      node, node_name);
+
+    // Wait for serive to show up
+    int counter = 0;
+    while (!parameters_client->wait_for_service(1s)) {
+      std::cout << "service not available, waiting again..." << std::endl;
+      counter++;
+      if (counter > 5) {FAIL();}
+    }
+
+    // Verify the parameters
+    std::vector<std::string> parameter_names;
+    for (auto & element : parameter_pairs) {
+      parameter_names.push_back(element.first);
+    }
+    std::this_thread::sleep_for(1s);
+    auto parameters_received = parameters_client->get_parameters(parameter_names);
+    for (auto & parameter : parameters_received) {
+      ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
+    }
+  }
 };
 
-#define LoadWorld(world_file)\
-  this->Load(world_file, true);\
-  auto world = gazebo::physics::get_world();\
-  ASSERT_NE(nullptr, world);\
-  auto node = std::make_shared<rclcpp::Node>("test_gazebo_ros_wheelslip");\
-  ASSERT_NE(nullptr, node);\
-
-#define VerifyParameters()\
-  int counter = 0;\
-  while (!parameters_client->wait_for_service(1s)) {\
-    std::cout << "service not available, waiting again..." << std::endl;\
-    counter++;\
-    if (counter > 5) {FAIL();}\
-  }\
-  std::vector<std::string> parameter_names;\
-  for (auto & element : parameter_pairs) {\
-    parameter_names.push_back(element.first);\
-  }\
-  auto parameters_received = parameters_client->get_parameters(parameter_names);\
-  for (auto & parameter : parameters_received) {\
-    ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());\
-  }\
 
 TEST_F(GazeboRosWheelSlipTest, TestWorldFile_2)
 {
   // We have global ROS parameters and sdf parameters in the world file
-  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_2.world")
-  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
-    node,
-    "trisphere_cycle_slip0/wheel_slip_front");
-
   std::map<std::string, double> parameter_pairs = {
     {"slip_compliance_unitless_lateral", 10.0},
     {"slip_compliance_unitless_lateral/wheel_front", 10.0},
     {"slip_compliance_unitless_longitudinal", 11.0},
     {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
 
-  VerifyParameters()
+  this->TestParameters(
+    "worlds/wheelslip_worlds/gazebo_ros_wheelslip_2.world",
+    "trisphere_cycle_slip0/wheel_slip_front",
+    parameter_pairs
+  );
 }
 
 TEST_F(GazeboRosWheelSlipTest, TestWorldFile_3)
 {
   // We have only global ROS parameters in the world file
-  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_3.world")
-  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
-    node,
-    "trisphere_cycle_slip0/wheel_slip_front");
-
   std::map<std::string, double> parameter_pairs = {
     {"slip_compliance_unitless_lateral", 10.0},
     {"slip_compliance_unitless_lateral/wheel_front", 10.0},
     {"slip_compliance_unitless_longitudinal", 11.0},
     {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
 
-  VerifyParameters()
+  this->TestParameters(
+    "worlds/wheelslip_worlds/gazebo_ros_wheelslip_3.world",
+    "trisphere_cycle_slip0/wheel_slip_front",
+    parameter_pairs
+  );
 }
 
 
 TEST_F(GazeboRosWheelSlipTest, TestWorldFile_4)
 {
   // We have local ROS parameters and sdf parameters in the world file
-  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_4.world")
-  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
-    node,
-    "trisphere_cycle_slip0/wheel_slip_front");
-
   std::map<std::string, double> parameter_pairs = {
     {"slip_compliance_unitless_lateral", 1.0},
     {"slip_compliance_unitless_lateral/wheel_front", 10.0},
     {"slip_compliance_unitless_longitudinal", 2.0},
     {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
 
-  VerifyParameters()
+  this->TestParameters(
+    "worlds/wheelslip_worlds/gazebo_ros_wheelslip_4.world",
+    "trisphere_cycle_slip0/wheel_slip_front",
+    parameter_pairs
+  );
 }
 
 TEST_F(GazeboRosWheelSlipTest, TestWorldFile_5)
 {
   // We have global, local ROS params as well as sdf params in the world file
-  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_5.world")
-  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
-    node,
-    "trisphere_cycle_slip0/wheel_slip_rear");
-
   std::map<std::string, double> parameter_pairs = {
     {"slip_compliance_unitless_lateral", 100.5},
     {"slip_compliance_unitless_lateral/wheel_rear_left", 100.5},
@@ -121,12 +127,21 @@ TEST_F(GazeboRosWheelSlipTest, TestWorldFile_5)
     {"slip_compliance_unitless_longitudinal/wheel_rear_left", 200.67},
     {"slip_compliance_unitless_longitudinal/wheel_rear_right", 200.67}};
 
-  VerifyParameters()
+  this->TestParameters(
+    "worlds/wheelslip_worlds/gazebo_ros_wheelslip_5.world",
+    "trisphere_cycle_slip0/wheel_slip_rear",
+    parameter_pairs
+  );
 }
 
-TEST_F(GazeboRosWheelSlipTest, SetSlipCompliance)
+
+TEST_F(GazeboRosWheelSlipTest, TestWorldFile_1)
 {
-  LoadWorld("worlds/wheelslip_worlds/gazebo_ros_wheelslip_1.world")
+  this->Load("worlds/wheelslip_worlds/gazebo_ros_wheelslip_1.world", true);
+  auto world = gazebo::physics::get_world();
+  ASSERT_NE(nullptr, world);
+  auto node = std::make_shared<rclcpp::Node>("test_gazebo_ros_wheelslip");
+  ASSERT_NE(nullptr, node);
   auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
     node,
     "trisphere_cycle_slip0/wheel_slip_rear");
@@ -140,7 +155,21 @@ TEST_F(GazeboRosWheelSlipTest, SetSlipCompliance)
     {"slip_compliance_unitless_longitudinal/wheel_rear_right", 6}};
 
   // TEST 1 : Verify parameters were set as per the SDF, negative values should be replaced by 0
-  VerifyParameters()
+  int counter = 0;
+  while (!parameters_client->wait_for_service(1s)) {
+    std::cout << "service not available, waiting again..." << std::endl;
+    counter++;
+    if (counter > 5) {FAIL();}
+  }
+  std::vector<std::string> parameter_names;
+  for (auto & element : parameter_pairs) {
+    parameter_names.push_back(element.first);
+  }
+  std::this_thread::sleep_for(1s);
+  auto parameters_received = parameters_client->get_parameters(parameter_names);
+  for (auto & parameter : parameters_received) {
+    ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
+  }
 
   // TEST 2 : Set slip compliance for one wheel, verify others remain unchanged
   parameter_pairs["slip_compliance_unitless_lateral/wheel_rear_left"] = 3.0;
