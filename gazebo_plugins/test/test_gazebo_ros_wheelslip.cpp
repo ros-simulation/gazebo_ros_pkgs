@@ -13,8 +13,6 @@
 // limitations under the License.
 
 #include <gazebo/test/ServerFixture.hh>
-#include <gazebo_ros/node.hpp>
-#include <gazebo_ros/testing_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <chrono>
@@ -29,7 +27,7 @@ using namespace std::chrono_literals;
 class GazeboRosWheelSlipTest : public gazebo::ServerFixture
 {
 public:
-  void TestParameters(
+  void test_parameters(
     std::string world_file,
     std::string node_name,
     std::map<std::string, double> parameter_pairs)
@@ -76,7 +74,7 @@ TEST_F(GazeboRosWheelSlipTest, TestWorldFile_2)
     {"slip_compliance_unitless_longitudinal", 11.0},
     {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
 
-  this->TestParameters(
+  this->test_parameters(
     "worlds/wheelslip_worlds/gazebo_ros_wheelslip_2.world",
     "trisphere_cycle_slip0/wheel_slip_front",
     parameter_pairs
@@ -92,7 +90,7 @@ TEST_F(GazeboRosWheelSlipTest, TestWorldFile_3)
     {"slip_compliance_unitless_longitudinal", 11.0},
     {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
 
-  this->TestParameters(
+  this->test_parameters(
     "worlds/wheelslip_worlds/gazebo_ros_wheelslip_3.world",
     "trisphere_cycle_slip0/wheel_slip_front",
     parameter_pairs
@@ -109,7 +107,7 @@ TEST_F(GazeboRosWheelSlipTest, TestWorldFile_4)
     {"slip_compliance_unitless_longitudinal", 2.0},
     {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
 
-  this->TestParameters(
+  this->test_parameters(
     "worlds/wheelslip_worlds/gazebo_ros_wheelslip_4.world",
     "trisphere_cycle_slip0/wheel_slip_front",
     parameter_pairs
@@ -127,7 +125,7 @@ TEST_F(GazeboRosWheelSlipTest, TestWorldFile_5)
     {"slip_compliance_unitless_longitudinal/wheel_rear_left", 200.67},
     {"slip_compliance_unitless_longitudinal/wheel_rear_right", 200.67}};
 
-  this->TestParameters(
+  this->test_parameters(
     "worlds/wheelslip_worlds/gazebo_ros_wheelslip_5.world",
     "trisphere_cycle_slip0/wheel_slip_rear",
     parameter_pairs
