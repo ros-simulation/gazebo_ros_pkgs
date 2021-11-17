@@ -4,12 +4,7 @@ find_package(cv_bridge REQUIRED)
 option(ENABLE_DISPLAY_TESTS "Enable the building of tests that requires a display" OFF)
 
 # Worlds
-file(GLOB worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "worlds/*.world")
-foreach(world ${worlds})
-  # Use configure_file so this is rerun each time make is invoked (as opposed to just cmake)
-  configure_file(${world} ${world} COPYONLY)
-endforeach()
-file(GLOB worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "worlds/wheelslip_worlds/*.world")
+file(GLOB_RECURSE worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "worlds/*.world")
 foreach(world ${worlds})
   # Use configure_file so this is rerun each time make is invoked (as opposed to just cmake)
   configure_file(${world} ${world} COPYONLY)
