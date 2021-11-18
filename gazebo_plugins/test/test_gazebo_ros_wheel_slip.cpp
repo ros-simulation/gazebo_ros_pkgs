@@ -56,7 +56,7 @@ TEST_F(GazeboRosWheelSlipTest, Publishing)
   // Spin until we get a message or timeout
   auto startTime = std::chrono::steady_clock::now();
   while (latestMsg == nullptr &&
-    (std::chrono::steady_clock::now() - startTime) < std::chrono::seconds(2))
+    (std::chrono::steady_clock::now() - startTime) < std::chrono::seconds(5))
   {
     world->Step(100);
     executor.spin_once(100ms);
