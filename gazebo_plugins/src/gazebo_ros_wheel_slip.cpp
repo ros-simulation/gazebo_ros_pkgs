@@ -301,7 +301,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->last_update_time_ = _model->GetWorld()->SimTime();
 
   impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::InstantSlip>(
-    "wheelslip", 10);
+    "wheel_slip", 10);
 
   auto on_update_callback = [this, zero_wheel_spin_tolerance](
     const gazebo::common::UpdateInfo & info) {
