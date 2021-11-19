@@ -43,13 +43,8 @@ public:
     auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
       node, node_name);
 
-    // Wait for serive to show up
-    int counter = 0;
-    while (!parameters_client->wait_for_service(1s)) {
-      std::cout << "service not available, waiting again..." << std::endl;
-      counter++;
-      if (counter > 5) {FAIL();}
-    }
+    // Wait for service to show up
+    ASSERT_TRUE(parameters_client->wait_for_service(5s));
 
     // Verify the parameters
     std::vector<std::string> parameter_names;
@@ -161,7 +156,7 @@ TEST_F(GazeboRosWheelSlipTest, RosLocalParamsOverrideSdf)
   );
 }
 
-TEST_F(GazeboRosWheelSlipTest, TestRosGloabalParamsOverrideAll)
+TEST_F(GazeboRosWheelSlipTest, TestRosGlobalParamsOverrideAll)
 {
   // World file contains:
   // - SDF tags for wheels : <slip_compliance_lateral>, <slip_compliance_longitudinal>
@@ -218,12 +213,7 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
     {"slip_compliance_unitless_longitudinal/wheel_rear_right", 6}};
 
   // TEST 1 : Verify parameters were set as per the SDF, negative values should be replaced by 0
-  int counter = 0;
-  while (!parameters_client->wait_for_service(1s)) {
-    std::cout << "service not available, waiting again..." << std::endl;
-    counter++;
-    if (counter > 5) {FAIL();}
-  }
+  ASSERT_TRUE(parameters_client->wait_for_service(5s));
   std::vector<std::string> parameter_names;
   for (auto & element : parameter_pairs) {
     parameter_names.push_back(element.first);

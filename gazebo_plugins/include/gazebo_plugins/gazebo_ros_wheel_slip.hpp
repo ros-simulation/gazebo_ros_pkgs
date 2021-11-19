@@ -24,12 +24,10 @@ namespace gazebo_plugins
 {
 class GazeboRosWheelSlipPrivate;
 
-/// Description:
-/// ------------
 /// A plugin for adjusting wheel slip parameters in gazebo.
 /// The plugin can set separate longitudinal and lateral wheel slip compliance
-/// parameters for separate wheel links. THe following ROS parameters can be specified in
-/// the world file (These are optional, you may not may not declare them):
+/// parameters for separate wheel links.
+/// The following ROS parameters can optionally be specified in the world file:
 ///  1. slip_compliance_unitless_lateral
 ///      - Type: double
 ///      - Description: Unitless slip compliance (slip / friction) in the
@@ -46,7 +44,7 @@ class GazeboRosWheelSlipPrivate;
 ///      - Type: double
 ///      - Description: Unitless slip compliance (slip / friction) in the
 ///           lateral direction. This value is applied to the wheel named 'wheel_name'
-///           declaredin in the WheelSlipPlugin.
+///           declared in in the WheelSlipPlugin.
 ///
 ///  4. slip_compliance_unitless_longitudinal/wheel_name
 ///      - Type: double
@@ -54,20 +52,20 @@ class GazeboRosWheelSlipPrivate;
 ///           longitudinal direction. This value is applied to the wheel named 'wheel_name'
 ///           declared in the WheelSlipPlugin.
 ///
-/// Precedence order and deafult values:
-/// -----------------------------------
+/// Precedence order and default values:
+/// ------------------------------------
 /// Slip compliance values can be declared in 3 ways:
-///  1. SDF parameters, for e.g. :
+///  1. SDF parameters, e.g. :
 ///       <wheel link_name="wheel_front">
 ///         <slip_compliance_lateral>1</slip_compliance_lateral>
 ///         <slip_compliance_longitudinal>2</slip_compliance_longitudinal>
 ///         <wheel_normal_force>77</wheel_normal_force>
 ///       </wheel>
 ///
-///      These if not specified, will default to 0.0. Any negative values will ignored and
-//       set to 0.0
+///      If not specified, these will default to 0.0.
+///      Any negative values will ignored and set to 0.0.
 ///
-///  2. ROS parameters for each wheel, for e.g :
+///  2. ROS parameters for each wheel, e.g :
 ///       <ros>
 ///         <parameter name="slip_compliance_unitless_lateral/wheel_front" type="double">10.0
 ///           </parameter>
@@ -75,17 +73,16 @@ class GazeboRosWheelSlipPrivate;
 ///           </parameter>
 ///       </ros>
 ///
-///      These if not specified, default to SDF parameters set for each wheel. If specified, they
-///      will override the ones set as SDF parameters.
+///      If not specified, these default to SDF parameters set for each wheel.
+///      If specified, they will override the values set as SDF parameters.
 ///
-///  3. ROS parameters for all wheels, for e.g :
+///  3. ROS parameters for all wheels, e.g :
 ///      <ros>
 ///         <parameter name="slip_compliance_unitless_lateral" type="double">10.0</parameter>
 ///         <parameter name="slip_compliance_unitless_longitudinal" type="double">11.0</parameter>
 ///      </ros>
 ///
-///     These if not specified will default to the last ones set in the SDF tags. In this case,
-///     they won't override anything.
+///     If not specified, these will default to the last values set in SDF tags.
 ///     If these are specified, they override both SDF and the ROS parameters for each wheel.
 ///
 ///   Precedence order :
