@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <gravity>-2 0 -9.8</gravity>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+      <uri>model://trisphere_cycle</uri>
+      <name>trisphere_cycle_slip0</name>
+      <pose>0 0 0  0 0 0</pose>
+      <plugin name="wheel_slip_front" filename="libgazebo_ros_wheel_slip.so">
+
+        <ros>
+          <namespace>trisphere_cycle_slip0</namespace>
+          <parameter name="slip_compliance_unitless_lateral/wheel_front" type="double">0.3</parameter>
+          <parameter name="slip_compliance_unitless_longitudinal/wheel_front" type="double">0.4</parameter>
+        </ros>
+
+        <wheel link_name="wheel_front">
+          <slip_compliance_lateral>0.1</slip_compliance_lateral>
+          <slip_compliance_longitudinal>0.2</slip_compliance_longitudinal>
+          <wheel_normal_force>77</wheel_normal_force>
+        </wheel>
+      </plugin>
+    </include>
+
+  </world>
+</sdf>
