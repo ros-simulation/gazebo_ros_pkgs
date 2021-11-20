@@ -93,10 +93,10 @@ TEST_F(GazeboRosWheelSlipTest, TestRosGlobalParamsOverrideSdf)
   // ----------------------------------------------------------------------------------------------
   // Expected result: ROS parameters (for all wheels) override the ones in SDF
   std::map<std::string, double> parameter_pairs = {
-    {"slip_compliance_unitless_lateral", 10.0},
-    {"slip_compliance_unitless_lateral/wheel_front", 10.0},
-    {"slip_compliance_unitless_longitudinal", 11.0},
-    {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
+    {"slip_compliance_unitless_lateral", 0.3},
+    {"slip_compliance_unitless_lateral/wheel_front", 0.3},
+    {"slip_compliance_unitless_longitudinal", 0.4},
+    {"slip_compliance_unitless_longitudinal/wheel_front", 0.4}};
 
   this->test_parameters(
     "worlds/wheelslip_worlds/gazebo_ros_wheelslip_2.world",
@@ -118,10 +118,10 @@ TEST_F(GazeboRosWheelSlipTest, TestRosGlobalParamsApply)
   // ----------------------------------------------------------------------------------------------
   // Expected result: ROS parameters (for all wheels) should apply
   std::map<std::string, double> parameter_pairs = {
-    {"slip_compliance_unitless_lateral", 10.0},
-    {"slip_compliance_unitless_lateral/wheel_front", 10.0},
-    {"slip_compliance_unitless_longitudinal", 11.0},
-    {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
+    {"slip_compliance_unitless_lateral", 0.3},
+    {"slip_compliance_unitless_lateral/wheel_front", 0.3},
+    {"slip_compliance_unitless_longitudinal", 0.4},
+    {"slip_compliance_unitless_longitudinal/wheel_front", 0.4}};
 
   this->test_parameters(
     "worlds/wheelslip_worlds/gazebo_ros_wheelslip_3.world",
@@ -144,10 +144,10 @@ TEST_F(GazeboRosWheelSlipTest, RosLocalParamsOverrideSdf)
   // ----------------------------------------------------------------------------------------------
   // Expected result: ROS parameters (for each wheel) should override the SDF ones
   std::map<std::string, double> parameter_pairs = {
-    {"slip_compliance_unitless_lateral", 1.0},
-    {"slip_compliance_unitless_lateral/wheel_front", 10.0},
-    {"slip_compliance_unitless_longitudinal", 2.0},
-    {"slip_compliance_unitless_longitudinal/wheel_front", 11.0}};
+    {"slip_compliance_unitless_lateral", 0.1},
+    {"slip_compliance_unitless_lateral/wheel_front", 0.3},
+    {"slip_compliance_unitless_longitudinal", 0.2},
+    {"slip_compliance_unitless_longitudinal/wheel_front", 0.4}};
 
   this->test_parameters(
     "worlds/wheelslip_worlds/gazebo_ros_wheelslip_4.world",
@@ -168,12 +168,12 @@ TEST_F(GazeboRosWheelSlipTest, TestRosGlobalParamsOverrideAll)
   // Expected result: ROS parameters (for all wheels) should override all SDF
   // and ROS parameters (for each wheel)
   std::map<std::string, double> parameter_pairs = {
-    {"slip_compliance_unitless_lateral", 100.5},
-    {"slip_compliance_unitless_lateral/wheel_rear_left", 100.5},
-    {"slip_compliance_unitless_lateral/wheel_rear_right", 100.5},
-    {"slip_compliance_unitless_longitudinal", 200.67},
-    {"slip_compliance_unitless_longitudinal/wheel_rear_left", 200.67},
-    {"slip_compliance_unitless_longitudinal/wheel_rear_right", 200.67}};
+    {"slip_compliance_unitless_lateral", 0.1},
+    {"slip_compliance_unitless_lateral/wheel_rear_left", 0.1},
+    {"slip_compliance_unitless_lateral/wheel_rear_right", 0.1},
+    {"slip_compliance_unitless_longitudinal", 0.2},
+    {"slip_compliance_unitless_longitudinal/wheel_rear_left", 0.2},
+    {"slip_compliance_unitless_longitudinal/wheel_rear_right", 0.2}};
 
   this->test_parameters(
     "worlds/wheelslip_worlds/gazebo_ros_wheelslip_5.world",
@@ -205,12 +205,12 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
     "trisphere_cycle_slip0/wheel_slip_rear");
 
   std::map<std::string, double> parameter_pairs = {
-    {"slip_compliance_unitless_lateral", 5},
+    {"slip_compliance_unitless_lateral", 0.5},
     {"slip_compliance_unitless_lateral/wheel_rear_left", 0.0},
-    {"slip_compliance_unitless_lateral/wheel_rear_right", 5},
-    {"slip_compliance_unitless_longitudinal", 6},
-    {"slip_compliance_unitless_longitudinal/wheel_rear_left", 4},
-    {"slip_compliance_unitless_longitudinal/wheel_rear_right", 6}};
+    {"slip_compliance_unitless_lateral/wheel_rear_right", 0.5},
+    {"slip_compliance_unitless_longitudinal", 0.6},
+    {"slip_compliance_unitless_longitudinal/wheel_rear_left", 0.4},
+    {"slip_compliance_unitless_longitudinal/wheel_rear_right", 0.6}};
 
   // TEST 1 : Verify parameters were set as per the SDF, negative values should be replaced by 0
   ASSERT_TRUE(parameters_client->wait_for_service(5s));
@@ -225,9 +225,9 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
   }
 
   // TEST 2 : Set slip compliance for one wheel, verify others remain unchanged
-  parameter_pairs["slip_compliance_unitless_lateral/wheel_rear_left"] = 3.0;
+  parameter_pairs["slip_compliance_unitless_lateral/wheel_rear_left"] = 0.3;
   std::vector<rclcpp::Parameter> change_param = {
-    rclcpp::Parameter("slip_compliance_unitless_lateral/wheel_rear_left", 3.0)};
+    rclcpp::Parameter("slip_compliance_unitless_lateral/wheel_rear_left", 0.3)};
   auto result = parameters_client->set_parameters(change_param);
   ASSERT_TRUE(result[0].successful);
 
@@ -238,8 +238,8 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
 
   // TEST 3 : Set global slip compliance parameters, which should override the ones for wheels
   std::vector<rclcpp::Parameter> change_params_global = {
-    rclcpp::Parameter("slip_compliance_unitless_lateral", 10.0),
-    rclcpp::Parameter("slip_compliance_unitless_longitudinal", 11.0)
+    rclcpp::Parameter("slip_compliance_unitless_lateral", 0.1),
+    rclcpp::Parameter("slip_compliance_unitless_longitudinal", 0.2)
   };
   result = parameters_client->set_parameters(change_params_global);
   ASSERT_TRUE(result[0].successful);
@@ -251,9 +251,9 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
   parameters_received = parameters_client->get_parameters(parameter_names);
   for (auto & parameter : parameters_received) {
     if (parameter.get_name().find("slip_compliance_unitless_lateral") != std::string::npos) {
-      ASSERT_EQ(parameter.as_double(), 10.0);
+      ASSERT_EQ(parameter.as_double(), 0.1);
     } else {
-      ASSERT_EQ(parameter.as_double(), 11.0);
+      ASSERT_EQ(parameter.as_double(), 0.2);
     }
   }
 }

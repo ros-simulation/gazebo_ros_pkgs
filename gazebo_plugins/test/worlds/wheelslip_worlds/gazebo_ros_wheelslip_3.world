@@ -18,8 +18,8 @@
 
         <ros>
           <namespace>trisphere_cycle_slip0</namespace>
-          <parameter name="slip_compliance_unitless_lateral" type="double">10.0</parameter>
-          <parameter name="slip_compliance_unitless_longitudinal" type="double">11.0</parameter>
+          <parameter name="slip_compliance_unitless_lateral" type="double">0.3</parameter>
+          <parameter name="slip_compliance_unitless_longitudinal" type="double">0.4</parameter>
         </ros>
 
         <wheel link_name="wheel_front">

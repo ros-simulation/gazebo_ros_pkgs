@@ -19,13 +19,13 @@
           <namespace>trisphere_cycle_slip0</namespace>
        </ros>
         <wheel link_name="wheel_rear_left">
-          <slip_compliance_lateral>-3</slip_compliance_lateral>
-          <slip_compliance_longitudinal>4</slip_compliance_longitudinal>
+          <slip_compliance_lateral>-0.3</slip_compliance_lateral>
+          <slip_compliance_longitudinal>0.4</slip_compliance_longitudinal>
           <wheel_normal_force>32</wheel_normal_force>
         </wheel>
         <wheel link_name="wheel_rear_right">
-          <slip_compliance_lateral>5</slip_compliance_lateral>
-          <slip_compliance_longitudinal>6</slip_compliance_longitudinal>
+          <slip_compliance_lateral>0.5</slip_compliance_lateral>
+          <slip_compliance_longitudinal>0.6</slip_compliance_longitudinal>
           <wheel_normal_force>32</wheel_normal_force>
         </wheel>
       </plugin>
