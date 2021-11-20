@@ -57,8 +57,8 @@ class GazeboRosWheelSlipPrivate;
 /// Slip compliance values can be declared in 3 ways:
 ///  1. SDF parameters, e.g. :
 ///       <wheel link_name="wheel_front">
-///         <slip_compliance_lateral>1</slip_compliance_lateral>
-///         <slip_compliance_longitudinal>2</slip_compliance_longitudinal>
+///         <slip_compliance_lateral>0.1</slip_compliance_lateral>
+///         <slip_compliance_longitudinal>0.2</slip_compliance_longitudinal>
 ///         <wheel_normal_force>77</wheel_normal_force>
 ///       </wheel>
 ///
@@ -67,9 +67,9 @@ class GazeboRosWheelSlipPrivate;
 ///
 ///  2. ROS parameters for each wheel, e.g :
 ///       <ros>
-///         <parameter name="slip_compliance_unitless_lateral/wheel_front" type="double">10.0
+///         <parameter name="slip_compliance_unitless_lateral/wheel_front" type="double">0.1
 ///           </parameter>
-///         <parameter name="slip_compliance_unitless_longitudinal/wheel_front" type="double">11.0
+///         <parameter name="slip_compliance_unitless_longitudinal/wheel_front" type="double">0.2
 ///           </parameter>
 ///       </ros>
 ///
@@ -78,8 +78,8 @@ class GazeboRosWheelSlipPrivate;
 ///
 ///  3. ROS parameters for all wheels, e.g :
 ///      <ros>
-///         <parameter name="slip_compliance_unitless_lateral" type="double">10.0</parameter>
-///         <parameter name="slip_compliance_unitless_longitudinal" type="double">11.0</parameter>
+///         <parameter name="slip_compliance_unitless_lateral" type="double">0.1</parameter>
+///         <parameter name="slip_compliance_unitless_longitudinal" type="double">0.2</parameter>
 ///      </ros>
 ///
 ///     If not specified, these will default to the last values set in SDF tags.
@@ -98,10 +98,10 @@ class GazeboRosWheelSlipPrivate;
     <plugin name="projector" filename="libgazebo_ros_wheel_speed.so">
       <ros>
         <namespace>wheel_slip_front</namespace>
-        <parameter name="slip_compliance_unitless_lateral/wheel_front_left" type="double">10.0</parameter>
-        <parameter name="slip_compliance_unitless_longitudinal/wheel_front_left" type="double">11.0</parameter>
-        <parameter name="slip_compliance_unitless_lateral" type="double">10.0</parameter>
-        <parameter name="slip_compliance_unitless_longitudinal" type="double">11.0</parameter>
+        <parameter name="slip_compliance_unitless_lateral/wheel_front_left" type="double">0.1</parameter>
+        <parameter name="slip_compliance_unitless_longitudinal/wheel_front_left" type="double">0.2</parameter>
+        <parameter name="slip_compliance_unitless_lateral" type="double">0.3</parameter>
+        <parameter name="slip_compliance_unitless_longitudinal" type="double">0.4</parameter>
       </ros>
       <wheel link_name="wheel_front_left">
         <slip_compliance_lateral>0</slip_compliance_lateral>
