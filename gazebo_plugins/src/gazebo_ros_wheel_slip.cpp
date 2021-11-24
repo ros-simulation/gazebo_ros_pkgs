@@ -229,7 +229,6 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     "slip_compliance_unitless_longitudinal",
     impl_->default_slip_longitudinal_);
 
-
   // Global slip_parameters are declared before this callback is set, as we don't want the
   // individual wheel slip params to be set which haven't been declared yet
   impl_->parameter_event_handler_ =
@@ -273,7 +272,6 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       }
     }
   }
-    slip_longitudinal_default);
 
   double zero_wheel_spin_tolerance = 1.0e-3;
   if (!_sdf->HasElement("zero_wheel_spin_tolerance")) {
