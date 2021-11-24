@@ -14,7 +14,7 @@
 
 #include <gazebo/common/Time.hh>
 #include <gazebo/test/ServerFixture.hh>
-#include <gazebo_msgs/msg/instant_slip.hpp>
+#include <gazebo_msgs/msg/wheel_slip.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <chrono>
@@ -284,10 +284,10 @@ TEST_F(GazeboRosWheelSlipPublisherTest, Publishing)
   executor.add_node(node);
 
   // Create subscriber
-  gazebo_msgs::msg::InstantSlip::SharedPtr latestMsg;
-  auto sub = node->create_subscription<gazebo_msgs::msg::InstantSlip>(
+  gazebo_msgs::msg::WheelSlip::SharedPtr latestMsg;
+  auto sub = node->create_subscription<gazebo_msgs::msg::WheelSlip>(
     "trisphere_cycle_slip/wheel_slip", rclcpp::QoS(1),
-    [&latestMsg](const gazebo_msgs::msg::InstantSlip::SharedPtr msg) {
+    [&latestMsg](const gazebo_msgs::msg::WheelSlip::SharedPtr msg) {
       latestMsg = msg;
     });
 
