@@ -273,25 +273,26 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     }
   }
 
-  double zero_wheel_spin_tolerance = 1.0e-3;
-  if (!_sdf->HasElement("zero_wheel_spin_tolerance")) {
+  double wheel_spin_tolerance = 1.0e-3;
+  if (!_sdf->HasElement("wheel_spin_tolerance")) {
     RCLCPP_INFO(
-      impl_->ros_node_->get_logger(), "Missing <zero_wheel_spin_tolerance>, defaults to %f",
-      zero_wheel_spin_tolerance);
+      impl_->ros_node_->get_logger(), "Missing <wheel_spin_tolerance>, defaults to %f",
+      wheel_spin_tolerance);
   } else {
-    zero_wheel_spin_tolerance = _sdf->GetElement("zero_wheel_spin_tolerance")->Get<double>();
+    wheel_spin_tolerance = _sdf->GetElement("wheel_spin_tolerance")->Get<double>();
   }
 
-  double update_rate = 100.0;
-  if (!_sdf->HasElement("update_rate")) {
+  double publisher_update_rate = 100.0;
+  if (!_sdf->HasElement("publisher_update_rate")) {
     RCLCPP_INFO(
-      impl_->ros_node_->get_logger(), "Missing <update_rate>, defaults to %f", update_rate);
+      impl_->ros_node_->get_logger(),
+      "Missing <publisher_update_rate>, defaults to %f", publisher_update_rate);
   } else {
-    update_rate = _sdf->GetElement("update_rate")->Get<double>();
+    publisher_update_rate = _sdf->GetElement("publisher_update_rate")->Get<double>();
   }
 
-  if (update_rate > 0.0) {
-    impl_->update_period_ = 1.0 / update_rate;
+  if (publisher_update_rate > 0.0) {
+    impl_->update_period_ = 1.0 / publisher_update_rate;
   } else {
     impl_->update_period_ = 0.0;
   }
@@ -301,11 +302,11 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::WheelSlip>(
     "wheel_slip", 10);
 
-  auto on_update_callback = [this, zero_wheel_spin_tolerance](
+  auto on_update_callback = [this, wheel_spin_tolerance](
     const gazebo::common::UpdateInfo & info) {
 
     #ifdef IGN_PROFILER_ENABLE
-      IGN_PROFILE("instant slip callback");
+      IGN_PROFILE("GazeboRosWheelSlip publisher");
     #endif
 
       gazebo::common::Time current_time = info.simTime;
@@ -339,7 +340,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
         auto long_vel = slip.X() + slip.Z();
         auto lat_vel = slip.Y();
         double long_slip;
-        if (fabs(spin_speed) < zero_wheel_spin_tolerance) {
+        if (fabs(spin_speed) < wheel_spin_tolerance) {
           long_slip = 0;
         } else {
           long_slip = (long_vel - spin_speed) / spin_speed;
