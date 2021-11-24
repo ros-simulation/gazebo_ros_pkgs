@@ -17,7 +17,7 @@
 #include <gazebo/transport/transport.hh>
 
 #include <gazebo_plugins/gazebo_ros_wheel_slip.hpp>
-#include <gazebo_msgs/msg/instant_slip.hpp>
+#include <gazebo_msgs/msg/wheel_slip.hpp>
 #include <gazebo_ros/node.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/bool.hpp>
@@ -52,7 +52,7 @@ public:
   std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
   rclcpp::ParameterEventCallbackHandle::SharedPtr parameter_set_event_callback_;
   // Publish wheel slip
-  rclcpp::Publisher<gazebo_msgs::msg::InstantSlip>::SharedPtr slip_publisher_;
+  rclcpp::Publisher<gazebo_msgs::msg::WheelSlip>::SharedPtr slip_publisher_;
 
   /// Period in seconds
   double update_period_;
@@ -298,7 +298,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
   impl_->last_update_time_ = _model->GetWorld()->SimTime();
 
-  impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::InstantSlip>(
+  impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::WheelSlip>(
     "wheel_slip", 10);
 
   auto on_update_callback = [this, zero_wheel_spin_tolerance](
@@ -328,7 +328,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     #endif
 
       // Populate message
-      auto slip_msg = gazebo_msgs::msg::InstantSlip();
+      auto slip_msg = gazebo_msgs::msg::WheelSlip();
 
       std::map<std::string, ignition::math::Vector3d> slips;
       this->GetSlips(slips);
