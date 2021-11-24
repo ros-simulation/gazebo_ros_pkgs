@@ -311,7 +311,7 @@ TEST_F(GazeboRosWheelSlipPublisherTest, Publishing)
 
   EXPECT_NEAR(0.0, latestMsg->lateral_slip[0], tol);
   ASSERT_LT(0.0, fabs(latestMsg->longitudinal_slip[0]));
-  ASSERT_GT(0.6, fabs(latestMsg->longitudinal_slip[0]));
+  ASSERT_GT(0.7, fabs(latestMsg->longitudinal_slip[0]));
 }
 
 int main(int argc, char ** argv)
