@@ -44,13 +44,14 @@
 #include <gazebo/physics/Model.hh>
 #include <gazebo_plugins/gazebo_ros_hand_of_god.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
+#include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/node.hpp>
 #ifdef IGN_PROFILER_ENABLE
 #include <ignition/common/Profiler.hh>
 #endif
 #include <sdf/sdf.hh>
 
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
@@ -64,7 +65,7 @@ class GazeboRosHandOfGodPrivate
 {
 public:
   /// Callback to be called at every simulation iteration.
-  void OnUpdate();
+  void OnUpdate(const gazebo::common::UpdateInfo & info);
 
   /// A pointer to the GazeboROS node.
   gazebo_ros::Node::SharedPtr ros_node_;
@@ -136,10 +137,10 @@ void GazeboRosHandOfGod::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboRosHandOfGodPrivate::OnUpdate, impl_.get()));
+    std::bind(&GazeboRosHandOfGodPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
 }
 
-void GazeboRosHandOfGodPrivate::OnUpdate()
+void GazeboRosHandOfGodPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
 {
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE("GazeboRosHandOfGodPrivate::OnUpdate");
@@ -183,7 +184,8 @@ void GazeboRosHandOfGodPrivate::OnUpdate()
   geometry_msgs::msg::TransformStamped hog_actual_tform;
 
   hog_actual_tform.header.frame_id = "world";
-  hog_actual_tform.header.stamp = ros_node_->now();
+  gazebo::common::Time current_time = info.simTime;
+  hog_actual_tform.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
 
   hog_actual_tform.child_frame_id = frame_ + "_actual";
 

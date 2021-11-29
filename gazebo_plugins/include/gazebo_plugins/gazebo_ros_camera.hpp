@@ -18,6 +18,7 @@
 #include <gazebo/plugins/CameraPlugin.hh>
 #include <gazebo/plugins/DepthCameraPlugin.hh>
 #include <gazebo_plugins/multi_camera_plugin.hpp>
+#include <gazebo_ros/node.hpp>
 #include <std_msgs/msg/empty.hpp>
 
 #include <memory>
@@ -171,6 +172,10 @@ protected:
 
   // Get number of cameras
   uint64_t GetNumCameras() const;
+
+  /// Get the ROS node associated with this plugin
+  /// The returned pointer is null if the plugin has not been loaded.
+  gazebo_ros::Node::SharedPtr GetRosNode() const;
 
 private:
   /// Private data pointer

@@ -26,6 +26,7 @@
 #include <mutex>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace gazebo_ros
 {
@@ -129,6 +130,9 @@ private:
   /// Inherit constructor
   using rclcpp::Node::Node;
 
+  // A handler for the param change callback.
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_change_callback_handler_;
+
   /// Points to #static_executor_, so that when all #gazebo_ros::Node instances are destroyed, the
   /// executor thread is too
   std::shared_ptr<Executor> executor_;
@@ -173,6 +177,40 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
     node->executor_ = std::make_shared<Executor>();
     static_executor_ = node->executor_;
   }
+
+  // Generate warning on start up if use_sim_time parameter is set to false
+  bool check_sim_time;
+  node->get_parameter("use_sim_time", check_sim_time);
+  if (!check_sim_time) {
+    RCLCPP_WARN(
+      node->get_logger(), "Startup warning: use_sim_time parameter will be ignored "
+      "by default plugins and ROS messages will continue to use simulation timestamps");
+  }
+
+  std::weak_ptr<gazebo_ros::Node> node_weak_ptr;
+  node_weak_ptr = node;
+  // Parameter change callback
+  auto param_change_callback =
+    [&node_weak_ptr](std::vector<rclcpp::Parameter> parameters) {
+      auto result = rcl_interfaces::msg::SetParametersResult();
+      result.successful = true;
+
+      for (const auto & parameter : parameters) {
+        auto param_name = parameter.get_name();
+        if (param_name == "use_sim_time") {
+          if (auto node_shared_ptr = node_weak_ptr.lock()) {
+            RCLCPP_WARN(
+              node_shared_ptr->get_logger(),
+              "use_sim_time parameter will be ignored by default plugins "
+              "and ROS messages will continue to use simulation timestamps");
+          }
+        }
+      }
+      return result;
+    };
+
+  node->param_change_callback_handler_ =
+    node->add_on_set_parameters_callback(param_change_callback);
 
   // Add new node to the executor so its callbacks are called
   node->executor_->add_node(node);
