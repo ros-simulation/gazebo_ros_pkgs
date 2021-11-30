@@ -55,13 +55,13 @@ public:
   rclcpp::Publisher<gazebo_msgs::msg::WheelSlip>::SharedPtr slip_publisher_;
 
   /// Period in seconds
-  double update_period_;
+  double publisher_update_period_;
 
   /// Keep last time an update was published
-  gazebo::common::Time last_update_time_;
+  gazebo::common::Time publisher_last_update_time_;
 
   /// Pointer to the update event connection.
-  gazebo::event::ConnectionPtr update_connection_;
+  gazebo::event::ConnectionPtr publisher_update_connection_;
 };
 
 GazeboRosWheelSlip::GazeboRosWheelSlip()
@@ -292,12 +292,12 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   }
 
   if (publisher_update_rate > 0.0) {
-    impl_->update_period_ = 1.0 / publisher_update_rate;
+    impl_->publisher_update_period_ = 1.0 / publisher_update_rate;
   } else {
-    impl_->update_period_ = 0.0;
+    impl_->publisher_update_period_ = 0.0;
   }
 
-  impl_->last_update_time_ = _model->GetWorld()->SimTime();
+  impl_->publisher_last_update_time_ = _model->GetWorld()->SimTime();
 
   impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::WheelSlip>(
     "wheel_slip", 10);
@@ -312,15 +312,16 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       gazebo::common::Time current_time = info.simTime;
 
       // If the world is reset, for example
-      if (current_time < impl_->last_update_time_) {
+      if (current_time < impl_->publisher_last_update_time_) {
         RCLCPP_INFO(impl_->ros_node_->get_logger(), "Negative sim time difference detected.");
-        impl_->last_update_time_ = current_time;
+        impl_->publisher_last_update_time_ = current_time;
       }
 
       // Check period
-      double seconds_since_last_update = (current_time - impl_->last_update_time_).Double();
+      double seconds_since_last_update = (
+        current_time - impl_->publisher_last_update_time_).Double();
 
-      if (seconds_since_last_update < impl_->update_period_) {
+      if (seconds_since_last_update < impl_->publisher_update_period_) {
         return;
       }
 
@@ -364,11 +365,12 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     #endif
 
       // Update time
-      impl_->last_update_time_ = current_time;
+      impl_->publisher_last_update_time_ = current_time;
     };
 
   // Callback on every iteration
-  impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(on_update_callback);
+  impl_->publisher_update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+    on_update_callback);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosWheelSlip)
