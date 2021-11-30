@@ -31,7 +31,7 @@
       <plugin name="wheel_slip_front" filename="libgazebo_ros_wheel_slip.so">
         <ros>
           <namespace>trisphere_cycle_slip0</namespace>
-       </ros>
+        </ros>
         <wheel link_name="wheel_front">
           <slip_compliance_lateral>0</slip_compliance_lateral>
           <slip_compliance_longitudinal>0</slip_compliance_longitudinal>
@@ -41,7 +41,7 @@
       <plugin name="wheel_slip_rear" filename="libgazebo_ros_wheel_slip.so">
         <ros>
           <namespace>trisphere_cycle_slip0</namespace>
-       </ros>
+        </ros>
         <wheel link_name="wheel_rear_left">
           <slip_compliance_lateral>0</slip_compliance_lateral>
           <slip_compliance_longitudinal>0</slip_compliance_longitudinal>
@@ -80,7 +80,7 @@
       <plugin name="wheel_slip_front" filename="libgazebo_ros_wheel_slip.so">
         <ros>
           <namespace>trisphere_cycle_slip1</namespace>
-       </ros>
+        </ros>
         <wheel link_name="wheel_front">
           <slip_compliance_lateral>1</slip_compliance_lateral>
           <slip_compliance_longitudinal>1</slip_compliance_longitudinal>
@@ -90,7 +90,7 @@
       <plugin name="wheel_slip_rear" filename="libgazebo_ros_wheel_slip.so">
         <ros>
           <namespace>trisphere_cycle_slip1</namespace>
-       </ros>
+        </ros>
         <wheel link_name="wheel_rear_left">
           <slip_compliance_lateral>1</slip_compliance_lateral>
           <slip_compliance_longitudinal>1</slip_compliance_longitudinal>
