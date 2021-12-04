@@ -14,20 +14,15 @@
       <uri>model://trisphere_cycle</uri>
       <name>trisphere_cycle_slip</name>
       <pose>0 2 0  0 0 0</pose>
-      <plugin name="wheel_slip_front" filename="libgazebo_ros_wheel_slip.so">
+      <plugin name="wheel_slip" filename="libgazebo_ros_wheel_slip.so">
         <ros>
           <namespace>trisphere_cycle_slip</namespace>
         </ros>
         <wheel link_name="wheel_front">
           <slip_compliance_lateral>1</slip_compliance_lateral>
           <slip_compliance_longitudinal>1</slip_compliance_longitudinal>
-          <wheel_normal_force>77</wheel_normal_force>
+          <wheel_normal_force>32</wheel_normal_force>
         </wheel>
-      </plugin>
-      <plugin name="wheel_slip_rear" filename="libgazebo_ros_wheel_slip.so">
-        <ros>
-          <namespace>trisphere_cycle_slip</namespace>
-        </ros>
         <wheel link_name="wheel_rear_left">
           <slip_compliance_lateral>1</slip_compliance_lateral>
           <slip_compliance_longitudinal>1</slip_compliance_longitudinal>
@@ -46,12 +41,14 @@
           <pid_gains>9 0 0.1</pid_gains>
         </controller>
         <controller type="velocity">
+          <joint>wheel_front</joint>
           <joint>wheel_rear_left_spin</joint>
           <joint>wheel_rear_right_spin</joint>
           <target>6.0</target>
           <pid_gains>9 0 0</pid_gains>
         </controller>
         <controller type="force">
+          <joint>wheel_front</joint>
           <joint>wheel_rear_left_spin</joint>
           <joint>wheel_rear_right_spin</joint>
           <target>2.15</target>
