@@ -41,14 +41,14 @@
           <pid_gains>9 0 0.1</pid_gains>
         </controller>
         <controller type="velocity">
-          <joint>wheel_front</joint>
+          <joint>wheel_front_spin</joint>
           <joint>wheel_rear_left_spin</joint>
           <joint>wheel_rear_right_spin</joint>
           <target>6.0</target>
           <pid_gains>9 0 0</pid_gains>
         </controller>
         <controller type="force">
-          <joint>wheel_front</joint>
+          <joint>wheel_front_spin</joint>
           <joint>wheel_rear_left_spin</joint>
           <joint>wheel_rear_right_spin</joint>
           <target>2.15</target>

@@ -307,15 +307,8 @@ TEST_F(GazeboRosWheelSlipPublisherTest, Publishing)
   EXPECT_EQ(latestMsg->name.size(), latestMsg->longitudinal_slip.size());
 
   for (unsigned int i = 0; i < latestMsg->name.size(); ++i) {
-    const std::string & name = latestMsg->name[i];
-    if (name == "wheel_front") {
-      EXPECT_NEAR(0.02, latestMsg->longitudinal_slip[i], 0.01);
-    } else if (name == "wheel_rear_left" || name == "wheel_rear_right") {
-      EXPECT_NEAR(0.45, latestMsg->longitudinal_slip[i], 0.1);
-    } else {
-      FAIL() << "Unexpected wheel name: " << name;
-    }
     EXPECT_NEAR(0.0, latestMsg->lateral_slip[i], 1e-4);
+    EXPECT_NEAR(0.3, latestMsg->longitudinal_slip[i], 0.05);
   }
 }
 
