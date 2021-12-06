@@ -294,7 +294,7 @@ TEST_F(GazeboRosWheelSlipPublisherTest, Publishing)
   while (latestMsg == nullptr &&
     (std::chrono::steady_clock::now() - startTime) < std::chrono::seconds(2))
   {
-    world->Step(100);
+    world->Step(1000);
     executor.spin_once(100ms);
     gazebo::common::Time::MSleep(100);
   }
@@ -307,8 +307,15 @@ TEST_F(GazeboRosWheelSlipPublisherTest, Publishing)
   EXPECT_EQ(latestMsg->name.size(), latestMsg->longitudinal_slip.size());
 
   for (unsigned int i = 0; i < latestMsg->name.size(); ++i) {
-    EXPECT_NEAR(0.0, latestMsg->lateral_slip[i], 0.0001);
-    EXPECT_NEAR(0.2, latestMsg->longitudinal_slip[i], 0.1);
+    const std::string & name = latestMsg->name[i];
+    if (name == "wheel_front") {
+      EXPECT_NEAR(0.02, latestMsg->longitudinal_slip[i], 0.01);
+    } else if (name == "wheel_rear_left" || name == "wheel_rear_right") {
+      EXPECT_NEAR(0.45, latestMsg->longitudinal_slip[i], 0.1);
+    } else {
+      FAIL() << "Unexpected wheel name: " << name;
+    }
+    EXPECT_NEAR(0.0, latestMsg->lateral_slip[i], 1e-4);
   }
 }
 
