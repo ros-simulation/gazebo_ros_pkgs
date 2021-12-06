@@ -24,8 +24,6 @@
 #include <string>
 #include <vector>
 
-#define tol 10e-4
-
 using namespace std::chrono_literals;
 
 /// Tests the gazebo_ros_wheelslip plugin
@@ -304,14 +302,14 @@ TEST_F(GazeboRosWheelSlipPublisherTest, Publishing)
   // Check that we receive the latest joint state
   ASSERT_NE(nullptr, latestMsg);
 
-  ASSERT_LT(0u, latestMsg->name.size());
-  ASSERT_GT(4u, latestMsg->name.size());
-  ASSERT_EQ(latestMsg->name.size(), latestMsg->lateral_slip.size());
-  ASSERT_EQ(latestMsg->name.size(), latestMsg->longitudinal_slip.size());
+  EXPECT_EQ(3u, latestMsg->name.size());
+  EXPECT_EQ(latestMsg->name.size(), latestMsg->lateral_slip.size());
+  EXPECT_EQ(latestMsg->name.size(), latestMsg->longitudinal_slip.size());
 
-  EXPECT_NEAR(0.0, latestMsg->lateral_slip[0], tol);
-  EXPECT_NE(0.0, latestMsg->longitudinal_slip[0]);
-  EXPECT_GT(0.7, fabs(latestMsg->longitudinal_slip[0]));
+  for (unsigned int i = 0; i < latestMsg->name.size(); ++i) {
+    EXPECT_NEAR(0.0, latestMsg->lateral_slip[i], 0.0001);
+    EXPECT_NEAR(0.2, latestMsg->longitudinal_slip[i], 0.1);
+  }
 }
 
 int main(int argc, char ** argv)
