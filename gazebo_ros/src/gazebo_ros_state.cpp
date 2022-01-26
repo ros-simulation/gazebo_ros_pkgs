@@ -141,7 +141,7 @@ void GazeboRosStatePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
   double seconds_since_last_update = (_info.simTime - last_update_time_).Double();
 
-  if (seconds_since_last_update < update_period_) {
+  if (seconds_since_last_update > 0.0 && seconds_since_last_update < update_period_) {
     return;
   }
 
