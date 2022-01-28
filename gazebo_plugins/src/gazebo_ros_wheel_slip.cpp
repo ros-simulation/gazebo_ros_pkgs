@@ -14,16 +14,22 @@
 
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
-
 #include <gazebo/transport/transport.hh>
+
 #include <gazebo_plugins/gazebo_ros_wheel_slip.hpp>
+#include <gazebo_msgs/msg/wheel_slip.hpp>
 #include <gazebo_ros/node.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/bool.hpp>
 
-#include <unordered_map>
+#include <cmath>
+#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+using namespace std::chrono_literals;
 
 namespace gazebo_plugins
 {
@@ -45,6 +51,17 @@ public:
   // Event handler to set slip compliance values for individual wheels based
   std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
   rclcpp::ParameterEventCallbackHandle::SharedPtr parameter_set_event_callback_;
+  // Publish wheel slip
+  rclcpp::Publisher<gazebo_msgs::msg::WheelSlip>::SharedPtr slip_publisher_;
+
+  /// Period in seconds
+  double publisher_update_period_;
+
+  /// Keep last time an update was published
+  gazebo::common::Time publisher_last_update_time_;
+
+  /// Pointer to the update event connection.
+  gazebo::event::ConnectionPtr publisher_update_connection_;
 };
 
 GazeboRosWheelSlip::GazeboRosWheelSlip()
@@ -212,7 +229,6 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     "slip_compliance_unitless_longitudinal",
     impl_->default_slip_longitudinal_);
 
-
   // Global slip_parameters are declared before this callback is set, as we don't want the
   // individual wheel slip params to be set which haven't been declared yet
   impl_->parameter_event_handler_ =
@@ -256,6 +272,107 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       }
     }
   }
+
+  double wheel_spin_tolerance = 1.0e-3;
+  if (!_sdf->HasElement("wheel_spin_tolerance")) {
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Missing <wheel_spin_tolerance>, defaults to %f",
+      wheel_spin_tolerance);
+  } else {
+    wheel_spin_tolerance = _sdf->GetElement("wheel_spin_tolerance")->Get<double>();
+  }
+
+  double publisher_update_rate = 100.0;
+  if (!_sdf->HasElement("publisher_update_rate")) {
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(),
+      "Missing <publisher_update_rate>, defaults to %f", publisher_update_rate);
+  } else {
+    publisher_update_rate = _sdf->GetElement("publisher_update_rate")->Get<double>();
+  }
+
+  if (publisher_update_rate > 0.0) {
+    impl_->publisher_update_period_ = 1.0 / publisher_update_rate;
+  } else {
+    impl_->publisher_update_period_ = 0.0;
+  }
+
+  impl_->publisher_last_update_time_ = _model->GetWorld()->SimTime();
+
+  impl_->slip_publisher_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::WheelSlip>(
+    "wheel_slip", 10);
+
+  auto on_update_callback = [this, wheel_spin_tolerance](
+    const gazebo::common::UpdateInfo & info) {
+
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE("GazeboRosWheelSlip publisher");
+    #endif
+
+      gazebo::common::Time current_time = info.simTime;
+
+      // If the world is reset, for example
+      if (current_time < impl_->publisher_last_update_time_) {
+        RCLCPP_INFO(impl_->ros_node_->get_logger(), "Negative sim time difference detected.");
+        impl_->publisher_last_update_time_ = current_time;
+      }
+
+      // Check period
+      double seconds_since_last_update = (
+        current_time - impl_->publisher_last_update_time_).Double();
+
+      if (seconds_since_last_update < impl_->publisher_update_period_) {
+        return;
+      }
+
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_BEGIN("fill ROS message");
+    #endif
+
+      // Populate message
+      auto slip_msg = gazebo_msgs::msg::WheelSlip();
+
+      std::map<std::string, ignition::math::Vector3d> slips;
+      this->GetSlips(slips);
+      for (const auto & wheel : slips) {
+        auto name = wheel.first;
+        auto slip = wheel.second;
+        auto spin_speed = slip.Z();
+        auto long_vel = slip.X() + slip.Z();
+        auto lat_vel = slip.Y();
+        double long_slip;
+        double lat_slip;
+        if (fabs(spin_speed) < wheel_spin_tolerance) {
+          long_slip = 0;
+          lat_slip = 0;
+        } else {
+          long_slip = (spin_speed - long_vel) / spin_speed;
+          lat_slip = atan2(lat_vel, long_vel);
+        }
+        slip_msg.name.push_back(name);
+        slip_msg.lateral_slip.push_back(lat_slip);
+        slip_msg.longitudinal_slip.push_back(long_slip);
+      }
+
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_END();
+      IGN_PROFILE_BEGIN("publish");
+    #endif
+
+      // Publish
+      impl_->slip_publisher_->publish(slip_msg);
+
+    #ifdef IGN_PROFILER_ENABLE
+      IGN_PROFILE_END();
+    #endif
+
+      // Update time
+      impl_->publisher_last_update_time_ = current_time;
+    };
+
+  // Callback on every iteration
+  impl_->publisher_update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+    on_update_callback);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboRosWheelSlip)

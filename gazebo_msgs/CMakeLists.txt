@@ -31,6 +31,7 @@ set(msg_files
   "msg/ODEPhysics.msg"
   "msg/PerformanceMetrics.msg"
   "msg/SensorPerformanceMetric.msg"
+  "msg/WheelSlip.msg"
   "msg/WorldState.msg"
 )
 

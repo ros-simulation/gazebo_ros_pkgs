@@ -52,6 +52,18 @@ class GazeboRosWheelSlipPrivate;
 ///           longitudinal direction. This value is applied to the wheel named 'wheel_name'
 ///           declared in the WheelSlipPlugin.
 ///
+///  5. wheel_spin_tolerance
+///      - Type: double
+///      - Description: The tolerance for the wheel to be considered in motion.
+///           If the wheel speed is less than this value, the wheel is considered to be
+///           stopped. This value is applied to all wheels declared in the WheelSlipPlugin.
+///
+///  6. publisher_update_rate
+///      - Type: double
+///      - Description: The rate at which the publisher publishes the wheel slip. If this
+///           value is zero or negative, the publisher will publish at the maximum rate.
+///           This value is applied to all wheels declared in the WheelSlipPlugin.
+///
 /// Precedence order and default values:
 /// ------------------------------------
 /// Slip compliance values can be declared in 3 ways:

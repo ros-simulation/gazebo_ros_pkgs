@@ -455,6 +455,7 @@ if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
   )
   ament_target_dependencies(gazebo_ros_wheel_slip
     "gazebo_dev"
+    "gazebo_msgs"
     "gazebo_ros"
     "rclcpp"
     "std_msgs"

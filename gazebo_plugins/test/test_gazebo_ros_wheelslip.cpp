@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <gazebo/common/Time.hh>
 #include <gazebo/test/ServerFixture.hh>
+#include <gazebo_msgs/msg/wheel_slip.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <chrono>
+#include <cmath>
 #include <map>
 #include <memory>
 #include <string>
@@ -256,6 +259,80 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
       ASSERT_EQ(parameter.as_double(), 0.2);
     }
   }
+}
+
+class GazeboRosWheelSlipPublisherTest : public gazebo::ServerFixture
+{
+public:
+  void test_publishing(
+    std::string world_file,
+    bool at_rest)
+  {
+    // Load test world and start paused
+    this->Load(world_file, true);
+
+    // World
+    auto world = gazebo::physics::get_world();
+    ASSERT_NE(nullptr, world);
+
+    // Create node and executor
+    auto node = std::make_shared<rclcpp::Node>("gazebo_ros_joint_state_publisher_test");
+    ASSERT_NE(nullptr, node);
+
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
+
+    // Create subscriber
+    gazebo_msgs::msg::WheelSlip::SharedPtr latestMsg;
+    auto sub = node->create_subscription<gazebo_msgs::msg::WheelSlip>(
+      "trisphere_cycle_slip/wheel_slip", rclcpp::QoS(1),
+      [&latestMsg](const gazebo_msgs::msg::WheelSlip::SharedPtr msg) {
+        latestMsg = msg;
+      });
+
+    // Spin until we get a message or timeout
+    auto startTime = std::chrono::steady_clock::now();
+    while (latestMsg == nullptr &&
+      (std::chrono::steady_clock::now() - startTime) < std::chrono::seconds(2))
+    {
+      world->Step(1000);
+      executor.spin_once(100ms);
+      gazebo::common::Time::MSleep(100);
+    }
+
+    // Check that we receive the latest joint state
+    ASSERT_NE(nullptr, latestMsg);
+
+    EXPECT_EQ(3u, latestMsg->name.size());
+    EXPECT_EQ(latestMsg->name.size(), latestMsg->lateral_slip.size());
+    EXPECT_EQ(latestMsg->name.size(), latestMsg->longitudinal_slip.size());
+
+    for (unsigned int i = 0; i < latestMsg->name.size(); ++i) {
+      if (at_rest) {
+        EXPECT_DOUBLE_EQ(0.0, latestMsg->lateral_slip[i]);
+        EXPECT_DOUBLE_EQ(0.0, latestMsg->longitudinal_slip[i]);
+      } else {
+        EXPECT_NEAR(0.0, latestMsg->lateral_slip[i], 1e-4);
+        EXPECT_NEAR(0.3, latestMsg->longitudinal_slip[i], 0.05);
+      }
+    }
+  }
+};
+
+TEST_F(GazeboRosWheelSlipPublisherTest, Publishing)
+{
+  this->test_publishing(
+    "worlds/gazebo_ros_wheel_slip.world",
+    false
+  );
+}
+
+TEST_F(GazeboRosWheelSlipPublisherTest, PublishingAtRest)
+{
+  this->test_publishing(
+    "worlds/gazebo_ros_wheel_slip_at_rest.world",
+    true
+  );
 }
 
 int main(int argc, char ** argv)
