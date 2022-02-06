@@ -19,11 +19,12 @@
 #include <stdlib.h>
 
 #include <gtest/gtest.h>
-#include <rclcpp/rclcpp.hpp>
 
 #include <utility>
 #include <vector>
 #include <string>
+
+#include <rclcpp/rclcpp.hpp>
 
 namespace gazebo_ros
 {

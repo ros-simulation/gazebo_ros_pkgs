@@ -16,9 +16,9 @@
 #define GAZEBO_ROS__CONVERSIONS__BUILTIN_INTERFACES_HPP_
 
 #include <gazebo/msgs/time.pb.h>
+#include <gazebo/common/Time.hh>
 
 #include <builtin_interfaces/msg/time.hpp>
-#include <gazebo/common/Time.hh>
 
 #include "gazebo_ros/conversions/generic.hpp"
 

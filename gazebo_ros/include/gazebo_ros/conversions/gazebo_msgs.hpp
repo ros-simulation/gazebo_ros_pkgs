@@ -16,10 +16,11 @@
 #define GAZEBO_ROS__CONVERSIONS__GAZEBO_MSGS_HPP_
 
 #include <gazebo/msgs/contacts.pb.h>
-#include <gazebo_msgs/msg/contact_state.hpp>
-#include <gazebo_msgs/msg/contacts_state.hpp>
 
 #include <sstream>
+
+#include <gazebo_msgs/msg/contact_state.hpp>
+#include <gazebo_msgs/msg/contacts_state.hpp>
 
 #include "gazebo_ros/conversions/builtin_interfaces.hpp"
 #include "gazebo_ros/conversions/generic.hpp"
