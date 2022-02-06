@@ -22,13 +22,13 @@ import math
 import os
 import sys
 from urllib.parse import SplitResult, urlsplit
-from lxml import etree as ElementTree
 
 from gazebo_msgs.msg import ModelStates
 from gazebo_msgs.srv import DeleteEntity
 # from gazebo_msgs.srv import SetModelConfiguration
 from gazebo_msgs.srv import SpawnEntity
 from geometry_msgs.msg import Pose
+from lxml import etree as ElementTree
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy
