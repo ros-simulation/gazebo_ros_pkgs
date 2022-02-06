@@ -13,13 +13,14 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include <gazebo_ros/testing_utils.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <rosgraph_msgs/msg/clock.hpp>
 
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <gazebo_ros/testing_utils.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rosgraph_msgs/msg/clock.hpp>
 
 using namespace std::literals::chrono_literals;
 

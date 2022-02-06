@@ -14,6 +14,8 @@
 
 #include "gazebo_ros/gazebo_ros_factory.hpp"
 
+#include <tinyxml.h>
+
 #include <gazebo/common/Events.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/Entity.hh>
@@ -21,6 +23,13 @@
 #include <gazebo/physics/PhysicsIface.hh>
 #include <gazebo/physics/World.hh>
 #include <gazebo/transport/Node.hh>
+
+#include <algorithm>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include <gazebo_msgs/srv/get_model_list.hpp>
 #include <gazebo_msgs/srv/delete_entity.hpp>
 #include <gazebo_msgs/srv/spawn_entity.hpp>
@@ -29,13 +38,6 @@
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
 #include <rosgraph_msgs/msg/clock.hpp>
-
-#include <tinyxml.h>
-#include <algorithm>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
 
 namespace gazebo_ros
 {

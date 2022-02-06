@@ -13,10 +13,6 @@
 // limitations under the License.
 
 #include <gazebo_ros/qos.hpp>
-
-#include <rclcpp/expand_topic_or_service_name.hpp>
-#include <rclcpp/node_options.hpp>
-#include <rclcpp/qos.hpp>
 #include <rcl/rcl.h>
 #include <rcl/remap.h>
 #include <rmw/types.h>
@@ -28,6 +24,10 @@
 #include <sstream>
 #include <string>
 #include <utility>
+
+#include <rclcpp/expand_topic_or_service_name.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/qos.hpp>
 
 namespace gazebo_ros
 {
