@@ -232,7 +232,9 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
 
   // Copy data into pose message
   pose_msg.header.frame_id = frame_name_;
-  pose_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
+  pose_msg.header.stamp = ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time) :
+    ros_node_->stamp_now();
   pose_msg.child_frame_id = link_->GetName();
 
   // Get inertial rates

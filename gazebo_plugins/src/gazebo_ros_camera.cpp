@@ -576,8 +576,9 @@ void GazeboRosCamera::NewFrame(
 
   // Publish camera info
   auto camera_info_msg = impl_->camera_info_manager_[_camera_num]->getCameraInfo();
-  camera_info_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
-    sensor_update_time);
+  camera_info_msg.header.stamp = impl_->ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(sensor_update_time) :
+    (builtin_interfaces::msg::Time)impl_->ros_node_->stamp_now();
 
   impl_->camera_info_pub_[_camera_num]->publish(camera_info_msg);
 
@@ -585,8 +586,9 @@ void GazeboRosCamera::NewFrame(
 
   // Publish image
   impl_->image_msg_.header.frame_id = impl_->frame_name_;
-  impl_->image_msg_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(
-    sensor_update_time);
+  impl_->image_msg_.header.stamp = impl_->ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(sensor_update_time) :
+    impl_->ros_node_->stamp_now();
 
   // Copy from src to image_msg
   sensor_msgs::fillImage(
@@ -654,7 +656,8 @@ void GazeboRosCamera::OnNewDepthFrame(
   sensor_msgs::msg::Image image_msg;
   image_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
   image_msg.header.frame_id = impl_->frame_name_;
-  image_msg.header.stamp = sensor_update_time;
+  image_msg.header.stamp = impl_->ros_node_->use_sim_time() ?
+    sensor_update_time : impl_->ros_node_->stamp_now();
   image_msg.width = _width;
   image_msg.height = _height;
   image_msg.step = FLOAT_SIZE * _width;
@@ -690,7 +693,8 @@ void GazeboRosCamera::OnNewDepthFrame(
 #endif
   // Publish camera info
   auto camera_info_msg = impl_->camera_info_manager_[0]->getCameraInfo();
-  camera_info_msg.header.stamp = sensor_update_time;
+  camera_info_msg.header.stamp = impl_->ros_node_->use_sim_time() ?
+    sensor_update_time : impl_->ros_node_->stamp_now();
 
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_BEGIN("publish camera depth info");
@@ -702,7 +706,8 @@ void GazeboRosCamera::OnNewDepthFrame(
   IGN_PROFILE_BEGIN("fill ROS cloud point message");
 #endif
   // Publish point cloud
-  impl_->cloud_msg_.header.stamp = sensor_update_time;
+  impl_->cloud_msg_.header.stamp = impl_->ros_node_->use_sim_time() ?
+    sensor_update_time : impl_->ros_node_->stamp_now();
   impl_->cloud_msg_.width = _width;
   impl_->cloud_msg_.height = _height;
   impl_->cloud_msg_.row_step = impl_->cloud_msg_.point_step * _width * _height;

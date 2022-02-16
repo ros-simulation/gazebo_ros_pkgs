@@ -431,7 +431,9 @@ void GazeboRosTricycleDrive::Reset()
 void GazeboRosTricycleDrivePrivate::PublishWheelJointState(
   const gazebo::common::Time & _current_time)
 {
-  joint_state_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+  joint_state_.header.stamp = ros_node_->use_sim_time() ?
+    gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time) :
+    ros_node_->stamp_now();
 
   for (std::size_t i = 0; i < joints_.size(); i++) {
     joint_state_.position[i] = joints_[i]->Position(0);
@@ -452,7 +454,7 @@ void GazeboRosTricycleDrivePrivate::PublishWheelsTf(const gazebo::common::Time &
     ignition::math::Pose3d pose = joint->GetChild()->RelativePose();
 
     geometry_msgs::msg::TransformStamped msg;
-    msg.header.stamp = current_time;
+    msg.header.stamp = ros_node_->use_sim_time() ? current_time : ros_node_->now();
     msg.header.frame_id = parent_frame;
     msg.child_frame_id = frame;
     msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(pose.Pos());
@@ -670,7 +672,7 @@ void GazeboRosTricycleDrivePrivate::PublishOdometryMsg(const gazebo::common::Tim
   }
 
   geometry_msgs::msg::TransformStamped msg;
-  msg.header.stamp = current_time;
+  msg.header.stamp = ros_node_->use_sim_time() ? current_time : ros_node_->now();
   msg.header.frame_id = odometry_frame_;
   msg.child_frame_id = robot_base_frame_;
   msg.transform.translation =
@@ -680,7 +682,7 @@ void GazeboRosTricycleDrivePrivate::PublishOdometryMsg(const gazebo::common::Tim
   transform_broadcaster_->sendTransform(msg);
 
   // set header stamp
-  odom_.header.stamp = current_time;
+  odom_.header.stamp = ros_node_->use_sim_time() ? current_time : ros_node_->now();
 
   odometry_pub_->publish(odom_);
 }
