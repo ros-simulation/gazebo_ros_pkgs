@@ -145,10 +145,6 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
 
   impl_->multi_robot_namespace_divider.erase(0, 1);
 
-  if (impl_->multi_robot_namespace_divider != "") {
-    impl_->multi_robot_namespace_divider += "/";
-  }
-
   // Odometry
   impl_->odometry_frame_ = impl_->multi_robot_namespace_divider +
     _sdf->Get<std::string>("odometry_frame", "odom").first;
