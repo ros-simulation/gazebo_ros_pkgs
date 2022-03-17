@@ -538,6 +538,12 @@ install(TARGETS
   RUNTIME DESTINATION bin)
 endif()
 
+install(
+  PROGRAMS
+    scripts/wheel_slip_drawbar_pull_publisher.py
+    DESTINATION lib/${PROJECT_NAME}/
+)
+
 install(DIRECTORY
   worlds
   DESTINATION share/${PROJECT_NAME}/
