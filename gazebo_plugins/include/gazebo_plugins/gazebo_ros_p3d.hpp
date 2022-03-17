@@ -29,7 +29,7 @@ class GazeboRosP3DPrivate;
 /**
   Example Usage:
   \code{.xml}
-    <plugin name="gazebo_ros_force" filename="libgazebo_ros_force.so">
+    <plugin name="gazebo_ros_p3d" filename="libgazebo_ros_p3d.so">
 
       <ros>
 
