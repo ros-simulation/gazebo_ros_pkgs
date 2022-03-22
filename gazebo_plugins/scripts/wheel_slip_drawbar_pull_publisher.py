@@ -24,31 +24,28 @@ import sys
 from geometry_msgs.msg import Wrench
 from rclpy.node import Node
 
-kDefaultTopic = '/drawbar_pull'
-kDefaultForceIncrement = 10
-kDefaultMaxForce = 70
-kDefaultPublishInterval = 2.0
+DEFAULT_FORCE_INCREMENT = 10
+DEFAULT_MAX_FORCE = 70
+DEFAULT_PUBLISH_INTERVAL = 2.0
 
 class WheelSlipDrawbarPullPublisher(Node):
     def __init__(self, args):
         super().__init__('wheel_slip_drawbar_pull_publisher')
         parser = argparse.ArgumentParser(
             description='Publish drag forces as a wrench representing drawbar pull on the back of a vehicle.')
-        parser.add_argument('-t', '--topic', type=str, default=kDefaultTopic,
-                            help='The topic name for publishing a drawbar pull wrench')
-        parser.add_argument('-f', '--force-increment', type=float, default=kDefaultForceIncrement,
+        parser.add_argument('-f', '--force-increment', type=float, default=DEFAULT_FORCE_INCREMENT,
                             help='The drawbar pull force increment (Newtons)')
-        parser.add_argument('-i', '--interval', type=float, default=kDefaultPublishInterval,
+        parser.add_argument('-i', '--interval', type=float, default=DEFAULT_PUBLISH_INTERVAL,
                             help='The drawar pull publication interval (seconds)')
-        parser.add_argument('-m', '--max-force', type=float, default=kDefaultMaxForce,
+        parser.add_argument('-m', '--max-force', type=float, default=DEFAULT_MAX_FORCE,
                             help='The maximum drawbar pull force')
         self.args = parser.parse_args(args[1:])
 
-        self.publisher = self.create_publisher(Wrench, self.args.topic, 1)
+        self.publisher = self.create_publisher(Wrench, "drawbar_pull", 1)
         self.publish_counter = 1
-        self.publish_timer = self.create_timer(self.args.interval, self.updateWrench)
+        self.publish_timer = self.create_timer(self.args.interval, self.update_wrench)
 
-    def updateWrench(self):
+    def update_wrench(self):
         i = self.publish_counter
         self.publish_counter += 1
         amplitude = self.args.force_increment * math.floor(i / 2)
@@ -60,7 +57,7 @@ class WheelSlipDrawbarPullPublisher(Node):
         msg.force.x = sign * float(amplitude)
 
         self.publisher.publish(msg)
-        self.get_logger().info(f"Publishing drawbar pull force of {msg.force.x} N")
+        self.get_logger().info(f'Publishing drawbar pull force of {msg.force.x} N')
 
 def main(args=sys.argv):
     rclpy.init(args=args)
