@@ -77,7 +77,16 @@ class GazeboRosWheelSlipPrivate;
 ///      If not specified, these will default to 0.0.
 ///      Any negative values will ignored and set to 0.0.
 ///
-///  2. ROS parameters for each wheel, e.g :
+///  2. ROS parameters for all wheels, e.g :
+///      <ros>
+///         <parameter name="slip_compliance_unitless_lateral" type="double">0.1</parameter>
+///         <parameter name="slip_compliance_unitless_longitudinal" type="double">0.2</parameter>
+///      </ros>
+///
+///     If not specified, these will default to the last values set in SDF tags.
+///     If these are specified, they override SDF parameters for each wheel.
+///
+///  3. ROS parameters for each wheel, e.g :
 ///       <ros>
 ///         <parameter name="slip_compliance_unitless_lateral/wheel_front" type="double">0.1
 ///           </parameter>
@@ -85,20 +94,12 @@ class GazeboRosWheelSlipPrivate;
 ///           </parameter>
 ///       </ros>
 ///
-///      If not specified, these default to SDF parameters set for each wheel.
-///      If specified, they will override the values set as SDF parameters.
-///
-///  3. ROS parameters for all wheels, e.g :
-///      <ros>
-///         <parameter name="slip_compliance_unitless_lateral" type="double">0.1</parameter>
-///         <parameter name="slip_compliance_unitless_longitudinal" type="double">0.2</parameter>
-///      </ros>
-///
-///     If not specified, these will default to the last values set in SDF tags.
-///     If these are specified, they override both SDF and the ROS parameters for each wheel.
+///      If not specified, these default to the value of the ROS parameter for all wheels.
+///      If specified, they will override values set as SDF parameters or ROS parameters for all
+///      wheels.
 ///
 ///   Precedence order :
-///   ROS Params for all wheels > ROS params for individual wheels > SDF parameters
+///   ROS Params for individual wheels > ROS params for all wheels > SDF parameters
 ///   Check out the test cases for more information and expected behaviour.
 ///
 /// See the WheelSlipPlugin documentation at the following location for more details:
