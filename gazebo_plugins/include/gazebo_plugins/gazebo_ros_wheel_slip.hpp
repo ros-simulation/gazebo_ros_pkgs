@@ -64,8 +64,8 @@ class GazeboRosWheelSlipPrivate;
 ///           value is zero or negative, the publisher will publish at the maximum rate.
 ///           This value is applied to all wheels declared in the WheelSlipPlugin.
 ///
-/// Precedence order and default values:
-/// ------------------------------------
+/// Default values:
+/// ---------------
 /// Slip compliance values can be declared in 3 ways:
 ///  1. SDF parameters, e.g. :
 ///       <wheel link_name="wheel_front">
@@ -84,9 +84,9 @@ class GazeboRosWheelSlipPrivate;
 ///      </ros>
 ///
 ///     If not specified, these will default to the last values set in SDF tags.
-///     If these are specified, they override SDF parameters for each wheel.
+///     If these are specified, they override SDF parameters.
 ///
-///  3. ROS parameters for each wheel, e.g :
+///  3. ROS parameters for specific wheels, e.g :
 ///       <ros>
 ///         <parameter name="slip_compliance_unitless_lateral/wheel_front" type="double">0.1
 ///           </parameter>
@@ -95,11 +95,12 @@ class GazeboRosWheelSlipPrivate;
 ///       </ros>
 ///
 ///      If not specified, these default to the value of the ROS parameter for all wheels.
-///      If specified, they will override values set as SDF parameters or ROS parameters for all
-///      wheels.
+///      If specified, they override SDF parameters and ROS parameters
+///      "slip_compliance_unitless_lateral" and "slip_compliance_unitless_longitudinal".
 ///
-///   Precedence order :
-///   ROS Params for individual wheels > ROS params for all wheels > SDF parameters
+///   Precedence order
+///   ----------------
+///   ROS parameters for individual wheels > ROS parameters for all wheels > SDF parameters
 ///   Check out the test cases for more information and expected behaviour.
 ///
 /// See the WheelSlipPlugin documentation at the following location for more details:
