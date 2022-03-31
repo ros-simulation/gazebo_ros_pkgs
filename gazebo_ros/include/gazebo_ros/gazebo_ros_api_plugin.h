@@ -65,6 +65,8 @@
 #include "gazebo_msgs/GetModelState.h"
 #include "gazebo_msgs/SetModelState.h"
 
+#include "gazebo_msgs/SetModelVisual.h"
+
 #include "gazebo_msgs/GetJointProperties.h"
 #include "gazebo_msgs/ApplyJointEffort.h"
 
@@ -212,6 +214,9 @@ public:
   bool setModelState(gazebo_msgs::SetModelState::Request &req,gazebo_msgs::SetModelState::Response &res);
 
   /// \brief
+  bool setModelVisual(gazebo_msgs::SetModelVisual::Request &req,gazebo_msgs::SetModelVisual::Response &res);
+
+  /// \brief
   void updateModelState(const gazebo_msgs::ModelState::ConstPtr& model_state);
 
   /// \brief
@@ -342,6 +347,7 @@ private:
   gazebo::transport::PublisherPtr light_modify_pub_;
   gazebo::transport::SubscriberPtr performance_metric_sub_;
   gazebo::transport::PublisherPtr request_pub_;
+  gazebo::transport::PublisherPtr visual_pub_;
   gazebo::transport::SubscriberPtr response_sub_;
 
   boost::shared_ptr<ros::NodeHandle> nh_;
@@ -374,6 +380,7 @@ private:
   ros::ServiceServer apply_body_wrench_service_;
   ros::ServiceServer set_joint_properties_service_;
   ros::ServiceServer set_model_state_service_;
+  ros::ServiceServer set_model_visual_service_;
   ros::ServiceServer apply_joint_effort_service_;
   ros::ServiceServer set_model_configuration_service_;
   ros::ServiceServer set_link_state_service_;
