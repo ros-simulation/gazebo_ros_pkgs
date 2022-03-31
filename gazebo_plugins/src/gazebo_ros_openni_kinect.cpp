@@ -103,6 +103,13 @@ void GazeboRosOpenniKinect::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
   else
     this->point_cloud_cutoff_max_ = _sdf->GetElement("pointCloudCutoffMax")->Get<double>();
 
+  // noise
+    if (!_sdf->HasElement("gaussianNoise")) {
+    this->gaussian_noise_ = 0;
+  } else {
+    this->gaussian_noise_ = _sdf->GetElement("gaussianNoise")->Get<double>();
+  }
+
   load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosOpenniKinect::Advertise, this));
   GazeboRosCameraUtils::Load(_parent, _sdf);
 }
@@ -334,7 +341,7 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
       if (cols_arg>1) yAngle = atan2( (double)i - 0.5*(double)(cols_arg-1), fl);
       else            yAngle = 0.0;
 
-      double depth = toCopyFrom[index++]; // + 0.0*this->myParent->GetNearClip();
+      double depth = toCopyFrom[index++] * ( 1 + gaussianKernel(0, this->gaussian_noise_) ); // + 0.0*this->myParent->GetNearClip();
 
       if(depth > this->point_cloud_cutoff_ &&
          depth < this->point_cloud_cutoff_max_)
