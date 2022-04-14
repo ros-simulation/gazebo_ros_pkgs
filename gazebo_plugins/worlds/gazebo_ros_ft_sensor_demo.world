@@ -12,6 +12,7 @@
 
     <physics type="ode">
       <ode>
+        <ode_quiet>1</ode_quiet>
         <solver>
           <type>world</type>
         </solver>
