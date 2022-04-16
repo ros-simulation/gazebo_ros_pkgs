@@ -10,6 +10,15 @@
 <sdf version="1.6">
   <world name="default">
 
+    <physics type="ode">
+      <ode>
+        <ode_quiet>1</ode_quiet>
+        <solver>
+          <type>world</type>
+        </solver>
+      </ode>
+    </physics>
+
     <include>
       <uri>model://ground_plane</uri>
     </include>
