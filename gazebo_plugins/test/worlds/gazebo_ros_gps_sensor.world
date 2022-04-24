@@ -48,11 +48,26 @@
                 </noise>
               </vertical>
             </position_sensing>
+            <velocity_sensing>
+              <horizontal>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </horizontal>
+              <vertical>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </vertical>
+            </velocity_sensing>
           </gps>
           <plugin name="my_gps_plugin" filename="libgazebo_ros_gps_sensor.so">
             <ros>
               <namespace>/gps</namespace>
               <remapping>~/out:=data</remapping>
+              <remapping>~/vel:=velocity</remapping>
             </ros>
           </plugin>
         </sensor>
