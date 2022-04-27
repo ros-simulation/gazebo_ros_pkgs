@@ -38,6 +38,31 @@ link_directories(
 
 ament_python_install_package(scripts)
 
+pkg_check_modules(TBB tbb)
+set (TBB_PKG_CONFIG "tbb")
+if (NOT TBB_FOUND)
+  message(STATUS "TBB not found, attempting to detect manually")
+  set (TBB_PKG_CONFIG "")
+
+  # Workaround for CMake bug https://gitlab.kitware.com/cmake/cmake/issues/171
+  unset(TBB_FOUND CACHE)
+
+  find_package(TBB CONFIG)
+  if (TBB_FOUND)
+    set(TBB_LIBRARIES TBB::tbb)
+  endif()
+
+  if (NOT TBB_FOUND)
+    find_library(tbb_library tbb ENV LD_LIBRARY_PATH)
+    if (tbb_library)
+      set(TBB_FOUND true)
+      set(TBB_LIBRARIES ${tbb_library})
+    else (tbb_library)
+      message(FATAL_ERROR "Missing: TBB - Threading Building Blocks")
+    endif(tbb_library)
+  endif (NOT TBB_FOUND)
+endif (NOT TBB_FOUND)
+
 # gazebo_ros_node
 add_library(gazebo_ros_node SHARED
   src/executor.cpp
@@ -49,6 +74,10 @@ target_include_directories(gazebo_ros_node
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${gazebo_dev_INCLUDE_DIRS}
+    ${TBB_LIBRARY_DIR}
+)
+target_link_libraries(gazebo_ros_node
+  ${TBB_LIBRARIES}
 )
 if(WIN32)
   target_compile_definitions(gazebo_ros_node PRIVATE "GAZEBO_ROS_NODE_BUILDING_DLL")

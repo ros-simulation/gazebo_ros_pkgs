@@ -10,6 +10,31 @@ foreach(world ${worlds})
   configure_file(${world} ${world} COPYONLY)
 endforeach()
 
+pkg_check_modules(TBB tbb)
+set (TBB_PKG_CONFIG "tbb")
+if (NOT TBB_FOUND)
+  message(STATUS "TBB not found, attempting to detect manually")
+  set (TBB_PKG_CONFIG "")
+
+  # Workaround for CMake bug https://gitlab.kitware.com/cmake/cmake/issues/171
+  unset(TBB_FOUND CACHE)
+
+  find_package(TBB CONFIG)
+  if (TBB_FOUND)
+    set(TBB_LIBRARIES TBB::tbb)
+  endif()
+
+  if (NOT TBB_FOUND)
+    find_library(tbb_library tbb ENV LD_LIBRARY_PATH)
+    if (tbb_library)
+      set(TBB_FOUND true)
+      set(TBB_LIBRARIES ${tbb_library})
+    else (tbb_library)
+      message(FATAL_ERROR "Missing: TBB - Threading Building Blocks")
+    endif(tbb_library)
+  endif (NOT TBB_FOUND)
+endif (NOT TBB_FOUND)
+
 # Tests
 set(tests
   test_gazebo_ros_ackermann_drive
@@ -53,8 +78,13 @@ foreach(test ${tests})
     TIMEOUT
       120
   )
+  target_include_directories(${test}
+    PUBLIC
+      ${TBB_LIBRARY_DIRS}
+  )
   target_link_libraries(${test}
     gazebo_test_fixture
+    ${TBB_LIBRARIES}
   )
   ament_target_dependencies(${test}
     "cv_bridge"
