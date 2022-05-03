@@ -26,7 +26,7 @@ else()
       set(TBB_LIBRARIES ${tbb_library})
     else (tbb_library)
       message(FATAL_ERROR "Missing: TBB - Threading Building Blocks")
-    endif(tbb_library)
+    endif()
   endif (NOT TBB_FOUND)
 endif (NOT TBB_FOUND)
 
