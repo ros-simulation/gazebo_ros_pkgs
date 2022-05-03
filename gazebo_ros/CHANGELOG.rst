@@ -2,6 +2,30 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix spawn_entity_demo: use executable (`#1349 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1349>`_)
+* Added runtime warning when user sets use_sim_time parameter
+  * Added runtime warning, need to check hand_of_god demo
+  * Check on start in Node.cpp, param callback check added
+  * Added weak ptr to callback lambda fcn
+* Added ROS parameter to toggle performance metrics in gazebo_ros (`#1295 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1295>`_)
+  * Added ROS parameter to toggle performance metrics
+  * Added quick return logic, parameter description
+  * Quick return logic changed for readablity
+  * launch test added to disable performace_metrics
+  * Added Event() based quick return logic
+  * Test cases merged to 1 fixture
+* Deprecate -spawn_service_timeout option (`#1238 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1238>`_)
+  The spawn_entity.py script has two options for setting service timeouts:
+  1. '-timeout': Sets the duration to wait for all services to be ready
+  2. '-spawn_service_timeout': Sets the duration to wait for the spawn_entity service to be ready
+  (1) is available in all ROS distros since Dashing (except Eloquent for some reason).
+  (2) was introduced in Eloquent, and replaced (1) in Foxy as the way to control the timeout specifically for the spawn_entity service.
+  This change deprecates (2) and assumes (1) is used for all service timeouts again.
+  This change also adds smoke tests for the two options.
+* Contributors: Aditya Pande, Felix Exner, Jacob Perron
+
 3.5.2 (2021-03-15)
 ------------------
 * Remove slash from gazebo_ros scripts Python package name (`#1251 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1251>`_)

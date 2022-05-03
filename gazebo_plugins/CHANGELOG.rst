@@ -2,6 +2,57 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#1354 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1354>`_ from scpeters/ft_sensor_demo_world_solver
+  gazebo_ros_ft_sensor_demo.world: use world solver
+* added ode_quiet tag
+* gazebo_ros_ft_sensor_demo.world: use world solver
+  The default solver settings with the quick-step solver
+  have poor convergence behavior. The world-step solver
+  has less noise.
+* wheel_slip: set lateral slip to zero at low speed (`#1338 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1338>`_)
+  Use the same low-speed logic for lateral and
+  longitudianl slip. Add a test.
+* gazebo_ros_wheel_slip: publish wheel slip (`#1331 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1331>`_)
+  The wheel slip plugin now publishes a WheelSlip message
+  containing the lateral and longitudinal wheel slip for each
+  wheel link that uses the plugin. The publication rate can be
+  configured through an SDFormat parameter. The new
+  `WheelSlip.msg` is added to `gazebo_msgs`.
+* Adds slip values for individual wheels (`#1312 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1312>`_)
+  * Adds slip values for individual wheels
+  * ROS parameters override sdf ones
+  * Updated header to have realistic slip values
+* Default slip values fix for wheel slip plugin (`#1308 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1308>`_)
+  * Added check for positive slip values
+  * Reject negative values, default slip values changed to 0
+  * Added parameter rejection msg
+* Added runtime warning when user sets use_sim_time parameter
+  * Added runtime warning, need to check hand_of_god demo
+  * Removed unnecessary files
+  * Check on start in Node.cpp, param callback check added
+  * Reworded warnings, changed startup warning location, pushed executer after callback
+  * Added pass by ref to callback lambda function
+  * Added underscore to param_change_callback_handler\_
+  * Added weak ptr to callback lambda fcn
+* Fix warnings when building against the latest sources. (`#1282 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1282>`_)
+  Post-Galactic, we have deprecated the tf2_geometry_msgs.h
+  header file in preference to tf2_geometry_msgs.hpp.  While
+  we are in here, also remove a command-line option that gcc
+  does not understand.
+* Add method to get ROS node from GazeboRosCameraPlugin (`#1299 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1299>`_)
+  This helps avoid an issue with duplicate node names if this class is subclassed and wants access to a ROS node.
+* Improve robustness of joint state publisher test (`#1259 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1259>`_)
+  The spin_once method does not guarantee that we will get a message from the subscription.
+  This change refactors to the code to spin until we get a message before asserting things about it.
+* Avoid rejecting QoS overrides parameters (`#1258 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1258>`_)
+  Some parameters are declared by the node and rejecting them can cause the gazebo plugin to crash.
+* publish with QoS reliable as default (`#1224 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1224>`_) (`#1235 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1235>`_)
+  * default to reliable publishers
+  Co-authored-by: Brett Downing <BrettRD@users.noreply.github.com>
+* Contributors: Aditya Pande, Audrow Nash, Chris Lalancette, Dharini Dutia, Jacob Perron, Steve Peters
+
 3.5.2 (2021-03-15)
 ------------------
 * gazebo_ros_camera: Added accessor methods for camera properties (`#1246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1246>`_)

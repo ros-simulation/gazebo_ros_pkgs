@@ -2,6 +2,16 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* gazebo_ros_wheel_slip: publish wheel slip (`#1331 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1331>`_)
+  The wheel slip plugin now publishes a WheelSlip message
+  containing the lateral and longitudinal wheel slip for each
+  wheel link that uses the plugin. The publication rate can be
+  configured through an SDFormat parameter. The new
+  `WheelSlip.msg` is added to `gazebo_msgs`.
+* Contributors: Audrow Nash
+
 3.5.2 (2021-03-15)
 ------------------
 
