@@ -13,7 +13,7 @@ if(NOT TBB_FOUND)
   message(STATUS "TBB not found, attempting to detect manually")
   set(TBB_PKG_CONFIG "")
 
-  # Workaround for CMake bug https://gitlab.kitware.com/cmake/cmake/issues/171
+  # Workaround for CMake bug https://gitlab.kitware.com/cmake/cmake/issues/17135
   unset(TBB_FOUND CACHE)
 
   find_package(TBB CONFIG)
