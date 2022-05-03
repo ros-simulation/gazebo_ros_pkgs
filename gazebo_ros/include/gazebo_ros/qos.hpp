@@ -15,17 +15,17 @@
 #ifndef GAZEBO_ROS__QOS_HPP_
 #define GAZEBO_ROS__QOS_HPP_
 
-#include <sdf/sdf.hh>
-
-#include <rclcpp/node_options.hpp>
-#include <rclcpp/qos.hpp>
-
-#include <gazebo_ros/node_visibility_control.h>
-
 #include <map>
 #include <memory>
 #include <stdexcept>
 #include <string>
+
+#include "sdf/sdf.hh"
+
+#include "gazebo_ros/node_visibility_control.h"
+
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/qos.hpp>
 
 namespace gazebo_ros
 {

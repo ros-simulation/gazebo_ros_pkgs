@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <limits>
+#include <memory>
+
 #include <gazebo_plugins/gazebo_ros_elevator.hpp>
 #include <gazebo_ros/node.hpp>
 #include <std_msgs/msg/string.hpp>
-
-#include <limits>
-#include <memory>
 
 namespace gazebo_plugins
 {

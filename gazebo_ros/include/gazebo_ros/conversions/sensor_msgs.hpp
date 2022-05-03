@@ -17,7 +17,11 @@
 
 #include <math.h>
 
-#include <gazebo/msgs/laserscan_stamped.pb.h>
+#include <algorithm>
+#include <limits>
+
+#include "gazebo/msgs/laserscan_stamped.pb.h"
+
 #include <geometry_msgs/msg/point32.hpp>
 #include <rclcpp/logging.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -25,9 +29,6 @@
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <sensor_msgs/msg/range.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-
-#include <algorithm>
-#include <limits>
 
 #include "gazebo_ros/conversions/builtin_interfaces.hpp"
 #include "gazebo_ros/conversions/generic.hpp"

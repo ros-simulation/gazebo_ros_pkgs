@@ -15,10 +15,10 @@
 #ifndef GAZEBO_PLUGINS__GAZEBO_ROS_HARNESS_HPP_
 #define GAZEBO_PLUGINS__GAZEBO_ROS_HARNESS_HPP_
 
-#include <gazebo/plugins/HarnessPlugin.hh>
-#include <std_msgs/msg/empty.hpp>
-
 #include <memory>
+
+#include "gazebo/plugins/HarnessPlugin.hh"
+#include <std_msgs/msg/empty.hpp>
 
 namespace gazebo_plugins
 {

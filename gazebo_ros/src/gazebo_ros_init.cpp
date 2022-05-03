@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+#include <string>
+
 #include "gazebo_ros/gazebo_ros_init.hpp"
 
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/msgs/MessageTypes.hh>
-#include <gazebo/physics/PhysicsIface.hh>
-#include <gazebo/physics/World.hh>
-#include <gazebo/transport/Node.hh>
+#include "gazebo/common/Plugin.hh"
+#include "gazebo/msgs/MessageTypes.hh"
+#include "gazebo/physics/PhysicsIface.hh"
+#include "gazebo/physics/World.hh"
+#include "gazebo/transport/Node.hh"
 
 #include <gazebo_msgs/msg/performance_metrics.hpp>
 #include <gazebo_msgs/msg/sensor_performance_metric.hpp>
@@ -29,9 +32,6 @@
 
 #include <rosgraph_msgs/msg/clock.hpp>
 #include <std_srvs/srv/empty.hpp>
-
-#include <memory>
-#include <string>
 
 #ifndef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
 #if \

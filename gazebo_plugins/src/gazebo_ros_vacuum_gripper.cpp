@@ -20,22 +20,23 @@
  * \date 7 Dec 2015
  */
 
-#include <gazebo/physics/Link.hh>
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
-#include <gazebo_plugins/gazebo_ros_vacuum_gripper.hpp>
-#include <gazebo_ros/node.hpp>
-#ifdef IGN_PROFILER_ENABLE
-#include <ignition/common/Profiler.hh>
-#endif
-#include <std_msgs/msg/bool.hpp>
-#include <std_srvs/srv/set_bool.hpp>
-#include <sdf/sdf.hh>
-
 #include <algorithm>
 #include <memory>
 #include <string>
 #include <unordered_set>
+
+#include "gazebo/physics/Link.hh"
+#include "gazebo/physics/Model.hh"
+#include "gazebo/physics/World.hh"
+#include "gazebo_plugins/gazebo_ros_vacuum_gripper.hpp"
+#include "gazebo_ros/node.hpp"
+#ifdef IGN_PROFILER_ENABLE
+#include "ignition/common/Profiler.hh"
+#endif
+#include "sdf/sdf.hh"
+
+#include <std_msgs/msg/bool.hpp>
+#include <std_srvs/srv/set_bool.hpp>
 
 namespace gazebo_plugins
 {

@@ -15,15 +15,15 @@
 #ifndef GAZEBO_PLUGINS__GAZEBO_ROS_CAMERA_HPP_
 #define GAZEBO_PLUGINS__GAZEBO_ROS_CAMERA_HPP_
 
-#include <gazebo/plugins/CameraPlugin.hh>
-#include <gazebo/plugins/DepthCameraPlugin.hh>
-#include <gazebo_plugins/multi_camera_plugin.hpp>
-#include <gazebo_ros/node.hpp>
-#include <std_msgs/msg/empty.hpp>
-
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "gazebo/plugins/CameraPlugin.hh"
+#include "gazebo/plugins/DepthCameraPlugin.hh"
+#include <gazebo_plugins/multi_camera_plugin.hpp>
+#include <gazebo_ros/node.hpp>
+#include <std_msgs/msg/empty.hpp>
 
 namespace gazebo_plugins
 {

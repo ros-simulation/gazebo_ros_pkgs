@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/physics/Model.hh>
+#include <memory>
+
+#include "gazebo/physics/Model.hh"
+
 #include <gazebo_plugins/gazebo_ros_template.hpp>
 #include <gazebo_ros/node.hpp>
 #include <rclcpp/rclcpp.hpp>
-
-#include <memory>
 
 namespace gazebo_plugins
 {

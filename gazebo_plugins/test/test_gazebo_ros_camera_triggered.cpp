@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/test/ServerFixture.hh>
-#include <image_transport/image_transport.h>
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/empty.hpp>
-
 #include <memory>
 #include <string>
+
+#include "gazebo/test/ServerFixture.hh"
+
+#include <image_transport/image_transport.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/empty.hpp>
 
 using namespace std::literals::chrono_literals; // NOLINT
 

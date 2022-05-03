@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cv_bridge/cv_bridge.h>
-#include <gazebo/test/ServerFixture.hh>
-#include <image_transport/image_transport.h>
+#include <memory>
+#include <string>
+
+#include "cv_bridge/cv_bridge.h"
+#include "gazebo/test/ServerFixture.hh"
+
+#include <image_transport/image_transport.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <rclcpp/rclcpp.hpp>
-
-#include <memory>
-#include <string>
 
 using namespace std::literals::chrono_literals; // NOLINT
 

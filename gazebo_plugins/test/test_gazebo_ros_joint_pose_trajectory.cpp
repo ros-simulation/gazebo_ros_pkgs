@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/common/Time.hh>
-#include <gazebo/test/ServerFixture.hh>
+#include <memory>
+
+#include "gazebo/common/Time.hh"
+#include "gazebo/test/ServerFixture.hh"
+
 #include <rclcpp/rclcpp.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
-
-#include <memory>
 
 #define tol 10e-2
 

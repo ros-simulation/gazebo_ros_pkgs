@@ -12,15 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo_ros/qos.hpp>
-
-#include <rclcpp/expand_topic_or_service_name.hpp>
-#include <rclcpp/node_options.hpp>
-#include <rclcpp/qos.hpp>
-#include <rcl/rcl.h>
-#include <rcl/remap.h>
-#include <rmw/types.h>
-
 #include <chrono>
 #include <map>
 #include <memory>
@@ -28,6 +19,16 @@
 #include <sstream>
 #include <string>
 #include <utility>
+
+#include "rcl/rcl.h"
+#include "rcl/remap.h"
+#include "rmw/types.h"
+
+#include <gazebo_ros/qos.hpp>
+
+#include <rclcpp/expand_topic_or_service_name.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp/qos.hpp>
 
 namespace gazebo_ros
 {

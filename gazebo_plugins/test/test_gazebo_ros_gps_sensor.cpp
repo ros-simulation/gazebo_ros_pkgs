@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/test/ServerFixture.hh>
+#include <memory>
+
+#include "gazebo/test/ServerFixture.hh"
+
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/testing_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
-
-#include <memory>
 
 #define tol 10e-4
 

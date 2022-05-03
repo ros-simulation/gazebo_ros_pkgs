@@ -12,15 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/physics/Entity.hh>
-#include <gazebo/physics/Joint.hh>
-#include <gazebo/physics/Light.hh>
-#include <gazebo/physics/Link.hh>
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
-#include <gazebo/physics/Collision.hh>
-#include <gazebo/transport/Node.hh>
+#include <memory>
+
+#include "gazebo/common/Plugin.hh"
+#include "gazebo/physics/Entity.hh"
+#include "gazebo/physics/Joint.hh"
+#include "gazebo/physics/Light.hh"
+#include "gazebo/physics/Link.hh"
+#include "gazebo/physics/Model.hh"
+#include "gazebo/physics/World.hh"
+#include "gazebo/physics/Collision.hh"
+#include "gazebo/transport/Node.hh"
+
 #include <gazebo_msgs/srv/get_joint_properties.hpp>
 #include <gazebo_msgs/srv/get_light_properties.hpp>
 #include <gazebo_msgs/srv/get_link_properties.hpp>
@@ -32,8 +35,6 @@
 #include <gazebo_msgs/srv/set_physics_properties.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
-
-#include <memory>
 
 #include "gazebo_ros/gazebo_ros_properties.hpp"
 

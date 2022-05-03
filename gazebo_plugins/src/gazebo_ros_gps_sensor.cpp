@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
+#include <memory>
+#include <string>
+
+#ifdef IGN_PROFILER_ENABLE
+#include "ignition/common/Profiler.hh"
+#endif
 
 #include <builtin_interfaces/msg/time.hpp>
 #include <gazebo_plugins/gazebo_ros_gps_sensor.hpp>
@@ -19,14 +26,8 @@
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
 #include <gazebo_ros/utils.hpp>
-#ifdef IGN_PROFILER_ENABLE
-#include <ignition/common/Profiler.hh>
-#endif
-#include <sensor_msgs/msg/nav_sat_fix.hpp>
 
-#include <iostream>
-#include <memory>
-#include <string>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
 
 namespace gazebo_plugins
 {

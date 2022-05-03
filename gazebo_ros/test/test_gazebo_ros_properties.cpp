@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/test/ServerFixture.hh>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "gazebo/test/ServerFixture.hh"
 
 #include <gazebo_msgs/srv/get_model_properties.hpp>
 #include <gazebo_msgs/srv/get_joint_properties.hpp>
@@ -28,10 +32,6 @@
 #include <gazebo_msgs/srv/spawn_entity.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <rclcpp/rclcpp.hpp>
-
-#include <memory>
-#include <string>
-#include <vector>
 
 #define tol 0.01
 

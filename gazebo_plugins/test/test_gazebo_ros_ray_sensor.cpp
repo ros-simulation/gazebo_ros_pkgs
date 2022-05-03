@@ -12,9 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/common/Time.hh>
-#include <gazebo/common/Events.hh>
-#include <gazebo/test/ServerFixture.hh>
+#include <memory>
+#include <vector>
+#include <algorithm>
+
+#include "gazebo/common/Time.hh"
+#include "gazebo/common/Events.hh"
+#include "gazebo/test/ServerFixture.hh"
+
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/conversions/sensor_msgs.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -22,10 +27,6 @@
 #include <sensor_msgs/msg/point_cloud.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/range.hpp>
-
-#include <memory>
-#include <vector>
-#include <algorithm>
 
 using namespace std::literals::chrono_literals; // NOLINT
 

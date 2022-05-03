@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/common/Plugin.hh>
+#include <memory>
+
+#include "gazebo/common/Plugin.hh"
 
 #include <std_msgs/msg/string.hpp>
 #include <gazebo_ros/node.hpp>
-
-#include <memory>
 
 /// Simple example of a gazebo system plugin which uses a ROS2 node with gazebo_ros::Node.
 class ProperInit : public gazebo::SystemPlugin

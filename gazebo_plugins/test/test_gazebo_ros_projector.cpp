@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/common/Time.hh>
-#include <gazebo/test/ServerFixture.hh>
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/bool.hpp>
 
 #include <memory>
+
+#include "gazebo/common/Time.hh"
+#include "gazebo/test/ServerFixture.hh"
+
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/bool.hpp>
 
 using namespace std::literals::chrono_literals; // NOLINT
 

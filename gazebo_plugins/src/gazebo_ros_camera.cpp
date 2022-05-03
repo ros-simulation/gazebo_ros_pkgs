@@ -12,14 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <sdf/Element.hh>
-#include <gazebo/common/Events.hh>
-#include <gazebo/rendering/Distortion.hh>
-#include <gazebo/sensors/SensorTypes.hh>
+#include <algorithm>
+#include <limits>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <vector>
+
+#include "gazebo/common/Events.hh"
+#include "gazebo/rendering/Distortion.hh"
+#include "gazebo/sensors/SensorTypes.hh"
 #ifdef IGN_PROFILER_ENABLE
-#include <ignition/common/Profiler.hh>
+#include "ignition/common/Profiler.hh"
 #endif
-#include <ignition/math/Helpers.hh>
+#include "ignition/math/Helpers.hh"
+#include "sdf/Element.hh"
 
 #include <camera_info_manager/camera_info_manager.hpp>
 #include <gazebo_plugins/gazebo_ros_camera.hpp>
@@ -32,13 +39,6 @@
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-
-#include <algorithm>
-#include <limits>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <vector>
 
 #define FLOAT_SIZE sizeof(float)
 

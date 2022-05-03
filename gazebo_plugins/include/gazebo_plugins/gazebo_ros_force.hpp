@@ -15,10 +15,10 @@
 #ifndef GAZEBO_PLUGINS__GAZEBO_ROS_FORCE_HPP_
 #define GAZEBO_PLUGINS__GAZEBO_ROS_FORCE_HPP_
 
-#include <gazebo/common/Plugin.hh>
-#include <geometry_msgs/msg/wrench.hpp>
-
 #include <memory>
+
+#include "gazebo/common/Plugin.hh"
+#include <geometry_msgs/msg/wrench.hpp>
 
 namespace gazebo_plugins
 {

@@ -16,11 +16,11 @@
 #ifndef GAZEBO_PLUGINS__GAZEBO_ROS_IMU_SENSOR_HPP_
 #define GAZEBO_PLUGINS__GAZEBO_ROS_IMU_SENSOR_HPP_
 
-#include <gazebo/plugins/ImuSensorPlugin.hh>
-#include <sensor_msgs/msg/imu.hpp>
-
 #include <string>
 #include <memory>
+
+#include "gazebo/plugins/ImuSensorPlugin.hh"
+#include <sensor_msgs/msg/imu.hpp>
 
 namespace gazebo_plugins
 {

@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/common/Time.hh>
-#include <gazebo/test/ServerFixture.hh>
+#include <memory>
+
+#include "gazebo/common/Time.hh"
+#include "gazebo/test/ServerFixture.hh"
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
-
-#include <memory>
 
 using namespace std::literals::chrono_literals; // NOLINT
 

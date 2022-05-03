@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo_ros/utils.hpp>
-#include <gazebo/sensors/GaussianNoiseModel.hh>
-#include <gazebo/sensors/sensors.hh>
-#include <gtest/gtest.h>
-
 #include <memory>
 #include <string>
+
+#include "gazebo/sensors/GaussianNoiseModel.hh"
+#include "gazebo/sensors/sensors.hh"
+
+#include "gtest/gtest.h"
+
+#include <gazebo_ros/utils.hpp>
 
 TEST(TestUtils, NoiseVariance)
 {

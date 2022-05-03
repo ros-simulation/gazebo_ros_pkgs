@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/common/Plugin.hh>
+#include <memory>
+#include <string>
+
+#include "gazebo/common/Plugin.hh"
 
 #include <std_msgs/msg/string.hpp>
 #include <gazebo_ros/node.hpp>
 #include <rclcpp/exceptions.hpp>
-
-#include <memory>
-#include <string>
 
 /// Simple example of a gazebo world plugin which uses a ROS2 node with gazebo_ros::Node.
 class SDFNode : public gazebo::WorldPlugin

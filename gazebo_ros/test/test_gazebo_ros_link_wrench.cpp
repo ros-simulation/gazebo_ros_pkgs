@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/test/ServerFixture.hh>
+#include <memory>
+
+#include "gazebo/test/ServerFixture.hh"
+
 #include <gazebo_msgs/srv/apply_link_wrench.hpp>
 #include <gazebo_msgs/srv/link_request.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <memory>
 
 #define tol 10e-2
 

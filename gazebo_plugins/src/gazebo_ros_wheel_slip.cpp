@@ -12,9 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
-#include <gazebo/transport/transport.hh>
+#include <cmath>
+#include <map>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "gazebo/physics/Model.hh"
+#include "gazebo/physics/World.hh"
+#include "gazebo/transport/transport.hh"
 
 #include <gazebo_plugins/gazebo_ros_wheel_slip.hpp>
 #include <gazebo_msgs/msg/wheel_slip.hpp>
@@ -22,12 +29,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/bool.hpp>
 
-#include <cmath>
-#include <map>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 using namespace std::chrono_literals;
 
