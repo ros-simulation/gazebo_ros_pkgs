@@ -27,8 +27,8 @@ else()
     else()
       message(FATAL_ERROR "Missing: TBB - Threading Building Blocks")
     endif()
-  endif (NOT TBB_FOUND)
-endif (NOT TBB_FOUND)
+  endif()
+endif()
 
 # The following lines will tell catkin to add the Gazebo directories and libraries to the
 # respective catkin_* cmake variables.
