@@ -8,20 +8,20 @@ message(STATUS "Gazebo version: ${GAZEBO_VERSION}")
 # On Ubuntu Jammy Gazebo11 is used directly from Ubuntu, before removing this
 # please be sure that the package is updated there.
 pkg_check_modules(TBB tbb)
-set (TBB_PKG_CONFIG "tbb")
-if (NOT TBB_FOUND)
+set(TBB_PKG_CONFIG "tbb")
+if(NOT TBB_FOUND)
   message(STATUS "TBB not found, attempting to detect manually")
-  set (TBB_PKG_CONFIG "")
+  set(TBB_PKG_CONFIG "")
 
   # Workaround for CMake bug https://gitlab.kitware.com/cmake/cmake/issues/171
   unset(TBB_FOUND CACHE)
 
   find_package(TBB CONFIG)
-  if (TBB_FOUND)
+  if(TBB_FOUND)
     set(TBB_LIBRARIES TBB::tbb)
-else()
+  else()
     find_library(tbb_library tbb ENV LD_LIBRARY_PATH)
-    if (tbb_library)
+    if(tbb_library)
       set(TBB_FOUND true)
       set(TBB_LIBRARIES ${tbb_library})
     else()
