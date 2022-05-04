@@ -62,7 +62,7 @@ TEST_F(TestSimTime, TestClock)
   std::vector<ClockMsg::SharedPtr> msgs;
   std::vector<rclcpp::Time> times;
   auto sub = node->create_subscription<ClockMsg>(
-    "/clock", rclcpp::SystemDefaultsQoS(),
+    "/clock", rclcpp::ClockQoS(),
     [&](ClockMsg::SharedPtr _msg) {
       msgs.push_back(_msg);
       times.push_back(node->now());
