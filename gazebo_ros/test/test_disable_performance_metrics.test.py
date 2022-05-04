@@ -91,7 +91,7 @@ class TestPerformanceMetricsParam(unittest.TestCase):
 
         node.start_subscriber()
         msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
-        assert not msgs_received_flag, f'Received messages after\
+        assert not msgs_received_flag, 'Received messages after\
             setting enable_performance_metrics parameter to False, test failed'
         rclpy.shutdown()
 
