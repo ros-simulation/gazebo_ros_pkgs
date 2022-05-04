@@ -219,6 +219,6 @@ def _arg_command(arg):
 
 # Add gazebo_ros plugins if true
 def _plugin_command(arg):
-    cmd = ['"-s libgazebo_ros_', arg, '.so" if "true" == "', LaunchConfiguration(arg), '" else ""']
+    cmd = ['"-s', 'libgazebo_ros_', arg, '.so" if "true" == "', LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
     return py_cmd
