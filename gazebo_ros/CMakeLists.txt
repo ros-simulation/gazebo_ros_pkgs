@@ -161,7 +161,13 @@ ament_export_dependencies(gazebo_dev)
 if(BUILD_TESTING)
   add_subdirectory(test)
   find_package(ament_lint_auto REQUIRED)
+  list(APPEND AMENT_LINT_AUTO_EXCLUDE
+    ament_cmake_cpplint
+  )
   ament_lint_auto_find_test_dependencies()
+  ament_cpplint(
+    FILTERS -build/include_order
+  )
 endif()
 
 ament_package()
