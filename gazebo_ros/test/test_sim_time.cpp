@@ -88,7 +88,7 @@ TEST_F(TestSimTime, TestClock)
       EXPECT_GT(rclcpp::Time(msgs[i]->clock), rclcpp::Time(msgs[i - 1]->clock)) <<
         rclcpp::Time(msgs[i]->clock).nanoseconds() << "    " <<
         rclcpp::Time(msgs[i - 1]->clock).nanoseconds();
-      EXPECT_GT(times[i], times[i - 1]) << times[i].nanoseconds() << "    " <<
+      EXPECT_GE(times[i], times[i - 1]) << times[i].nanoseconds() << "    " <<
         times[i - 1].nanoseconds();
 
       // The message from the clock should be close to the node's time
