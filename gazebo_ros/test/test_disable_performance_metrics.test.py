@@ -12,22 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from threading import Event, Thread
+import time
 import unittest
+
+from gazebo_msgs.msg import PerformanceMetrics
 
 import launch
 import launch.actions
 
 import launch_testing
 import launch_testing.asserts
+
 import pytest
 
-import rclpy
-from gazebo_msgs.msg import PerformanceMetrics
-from rclpy.node import Node
 from rcl_interfaces.msg import Parameter, ParameterType
 from rcl_interfaces.srv import SetParameters
-import time
-from threading import Thread, Event
+import rclpy
+from rclpy.node import Node
 
 
 @pytest.mark.launch_test
@@ -89,12 +91,13 @@ class TestPerformanceMetricsParam(unittest.TestCase):
 
         node.start_subscriber()
         msgs_received_flag = node.msg_event_object.wait(timeout=5.0)
-        assert not msgs_received_flag, f'Received messages after\
+        assert not msgs_received_flag, 'Received messages after\
             setting enable_performance_metrics parameter to False, test failed'
         rclpy.shutdown()
 
 
 class MakeTestNode(Node):
+
     def __init__(self, name):
         """Initialize node and counters."""
         super().__init__(name)

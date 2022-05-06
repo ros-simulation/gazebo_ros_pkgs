@@ -162,7 +162,7 @@ void GazeboRosInit::Load(int argc, char ** argv)
   // the simulation is paused), late subscribers can receive the previously published message(s).
   impl_->clock_pub_ = impl_->ros_node_->create_publisher<rosgraph_msgs::msg::Clock>(
     "/clock",
-    rclcpp::QoS(rclcpp::KeepLast(10)).transient_local());
+    rclcpp::ClockQoS());
 
 #ifdef GAZEBO_ROS_HAS_PERFORMANCE_METRICS
   impl_->performance_metrics_pub_ =
