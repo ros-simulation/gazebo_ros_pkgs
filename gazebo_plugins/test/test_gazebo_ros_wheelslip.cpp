@@ -58,17 +58,24 @@ public:
     /* Query for the parameters and check if they match with the expected ones.
        Plugin takes a while to set the parameters, so we make multiple attempts to
        check the parameters */
-    int max_attempts = 5;
+    int max_attempts = 30;
     bool flag_do_parameters_match;
+    std::vector<rclcpp::Parameter> parameters_received;
     for (int i = 0; i < max_attempts; i++) {
       // Assume all expected and received parameters match
       flag_do_parameters_match = true;
 
       // Query for parameters
-      auto parameters_received = parameters_client->get_parameters(parameter_names);
+      parameters_received = parameters_client->get_parameters(parameter_names);
       for (auto & parameter : parameters_received) {
-        if (parameter_pairs[parameter.get_name()] != parameter.as_double()) {
-          // Parameters don't match
+        try {
+          if (fabs(parameter_pairs[parameter.get_name()] - parameter.as_double()) < 1e-3) {
+            // Parameters don't match
+            flag_do_parameters_match = false;
+            break;
+          }
+        } catch (std::runtime_error &) {
+          // Parameter may not be set yet
           flag_do_parameters_match = false;
           break;
         }
@@ -78,7 +85,12 @@ public:
       if (flag_do_parameters_match) {break;}
       std::this_thread::sleep_for(0.2s);
     }
-    ASSERT_TRUE(flag_do_parameters_match);
+    if (!flag_do_parameters_match) {
+      for (auto & parameter : parameters_received) {
+        EXPECT_NEAR(parameter_pairs[parameter.get_name()], parameter.as_double(), 1e-3)
+          << "unexpected value for param '" << parameter.get_name() << "'";
+      }
+    }
   }
 };
 
@@ -147,9 +159,7 @@ TEST_F(GazeboRosWheelSlipTest, RosLocalParamsOverrideSdf)
   // ----------------------------------------------------------------------------------------------
   // Expected result: ROS parameters (for each wheel) should override the SDF ones
   std::map<std::string, double> parameter_pairs = {
-    {"slip_compliance_unitless_lateral", 0.1},
     {"slip_compliance_unitless_lateral/wheel_front", 0.3},
-    {"slip_compliance_unitless_longitudinal", 0.2},
     {"slip_compliance_unitless_longitudinal/wheel_front", 0.4}};
 
   this->test_parameters(
@@ -168,14 +178,14 @@ TEST_F(GazeboRosWheelSlipTest, TestRosGlobalParamsOverrideAll)
   // - ROS parameters (for all wheels) - ('slip_compliance_unitless_lateral',
   //                  'slip_compliance_unitless_longitudinal')
   // ----------------------------------------------------------------------------------------------
-  // Expected result: ROS parameters (for all wheels) should override all SDF
-  // and ROS parameters (for each wheel)
+  // Expected result: ROS parameters for all wheels should override SDF values
+  // and ROS parameters for each wheel should override parameters for all wheels.
   std::map<std::string, double> parameter_pairs = {
     {"slip_compliance_unitless_lateral", 0.1},
-    {"slip_compliance_unitless_lateral/wheel_rear_left", 0.1},
+    {"slip_compliance_unitless_lateral/wheel_rear_left", 0.6},
     {"slip_compliance_unitless_lateral/wheel_rear_right", 0.1},
     {"slip_compliance_unitless_longitudinal", 0.2},
-    {"slip_compliance_unitless_longitudinal/wheel_rear_left", 0.2},
+    {"slip_compliance_unitless_longitudinal/wheel_rear_left", 0.7},
     {"slip_compliance_unitless_longitudinal/wheel_rear_right", 0.2}};
 
   this->test_parameters(
@@ -208,10 +218,8 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
     "trisphere_cycle_slip0/wheel_slip_rear");
 
   std::map<std::string, double> parameter_pairs = {
-    {"slip_compliance_unitless_lateral", 0.5},
     {"slip_compliance_unitless_lateral/wheel_rear_left", 0.0},
     {"slip_compliance_unitless_lateral/wheel_rear_right", 0.5},
-    {"slip_compliance_unitless_longitudinal", 0.6},
     {"slip_compliance_unitless_longitudinal/wheel_rear_left", 0.4},
     {"slip_compliance_unitless_longitudinal/wheel_rear_right", 0.6}};
 

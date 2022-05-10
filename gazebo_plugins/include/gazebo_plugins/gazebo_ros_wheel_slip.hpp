@@ -64,8 +64,8 @@ class GazeboRosWheelSlipPrivate;
 ///           value is zero or negative, the publisher will publish at the maximum rate.
 ///           This value is applied to all wheels declared in the WheelSlipPlugin.
 ///
-/// Precedence order and default values:
-/// ------------------------------------
+/// Default values:
+/// ---------------
 /// Slip compliance values can be declared in 3 ways:
 ///  1. SDF parameters, e.g. :
 ///       <wheel link_name="wheel_front">
@@ -77,7 +77,16 @@ class GazeboRosWheelSlipPrivate;
 ///      If not specified, these will default to 0.0.
 ///      Any negative values will ignored and set to 0.0.
 ///
-///  2. ROS parameters for each wheel, e.g :
+///  2. ROS parameters for all wheels, e.g :
+///      <ros>
+///         <parameter name="slip_compliance_unitless_lateral" type="double">0.1</parameter>
+///         <parameter name="slip_compliance_unitless_longitudinal" type="double">0.2</parameter>
+///      </ros>
+///
+///     If not specified, these will default to the last values set in SDF tags.
+///     If these are specified, they override SDF parameters.
+///
+///  3. ROS parameters for specific wheels, e.g :
 ///       <ros>
 ///         <parameter name="slip_compliance_unitless_lateral/wheel_front" type="double">0.1
 ///           </parameter>
@@ -85,20 +94,13 @@ class GazeboRosWheelSlipPrivate;
 ///           </parameter>
 ///       </ros>
 ///
-///      If not specified, these default to SDF parameters set for each wheel.
-///      If specified, they will override the values set as SDF parameters.
+///      If not specified, these default to the value of the ROS parameter for all wheels.
+///      If specified, they override SDF parameters and ROS parameters
+///      "slip_compliance_unitless_lateral" and "slip_compliance_unitless_longitudinal".
 ///
-///  3. ROS parameters for all wheels, e.g :
-///      <ros>
-///         <parameter name="slip_compliance_unitless_lateral" type="double">0.1</parameter>
-///         <parameter name="slip_compliance_unitless_longitudinal" type="double">0.2</parameter>
-///      </ros>
-///
-///     If not specified, these will default to the last values set in SDF tags.
-///     If these are specified, they override both SDF and the ROS parameters for each wheel.
-///
-///   Precedence order :
-///   ROS Params for all wheels > ROS params for individual wheels > SDF parameters
+///   Precedence order
+///   ----------------
+///   ROS parameters for individual wheels > ROS parameters for all wheels > SDF parameters
 ///   Check out the test cases for more information and expected behaviour.
 ///
 /// See the WheelSlipPlugin documentation at the following location for more details:
