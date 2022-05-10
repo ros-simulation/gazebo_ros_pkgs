@@ -185,7 +185,7 @@ def generate_launch_description():
             cmd=cmd,
             output='screen',
             additional_env=env,
-            shell=True,
+            shell=False,
             prefix=prefix,
             on_exit=Shutdown(),
             condition=IfCondition(LaunchConfiguration('server_required')),
@@ -196,7 +196,7 @@ def generate_launch_description():
             cmd=cmd,
             output='screen',
             additional_env=env,
-            shell=True,
+            shell=False,
             prefix=prefix,
             condition=UnlessCondition(LaunchConfiguration('server_required')),
         ),
@@ -219,6 +219,7 @@ def _arg_command(arg):
 
 # Add gazebo_ros plugins if true
 def _plugin_command(arg):
-    cmd = ['"-s libgazebo_ros_', arg, '.so" if "true" == "', LaunchConfiguration(arg), '" else ""']
+    cmd = ['"-s', 'libgazebo_ros_', arg, '.so" if "true" == "',
+           LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
     return py_cmd
