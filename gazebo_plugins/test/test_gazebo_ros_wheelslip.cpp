@@ -159,9 +159,7 @@ TEST_F(GazeboRosWheelSlipTest, RosLocalParamsOverrideSdf)
   // ----------------------------------------------------------------------------------------------
   // Expected result: ROS parameters (for each wheel) should override the SDF ones
   std::map<std::string, double> parameter_pairs = {
-    {"slip_compliance_unitless_lateral", 0.1},
     {"slip_compliance_unitless_lateral/wheel_front", 0.3},
-    {"slip_compliance_unitless_longitudinal", 0.2},
     {"slip_compliance_unitless_longitudinal/wheel_front", 0.4}};
 
   this->test_parameters(
