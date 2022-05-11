@@ -2,6 +2,11 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.6.0 (2022-05-10)
+------------------
+* gazebo_ros_wheel_slip: publish wheel slip (`#1331 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1331>`_)
+* Contributors: Audrow Nash
+
 3.5.2 (2021-03-15)
 ------------------
 

@@ -2,6 +2,12 @@
 Changelog for package gazebo_dev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.6.0 (2022-05-10)
+------------------
+* Fix test failures (`#1380 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1380>`_)
+* Include TBB in gazebo-dev cmake to fix `#1372 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1372>`_ (`#1373 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1373>`_)
+* Contributors: Daisuke Nishimatsu, Jose Luis Rivero, Steve Peters
+
 3.5.2 (2021-03-15)
 ------------------
 

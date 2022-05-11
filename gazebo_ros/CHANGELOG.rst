@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.6.0 (2022-05-10)
+------------------
+* Fixes gazebo shutdown error when using nested launch files (`#1376 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1376>`_)
+* Fix test failures (`#1380 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1380>`_)
+* Fix spawn_entity_demo: use executable (`#1349 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1349>`_)
+* Add runtime warning when user sets use_sim_time parameter
+* Add ROS parameter to toggle performance metrics in gazebo_ros (`#1295 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1295>`_)
+* Deprecate -spawn_service_timeout option (`#1238 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1238>`_)
+* Contributors: Aditya Pande, Daisuke Nishimatsu, Felix Exner, Jacob Perron
+
 3.5.2 (2021-03-15)
 ------------------
 * Remove slash from gazebo_ros scripts Python package name (`#1251 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1251>`_)

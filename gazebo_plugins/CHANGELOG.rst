@@ -2,6 +2,23 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.6.0 (2022-05-10)
+------------------
+* Initialize wheel slip parameters directly from SDF (`#1365 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1365>`_)
+* Fix test failures (`#1380 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1380>`_)
+* gazebo_ros_ft_sensor_demo.world: use world solver (`#1354 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1354>`_)
+* gazebo_ros_wheel_slip: set lateral slip to zero at low speed (`#1338 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1338>`_)
+* gazebo_ros_wheel_slip: publish wheel slip (`#1331 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1331>`_)
+* Add slip values for individual wheels (`#1312 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1312>`_)
+* Default slip values fix for wheel slip plugin (`#1308 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1308>`_)
+* Add runtime warning when user sets use_sim_time parameter
+* Fix warnings when building against the latest sources (`#1282 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1282>`_)
+* Add method to get ROS node from GazeboRosCameraPlugin (`#1299 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1299>`_)
+* Improve robustness of joint state publisher test (`#1259 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1259>`_)
+* Avoid rejecting QoS overrides parameters (`#1258 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1258>`_)
+* Publish with QoS reliable as default (`#1224 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1224>`_) (`#1235 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1235>`_)
+* Contributors: Aditya Pande, Audrow Nash, Brett Downing, Chris Lalancette, Daisuke Nishimatsu, Dharini Dutia, Jacob Perron, Steve Peters
+
 3.5.2 (2021-03-15)
 ------------------
 * gazebo_ros_camera: Added accessor methods for camera properties (`#1246 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1246>`_)
