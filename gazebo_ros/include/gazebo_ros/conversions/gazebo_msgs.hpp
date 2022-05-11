@@ -32,6 +32,7 @@ namespace gazebo_ros
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
+inline
 T Convert(const gazebo::msgs::Contacts &)
 {
   T::ConversionNotImplemented;
@@ -41,6 +42,7 @@ T Convert(const gazebo::msgs::Contacts &)
 /// \param[in] in Input message;
 /// \return A ROS Contacts state message with the same data as the input message
 template<>
+inline
 gazebo_msgs::msg::ContactsState Convert(const gazebo::msgs::Contacts & in)
 {
   gazebo_msgs::msg::ContactsState contact_state_msg;

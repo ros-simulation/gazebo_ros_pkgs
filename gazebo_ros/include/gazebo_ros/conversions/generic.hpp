@@ -35,6 +35,7 @@ static rclcpp::Logger conversions_logger = rclcpp::get_logger("gazebo_ros_conver
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
+inline
 T Convert(const ignition::math::Vector3d &)
 {
   T::ConversionNotImplemented;
@@ -45,6 +46,7 @@ T Convert(const ignition::math::Vector3d &)
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
+inline
 T Convert(const ignition::math::Quaterniond &)
 {
   T::ConversionNotImplemented;
@@ -55,6 +57,7 @@ T Convert(const ignition::math::Quaterniond &)
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
+inline
 T Convert(const ignition::math::Pose3d &)
 {
   T::ConversionNotImplemented;
@@ -65,6 +68,7 @@ T Convert(const ignition::math::Pose3d &)
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
+inline
 T Convert(const gazebo::common::Time &)
 {
   T::ConversionNotImplemented;
@@ -74,6 +78,7 @@ T Convert(const gazebo::common::Time &)
 /// \param[in] in Gazebo Time to convert.
 /// \return A rclcpp::Time object with the same value as in
 template<>
+inline
 rclcpp::Time Convert(const gazebo::common::Time & in)
 {
   return rclcpp::Time(in.sec, in.nsec, rcl_clock_type_t::RCL_ROS_TIME);
@@ -84,6 +89,7 @@ rclcpp::Time Convert(const gazebo::common::Time & in)
 /// \return Conversion result
 /// \tparam T Output type
 template<class T>
+inline
 T Convert(const gazebo::msgs::Time &)
 {
   T::ConversionNotImplemented;
