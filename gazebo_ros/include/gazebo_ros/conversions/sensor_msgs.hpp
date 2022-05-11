@@ -39,7 +39,8 @@ namespace gazebo_ros
 /// \param[in] min_intensity The minimum intensity value to clip the output intensities
 /// \return Conversion result
 /// \tparam T Output type
-template<class T> inline
+template<class T>
+inline
 T Convert(const gazebo::msgs::LaserScanStamped &, double min_intensity = 0.0)
 {
   (void)min_intensity;
@@ -52,7 +53,8 @@ T Convert(const gazebo::msgs::LaserScanStamped &, double min_intensity = 0.0)
 /// \return A ROS Laser Scan message with the same data as the input message
 /// \note If multiple vertical rays are present, the LaserScan will be the
 ///       horizontal scan in the center of the vertical range
-template<> inline
+template<>
+inline
 sensor_msgs::msg::LaserScan Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity)
 {
   sensor_msgs::msg::LaserScan ls;
@@ -94,7 +96,8 @@ sensor_msgs::msg::LaserScan Convert(const gazebo::msgs::LaserScanStamped & in, d
 /// \param[in] in Input message;
 /// \param[in] min_intensity The minimum intensity value to clip the output intensities
 /// \return A ROS PointCloud message with the same data as the input message
-template<> inline
+template<>
+inline
 sensor_msgs::msg::PointCloud Convert(
   const gazebo::msgs::LaserScanStamped & in,
   double min_intensity)
@@ -177,7 +180,8 @@ sensor_msgs::msg::PointCloud Convert(
 /// \param[in] in Input message;
 /// \param[in] min_intensity The minimum intensity value to clip the output intensities
 /// \return A ROS PointCloud2 message with the same data as the input message
-template<> inline
+template<>
+inline
 sensor_msgs::msg::PointCloud2 Convert(
   const gazebo::msgs::LaserScanStamped & in,
   double min_intensity)
@@ -282,7 +286,8 @@ sensor_msgs::msg::PointCloud2 Convert(
 /// \param[in] in Input message;
 /// \param[in] min_intensity Ignored.
 /// \return A ROS Range message with minimum range of the rays in the laser scan
-template<> inline
+template<>
+inline
 sensor_msgs::msg::Range Convert(const gazebo::msgs::LaserScanStamped & in, double min_intensity)
 {
   (void) min_intensity;

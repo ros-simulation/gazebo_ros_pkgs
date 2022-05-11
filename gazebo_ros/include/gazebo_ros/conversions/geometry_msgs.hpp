@@ -34,7 +34,8 @@ namespace gazebo_ros
 /// \param[in] in Input message.
 /// \return Conversion result
 /// \tparam T Output type
-template<class T> inline
+template<class T>
+inline
 T Convert(const geometry_msgs::msg::Vector3 &)
 {
   T::ConversionNotImplemented;
@@ -43,7 +44,8 @@ T Convert(const geometry_msgs::msg::Vector3 &)
 /// \brief Specialized conversion from a ROS vector message to an Ignition Math vector.
 /// \param[in] msg ROS message to convert.
 /// \return An Ignition Math vector.
-template<> inline
+template<>
+inline
 ignition::math::Vector3d Convert(const geometry_msgs::msg::Vector3 & msg)
 {
   ignition::math::Vector3d vec;
@@ -57,7 +59,8 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Vector3 & msg)
 /// \param[in] in Input message.
 /// \return Conversion result
 /// \tparam T Output type
-template<class T> inline
+template<class T>
+inline
 T Convert(const geometry_msgs::msg::Point32 &)
 {
   T::ConversionNotImplemented;
@@ -66,7 +69,8 @@ T Convert(const geometry_msgs::msg::Point32 &)
 /// \brief Specialized conversion from a ROS point32 message to an Ignition Math vector.
 /// \param[in] in ROS message to convert.
 /// \return An Ignition Math vector.
-template<> inline
+template<>
+inline
 ignition::math::Vector3d Convert(const geometry_msgs::msg::Point32 & in)
 {
   ignition::math::Vector3d vec;
@@ -80,7 +84,8 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Point32 & in)
 /// \param[in] in Input message.
 /// \return Conversion result
 /// \tparam T Output type
-template<class T> inline
+template<class T>
+inline
 T Convert(const geometry_msgs::msg::Point &)
 {
   T::ConversionNotImplemented;
@@ -90,7 +95,8 @@ T Convert(const geometry_msgs::msg::Point &)
 /// \brief Specialized conversion from a ROS point message to a ROS vector message.
 /// \param[in] in ROS message to convert.
 /// \return A ROS vector message.
-template<> inline
+template<>
+inline
 geometry_msgs::msg::Vector3 Convert(const geometry_msgs::msg::Point & in)
 {
   geometry_msgs::msg::Vector3 msg;
@@ -103,7 +109,8 @@ geometry_msgs::msg::Vector3 Convert(const geometry_msgs::msg::Point & in)
 /// \brief Specialized conversion from a ROS point message to an Ignition math vector.
 /// \param[in] in ROS message to convert.
 /// \return A ROS vector message.
-template<> inline
+template<>
+inline
 ignition::math::Vector3d Convert(const geometry_msgs::msg::Point & in)
 {
   ignition::math::Vector3d out;
@@ -116,7 +123,8 @@ ignition::math::Vector3d Convert(const geometry_msgs::msg::Point & in)
 /// \brief Specialized conversion from an Ignition Math vector to a ROS message.
 /// \param[in] vec Ignition vector to convert.
 /// \return ROS geometry vector message
-template<> inline
+template<>
+inline
 geometry_msgs::msg::Vector3 Convert(const ignition::math::Vector3d & vec)
 {
   geometry_msgs::msg::Vector3 msg;
@@ -129,7 +137,8 @@ geometry_msgs::msg::Vector3 Convert(const ignition::math::Vector3d & vec)
 /// \brief Specialized conversion from an Ignition Math vector to a ROS message.
 /// \param[in] vec Ignition vector to convert.
 /// \return ROS geometry point message
-template<> inline
+template<>
+inline
 geometry_msgs::msg::Point Convert(const ignition::math::Vector3d & vec)
 {
   geometry_msgs::msg::Point msg;
@@ -142,7 +151,8 @@ geometry_msgs::msg::Point Convert(const ignition::math::Vector3d & vec)
 /// \brief Specialized conversion from an Ignition Math Quaternion to a ROS message.
 /// \param[in] in Ignition Quaternion to convert.
 /// \return ROS geometry quaternion message
-template<> inline
+template<>
+inline
 geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
 {
   geometry_msgs::msg::Quaternion msg;
@@ -156,7 +166,8 @@ geometry_msgs::msg::Quaternion Convert(const ignition::math::Quaterniond & in)
 /// \brief Specialized conversion from an Ignition Math Pose3d to a ROS geometry transform message.
 /// \param[in] in Ignition Pose3d to convert.
 /// \return ROS geometry transform message
-template<> inline
+template<>
+inline
 geometry_msgs::msg::Transform Convert(const ignition::math::Pose3d & in)
 {
   geometry_msgs::msg::Transform msg;
@@ -168,7 +179,8 @@ geometry_msgs::msg::Transform Convert(const ignition::math::Pose3d & in)
 /// \brief Specialized conversion from an Ignition Math Pose3d to a ROS geometry pose message.
 /// \param[in] in Ignition Pose3d to convert.
 /// \return ROS geometry pose message
-template<> inline
+template<>
+inline
 geometry_msgs::msg::Pose Convert(const ignition::math::Pose3d & in)
 {
   geometry_msgs::msg::Pose msg;
@@ -181,7 +193,8 @@ geometry_msgs::msg::Pose Convert(const ignition::math::Pose3d & in)
 /// \param[in] in Input quaternion
 /// \return Conversion result
 /// \tparam T Output type
-template<class T> inline
+template<class T>
+inline
 T Convert(const geometry_msgs::msg::Quaternion &)
 {
   T::ConversionNotImplemented;
@@ -190,7 +203,8 @@ T Convert(const geometry_msgs::msg::Quaternion &)
 /// \brief Specialized conversion from a ROS quaternion message to ignition quaternion
 /// \param[in] in Input quaternion message
 /// \return Ignition math quaternion with same values as the input message
-template<> inline
+template<>
+inline
 ignition::math::Quaterniond Convert(const geometry_msgs::msg::Quaternion & in)
 {
   return ignition::math::Quaterniond(in.w, in.x, in.y, in.z);
@@ -200,7 +214,8 @@ ignition::math::Quaterniond Convert(const geometry_msgs::msg::Quaternion & in)
 /// \param[in] in Input message.
 /// \return Conversion result
 /// \tparam T Output type
-template<class T> inline
+template<class T>
+inline
 T Convert(const geometry_msgs::msg::Transform &)
 {
   T::ConversionNotImplemented;
@@ -209,7 +224,8 @@ T Convert(const geometry_msgs::msg::Transform &)
 /// \brief Specialized conversion from a ROS geometry transform message to an Ignition math pose3d.
 /// \param[in] in ROS message to convert.
 /// \return A Ignition Math pose3d.
-template<> inline
+template<>
+inline
 ignition::math::Pose3d Convert(const geometry_msgs::msg::Transform & in)
 {
   ignition::math::Pose3d msg;
@@ -222,7 +238,8 @@ ignition::math::Pose3d Convert(const geometry_msgs::msg::Transform & in)
 /// \param[in] in Input message.
 /// \return Conversion result
 /// \tparam T Output type
-template<class T> inline
+template<class T>
+inline
 T Convert(const geometry_msgs::msg::Pose &)
 {
   T::ConversionNotImplemented;
@@ -231,7 +248,8 @@ T Convert(const geometry_msgs::msg::Pose &)
 /// \brief Specialized conversion from a ROS pose message to a ROS geometry transform message.
 /// \param[in] in ROS pose message to convert.
 /// \return A ROS geometry transform message.
-template<> inline
+template<>
+inline
 geometry_msgs::msg::Transform Convert(const geometry_msgs::msg::Pose & in)
 {
   geometry_msgs::msg::Transform msg;
@@ -243,7 +261,8 @@ geometry_msgs::msg::Transform Convert(const geometry_msgs::msg::Pose & in)
 /// \brief Specialized conversion from a ROS pose message to an Ignition Math pose.
 /// \param[in] in ROS pose message to convert.
 /// \return Ignition Math pose.
-template<> inline
+template<>
+inline
 ignition::math::Pose3d Convert(const geometry_msgs::msg::Pose & in)
 {
   return {Convert<ignition::math::Vector3d>(in.position),
