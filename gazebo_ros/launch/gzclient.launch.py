@@ -29,13 +29,13 @@ from scripts import GazeboRosPaths
 
 
 def generate_launch_description():
-    cmd = [[
+    cmd = [
         'gzclient',
         _boolean_command('version'), ' ',
         _boolean_command('verbose'), ' ',
         _boolean_command('help'), ' ',
         LaunchConfiguration('extra_gazebo_args'),
-    ]]
+    ]
 
     model, plugin, media = GazeboRosPaths.get_paths()
 
@@ -99,7 +99,7 @@ def generate_launch_description():
             cmd=cmd,
             output='screen',
             additional_env=env,
-            shell=True,
+            shell=False,
             prefix=prefix,
             on_exit=Shutdown(),
             condition=IfCondition(LaunchConfiguration('gui_required')),
@@ -110,7 +110,7 @@ def generate_launch_description():
             cmd=cmd,
             output='screen',
             additional_env=env,
-            shell=True,
+            shell=False,
             prefix=prefix,
             condition=UnlessCondition(LaunchConfiguration('gui_required')),
         ),
