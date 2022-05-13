@@ -186,6 +186,7 @@ target_include_directories(gazebo_ros_gps_sensor PUBLIC include)
 ament_target_dependencies(gazebo_ros_gps_sensor
   "gazebo_ros"
   "sensor_msgs"
+  "geometry_msgs"
   "gazebo_dev"
 )
 ament_export_libraries(gazebo_ros_gps_sensor)
