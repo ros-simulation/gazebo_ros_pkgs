@@ -55,11 +55,12 @@ def generate_launch_description():
         # _plugin_command('force_system'), ' ',
         _arg_command('profile'), ' ', LaunchConfiguration('profile'), ' ', 
         # convenience parameter for params file
+        '--ros-args',
         PythonExpression([
-            '"--ros-args', ' --params-file', '" if "" != "',
+            '"--params-file', '" if "" != "',
             LaunchConfiguration("params_file"), '" else ""' ]),
-        LaunchConfiguration("params_file"), ' ',
-
+        LaunchConfiguration("params_file"),
+        '--',
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
@@ -160,7 +161,7 @@ def generate_launch_description():
         
         DeclareLaunchArgument(
             'params_file', default_value='',
-            description='Path to ROS2 yaml parameter file'
+            description='Path to ROS 2 yaml parameter file'
         ),
 
         # Specific to gazebo_ros
