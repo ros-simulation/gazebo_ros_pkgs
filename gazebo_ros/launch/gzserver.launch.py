@@ -53,7 +53,14 @@ def generate_launch_description():
         _plugin_command('force_system'), ' ',
         # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
         # _plugin_command('force_system'), ' ',
-        _arg_command('profile'), ' ', LaunchConfiguration('profile'),
+        _arg_command('profile'), ' ', LaunchConfiguration('profile'), ' ',
+        # convenience parameter for params file
+        '--ros-args',
+        PythonExpression([
+            '"--params-file', '" if "" != "',
+            LaunchConfiguration("params_file"), '" else ""']),
+        LaunchConfiguration("params_file"),
+        '--',
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
@@ -150,6 +157,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'extra_gazebo_args', default_value='',
             description='Extra arguments to be passed to Gazebo'
+        ),
+        DeclareLaunchArgument(
+            'params_file', default_value='',
+            description='Path to ROS 2 yaml parameter file'
         ),
 
         # Specific to gazebo_ros
