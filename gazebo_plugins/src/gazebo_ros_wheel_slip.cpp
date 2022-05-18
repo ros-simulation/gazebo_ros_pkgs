@@ -44,9 +44,7 @@ public:
 
   // Containers to hold default values of slip parameters
   std::unordered_map<std::string, double> map_slip_lateral_default_;
-  double default_slip_lateral_;
   std::unordered_map<std::string, double> map_slip_longitudinal_default_;
-  double default_slip_longitudinal_;
 
   // Containers to hold default values of friction coefficients
   std::unordered_map<std::string, double> map_friction_primary_default_;
