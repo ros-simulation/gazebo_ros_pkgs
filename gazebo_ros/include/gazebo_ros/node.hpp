@@ -31,8 +31,8 @@
 
 namespace gazebo_ros
 {
-// forward declare NodeLookUp
-class NodeLookUp;
+// forward declare ExistingNodes
+class ExistingNodes;
 
 /// ROS Node for gazebo plugins
 /**
@@ -145,7 +145,7 @@ private:
   gazebo_ros::QoS qos_;
 
   /// ros node lookup
-  static NodeLookUp static_node_lookup_;
+  static ExistingNodes static_node_lookup_;
 
   /// Locks #initialized_ and #executor_
   static std::mutex lock_;
@@ -226,12 +226,12 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
 }
 
 // Class to hold the global set of tracked node names.
-class NodeLookUp
+class ExistingNodes
 {
 public:
   // Methods need to be protected by internal mutex
   void add_node(const std::string & node_name);
-  bool is_node_name_in_set(const std::string & node_name);
+  bool check_node(const std::string & node_name);
   void remove_node(const std::string & node_name);
 
 private:

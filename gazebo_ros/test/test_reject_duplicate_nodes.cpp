@@ -16,7 +16,7 @@
 #include <gazebo_ros/node.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-TEST(TestNodeLookUp, NodesSameName)
+TEST(TestRejectDuplicateNodes, PluginsSameName)
 {
   // sdf model with same plugin name
   auto sdf_str =

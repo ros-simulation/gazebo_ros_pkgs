@@ -28,7 +28,7 @@ namespace gazebo_ros
 std::weak_ptr<Executor> Node::static_executor_;
 std::weak_ptr<Node> Node::static_node_;
 std::mutex Node::lock_;
-NodeLookUp Node::static_node_lookup_;
+ExistingNodes Node::static_node_lookup_;
 
 Node::~Node()
 {
@@ -111,11 +111,14 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   }
 
   // check if node with the same name exists already
-  if (static_node_lookup_.is_node_name_in_set(full_name)) {
+  if (static_node_lookup_.check_node(full_name)) {
     RCLCPP_ERROR(
       internal_logger(),
-      "Found multiple nodes with same name: %s. This is due to different plugins with same name, "
-      "either change the plugin name or use a unique namespace", full_name.c_str());
+      "Found multiple nodes with same name: %s. This might be due to multiple plugins using same "
+      "name to solve this either change one of the the plugin names or use a different namespace. "
+      "The error might also result from a custom plugin inheriting from one of the GazeboRosPlugin "
+      "this can be solved by accessing node object of the parent class itself instead of creating "
+      "a new node object for custom plugin.", full_name.c_str());
     return nullptr; // this makes the gazebo shutdown safely
   }
 
@@ -188,19 +191,19 @@ rclcpp::Logger Node::internal_logger()
   return rclcpp::get_logger("gazebo_ros_node");
 }
 
-void NodeLookUp::add_node(const std::string & node_name)
+void ExistingNodes::add_node(const std::string & node_name)
 {
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
   this->set_.insert(node_name);
 }
 
-void NodeLookUp::remove_node(const std::string & node_name)
+void ExistingNodes::remove_node(const std::string & node_name)
 {
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
   this->set_.erase(node_name);
 }
 
-bool NodeLookUp::is_node_name_in_set(const std::string & node_name)
+bool ExistingNodes::check_node(const std::string & node_name)
 {
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
   return this->set_.find(node_name) != this->set_.end();
