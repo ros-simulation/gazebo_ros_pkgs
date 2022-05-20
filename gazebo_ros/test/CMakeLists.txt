@@ -39,6 +39,7 @@ set(tests
   test_gazebo_ros_properties
   test_gazebo_ros_state
   test_node
+  test_node_lookup
   test_plugins
   test_qos
   test_sim_time
