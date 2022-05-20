@@ -110,7 +110,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     RCLCPP_ERROR(
       internal_logger(),
       "Found multiple nodes with same name: %s. This is due to different plugins with same name, either change the plugin name"
-      "or use a unique namespace", full_name.c_str());
+      " or use a unique namespace", full_name.c_str());
     // TODO: maybe throw here check with Aditya and Jacob
   }
 

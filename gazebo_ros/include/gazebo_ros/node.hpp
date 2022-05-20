@@ -238,7 +238,6 @@ private:
   /// set of tracked node names
   std::unordered_set<std::string> set_;
   std::mutex internal_mutex_;
-
 };
 
 }  // namespace gazebo_ros
