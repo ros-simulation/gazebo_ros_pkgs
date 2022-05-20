@@ -30,6 +30,9 @@
 
 namespace gazebo_ros
 {
+
+class NodeLookUp;
+
 /// ROS Node for gazebo plugins
 /**
  * \class Node node.hpp <gazebo_ros/node.hpp>
@@ -140,6 +143,9 @@ private:
   /// QoS for node entities
   gazebo_ros::QoS qos_;
 
+  /// ros node lookup
+  static NodeLookUp static_node_lookup_;
+
   /// Locks #initialized_ and #executor_
   static std::mutex lock_;
 
@@ -217,5 +223,20 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
 
   return node;
 }
+
+// Class to hold the global map of gazebo_ros::Node::SharedPtr objects
+class NodeLookUp{
+   public:
+    // Methods need to be protected by internal mutex
+    void add_node(const std::string& node_name, Node::SharedPtr ros_node);
+    Node::SharedPtr get_node(const std::string& node_name);
+    void remove_node(const std::string& node_name);
+
+ private:
+    /// map of node names vs objects
+    std::unordered_map<std::string, Node::SharedPtr> map_;
+    std::mutex internal_mutex_;
+};
+
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__NODE_HPP_

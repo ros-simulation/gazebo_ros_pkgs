@@ -28,6 +28,7 @@ namespace gazebo_ros
 std::weak_ptr<Executor> Node::static_executor_;
 std::weak_ptr<Node> Node::static_node_;
 std::mutex Node::lock_;
+NodeLookUp Node::static_node_lookup_;
 
 Node::~Node()
 {
@@ -102,6 +103,9 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   node_options.arguments(arguments);
   node_options.parameter_overrides(parameter_overrides);
 
+  // check if node with the same name exists already
+  // TODO
+
   // Create node with parsed arguments
   std::shared_ptr<gazebo_ros::Node> node = CreateWithArgs(name, ns, node_options);
 
@@ -162,6 +166,21 @@ rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)
 rclcpp::Logger Node::internal_logger()
 {
   return rclcpp::get_logger("gazebo_ros_node");
+}
+
+void NodeLookUp::add_node(const std::string& node_name, Node::SharedPtr ros_node) {
+  std::lock_guard<std::mutex> guard(this->internal_mutex_);
+  this->map_.emplace(node_name, ros_node);
+}
+
+Node::SharedPtr NodeLookUp::get_node(const std::string& node_name) {
+  std::lock_guard<std::mutex> guard(this->internal_mutex_);
+  return this->map_[node_name];
+}
+
+void NodeLookUp::remove_node(const std::string& node_name) {
+  std::lock_guard<std::mutex> guard(this->internal_mutex_);
+  this->map_.erase(node_name);
 }
 
 }  // namespace gazebo_ros
