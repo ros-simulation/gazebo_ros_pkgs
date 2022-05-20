@@ -106,7 +106,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   full_name = ns + "/" + name;
 
   // check if node with the same name exists already
-  if(static_node_lookup_.is_node_name_in_map(full_name)){
+  if(static_node_lookup_.is_node_name_in_set(full_name)){
     RCLCPP_ERROR(
         internal_logger(),
         "Found multiple nodes with same name: %s. This is due to different plugins with same name, either change the plugin name"
@@ -122,7 +122,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   std::shared_ptr<gazebo_ros::Node> node = CreateWithArgs(name, ns, node_options);
 
   // Add node to global map
-  static_node_lookup_.add_node(full_name, node);
+  static_node_lookup_.add_node(full_name);
 
   // Parse the qos tag
   node->qos_ = gazebo_ros::QoS(sdf, name, ns, node_options);
@@ -183,24 +183,19 @@ rclcpp::Logger Node::internal_logger()
   return rclcpp::get_logger("gazebo_ros_node");
 }
 
-void NodeLookUp::add_node(const std::string& node_name, Node::SharedPtr ros_node) {
+void NodeLookUp::add_node(const std::string& node_name) {
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
-  this->map_.emplace(node_name, ros_node);
-}
-
-Node::SharedPtr NodeLookUp::get_node(const std::string& node_name) {
-  std::lock_guard<std::mutex> guard(this->internal_mutex_);
-  return this->map_[node_name];
+  this->set_.insert(node_name);
 }
 
 void NodeLookUp::remove_node(const std::string& node_name) {
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
-  this->map_.erase(node_name);
+  this->set_.erase(node_name);
 }
 
-bool NodeLookUp::is_node_name_in_map(const std::string &node_name) {
+bool NodeLookUp::is_node_name_in_set(const std::string &node_name) {
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
-  return this->map_.find(node_name) != this->map_.end();
+  return this->set_.find(node_name) != this->set_.end();
 }
 
 }  // namespace gazebo_ros
