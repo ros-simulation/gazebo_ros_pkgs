@@ -27,6 +27,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unordered_set>
 
 namespace gazebo_ros
 {
