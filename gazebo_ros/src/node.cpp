@@ -106,12 +106,12 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   full_name = ns + "/" + name;
 
   // check if node with the same name exists already
-  if(static_node_lookup_.is_node_name_in_set(full_name)){
+  if (static_node_lookup_.is_node_name_in_set(full_name)) {
     RCLCPP_ERROR(
-        internal_logger(),
-        "Found multiple nodes with same name: %s. This is due to different plugins with same name, either change the plugin name"
-        "or use a unique namespace", full_name.c_str());
-    // TODO: throw?
+      internal_logger(),
+      "Found multiple nodes with same name: %s. This is due to different plugins with same name, either change the plugin name"
+      "or use a unique namespace", full_name.c_str());
+    // TODO: maybe throw here check with Aditya and Jacob
   }
 
   rclcpp::NodeOptions node_options;
@@ -183,17 +183,20 @@ rclcpp::Logger Node::internal_logger()
   return rclcpp::get_logger("gazebo_ros_node");
 }
 
-void NodeLookUp::add_node(const std::string& node_name) {
+void NodeLookUp::add_node(const std::string & node_name)
+{
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
   this->set_.insert(node_name);
 }
 
-void NodeLookUp::remove_node(const std::string& node_name) {
+void NodeLookUp::remove_node(const std::string & node_name)
+{
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
   this->set_.erase(node_name);
 }
 
-bool NodeLookUp::is_node_name_in_set(const std::string &node_name) {
+bool NodeLookUp::is_node_name_in_set(const std::string & node_name)
+{
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
   return this->set_.find(node_name) != this->set_.end();
 }

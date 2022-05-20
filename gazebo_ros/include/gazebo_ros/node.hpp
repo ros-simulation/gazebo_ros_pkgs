@@ -225,17 +225,19 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
 }
 
 // Class to hold the global set of tracked node names.
-class NodeLookUp{
-   public:
-    // Methods need to be protected by internal mutex
-    void add_node(const std::string& node_name);
-    bool is_node_name_in_set(const std::string& node_name);
-    void remove_node(const std::string& node_name);
+class NodeLookUp
+{
+public:
+  // Methods need to be protected by internal mutex
+  void add_node(const std::string & node_name);
+  bool is_node_name_in_set(const std::string & node_name);
+  void remove_node(const std::string & node_name);
 
- private:
-    /// set of tracked node names
-    std::unordered_set<std::string> set_;
-    std::mutex internal_mutex_;
+private:
+  /// set of tracked node names
+  std::unordered_set<std::string> set_;
+  std::mutex internal_mutex_;
+
 };
 
 }  // namespace gazebo_ros
