@@ -33,6 +33,9 @@ NodeLookUp Node::static_node_lookup_;
 Node::~Node()
 {
   executor_->remove_node(get_node_base_interface());
+
+  // remove node object from global map
+  static_node_lookup_.remove_node(this->get_fully_qualified_name());
 }
 
 Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
@@ -40,6 +43,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   // Initialize arguments
   std::string name = "";
   std::string ns = "/";
+  std::string full_name;
   std::vector<std::string> arguments;
   std::vector<rclcpp::Parameter> parameter_overrides;
 
@@ -98,16 +102,27 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
       parameter_sdf = parameter_sdf->GetNextElement("parameter");
     }
   }
+  // set full node name
+  full_name = ns + "/" + name;
+
+  // check if node with the same name exists already
+  if(static_node_lookup_.is_node_name_in_map(full_name)){
+    RCLCPP_ERROR(
+        internal_logger(),
+        "Found multiple nodes with same name: %s. This is due to different plugins with same name, either change the plugin name"
+        "or use a unique namespace", full_name.c_str());
+    // TODO: throw?
+  }
 
   rclcpp::NodeOptions node_options;
   node_options.arguments(arguments);
   node_options.parameter_overrides(parameter_overrides);
 
-  // check if node with the same name exists already
-  // TODO
-
   // Create node with parsed arguments
   std::shared_ptr<gazebo_ros::Node> node = CreateWithArgs(name, ns, node_options);
+
+  // Add node to global map
+  static_node_lookup_.add_node(full_name, node);
 
   // Parse the qos tag
   node->qos_ = gazebo_ros::QoS(sdf, name, ns, node_options);
@@ -181,6 +196,11 @@ Node::SharedPtr NodeLookUp::get_node(const std::string& node_name) {
 void NodeLookUp::remove_node(const std::string& node_name) {
   std::lock_guard<std::mutex> guard(this->internal_mutex_);
   this->map_.erase(node_name);
+}
+
+bool NodeLookUp::is_node_name_in_map(const std::string &node_name) {
+  std::lock_guard<std::mutex> guard(this->internal_mutex_);
+  return this->map_.find(node_name) != this->map_.end();
 }
 
 }  // namespace gazebo_ros

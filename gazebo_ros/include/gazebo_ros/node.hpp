@@ -30,7 +30,7 @@
 
 namespace gazebo_ros
 {
-
+// forward declare NodeLookUp
 class NodeLookUp;
 
 /// ROS Node for gazebo plugins
@@ -230,6 +230,7 @@ class NodeLookUp{
     // Methods need to be protected by internal mutex
     void add_node(const std::string& node_name, Node::SharedPtr ros_node);
     Node::SharedPtr get_node(const std::string& node_name);
+    bool is_node_name_in_map(const std::string& node_name);
     void remove_node(const std::string& node_name);
 
  private:
