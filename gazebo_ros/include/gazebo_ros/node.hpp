@@ -239,6 +239,5 @@ private:
   std::unordered_set<std::string> set_;
   std::mutex internal_mutex_;
 };
-
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__NODE_HPP_

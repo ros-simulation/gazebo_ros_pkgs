@@ -109,9 +109,9 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   if (static_node_lookup_.is_node_name_in_set(full_name)) {
     RCLCPP_ERROR(
       internal_logger(),
-      "Found multiple nodes with same name: %s. This is due to different plugins with same name, either change the plugin name"
-      " or use a unique namespace", full_name.c_str());
-    // TODO: maybe throw here check with Aditya and Jacob
+      "Found multiple nodes with same name: %s. This is due to different plugins with same name, "
+      "either change the plugin name or use a unique namespace", full_name.c_str());
+    // TODO(deepanshu): maybe throw here check with Aditya and Jacob
   }
 
   rclcpp::NodeOptions node_options;
