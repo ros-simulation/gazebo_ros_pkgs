@@ -28,14 +28,14 @@ namespace gazebo_ros
 std::weak_ptr<Executor> Node::static_executor_;
 std::weak_ptr<Node> Node::static_node_;
 std::mutex Node::lock_;
-ExistingNodes Node::static_node_lookup_;
+ExistingNodes Node::static_existing_nodes_;
 
 Node::~Node()
 {
   executor_->remove_node(get_node_base_interface());
 
   // remove node object from global map
-  static_node_lookup_.remove_node(this->get_fully_qualified_name());
+  static_existing_nodes_.remove_node(this->get_fully_qualified_name());
 }
 
 Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
@@ -111,7 +111,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   }
 
   // check if node with the same name exists already
-  if (static_node_lookup_.check_node(full_name)) {
+  if (static_existing_nodes_.check_node(full_name)) {
     RCLCPP_ERROR(
       internal_logger(),
       "Found multiple nodes with same name: %s. This might be due to multiple plugins using same "
@@ -130,7 +130,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   std::shared_ptr<gazebo_ros::Node> node = CreateWithArgs(name, ns, node_options);
 
   // Add node to global map
-  static_node_lookup_.add_node(full_name);
+  static_existing_nodes_.add_node(full_name);
 
   // Parse the qos tag
   node->qos_ = gazebo_ros::QoS(sdf, name, ns, node_options);

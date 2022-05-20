@@ -144,8 +144,8 @@ private:
   /// QoS for node entities
   gazebo_ros::QoS qos_;
 
-  /// ros node lookup
-  static ExistingNodes static_node_lookup_;
+  /// track of nodes already instantiated
+  static ExistingNodes static_existing_nodes_;
 
   /// Locks #initialized_ and #executor_
   static std::mutex lock_;
