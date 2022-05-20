@@ -55,15 +55,14 @@ def generate_launch_description():
         # _plugin_command('force_system'), ' ',
         _arg_command('profile'), ' ', LaunchConfiguration('profile'), ' ',
         # convenience parameter for params file
-        '--ros-args',
-        PythonExpression([
-            '"--params-file', '" if "" != "',
-            LaunchConfiguration("params_file"), '" else ""']),
-        LaunchConfiguration("params_file"),
-        '--',
+        _arg_command('--ros-args', related_launch_config=LaunchConfiguration('params_file')), ' ',
+        _arg_command('--params-file', related_launch_config=LaunchConfiguration('params_file')),
+        ' ', LaunchConfiguration('params_file'), ' ',
+        _arg_command('--', related_launch_config=LaunchConfiguration('params_file')), ' ',
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
+    print('--------CMD------')
     model, plugin, media = GazeboRosPaths.get_paths()
 
     if 'GAZEBO_MODEL_PATH' in environ:
@@ -222,8 +221,11 @@ def _boolean_command(arg):
 
 
 # Add string commands if not empty
-def _arg_command(arg):
-    cmd = ['"--', arg, '" if "" != "', LaunchConfiguration(arg), '" else ""']
+def _arg_command(arg, related_launch_config=None):
+    if related_launch_config:
+        cmd = ['"--', arg, '" if "" != "', related_launch_config, '" else ""']
+    else:
+        cmd = ['"--', arg, '" if "" != "', LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
     return py_cmd
 
