@@ -102,8 +102,13 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
       parameter_sdf = parameter_sdf->GetNextElement("parameter");
     }
   }
+
   // set full node name
-  full_name = ns + "/" + name;
+  if (ns[0] == '/' && ns.size() == 1) {
+    full_name = ns + name;
+  } else {
+    full_name = ns + "/" + name;
+  }
 
   // check if node with the same name exists already
   if (static_node_lookup_.is_node_name_in_set(full_name)) {
@@ -111,7 +116,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
       internal_logger(),
       "Found multiple nodes with same name: %s. This is due to different plugins with same name, "
       "either change the plugin name or use a unique namespace", full_name.c_str());
-    return nullptr;
+    return nullptr; // this makes the gazebo shutdown safely
   }
 
   rclcpp::NodeOptions node_options;
