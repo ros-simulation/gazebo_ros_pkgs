@@ -62,7 +62,6 @@ def generate_launch_description():
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
-    print('--------CMD------')
     model, plugin, media = GazeboRosPaths.get_paths()
 
     if 'GAZEBO_MODEL_PATH' in environ:
