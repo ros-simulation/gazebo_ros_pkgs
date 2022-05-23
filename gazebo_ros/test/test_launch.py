@@ -90,5 +90,4 @@ def test_launch_gazebo_ros(gzclient_proc, launch_context):
     current_process = psutil.Process()
     children = current_process.children(recursive=True)
     names = [i.name() for i in children]
-    print(names)
     assert 'gzclient' in names and 'gzserver' in names, 'Error; gazebo not launched'
