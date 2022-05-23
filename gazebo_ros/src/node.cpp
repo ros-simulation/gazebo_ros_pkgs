@@ -38,7 +38,7 @@ Node::~Node()
   static_existing_nodes_.remove_node(this->get_fully_qualified_name());
 }
 
-Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
+Node::SharedPtr Node::Get(sdf::ElementPtr sdf, std::string node_name)
 {
   // Initialize arguments
   std::string name = "";
@@ -51,7 +51,12 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   if (!sdf->HasAttribute("name")) {
     RCLCPP_WARN(internal_logger(), "Name of plugin not found.");
   }
-  name = sdf->Get<std::string>("name");
+
+  if(!node_name.empty()){
+    name = node_name;
+  }else{
+    name = sdf->Get<std::string>("name");
+  }
 
   // Get inner <ros> element if full plugin sdf was passed in
   if (sdf->HasElement("ros")) {
@@ -115,10 +120,11 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     RCLCPP_ERROR(
       internal_logger(),
       "Found multiple nodes with same name: %s. This might be due to multiple plugins using same "
-      "name to solve this either change one of the the plugin names or use a different namespace. "
-      "The error might also result from a custom plugin inheriting from one of the GazeboRosPlugin "
-      "this can be solved by accessing node object of the parent class itself instead of creating "
-      "a new node object for custom plugin.", full_name.c_str());
+      "name. Try changing one of the the plugin names or use a different ROS namespace. "
+      "This error might also result from a custom plugin inheriting from another gazebo_ros plugin "
+      "and the custom plugin trying to access the ROS node object, resulting in multiple nodes "
+      "with same name. To solve this try providing the optional node_name argument in "
+      "gazebo_ros::Node::Get() function. ", full_name.c_str());
     return nullptr;  // this makes the gazebo shutdown safely
   }
 

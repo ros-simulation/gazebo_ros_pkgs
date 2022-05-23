@@ -87,9 +87,11 @@ public:
    * </plugin>
    * \endcode
    * \param[in] _sdf An SDF element in the style above or containing a <ros> tag in the style above
-   * \return A shared pointer to a new #gazebo_ros::Node
+   * \param[in] _node_name: An optional node_name to overwrite plugin name being used as node name.
+   * \return A shared pointer to a new #gazebo_ros::Node. A nullptr is returned in case multiple
+   * nodes have the same name resulting in a ROS error and gazebo crash.
    */
-  static SharedPtr Get(sdf::ElementPtr _sdf);
+  static SharedPtr Get(sdf::ElementPtr _sdf, std::string _node_name="");
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
