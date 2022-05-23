@@ -52,9 +52,9 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf, std::string node_name)
     RCLCPP_WARN(internal_logger(), "Name of plugin not found.");
   }
 
-  if(!node_name.empty()){
+  if (!node_name.empty()) {
     name = node_name;
-  }else{
+  } else {
     name = sdf->Get<std::string>("name");
   }
 

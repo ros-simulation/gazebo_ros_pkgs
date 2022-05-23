@@ -110,14 +110,14 @@ TEST(TestNode, GetSdf)
   // EXPECT_STREQ("node_3", node_3->get_name());
 }
 
-TEST(TestNode, OptionalNodeName){
+TEST(TestNode, OptionalNodeName) {
   auto sdf_str_1 =
-      "<?xml version='1.0' ?>"
-      "<sdf version='1.6'>"
-      "<world name='default'>"
-      "<plugin name='node_1' filename='libnode_name.so'/>"
-      "</world>"
-      "</sdf>";
+    "<?xml version='1.0' ?>"
+    "<sdf version='1.6'>"
+    "<world name='default'>"
+    "<plugin name='node_1' filename='libnode_name.so'/>"
+    "</world>"
+    "</sdf>";
   sdf::SDF sdf_1;
   sdf_1.SetFromString(sdf_str_1);
   auto plugin_sdf_1 = sdf_1.Root()->GetElement("world")->GetElement("plugin");

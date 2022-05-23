@@ -91,7 +91,7 @@ public:
    * \return A shared pointer to a new #gazebo_ros::Node. A nullptr is returned in case multiple
    * nodes have the same name resulting in a ROS error and gazebo crash.
    */
-  static SharedPtr Get(sdf::ElementPtr _sdf, std::string _node_name="");
+  static SharedPtr Get(sdf::ElementPtr _sdf, std::string _node_name = "");
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
