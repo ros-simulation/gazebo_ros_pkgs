@@ -122,7 +122,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf, std::string node_name)
       "Found multiple nodes with same name: %s. This might be due to multiple plugins using same "
       "name. Try changing one of the the plugin names or use a different ROS namespace. "
       "This error might also result from a custom plugin inheriting from another gazebo_ros plugin "
-      "and the custom plugin trying to access the ROS node object, resulting in multiple nodes "
+      "and the custom plugin trying to access the ROS node object hence creating multiple nodes "
       "with same name. To solve this try providing the optional node_name argument in "
       "gazebo_ros::Node::Get() function. ", full_name.c_str());
     return nullptr;  // this makes the gazebo shutdown safely
