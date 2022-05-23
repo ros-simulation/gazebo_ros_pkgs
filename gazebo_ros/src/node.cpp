@@ -119,7 +119,7 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
       "The error might also result from a custom plugin inheriting from one of the GazeboRosPlugin "
       "this can be solved by accessing node object of the parent class itself instead of creating "
       "a new node object for custom plugin.", full_name.c_str());
-    return nullptr; // this makes the gazebo shutdown safely
+    return nullptr;  // this makes the gazebo shutdown safely
   }
 
   rclcpp::NodeOptions node_options;
