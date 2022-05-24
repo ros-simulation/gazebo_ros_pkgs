@@ -55,10 +55,10 @@ def generate_launch_description():
         # _plugin_command('force_system'), ' ',
         _arg_command('profile'), ' ', LaunchConfiguration('profile'), ' ',
         # convenience parameter for params file
-        _arg_command('--ros-args', condition=LaunchConfiguration('params_file')), ' ',
-        _arg_command('--params-file', condition=LaunchConfiguration('params_file')),
-        ' ', LaunchConfiguration('params_file'), ' ',
-        _arg_command('--', condition=LaunchConfiguration('params_file')), ' ',
+        _arg_command('ros-args', condition=LaunchConfiguration('params_file')),
+        _arg_command('params-file', condition=LaunchConfiguration('params_file')),
+        LaunchConfiguration('params_file'),
+        _arg_command('', condition=LaunchConfiguration('params_file')), ' ',
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
