@@ -161,18 +161,18 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
       for (const auto & parameter : parameters) {
         std::string param_name = parameter.get_name();
-        bool is_slip_param = param_name.find("slip_compliance") != std::string::npos;
 
-        if (is_slip_param || param_name.find("friction_coefficient") != std::string::npos)
-        {
-          double param_value = parameter.as_double();
-          if (param_value < 0.) {
+        if (param_name.find("slip_compliance") != std::string::npos) {
+          double slip = parameter.as_double();
+          if (slip < 0.) {
             result.successful = false;
-            std::string param_type = "Friction coefficient";
-            if (is_slip_param) {
-              param_type = "Slip compliance";
-            }
-            result.reason = param_type + " values cannot be negative";
+            result.reason = "Slip compliance values cannot be negative";
+          }
+        } else if (param_name.find("friction_coefficient") != std::string::npos) {
+          double friction = parameter.as_double();
+          if (friction < 0.) {
+            result.successful = false;
+            result.reason = "Friction coefficient values cannot be negative";
           }
         }
       }
