@@ -55,12 +55,10 @@ def generate_launch_description():
         # _plugin_command('force_system'), ' ',
         _arg_command('profile'), ' ', LaunchConfiguration('profile'), ' ',
         # convenience parameter for params file
-        '--ros-args',
-        PythonExpression([
-            '"--params-file', '" if "" != "',
-            LaunchConfiguration("params_file"), '" else ""']),
-        LaunchConfiguration("params_file"),
-        '--',
+        _arg_command('ros-args', condition=LaunchConfiguration('params_file')),
+        _arg_command('params-file', condition=LaunchConfiguration('params_file')),
+        LaunchConfiguration('params_file'),
+        _arg_command('', condition=LaunchConfiguration('params_file')), ' ',
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
@@ -222,8 +220,11 @@ def _boolean_command(arg):
 
 
 # Add string commands if not empty
-def _arg_command(arg):
-    cmd = ['"--', arg, '" if "" != "', LaunchConfiguration(arg), '" else ""']
+def _arg_command(arg, condition=None):
+    if condition:
+        cmd = ['"--', arg, '" if "" != "', condition, '" else ""']
+    else:
+        cmd = ['"--', arg, '" if "" != "', LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
     return py_cmd
 
