@@ -274,11 +274,17 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             auto wheel_name = parameter.name.substr(parameter.name.find("/") + 1);
             if (this->impl_->map_friction_primary_default_.count(wheel_name) == 1) {
               double friction = temp_param.as_double();
-              RCLCPP_INFO(
-                this->impl_->ros_node_->get_logger(),
-                "New friction coefficient in primary direction for %s: %.3e",
-                wheel_name.c_str(), friction);
-              this->SetMuPrimary(wheel_name, friction);
+              if (this->SetMuPrimary(wheel_name, friction)) {
+                RCLCPP_INFO(
+                  this->impl_->ros_node_->get_logger(),
+                  "New friction coefficient in primary direction for %s: %.3e",
+                  wheel_name.c_str(), friction);
+              } else {
+                RCLCPP_ERROR(
+                  this->impl_->ros_node_->get_logger(),
+                  "Unable to set friction coefficient in primary direction for %s",
+                  wheel_name.c_str());
+              }
             }
           }
 
@@ -287,11 +293,17 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             auto wheel_name = parameter.name.substr(parameter.name.find("/") + 1);
             if (this->impl_->map_friction_secondary_default_.count(wheel_name) == 1) {
               double friction = temp_param.as_double();
-              RCLCPP_INFO(
-                this->impl_->ros_node_->get_logger(),
-                "New friction coefficient in secondary direction for %s: %.3e",
-                wheel_name.c_str(), friction);
-              this->SetMuSecondary(wheel_name, friction);
+              if (this->SetMuSecondary(wheel_name, friction)) {
+                RCLCPP_INFO(
+                  this->impl_->ros_node_->get_logger(),
+                  "New friction coefficient in secondary direction for %s: %.3e",
+                  wheel_name.c_str(), friction);
+              } else {
+                RCLCPP_ERROR(
+                  this->impl_->ros_node_->get_logger(),
+                  "Unable to set friction coefficient in secondary direction for %s",
+                  wheel_name.c_str());
+              }
             }
           }
         }
