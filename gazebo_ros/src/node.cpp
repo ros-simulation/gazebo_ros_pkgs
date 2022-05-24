@@ -28,17 +28,22 @@ namespace gazebo_ros
 std::weak_ptr<Executor> Node::static_executor_;
 std::weak_ptr<Node> Node::static_node_;
 std::mutex Node::lock_;
+ExistingNodes Node::static_existing_nodes_;
 
 Node::~Node()
 {
   executor_->remove_node(get_node_base_interface());
+
+  // remove node object from global map
+  static_existing_nodes_.remove_node(this->get_fully_qualified_name());
 }
 
-Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
+Node::SharedPtr Node::Get(sdf::ElementPtr sdf, std::string node_name)
 {
   // Initialize arguments
   std::string name = "";
   std::string ns = "/";
+  std::string full_name;
   std::vector<std::string> arguments;
   std::vector<rclcpp::Parameter> parameter_overrides;
 
@@ -46,7 +51,12 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
   if (!sdf->HasAttribute("name")) {
     RCLCPP_WARN(internal_logger(), "Name of plugin not found.");
   }
-  name = sdf->Get<std::string>("name");
+
+  if (!node_name.empty()) {
+    name = node_name;
+  } else {
+    name = sdf->Get<std::string>("name");
+  }
 
   // Get inner <ros> element if full plugin sdf was passed in
   if (sdf->HasElement("ros")) {
@@ -98,12 +108,35 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf)
     }
   }
 
+  // set full node name
+  if (ns[0] == '/' && ns.size() == 1) {
+    full_name = ns + name;
+  } else {
+    full_name = ns + "/" + name;
+  }
+
+  // check if node with the same name exists already
+  if (static_existing_nodes_.check_node(full_name)) {
+    RCLCPP_ERROR(
+      internal_logger(),
+      "Found multiple nodes with same name: %s. This might be due to multiple plugins using the "
+      "same name. Try changing one of the the plugin names or use a different ROS namespace. "
+      "This error might also result from a custom plugin inheriting from another gazebo_ros plugin "
+      "and the custom plugin trying to access the ROS node object hence creating multiple nodes "
+      "with same name. To solve this try providing the optional node_name argument in "
+      "gazebo_ros::Node::Get() function. ", full_name.c_str());
+    return nullptr;
+  }
+
   rclcpp::NodeOptions node_options;
   node_options.arguments(arguments);
   node_options.parameter_overrides(parameter_overrides);
 
   // Create node with parsed arguments
   std::shared_ptr<gazebo_ros::Node> node = CreateWithArgs(name, ns, node_options);
+
+  // Add node to global map
+  static_existing_nodes_.add_node(full_name);
 
   // Parse the qos tag
   node->qos_ = gazebo_ros::QoS(sdf, name, ns, node_options);
@@ -162,6 +195,24 @@ rclcpp::Parameter Node::sdf_to_ros_parameter(sdf::ElementPtr const & sdf)
 rclcpp::Logger Node::internal_logger()
 {
   return rclcpp::get_logger("gazebo_ros_node");
+}
+
+void ExistingNodes::add_node(const std::string & node_name)
+{
+  std::lock_guard<std::mutex> guard(this->internal_mutex_);
+  this->set_.insert(node_name);
+}
+
+void ExistingNodes::remove_node(const std::string & node_name)
+{
+  std::lock_guard<std::mutex> guard(this->internal_mutex_);
+  this->set_.erase(node_name);
+}
+
+bool ExistingNodes::check_node(const std::string & node_name)
+{
+  std::lock_guard<std::mutex> guard(this->internal_mutex_);
+  return this->set_.find(node_name) != this->set_.end();
 }
 
 }  // namespace gazebo_ros

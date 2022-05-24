@@ -110,6 +110,24 @@ TEST(TestNode, GetSdf)
   // EXPECT_STREQ("node_3", node_3->get_name());
 }
 
+TEST(TestNode, OptionalNodeName) {
+  auto sdf_str_1 =
+    "<?xml version='1.0' ?>"
+    "<sdf version='1.6'>"
+    "<world name='default'>"
+    "<plugin name='node_1' filename='libnode_name.so'/>"
+    "</world>"
+    "</sdf>";
+  sdf::SDF sdf_1;
+  sdf_1.SetFromString(sdf_str_1);
+  auto plugin_sdf_1 = sdf_1.Root()->GetElement("world")->GetElement("plugin");
+
+  // use optional node name instead of plugin name as node name
+  auto node_1 = gazebo_ros::Node::Get(plugin_sdf_1, "node_name_optional");
+  ASSERT_NE(nullptr, node_1);
+  EXPECT_STREQ("node_name_optional", node_1->get_name());
+}
+
 TEST(TestNode, RemapAndQoSOverride)
 {
   // Remap topic 'foo' to 'bar', 'bar' to 'baz', and '~/zoo' to 'foo/bar'

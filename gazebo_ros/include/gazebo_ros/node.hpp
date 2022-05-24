@@ -27,9 +27,13 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unordered_set>
 
 namespace gazebo_ros
 {
+// forward declare ExistingNodes
+class ExistingNodes;
+
 /// ROS Node for gazebo plugins
 /**
  * \class Node node.hpp <gazebo_ros/node.hpp>
@@ -83,9 +87,11 @@ public:
    * </plugin>
    * \endcode
    * \param[in] _sdf An SDF element in the style above or containing a <ros> tag in the style above
-   * \return A shared pointer to a new #gazebo_ros::Node
+   * \param[in] _node_name: An optional node_name to overwrite plugin name being used as node name.
+   * \return A shared pointer to a new #gazebo_ros::Node. A nullptr is returned and an error message
+   * is logged in case multiple nodes have the same name.
    */
-  static SharedPtr Get(sdf::ElementPtr _sdf);
+  static SharedPtr Get(sdf::ElementPtr _sdf, std::string _node_name = "");
 
   /// Create a #gazebo_ros::Node and add it to the global #gazebo_ros::Executor.
   /**
@@ -139,6 +145,9 @@ private:
 
   /// QoS for node entities
   gazebo_ros::QoS qos_;
+
+  /// track of nodes already instantiated
+  static ExistingNodes static_existing_nodes_;
 
   /// Locks #initialized_ and #executor_
   static std::mutex lock_;
@@ -217,5 +226,20 @@ Node::SharedPtr Node::CreateWithArgs(Args && ... args)
 
   return node;
 }
+
+// Class to hold the global set of tracked node names.
+class ExistingNodes
+{
+public:
+  // Methods need to be protected by internal mutex
+  void add_node(const std::string & node_name);
+  bool check_node(const std::string & node_name);
+  void remove_node(const std::string & node_name);
+
+private:
+  /// set of tracked node names
+  std::unordered_set<std::string> set_;
+  std::mutex internal_mutex_;
+};
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__NODE_HPP_
