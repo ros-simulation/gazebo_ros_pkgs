@@ -269,6 +269,7 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
   }
 }
 
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION >= 11)
 TEST_F(GazeboRosWheelSlipTest, TestFrictionParameters)
 {
   // World file contains:
@@ -320,6 +321,7 @@ TEST_F(GazeboRosWheelSlipTest, TestFrictionParameters)
     ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
   }
 }
+#endif
 
 class GazeboRosWheelSlipPublisherTest : public gazebo::ServerFixture
 {

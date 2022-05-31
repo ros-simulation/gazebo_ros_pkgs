@@ -29,6 +29,10 @@
 #include <unordered_map>
 #include <vector>
 
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION >= 11)
+#define GAZEBO_WHEELSLIP_HAS_FRICTION
+#endif
+
 using namespace std::chrono_literals;
 
 namespace gazebo_plugins
@@ -46,9 +50,11 @@ public:
   std::unordered_map<std::string, double> map_slip_lateral_default_;
   std::unordered_map<std::string, double> map_slip_longitudinal_default_;
 
+#ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
   // Containers to hold default values of friction coefficients
   std::unordered_map<std::string, double> map_friction_primary_default_;
   std::unordered_map<std::string, double> map_friction_secondary_default_;
+#endif
 
   // Event handler to set slip compliance values for individual wheels based
   std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
@@ -168,18 +174,23 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             result.successful = false;
             result.reason = "Slip compliance values cannot be negative";
           }
-        } else if (param_name.find("friction_coefficient") != std::string::npos) {
+        }
+
+#ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
+        if (param_name.find("friction_coefficient") != std::string::npos) {
           double friction = parameter.as_double();
           if (friction < 0.) {
             result.successful = false;
             result.reason = "Friction coefficient values cannot be negative";
           }
         }
+#endif
       }
 
       return result;
     };
 
+#ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
   // Read friction coefficient values from model and set friction parameters
   auto frictionCoeffs = WheelSlipPlugin::GetFrictionCoefficients();
   for (const auto &friction_coef : frictionCoeffs)
@@ -195,6 +206,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       impl_->map_friction_secondary_default_[friction_coef.first]
     );
   }
+#endif
 
   impl_->on_set_parameters_callback_handle_ = impl_->ros_node_->add_on_set_parameters_callback(
     param_validation_callback);
@@ -269,6 +281,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             }
           }
 
+#ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
           // Set the friction coefficient in the primary direction for an individual wheel
           if (parameter.name.find("friction_coefficient_primary/") != std::string::npos) {
             auto wheel_name = parameter.name.substr(parameter.name.find("/") + 1);
@@ -306,6 +319,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
               }
             }
           }
+#endif
         }
         // Iteration over parameters done
       }
