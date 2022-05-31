@@ -193,8 +193,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 #ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
   // Read friction coefficient values from model and set friction parameters
   auto frictionCoeffs = WheelSlipPlugin::GetFrictionCoefficients();
-  for (const auto &friction_coef : frictionCoeffs)
-  {
+  for (const auto & friction_coef : frictionCoeffs) {
     impl_->map_friction_primary_default_[friction_coef.first] = friction_coef.second.X();
     impl_->ros_node_->declare_parameter(
       "friction_coefficient_primary/" + friction_coef.first,
