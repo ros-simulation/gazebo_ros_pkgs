@@ -269,6 +269,62 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
   }
 }
 
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION >= 11)
+TEST_F(GazeboRosWheelSlipTest, TestFrictionParameters)
+{
+  // World file contains:
+  // - SDF wheels link_names: wheel_rear_left, wheel_rear_right
+  // ----------------------------------------------------------------------------------------------
+  // World file does NOT contain:
+  // - ROS Parameters (for each wheel) - ('friction_coefficient_primary/wheel_*',
+  //                  'friction_coefficient_secondary/wheel_*')
+  // ----------------------------------------------------------------------------------------------
+  // Expected result: Default friction ROS Parameters are 1.0 and updating new friction should apply
+  this->Load("worlds/wheelslip_worlds/gazebo_ros_wheelslip_1.world", true);
+  auto world = gazebo::physics::get_world();
+  ASSERT_NE(nullptr, world);
+  auto node = std::make_shared<rclcpp::Node>("test_gazebo_ros_wheelslip");
+  ASSERT_NE(nullptr, node);
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(
+    node,
+    "trisphere_cycle_slip0/wheel_slip_rear");
+
+  std::map<std::string, double> parameter_pairs = {
+    {"friction_coefficient_primary/wheel_rear_left", 1.0},
+    {"friction_coefficient_primary/wheel_rear_right", 1.0},
+    {"friction_coefficient_secondary/wheel_rear_left", 1.0},
+    {"friction_coefficient_secondary/wheel_rear_right", 1.0}};
+
+  // TEST 1 : Verify parameters default friction parameters are 1.0
+  // Since the trisphere model does not set SDF tags //friction/ode/mu or //friction/ode/mu2,
+  // we expect both to be 1.0 by default
+  ASSERT_TRUE(parameters_client->wait_for_service(5s));
+  std::vector<std::string> parameter_names;
+  for (auto & element : parameter_pairs) {
+    parameter_names.push_back(element.first);
+  }
+  std::this_thread::sleep_for(1s);
+  auto parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
+  for (auto & parameter : parameters_received) {
+    ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
+  }
+
+  // TEST 2 : Set friction coefficient for one wheel, verify others remain unchanged
+  parameter_pairs["friction_coefficient_primary/wheel_rear_left"] = 0.5;
+  std::vector<rclcpp::Parameter> change_param = {
+    rclcpp::Parameter("friction_coefficient_primary/wheel_rear_left", 0.5)};
+  auto result = parameters_client->set_parameters(change_param);
+  ASSERT_TRUE(result[0].successful);
+
+  parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
+  for (auto & parameter : parameters_received) {
+    ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
+  }
+}
+#endif
+
 class GazeboRosWheelSlipPublisherTest : public gazebo::ServerFixture
 {
 public:

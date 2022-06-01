@@ -29,6 +29,10 @@
 #include <unordered_map>
 #include <vector>
 
+#if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION >= 11)
+#define GAZEBO_WHEELSLIP_HAS_FRICTION
+#endif
+
 using namespace std::chrono_literals;
 
 namespace gazebo_plugins
@@ -44,9 +48,13 @@ public:
 
   // Containers to hold default values of slip parameters
   std::unordered_map<std::string, double> map_slip_lateral_default_;
-  double default_slip_lateral_;
   std::unordered_map<std::string, double> map_slip_longitudinal_default_;
-  double default_slip_longitudinal_;
+
+#ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
+  // Containers to hold default values of friction coefficients
+  std::unordered_map<std::string, double> map_friction_primary_default_;
+  std::unordered_map<std::string, double> map_friction_secondary_default_;
+#endif
 
   // Event handler to set slip compliance values for individual wheels based
   std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
@@ -167,10 +175,37 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
             result.reason = "Slip compliance values cannot be negative";
           }
         }
+
+#ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
+        if (param_name.find("friction_coefficient") != std::string::npos) {
+          double friction = parameter.as_double();
+          if (friction < 0.) {
+            result.successful = false;
+            result.reason = "Friction coefficient values cannot be negative";
+          }
+        }
+#endif
       }
 
       return result;
     };
+
+#ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
+  // Read friction coefficient values from model and set friction parameters
+  auto frictionCoeffs = WheelSlipPlugin::GetFrictionCoefficients();
+  for (const auto & friction_coef : frictionCoeffs) {
+    impl_->map_friction_primary_default_[friction_coef.first] = friction_coef.second.X();
+    impl_->ros_node_->declare_parameter(
+      "friction_coefficient_primary/" + friction_coef.first,
+      impl_->map_friction_primary_default_[friction_coef.first]
+    );
+    impl_->map_friction_secondary_default_[friction_coef.first] = friction_coef.second.Y();
+    impl_->ros_node_->declare_parameter(
+      "friction_coefficient_secondary/" + friction_coef.first,
+      impl_->map_friction_secondary_default_[friction_coef.first]
+    );
+  }
+#endif
 
   impl_->on_set_parameters_callback_handle_ = impl_->ros_node_->add_on_set_parameters_callback(
     param_validation_callback);
@@ -244,6 +279,46 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
               this->SetSlipComplianceLongitudinal(wheel_name, slip);
             }
           }
+
+#ifdef GAZEBO_WHEELSLIP_HAS_FRICTION
+          // Set the friction coefficient in the primary direction for an individual wheel
+          if (parameter.name.find("friction_coefficient_primary/") != std::string::npos) {
+            auto wheel_name = parameter.name.substr(parameter.name.find("/") + 1);
+            if (this->impl_->map_friction_primary_default_.count(wheel_name) == 1) {
+              double friction = temp_param.as_double();
+              if (this->SetMuPrimary(wheel_name, friction)) {
+                RCLCPP_INFO(
+                  this->impl_->ros_node_->get_logger(),
+                  "New friction coefficient in primary direction for %s: %.3e",
+                  wheel_name.c_str(), friction);
+              } else {
+                RCLCPP_ERROR(
+                  this->impl_->ros_node_->get_logger(),
+                  "Unable to set friction coefficient in primary direction for %s",
+                  wheel_name.c_str());
+              }
+            }
+          }
+
+          // Set the friction coefficient in the secondary direction for an individual wheel
+          if (parameter.name.find("friction_coefficient_secondary/") != std::string::npos) {
+            auto wheel_name = parameter.name.substr(parameter.name.find("/") + 1);
+            if (this->impl_->map_friction_secondary_default_.count(wheel_name) == 1) {
+              double friction = temp_param.as_double();
+              if (this->SetMuSecondary(wheel_name, friction)) {
+                RCLCPP_INFO(
+                  this->impl_->ros_node_->get_logger(),
+                  "New friction coefficient in secondary direction for %s: %.3e",
+                  wheel_name.c_str(), friction);
+              } else {
+                RCLCPP_ERROR(
+                  this->impl_->ros_node_->get_logger(),
+                  "Unable to set friction coefficient in secondary direction for %s",
+                  wheel_name.c_str());
+              }
+            }
+          }
+#endif
         }
         // Iteration over parameters done
       }
