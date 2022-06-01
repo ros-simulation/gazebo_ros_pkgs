@@ -231,6 +231,7 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
   }
   std::this_thread::sleep_for(1s);
   auto parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
   for (auto & parameter : parameters_received) {
     ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
   }
@@ -243,6 +244,7 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
   ASSERT_TRUE(result[0].successful);
 
   parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
   for (auto & parameter : parameters_received) {
     ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
   }
@@ -260,6 +262,7 @@ TEST_F(GazeboRosWheelSlipTest, TestSetParameters)
   // This takes time, and the sleep_for() below allows them to be set.
   std::this_thread::sleep_for(2s);
   parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
   for (auto & parameter : parameters_received) {
     if (parameter.get_name().find("slip_compliance_unitless_lateral") != std::string::npos) {
       ASSERT_EQ(parameter.as_double(), 0.1);
@@ -305,6 +308,7 @@ TEST_F(GazeboRosWheelSlipTest, TestFrictionParameters)
   }
   std::this_thread::sleep_for(1s);
   auto parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
   for (auto & parameter : parameters_received) {
     ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
   }
@@ -317,6 +321,7 @@ TEST_F(GazeboRosWheelSlipTest, TestFrictionParameters)
   ASSERT_TRUE(result[0].successful);
 
   parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
   for (auto & parameter : parameters_received) {
     ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
   }
