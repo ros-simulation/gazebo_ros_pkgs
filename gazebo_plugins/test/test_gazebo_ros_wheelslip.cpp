@@ -305,6 +305,7 @@ TEST_F(GazeboRosWheelSlipTest, TestFrictionParameters)
   }
   std::this_thread::sleep_for(1s);
   auto parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
   for (auto & parameter : parameters_received) {
     ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
   }
@@ -317,6 +318,7 @@ TEST_F(GazeboRosWheelSlipTest, TestFrictionParameters)
   ASSERT_TRUE(result[0].successful);
 
   parameters_received = parameters_client->get_parameters(parameter_names);
+  EXPECT_EQ(parameters_received.size(), parameter_pairs.size());
   for (auto & parameter : parameters_received) {
     ASSERT_EQ(parameter_pairs[parameter.get_name()], parameter.as_double());
   }
