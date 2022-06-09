@@ -150,17 +150,19 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
   }
   impl_->last_update_time_ = impl_->world_->SimTime();
 
-  // Update rate
+  // Publish rate
   auto publish_rate = _sdf->Get<double>("publish_rate", 20.0).first;
-  if (update_rate > 0.0) {
+  if (publish_rate > 0.0) {
     impl_->publish_period_ = 1.0 / publish_rate;
   } else {
     impl_->publish_period_ = 0.0;
   }
   impl_->last_publish_time_ = impl_->world_->SimTime();
 
+  auto cmd_topic = _sdf->Get<std::string>("command_topic", "cmd_vel").first;
+
   impl_->cmd_vel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
-    "cmd_vel", qos.get_subscription_qos("cmd_vel", rclcpp::QoS(1)),
+    cmd_topic, qos.get_subscription_qos(cmd_topic, rclcpp::QoS(1)),
     std::bind(&GazeboRosPlanarMovePrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
   RCLCPP_INFO(
