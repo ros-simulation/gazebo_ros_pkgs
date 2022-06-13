@@ -2,6 +2,13 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.7.0 (2022-06-13)
+------------------
+* Fix gzserver launch file breaking when no ros args provided (`#1395 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1395>`_)
+* Multiple nodes with same name issue (`#1394 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1394>`_)
+* Expose launch parameter for ``params_file`` (`#1391 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1391>`_)
+* Contributors: Brian Chen, Deepanshu Bansal, Jacob Perron
+
 3.6.0 (2022-05-10)
 ------------------
 * Fixes gazebo shutdown error when using nested launch files (`#1376 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1376>`_)

@@ -2,6 +2,12 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.7.0 (2022-06-13)
+------------------
+* Add friction coefficient parameters (`#1393 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1393>`_)
+* GPS sensor plugin publishing velocity (`#1371 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1371>`_) (`#1387 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1387>`_)
+* Contributors: Jacob Perron, Jenn Nguyen, Marcel Dudek
+
 3.6.0 (2022-05-10)
 ------------------
 * Initialize wheel slip parameters directly from SDF (`#1365 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1365>`_)
