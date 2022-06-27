@@ -21,11 +21,12 @@ import argparse
 import math
 import os
 import sys
+import time
 from urllib.parse import SplitResult, urlsplit
 
 from gazebo_msgs.msg import ModelStates
 from gazebo_msgs.srv import DeleteEntity
-# from gazebo_msgs.srv import SetModelConfiguration
+from gazebo_msgs.srv import SetModelConfiguration
 from gazebo_msgs.srv import SpawnEntity
 from geometry_msgs.msg import Pose
 from lxml import etree as ElementTree
@@ -75,6 +76,8 @@ class SpawnEntityNode(Node):
         parser.add_argument('-timeout', type=float, default=30.0,
                             help='Number of seconds to wait for the spawn and delete services to \
                             become available')
+        parser.add_argument('-pause', action='store_true',
+                            help='pause physics before spawning entity')
         parser.add_argument('-unpause', action='store_true',
                             help='unpause physics after spawning entity')
         parser.add_argument('-wait', type=str, metavar='ENTITY_NAME',
@@ -94,24 +97,19 @@ class SpawnEntityNode(Node):
         parser.add_argument('-Y', type=float, default=0,
                             help='yaw angle of initial orientation, radians')
 
-        # TODO(shivesh): Wait for /set_model_configuration
-        # (https://github.com/ros-simulation/gazebo_ros_pkgs/issues/779)
-        # parser.add_argument('-J', dest='joints', default=[], action='append',
-        #     metavar=('JOINT_NAME', 'JOINT_POSITION'), type=str, nargs=2,
-        #     help='initialize the specified joint at the specified position')
+        parser.add_argument('-J', dest='joints', default=[], action='append',
+                            metavar=('JOINT_NAME', 'JOINT_POSITION'), type=str, nargs=2,
+                            help='initialize the specified joint at the specified position')
 
         parser.add_argument('-package_to_model', action='store_true', help='convert urdf \
                             <mesh filename="package://..." to <mesh filename="model://..."')
 
         parser.add_argument('-b', dest='bond', action='store_true', help='bond to gazebo \
-                             and delete the entity when this program is interrupted')
+                            and delete the entity when this program is interrupted')
         self.args = parser.parse_args(args[1:])
 
-        # TODO(shivesh): Wait for /set_model_configuration
-        # (https://github.com/ros-simulation/gazebo_ros_pkgs/issues/779)
-        # Convert position of joints to floats
-        # for i in range(len(self.args.joints)):
-        #     self.args.joints[i][1] = float(self.args.joints[i][1])
+        for i in range(len(self.args.joints)):
+            self.args.joints[i][1] = float(self.args.joints[i][1])
 
     def run(self):
         """
@@ -220,6 +218,10 @@ class SpawnEntityNode(Node):
         initial_pose.orientation.y = q[2]
         initial_pose.orientation.z = q[3]
 
+        # Pause physics if user requested
+        if self.args.pause:
+            self._pause_gazebo()
+
         spawn_service_timeout = self.args.timeout
         if self.args.spawn_service_timeout is not None:
             self.get_logger().warning(
@@ -230,27 +232,18 @@ class SpawnEntityNode(Node):
             self.get_logger().error('Spawn service failed. Exiting.')
             return 1
 
-        # TODO(shivesh): Wait for /set_model_configuration
-        # (https://github.com/ros-simulation/gazebo_ros_pkgs/issues/779)
         # Apply joint positions if any specified
-        # if len(self.args.joints) != 0:
-        #     joint_names = [joint[0] for joint in self.args.joints]
-        #     joint_positions = [joint[1] for joint in self.args.joints]
-        #     success = _set_model_configuration(joint_names, joint_positions)
-        #     if not success:
-        #         self.get_logger().error('SetModelConfiguration service failed. Exiting.')
-        #         return 1
+        if len(self.args.joints) != 0:
+            joint_names = [joint[0] for joint in self.args.joints]
+            joint_positions = [joint[1] for joint in self.args.joints]
+            success = self._set_joint_positions(joint_names, joint_positions)
+            if not success:
+                self.get_logger().error('set_joint_positions service failed. Exiting.')
+                return 1
 
         # Unpause physics if user requested
         if self.args.unpause:
-            client = self.create_client(Empty, '%s/unpause_physics' % self.args.gazebo_namespace)
-            if client.wait_for_service(timeout_sec=self.args.timeout):
-                self.get_logger().info(
-                    'Calling service %s/unpause_physics' % self.args.gazebo_namespace)
-                client.call_async(Empty.Request())
-            else:
-                self.get_logger().error('Service %s/unpause_physics unavailable. \
-                                         Was Gazebo started with GazeboRosInit?')
+            self._unpause_gazebo()
 
         # If bond enabled, setup shutdown callback and wait for shutdown
         if self.args.bond:
@@ -263,6 +256,36 @@ class SpawnEntityNode(Node):
             self._delete_entity()
 
         return 0
+
+    # Routine to pause physics engine
+    def _pause_gazebo(self):
+        client = self.create_client(Empty, '%s/pause_physics' % self.args.gazebo_namespace)
+        if client.wait_for_service(timeout_sec=self.args.timeout):
+            self.get_logger().info(
+                'Calling service %s/pause_physics' % self.args.gazebo_namespace)
+            srv_call = client.call_async(Empty.Request())
+            while rclpy.ok():
+                if srv_call.done():
+                    break
+                rclpy.spin_once(self)
+        else:
+            self.get_logger().error('Service %s/pause_physics unavailable. \
+                                    Was Gazebo started with GazeboRosInit?')
+
+    # Routine to unpause physics engine
+    def _unpause_gazebo(self):
+        client = self.create_client(Empty, '%s/unpause_physics' % self.args.gazebo_namespace)
+        if client.wait_for_service(timeout_sec=self.args.timeout):
+            self.get_logger().info(
+                'Calling service %s/unpause_physics' % self.args.gazebo_namespace)
+            srv_call = client.call_async(Empty.Request())
+            while rclpy.ok():
+                if srv_call.done():
+                    break
+                rclpy.spin_once(self)
+        else:
+            self.get_logger().error('Service %s/unpause_physics unavailable. \
+                                    Was Gazebo started with GazeboRosInit?')
 
     def _spawn_entity(self, entity_xml, initial_pose, timeout=5.0):
         if timeout < 0:
@@ -315,29 +338,34 @@ class SpawnEntityNode(Node):
                 'Service %s/delete_entity unavailable. ' +
                 'Was Gazebo started with GazeboRosFactory?')
 
-    # def _set_model_configuration(self, joint_names, joint_positions):
-    #     self.get_logger().info(
-    #         'Waiting for service %s/set_model_configuration' % self.args.gazebo_namespace)
-    #     client = self.create_client(SetModelConfiguration, 'set_model_configuration')
-    #     if client.wait_for_service(timeout_sec=5.0):
-    #         req = SetModelConfiguration.Request()
-    #         req.model_name = self.args.entity
-    #         req.urdf_param_name = ''
-    #         req.joint_names = joint_names
-    #         req.joint_positions = joint_positions
-    #         self.get_logger().info(
-    #             'Calling service %s/set_model_configuration' % self.args.gazebo_namespace)
-    #         srv_call = client.call_async(req)
-    #         while rclpy.ok():
-    #             if srv_call.done():
-    #                 self.get_logger().info(
-    #                     'Set model configuration status: %s' % srv_call.result().status_message)
-    #                 break
-    #             rclpy.spin_once(self)
-    #         return srv_call.result().success
-    #     self.get_logger().error('Service %s/set_model_configuration unavailable. \
-    #                              Was Gazebo started with GazeboRosState?')
-    #     return False
+    def _set_joint_positions(self, joint_names, joint_positions):
+        self.get_logger().info(
+            'Waiting for service %s/set_joint_positions' % self.args.gazebo_namespace)
+
+        client = self.create_client(SetModelConfiguration, 'set_joint_positions')
+        if client.wait_for_service(timeout_sec=5.0):
+            req = SetModelConfiguration.Request()
+            req.model_name = self.args.entity
+            req.urdf_param_name = ''
+            req.joint_names = joint_names
+            req.joint_positions = joint_positions
+            self.get_logger().info("temporary hack to **fix** \
+                the -J joint position option (issue #93), \
+                sleeping for 1 second to avoid race condition.")
+            time.sleep(1.0)
+            self.get_logger().info(
+                'Calling service %s/set_joint_positions' % self.args.gazebo_namespace)
+            srv_call = client.call_async(req)
+            while rclpy.ok():
+                if srv_call.done():
+                    self.get_logger().info(
+                        'Set model configuration status: %s' % srv_call.result().status_message)
+                    break
+                rclpy.spin_once(self)
+            return srv_call.result().success
+        self.get_logger().error('Service %s/set_joint_positions unavailable. \
+                                 Was Gazebo started with GazeboRosState?')
+        return False
 
 
 def quaternion_from_euler(roll, pitch, yaw):

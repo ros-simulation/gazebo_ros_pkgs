@@ -22,6 +22,7 @@
 #include <gazebo_msgs/msg/model_states.hpp>
 #include <gazebo_msgs/srv/get_entity_state.hpp>
 #include <gazebo_msgs/srv/set_entity_state.hpp>
+#include <gazebo_msgs/srv/set_model_configuration.hpp>
 #include <gazebo_ros/node.hpp>
 
 #include <memory>
@@ -54,6 +55,13 @@ public:
     gazebo_msgs::srv::SetEntityState::Request::SharedPtr _req,
     gazebo_msgs::srv::SetEntityState::Response::SharedPtr _res);
 
+  /// \brief Callback for set joint position service.
+  /// \param[in] _req Request
+  /// \param[out] _res Response
+  void SetJointPositions(
+    gazebo_msgs::srv::SetModelConfiguration::Request::SharedPtr _req,
+    gazebo_msgs::srv::SetModelConfiguration::Response::SharedPtr _res);
+
   /// \brief World pointer from Gazebo.
   gazebo::physics::WorldPtr world_;
 
@@ -65,6 +73,9 @@ public:
 
   /// \brief ROS service to handle requests to set entity states.
   rclcpp::Service<gazebo_msgs::srv::SetEntityState>::SharedPtr set_entity_state_service_;
+
+  /// \brief ROS service to handle requests to set joint states.
+  rclcpp::Service<gazebo_msgs::srv::SetModelConfiguration>::SharedPtr set_joint_positions_service_;
 
   /// \brief ROS publisher to publish model_states.
   rclcpp::Publisher<gazebo_msgs::msg::ModelStates>::SharedPtr model_states_pub_;
@@ -107,6 +118,12 @@ void GazeboRosState::Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr _sdf
     impl_->ros_node_->create_service<gazebo_msgs::srv::SetEntityState>(
     "set_entity_state", std::bind(
       &GazeboRosStatePrivate::SetEntityState, impl_.get(),
+      std::placeholders::_1, std::placeholders::_2));
+
+  impl_->set_joint_positions_service_ =
+    impl_->ros_node_->create_service<gazebo_msgs::srv::SetModelConfiguration>(
+    "set_joint_positions", std::bind(
+      &GazeboRosStatePrivate::SetJointPositions, impl_.get(),
       std::placeholders::_1, std::placeholders::_2));
 
   impl_->model_states_pub_ = impl_->ros_node_->create_publisher<gazebo_msgs::msg::ModelStates>(
@@ -308,6 +325,52 @@ void GazeboRosStatePrivate::SetEntityState(
 
   // Fill response
   _res->success = true;
+}
+
+void GazeboRosStatePrivate::SetJointPositions(
+  gazebo_msgs::srv::SetModelConfiguration::Request::SharedPtr _req,
+  gazebo_msgs::srv::SetModelConfiguration::Response::SharedPtr _res)
+{
+  // search for model with name
+  #if GAZEBO_MAJOR_VERSION >= 8
+    gazebo::physics::ModelPtr model = world_->ModelByName(_req->model_name);
+  #else
+    gazebo::physics::ModelPtr model = world_->GetModel(_req->model_name);
+  #endif
+
+  if (!model)
+  {
+    RCLCPP_ERROR(ros_node_->get_logger(),
+     "set_joint_positions: model [%s] does not exist", _req->model_name.c_str());
+    _res->success = false;
+    _res->status_message = "set_joint_positions: model does not exist";
+    return;
+  }
+
+  if (_req->joint_names.size() == _req->joint_positions.size())
+  {
+    std::map<std::string, double> joint_position_map;
+    for (unsigned int i = 0; i < _req->joint_names.size(); i++)
+    {
+      joint_position_map[_req->joint_names[i]] = _req->joint_positions[i];
+    }
+
+    // make the service call to pause gazebo
+    bool is_paused = world_->IsPaused();
+    if (!is_paused) world_->SetPaused(true);
+
+    model->SetJointPositions(joint_position_map);
+
+    // resume paused state before this call
+    world_->SetPaused(is_paused);
+
+    _res->success = true;
+    _res->status_message = "set_joint_positions: success";
+  } else {
+    _res->success = false;
+    _res->status_message = "set_joint_positions: \
+        joint name and position list have different lengths";
+  }
 }
 
 GZ_REGISTER_WORLD_PLUGIN(GazeboRosState)
