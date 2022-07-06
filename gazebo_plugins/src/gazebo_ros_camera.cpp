@@ -356,13 +356,6 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   }
 
   for (uint64_t i = 0; i < impl_->num_cameras_; ++i) {
-    // C parameters
-    auto default_cx = (static_cast<double>(width[i]) + 1.0) / 2.0;
-    auto cx = _sdf->Get<double>("cx", default_cx).first;
-
-    auto default_cy = (static_cast<double>(height[i]) + 1.0) / 2.0;
-    auto cy = _sdf->Get<double>("cy", default_cy).first;
-
     impl_->hfov_.push_back(impl_->camera_[i]->HFOV().Radian());
 
     double computed_focal_length =
@@ -398,6 +391,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     auto border_crop = _sdf->Get<bool>("border_crop", true).first;
     auto hack_baseline = _sdf->Get<double>("hack_baseline", 0.0).first;
 
+    // Get Optical center from camera
+    double cx = (static_cast<double>(width[i]) + 1.0) / 2.0;
+    double cy = (static_cast<double>(height[i]) + 1.0) / 2.0;
+
     // Get distortion from camera
     double distortion_k1{0.0};
     double distortion_k2{0.0};
@@ -406,6 +403,9 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     double distortion_t2{0.0};
     if (impl_->camera_[i]->LensDistortion()) {
       impl_->camera_[i]->LensDistortion()->SetCrop(border_crop);
+
+      cx = impl_->camera_[i]->LensDistortion()->Center().X();
+      cy =  impl_->camera_[i]->LensDistortion()->Center().Y();
 
       distortion_k1 = impl_->camera_[i]->LensDistortion()->K1();
       distortion_k2 = impl_->camera_[i]->LensDistortion()->K2();
