@@ -19,6 +19,8 @@
 #include <gazebo/plugins/DepthCameraPlugin.hh>
 #include <gazebo_plugins/multi_camera_plugin.hpp>
 #include <gazebo_ros/node.hpp>
+
+#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 #include <std_msgs/msg/empty.hpp>
 
 #include <memory>
