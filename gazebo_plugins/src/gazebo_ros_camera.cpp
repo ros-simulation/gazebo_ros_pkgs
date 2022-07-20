@@ -405,7 +405,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       impl_->camera_[i]->LensDistortion()->SetCrop(border_crop);
 
       cx = impl_->camera_[i]->LensDistortion()->Center().X();
-      cy =  impl_->camera_[i]->LensDistortion()->Center().Y();
+      cy = impl_->camera_[i]->LensDistortion()->Center().Y();
 
       distortion_k1 = impl_->camera_[i]->LensDistortion()->K1();
       distortion_k2 = impl_->camera_[i]->LensDistortion()->K2();
