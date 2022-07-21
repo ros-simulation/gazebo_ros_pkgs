@@ -29,6 +29,7 @@ set(tests
   test_gazebo_ros_ray_sensor
   test_gazebo_ros_tricycle_drive
   test_gazebo_ros_vacuum_gripper
+  test_gazebo_ros_camera_optical_center
   test_gazebo_ros_wheelslip
 )
 
