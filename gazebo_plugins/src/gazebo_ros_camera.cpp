@@ -391,7 +391,6 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     auto border_crop = _sdf->Get<bool>("border_crop", true).first;
     auto hack_baseline = _sdf->Get<double>("hack_baseline", 0.0).first;
 
-    // Get Optical center from camera
     double default_cx = (static_cast<double>(width[i]) + 1.0) / 2.0;
     double default_cy = (static_cast<double>(height[i]) + 1.0) / 2.0;
 
@@ -404,6 +403,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     if (impl_->camera_[i]->LensDistortion()) {
       impl_->camera_[i]->LensDistortion()->SetCrop(border_crop);
 
+      // Get Optical center from camera
       default_cx = impl_->camera_[i]->LensDistortion()->Center().X();
       default_cy = impl_->camera_[i]->LensDistortion()->Center().Y();
 
@@ -414,6 +414,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
       distortion_t2 = impl_->camera_[i]->LensDistortion()->P2();
     }
 
+    // Override the default values if sdf tag exists
     double cx = _sdf->Get<double>("cx", default_cx).first;
     double cy = _sdf->Get<double>("cy", default_cy).first;
 
