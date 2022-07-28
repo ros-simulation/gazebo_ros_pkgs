@@ -398,7 +398,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     if(_sdf->HasElement("focal_length")) {
       RCLCPP_WARN(
           impl_->ros_node_->get_logger(),
-          "The <cx> [%f] you have provided for camera [%s]"
+          "The <focal_length> [%f] you have provided for camera [%s]"
           " is deprecated and will be ignored. Consider not providing the "
           "<cx> tag altogether since this value is fetched directly from "
           "Gazebo.",
