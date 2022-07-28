@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 #include <gazebo/test/ServerFixture.hh>
-#include <image_transport/image_transport.h>
+#include <image_transport/image_transport.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <memory>
@@ -29,8 +28,11 @@ struct TestParams
   /// Path to world file
   std::string world;
 
-  /// Camera info topic to subscribe to
-  std::string info_topic;
+  /// Camera1 info topic to subscribe to
+  std::string info_topic_1;
+  
+  /// Camera2 info topic to subscribe to
+  std::string info_topic_2;
 };
 
 class GazeboRosCameraIntrinsicsTest
@@ -40,15 +42,18 @@ class GazeboRosCameraIntrinsicsTest
   void TearDown() override
   {
     // Make sure they're destroyed even if test fails by ASSERT
-    cam_info_sub_.reset();
+    cam_info_1_sub_.reset();
     ServerFixture::TearDown();
   }
 
-  /// Subscribe to camera info.
-  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_sub_;
+  /// Subscribe to camera info_topic_1.
+  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_1_sub_;
+
+  /// Subscribe to camera info_topic_2.
+  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_2_sub_;
 };
 
-TEST_P(GazeboRosCameraIntrinsicsTest, CameraDefaultOpticalCenter)
+TEST_P(GazeboRosCameraIntrinsicsTest, CameraIntrinsics)
 {
   // Load test world and start paused
   this->Load(GetParam().world, true);
@@ -64,12 +69,20 @@ TEST_P(GazeboRosCameraIntrinsicsTest, CameraDefaultOpticalCenter)
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
-  // Subscribe to camera info
-  sensor_msgs::msg::CameraInfo::SharedPtr cam_info;
-  cam_info_sub_ = node->create_subscription<sensor_msgs::msg::CameraInfo>(
-      GetParam().info_topic, rclcpp::SensorDataQoS(),
-      [&cam_info](const sensor_msgs::msg::CameraInfo::SharedPtr _msg) {
-        cam_info = _msg;
+  // Subscribe to info_topic_1
+  sensor_msgs::msg::CameraInfo::SharedPtr cam_info_1;
+  cam_info_1_sub_ = node->create_subscription<sensor_msgs::msg::CameraInfo>(
+      GetParam().info_topic_1, rclcpp::SensorDataQoS(),
+      [&cam_info_1](const sensor_msgs::msg::CameraInfo::SharedPtr _msg) {
+        cam_info_1 = _msg;
+      });
+
+  // Subscribe to info_topic_2
+  sensor_msgs::msg::CameraInfo::SharedPtr cam_info_2;
+  cam_info_2_sub_ = node->create_subscription<sensor_msgs::msg::CameraInfo>(
+      GetParam().info_topic_2, rclcpp::SensorDataQoS(),
+      [&cam_info_2](const sensor_msgs::msg::CameraInfo::SharedPtr _msg) {
+        cam_info_2 = _msg;
       });
 
   world->Step(5000);
@@ -78,51 +91,75 @@ TEST_P(GazeboRosCameraIntrinsicsTest, CameraDefaultOpticalCenter)
   executor.spin_once(100ms);
   executor.spin_once(100ms);
 
-  ASSERT_NE(nullptr, cam_info);
+  ASSERT_NE(nullptr, cam_info_1);
+  ASSERT_NE(nullptr, cam_info_2);
+
+  // Cleanup transport so we don't get new messages while proceeding the test
+  // Clean up
+  cam_info_1_sub_.reset();
+  cam_info_2_sub_.reset();
 
   // Load camera coefficients from published ROS information
-  auto intrinsic_matrix = cv::Mat(3, 3, CV_64F);
-  if (cam_info->k.size() == 9) {
+  auto intrinsic_matrix_1 = cv::Mat(3, 3, CV_64F);
+  if (cam_info_1->k.size() == 9) {
   memcpy(
-      intrinsic_matrix.data, cam_info->k.data(),
-      cam_info->k.size() * sizeof(double));
+      intrinsic_matrix_1.data, cam_info_1->k.data(),
+      cam_info_1->k.size() * sizeof(double));
   }
 
-  // from sdf file
-  double width = 640.0;
-  double height = 480.0;
-  double hfov = 1.3962634;
+  auto intrinsic_matrix_2 = cv::Mat(3, 3, CV_64F);
+  if (cam_info_2->k.size() == 9) {
+    memcpy(
+        intrinsic_matrix_2.data, cam_info_2->k.data(),
+        cam_info_2->k.size() * sizeof(double));
+  }
 
-  // calculations
-  double ratio = width / height;
-  double vfov = 2.0 * atan(tan(hfov / 2.0) / ratio);
-  double computed_fx =
-      (static_cast<double>(width)) / (2.0 * tan(hfov / 2.0));
-  double computed_fy =
-      (static_cast<double>(height)) / (2.0 * tan(vfov / 2.0));
+  // ##############################################################
+  // camera1 with no camera lens intrinsics sdf tag provided
+  {
+    // same as sdf file
+    double width = 640.0;
+    double height = 480.0;
+    double hfov = 1.3962634;
 
-  // verify that the camera intrinsics from gazebo when no camera lens
-  // intrinsics tag is provided in sdf file.
-  // optical centre
-  ASSERT_DOUBLE_EQ(intrinsic_matrix.at<double>(0, 2), width/2);
-  ASSERT_DOUBLE_EQ(intrinsic_matrix.at<double>(1, 2), height/2);
-  // focal length
-  ASSERT_DOUBLE_EQ(intrinsic_matrix.at<double>(0, 0), 381.36241912841797);
-  ASSERT_DOUBLE_EQ(intrinsic_matrix.at<double>(1, 1), 381.36242866516113);
+    // calculations
+    double ratio = width / height;
+    double vfov = 2.0 * atan(tan(hfov / 2.0) / ratio);
+    double computed_fx =
+        (static_cast<double>(width)) / (2.0 * tan(hfov / 2.0));
+    double computed_fy =
+        (static_cast<double>(height)) / (2.0 * tan(vfov / 2.0));
 
-  // check if focal length from gazebo matches computed focal length
-  double error = 1e-2;
-  ASSERT_NEAR(intrinsic_matrix.at<double>(0, 0), computed_fx, error);
-  ASSERT_NEAR(intrinsic_matrix.at<double>(1, 1), computed_fy, error);
+    // verify that the camera intrinsics from gazebo when no camera lens
+    // intrinsics tag is provided in sdf file.
+    // optical centre
+    ASSERT_DOUBLE_EQ(intrinsic_matrix_1.at<double>(0, 2), width / 2);
+    ASSERT_DOUBLE_EQ(intrinsic_matrix_1.at<double>(1, 2), height / 2);
+    // focal length
+    ASSERT_DOUBLE_EQ(intrinsic_matrix_1.at<double>(0, 0), 381.36241912841797);
+    ASSERT_DOUBLE_EQ(intrinsic_matrix_1.at<double>(1, 1), 381.36242866516113);
 
-  // Clean up
-  cam_info_sub_.reset();
+    // check if focal length from gazebo matches computed focal length
+    double error = 1e-2;
+    ASSERT_NEAR(intrinsic_matrix_1.at<double>(0, 0), computed_fx, error);
+    ASSERT_NEAR(intrinsic_matrix_1.at<double>(1, 1), computed_fy, error);
+  }
+  
+  // camera2 with camera lens intrinsics sdf tag provided
+  {
+    // optical centre
+    ASSERT_DOUBLE_EQ(intrinsic_matrix_2.at<double>(0, 2), 500.0);
+    ASSERT_DOUBLE_EQ(intrinsic_matrix_2.at<double>(1, 2), 500.0);
+    // focal length
+    ASSERT_DOUBLE_EQ(intrinsic_matrix_2.at<double>(0, 0), 1000.0);
+    ASSERT_DOUBLE_EQ(intrinsic_matrix_2.at<double>(1, 1), 800.0);
+  }
 }
 
 INSTANTIATE_TEST_SUITE_P(
     GazeboRosCamera, GazeboRosCameraIntrinsicsTest, ::testing::Values(
     TestParams({"worlds/gazebo_ros_camera_intrinsics.world",
-                "/camera1/camera_info"})
+                "/camera1/camera_info", "/camera2/camera_info"})
 ));
 
 int main(int argc, char ** argv)

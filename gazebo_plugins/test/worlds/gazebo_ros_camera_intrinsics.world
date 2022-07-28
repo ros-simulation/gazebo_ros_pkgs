@@ -54,7 +54,7 @@
       </link>
     </model>
 
-    <model name="camera_model">
+    <model name="camera_model_1">
       <pose>0 0 0.5 0 0 3.14</pose>
       <static>true</static>
       <link name="camera_link">
@@ -69,12 +69,42 @@
               <format>R8G8B8</format>
             </image>
           </camera>
-          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+          <plugin name="camera_controller_1" filename="libgazebo_ros_camera.so">
             <ros>
               <camera_name>camera1</camera_name>
             </ros>
-            <!-- camera_name>omit so it defaults to sensor name</camera_name-->
-            <!-- frame_name>omit so it defaults to link name</frame_name-->
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+
+    <model name="camera_model_2">
+      <pose>0 0 0.5 0 0 3.14</pose>
+      <static>true</static>
+      <link name="camera_link">
+        <sensor type="camera" name="camera2">
+          <update_rate>60</update_rate>
+          <visualize>true</visualize>
+          <camera name="head">
+            <horizontal_fov>1.3962634</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
+            <lens>
+              <intrinsics>
+                <fx>1000</fx>
+                <fy>800</fy>
+                <cx>500</cx>
+                <cy>500</cy>
+              </intrinsics> <!-- End Intrinsics -->
+            </lens> <!-- End Lens -->
+          </camera>
+          <plugin name="camera_controller_2" filename="libgazebo_ros_camera.so">
+            <ros>
+              <camera_name>camera2</camera_name>
+            </ros>
           </plugin>
         </sensor>
       </link>
