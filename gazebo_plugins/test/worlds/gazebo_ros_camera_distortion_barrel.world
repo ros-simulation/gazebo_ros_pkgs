@@ -46,6 +46,7 @@
             <frame_name>frame_name</frame_name>
             <hack_baseline>0.07</hack_baseline>
             <border_crop>false</border_crop>
+            <cx>4.0</cx>
           </plugin>
         </sensor>
       </link>

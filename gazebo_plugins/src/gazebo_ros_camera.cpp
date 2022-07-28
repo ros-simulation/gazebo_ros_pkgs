@@ -123,6 +123,18 @@ public:
   /// Horizontal FOV of cameras
   std::vector<double> hfov_;
 
+  /// X focal length in pixels
+  std::vector<double> fx_;
+
+  /// Y focal length in pixels
+  std::vector<double> fy_;
+
+  /// X principal point (in pixels)
+  std::vector<double> cx_;
+
+  // Y principal point (in pixels)
+  std::vector<double> cy_;
+
   /// Min valid depth
   double min_depth_;
 
@@ -356,32 +368,41 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
   }
 
   for (uint64_t i = 0; i < impl_->num_cameras_; ++i) {
-    // C parameters
-    auto default_cx = (static_cast<double>(width[i]) + 1.0) / 2.0;
-    auto cx = _sdf->Get<double>("cx", default_cx).first;
-
-    auto default_cy = (static_cast<double>(height[i]) + 1.0) / 2.0;
-    auto cy = _sdf->Get<double>("cy", default_cy).first;
-
+    // Camera intrinsic parameters
+    impl_->fx_.push_back(impl_->camera_[i]->FocalLengthX());
+    impl_->fy_.push_back(impl_->camera_[i]->FocalLengthY());
+    impl_->cx_.push_back(impl_->camera_[i]->OpticalCentreX());
+    impl_->cy_.push_back(impl_->camera_[i]->OpticalCentreY());
     impl_->hfov_.push_back(impl_->camera_[i]->HFOV().Radian());
 
-    double computed_focal_length =
-      (static_cast<double>(width[i])) / (2.0 * tan(impl_->hfov_[i] / 2.0));
-
-    // Focal length
-    auto focal_length = _sdf->Get<double>("focal_length", 0.0).first;
-    if (focal_length == 0) {
-      focal_length = computed_focal_length;
-    } else if (!ignition::math::equal(focal_length, computed_focal_length)) {
+    if(_sdf->HasElement("cx")) {
       RCLCPP_WARN(
-        impl_->ros_node_->get_logger(),
-        "The <focal_length> [%f] you have provided for camera [%s]"
-        " is inconsistent with specified <image_width> [%d] and"
-        " HFOV [%f]. Please double check to see that"
-        " focal_length = width / (2.0 * tan(HFOV/2.0))."
-        " The expected focal_length value is [%f],"
-        " please update your camera model description accordingly.",
-        focal_length, _sensor->Name().c_str(), width[i], impl_->hfov_[i], computed_focal_length);
+          impl_->ros_node_->get_logger(),
+          "The <cx> [%f] you have provided for camera [%s] is "
+          "deprecated and will be ignored. Consider not providing the "
+          "<cx> tag altogether since this value is fetched directly from "
+          "Gazebo.",
+          _sdf->Get<double>("cx"), _sensor->Name().c_str());
+    }
+
+    if(_sdf->HasElement("cy")) {
+      RCLCPP_WARN(
+          impl_->ros_node_->get_logger(),
+          "The <cy> [%f] you have provided for camera [%s] is "
+          "deprecated and will be ignored. Consider not providing the "
+          "<cx> tag altogether since this value is fetched directly from "
+          "Gazebo.",
+          _sdf->Get<double>("cy"), _sensor->Name().c_str());
+    }
+
+    if(_sdf->HasElement("focal_length")) {
+      RCLCPP_WARN(
+          impl_->ros_node_->get_logger(),
+          "The <cx> [%f] you have provided for camera [%s]"
+          " is deprecated and will be ignored. Consider not providing the "
+          "<cx> tag altogether since this value is fetched directly from "
+          "Gazebo.",
+          _sdf->Get<double>("focal_length"), _sensor->Name().c_str());
     }
 
     // CameraInfo
@@ -424,12 +445,12 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     camera_info_msg.d[4] = distortion_k3;
 
     // Original camera matrix
-    camera_info_msg.k[0] = focal_length;
+    camera_info_msg.k[0] = impl_->fx_[i];
     camera_info_msg.k[1] = 0.0;
-    camera_info_msg.k[2] = cx;
+    camera_info_msg.k[2] = impl_->cx_[i];
     camera_info_msg.k[3] = 0.0;
-    camera_info_msg.k[4] = focal_length;
-    camera_info_msg.k[5] = cy;
+    camera_info_msg.k[4] = impl_->fy_[i];
+    camera_info_msg.k[5] = impl_->cy_[i];
     camera_info_msg.k[6] = 0.0;
     camera_info_msg.k[7] = 0.0;
     camera_info_msg.k[8] = 1.0;
@@ -447,13 +468,13 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
     // camera_ projection matrix (same as camera_ matrix due
     // to lack of distortion/rectification) (is this generated?)
-    camera_info_msg.p[0] = focal_length;
+    camera_info_msg.p[0] = impl_->fx_[i];
     camera_info_msg.p[1] = 0.0;
-    camera_info_msg.p[2] = cx;
-    camera_info_msg.p[3] = -focal_length * hack_baseline;
+    camera_info_msg.p[2] = impl_->cx_[i];
+    camera_info_msg.p[3] = -impl_->fx_[i] * hack_baseline;
     camera_info_msg.p[4] = 0.0;
-    camera_info_msg.p[5] = focal_length;
-    camera_info_msg.p[6] = cy;
+    camera_info_msg.p[5] = impl_->fy_[i];
+    camera_info_msg.p[6] = impl_->cy_[i];
     camera_info_msg.p[7] = 0.0;
     camera_info_msg.p[8] = 0.0;
     camera_info_msg.p[9] = 0.0;
