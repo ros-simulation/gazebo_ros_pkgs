@@ -369,10 +369,10 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
   for (uint64_t i = 0; i < impl_->num_cameras_; ++i) {
     // Camera intrinsic parameters
-    impl_->fx_.push_back(impl_->camera_[i]->FocalLengthX());
-    impl_->fy_.push_back(impl_->camera_[i]->FocalLengthY());
-    impl_->cx_.push_back(impl_->camera_[i]->OpticalCentreX());
-    impl_->cy_.push_back(impl_->camera_[i]->OpticalCentreY());
+    impl_->fx_.push_back(impl_->camera_[i]->ImageFocalLengthX());
+    impl_->fy_.push_back(impl_->camera_[i]->ImageFocalLengthY());
+    impl_->cx_.push_back(impl_->camera_[i]->ImageOpticalCentreX());
+    impl_->cy_.push_back(impl_->camera_[i]->ImageOpticalCentreY());
     impl_->hfov_.push_back(impl_->camera_[i]->HFOV().Radian());
 
     if(_sdf->HasElement("cx")) {
