@@ -197,7 +197,7 @@ void GazeboRosRaySensorPrivate::SubscribeGazeboLaserScan()
 void GazeboRosRaySensorPrivate::PublishLaserScan(ConstLaserScanStampedPtr & _msg)
 {
   // Convert Laser scan to ROS LaserScan
-  auto ls = gazebo_ros::Convert<sensor_msgs::msg::LaserScan>(*_msg);
+  auto ls = gazebo_ros::Convert<sensor_msgs::msg::LaserScan>(*_msg, min_intensity_);
   // Set tf frame
   ls.header.frame_id = frame_name_;
   // Publish output
