@@ -107,8 +107,8 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
   sensor_msgs::msg::PointCloud2::SharedPtr pc2 = nullptr;
   sensor_msgs::msg::Range::SharedPtr range = nullptr;
   auto ls_sub = SUBSCRIBE_SETTER(ls, "/ray/laserscan");
-  auto ls_min_intensity_sub = SUBSCRIBE_SETTER(ls_min_intensity,
-      "/ray/laserscan_min_intensity");
+  auto ls_min_intensity_sub =
+    SUBSCRIBE_SETTER(ls_min_intensity, "/ray/laserscan_min_intensity");
   auto pc_sub = SUBSCRIBE_SETTER(pc, "/ray/pointcloud");
   auto pc2_sub = SUBSCRIBE_SETTER(pc2, "/ray/pointcloud2");
   auto range_sub = SUBSCRIBE_SETTER(range, "/ray/range");
