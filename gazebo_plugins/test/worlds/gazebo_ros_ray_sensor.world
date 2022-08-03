@@ -68,6 +68,14 @@
             </ros>
             <output_type>sensor_msgs/LaserScan</output_type>
           </plugin>
+          <plugin name="ls_min_intensity" filename="libgazebo_ros_ray_sensor.so">
+            <ros>
+              <namespace>/ray</namespace>
+              <remapping>~/out:=laserscan_min_intensity</remapping>
+            </ros>
+            <output_type>sensor_msgs/LaserScan</output_type>
+            <min_intensity>81</min_intensity>
+          </plugin>
           <plugin name="range" filename="libgazebo_ros_ray_sensor.so">
             <ros>
               <namespace>/ray</namespace>

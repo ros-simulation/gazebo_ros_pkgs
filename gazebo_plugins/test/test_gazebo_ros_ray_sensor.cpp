@@ -102,10 +102,13 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
 
   // Create subscribe setter for each output type
   sensor_msgs::msg::LaserScan::SharedPtr ls = nullptr;
+  sensor_msgs::msg::LaserScan::SharedPtr ls_min_intensity = nullptr;
   sensor_msgs::msg::PointCloud::SharedPtr pc = nullptr;
   sensor_msgs::msg::PointCloud2::SharedPtr pc2 = nullptr;
   sensor_msgs::msg::Range::SharedPtr range = nullptr;
   auto ls_sub = SUBSCRIBE_SETTER(ls, "/ray/laserscan");
+  auto ls_min_intensity_sub =
+    SUBSCRIBE_SETTER(ls_min_intensity, "/ray/laserscan_min_intensity");
   auto pc_sub = SUBSCRIBE_SETTER(pc, "/ray/pointcloud");
   auto pc2_sub = SUBSCRIBE_SETTER(pc2, "/ray/pointcloud2");
   auto range_sub = SUBSCRIBE_SETTER(range, "/ray/range");
@@ -122,6 +125,7 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
 
   // Ensure every message was received
   ASSERT_NE(ls, nullptr);
+  ASSERT_NE(ls_min_intensity, nullptr);
   ASSERT_NE(pc, nullptr);
   ASSERT_NE(pc2, nullptr);
   ASSERT_NE(range, nullptr);
@@ -181,6 +185,31 @@ TEST_F(GazeboRosRaySensorTest, CorrectOutput)
     if (idx > static_cast<int>(ls->ranges.size())) {idx = ls->ranges.size() - 1;}
     EXPECT_NEAR(ls->ranges[idx], range, POINT_DISTANCE_TOL);
     EXPECT_NEAR(ls->intensities[idx], 80, ROUNDING_ERROR_TOL);
+  }
+
+  // LaserScan with min intensity verification
+  EXPECT_EQ(ls_min_intensity->header.frame_id, "ray_link");
+  EXPECT_NEAR(ls_min_intensity->angle_min, -0.5236, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(ls_min_intensity->angle_max, 0.5236, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(ls_min_intensity->range_min, 0.05, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(ls_min_intensity->range_max, 50.0, ROUNDING_ERROR_TOL);
+  EXPECT_NEAR(
+    ls_min_intensity->angle_increment,
+    (ls_min_intensity->angle_max - ls_min_intensity->angle_min) /
+    ls_min_intensity->ranges.size(), ROUNDING_ERROR_TOL);
+
+  // Ensure each ground truth range is found in the laserscan
+  for (size_t i = 0; i < ranges.size(); ++i) {
+    double range = ranges[i];
+    double angle = angles[i];
+    // Check for a correct range at roughly the ground truth angle
+    int idx = (angle - ls->angle_min) / ls_min_intensity->angle_increment;
+    if (idx < 0) {idx = 0;}
+    if (idx > static_cast<int>(ls_min_intensity->ranges.size())) {
+      idx = ls_min_intensity->ranges.size() - 1;
+    }
+    EXPECT_NEAR(ls_min_intensity->ranges[idx], range, POINT_DISTANCE_TOL);
+    EXPECT_NEAR(ls_min_intensity->intensities[idx], 81, ROUNDING_ERROR_TOL);
   }
 
   // Artificialy trigger sigInt
