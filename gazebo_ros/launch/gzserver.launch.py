@@ -20,16 +20,67 @@ from os import pathsep
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import ExecuteProcess
+from launch.actions import OpaqueFunction
 from launch.actions import Shutdown
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PythonExpression
+from launch.utilities import normalize_to_list_of_substitutions
 
 from scripts import GazeboRosPaths
 
 
 def generate_launch_description():
-    cmd = [
+    model, plugin, media = GazeboRosPaths.get_paths()
+
+    if 'GAZEBO_MODEL_PATH' in environ:
+        model += pathsep+environ['GAZEBO_MODEL_PATH']
+    if 'GAZEBO_PLUGIN_PATH' in environ:
+        plugin += pathsep+environ['GAZEBO_PLUGIN_PATH']
+    if 'GAZEBO_RESOURCE_PATH' in environ:
+        media += pathsep+environ['GAZEBO_RESOURCE_PATH']
+
+    env = {
+        'GAZEBO_MODEL_PATH': model,
+        'GAZEBO_PLUGIN_PATH': plugin,
+        'GAZEBO_RESOURCE_PATH': media
+    }
+
+    prefix = PythonExpression([
+        '"gdb -ex run --args" if "true" == "',
+        LaunchConfiguration('gdb'),
+        '" else "valgrind" if "true" == "',
+        LaunchConfiguration('valgrind'),
+        '" else ""'
+    ])
+
+    # Function that returns the ExecuteProcess command for gzserver
+    def execute_command(context, command):
+        # Workaround for https://github.com/ros2/launch/issues/638
+        # Filter out any empty strings from the argument list
+        normalized_command = normalize_to_list_of_substitutions(command)
+        command_post_substitution = [
+            context.perform_substitution(command_part)
+            for command_part in normalized_command
+        ]
+
+        # Check if we should shutdown if server_required is true and gzserver stops
+        # Could be simplified with https://github.com/ros2/launch/issues/290
+        server_required = LaunchConfiguration('server_required').perform(context)
+        on_exit_action = Shutdown() if server_required.lower() == 'true' else None
+
+        return [
+            ExecuteProcess(
+                cmd=list(filter(None, command_post_substitution)),
+                output='screen',
+                additional_env=env,
+                shell=False,
+                prefix=prefix,
+                on_exit=on_exit_action,
+            )
+        ]
+
+    gzserver_command = [
         'gzserver',
         # Pass through arguments to gzserver
         LaunchConfiguration('world'),
@@ -61,29 +112,6 @@ def generate_launch_description():
         _arg_command('', condition=LaunchConfiguration('params_file')),
         LaunchConfiguration('extra_gazebo_args'),
     ]
-
-    model, plugin, media = GazeboRosPaths.get_paths()
-
-    if 'GAZEBO_MODEL_PATH' in environ:
-        model += pathsep+environ['GAZEBO_MODEL_PATH']
-    if 'GAZEBO_PLUGIN_PATH' in environ:
-        plugin += pathsep+environ['GAZEBO_PLUGIN_PATH']
-    if 'GAZEBO_RESOURCE_PATH' in environ:
-        media += pathsep+environ['GAZEBO_RESOURCE_PATH']
-
-    env = {
-        'GAZEBO_MODEL_PATH': model,
-        'GAZEBO_PLUGIN_PATH': plugin,
-        'GAZEBO_RESOURCE_PATH': media
-    }
-
-    prefix = PythonExpression([
-        '"gdb -ex run --args" if "true" == "',
-        LaunchConfiguration('gdb'),
-        '" else "valgrind" if "true" == "',
-        LaunchConfiguration('valgrind'),
-        '" else ""'
-    ])
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -186,29 +214,9 @@ def generate_launch_description():
             'server_required', default_value='false',
             description='Set "true" to shut down launch script when server is terminated'
         ),
+        # Start gzserver
+        OpaqueFunction(function=execute_command, args=[gzserver_command])
 
-        # Execute node with on_exit=Shutdown if server_required is specified.
-        # See ros-simulation/gazebo_ros_pkgs#1086. Simplification of logic
-        # would be possible pending ros2/launch#290.
-        ExecuteProcess(
-            cmd=cmd,
-            output='screen',
-            additional_env=env,
-            shell=False,
-            prefix=prefix,
-            on_exit=Shutdown(),
-            condition=IfCondition(LaunchConfiguration('server_required')),
-        ),
-
-        # Execute node with default on_exit if the node is not required
-        ExecuteProcess(
-            cmd=cmd,
-            output='screen',
-            additional_env=env,
-            shell=False,
-            prefix=prefix,
-            condition=UnlessCondition(LaunchConfiguration('server_required')),
-        ),
     ])
 
 
