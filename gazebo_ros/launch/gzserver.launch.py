@@ -24,6 +24,7 @@ from launch.actions import Shutdown
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PythonExpression
+from launch_ros.substitutions import FindPackageShare
 
 from scripts import GazeboRosPaths
 
@@ -87,8 +88,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument(
-            'world', default_value='',
-            description='Specify world file name'
+            'world', default_value=[FindPackageShare('gazebo_ros'), '/worlds/empty.world'],
+            description='Specify world file name. Defaults to an empty world.'
         ),
         DeclareLaunchArgument(
             'version', default_value='false',
