@@ -378,31 +378,39 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     if(_sdf->HasElement("cx")) {
       RCLCPP_WARN(
           impl_->ros_node_->get_logger(),
-          "The <cx> [%f] you have provided for camera [%s] is "
-          "deprecated and will be ignored. Consider not providing the "
-          "<cx> tag altogether since this value is fetched directly from "
-          "Gazebo.",
+          "The <cx> [%f] tag for camera [%s] is deprecated. Consider "
+          "providing the <cx> in <intrinsics> tag of Gazebo camera sensor or "
+          "optionally not using the <intrinsics> tag altogether since the "
+          "value will be calculated by default from Gazebo using the image size "
+          "and FOV in case no <intrinsics> tag is provided.",
           _sdf->Get<double>("cx"), _sensor->Name().c_str());
+      impl_->cx_[impl_->cx_.size() - 1] = _sdf->Get<double>("cx");
     }
 
     if(_sdf->HasElement("cy")) {
       RCLCPP_WARN(
           impl_->ros_node_->get_logger(),
-          "The <cy> [%f] you have provided for camera [%s] is "
-          "deprecated and will be ignored. Consider not providing the "
-          "<cx> tag altogether since this value is fetched directly from "
-          "Gazebo.",
+          "The <cy> [%f] tag for camera [%s] is deprecated. Consider "
+          "providing the <cy> in <intrinsics> tag of Gazebo camera sensor or "
+          "optionally not using the <intrinsics> tag altogether since the "
+          "value will be calculated by default from Gazebo using the image size "
+          "and FOV in case no <intrinsics> tag is provided.",
           _sdf->Get<double>("cy"), _sensor->Name().c_str());
+      impl_->cy_[impl_->cy_.size() - 1] = _sdf->Get<double>("cy");
     }
 
     if(_sdf->HasElement("focal_length")) {
       RCLCPP_WARN(
           impl_->ros_node_->get_logger(),
-          "The <focal_length> [%f] you have provided for camera [%s]"
-          " is deprecated and will be ignored. Consider not providing the "
-          "<cx> tag altogether since this value is fetched directly from "
-          "Gazebo.",
+          "The <focal_length> [%f] tag for camera [%s] is deprecated. "
+          "Consider providing the <focal_length> in <intrinsics> tag of "
+          "Gazebo camera sensor or optionally not using the <intrinsics> "
+          "tag altogether since the value will be calculated by default "
+          "from Gazebo using the image size and FOV in case no <intrinsics> "
+          "tag is provided.",
           _sdf->Get<double>("focal_length"), _sensor->Name().c_str());
+      impl_->fx_[impl_->fx_.size() - 1] = _sdf->Get<double>("focal_length");
+      impl_->fy_[impl_->fy_.size() - 1] = _sdf->Get<double>("focal_length");
     }
 
     // CameraInfo
