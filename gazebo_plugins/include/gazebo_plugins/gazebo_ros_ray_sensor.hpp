@@ -48,7 +48,7 @@ class GazeboRosRaySensorPrivate;
 
   \verbatim
   <radiation_type>: The radiation type to publish when the output type is sensor_msgs/Range.
-                   Can be either "infrared" or "ultrasonic".
+                   Can be either "infrared" or "ultrasound".
                    Default: "infrared".
   \endverbatim
 
