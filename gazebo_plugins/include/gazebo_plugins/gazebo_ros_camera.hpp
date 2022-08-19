@@ -58,6 +58,11 @@ class GazeboRosCameraPrivate;
       <!-- Set to true to turn on triggering -->
       <triggered>true</triggered>
 
+      <!-- Set some projection matrix fields-->
+      <P_cx>0</P_cx>
+      <P_cy>320.5</P_cy>
+      <Tx>240.5</Tx>
+
       <hack_baseline>0.07</hack_baseline>
     </plugin>
   \endcode

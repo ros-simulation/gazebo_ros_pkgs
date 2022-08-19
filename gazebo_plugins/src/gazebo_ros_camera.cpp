@@ -445,8 +445,7 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     camera_info_msg.r[7] = 0.0;
     camera_info_msg.r[8] = 1.0;
 
-    // camera_ projection matrix (same as camera_ matrix due
-    // to lack of distortion/rectification) (is this generated?)
+    // projection matrix
     camera_info_msg.p[0] = _sdf->Get<double>("P_fx", focal_length).first;
     camera_info_msg.p[1] = 0.0;
     camera_info_msg.p[2] = _sdf->Get<double>("P_cx", cx).first;
