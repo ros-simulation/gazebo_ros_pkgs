@@ -97,6 +97,9 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
     gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
+    gazebo_ros_->getParameter<double> ( covariance_x_, "covariance_x", 0.00001 );
+    gazebo_ros_->getParameter<double> ( covariance_y_, "covariance_y", 0.00001 );
+    gazebo_ros_->getParameter<double> ( covariance_yaw_, "covariance_yaw", 0.001 );
     std::map<std::string, OdomSource> odomOptions;
     odomOptions["encoder"] = ENCODER;
     odomOptions["world"] = WORLD;
@@ -449,12 +452,19 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
 
 
     // set covariance
-    odom_.pose.covariance[0] = 0.00001;
-    odom_.pose.covariance[7] = 0.00001;
+    odom_.pose.covariance[0] = covariance_x_;
+    odom_.pose.covariance[7] = covariance_y_;
     odom_.pose.covariance[14] = 1000000000000.0;
     odom_.pose.covariance[21] = 1000000000000.0;
     odom_.pose.covariance[28] = 1000000000000.0;
-    odom_.pose.covariance[35] = 0.001;
+    odom_.pose.covariance[35] = covariance_yaw_;
+
+    odom_.twist.covariance[0] = covariance_x_;
+    odom_.twist.covariance[7] = covariance_y_;
+    odom_.twist.covariance[14] = 1000000000000.0;
+    odom_.twist.covariance[21] = 1000000000000.0;
+    odom_.twist.covariance[28] = 1000000000000.0;
+    odom_.twist.covariance[35] = covariance_yaw_;
 
 
     // set header
