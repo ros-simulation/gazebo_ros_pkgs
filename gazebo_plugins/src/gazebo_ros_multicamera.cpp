@@ -63,6 +63,52 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
   this->image_connect_count_lock_ = boost::shared_ptr<boost::mutex>(new boost::mutex);
   this->was_active_ = boost::shared_ptr<bool>(new bool(false));
 
+  const double hackBaselineSdf = (_sdf->HasElement("hackBaseline") ?
+      _sdf->Get<double>("hackBaseline") : 0);
+
+  std::vector<std::string> cameraSuffixes;
+  if (_sdf->HasElement("cameraSuffixes"))
+  {
+    const auto suffixes = _sdf->Get<std::string>("cameraSuffixes");
+    if (!suffixes.empty())
+    {
+      boost::split(cameraSuffixes, suffixes, boost::is_any_of(","));
+      if (cameraSuffixes.size() != this->camera.size())
+      {
+        ROS_FATAL_STREAM_NAMED("multicamera", "The multicamera plugin "
+          " has different number of cameras than there are items in "
+          "<cameraSuffixes>. Either leave <cameraSuffixes> empty, or put there "
+          "the same number of comma-delimited strings as there are cameras.");
+        return;
+      }
+    }
+  }
+  // backwards compatibility with the two-camera-only version
+  else if (this->camera.size() == 2 &&
+    this->camera[0]->Name().find("left") != std::string::npos &&
+    this->camera[1]->Name().find("right") != std::string::npos)
+  {
+    cameraSuffixes = { "/left", "/right" };
+  }
+  else if (this->camera.size() == 2 &&
+    this->camera[0]->Name().find("right") != std::string::npos &&
+    this->camera[1]->Name().find("left") != std::string::npos)
+  {
+    cameraSuffixes = { "/right", "/left" };
+  }
+
+  std::vector<std::string> frameNames;
+  const auto frameName = (_sdf->HasElement("frameName") ?
+      _sdf->Get<std::string>("frameName") : "world");
+  // read <frameName> as a comma-separated list of camera frames
+  boost::split(frameNames, frameName, boost::is_any_of(","));
+  // if only one frame name was entered, use it for all cameras
+  if (this->camera.size() > 1 && frameNames.size() == 1)
+  {
+    for (size_t i = 0; i < this->camera.size() - 1; ++i)
+      frameNames.push_back(frameNames[0]);
+  }
+
   // copying from CameraPlugin into GazeboRosCameraUtils
   for (unsigned i = 0; i < this->camera.size(); ++i)
   {
@@ -77,27 +123,29 @@ void GazeboRosMultiCamera::Load(sensors::SensorPtr _parent,
     util->image_connect_count_ = this->image_connect_count_;
     util->image_connect_count_lock_ = this->image_connect_count_lock_;
     util->was_active_ = this->was_active_;
-    if (this->camera[i]->Name().find("left") != std::string::npos)
-    {
-      // FIXME: hardcoded, left hack_baseline_ 0
-      util->Load(_parent, _sdf, "/left", 0.0);
-    }
-    else if (this->camera[i]->Name().find("right") != std::string::npos)
-    {
-      double hackBaseline = 0.0;
-      if (_sdf->HasElement("hackBaseline"))
-        hackBaseline = _sdf->Get<double>("hackBaseline");
-      util->Load(_parent, _sdf, "/right", hackBaseline);
-    }
+
+    double hackBaseline = 0.0;
+    if (this->camera[i]->Name().find("right") != std::string::npos)
+      hackBaseline = hackBaselineSdf;
+
+    const auto cameraSuffix = (cameraSuffixes.empty() ?
+      ("/" + this->camera[i]->Name()) : cameraSuffixes[i]);
+
+    util->Load(_parent, _sdf, cameraSuffix, hackBaseline);
+    util->frame_name_ = frameNames[i]; // overwrite the SDF-parsed frame name
+
     this->utils.push_back(util);
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
+// Update the controller
 void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
-    GazeboRosCameraUtils* util)
+    const size_t _camNumber,
+    unsigned int /*_width*/, unsigned int /*_height*/, unsigned int /*_depth*/,
+    const std::string &/*_format*/)
 {
+  GazeboRosCameraUtils* util = this->utils[_camNumber];
+
 # if GAZEBO_MAJOR_VERSION >= 7
   common::Time sensor_update_time = util->parentSensor_->LastMeasurementTime();
 # else
@@ -113,22 +161,5 @@ void GazeboRosMultiCamera::OnNewFrame(const unsigned char *_image,
       util->last_update_time_ = sensor_update_time;
     }
   }
-}
-
-// Update the controller
-void GazeboRosMultiCamera::OnNewFrameLeft(const unsigned char *_image,
-    unsigned int _width, unsigned int _height, unsigned int _depth,
-    const std::string &_format)
-{
-  OnNewFrame(_image, this->utils[0]);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Update the controller
-void GazeboRosMultiCamera::OnNewFrameRight(const unsigned char *_image,
-    unsigned int _width, unsigned int _height, unsigned int _depth,
-    const std::string &_format)
-{
-  OnNewFrame(_image, this->utils[1]);
 }
 }

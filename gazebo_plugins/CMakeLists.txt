@@ -428,6 +428,10 @@ if (CATKIN_ENABLE_TESTING)
                       test/camera/multicamera.test
                       test/camera/multicamera.cpp)
     target_link_libraries(multicamera-test ${catkin_LIBRARIES})
+    add_rostest_gtest(multimulticamera-test
+                      test/camera/multimulticamera.test
+                      test/camera/multimulticamera.cpp)
+    target_link_libraries(multimulticamera-test ${catkin_LIBRARIES})
     add_rostest_gtest(camera-test
                       test/camera/camera.test
                       test/camera/camera.cpp)
