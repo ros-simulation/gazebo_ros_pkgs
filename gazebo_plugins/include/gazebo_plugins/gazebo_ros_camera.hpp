@@ -59,7 +59,7 @@ class GazeboRosCameraPrivate;
 
       <!-- Set to true to turn on triggering -->
       <triggered>true</triggered>
-      
+
       <!-- Set some projection matrix fields-->
       <!-- Projection matrix principal point cx-->
       <P_cx>0</P_cx>
