@@ -2697,6 +2697,8 @@ bool GazeboRosApiPlugin::spawnAndConform(TiXmlDocument &gazebo_model_xml, const 
 
   /// \brief poll and wait, verify that the model is spawned within Hardcoded 10 seconds
   ros::Duration model_spawn_timeout(10.0);
+  /// Wait until time can be read.
+  while (ros::Time::now().is_zero());
   ros::Time timeout = ros::Time::now() + model_spawn_timeout;
 
   while (ros::ok())
