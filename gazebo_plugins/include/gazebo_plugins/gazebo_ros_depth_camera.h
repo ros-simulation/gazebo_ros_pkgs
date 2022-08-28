@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2014 Open Source Robotics Foundation
+ * Copyright (C) 2012-2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,6 @@
  * limitations under the License.
  *
 */
-/*
- * Desc: A dynamic controller plugin that publishes ROS image_raw camera_info topic for generic camera sensor.
- * Author: John Hsu
- * Date: 24 Sept 2008
- */
 
 #ifndef GAZEBO_ROS_DEPTH_CAMERA_HH
 #define GAZEBO_ROS_DEPTH_CAMERA_HH
@@ -121,7 +116,10 @@ namespace gazebo
     private: sensor_msgs::PointCloud2 point_cloud_msg_;
     private: sensor_msgs::Image depth_image_msg_;
 
+    /// \brief Minimum range of the point cloud
     private: double point_cloud_cutoff_;
+    /// \brief Maximum range of the point cloud
+    protected: double point_cloud_cutoff_max_;
 
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;

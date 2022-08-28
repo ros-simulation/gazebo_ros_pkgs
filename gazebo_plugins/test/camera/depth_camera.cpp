@@ -55,22 +55,6 @@ TEST_F(DepthCameraTest, cameraSubscribeTest)
   points_sub_ = nh_.subscribe("camera1/points", 1,
                              &DepthCameraTest::pointsCallback,
                              dynamic_cast<DepthCameraTest*>(this));
-#if 0
-  // wait for gazebo to start publishing
-  // TODO(lucasw) this isn't really necessary since this test
-  // is purely passive
-  bool wait_for_topic = true;
-  while (wait_for_topic)
-  {
-    // @todo this fails without the additional 0.5 second sleep after the
-    // publisher comes online, which means on a slower or more heavily
-    // loaded system it may take longer than 0.5 seconds, and the test
-    // would hang until the timeout is reached and fail.
-    if (cam_sub_.getNumPublishers() > 0)
-       wait_for_topic = false;
-    ros::Duration(0.5).sleep();
-  }
-#endif
 
   while (!has_new_image_ || !has_new_depth_ || !has_new_points_)
   {
