@@ -385,7 +385,12 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
     odom_.pose.pose.orientation.w = qt.w();
 
     odom_.twist.twist.angular.z = w;
-    odom_.twist.twist.linear.x = v;
+    if (ssum<0) {
+        odom_.twist.twist.linear.x = -v;
+    }
+    else {
+        odom_.twist.twist.linear.x = v;
+    }
     odom_.twist.twist.linear.y = 0;
 }
 
