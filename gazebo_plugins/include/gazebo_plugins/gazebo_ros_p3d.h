@@ -91,6 +91,9 @@ namespace gazebo
     /// \brief allow specifying constant xyz and rpy offsets
     private: ignition::math::Pose3d offset_;
 
+    // \brief Flag to indicate if rotation calculation needs to be reversed
+    private: bool correctedOffsets_ = false;
+
     /// \brief mutex to lock access to fields used in message callbacks
     private: boost::mutex lock;
 

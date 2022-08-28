@@ -115,6 +115,9 @@ void GazeboRosIMU::LoadThread()
   else
     this->offset_.Rot() = ignition::math::Quaterniond(this->sdf->Get<ignition::math::Vector3d>("rpyOffset"));
 
+  if (this->sdf->HasElement("ignition::corrected_offsets"))
+    this->correctedOffsets_ = this->sdf->Get<bool>("ignition::corrected_offsets");
+
   if (!this->sdf->HasElement("updateRate"))
   {
     ROS_DEBUG_NAMED("imu", "imu plugin missing <updateRate>, defaults to 0.0"
@@ -244,7 +247,13 @@ void GazeboRosIMU::UpdateChild()
     rot = pose.Rot();
 
     // apply rpy offsets
+    // rotation calculation needs to be reversed for sdformat versions > 6.2.0,
+    // see https://github.com/osrf/sdformat/pull/500
+  if (this->correctedOffsets_)
+    rot = rot*this->offset_.Rot();
+  else
     rot = this->offset_.Rot()*rot;
+
     rot.Normalize();
 
     // get Rates
