@@ -217,19 +217,21 @@ void GazeboRosControlPlugin::Update()
   gazebo::common::Time gz_time_now = parent_model_->GetWorld()->GetSimTime();
 #endif
   ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
-  ros::Duration sim_period = sim_time_ros - last_update_sim_time_ros_;
+  ros::Duration update_period = sim_time_ros - last_update_sim_time_ros_;
+  ros::Duration hardware_period = sim_time_ros - last_write_sim_time_ros_;
+  last_write_sim_time_ros_ = sim_time_ros;
 
   robot_hw_sim_->eStopActive(e_stop_active_);
 
+  // Update the robot simulation with the state of the gazebo model
+  robot_hw_sim_->readSim(sim_time_ros, hardware_period);
+
   // Check if we should update the controllers
-  if(sim_period >= control_period_) {
+  if(update_period >= control_period_) {
     // Store this simulation time
     last_update_sim_time_ros_ = sim_time_ros;
 
-    // Update the robot simulation with the state of the gazebo model
-    robot_hw_sim_->readSim(sim_time_ros, sim_period);
-
-    // Compute the controller commands
+    // Determine if controller need to be reset due to e-stop
     bool reset_ctrlrs;
     if (e_stop_active_)
     {
@@ -248,13 +250,13 @@ void GazeboRosControlPlugin::Update()
         reset_ctrlrs = false;
       }
     }
-    controller_manager_->update(sim_time_ros, sim_period, reset_ctrlrs);
+
+    // Compute the controller commands
+    controller_manager_->update(sim_time_ros, update_period, reset_ctrlrs);
   }
 
   // Update the gazebo model with the result of the controller
-  // computation
-  robot_hw_sim_->writeSim(sim_time_ros, sim_time_ros - last_write_sim_time_ros_);
-  last_write_sim_time_ros_ = sim_time_ros;
+  robot_hw_sim_->writeSim(sim_time_ros, hardware_period);
 }
 
 // Called on world reset
