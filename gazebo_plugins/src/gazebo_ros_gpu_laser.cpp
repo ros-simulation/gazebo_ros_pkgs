@@ -58,6 +58,7 @@ GazeboRosLaser::GazeboRosLaser()
 GazeboRosLaser::~GazeboRosLaser()
 {
   ROS_DEBUG_STREAM_NAMED("gpu_laser","Shutting down GPU Laser");
+  this->laser_scan_sub_.reset();
   this->rosnode_->shutdown();
   delete this->rosnode_;
   ROS_DEBUG_STREAM_NAMED("gpu_laser","Unloaded");
