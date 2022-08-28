@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
   camera_info_manager
   std_msgs
+  moveit_msgs
 )
 
 # Through transitive dependencies in the packages above, gazebo_plugins depends
@@ -136,6 +137,7 @@ catkin_package(
   gazebo_ros_planar_move
   gazebo_ros_range
   gazebo_ros_vacuum_gripper
+  gazebo_ros_moveit_planning_scene
 
   CATKIN_DEPENDS
   message_runtime
@@ -158,6 +160,7 @@ catkin_package(
   rosconsole
   camera_info_manager
   std_msgs
+  moveit_msgs
 )
 add_dependencies(${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
@@ -316,6 +319,10 @@ target_link_libraries(gazebo_ros_vacuum_gripper ${catkin_LIBRARIES} ${Boost_LIBR
 ## Add your new plugin here
 ##
 
+add_library(gazebo_ros_moveit_planning_scene src/gazebo_ros_moveit_planning_scene.cpp)
+add_dependencies(gazebo_ros_moveit_planning_scene ${catkin_EXPORTED_TARGETS})
+target_link_libraries(gazebo_ros_moveit_planning_scene ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
+
 ## Template
 add_library(gazebo_ros_template src/gazebo_ros_template.cpp)
 target_link_libraries(gazebo_ros_template ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -353,6 +360,7 @@ install(TARGETS
   gazebo_ros_force
   gazebo_ros_joint_state_publisher
   gazebo_ros_joint_pose_trajectory
+  gazebo_ros_moveit_planning_scene
   gazebo_ros_diff_drive
   gazebo_ros_tricycle_drive
   gazebo_ros_skid_steer_drive
