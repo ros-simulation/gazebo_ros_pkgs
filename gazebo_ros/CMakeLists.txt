@@ -100,6 +100,10 @@ set_target_properties(gazebo_ros_paths_plugin PROPERTIES COMPILE_FLAGS "${cxx_fl
 set_target_properties(gazebo_ros_paths_plugin PROPERTIES LINK_FLAGS "${ld_flags}")
 target_link_libraries(gazebo_ros_paths_plugin ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+## Tools
+add_executable(gazebo_ros_pose_publisher src/gazebo_ros_pose_publisher.cpp)
+target_link_libraries(gazebo_ros_pose_publisher ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 ## Tests
 
 add_subdirectory(test)
