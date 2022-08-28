@@ -343,9 +343,9 @@ bool GazeboRosOpenniKinect::FillPointCloudHelper(
         // hardcoded rotation rpy(-M_PI/2, 0, -M_PI/2) is built-in
         // to urdf, where the *_optical_frame should have above relative
         // rotation from the physical camera *_frame
-        *iter_x = depth * tan(yAngle);
-        *iter_y = depth * tan(pAngle);
-        *iter_z = depth;
+        *iter_x = depth;
+        *iter_y = -depth * tan(yAngle);
+        *iter_z = -depth * tan(pAngle);
       }
       else //point in the unseeable range
       {
