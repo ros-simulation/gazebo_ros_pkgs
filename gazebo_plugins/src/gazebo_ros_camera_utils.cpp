@@ -180,13 +180,46 @@ void GazeboRosCameraUtils::Load(sensors::SensorPtr _parent,
   else
     this->cy_ = this->sdf->Get<double>("Cy");
 
-  if (!this->sdf->HasElement("focalLength"))
+  if (!this->sdf->HasElement("AxisSkew"))
   {
-    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <focalLength>, defaults to 0");
-    this->focal_length_= 0;
+    ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <AxisSkew>, defaults to 0");
+    this->axis_skew_= 0;
   }
   else
-    this->focal_length_ = this->sdf->Get<double>("focalLength");
+    this->axis_skew_ = this->sdf->Get<double>("AxisSkew");
+
+  if (this->sdf->HasElement("focalLength"))
+  {
+    this->focal_length_ = this->sdf->Get<double>("focalLength"); // deprecated
+    this->focal_length_x_ = this->focal_length_;
+    this->focal_length_y_ = this->focal_length_;
+  }
+
+  if (!this->sdf->HasElement("focalLengthX"))
+  {
+    if (!this->sdf->HasElement("focalLength"))
+    {
+      ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <focalLengthX>, defaults to 0");
+      this->focal_length_x_= 0;
+    }
+  }
+  else
+  {
+    this->focal_length_x_ = this->sdf->Get<double>("focalLengthX");
+    this->focal_length_ = this->focal_length_x_;
+  }
+
+  if (!this->sdf->HasElement("focalLengthY"))
+  {
+    if (!this->sdf->HasElement("focalLength"))
+    {
+      ROS_DEBUG_NAMED("camera_utils", "Camera plugin missing <focalLengthY>, defaults to 0");
+      this->focal_length_y_= 0;
+    }
+  }
+  else
+    this->focal_length_y_ = this->sdf->Get<double>("focalLengthY");
+
 
   if (!this->sdf->HasElement("hackBaseline"))
   {
@@ -514,28 +547,47 @@ void GazeboRosCameraUtils::Init()
 
 
   double hfov = this->camera_->HFOV().Radian();
-  double computed_focal_length =
+  double computed_focal_length_x =
     (static_cast<double>(this->width_)) /
     (2.0 * tan(hfov / 2.0));
 
-  if (this->focal_length_ == 0)
+  double vfov = this->camera_->VFOV().Radian();
+  double computed_focal_length_y =
+    (static_cast<double>(this->height_)) /
+    (2.0 * tan(vfov / 2.0));
+
+  if (this->focal_length_x_ == 0 || this->focal_length_y_ == 0)
   {
-    this->focal_length_ = computed_focal_length;
+    this->focal_length_x_ = computed_focal_length_x;
+    this->focal_length_y_ = computed_focal_length_y;
   }
   else
   {
     // check against float precision
-    if (!ignition::math::equal(this->focal_length_, computed_focal_length))
+    if (!ignition::math::equal(this->focal_length_x_, computed_focal_length_x))
     {
-      ROS_WARN_NAMED("camera_utils", "The <focal_length>[%f] you have provided for camera_ [%s]"
-               " is inconsistent with specified image_width [%d] and"
-               " HFOV [%f].   Please double check to see that"
-               " focal_length = width_ / (2.0 * tan(HFOV/2.0)),"
-               " the explected focal_lengtth value is [%f],"
+      ROS_WARN_NAMED("camera_utils", "The <focal_length_x> [%f] you have provided for camera [%s]"
+               " is inconsistent with specified image width [%d] and"
+               " HFOV [%f]. Please double check to see that"
+               " focal_length_x = image_width / (2.0 * tan(hfov_radians / 2.0)),"
+               " the explected x focal_length value is [%f],"
                " please update your camera_ model description accordingly.",
-                this->focal_length_, this->parentSensor_->Name().c_str(),
+                this->focal_length_x_, this->parentSensor_->Name().c_str(),
                 this->width_, hfov,
-                computed_focal_length);
+                computed_focal_length_x);
+    }
+
+    if (!ignition::math::equal(this->focal_length_y_, computed_focal_length_y))
+    {
+      ROS_WARN_NAMED("camera_utils", "The <focal_length_y> [%f] you have provided for camera [%s]"
+               " is inconsistent with specified image height [%d] and"
+               " VFOV [%f]. Please double check to see that"
+               " focal_length_y = image_height / (2.0 * tan(vfov_radians / 2.0)),"
+               " the explected y focal_length value is [%f],"
+               " please update your camera_ model description accordingly.",
+                this->focal_length_y_, this->parentSensor_->Name().c_str(),
+                this->height_, vfov,
+                computed_focal_length_y);
     }
   }
 
@@ -587,11 +639,11 @@ void GazeboRosCameraUtils::Init()
   camera_info_msg.D[3] = this->distortion_t2_;
   camera_info_msg.D[4] = this->distortion_k3_;
   // original camera_ matrix
-  camera_info_msg.K[0] = this->focal_length_;
-  camera_info_msg.K[1] = 0.0;
+  camera_info_msg.K[0] = this->focal_length_x_;
+  camera_info_msg.K[1] = this->axis_skew_;
   camera_info_msg.K[2] = this->cx_;
   camera_info_msg.K[3] = 0.0;
-  camera_info_msg.K[4] = this->focal_length_;
+  camera_info_msg.K[4] = this->focal_length_y_;
   camera_info_msg.K[5] = this->cy_;
   camera_info_msg.K[6] = 0.0;
   camera_info_msg.K[7] = 0.0;
@@ -608,12 +660,12 @@ void GazeboRosCameraUtils::Init()
   camera_info_msg.R[8] = 1.0;
   // camera_ projection matrix (same as camera_ matrix due
   // to lack of distortion/rectification) (is this generated?)
-  camera_info_msg.P[0] = this->focal_length_;
-  camera_info_msg.P[1] = 0.0;
+  camera_info_msg.P[0] = this->focal_length_x_;
+  camera_info_msg.P[1] = this->axis_skew_;
   camera_info_msg.P[2] = this->cx_;
-  camera_info_msg.P[3] = -this->focal_length_ * this->hack_baseline_;
+  camera_info_msg.P[3] = -this->focal_length_x_ * this->hack_baseline_;
   camera_info_msg.P[4] = 0.0;
-  camera_info_msg.P[5] = this->focal_length_;
+  camera_info_msg.P[5] = this->focal_length_y_;
   camera_info_msg.P[6] = this->cy_;
   camera_info_msg.P[7] = 0.0;
   camera_info_msg.P[8] = 0.0;
