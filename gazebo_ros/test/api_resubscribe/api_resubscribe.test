@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused"   value="false"/>
+    <arg name="gui"      value="false"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug"    value="false"/>
+  </include>
+
+  <test pkg="gazebo_ros" type="test_resubscribe" test-name="test_resubscribe" />
+</launch>
