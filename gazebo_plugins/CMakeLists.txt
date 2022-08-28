@@ -220,9 +220,10 @@ add_library(gazebo_ros_depth_camera src/gazebo_ros_depth_camera.cpp)
 add_dependencies(gazebo_ros_depth_camera ${PROJECT_NAME}_gencfg)
 target_link_libraries(gazebo_ros_depth_camera gazebo_ros_camera_utils DepthCameraPlugin ${catkin_LIBRARIES})
 
+# Deprecated plugin now just inherits from gazebo_ros_depth_camera
 add_library(gazebo_ros_openni_kinect src/gazebo_ros_openni_kinect.cpp)
-add_dependencies(gazebo_ros_openni_kinect ${PROJECT_NAME}_gencfg)
-target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_camera_utils DepthCameraPlugin ${catkin_LIBRARIES})
+add_dependencies(gazebo_ros_openni_kinect gazebo_ros_depth_camera)
+target_link_libraries(gazebo_ros_openni_kinect gazebo_ros_depth_camera)
 
 add_library(gazebo_ros_gpu_laser src/gazebo_ros_gpu_laser.cpp)
 target_link_libraries(gazebo_ros_gpu_laser ${catkin_LIBRARIES} GpuRayPlugin)
@@ -424,6 +425,10 @@ if (CATKIN_ENABLE_TESTING)
                       test/camera/depth_camera.test
                       test/camera/depth_camera.cpp)
     target_link_libraries(depth_camera-test ${catkin_LIBRARIES})
+    add_rostest_gtest(openi_kinect-test
+                      test/camera/openni_kinect.test
+                      test/camera/depth_camera.cpp)
+    target_link_libraries(openi_kinect-test ${catkin_LIBRARIES})
     add_rostest_gtest(multicamera-test
                       test/camera/multicamera.test
                       test/camera/multicamera.cpp)

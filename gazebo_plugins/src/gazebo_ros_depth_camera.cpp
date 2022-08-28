@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Open Source Robotics Foundation
+ * Copyright 2013-2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,6 @@
  * limitations under the License.
  *
 */
-/*
-   Desc: GazeboRosDepthCamera plugin for simulating cameras in Gazebo
-   Author: John Hsu
-   Date: 24 Sept 2008
- */
 
 #include <algorithm>
 #include <assert.h>
@@ -102,9 +97,19 @@ void GazeboRosDepthCamera::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
     this->depth_image_camera_info_topic_name_ = _sdf->GetElement("depthImageCameraInfoTopicName")->Get<std::string>();
 
   if (!_sdf->HasElement("pointCloudCutoff"))
+  {
     this->point_cloud_cutoff_ = 0.4;
+    ROS_INFO_NAMED("depth_camera", "Tag <pointCloudCutoff> not set, defaulting to %f", this->point_cloud_cutoff_);
+  }
   else
     this->point_cloud_cutoff_ = _sdf->GetElement("pointCloudCutoff")->Get<double>();
+  if (!_sdf->HasElement("pointCloudCutoffMax"))
+  {
+    this->point_cloud_cutoff_max_ = -1;
+    ROS_INFO_NAMED("depth_camera", "Tag <pointCloudCutoffMax> not set, defaulting to no max");
+  }
+  else
+    this->point_cloud_cutoff_max_ = _sdf->GetElement("pointCloudCutoffMax")->Get<double>();
 
   load_connection_ = GazeboRosCameraUtils::OnLoad(boost::bind(&GazeboRosDepthCamera::Advertise, this));
   GazeboRosCameraUtils::Load(_parent, _sdf);
@@ -222,6 +227,8 @@ void GazeboRosDepthCamera::OnNewDepthFrame(const float *_image,
       // do this first so there's chance for sensor to run 1 frame after activate
       this->parentSensor->SetActive(true);
   }
+
+  PublishCameraInfo();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -303,27 +310,31 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
   if (!this->initialized_ || this->height_ <=0 || this->width_ <=0)
     return;
 
-  //ROS_ERROR_NAMED("depth_camera", "camera_ new frame %s %s",this->parentSensor_->GetName().c_str(),this->frame_name_.c_str());
 # if GAZEBO_MAJOR_VERSION >= 7
   this->sensor_update_time_ = this->parentSensor->LastMeasurementTime();
 # else
   this->sensor_update_time_ = this->parentSensor->GetLastMeasurementTime();
 # endif
 
-  if (!this->parentSensor->IsActive())
+  if (this->parentSensor->IsActive())
   {
-    if ((*this->image_connect_count_) > 0)
-      // do this first so there's chance for sensor to run 1 frame after activate
-      this->parentSensor->SetActive(true);
+    if (this->point_cloud_connect_count_ <= 0 &&
+        this->depth_image_connect_count_ <= 0 &&
+        (*this->image_connect_count_) <= 0)
+    {
+      this->parentSensor->SetActive(false);
+    }
+    else
+    {
+      if ((*this->image_connect_count_) > 0)
+        this->PutCameraData(_image);
+    }
   }
   else
   {
     if ((*this->image_connect_count_) > 0)
-    {
-      this->PutCameraData(_image);
-      // TODO(lucasw) publish camera info with depth image
-      // this->PublishCameraInfo(sensor_update_time);
-    }
+      // do this first so there's chance for sensor to run 1 frame after activate
+      this->parentSensor->SetActive(true);
   }
 }
 
@@ -331,6 +342,7 @@ void GazeboRosDepthCamera::OnNewImageFrame(const unsigned char *_image,
 // Put camera data to the interface
 void GazeboRosDepthCamera::FillPointdCloud(const float *_src)
 {
+  // TODO: use scoped lock gaurds
   this->lock_.lock();
 
   this->point_cloud_msg_.header.frame_id = this->frame_name_;
@@ -341,13 +353,15 @@ void GazeboRosDepthCamera::FillPointdCloud(const float *_src)
   this->point_cloud_msg_.row_step = this->point_cloud_msg_.point_step * this->width;
 
   ///copy from depth to point cloud message
-  FillPointCloudHelper(this->point_cloud_msg_,
-                 this->height,
-                 this->width,
-                 this->skip_,
-                 (void*)_src );
+  bool success = FillPointCloudHelper(this->point_cloud_msg_,
+                                      this->height,
+                                      this->width,
+                                      this->skip_,
+                                      (void*)_src );
 
-  this->point_cloud_pub_.publish(this->point_cloud_msg_);
+  // If filling point cloud failed, don't publish it (user has already been warned)
+  if (success)
+    this->point_cloud_pub_.publish(this->point_cloud_msg_);
 
   this->lock_.unlock();
 }
@@ -381,14 +395,73 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
     uint32_t rows_arg, uint32_t cols_arg,
     uint32_t step_arg, void* data_arg)
 {
+  // Skip if color image has not been filled yet
+  if (this->image_msg_.data.empty())
+  {
+    ROS_DEBUG_STREAM_NAMED("depth_camera", "Image is empty, skipping point cloud generation. "
+                           << "This should only happen once at the beginning");
+    return false;
+  }
+
+  // Determine if/how to set color/intensity fields based on camera encoding
+  enum {RGB, BGR, MONO, NO_COLOR} color;
+  std::string encoding = this->image_msg_.encoding;
+  if (encoding == sensor_msgs::image_encodings::RGB8)
+    color = RGB;
+  else if (encoding == sensor_msgs::image_encodings::BGR8)
+    color = BGR;
+  else if (encoding == sensor_msgs::image_encodings::MONO8)
+    color = MONO;
+  else
+  {
+    ROS_WARN_ONCE_NAMED("depth_camera", "Unsupported image encoding %s. Pointcloud will not contain color/intensity.",
+                        encoding.c_str());
+    color = NO_COLOR;
+  }
+
+  // Ensure image is correct size
+  if ((color == RGB || color == BGR) && this->image_msg_.data.size() != rows_arg*cols_arg*3)
+  {
+    ROS_WARN_ONCE_NAMED("depth_camera", "Image is wrong size, point cloud will not contain color");
+    color = NO_COLOR;
+  }
+  else if (color == MONO && this->image_msg_.data.size() != rows_arg*cols_arg)
+  {
+    ROS_WARN_ONCE_NAMED("depth_camera", "Image is wrong size, point cloud will not contain intensity");
+    color = NO_COLOR;
+  }
+
   sensor_msgs::PointCloud2Modifier pcd_modifier(point_cloud_msg);
-  pcd_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+  // Set fields of pointcloud based on camera encoding
+  if (color == RGB || color == BGR)
+  {
+    pcd_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
+  }
+  else if (color == MONO)
+  {
+    pcd_modifier.setPointCloud2Fields(4, "x", 1, sensor_msgs::PointField::FLOAT32,
+                                     "y", 1, sensor_msgs::PointField::FLOAT32,
+                                     "z", 1, sensor_msgs::PointField::FLOAT32,
+                                     "intensity", 1, sensor_msgs::PointField::UINT8);
+  }
+  else
+    pcd_modifier.setPointCloud2FieldsByString(1, "xyz");
+
+  // Preallocate points for each pixel
   pcd_modifier.resize(rows_arg*cols_arg);
 
+  // Create iterator for point xyz position
   sensor_msgs::PointCloud2Iterator<float> iter_x(point_cloud_msg_, "x");
   sensor_msgs::PointCloud2Iterator<float> iter_y(point_cloud_msg_, "y");
   sensor_msgs::PointCloud2Iterator<float> iter_z(point_cloud_msg_, "z");
-  sensor_msgs::PointCloud2Iterator<uint8_t> iter_rgb(point_cloud_msg_, "rgb");
+
+  // Create iterator for rgb or intensity based on camera encoding
+  typedef sensor_msgs::PointCloud2Iterator<uint8_t> color_iter_t;
+  std::unique_ptr<color_iter_t> iter_color = nullptr;
+  if (color == BGR || color == RGB)
+    iter_color.reset(new color_iter_t(point_cloud_msg_, "rgb"));
+  else if (color == MONO)
+    iter_color.reset(new color_iter_t(point_cloud_msg_, "intensity"));
 
   point_cloud_msg.is_dense = true;
 
@@ -405,7 +478,7 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
     if (rows_arg>1) pAngle = atan2( (double)j - 0.5*(double)(rows_arg-1), fl);
     else            pAngle = 0.0;
 
-    for (uint32_t i=0; i<cols_arg; i++, ++iter_x, ++iter_y, ++iter_z, ++iter_rgb)
+    for (uint32_t i=0; i < cols_arg; i++, ++iter_x, ++iter_y, ++iter_z)
     {
       double yAngle;
       if (cols_arg>1) yAngle = atan2( (double)i - 0.5*(double)(cols_arg-1), fl);
@@ -413,14 +486,11 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
 
       double depth = toCopyFrom[index++];
 
-      // in optical frame
-      // hardcoded rotation rpy(-M_PI/2, 0, -M_PI/2) is built-in
-      // to urdf, where the *_optical_frame should have above relative
-      // rotation from the physical camera *_frame
-      *iter_x      = depth * tan(yAngle);
-      *iter_y      = depth * tan(pAngle);
-      if(depth > this->point_cloud_cutoff_)
+      if (depth > this->point_cloud_cutoff_ &&
+         (this->point_cloud_cutoff_max_ < 0 || depth < this->point_cloud_cutoff_max_))
       {
+        *iter_x      = depth * tan(yAngle);
+        *iter_y      = depth * tan(pAngle);
         *iter_z    = depth;
       }
       else //point in the unseeable range
@@ -431,29 +501,37 @@ bool GazeboRosDepthCamera::FillPointCloudHelper(
 
       // put image color data for each point
       uint8_t*  image_src = (uint8_t*)(&(this->image_msg_.data[0]));
-      if (this->image_msg_.data.size() == rows_arg*cols_arg*3)
+
+      // Set rgb or intensity fields based on encoding
+      if (color == RGB)
       {
         // color
-        iter_rgb[0] = image_src[i*3+j*cols_arg*3+0];
-        iter_rgb[1] = image_src[i*3+j*cols_arg*3+1];
-        iter_rgb[2] = image_src[i*3+j*cols_arg*3+2];
+        (*iter_color)[0] = image_src[i*3+j*cols_arg*3+2];
+        (*iter_color)[1] = image_src[i*3+j*cols_arg*3+1];
+        (*iter_color)[2] = image_src[i*3+j*cols_arg*3+0];
       }
-      else if (this->image_msg_.data.size() == rows_arg*cols_arg)
+      else if (color == BGR)
       {
-        // mono (or bayer?  @todo; fix for bayer)
-        iter_rgb[0] = image_src[i+j*cols_arg];
-        iter_rgb[1] = image_src[i+j*cols_arg];
-        iter_rgb[2] = image_src[i+j*cols_arg];
+        // color
+        (*iter_color)[0] = image_src[i*3+j*cols_arg*3+0];
+        (*iter_color)[1] = image_src[i*3+j*cols_arg*3+1];
+        (*iter_color)[2] = image_src[i*3+j*cols_arg*3+2];
+
       }
-      else
+      else if (color == MONO)
       {
-        // no image
-        iter_rgb[0] = 0;
-        iter_rgb[1] = 0;
-        iter_rgb[2] = 0;
+        *(*iter_color) = image_src[i+j*cols_arg];
       }
+
+      // Increment color iterator if it is being used
+      if(iter_color) ++(*iter_color);
     }
   }
+
+  // reconvert to original height and width after the flat reshape
+  point_cloud_msg.height = rows_arg;
+  point_cloud_msg.width = cols_arg;
+  point_cloud_msg.row_step = point_cloud_msg.point_step * point_cloud_msg.width;
 
   return true;
 }
@@ -484,7 +562,8 @@ bool GazeboRosDepthCamera::FillDepthImageHelper(
     {
       float depth = toCopyFrom[index++];
 
-      if (depth > this->point_cloud_cutoff_)
+      if (depth > this->point_cloud_cutoff_ &&
+         (this->point_cloud_cutoff_max_ < 0 || depth < this->point_cloud_cutoff_max_))
       {
         dest[i + j * cols_arg] = depth;
       }
@@ -505,48 +584,15 @@ void GazeboRosDepthCamera::PublishCameraInfo()
   if (this->depth_info_connect_count_ > 0)
   {
 # if GAZEBO_MAJOR_VERSION >= 7
-    common::Time sensor_update_time = this->parentSensor_->LastMeasurementTime();
+    this->sensor_update_time_ =  this->parentSensor_->LastMeasurementTime();
 # else
-    common::Time sensor_update_time = this->parentSensor_->GetLastMeasurementTime();
+    this->sensor_update_time_ =  this->parentSensor_->GetLastMeasurementTime();
 # endif
-    this->sensor_update_time_ = sensor_update_time;
-    if (sensor_update_time - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
+    if (this->sensor_update_time_ - this->last_depth_image_camera_info_update_time_ >= this->update_period_)
     {
-      this->PublishCameraInfo(this->depth_image_camera_info_pub_);  // , sensor_update_time);
-      this->last_depth_image_camera_info_update_time_ = sensor_update_time;
+      this->PublishCameraInfo(this->depth_image_camera_info_pub_);
+      this->last_depth_image_camera_info_update_time_ = this->sensor_update_time_;
     }
   }
 }
-
-//@todo: publish disparity similar to openni_camera_deprecated/src/nodelets/openni_nodelet.cpp.
-/*
-#include <stereo_msgs/DisparityImage.h>
-pub_disparity_ = comm_nh.advertise<stereo_msgs::DisparityImage > ("depth/disparity", 5, subscriberChanged2, subscriberChanged2);
-
-void GazeboRosDepthCamera::PublishDisparityImage(const DepthImage& depth, ros::Time time)
-{
-  stereo_msgs::DisparityImagePtr disp_msg = boost::make_shared<stereo_msgs::DisparityImage > ();
-  disp_msg->header.stamp                  = time;
-  disp_msg->header.frame_id               = device_->isDepthRegistered () ? rgb_frame_id_ : depth_frame_id_;
-  disp_msg->image.header                  = disp_msg->header;
-  disp_msg->image.encoding                = sensor_msgs::image_encodings::TYPE_32FC1;
-  disp_msg->image.height                  = depth_height_;
-  disp_msg->image.width                   = depth_width_;
-  disp_msg->image.step                    = disp_msg->image.width * sizeof (float);
-  disp_msg->image.data.resize (disp_msg->image.height * disp_msg->image.step);
-  disp_msg->T = depth.getBaseline ();
-  disp_msg->f = depth.getFocalLength () * depth_width_ / depth.getWidth ();
-
-  /// @todo Compute these values from DepthGenerator::GetDeviceMaxDepth() and the like
-  disp_msg->min_disparity = 0.0;
-  disp_msg->max_disparity = disp_msg->T * disp_msg->f / 0.3;
-  disp_msg->delta_d = 0.125;
-
-  depth.fillDisparityImage (depth_width_, depth_height_, reinterpret_cast<float*>(&disp_msg->image.data[0]), disp_msg->image.step);
-
-  pub_disparity_.publish (disp_msg);
-}
-*/
-
-
 }
