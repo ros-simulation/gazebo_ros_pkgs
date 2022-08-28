@@ -186,8 +186,7 @@ namespace gazebo
     }
 
     std::string name = robot_namespace_ + "_visual";
-    video_visual_.reset(
-        new VideoVisual(name, parent, height, width));
+    video_visual_ = boost::make_shared<VideoVisual>(name, parent, height, width);
 
     // Initialize the ROS node for the gazebo client if necessary
     if (!ros::isInitialized())
@@ -236,8 +235,19 @@ namespace gazebo
   {
     // Get a reference to the image from the image message pointer
     boost::mutex::scoped_lock scoped_lock(m_image_);
-    // We get image with alpha channel as it allows memcpy onto ogre texture
-    image_ = cv_bridge::toCvCopy(msg, "bgra8");
+    // We get image with alpha channel as it allows memcpy onto ogre texture    
+    if (msg->encoding == "32FC1")
+    {
+      cv::Mat mono8_img = cv::Mat(msg->height, msg->width , CV_8UC1);
+      cv::convertScaleAbs(cv_bridge::toCvShare(msg, "")->image, mono8_img, 100, 0.0);
+      cv_bridge::CvImagePtr cvImage = boost::make_shared<cv_bridge::CvImage>(msg->header, "mono8", mono8_img);
+      image_ = cv_bridge::cvtColor(cvImage,"bgra8");
+    }
+    else
+    {
+      image_ = cv_bridge::toCvCopy(msg, "bgra8");
+    }
+
     new_image_available_ = true;
   }
 
