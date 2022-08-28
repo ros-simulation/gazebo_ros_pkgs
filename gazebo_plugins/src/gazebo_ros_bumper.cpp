@@ -135,6 +135,9 @@ void GazeboRosBumper::OnContact()
   if (this->contact_pub_.getNumSubscribers() <= 0)
     return;
 
+  if (this->parentSensor->Contacts().contact_size() <= 0)
+    return;
+
   msgs::Contacts contacts;
   contacts = this->parentSensor->Contacts();
   /// \TODO: need a time for each Contact in i-loop, they may differ
