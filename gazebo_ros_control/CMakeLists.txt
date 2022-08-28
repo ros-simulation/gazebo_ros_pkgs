@@ -48,7 +48,7 @@ catkin_package(
     urdf
     angles
   INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME} default_robot_hw_sim
+  LIBRARIES ${PROJECT_NAME} default_robot_hw_sim combined_robot_hw_sim
 )
 
 link_directories(
@@ -72,11 +72,19 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_library(default_robot_hw_sim src/default_robot_hw_sim.cpp)
 target_link_libraries(default_robot_hw_sim ${catkin_LIBRARIES})
 
+add_library(combined_robot_hw_sim src/combined_robot_hw_sim.cpp)
+target_link_libraries(combined_robot_hw_sim ${catkin_LIBRARIES})
+
+
 ## Install
 install(TARGETS ${PROJECT_NAME} default_robot_hw_sim
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+)
+
+install(TARGETS ${PROJECT_NAME} combined_robot_hw_sim
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/

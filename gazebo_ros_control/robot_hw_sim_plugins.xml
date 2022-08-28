@@ -1,11 +1,22 @@
-<library path="lib/libdefault_robot_hw_sim">
-
-  <class
-    name="gazebo_ros_control/DefaultRobotHWSim"
-    type="gazebo_ros_control::DefaultRobotHWSim"
-    base_class_type="gazebo_ros_control::RobotHWSim">
-    <description>
-      A default robot simulation interface which constructs joint handles from an SDF/URDF.
-    </description>
-  </class>
-</library>
+<class_libraries>
+  <library path="lib/libdefault_robot_hw_sim">
+    <class
+      name="gazebo_ros_control/DefaultRobotHWSim"
+      type="gazebo_ros_control::DefaultRobotHWSim"
+      base_class_type="gazebo_ros_control::RobotHWSim">
+      <description>
+        A default robot simulation interface which constructs joint handles from an SDF/URDF.
+      </description>
+    </class>
+  </library>
+  <library path="lib/libcombined_robot_hw_sim">
+    <class
+      name="gazebo_ros_control/CombinedRobotHWSim"
+      type="gazebo_ros_control::CombinedRobotHWSim"
+      base_class_type="gazebo_ros_control::RobotHWSim">
+      <description>
+        A robot simulation interface which allows multiple RobotHWSim plugins to be used.
+      </description>
+    </class>
+  </library>
+</class_libraries>
