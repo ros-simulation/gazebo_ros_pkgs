@@ -123,6 +123,24 @@ namespace gazebo
     /// \brief ROS image topic name
     private: std::string point_cloud_topic_name_;
 
+    /// \brief Gaussian noise standard deviation
+    private: double gaussian_noise_;
+
+    /// \brief Gaussian noise generator
+    private: static double gaussianKernel(double mu, double sigma)
+    {
+      // using Box-Muller transform to generate two independent standard normally distributed normal variables
+      // see wikipedia
+      double U = (double)rand() / (double)RAND_MAX; // normalized uniform random variable
+      double V = (double)rand() / (double)RAND_MAX; // normalized uniform random variable
+      return sigma * (sqrt(-2.0 * ::log(U)) * cos(2.0 * M_PI * V)) + mu;
+    }
+
+    /// \brief outlier distance in meters from nominal point
+    private: double outlier_magnitude_;
+
+    /// \brief the index of the point which will become the outlier
+    private: int outlier_index_;
 
     /// \brief image where each pixel contains the depth data
     private: std::string depth_image_topic_name_;
