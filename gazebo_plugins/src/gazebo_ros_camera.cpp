@@ -113,5 +113,8 @@ void GazeboRosCamera::OnNewFrame(const unsigned char *_image,
       }
     }
   }
+  //Publish Optical Trasnform
+  this->camera_optical_frame_transform_.header.stamp = ros::Time::now();
+  this->optical_broadcaster_.sendTransform(this->camera_optical_frame_transform_); 
 }
 }
