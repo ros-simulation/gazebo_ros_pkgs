@@ -441,15 +441,15 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
 
     ignition::math::Matrix3d rmat;
     stream >> rmat;
-    camera_info_msg.r[0] = rmat(0,0);
-    camera_info_msg.r[1] = rmat(0,1);
-    camera_info_msg.r[2] = rmat(0,2);
-    camera_info_msg.r[3] = rmat(1,0);
-    camera_info_msg.r[4] = rmat(1,1);
-    camera_info_msg.r[5] = rmat(1,2);
-    camera_info_msg.r[6] = rmat(2,0);
-    camera_info_msg.r[7] = rmat(2,1);
-    camera_info_msg.r[8] = rmat(2,2);
+    camera_info_msg.r[0] = rmat(0, 0);
+    camera_info_msg.r[1] = rmat(0, 1);
+    camera_info_msg.r[2] = rmat(0, 2);
+    camera_info_msg.r[3] = rmat(1, 0);
+    camera_info_msg.r[4] = rmat(1, 1);
+    camera_info_msg.r[5] = rmat(1, 2);
+    camera_info_msg.r[6] = rmat(2, 0);
+    camera_info_msg.r[7] = rmat(2, 1);
+    camera_info_msg.r[8] = rmat(2, 2);
 
     // projection matrix
     camera_info_msg.p[0] = _sdf->Get<double>("P_fx", focal_length).first;
