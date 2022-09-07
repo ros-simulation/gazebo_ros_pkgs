@@ -33,7 +33,7 @@ def generate_launch_description():
         'gzclient',
         _boolean_command('version'),
         _boolean_command('verbose'),
-        _boolean_command('help'), 
+        _boolean_command('help'),
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
