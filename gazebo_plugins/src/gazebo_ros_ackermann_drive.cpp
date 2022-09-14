@@ -321,35 +321,12 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
     "linear_velocity_i_range", ignition::math::Vector2d::Zero).first;
   impl_->pid_linear_vel_.Init(pid.X(), pid.Y(), pid.Z(), i_range.Y(), i_range.X());
 
-  // Update wheel radiu for wheel from SDF collision objects
-  // assumes that wheel link is child of joint (and not parent of joint)
-  // assumes that wheel link has only one collision
-  // assumes all wheel of both rear wheels of same radii
-  unsigned int id = 0;
-  impl_->wheel_radius_ = impl_->CollisionRadius(
-    impl_->joints_[GazeboRosAckermannDrivePrivate::REAR_RIGHT]->GetChild()->GetCollision(id));
+  // Get the wheel radius
+  impl_->wheel_radius_ = _sdf->Get<double>("wheel_radius", 0.3).first;
 
-  // Compute wheel_base, front wheel separation, and rear wheel separation
-  // first compute the positions of the 4 wheel centers
-  // again assumes wheel link is child of joint and has only one collision
-  auto front_right_center_pos = impl_->joints_[GazeboRosAckermannDrivePrivate::FRONT_RIGHT]->
-    GetChild()->GetCollision(id)->WorldPose().Pos();
-  auto front_left_center_pos = impl_->joints_[GazeboRosAckermannDrivePrivate::FRONT_LEFT]->
-    GetChild()->GetCollision(id)->WorldPose().Pos();
-  auto rear_right_center_pos = impl_->joints_[GazeboRosAckermannDrivePrivate::REAR_RIGHT]->
-    GetChild()->GetCollision(id)->WorldPose().Pos();
-  auto rear_left_center_pos = impl_->joints_[GazeboRosAckermannDrivePrivate::REAR_LEFT]->
-    GetChild()->GetCollision(id)->WorldPose().Pos();
-
-  auto distance = front_left_center_pos - front_right_center_pos;
-  impl_->wheel_separation_ = distance.Length();
-
-  // to compute wheelbase, first position of axle centers are computed
-  auto front_axle_pos = (front_left_center_pos + front_right_center_pos) / 2;
-  auto rear_axle_pos = (rear_left_center_pos + rear_right_center_pos) / 2;
-  // then the wheelbase is the distance between the axle centers
-  distance = front_axle_pos - rear_axle_pos;
-  impl_->wheel_base_ = distance.Length();
+  // Get the wheel separation
+  impl_->wheel_separation_ = _sdf->Get<double>("track_width", 1.2).first;
+  impl_->wheel_base_ = _sdf->Get<double>("wheel_base", 2.0).first;
 
   // Update rate
   auto update_rate = _sdf->Get<double>("update_rate", 100.0).first;
