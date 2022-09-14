@@ -321,10 +321,8 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
     "linear_velocity_i_range", ignition::math::Vector2d::Zero).first;
   impl_->pid_linear_vel_.Init(pid.X(), pid.Y(), pid.Z(), i_range.Y(), i_range.X());
 
-  // Get the wheel radius
+  // Get the kinematic parameters
   impl_->wheel_radius_ = _sdf->Get<double>("wheel_radius", 0.3).first;
-
-  // Get the wheel separation
   impl_->wheel_separation_ = _sdf->Get<double>("track_width", 1.2).first;
   impl_->wheel_base_ = _sdf->Get<double>("wheel_base", 2.0).first;
 
