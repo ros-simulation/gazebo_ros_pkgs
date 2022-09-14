@@ -39,12 +39,12 @@ class GazeboRosAckermannDrivePrivate;
 
       <update_rate>100.0</update_rate>
 
-      <!-- wheels -->
+      <!-- kinematics -->
       <wheel_radius>0.3</front_left_joint>
       <wheel_base>2.0</wheel_base>
       <track_width>1.2</track_width>
 
-      <!-- joints -->
+      <!-- wheels -->
       <front_left_joint>front_left_wheel_joint</front_left_joint>
       <front_right_joint>front_right_wheel_joint</front_right_joint>
       <rear_left_joint>rear_left_wheel_joint</rear_left_joint>
