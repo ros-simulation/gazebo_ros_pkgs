@@ -30,7 +30,7 @@ struct TestParams
 
   /// Camera1 info topic to subscribe to
   std::string info_topic_1;
-  
+
   /// Camera2 info topic to subscribe to
   std::string info_topic_2;
 };
@@ -144,7 +144,7 @@ TEST_P(GazeboRosCameraIntrinsicsTest, CameraIntrinsics)
     ASSERT_NEAR(intrinsic_matrix_1.at<double>(0, 0), computed_fx, error);
     ASSERT_NEAR(intrinsic_matrix_1.at<double>(1, 1), computed_fy, error);
   }
-  
+
   // camera2 with camera lens intrinsics sdf tag provided
   {
     // optical centre

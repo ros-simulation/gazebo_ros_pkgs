@@ -35,8 +35,8 @@ set(tests
 if(ENABLE_DISPLAY_TESTS)
 set(tests ${tests}
   test_gazebo_ros_camera
-  test_gazebo_ros_camera_intrinsics
   test_gazebo_ros_camera_distortion
+  test_gazebo_ros_camera_intrinsics
   test_gazebo_ros_camera_triggered
   test_gazebo_ros_depth_camera
   test_gazebo_ros_multicamera

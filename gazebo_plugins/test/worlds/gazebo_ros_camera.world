@@ -35,6 +35,11 @@
             <!-- camera_name>omit so it defaults to sensor name</camera_name-->
             <!-- frame_name>omit so it defaults to link name</frame_name-->
             <hack_baseline>0.07</hack_baseline>
+            <!-- setting some projection matrix fields-->
+            <P_cx>0</P_cx>
+            <P_cy>320.5</P_cy>
+            <Tx>240.5</Tx>
+            <rectification_matrix>0.999 0.0 -0.049 0.0 1.0 0.0 0.049 0.0 0.999</rectification_matrix>
           </plugin>
         </sensor>
       </link>

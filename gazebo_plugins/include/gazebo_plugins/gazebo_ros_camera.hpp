@@ -60,6 +60,19 @@ class GazeboRosCameraPrivate;
       <!-- Set to true to turn on triggering -->
       <triggered>true</triggered>
 
+      <!-- Set some projection matrix fields-->
+      <!-- Projection matrix principal point cx-->
+      <P_cx>0</P_cx>
+      <!-- Projection matrix principal point cy-->
+      <P_cy>320.5</P_cy>
+      <!-- Projection matrix focal length fy-->
+      <P_fy>0</P_fy>
+      <!-- Projection matrix translation Tx, Ty between stereo cameras-->
+      <Tx>240.5</Tx>
+      <Ty>0</Ty>
+      <!-- Full 3x3 rectification matrix. Values are in row-major order -->
+      <rectification_matrix>0.999 0.0 -0.049 0.0 1.0 0.0 0.049 0.0 0.999</rectification_matrix>
+
       <hack_baseline>0.07</hack_baseline>
     </plugin>
   \endcode

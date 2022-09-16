@@ -464,26 +464,31 @@ void GazeboRosCamera::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPtr _
     camera_info_msg.k[8] = 1.0;
 
     // rectification
-    camera_info_msg.r[0] = 1.0;
-    camera_info_msg.r[1] = 0.0;
-    camera_info_msg.r[2] = 0.0;
-    camera_info_msg.r[3] = 0.0;
-    camera_info_msg.r[4] = 1.0;
-    camera_info_msg.r[5] = 0.0;
-    camera_info_msg.r[6] = 0.0;
-    camera_info_msg.r[7] = 0.0;
-    camera_info_msg.r[8] = 1.0;
+    // Get string from SDF and parse into Matrix3d for populating message
+    std::string default_rmat("1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0");
+    std::istringstream stream(_sdf->Get<std::string>("rectification_matrix", default_rmat).first);
 
-    // camera_ projection matrix (same as camera_ matrix due
-    // to lack of distortion/rectification) (is this generated?)
-    camera_info_msg.p[0] = impl_->fx_[i];
+    ignition::math::Matrix3d rmat;
+    stream >> rmat;
+    camera_info_msg.r[0] = rmat(0, 0);
+    camera_info_msg.r[1] = rmat(0, 1);
+    camera_info_msg.r[2] = rmat(0, 2);
+    camera_info_msg.r[3] = rmat(1, 0);
+    camera_info_msg.r[4] = rmat(1, 1);
+    camera_info_msg.r[5] = rmat(1, 2);
+    camera_info_msg.r[6] = rmat(2, 0);
+    camera_info_msg.r[7] = rmat(2, 1);
+    camera_info_msg.r[8] = rmat(2, 2);
+
+    // projection matrix
+    camera_info_msg.p[0] = _sdf->Get<double>("P_fx", focal_length).first;
     camera_info_msg.p[1] = 0.0;
-    camera_info_msg.p[2] = impl_->cx_[i];
-    camera_info_msg.p[3] = -impl_->fx_[i] * hack_baseline;
+    camera_info_msg.p[2] = _sdf->Get<double>("P_cx", cx).first;
+    camera_info_msg.p[3] = _sdf->Get<double>("Tx", -focal_length * hack_baseline).first;
     camera_info_msg.p[4] = 0.0;
-    camera_info_msg.p[5] = impl_->fy_[i];
-    camera_info_msg.p[6] = impl_->cy_[i];
-    camera_info_msg.p[7] = 0.0;
+    camera_info_msg.p[5] = _sdf->Get<double>("P_fy", focal_length).first;
+    camera_info_msg.p[6] = _sdf->Get<double>("P_cy", cy).first;
+    camera_info_msg.p[7] = _sdf->Get<double>("Ty", 0).first;
     camera_info_msg.p[8] = 0.0;
     camera_info_msg.p[9] = 0.0;
     camera_info_msg.p[10] = 1.0;
