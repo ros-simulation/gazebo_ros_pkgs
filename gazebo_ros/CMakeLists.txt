@@ -177,7 +177,7 @@ install(DIRECTORY include/
 
 install(
   PROGRAMS
-    scripts/gazebo_ros_paths.py
+    gazebo_ros/gazebo_ros_paths.py
     DESTINATION lib/${PROJECT_NAME}/
 )
 
