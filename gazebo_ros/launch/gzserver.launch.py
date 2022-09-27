@@ -24,6 +24,7 @@ from launch.actions import Shutdown
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PythonExpression
+from launch_ros.substitutions import FindPackageShare
 
 from scripts import GazeboRosPaths
 
@@ -32,33 +33,33 @@ def generate_launch_description():
     cmd = [
         'gzserver',
         # Pass through arguments to gzserver
-        LaunchConfiguration('world'), ' ',
-        _boolean_command('version'), ' ',
-        _boolean_command('verbose'), ' ',
-        _boolean_command('lockstep'), ' ',
-        _boolean_command('help'), ' ',
-        _boolean_command('pause'), ' ',
-        _arg_command('physics'), ' ', LaunchConfiguration('physics'), ' ',
-        _arg_command('play'), ' ', LaunchConfiguration('play'), ' ',
-        _boolean_command('record'), ' ',
-        _arg_command('record_encoding'), ' ', LaunchConfiguration('record_encoding'), ' ',
-        _arg_command('record_path'), ' ', LaunchConfiguration('record_path'), ' ',
-        _arg_command('record_period'), ' ', LaunchConfiguration('record_period'), ' ',
-        _arg_command('record_filter'), ' ', LaunchConfiguration('record_filter'), ' ',
-        _arg_command('seed'), ' ', LaunchConfiguration('seed'), ' ',
-        _arg_command('iters'), ' ', LaunchConfiguration('iters'), ' ',
+        LaunchConfiguration('world'),
+        _boolean_command('version'),
+        _boolean_command('verbose'),
+        _boolean_command('lockstep'),
+        _boolean_command('help'),
+        _boolean_command('pause'),
+        _arg_command('physics'), LaunchConfiguration('physics'),
+        _arg_command('play'), LaunchConfiguration('play'),
+        _boolean_command('record'),
+        _arg_command('record_encoding'), LaunchConfiguration('record_encoding'),
+        _arg_command('record_path'), LaunchConfiguration('record_path'),
+        _arg_command('record_period'), LaunchConfiguration('record_period'),
+        _arg_command('record_filter'), LaunchConfiguration('record_filter'),
+        _arg_command('seed'), LaunchConfiguration('seed'),
+        _arg_command('iters'), LaunchConfiguration('iters'),
         _boolean_command('minimal_comms'),
-        _plugin_command('init'), ' ',
-        _plugin_command('factory'), ' ',
-        _plugin_command('force_system'), ' ',
+        _plugin_command('init'),
+        _plugin_command('factory'),
+        _plugin_command('force_system'),
         # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
         # _plugin_command('force_system'), ' ',
-        _arg_command('profile'), ' ', LaunchConfiguration('profile'), ' ',
+        _arg_command('profile'), LaunchConfiguration('profile'),
         # convenience parameter for params file
         _arg_command('ros-args', condition=LaunchConfiguration('params_file')),
         _arg_command('params-file', condition=LaunchConfiguration('params_file')),
         LaunchConfiguration('params_file'),
-        _arg_command('', condition=LaunchConfiguration('params_file')), ' ',
+        _arg_command('', condition=LaunchConfiguration('params_file')),
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
@@ -87,8 +88,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument(
-            'world', default_value='',
-            description='Specify world file name'
+            'world', default_value=[FindPackageShare('gazebo_ros'), '/worlds/empty.world'],
+            description='Specify world file name. Defaults to an empty world.'
         ),
         DeclareLaunchArgument(
             'version', default_value='false',
