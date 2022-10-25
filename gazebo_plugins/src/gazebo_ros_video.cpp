@@ -22,7 +22,7 @@
  *
  */
 
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 #include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.h>
 #include <opencv2/opencv.hpp>
