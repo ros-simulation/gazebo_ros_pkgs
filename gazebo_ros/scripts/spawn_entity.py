@@ -31,7 +31,7 @@ from geometry_msgs.msg import Pose
 from lxml import etree as ElementTree
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSDurabilityPolicy
+from rclpy.qos import DurabilityPolicy
 from rclpy.qos import QoSProfile
 from std_msgs.msg import String
 from std_srvs.srv import Empty
@@ -167,7 +167,7 @@ class SpawnEntityNode(Node):
 
             latched_qos = QoSProfile(
                 depth=1,
-                durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
+                durability=DurabilityPolicy.TRANSIENT_LOCAL)
             self.subscription = self.create_subscription(
                 String, self.args.topic, entity_xml_cb, latched_qos)
 

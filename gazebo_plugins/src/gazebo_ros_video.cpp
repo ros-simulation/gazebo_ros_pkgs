@@ -22,7 +22,11 @@
  *
  */
 
+#ifdef CV_BRIDGE_HAS_HPP_HEADERS
+#include <cv_bridge/cv_bridge.hpp>
+#else
 #include <cv_bridge/cv_bridge.h>
+#endif
 #include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.h>
 #include <opencv2/opencv.hpp>
