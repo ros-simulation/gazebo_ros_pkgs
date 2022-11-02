@@ -56,6 +56,10 @@ public:
   std::unordered_map<std::string, double> map_friction_secondary_default_;
 #endif
 
+  // Message to publish. Store as member variable to avoid problems during
+  // teardown.
+  gazebo_msgs::msg::WheelSlip slip_msg;
+
   // Event handler to set slip compliance values for individual wheels based
   std::shared_ptr<rclcpp::ParameterEventHandler> parameter_event_handler_;
   rclcpp::ParameterEventCallbackHandle::SharedPtr parameter_set_event_callback_;
@@ -385,8 +389,8 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       IGN_PROFILE_BEGIN("fill ROS message");
     #endif
 
-      // Populate message
-      auto slip_msg = gazebo_msgs::msg::WheelSlip();
+      // Reset message
+      impl_->slip_msg = gazebo_msgs::msg::WheelSlip();
 
       std::map<std::string, ignition::math::Vector3d> slips;
       this->GetSlips(slips);
@@ -405,9 +409,9 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
           long_slip = (spin_speed - long_vel) / spin_speed;
           lat_slip = atan2(lat_vel, long_vel);
         }
-        slip_msg.name.push_back(name);
-        slip_msg.lateral_slip.push_back(lat_slip);
-        slip_msg.longitudinal_slip.push_back(long_slip);
+        impl_->slip_msg.name.push_back(name);
+        impl_->slip_msg.lateral_slip.push_back(lat_slip);
+        impl_->slip_msg.longitudinal_slip.push_back(long_slip);
       }
 
     #ifdef IGN_PROFILER_ENABLE
@@ -416,7 +420,7 @@ void GazeboRosWheelSlip::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
     #endif
 
       // Publish
-      impl_->slip_publisher_->publish(slip_msg);
+      impl_->slip_publisher_->publish(impl_->slip_msg);
 
     #ifdef IGN_PROFILER_ENABLE
       IGN_PROFILE_END();
