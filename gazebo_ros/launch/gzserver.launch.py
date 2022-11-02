@@ -193,7 +193,7 @@ def generate_launch_description():
         # would be possible pending ros2/launch#290.
         ExecuteProcess(
             cmd=cmd,
-            output='screen',
+            output='both',
             additional_env=env,
             shell=False,
             prefix=prefix,
@@ -204,7 +204,7 @@ def generate_launch_description():
         # Execute node with default on_exit if the node is not required
         ExecuteProcess(
             cmd=cmd,
-            output='screen',
+            output='both',
             additional_env=env,
             shell=False,
             prefix=prefix,
