@@ -5,6 +5,7 @@
   <version>3.5.2</version>
   <description>Interface for using ROS with the <a href="http://gazebosim.org/">Gazebo</a> simulator.</description>
 
+  <maintainer email="ahcorde@osrfoundation.org">Alejandro Hernández Cordero</maintainer>
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
   <maintainer email="louise@openrobotics.org">Louise Poubel</maintainer>
 

@@ -7,6 +7,7 @@
     Message and service data structures for interacting with Gazebo from ROS2.
   </description>
 
+  <maintainer email="ahcorde@osrfoundation.org">Alejandro Hernández Cordero</maintainer>
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
   <maintainer email="louise@openrobotics.org">Louise Poubel</maintainer>
 
