@@ -7,6 +7,7 @@
     Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
   </description>
 
+  <maintainer email="ahcorde@osrfoundation.org">Alejandro Hernández Cordero</maintainer>
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
   <maintainer email="louise@openrobotics.org">Louise Poubel</maintainer>
 
