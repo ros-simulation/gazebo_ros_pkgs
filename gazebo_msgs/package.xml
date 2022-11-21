@@ -6,6 +6,7 @@
     Message and service data structures for interacting with Gazebo from ROS.
   </description>
 
+  <maintainer email="ahcorde@osrfoundation.org">Alejandro Hernández Cordero</maintainer>
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
 
   <license>BSD</license>
