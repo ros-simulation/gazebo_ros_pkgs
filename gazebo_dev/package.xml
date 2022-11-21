@@ -6,8 +6,7 @@
     Provides a cmake config for the default version of Gazebo for the ROS distribution.
   </description>
 
-  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+  <maintainer email="ahcorde@osrfoundation.org">Alejandro Hernández Cordero</maintainer>
 
   <license>Apache 2.0</license>
 
@@ -15,6 +14,8 @@
   <url type="bugtracker">https://github.com/ros-simulation/gazebo_ros_pkgs/issues</url>
   <url type="repository">https://github.com/ros-simulation/gazebo_ros_pkgs</url>
 
+  <author>Dave Coleman</author>
+  <author>John Hsu</author>
   <author>Johannes Meyer</author>
 
   <buildtool_depend>catkin</buildtool_depend>

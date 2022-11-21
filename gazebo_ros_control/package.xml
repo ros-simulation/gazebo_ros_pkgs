@@ -4,6 +4,7 @@
   <version>2.9.2</version>
   <description>gazebo_ros_control</description>
 
+  <maintainer email="ahcorde@osrfoundation.org">Alejandro Hernández Cordero</maintainer>
   <maintainer email="jrivero@osrfoundation.org">Jose Luis Rivero</maintainer>
 
   <license>BSD</license>
