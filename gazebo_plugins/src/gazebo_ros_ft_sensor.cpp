@@ -95,7 +95,7 @@ void GazeboRosFT::Load( physics::ModelPtr _model, sdf::ElementPtr _sdf )
 
   if (!_sdf->HasElement("gaussianNoise"))
   {
-    ROS_INFO_NAMED("ft_sensor", "imu plugin missing <gaussianNoise>, defaults to 0.0");
+    ROS_INFO_NAMED("ft_sensor", "ft_sensor plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0.0;
   }
   else
