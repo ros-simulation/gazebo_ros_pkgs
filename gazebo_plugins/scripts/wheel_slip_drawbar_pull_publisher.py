@@ -28,11 +28,13 @@ DEFAULT_FORCE_INCREMENT = 10
 DEFAULT_MAX_FORCE = 70
 DEFAULT_PUBLISH_INTERVAL = 2.0
 
+
 class WheelSlipDrawbarPullPublisher(Node):
+
     def __init__(self, args):
         super().__init__('wheel_slip_drawbar_pull_publisher')
         parser = argparse.ArgumentParser(
-            description='Publish drag forces as a wrench representing drawbar pull on the back of a vehicle.')
+            description='Publish a wrench representing drawbar pull on the back of a vehicle.')
         parser.add_argument('-f', '--force-increment', type=float, default=DEFAULT_FORCE_INCREMENT,
                             help='The drawbar pull force increment (Newtons)')
         parser.add_argument('-i', '--interval', type=float, default=DEFAULT_PUBLISH_INTERVAL,
@@ -59,18 +61,19 @@ class WheelSlipDrawbarPullPublisher(Node):
         self.publisher.publish(msg)
         self.get_logger().info(f'Publishing drawbar pull force of {msg.force.x} N')
 
+
 def main(args=sys.argv):
     rclpy.init(args=args)
     args_without_ros = rclpy.utilities.remove_ros_args(args)
-    wheel_slip_drawbar_pull_publisher = WheelSlipDrawbarPullPublisher(args_without_ros)
-    wheel_slip_drawbar_pull_publisher.get_logger().info('Wheel Slip Drawbar Pull Publisher started')
+    node = WheelSlipDrawbarPullPublisher(args_without_ros)
+    node.get_logger().info('Wheel Slip Drawbar Pull Publisher started')
 
     try:
-        rclpy.spin(wheel_slip_drawbar_pull_publisher)
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
 
-    wheel_slip_drawbar_pull_publisher.destroy_node()
+    node.destroy_node()
     rclpy.shutdown()
 
 
