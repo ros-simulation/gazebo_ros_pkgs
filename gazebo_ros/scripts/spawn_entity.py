@@ -169,7 +169,7 @@ class SpawnEntityNode(Node):
 
             latched_qos = QoSProfile(
                 depth=1,
-                durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL)
+                durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
             self.subscription = self.create_subscription(
                 String, self.args.topic, entity_xml_cb, latched_qos)
 
