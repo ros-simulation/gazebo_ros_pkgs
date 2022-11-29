@@ -66,6 +66,7 @@ set(srv_files
   "srv/SetPhysicsProperties.srv"
   "srv/SpawnEntity.srv"
   "srv/SpawnModel.srv"
+  "srv/StepControl.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
