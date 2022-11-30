@@ -236,8 +236,8 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
   pose_msg.child_frame_id = link_->GetName();
 
   // Get inertial rates
-  ignition::math::Vector3d vpos = link_->WorldLinearVel();
-  ignition::math::Vector3d veul = link_->WorldAngularVel();
+  ignition::math::Vector3d vpos = link_->RelativeLinearVel();
+  ignition::math::Vector3d veul = link_->RelativeAngularVel();
 
   // Get pose/orientation
   auto pose = link_->WorldPose();
@@ -246,15 +246,9 @@ void GazeboRosP3DPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
   if (reference_link_) {
     // Convert to relative pose, rates
     auto frame_pose = reference_link_->WorldPose();
-    auto frame_vpos = reference_link_->WorldLinearVel();
-    auto frame_veul = reference_link_->WorldAngularVel();
-
     pose.Pos() = pose.Pos() - frame_pose.Pos();
     pose.Pos() = frame_pose.Rot().RotateVectorReverse(pose.Pos());
     pose.Rot() *= frame_pose.Rot().Inverse();
-
-    vpos = frame_pose.Rot().RotateVector(vpos - frame_vpos);
-    veul = frame_pose.Rot().RotateVector(veul - frame_veul);
   }
 
   // Apply constant offsets
