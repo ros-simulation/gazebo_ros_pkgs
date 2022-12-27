@@ -31,6 +31,11 @@
 #include <std_msgs/msg/float32.hpp>
 #include <sdf/sdf.hh>
 
+#ifdef NO_ERROR
+// NO_ERROR is a macro defined in Windows that's used as an enum in tf2
+#undef NO_ERROR
+#endif
+
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
