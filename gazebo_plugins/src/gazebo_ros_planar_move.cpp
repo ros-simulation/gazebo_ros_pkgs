@@ -221,6 +221,7 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
 void GazeboRosPlanarMove::Reset()
 {
   impl_->last_update_time_ = impl_->world_->SimTime();
+  impl_->last_publish_time_ = impl_->world_->SimTime();
   impl_->target_cmd_vel_.linear.x = 0;
   impl_->target_cmd_vel_.linear.y = 0;
   impl_->target_cmd_vel_.angular.z = 0;
