@@ -126,10 +126,24 @@ namespace gazebo
       cmd_timeout_ = sdf->GetElement("cmdTimeout")->Get<double>();
     }
 
+    publish_tf_ = true;
+    if (!sdf->HasElement("publishTF"))
+    {
+      ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <publishTF>, "
+                                    "defaults to %f",
+                     robot_namespace_.c_str(), publish_tf_);
+    }
+    else
+    {
+      publish_tf_ = sdf->GetElement("publishTF")->Get<bool>();
+    }
+
+    
+
 #if GAZEBO_MAJOR_VERSION >= 8
-    last_odom_publish_time_ = parent_->GetWorld()->SimTime();
+        last_odom_publish_time_ = parent_->GetWorld()->SimTime();
 #else
-    last_odom_publish_time_ = parent_->GetWorld()->GetSimTime();
+        last_odom_publish_time_ = parent_->GetWorld()->GetSimTime();
 #endif
 #if GAZEBO_MAJOR_VERSION >= 8
     last_odom_pose_ = parent_->WorldPose();
@@ -277,9 +291,11 @@ namespace gazebo
     tf::Vector3    vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
 
     tf::Transform base_footprint_to_odom(qt, vt);
-    transform_broadcaster_->sendTransform(
+    if (publish_tf_){
+      transform_broadcaster_->sendTransform(
         tf::StampedTransform(base_footprint_to_odom, current_time, odom_frame,
             base_footprint_frame));
+    }
 
     // publish odom topic
     odom_.pose.pose.position.x = pose.Pos().X();
