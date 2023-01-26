@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 /*
  * Desc: Simple model controller that uses a twist message to move a robot on
@@ -36,7 +36,7 @@ namespace gazebo
 
   // Load the controller
   void GazeboRosPlanarMove::Load(physics::ModelPtr parent,
-      sdf::ElementPtr sdf)
+                                 sdf::ElementPtr sdf)
   {
 
     parent_ = parent;
@@ -47,20 +47,21 @@ namespace gazebo
     if (!sdf->HasElement("robotNamespace"))
     {
       ROS_INFO_NAMED("planar_move", "PlanarMovePlugin missing <robotNamespace>, "
-          "defaults to \"%s\"", robot_namespace_.c_str());
+                                    "defaults to \"%s\"",
+                     robot_namespace_.c_str());
     }
     else
     {
       robot_namespace_ =
-        sdf->GetElement("robotNamespace")->Get<std::string>();
+          sdf->GetElement("robotNamespace")->Get<std::string>();
     }
 
     command_topic_ = "cmd_vel";
     if (!sdf->HasElement("commandTopic"))
     {
       ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <commandTopic>, "
-          "defaults to \"%s\"",
-          robot_namespace_.c_str(), command_topic_.c_str());
+                                    "defaults to \"%s\"",
+                     robot_namespace_.c_str(), command_topic_.c_str());
     }
     else
     {
@@ -71,8 +72,8 @@ namespace gazebo
     if (!sdf->HasElement("odometryTopic"))
     {
       ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <odometryTopic>, "
-          "defaults to \"%s\"",
-          robot_namespace_.c_str(), odometry_topic_.c_str());
+                                    "defaults to \"%s\"",
+                     robot_namespace_.c_str(), odometry_topic_.c_str());
     }
     else
     {
@@ -83,8 +84,8 @@ namespace gazebo
     if (!sdf->HasElement("odometryFrame"))
     {
       ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <odometryFrame>, "
-          "defaults to \"%s\"",
-          robot_namespace_.c_str(), odometry_frame_.c_str());
+                                    "defaults to \"%s\"",
+                     robot_namespace_.c_str(), odometry_frame_.c_str());
     }
     else
     {
@@ -95,8 +96,8 @@ namespace gazebo
     if (!sdf->HasElement("robotBaseFrame"))
     {
       ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <robotBaseFrame>, "
-          "defaults to \"%s\"",
-          robot_namespace_.c_str(), robot_base_frame_.c_str());
+                                    "defaults to \"%s\"",
+                     robot_namespace_.c_str(), robot_base_frame_.c_str());
     }
     else
     {
@@ -107,8 +108,8 @@ namespace gazebo
     if (!sdf->HasElement("odometryRate"))
     {
       ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <odometryRate>, "
-          "defaults to %f",
-          robot_namespace_.c_str(), odometry_rate_);
+                                    "defaults to %f",
+                     robot_namespace_.c_str(), odometry_rate_);
     }
     else
     {
@@ -118,8 +119,8 @@ namespace gazebo
     if (!sdf->HasElement("cmdTimeout"))
     {
       ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <cmdTimeout>, "
-          "defaults to %f",
-          robot_namespace_.c_str(), cmd_timeout_);
+                                    "defaults to %f",
+                     robot_namespace_.c_str(), cmd_timeout_);
     }
     else
     {
@@ -130,7 +131,7 @@ namespace gazebo
     if (!sdf->HasElement("publishTF"))
     {
       ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <publishTF>, "
-                                    "defaults to %f",
+                                    "defaults to %d",
                      robot_namespace_.c_str(), publish_tf_);
     }
     else
@@ -138,12 +139,10 @@ namespace gazebo
       publish_tf_ = sdf->GetElement("publishTF")->Get<bool>();
     }
 
-    
-
 #if GAZEBO_MAJOR_VERSION >= 8
-        last_odom_publish_time_ = parent_->GetWorld()->SimTime();
+    last_odom_publish_time_ = parent_->GetWorld()->SimTime();
 #else
-        last_odom_publish_time_ = parent_->GetWorld()->GetSimTime();
+    last_odom_publish_time_ = parent_->GetWorld()->GetSimTime();
 #endif
 #if GAZEBO_MAJOR_VERSION >= 8
     last_odom_pose_ = parent_->WorldPose();
@@ -159,37 +158,36 @@ namespace gazebo
     if (!ros::isInitialized())
     {
       ROS_FATAL_STREAM_NAMED("planar_move", "PlanarMovePlugin (ns = " << robot_namespace_
-        << "). A ROS node for Gazebo has not been initialized, "
-        << "unable to load plugin. Load the Gazebo system plugin "
-        << "'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+                                                                      << "). A ROS node for Gazebo has not been initialized, "
+                                                                      << "unable to load plugin. Load the Gazebo system plugin "
+                                                                      << "'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
       return;
     }
     rosnode_.reset(new ros::NodeHandle(robot_namespace_));
 
     ROS_DEBUG_NAMED("planar_move", "OCPlugin (%s) has started",
-        robot_namespace_.c_str());
+                    robot_namespace_.c_str());
 
     tf_prefix_ = tf::getPrefixParam(*rosnode_);
     transform_broadcaster_.reset(new tf::TransformBroadcaster());
 
     // subscribe to the odometry topic
     ros::SubscribeOptions so =
-      ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
-          boost::bind(&GazeboRosPlanarMove::cmdVelCallback, this, _1),
-          ros::VoidPtr(), &queue_);
+        ros::SubscribeOptions::create<geometry_msgs::Twist>(command_topic_, 1,
+                                                            boost::bind(&GazeboRosPlanarMove::cmdVelCallback, this, _1),
+                                                            ros::VoidPtr(), &queue_);
 
     vel_sub_ = rosnode_->subscribe(so);
     odometry_pub_ = rosnode_->advertise<nav_msgs::Odometry>(odometry_topic_, 1);
 
     // start custom queue for diff drive
     callback_queue_thread_ =
-      boost::thread(boost::bind(&GazeboRosPlanarMove::QueueThread, this));
+        boost::thread(boost::bind(&GazeboRosPlanarMove::QueueThread, this));
 
     // listen to the update event (broadcast every simulation iteration)
     update_connection_ =
-      event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&GazeboRosPlanarMove::UpdateChild, this));
-
+        event::Events::ConnectWorldUpdateBegin(
+            boost::bind(&GazeboRosPlanarMove::UpdateChild, this));
   }
 
   // Update the controller
@@ -200,9 +198,9 @@ namespace gazebo
     IGN_PROFILE_BEGIN("fill ROS message");
 #endif
     boost::mutex::scoped_lock scoped_lock(lock);
-    if (cmd_timeout_>=0)
+    if (cmd_timeout_ >= 0)
     {
-      if ((ros::Time::now()-last_cmd_received_time_).toSec() > cmd_timeout_)
+      if ((ros::Time::now() - last_cmd_received_time_).toSec() > cmd_timeout_)
       {
         x_ = 0;
         y_ = 0;
@@ -216,22 +214,24 @@ namespace gazebo
 #endif
     float yaw = pose.Rot().Yaw();
     parent_->SetLinearVel(ignition::math::Vector3d(
-          x_ * cosf(yaw) - y_ * sinf(yaw),
-          y_ * cosf(yaw) + x_ * sinf(yaw),
-          0));
+        x_ * cosf(yaw) - y_ * sinf(yaw),
+        y_ * cosf(yaw) + x_ * sinf(yaw),
+        0));
     parent_->SetAngularVel(ignition::math::Vector3d(0, 0, rot_));
 #ifdef ENABLE_PROFILER
     IGN_PROFILE_END();
 #endif
-    if (odometry_rate_ > 0.0) {
+    if (odometry_rate_ > 0.0)
+    {
 #if GAZEBO_MAJOR_VERSION >= 8
       common::Time current_time = parent_->GetWorld()->SimTime();
 #else
       common::Time current_time = parent_->GetWorld()->GetSimTime();
 #endif
       double seconds_since_last_update =
-        (current_time - last_odom_publish_time_).Double();
-      if (seconds_since_last_update > (1.0 / odometry_rate_)) {
+          (current_time - last_odom_publish_time_).Double();
+      if (seconds_since_last_update > (1.0 / odometry_rate_))
+      {
 #ifdef ENABLE_PROFILER
         IGN_PROFILE_BEGIN("publishOdometry");
 #endif
@@ -245,7 +245,8 @@ namespace gazebo
   }
 
   // Finalize the controller
-  void GazeboRosPlanarMove::FiniChild() {
+  void GazeboRosPlanarMove::FiniChild()
+  {
     alive_ = false;
     queue_.clear();
     queue_.disable();
@@ -254,7 +255,7 @@ namespace gazebo
   }
 
   void GazeboRosPlanarMove::cmdVelCallback(
-      const geometry_msgs::Twist::ConstPtr& cmd_msg)
+      const geometry_msgs::Twist::ConstPtr &cmd_msg)
   {
     boost::mutex::scoped_lock scoped_lock(lock);
     last_cmd_received_time_ = ros::Time::now();
@@ -278,7 +279,7 @@ namespace gazebo
     ros::Time current_time = ros::Time::now();
     std::string odom_frame = tf::resolve(tf_prefix_, odometry_frame_);
     std::string base_footprint_frame =
-      tf::resolve(tf_prefix_, robot_base_frame_);
+        tf::resolve(tf_prefix_, robot_base_frame_);
 
     // getting data for base_footprint to odom transform
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -288,13 +289,14 @@ namespace gazebo
 #endif
 
     tf::Quaternion qt(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W());
-    tf::Vector3    vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
+    tf::Vector3 vt(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z());
 
     tf::Transform base_footprint_to_odom(qt, vt);
-    if (publish_tf_){
+    if (publish_tf_)
+    {
       transform_broadcaster_->sendTransform(
-        tf::StampedTransform(base_footprint_to_odom, current_time, odom_frame,
-            base_footprint_frame));
+          tf::StampedTransform(base_footprint_to_odom, current_time, odom_frame,
+                               base_footprint_frame));
     }
 
     // publish odom topic
@@ -325,8 +327,10 @@ namespace gazebo
     {
       float last_yaw = last_odom_pose_.Rot().Yaw();
       float current_yaw = pose.Rot().Yaw();
-      while (current_yaw < last_yaw - M_PI) current_yaw += 2 * M_PI;
-      while (current_yaw > last_yaw + M_PI) current_yaw -= 2 * M_PI;
+      while (current_yaw < last_yaw - M_PI)
+        current_yaw += 2 * M_PI;
+      while (current_yaw > last_yaw + M_PI)
+        current_yaw -= 2 * M_PI;
       float angular_diff = current_yaw - last_yaw;
       odom_.twist.twist.angular.z = angular_diff / step_time;
     }
