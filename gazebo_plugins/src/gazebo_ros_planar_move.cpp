@@ -130,7 +130,7 @@ namespace gazebo
     if (!sdf->HasElement("publishTF"))
     {
       ROS_WARN_NAMED("planar_move", "PlanarMovePlugin (ns = %s) missing <publishTF>, "
-                                    "defaults to %f",
+                                    "defaults to %d",
                      robot_namespace_.c_str(), publish_tf_);
     }
     else
