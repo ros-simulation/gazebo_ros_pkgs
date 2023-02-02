@@ -97,9 +97,6 @@ public:
   /// Gazebo node for communication.
   gazebo::transport::NodePtr gz_node_;
 
-  /// Publishes model factory messages.
-  gazebo::transport::PublisherPtr gz_factory_pub_;
-
   /// Publishes light factory messages.
   gazebo::transport::PublisherPtr gz_factory_light_pub_;
 
@@ -160,7 +157,6 @@ void GazeboRosFactoryPrivate::OnWorldCreated(const std::string & _world_name)
   // Gazebo transport
   gz_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   gz_node_->Init(_world_name);
-  gz_factory_pub_ = gz_node_->Advertise<gazebo::msgs::Factory>("~/factory");
   gz_factory_light_pub_ = gz_node_->Advertise<gazebo::msgs::Light>("~/factory/light");
   gz_request_pub_ = gz_node_->Advertise<gazebo::msgs::Request>("~/request");
 }
@@ -272,9 +268,7 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   } else {
     std::ostringstream sdfStr;
     sdfStr << "<sdf version='" << SDF_VERSION << "'>" << entity_elem->ToString("") << "</sdf>";
-    gazebo::msgs::Factory msg;
-    msg.set_sdf(sdfStr.str());
-    gz_factory_pub_->Publish(msg);
+    world_->InsertModelString(sdfStr.str());
   }
 
   // Only verify spawning if name is set, to keep ROS 1 functionality, but it would be more
