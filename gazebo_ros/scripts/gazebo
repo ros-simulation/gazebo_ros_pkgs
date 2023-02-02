@@ -49,7 +49,7 @@ if $(kill -0 $! 2> /dev/null); then
 fi
 
 # Kill the server if it is alive
-if $(kill -0 $! 2> /dev/null); then
+if $(kill -0 $gzserver_pid 2> /dev/null); then
   # -2 SIGINT valid for Linux and Mac
-  kill -2 $!
+  kill -2 $gzserver_pid
 fi
