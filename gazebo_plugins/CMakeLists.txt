@@ -313,7 +313,7 @@ add_library(gazebo_ros_skid_steer_drive src/gazebo_ros_skid_steer_drive.cpp)
 target_link_libraries(gazebo_ros_skid_steer_drive ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_library(gazebo_ros_video src/gazebo_ros_video.cpp)
-target_link_libraries(gazebo_ros_video ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OGRE_LIBRARIES} ${opencv_LIBRARIES})
+target_link_libraries(gazebo_ros_video ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OGRE_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_library(gazebo_ros_planar_move src/gazebo_ros_planar_move.cpp)
 target_link_libraries(gazebo_ros_planar_move ${catkin_LIBRARIES} ${Boost_LIBRARIES})
