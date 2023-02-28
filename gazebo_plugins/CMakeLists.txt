@@ -159,6 +159,28 @@ if(ENABLE_PROFILER)
   target_link_libraries(gazebo_ros_camera ${ignition-common3_LIBRARIES})
 endif()
 
+# gazebo_ros_sonar
+add_library(gazebo_ros_sonar SHARED
+  src/gazebo_ros_sonar.cpp
+)
+target_include_directories(gazebo_ros_sonar PUBLIC include)
+ament_target_dependencies(gazebo_ros_sonar
+  "gazebo_dev"
+  "gazebo_ros"
+  "rclcpp"
+  "sensor_msgs"
+  "tf2"
+  "tf2_ros"
+  "tf2_geometry_msgs")
+target_link_libraries(gazebo_ros_sonar
+  SonarPlugin
+)
+ament_export_libraries(gazebo_ros_sonar)
+if(ENABLE_PROFILER)
+  target_include_directories(gazebo_ros_sonar PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_sonar ${ignition-common3_LIBRARIES})
+endif()
+
 # gazebo_ros_imu_sensor
 add_library(gazebo_ros_imu_sensor SHARED
   src/gazebo_ros_imu_sensor.cpp
@@ -453,23 +475,23 @@ if(ENABLE_PROFILER)
 endif()
 
 # gazebo_ros_wheel_slip
-if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
-  add_library(gazebo_ros_wheel_slip SHARED
-    src/gazebo_ros_wheel_slip.cpp
-  )
-  ament_target_dependencies(gazebo_ros_wheel_slip
-    "gazebo_dev"
-    "gazebo_msgs"
-    "gazebo_ros"
-    "rclcpp"
-    "std_msgs"
-  )
-  target_link_libraries(gazebo_ros_wheel_slip
-    WheelSlipPlugin
-  )
-  target_include_directories(gazebo_ros_wheel_slip PUBLIC include)
-  ament_export_libraries(gazebo_ros_wheel_slip)
-endif()
+# if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
+#   add_library(gazebo_ros_wheel_slip SHARED
+#     src/gazebo_ros_wheel_slip.cpp
+#   )
+#   ament_target_dependencies(gazebo_ros_wheel_slip
+#     "gazebo_dev"
+#     "gazebo_msgs"
+#     "gazebo_ros"
+#     "rclcpp"
+#     "std_msgs"
+#   )
+#   target_link_libraries(gazebo_ros_wheel_slip
+#     WheelSlipPlugin
+#   )
+#   target_include_directories(gazebo_ros_wheel_slip PUBLIC include)
+#   ament_export_libraries(gazebo_ros_wheel_slip)
+# endif()
 
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp)
@@ -534,19 +556,19 @@ install(TARGETS
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
-install(TARGETS
-    gazebo_ros_wheel_slip
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-endif()
+# if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
+# install(TARGETS
+#     gazebo_ros_wheel_slip
+#   ARCHIVE DESTINATION lib
+#   LIBRARY DESTINATION lib
+#   RUNTIME DESTINATION bin)
+# endif()
 
-install(
-  PROGRAMS
-    scripts/wheel_slip_drawbar_pull_publisher.py
-    DESTINATION lib/${PROJECT_NAME}/
-)
+# install(
+#   PROGRAMS
+#     scripts/wheel_slip_drawbar_pull_publisher.py
+#     DESTINATION lib/${PROJECT_NAME}/
+# )
 
 install(DIRECTORY
   worlds
