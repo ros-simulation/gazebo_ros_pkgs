@@ -39,6 +39,7 @@ def generate_launch_description():
         _boolean_command('lockstep'),
         _boolean_command('help'),
         _boolean_command('pause'),
+        _arg_command('initial_sim_time'), LaunchConfiguration('initial_sim_time'),
         _arg_command('physics'), LaunchConfiguration('physics'),
         _arg_command('play'), LaunchConfiguration('play'),
         _boolean_command('record'),
@@ -106,6 +107,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'help', default_value='false',
             description='Set "true" to produce gzserver help message.'
+        ),
+        DeclareLaunchArgument(
+            'initial_sim_time', default_value='',
+            description='Specify the initial simulation time (seconds).'
         ),
         DeclareLaunchArgument(
             'pause', default_value='false',
