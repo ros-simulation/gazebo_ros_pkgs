@@ -55,11 +55,16 @@ def generate_launch_description():
         # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
         # _plugin_command('force_system'), ' ',
         _arg_command('profile'), LaunchConfiguration('profile'),
-        # convenience parameter for params file
-        _arg_command('ros-args', condition=LaunchConfiguration('params_file')),
-        _arg_command('params-file', condition=LaunchConfiguration('params_file')),
+        # Support a yaml params_file:
+        #   If a params file is to be used, it needs to be preceded by --ros-args
+        #   and followed by a trailing --
+        # This provides the leading --ros-args if a params_file is specified.
+        _conditional_command('ros-args', LaunchConfiguration('params_file')),
+        # These two lines provide the --params-file [params_file] arguments
+        _conditional_command('params-file', LaunchConfiguration('params_file')),
         LaunchConfiguration('params_file'),
-        _arg_command('', condition=LaunchConfiguration('params_file')),
+        # This provides the trailing -- if a params_file is specified.
+        _conditional_command('', LaunchConfiguration('params_file')),
         LaunchConfiguration('extra_gazebo_args'),
     ]
 
@@ -226,6 +231,13 @@ def _arg_command(arg, condition=None):
         cmd = ['"--', arg, '" if "" != "', condition, '" else ""']
     else:
         cmd = ['"--', arg, '" if "" != "', LaunchConfiguration(arg), '" else ""']
+    py_cmd = PythonExpression(cmd)
+    return py_cmd
+
+
+# Add --command if condition not empty
+def _conditional_command(arg, condition):
+    cmd = ['"--', arg, '" if "" != "', condition, '" else ""']
     py_cmd = PythonExpression(cmd)
     return py_cmd
 
