@@ -39,6 +39,9 @@ def generate_launch_description():
         _boolean_command('lockstep'),
         _boolean_command('help'),
         _boolean_command('pause'),
+        # join with '=' (--initial_sim_time=[time]) so that old versions of
+        # gazebo will parse it all as a single argument and ignore the [time].
+        _arg_command('initial_sim_time', join_with='='),
         _arg_command('physics'),
         _arg_command('play'),
         _boolean_command('record'),
@@ -111,6 +114,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'help', default_value='false',
             description='Set "true" to produce gzserver help message.'
+        ),
+        DeclareLaunchArgument(
+            'initial_sim_time', default_value='',
+            description='Specify the initial simulation time (seconds).'
         ),
         DeclareLaunchArgument(
             'pause', default_value='false',
