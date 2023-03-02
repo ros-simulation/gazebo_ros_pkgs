@@ -39,22 +39,22 @@ def generate_launch_description():
         _boolean_command('lockstep'),
         _boolean_command('help'),
         _boolean_command('pause'),
-        _arg_command('physics'), LaunchConfiguration('physics'),
-        _arg_command('play'), LaunchConfiguration('play'),
+        _arg_command('physics'),
+        _arg_command('play'),
         _boolean_command('record'),
-        _arg_command('record_encoding'), LaunchConfiguration('record_encoding'),
-        _arg_command('record_path'), LaunchConfiguration('record_path'),
-        _arg_command('record_period'), LaunchConfiguration('record_period'),
-        _arg_command('record_filter'), LaunchConfiguration('record_filter'),
-        _arg_command('seed'), LaunchConfiguration('seed'),
-        _arg_command('iters'), LaunchConfiguration('iters'),
+        _arg_command('record_encoding'),
+        _arg_command('record_path'),
+        _arg_command('record_period'),
+        _arg_command('record_filter'),
+        _arg_command('seed'),
+        _arg_command('iters'),
         _boolean_command('minimal_comms'),
         _plugin_command('init'),
         _plugin_command('factory'),
         _plugin_command('force_system'),
         # Wait for (https://github.com/ros-simulation/gazebo_ros_pkgs/pull/941)
         # _plugin_command('force_system'), ' ',
-        _arg_command('profile'), LaunchConfiguration('profile'),
+        _arg_command('profile'),
         # Support a yaml params_file:
         #   If a params file is to be used, it needs to be preceded by --ros-args
         #   and followed by a trailing --
@@ -225,14 +225,11 @@ def _boolean_command(arg):
     return py_cmd
 
 
-# Add string commands if not empty
-def _arg_command(arg, condition=None):
-    if condition:
-        cmd = ['"--', arg, '" if "" != "', condition, '" else ""']
-    else:
-        cmd = ['"--', arg, '" if "" != "', LaunchConfiguration(arg), '" else ""']
+# Add string command and argument if not empty
+def _arg_command(arg, join_with=" "):
+    cmd = ['"--', arg, join_with, '" if "" != "', LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
-    return py_cmd
+    return (py_cmd, LaunchConfiguration(arg))
 
 
 # Add --command if condition not empty
