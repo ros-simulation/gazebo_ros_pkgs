@@ -21,6 +21,8 @@
   <author>Dave Coleman</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend condition="$ROS_PYTHON_VERSION == 2">python-setuptools</buildtool_depend>
+  <buildtool_depend condition="$ROS_PYTHON_VERSION == 3">python3-setuptools</buildtool_depend>
 
   <build_depend>cmake_modules</build_depend>
   <build_depend>gazebo_dev</build_depend>
