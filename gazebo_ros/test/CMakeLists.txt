@@ -12,7 +12,7 @@ if(CATKIN_ENABLE_TESTING)
       # Check for test result file and create one if needed.  rostest can fail to
       # generate a file if it throws an exception.
       add_test(check_${rostest} rosrun rosunit check_test_ran.py 
-               --rostest ${ROS_PACKAGE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${rostest})
+               --rostest ${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${rostest})
   endforeach()
 endif()
 
