@@ -403,16 +403,16 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
   impl_->covariance_[0] = _sdf->Get<double>("covariance_x", 0.00001).first;
   impl_->covariance_[1] = _sdf->Get<double>("covariance_y", 0.00001).first;
-  impl_->covariance_[2] = _sdf->Get<double>("covariance_z", 0.00001).first;
-  impl_->covariance_[3] = _sdf->Get<double>("covariance_roll", 0.001).first;
-  impl_->covariance_[4] = _sdf->Get<double>("covariance_pitch", 0.001).first;
+  impl_->covariance_[2] = _sdf->Get<double>("covariance_z", 1000000000000.0).first;
+  impl_->covariance_[3] = _sdf->Get<double>("covariance_roll", 1000000000000.0).first;
+  impl_->covariance_[4] = _sdf->Get<double>("covariance_pitch", 1000000000000.0).first;
   impl_->covariance_[5] = _sdf->Get<double>("covariance_yaw", 0.001).first;
 
   impl_->covariance_[6] = _sdf->Get<double>("covariance_vx", 1.0).first;
   impl_->covariance_[7] = _sdf->Get<double>("covariance_vy", 1.0).first;
-  impl_->covariance_[8] = _sdf->Get<double>("covariance_vz", 1.0).first;
-  impl_->covariance_[9] = _sdf->Get<double>("covariance_vroll", 1.0).first;
-  impl_->covariance_[10] = _sdf->Get<double>("covariance_vpitch", 1.0).first;
+  impl_->covariance_[8] = _sdf->Get<double>("covariance_vz", 1000000000000.0).first;
+  impl_->covariance_[9] = _sdf->Get<double>("covariance_vroll", 1000000000000.0).first;
+  impl_->covariance_[10] = _sdf->Get<double>("covariance_vpitch", 1000000000000.0).first;
   impl_->covariance_[11] = _sdf->Get<double>("covariance_vyaw", 1.0).first;
 
   // Listen to the update event (broadcast every simulation iteration)
