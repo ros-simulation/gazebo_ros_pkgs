@@ -124,6 +124,9 @@ public:
   /// Update odometry according to world
   void UpdateOdometryWorld();
 
+  /// Update initial transform according to world
+  void UpdateInitialTransform();
+
   /// Publish odometry transforms
   /// \param[in] _current_time Current simulation time
   void PublishOdometryTf(const gazebo::common::Time & _current_time);
@@ -136,6 +139,11 @@ public:
   /// \param[in] _current_time Current simulation time
   void PublishOdometryMsg(const gazebo::common::Time & _current_time);
 
+  /// Publish ground truth odometry messages
+  /// \param[in] _current_time Current simulation time
+  void PublishOdometryGroundTruthMsg(const gazebo::common::Time & _current_time);
+
+
   /// A pointer to the GazeboROS node.
   gazebo_ros::Node::SharedPtr ros_node_;
 
@@ -144,6 +152,9 @@ public:
 
   /// Odometry publisher
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_pub_;
+
+  /// Ground truth odometry publisher
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_ground_truth_pub_;
 
   /// Connection to event called at every world iteration.
   gazebo::event::ConnectionPtr update_connection_;
@@ -193,6 +204,9 @@ public:
   /// Keep encoder data.
   geometry_msgs::msg::Pose2D pose_encoder_;
 
+  /// Inverse transform the vehicle was spawned.
+  tf2::Transform transform_initial_to_world_;
+
   /// Odometry frame ID
   std::string odometry_frame_;
 
@@ -205,11 +219,17 @@ public:
   /// Keep latest odometry message
   nav_msgs::msg::Odometry odom_;
 
+  /// Keep latest ground truth odometry message
+  nav_msgs::msg::Odometry odom_ground_truth_;
+
   /// Robot base frame ID
   std::string robot_base_frame_;
 
   /// True to publish odometry messages.
   bool publish_odom_;
+
+  /// True to publish ground_truth odometry messages.
+  bool publish_odom_ground_truth_;
 
   /// True to publish wheel-to-base transforms.
   bool publish_wheel_tf_;
@@ -374,6 +394,16 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
       impl_->ros_node_->get_logger(), "Advertise odometry on [%s]",
       impl_->odometry_pub_->get_topic_name());
   }
+  // Advertise ground truth odometry topic
+  impl_->publish_odom_ground_truth_ = _sdf->Get<bool>("publish_odom_ground_truth", false).first;
+  if (impl_->publish_odom_ground_truth_) {
+    impl_->odometry_ground_truth_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
+      "odom_ground_truth", qos.get_publisher_qos("odom_ground_truth", rclcpp::QoS(1)));
+
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Advertise ground truth odometry on [%s]",
+      impl_->odometry_ground_truth_pub_->get_topic_name());
+  }
 
   // Create TF broadcaster if needed
   impl_->publish_wheel_tf_ = _sdf->Get<bool>("publish_wheel_tf", false).first;
@@ -408,6 +438,7 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosDiffDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+
 }
 
 void GazeboRosDiffDrive::Reset()
@@ -436,6 +467,10 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE("GazeboRosDiffDrivePrivate::OnUpdate");
 #endif
+
+
+  UpdateInitialTransform();
+
   // Update encoder even if we're going to skip this update
   if (odom_source_ == ENCODER) {
     UpdateOdometryEncoder(_info.simTime);
@@ -460,6 +495,13 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
 #endif
   if (publish_odom_) {
     PublishOdometryMsg(_info.simTime);
+  }
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("PublishOdometryGroundTruthMsg");
+#endif
+  if (publish_odom_ground_truth_) {
+    PublishOdometryGroundTruthMsg(_info.simTime);
   }
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
@@ -601,6 +643,21 @@ void GazeboRosDiffDrivePrivate::UpdateOdometryEncoder(const gazebo::common::Time
   odom_.twist.twist.linear.y = 0;
 }
 
+void GazeboRosDiffDrivePrivate::UpdateInitialTransform(){
+  static bool inital_pose_stored = false;
+  if(inital_pose_stored == true) return;
+  inital_pose_stored = true;
+
+  auto pose = model_->WorldPose();
+  geometry_msgs::msg::Point p = gazebo_ros::Convert<geometry_msgs::msg::Point>(pose.Pos());
+  geometry_msgs::msg::Quaternion q = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
+
+  tf2::Transform transform_world_to_initial;
+  transform_world_to_initial.setOrigin(tf2::Vector3(p.x, p.y, p.z));
+  transform_world_to_initial.setRotation(tf2::Quaternion(q.x, q.y, q.z, q.w));
+  transform_initial_to_world_ = transform_world_to_initial.inverse();
+}
+
 void GazeboRosDiffDrivePrivate::UpdateOdometryWorld()
 {
   auto pose = model_->WorldPose();
@@ -645,7 +702,54 @@ void GazeboRosDiffDrivePrivate::PublishWheelsTf(const gazebo::common::Time & _cu
     transform_broadcaster_->sendTransform(msg);
   }
 }
+void GazeboRosDiffDrivePrivate::PublishOdometryGroundTruthMsg (const gazebo::common::Time & _current_time){
+  auto pose = model_->WorldPose();
 
+  // model pose in world coordiantes
+  geometry_msgs::msg::Point pw = gazebo_ros::Convert<geometry_msgs::msg::Point>(pose.Pos());
+  geometry_msgs::msg::Quaternion qw = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
+
+  tf2::Transform pose_current_world_;
+  pose_current_world_.setOrigin(tf2::Vector3(pw.x, pw.y, pw.z));
+  pose_current_world_.setRotation(tf2::Quaternion(qw.x, qw.y, qw.z, qw.w));
+
+  // model pose in initial (odom) coordiantes
+  tf2::Transform transform_initial_to_ground_truth;
+  transform_initial_to_ground_truth.mult(transform_initial_to_world_, pose_current_world_);
+  tf2::toMsg(transform_initial_to_ground_truth, odom_ground_truth_.pose.pose);
+
+  // Get velocity in odom frame
+  auto linear = model_->WorldLinearVel();
+  odom_ground_truth_.twist.twist.angular.z = model_->WorldAngularVel().Z();
+
+  // Convert velocity to child_frame_id(aka base_footprint)
+  float yaw = pose.Rot().Yaw();
+  odom_ground_truth_.twist.twist.linear.x = cosf(yaw) * linear.X() + sinf(yaw) * linear.Y();
+  odom_ground_truth_.twist.twist.linear.y = cosf(yaw) * linear.Y() - sinf(yaw) * linear.X();
+
+  // Set covariance
+  odom_ground_truth_.pose.covariance[0] = covariance_[0];
+  odom_ground_truth_.pose.covariance[7] = covariance_[1];
+  odom_ground_truth_.pose.covariance[14] = covariance_[2];
+  odom_ground_truth_.pose.covariance[21] = covariance_[3];
+  odom_ground_truth_.pose.covariance[28] = covariance_[4];
+  odom_ground_truth_.pose.covariance[35] = covariance_[5];
+
+  odom_ground_truth_.twist.covariance[0] = covariance_[6];
+  odom_ground_truth_.twist.covariance[7] = covariance_[7];
+  odom_ground_truth_.twist.covariance[14] = covariance_[8];
+  odom_ground_truth_.twist.covariance[21] = covariance_[9];
+  odom_ground_truth_.twist.covariance[28] = covariance_[10];
+  odom_ground_truth_.twist.covariance[35] = covariance_[11];
+
+  // Set header
+  odom_ground_truth_.header.frame_id = odometry_frame_;
+  odom_ground_truth_.child_frame_id = robot_base_frame_;
+  odom_ground_truth_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+
+  // Publish
+  odometry_ground_truth_pub_->publish(odom_ground_truth_);
+}
 void GazeboRosDiffDrivePrivate::PublishOdometryMsg(const gazebo::common::Time & _current_time)
 {
   // Set covariance
