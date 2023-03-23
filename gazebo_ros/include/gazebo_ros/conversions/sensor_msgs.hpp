@@ -27,7 +27,6 @@
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 
 #include <algorithm>
-#include <limits>
 
 #include "gazebo_ros/conversions/builtin_interfaces.hpp"
 #include "gazebo_ros/conversions/generic.hpp"
@@ -301,7 +300,7 @@ sensor_msgs::msg::Range Convert(const gazebo::msgs::LaserScanStamped & in, doubl
 
   // Set range to the minimum of the ray ranges
   // For single rays, this will just be the range of the ray
-  range_msg.range = std::numeric_limits<sensor_msgs::msg::Range::_range_type>::max();
+  range_msg.range = range_msg.max_range;
   for (double range : in.scan().ranges()) {
     if (range < range_msg.range) {
       range_msg.range = range;
