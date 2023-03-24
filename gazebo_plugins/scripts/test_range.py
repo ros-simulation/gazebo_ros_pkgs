@@ -12,7 +12,12 @@ class TestRangePlugin(unittest.TestCase):
 
   def test_inside_range(self):
     msg = rospy.wait_for_message('/sonar', Range)
-    self.assertTrue(msg.range < 0.25 and msg.range > 0.22, 'actual value: {0}'.format(msg.range))
+    # Nominal value is 0.225
+    # TODO(lucasw) could have this average over 10 samples or so
+    min_range = rospy.get_param("~min_range", 0.20)
+    max_range = rospy.get_param("~max_range", 0.25)
+    self.assertGreater(msg.range, min_range, 'range too small: {} < {}'.format(msg.range, min_range))
+    self.assertLess(msg.range, max_range, 'range too big: {} > {}'.format(msg.range, max_range))
 
 if __name__ == '__main__':
   import rostest
