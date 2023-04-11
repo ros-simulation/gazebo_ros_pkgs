@@ -256,11 +256,20 @@ class SpawnEntityNode(Node):
         if self.args.bond:
             self.get_logger().info(
                 'Waiting for shutdown to delete entity [{}]'.format(self.args.entity))
+
+            self.clientDeletion = self.create_client(
+                DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
+            if not self.clientDeletion.wait_for_service(timeout_sec=self.args.timeout):
+                self.get_logger().error(
+                    'Service %s/delete_entity unavailable. ' +
+                    'Was Gazebo started with GazeboRosFactory?')
+
             try:
                 rclpy.spin(self)
             except KeyboardInterrupt:
                 self.get_logger().info('Ctrl-C detected')
-            self._delete_entity()
+            finally:
+                self._delete_entity()
 
         return 0
 
@@ -296,24 +305,11 @@ class SpawnEntityNode(Node):
     def _delete_entity(self):
         # Delete entity from gazebo on shutdown if bond flag enabled
         self.get_logger().info('Deleting entity [{}]'.format(self.args.entity))
-        client = self.create_client(
-            DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
-        if client.wait_for_service(timeout_sec=self.args.timeout):
-            req = DeleteEntity.Request()
-            req.name = self.args.entity
-            self.get_logger().info(
-                'Calling service %s/delete_entity' % self.args.gazebo_namespace)
-            srv_call = client.call_async(req)
-            while rclpy.ok():
-                if srv_call.done():
-                    self.get_logger().info(
-                        'Deleting status: %s' % srv_call.result().status_message)
-                    break
-                rclpy.spin_once(self)
-        else:
-            self.get_logger().error(
-                'Service %s/delete_entity unavailable. ' +
-                'Was Gazebo started with GazeboRosFactory?')
+        req = DeleteEntity.Request()
+        req.name = self.args.entity
+        self.get_logger().info(
+            'Calling service %s/delete_entity' % self.args.gazebo_namespace)
+        self.clientDeletion.call(req)
 
     # def _set_model_configuration(self, joint_names, joint_positions):
     #     self.get_logger().info(
