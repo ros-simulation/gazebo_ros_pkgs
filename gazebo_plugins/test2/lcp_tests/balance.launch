@@ -9,11 +9,11 @@
   </group>
 
   <!-- start empty world -->
-  <node name="empty_world_server" pkg="gazebo" type="debug" args="-u $(find gazebo_tests)/test/lcp_tests/balance.world" respawn="false" output="screen"/>
+  <node name="empty_world_server" pkg="gazebo_ros" type="debug" args="-u $(find gazebo_tests)/test/lcp_tests/balance.world" respawn="false" output="screen"/>
 
   <!-- start gui -->
   <group if="$(arg gui)">
-    <node name="gazebo_gui" pkg="gazebo" type="gui" respawn="false" output="screen"/>
+    <node name="gazebo_gui" pkg="gazebo_ros" type="gui" respawn="false" output="screen"/>
   </group>
 
 </launch>
