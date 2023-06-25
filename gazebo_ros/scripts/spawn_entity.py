@@ -171,8 +171,8 @@ class SpawnEntityNode(Node):
             self.subscription = self.create_subscription(
                 String, self.args.topic, entity_xml_cb, latched_qos)
 
+            self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
             while rclpy.ok() and entity_xml == '':
-                self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
                 rclpy.spin_once(self)
                 pass
 
