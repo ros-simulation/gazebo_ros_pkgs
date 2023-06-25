@@ -271,7 +271,6 @@ class SpawnEntityNode(Node):
         self.get_logger().info(
             'Waiting for service %s/spawn_entity, timeout = %.f' % (
                 self.args.gazebo_namespace, timeout))
-        self.get_logger().info('Waiting for service %s/spawn_entity' % self.args.gazebo_namespace)
         client = self.create_client(SpawnEntity, '%s/spawn_entity' % self.args.gazebo_namespace)
         if client.wait_for_service(timeout_sec=timeout):
             req = SpawnEntity.Request()
