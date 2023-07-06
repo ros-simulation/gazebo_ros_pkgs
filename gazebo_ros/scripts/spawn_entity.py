@@ -261,8 +261,8 @@ class SpawnEntityNode(Node):
                 DeleteEntity, '%s/delete_entity' % self.args.gazebo_namespace)
             if not self.clientDeletion.wait_for_service(timeout_sec=self.args.timeout):
                 self.get_logger().error(
-                    'Service %s/delete_entity unavailable. ' +
-                    'Was Gazebo started with GazeboRosFactory?')
+                    'Service %s/delete_entity unavailable. Was Gazebo started with GazeboRosFactory?' %
+                        (self.args.gazebo_namespace))
 
             try:
                 rclpy.spin(self)
