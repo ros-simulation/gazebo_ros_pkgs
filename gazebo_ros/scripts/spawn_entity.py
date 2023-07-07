@@ -250,7 +250,8 @@ class SpawnEntityNode(Node):
                 client.call_async(Empty.Request())
             else:
                 self.get_logger().error('Service %s/unpause_physics unavailable. \
-                                         Was Gazebo started with GazeboRosInit?')
+                                         Was Gazebo started with GazeboRosInit?' % (
+                                             self.args.gazebo_namespace))
 
         # If bond enabled, setup shutdown callback and wait for shutdown
         if self.args.bond:
@@ -289,7 +290,8 @@ class SpawnEntityNode(Node):
                 rclpy.spin_once(self)
             return srv_call.result().success
         self.get_logger().error(
-            'Service %s/spawn_entity unavailable. Was Gazebo started with GazeboRosFactory?')
+            'Service %s/spawn_entity unavailable. Was Gazebo started with GazeboRosFactory?' % (
+                self.args.gazebo_namespace))
         return False
 
     # TODO(shivesh): Wait for https://github.com/ros2/rclpy/issues/244
