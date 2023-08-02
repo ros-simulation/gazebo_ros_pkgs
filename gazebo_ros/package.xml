@@ -22,6 +22,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>ament_index_cpp</depend>
   <depend>builtin_interfaces</depend>
   <depend>gazebo_dev</depend>
   <depend>gazebo_msgs</depend>

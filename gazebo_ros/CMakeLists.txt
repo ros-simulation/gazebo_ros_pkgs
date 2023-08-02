@@ -22,6 +22,7 @@ if(WIN32)
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_msgs REQUIRED)
@@ -102,6 +103,7 @@ add_library(gazebo_ros_factory SHARED
   src/gazebo_ros_factory.cpp
 )
 ament_target_dependencies(gazebo_ros_factory
+  "ament_index_cpp"
   "rclcpp"
   "gazebo_dev"
   "gazebo_msgs"

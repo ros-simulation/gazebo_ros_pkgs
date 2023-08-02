@@ -14,8 +14,10 @@
 
 #include "gazebo_ros/gazebo_ros_factory.hpp"
 
+#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <gazebo/common/Events.hh>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/msgs/MessageTypes.hh>
 #include <gazebo/physics/Entity.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsIface.hh>
@@ -32,9 +34,11 @@
 
 #include <tinyxml.h>
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace gazebo_ros
@@ -75,6 +79,12 @@ public:
   void AddNamespace(
     const sdf::ElementPtr & _elem,
     const std::string & _robot_namespace);
+
+  /// Call the gazebo service to determine existing resource paths
+  std::unordered_set<std::string> GetResourcePaths();
+
+  /// Call the gazebo service to add a resource path
+  bool AddResourcePath(const std::string& path);
 
   /// \brief World pointer from Gazebo.
   gazebo::physics::WorldPtr world_;
@@ -189,6 +199,36 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   auto root = factory_sdf_->Root();
   if (root->HasElement("world")) {
     root = root->GetElement("world");
+  }
+
+  // Gather all the ros packages referenced
+  std::unordered_set<std::string> ros_package_names;
+  std::string package_key = "package://";
+  std::string& urdf_s = req->xml;
+  size_t index = urdf_s.find(package_key);
+  while (index != std::string::npos)
+  {
+    index += package_key.length();
+    size_t index2 = urdf_s.find('/', index);
+    std::string package_name = urdf_s.substr(index, index2 - index);
+    ros_package_names.insert(package_name);
+    index = urdf_s.find(package_key, index2);
+  }
+
+  std::unordered_set<std::string> existing = GetResourcePaths();
+
+  for (const std::string& package_name : ros_package_names)
+  {
+    std::filesystem::path package_share_directory(ament_index_cpp::get_package_share_directory(package_name));
+    std::string parent = std::string(package_share_directory.parent_path());
+
+    if (existing.count(parent) != 0)
+    {
+      continue;
+    }
+    RCLCPP_INFO(ros_node_->get_logger(), "Adding to model path: %s", parent.c_str());
+    AddResourcePath(parent);
+    existing.insert(parent);
   }
 
   // Get entity SDF
@@ -381,6 +421,32 @@ void GazeboRosFactoryPrivate::AddNamespace(
     }
     AddNamespace(child_elem, _robot_namespace);
   }
+}
+
+std::unordered_set<std::string> GazeboRosFactoryPrivate::GetResourcePaths()
+{
+  std::unordered_set<std::string> paths;
+
+  /*gazebo::msgs::Empty request;
+  gazebo::msgs::StringMsg_V response;
+  gz_node_->Request("/gazebo/resource_paths/get", 5000, request, response);
+  for (const std::string& path : response)
+  {
+      paths.insert(path);
+  }*/
+
+  return paths;
+}
+
+bool GazeboRosFactoryPrivate::AddResourcePath(const std::string& path)
+{
+    /*gazebo::msgs::StringMsg_V request;
+    request.push_back(path);
+
+    gazebo::msgs::Empty response;
+
+    return gz_node_->Request("/gazebo/resource_paths/add", 5000, request, response);*/
+    return false;
 }
 
 GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosFactory)
