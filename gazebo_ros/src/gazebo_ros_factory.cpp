@@ -84,7 +84,7 @@ public:
   std::unordered_set<std::string> GetResourcePaths();
 
   /// Call the gazebo service to add a resource path
-  bool AddResourcePath(const std::string& path);
+  bool AddResourcePath(const std::string & path);
 
   /// \brief World pointer from Gazebo.
   gazebo::physics::WorldPtr world_;
@@ -204,10 +204,9 @@ void GazeboRosFactoryPrivate::SpawnEntity(
   // Gather all the ros packages referenced
   std::unordered_set<std::string> ros_package_names;
   std::string package_key = "package://";
-  std::string& urdf_s = req->xml;
+  std::string & urdf_s = req->xml;
   size_t index = urdf_s.find(package_key);
-  while (index != std::string::npos)
-  {
+  while (index != std::string::npos) {
     index += package_key.length();
     size_t index2 = urdf_s.find('/', index);
     std::string package_name = urdf_s.substr(index, index2 - index);
@@ -217,13 +216,12 @@ void GazeboRosFactoryPrivate::SpawnEntity(
 
   std::unordered_set<std::string> existing = GetResourcePaths();
 
-  for (const std::string& package_name : ros_package_names)
-  {
-    std::filesystem::path package_share_directory(ament_index_cpp::get_package_share_directory(package_name));
+  for (const std::string& package_name : ros_package_names) {
+    std::filesystem::path package_share_directory;
+    package_share_directory = ament_index_cpp::get_package_share_directory(package_name);
     std::string parent = std::string(package_share_directory.parent_path());
 
-    if (existing.count(parent) != 0)
-    {
+    if (existing.count(parent) != 0) {
       continue;
     }
     RCLCPP_INFO(ros_node_->get_logger(), "Adding to model path: %s", parent.c_str());
@@ -440,13 +438,13 @@ std::unordered_set<std::string> GazeboRosFactoryPrivate::GetResourcePaths()
 
 bool GazeboRosFactoryPrivate::AddResourcePath(const std::string& path)
 {
-    /*gazebo::msgs::StringMsg_V request;
-    request.push_back(path);
+  /*gazebo::msgs::StringMsg_V request;
+  request.push_back(path);
 
-    gazebo::msgs::Empty response;
+  gazebo::msgs::Empty response;
 
-    return gz_node_->Request("/gazebo/resource_paths/add", 5000, request, response);*/
-    return false;
+  return gz_node_->Request("/gazebo/resource_paths/add", 5000, request, response);*/
+  return false;
 }
 
 GZ_REGISTER_SYSTEM_PLUGIN(GazeboRosFactory)
