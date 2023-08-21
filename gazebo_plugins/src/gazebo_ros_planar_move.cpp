@@ -22,6 +22,7 @@
 
 #include <gazebo/common/Events.hh>
 #include <gazebo/physics/Model.hh>
+#include <gazebo/physics/Link.hh>
 #include <gazebo/physics/World.hh>
 #include <gazebo_plugins/gazebo_ros_planar_move.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
@@ -114,6 +115,9 @@ public:
 
   /// True to publish odom-to-world transforms.
   bool publish_odom_tf_;
+
+  /// Last Model Pose
+  ignition::math::Pose3d last_pose_;
 };
 
 GazeboRosPlanarMove::GazeboRosPlanarMove()
@@ -216,6 +220,8 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosPlanarMovePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+
+  impl_->last_pose_ = impl_->model_->WorldPose();
 }
 
 void GazeboRosPlanarMove::Reset()
@@ -237,13 +243,31 @@ void GazeboRosPlanarMovePrivate::OnUpdate(const gazebo::common::UpdateInfo & _in
 #endif
   if (seconds_since_last_update >= update_period_) {
     ignition::math::Pose3d pose = model_->WorldPose();
-    auto yaw = static_cast<float>(pose.Rot().Yaw());
-    model_->SetLinearVel(
-      ignition::math::Vector3d(
-        target_cmd_vel_.linear.x * cosf(yaw) - target_cmd_vel_.linear.y * sinf(yaw),
-        target_cmd_vel_.linear.y * cosf(yaw) + target_cmd_vel_.linear.x * sinf(yaw),
-        0));
-    model_->SetAngularVel(ignition::math::Vector3d(0, 0, target_cmd_vel_.angular.z));
+
+    // Compute Velocities even when the robot is not in a plane
+    ignition::math::Quaternion<double> q;
+    q.Euler(pose.Rot().Roll(), pose.Rot().Pitch(), pose.Rot().Yaw());
+
+    ignition::math::Vector3d lin_vel(target_cmd_vel_.linear.x, target_cmd_vel_.linear.y, 0.0);
+    ignition::math::Vector3d rot_vel(0.0, 0.0, target_cmd_vel_.angular.z);
+
+    // Apply Gravity force to the component Z
+    auto delta_pose = pose - last_pose_;
+    double g_vel;
+    ignition::math::Vector3d g = model_->GetWorld()->Gravity();
+
+    if(abs(g.Z()) > 0.0) {
+      g_vel = delta_pose.Z() / seconds_since_last_update + g.Z() * seconds_since_last_update;
+      lin_vel.Z() = lin_vel.Z() + g_vel;
+    }
+
+    auto lin_vel_rot = q.RotateVector(lin_vel);
+    auto rot_vel_rot = q.RotateVector(rot_vel);
+
+    last_pose_ = pose;
+
+    model_->SetLinearVel(lin_vel_rot);
+    model_->SetAngularVel(rot_vel_rot);
 
     last_update_time_ = _info.simTime;
   }
