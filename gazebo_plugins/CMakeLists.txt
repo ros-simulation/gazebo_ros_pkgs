@@ -453,7 +453,7 @@ if(ENABLE_PROFILER)
 endif()
 
 # gazebo_ros_wheel_slip
-if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
+if(NOT GAZEBO_VERSION VERSION_LESS 11.9)
   add_library(gazebo_ros_wheel_slip SHARED
     src/gazebo_ros_wheel_slip.cpp
   )
@@ -534,7 +534,7 @@ install(TARGETS
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-if(NOT GAZEBO_VERSION VERSION_LESS 9.5)
+if(NOT GAZEBO_VERSION VERSION_LESS 11.9)
 install(TARGETS
     gazebo_ros_wheel_slip
   ARCHIVE DESTINATION lib
