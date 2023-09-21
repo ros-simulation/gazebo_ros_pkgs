@@ -256,7 +256,7 @@ void GazeboRosPlanarMovePrivate::OnUpdate(const gazebo::common::UpdateInfo & _in
     double g_vel;
     ignition::math::Vector3d g = model_->GetWorld()->Gravity();
 
-    if(abs(g.Z()) > 0.0) {
+    if (abs(g.Z()) > 0.0) {
       g_vel = delta_pose.Z() / seconds_since_last_update + g.Z() * seconds_since_last_update;
       lin_vel.Z() = lin_vel.Z() + g_vel;
     }
