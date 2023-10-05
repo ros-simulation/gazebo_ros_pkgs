@@ -270,7 +270,7 @@ GazeboRosInitPrivate::GazeboRosInitPrivate()
 
 void GazeboRosInitPrivate::PublishSimTime(const gazebo::common::UpdateInfo & _info)
 {
-  if (!throttler_.IsReady(_info.realTime)) {
+  if (!throttler_.IsReady(_info.simTime)) {
     return;
   }
 
