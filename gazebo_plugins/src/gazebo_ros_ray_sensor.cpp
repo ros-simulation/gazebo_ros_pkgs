@@ -76,6 +76,9 @@ public:
   /// brief Radiation type to report when output type is range
   uint8_t range_radiation_type_;
 
+  /// If set, the range sensor becomes a proximity sensor and this its threshold.
+  double proximity_threshold_{0.0};
+
   /// Gazebo node used to subscribe to laser scan
   gazebo::transport::NodePtr gazebo_node_;
 
@@ -156,6 +159,10 @@ void GazeboRosRaySensor::Load(gazebo::sensors::SensorPtr _sensor, sdf::ElementPt
         _sdf->Get<std::string>("radiation_type").c_str());
       return;
     }
+    if (_sdf->HasElement("proximity_threshold")) {
+      impl_->proximity_threshold_ = _sdf->Get<double>("proximity_threshold");
+    }
+
   }
 
   if (!_sdf->HasElement("min_intensity")) {
@@ -232,6 +239,13 @@ void GazeboRosRaySensorPrivate::PublishRange(ConstLaserScanStampedPtr & _msg)
   range_msg.header.frame_id = frame_name_;
   // Set radiation type from sdf
   range_msg.radiation_type = range_radiation_type_;
+
+  if (proximity_threshold_ != 0.0) {
+    range_msg.min_range = range_msg.max_range = proximity_threshold_;
+    range_msg.range = range_msg.range <
+      proximity_threshold_ ? -std::numeric_limits<sensor_msgs::msg::Range::_range_type>::infinity() :
+      std::numeric_limits<sensor_msgs::msg::Range::_range_type>::infinity();
+  }
   // Publish output
   boost::get<RangePub>(pub_)->publish(range_msg);
 }
