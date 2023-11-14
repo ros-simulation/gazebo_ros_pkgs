@@ -152,7 +152,7 @@ void GazeboRosPlanarMove::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr
 
   // Update rate
   auto publish_rate = _sdf->Get<double>("publish_rate", 20.0).first;
-  if (update_rate > 0.0) {
+  if (publish_rate > 0.0) {
     impl_->publish_period_ = 1.0 / publish_rate;
   } else {
     impl_->publish_period_ = 0.0;
