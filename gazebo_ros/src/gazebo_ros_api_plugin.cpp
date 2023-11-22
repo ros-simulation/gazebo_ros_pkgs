@@ -2191,6 +2191,8 @@ void GazeboRosApiPlugin::publishSimTime()
 void GazeboRosApiPlugin::publishLinkStates()
 {
   gazebo_msgs::LinkStates link_states;
+  link_states.header.stamp = ros::Time::now();
+  link_states.header.frame_id = "map";
 
   // fill link_states
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -2248,6 +2250,9 @@ void GazeboRosApiPlugin::publishLinkStates()
 void GazeboRosApiPlugin::publishModelStates()
 {
   gazebo_msgs::ModelStates model_states;
+  model_states.header.stamp = ros::Time::now();
+  model_states.header.frame_id = "map";
+
 
   // fill model_states
 #if GAZEBO_MAJOR_VERSION >= 8
