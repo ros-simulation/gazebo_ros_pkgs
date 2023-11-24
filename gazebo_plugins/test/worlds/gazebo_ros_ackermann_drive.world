@@ -540,6 +540,7 @@
           <remapping>cmd_vel:=cmd_test</remapping>
           <remapping>odom:=odom_test</remapping>
           <remapping>distance:=distance_test</remapping>
+          <remapping>steerangle:=steerangle_test</remapping>
         </ros>
 
         <update_rate>100.0</update_rate>
@@ -576,6 +577,7 @@
         <publish_odom_tf>true</publish_odom_tf>
         <publish_wheel_tf>true</publish_wheel_tf>
         <publish_distance>true</publish_distance>
+        <publish_steerangle>true</publish_steerangle>
 
         <odometry_frame>odom_test</odometry_frame>
         <robot_base_frame>chassis</robot_base_frame>
