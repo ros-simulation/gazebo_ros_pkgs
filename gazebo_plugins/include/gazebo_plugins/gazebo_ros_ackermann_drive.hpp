@@ -35,6 +35,7 @@ class GazeboRosAckermannDrivePrivate;
         <remapping>cmd_vel:=cmd_demo</remapping>
         <remapping>odom:=odom_demo</remapping>
         <remapping>distance:=distance_demo</remapping>
+        <remapping>steerangle:=steerangle_demo</remapping>
       </ros>
 
       <update_rate>100.0</update_rate>
@@ -71,6 +72,7 @@ class GazeboRosAckermannDrivePrivate;
       <publish_odom_tf>true</publish_odom_tf>
       <publish_wheel_tf>true</publish_wheel_tf>
       <publish_distance>true</publish_distance>
+      <publish_steerangle>true</publish_steerangle>
 
       <odometry_frame>odom_demo</odometry_frame>
       <robot_base_frame>chassis</robot_base_frame>
