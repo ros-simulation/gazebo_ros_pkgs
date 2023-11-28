@@ -110,6 +110,9 @@ public:
   /// Distance publisher
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr distance_pub_;
 
+  /// Steerangle publisher
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr steerangle_pub_;
+
   /// Connection to event called at every world iteration.
   gazebo::event::ConnectionPtr update_connection_;
 
@@ -164,6 +167,9 @@ public:
   /// Keep latest distance message
   std_msgs::msg::Float32 distance_;
 
+  /// Keep latest steerangle message
+  std_msgs::msg::Float32 steerangle_;
+
   /// Robot base frame ID
   std::string robot_base_frame_;
 
@@ -172,6 +178,9 @@ public:
 
   /// True to publish distance travelled
   bool publish_distance_;
+
+  /// True to publish steering angle
+  bool publish_steerangle_;
 
   /// True to publish wheel-to-base transforms.
   bool publish_wheel_tf_;
@@ -393,6 +402,17 @@ void GazeboRosAckermannDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
       impl_->distance_pub_->get_topic_name());
   }
 
+  // Advertise steering angle
+  impl_->publish_steerangle_ = _sdf->Get<bool>("publish_steerangle", false).first;
+  if (impl_->publish_steerangle_) {
+    impl_->steerangle_pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Float32>(
+      "steerangle", qos.get_publisher_qos("steerangle", rclcpp::QoS(1)));
+
+    RCLCPP_INFO(
+      impl_->ros_node_->get_logger(), "Advertise steerangle on [%s]",
+      impl_->steerangle_pub_->get_topic_name());
+  }
+
   // Create TF broadcaster if needed
   impl_->publish_wheel_tf_ = _sdf->Get<bool>("publish_wheel_tf", false).first;
   impl_->publish_odom_tf_ = _sdf->Get<bool>("publish_odom_tf", false).first;
@@ -438,6 +458,7 @@ void GazeboRosAckermannDrive::Reset()
   impl_->target_linear_ = 0;
   impl_->target_rot_ = 0;
   impl_->distance_.data = 0;
+  impl_->steerangle_.data = 0;
 }
 
 void GazeboRosAckermannDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
@@ -532,6 +553,17 @@ void GazeboRosAckermannDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo &
     pid_right_steering_.Update(right_steering_diff, seconds_since_last_update);
 
   auto steer_wheel_angle = (left_steering_angle + right_steering_angle) * 0.5 / steering_ratio_;
+  steerangle_.data = (left_steering_angle + right_steering_angle) * 0.5;
+
+  if (publish_steerangle_) {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("publish steerangle");
+#endif
+    steerangle_pub_->publish(steerangle_);
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_END();
+#endif
+  }
 
   joints_[STEER_LEFT]->SetForce(0, left_steering_cmd);
   joints_[STEER_RIGHT]->SetForce(0, right_steering_cmd);

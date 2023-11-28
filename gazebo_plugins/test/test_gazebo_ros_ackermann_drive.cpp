@@ -17,6 +17,7 @@
 #include <geometry_msgs/msg/twist.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <std_msgs/msg/float32.hpp>
 
 #include <memory>
 
@@ -54,6 +55,13 @@ TEST_F(GazeboRosAckermannDriveTest, Publishing)
     "test/odom_test", rclcpp::QoS(rclcpp::KeepLast(1)),
     [&latestMsg](const nav_msgs::msg::Odometry::SharedPtr _msg) {
       latestMsg = _msg;
+    });
+
+  std_msgs::msg::Float32::SharedPtr latestSteerangle;
+  auto subSteerangle = node->create_subscription<std_msgs::msg::Float32>(
+    "test/steerangle_test", rclcpp::QoS(rclcpp::KeepLast(1)),
+    [&latestSteerangle](const std_msgs::msg::Float32::SharedPtr _msg) {
+      latestSteerangle = _msg;
     });
 
   // Step a bit for model to settle
@@ -101,6 +109,8 @@ TEST_F(GazeboRosAckermannDriveTest, Publishing)
   EXPECT_EQ("odom_test", latestMsg->header.frame_id);
   EXPECT_LT(0.0, latestMsg->pose.pose.position.x);
   EXPECT_LT(0.0, latestMsg->pose.pose.orientation.z);
+  ASSERT_NE(nullptr, latestSteerangle);
+  EXPECT_LT(0.0, latestSteerangle->data);
 
   // Check movement
   yaw = static_cast<float>(vehicle->WorldPose().Rot().Yaw());
