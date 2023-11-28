@@ -14,10 +14,10 @@
 
 #include <gazebo/common/Plugin.hh>
 
-#include <std_msgs/msg/string.hpp>
-#include <gazebo_ros/node.hpp>
-
 #include <memory>
+
+#include <gazebo_ros/node.hpp>
+#include <std_msgs/msg/string.hpp>
 
 /// Simple example of a gazebo system plugin which uses a ROS2 node with gazebo_ros::Node.
 class MultipleNodes : public gazebo::SystemPlugin

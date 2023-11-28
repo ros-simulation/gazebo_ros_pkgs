@@ -14,15 +14,15 @@
 
 #include <gtest/gtest.h>
 
-#include <gazebo_ros/testing_utils.hpp>
-
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
-
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <gazebo_ros/testing_utils.hpp>
+
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 
 struct TestParams
 {

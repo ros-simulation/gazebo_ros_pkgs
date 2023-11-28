@@ -14,6 +14,10 @@
 
 #include <gazebo/test/ServerFixture.hh>
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <gazebo_msgs/srv/get_model_properties.hpp>
 #include <gazebo_msgs/srv/get_joint_properties.hpp>
 #include <gazebo_msgs/srv/get_link_properties.hpp>
@@ -23,15 +27,11 @@
 #include <gazebo_msgs/srv/set_link_properties.hpp>
 #include <gazebo_msgs/srv/set_light_properties.hpp>
 #include <gazebo_msgs/srv/set_physics_properties.hpp>
-
-#include <geometry_msgs/msg/pose.hpp>
 #include <gazebo_msgs/srv/spawn_entity.hpp>
-#include <gazebo_ros/conversions/geometry_msgs.hpp>
-#include <rclcpp/rclcpp.hpp>
 
-#include <memory>
-#include <string>
-#include <vector>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
+#include <geometry_msgs/msg/pose.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #define tol 0.01
 

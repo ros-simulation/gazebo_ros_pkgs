@@ -16,15 +16,15 @@
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
 
+#include <memory>
+#include <string>
+
 #include <gazebo_msgs/msg/link_states.hpp>
 #include <gazebo_msgs/msg/model_states.hpp>
 #include <gazebo_msgs/srv/get_entity_state.hpp>
 #include <gazebo_msgs/srv/set_entity_state.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <rclcpp/rclcpp.hpp>
-
-#include <memory>
-#include <string>
 
 #define tol 10e-2
 

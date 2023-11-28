@@ -15,11 +15,7 @@
 #ifndef GAZEBO_ROS__NODE_HPP_
 #define GAZEBO_ROS__NODE_HPP_
 
-#include <rclcpp/rclcpp.hpp>
-
-#include <gazebo_ros/executor.hpp>
 #include <gazebo_ros/node_visibility_control.h>
-#include <gazebo_ros/qos.hpp>
 
 #include <atomic>
 #include <memory>
@@ -28,6 +24,11 @@
 #include <utility>
 #include <vector>
 #include <unordered_set>
+
+#include <gazebo_ros/executor.hpp>
+#include <gazebo_ros/qos.hpp>
+
+#include <rclcpp/rclcpp.hpp>
 
 namespace gazebo_ros
 {
