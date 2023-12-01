@@ -221,7 +221,7 @@ public:
   unsigned int num_wheel_pairs_;
 
   /// Covariance in odometry
-  double covariance_[3];
+  double covariance_[12];
 };
 
 GazeboRosDiffDrive::GazeboRosDiffDrive()
@@ -403,7 +403,17 @@ void GazeboRosDiffDrive::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr 
 
   impl_->covariance_[0] = _sdf->Get<double>("covariance_x", 0.00001).first;
   impl_->covariance_[1] = _sdf->Get<double>("covariance_y", 0.00001).first;
-  impl_->covariance_[2] = _sdf->Get<double>("covariance_yaw", 0.001).first;
+  impl_->covariance_[2] = _sdf->Get<double>("covariance_z", 1000000000000.0).first;
+  impl_->covariance_[3] = _sdf->Get<double>("covariance_roll", 1000000000000.0).first;
+  impl_->covariance_[4] = _sdf->Get<double>("covariance_pitch", 1000000000000.0).first;
+  impl_->covariance_[5] = _sdf->Get<double>("covariance_yaw", 0.001).first;
+
+  impl_->covariance_[6] = _sdf->Get<double>("covariance_vx", 1.0).first;
+  impl_->covariance_[7] = _sdf->Get<double>("covariance_vy", 1.0).first;
+  impl_->covariance_[8] = _sdf->Get<double>("covariance_vz", 1000000000000.0).first;
+  impl_->covariance_[9] = _sdf->Get<double>("covariance_vroll", 1000000000000.0).first;
+  impl_->covariance_[10] = _sdf->Get<double>("covariance_vpitch", 1000000000000.0).first;
+  impl_->covariance_[11] = _sdf->Get<double>("covariance_vyaw", 1.0).first;
 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
@@ -651,17 +661,17 @@ void GazeboRosDiffDrivePrivate::PublishOdometryMsg(const gazebo::common::Time & 
   // Set covariance
   odom_.pose.covariance[0] = covariance_[0];
   odom_.pose.covariance[7] = covariance_[1];
-  odom_.pose.covariance[14] = 1000000000000.0;
-  odom_.pose.covariance[21] = 1000000000000.0;
-  odom_.pose.covariance[28] = 1000000000000.0;
-  odom_.pose.covariance[35] = covariance_[2];
+  odom_.pose.covariance[14] = covariance_[2];
+  odom_.pose.covariance[21] = covariance_[3];
+  odom_.pose.covariance[28] = covariance_[4];
+  odom_.pose.covariance[35] = covariance_[5];
 
-  odom_.twist.covariance[0] = covariance_[0];
-  odom_.twist.covariance[7] = covariance_[1];
-  odom_.twist.covariance[14] = 1000000000000.0;
-  odom_.twist.covariance[21] = 1000000000000.0;
-  odom_.twist.covariance[28] = 1000000000000.0;
-  odom_.twist.covariance[35] = covariance_[2];
+  odom_.twist.covariance[0] = covariance_[6];
+  odom_.twist.covariance[7] = covariance_[7];
+  odom_.twist.covariance[14] = covariance_[8];
+  odom_.twist.covariance[21] = covariance_[9];
+  odom_.twist.covariance[28] = covariance_[10];
+  odom_.twist.covariance[35] = covariance_[11];
 
   // Set header
   odom_.header.frame_id = odometry_frame_;
