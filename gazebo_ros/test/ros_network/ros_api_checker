@@ -25,7 +25,7 @@ class Tester(unittest.TestCase):
         topics_actual = set(out.split('\n')) - set([''])
         topics_expected = set([x['topic'] for x in topics])
         topics_extra = topics_actual - topics_expected
-        self.assertEqual(topics_extra, set([]))
+        self.assertEqual(topics_extra, set([]), "\nactual topics: {}\nexpected topics: {}".format(topics_actual, topics_expected))
 
     def _test_extra_services(self, services):
         cmd = ['rosservice', 'list']
