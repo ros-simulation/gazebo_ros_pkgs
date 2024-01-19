@@ -172,6 +172,13 @@ details about which code should be submitted to this repository.
    - ***gazebo_plugin:*** --
    - ***example:*** multi_robot_scenario/xacro/p3dx/pioneer3dx_plugins.xacro
 
+* ***gazebo_moveit_planning_scene***
+    - ***description:*** ROS plugin that publishes the obstacle information for [moveit](https://github.com/ros-planning/moveit).
+      Publishes: moveit_msgs::PlanningScene
+    - ***status:*** maintained
+    - ***gazebo_plugin:*** --
+    - ***example:***
+
  * ***gazebo_ros_p3d***
    - ***description:*** publish 3D position interface for ground truth
      Publishes: nav_msgs::Odometry
