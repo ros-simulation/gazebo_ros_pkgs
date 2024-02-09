@@ -26,7 +26,7 @@ from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PythonExpression
 from launch_ros.substitutions import FindPackageShare
 
-from scripts import GazeboRosPaths
+from gazebo_ros import GazeboRosPaths
 
 
 def generate_launch_description():
