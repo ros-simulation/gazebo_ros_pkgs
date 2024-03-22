@@ -714,8 +714,7 @@ void GazeboRosCamera::OnNewDepthFrame(
 
   sensor_msgs::PointCloud2Modifier cloud_modifier(impl_->cloud_msg_);
   cloud_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
-  cloud_modifier.resize(_width * _height);
-
+  impl_->cloud_msg_.data.resize(_width * _height * impl_->cloud_msg_.point_step);
   impl_->cloud_msg_.is_dense = true;
 
   int image_index = 0;
