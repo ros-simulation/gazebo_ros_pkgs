@@ -22,6 +22,7 @@ if(WIN32)
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_msgs REQUIRED)
@@ -30,7 +31,7 @@ find_package(rcl REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rmw REQUIRED)
 find_package(std_srvs REQUIRED)
-find_package(tinyxml_vendor REQUIRED)
+find_package(tinyxml2_vendor REQUIRED)
 
 link_directories(
   ${gazebo_dev_LIBRARY_DIRS}
@@ -105,6 +106,7 @@ ament_target_dependencies(gazebo_ros_factory
   "rclcpp"
   "gazebo_dev"
   "gazebo_msgs"
+  "ament_index_cpp"
 )
 target_link_libraries(gazebo_ros_factory
   gazebo_ros_node
