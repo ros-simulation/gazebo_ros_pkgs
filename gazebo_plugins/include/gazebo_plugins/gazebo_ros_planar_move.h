@@ -75,6 +75,7 @@ namespace gazebo {
       std::string odometry_topic_;
       std::string odometry_frame_;
       std::string robot_base_frame_;
+      bool publish_tf_;
       double odometry_rate_;
       double cmd_timeout_;
       ros::Time last_cmd_received_time_;
