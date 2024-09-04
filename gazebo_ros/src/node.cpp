@@ -96,6 +96,18 @@ Node::SharedPtr Node::Get(sdf::ElementPtr sdf, std::string node_name)
     }
   }
 
+  if (sdf->HasElement("parameters")) {
+    sdf::ElementPtr argument_sdf = sdf->GetElement("parameters");
+
+    arguments.push_back(RCL_ROS_ARGS_FLAG);
+    while (argument_sdf) {
+      std::string argument = argument_sdf->Get<std::string>();
+      arguments.push_back(RCL_PARAM_FILE_FLAG);
+      arguments.push_back(argument);
+      argument_sdf = argument_sdf->GetNextElement("parameters");
+    }
+  }
+
   // Convert each parameter tag to a ROS parameter
   if (sdf->HasElement("parameter")) {
     sdf::ElementPtr parameter_sdf = sdf->GetElement("parameter");
