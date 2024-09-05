@@ -124,7 +124,8 @@ def test_launch_gzserver_with_args(gzserver_proc, launch_capture_io, launch_cont
     assert launch_capture_io.wait_for_stderr(timeout=5.0), \
         'Expected output on stderr, received none'
     assert 'Gazebo multi-robot simulator, version 11.11.0\nCopyright (C) 2012 Open Source ' \
-           'Robotics Foundation.\nReleased under the Apache 2 License.\nhttp://gazebosim.org\n\n' \
+           'Robotics Foundation.\nReleased under the Apache 2 License.\n' \
+           'http://classic.gazebosim.org\n\n' \
            in launch_capture_io.stderr
     assert not launch_capture_io.wait_for_stderr(timeout=1.0), \
         f'Expected no more output on stderr, got {launch_capture_io.stderr}'

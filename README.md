@@ -5,10 +5,10 @@
 Wrappers, tools and additional API's for using ROS with the Gazebo simulator. Formally simulator_gazebo stack, gazebo_pkgs is a meta package. Now Catkinized and works with the standalone Gazebo debian.
 
 ### Installation
-[Installing gazebo_ros_pkgs](http://gazebosim.org/tutorials?tut=ros2_installing&cat=connect_ros)
+[Installing gazebo_ros_pkgs](http://classic.gazebosim.org/tutorials?tut=ros2_installing&cat=connect_ros)
 
 ### Documentation and Tutorials
-[On gazebosim.org](http://gazebosim.org/tutorials?cat=connect_ros)
+[On gazebosim.org](http://classic.gazebosim.org/tutorials?cat=connect_ros)
 
 ### Develop and Contribute
 
