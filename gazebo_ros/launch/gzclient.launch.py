@@ -31,6 +31,7 @@ from scripts import GazeboRosPaths
 def generate_launch_description():
     cmd = [
         'gzclient',
+        ['--gui-client-plugin=libgazebo_ros_eol_gui.so'],
         _boolean_command('version'),
         _boolean_command('verbose'),
         _boolean_command('help'),
