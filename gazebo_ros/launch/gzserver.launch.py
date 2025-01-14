@@ -233,7 +233,7 @@ def _boolean_command(arg):
 
 
 # Add string command and argument if not empty
-def _arg_command(arg, join_with="="):
+def _arg_command(arg, join_with='='):
     cmd = ['"--', arg, join_with, '" if "" != "', LaunchConfiguration(arg), '" else ""']
     py_cmd = PythonExpression(cmd)
     return (py_cmd, LaunchConfiguration(arg))

@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <gazebo/common/CommonIface.hh>
 #include <gazebo_ros/utils.hpp>
 #include <gazebo/sensors/GaussianNoiseModel.hh>
 
+#include <cstring>
 #include <string>
 
 namespace gazebo_ros
@@ -82,6 +84,18 @@ bool Throttler::IsReady(const gazebo::common::Time & _now)
   // Enough time has passed, set last time to now and return true
   last_time_ = _now;
   return true;
+}
+
+bool ShouldDisplayEOLNotice()
+{
+  // Gazebo 11.15.0 and later contain the EOL warning in the core, so there's
+  // no need to add the notice here.
+  if (GAZEBO_MAJOR_VERSION == 11 && GAZEBO_MINOR_VERSION >= 15) {
+    return false;
+  }
+
+  const char * ignoreEol = gazebo::common::getEnv("GAZEBO_SUPPRESS_EOL_WARNING");
+  return ignoreEol == nullptr || strncmp(ignoreEol, "1", 1) != 0;
 }
 
 }  // namespace gazebo_ros

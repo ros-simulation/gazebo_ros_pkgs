@@ -89,5 +89,9 @@ private:
   gazebo::common::Time last_time_;
 };
 
+/// Determines if the Gazebo-classic EOL notice should be displayed
+GAZEBO_ROS_UTILS_PUBLIC
+bool ShouldDisplayEOLNotice();
+
 }  // namespace gazebo_ros
 #endif  // GAZEBO_ROS__UTILS_HPP_

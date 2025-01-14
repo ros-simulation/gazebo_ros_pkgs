@@ -33,8 +33,8 @@ find_package(std_srvs REQUIRED)
 find_package(tinyxml_vendor REQUIRED)
 
 # Needed for EOL GUI notice
-find_package (Qt5Widgets REQUIRED)
-find_package (Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Core REQUIRED)
 
 link_directories(
   ${gazebo_dev_LIBRARY_DIRS}
@@ -157,14 +157,18 @@ target_link_libraries(gazebo_ros_force_system
   gazebo_ros_node
 )
 
-set (CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOMOC ON)
 add_library(gazebo_ros_eol_gui  SHARED src/gazebo_ros_eol_gui.cpp)
 
-target_link_libraries(gazebo_ros_eol_gui ${Qt5Core_LIBRARIES} ${Qt5Widgets_LIBRARIES})
-ament_target_dependencies(gazebo_ros_eol_gui 
+target_link_libraries(gazebo_ros_eol_gui
+  ${Qt5Core_LIBRARIES}
+  ${Qt5Widgets_LIBRARIES}
+  gazebo_ros_utils
+)
+ament_target_dependencies(gazebo_ros_eol_gui
   "gazebo_dev"
 )
-set (CMAKE_AUTOMOC OFF)
+set(CMAKE_AUTOMOC OFF)
 
 ament_export_libraries(gazebo_ros_force_system)
 
