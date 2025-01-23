@@ -158,6 +158,26 @@ void GazeboRosInit::Load(int argc, char ** argv)
       "because it's already initialized with other arguments");
   }
 
+  if (gazebo_ros::ShouldDisplayEOLNotice()) {
+    const char * msg =
+      R"(
+#     # ####### ####### ###  #####  #######
+##    # #     #    #     #  #     # #
+# #   # #     #    #     #  #       #
+#  #  # #     #    #     #  #       #####
+#   # # #     #    #     #  #       #
+#    ## #     #    #     #  #     # #
+#     # #######    #    ###  #####  #######
+
+This version of Gazebo, now called Gazebo classic, reaches end-of-life
+in January 2025. Users are highly encouraged to migrate to the new Gazebo
+using our migration guides (https://gazebosim.org/docs/latest/gazebo_classic_migration?utm_source=gazebo_ros_pkgs&utm_medium=cli)
+
+)";
+
+    gzwarn << msg << std::endl;
+  }
+
   // Offer transient local durability on the clock topic so that if publishing is infrequent (e.g.
   // the simulation is paused), late subscribers can receive the previously published message(s).
   impl_->clock_pub_ = impl_->ros_node_->create_publisher<rosgraph_msgs::msg::Clock>(
