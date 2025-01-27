@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.9.0 (2025-01-27)
+------------------
 * Add Gazebo Classic EOL notice (`#1562 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1562>`_)
 * Fix: Fixed uninitialized warning (`#1560 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1560>`_)
 * Update Gazebo web links (`#1548 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1548>`_)
