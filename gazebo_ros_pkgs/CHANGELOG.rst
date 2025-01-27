@@ -2,6 +2,11 @@
 Changelog for package gazebo_ros_pkgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update Gazebo web links (`#1548 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1548>`_)
+* Contributors: Alejandro Hernández Cordero
+
 3.8.0 (2024-07-02)
 ------------------
 

@@ -2,6 +2,14 @@
 Changelog for package gazebo_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add Gazebo Classic EOL notice (`#1562 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1562>`_)
+* Fix: Fixed uninitialized warning (`#1560 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1560>`_)
+* Update Gazebo web links (`#1548 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1548>`_)
+* Add support to parse the parameters file directly (`#1546 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1546>`_)
+* Contributors: Addisu Z. Taddese, Alejandro Hernández Cordero, Sai Kishor Kothakota, Janosch Machowinski
+
 3.8.0 (2024-07-02)
 ------------------
 * Bloom-ignored all the packages except gazebo_msgs on jazzy (`#1534 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1534>`_)
