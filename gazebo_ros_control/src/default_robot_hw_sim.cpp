@@ -98,7 +98,7 @@ bool DefaultRobotHWSim::initSim(
     {
       ROS_WARN_STREAM_NAMED("default_robot_hw_sim","Transmission " << transmissions[j].name_
         << " has more than one joint. Currently the default robot hardware simulation "
-        << " interface only supports one.");
+        << "interface only supports one.");
       continue;
     }
 
