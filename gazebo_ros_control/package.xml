@@ -33,5 +33,10 @@
 
   <export>
     <gazebo_ros_control plugin="${prefix}/robot_hw_sim_plugins.xml"/>
+    <deprecated>
+      This package has been deprecated as of January 2025 with Gazebo classic 11 reaching
+      end-of-life. Users are highly encouraged to migrate to the new Gazebo
+      using our migration guides (https://gazebosim.org/docs/latest/gazebo_classic_migration)
+    </deprecated>
   </export>
 </package>

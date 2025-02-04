@@ -32,6 +32,13 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>std_srvs</exec_depend>
+  <export>
+    <deprecated>
+      This package has been deprecated as of January 2025 with Gazebo classic 11 reaching
+      end-of-life. Users are highly encouraged to migrate to the new Gazebo
+      using our migration guides (https://gazebosim.org/docs/latest/gazebo_classic_migration)
+    </deprecated>
+  </export>
 </package>
 
 
