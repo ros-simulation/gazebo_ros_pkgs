@@ -30,7 +30,7 @@
   <depend>rclpy</depend>
   <depend>rmw</depend>
   <depend>std_srvs</depend>
-  <depend>tinyxml_vendor</depend>
+  <depend>tinyxml2_vendor</depend>
 
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>python3-lxml</exec_depend>
