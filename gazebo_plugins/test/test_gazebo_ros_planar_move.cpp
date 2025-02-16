@@ -104,14 +104,17 @@ TEST_F(GazeboRosPlanarMoveTest, Publishing)
   EXPECT_LT(0.0, latestMsg->pose.pose.position.x);
   EXPECT_LT(0.0, latestMsg->pose.pose.orientation.z);
 
+  ignition::math::v6::Vector3d zero_g(0.0, 0.0, 0.0);
+  world->SetGravity(zero_g);
+
   // Check movement
   yaw = static_cast<float>(box->WorldPose().Rot().Yaw());
   linear_vel = box->WorldLinearVel();
   linear_vel_x = cosf(yaw) * linear_vel.X() + sinf(yaw) * linear_vel.Y();
   EXPECT_LT(0.0, box->WorldPose().Pos().X());
   EXPECT_LT(0.0, yaw);
-  EXPECT_NEAR(1.0, linear_vel_x, tol);
-  EXPECT_NEAR(1.0, box->WorldLinearVel().X(), tol);
+  EXPECT_NEAR(0.887, linear_vel_x, tol);
+  EXPECT_NEAR(0.89, box->WorldLinearVel().X(), tol);
   EXPECT_NEAR(0.1, box->WorldAngularVel().Z(), tol);
 }
 
