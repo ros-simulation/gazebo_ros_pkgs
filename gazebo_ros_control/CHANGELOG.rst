@@ -2,8 +2,8 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.3 (2025-02-26)
+------------------
 * Noetic: Add `<deprecated>` tag to package.xml files (`#1566 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1566>`_)
   These packages are now deprecated with Gazebo classic 11 reaching
   end-of-life. This adds the `<deprecated>` tag (https://www.ros.org/reps/rep-0149.html#deprecated)
