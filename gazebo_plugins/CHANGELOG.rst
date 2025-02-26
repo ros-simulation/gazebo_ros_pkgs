@@ -2,6 +2,21 @@
 Changelog for package gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Noetic: Add `<deprecated>` tag to package.xml files (`#1566 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1566>`_)
+  These packages are now deprecated with Gazebo classic 11 reaching
+  end-of-life. This adds the `<deprecated>` tag (https://www.ros.org/reps/rep-0149.html#deprecated)
+  enabling tools to notify users about the deprecation.
+* [ROS-O] compatible patches for newer systems (`#1543 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1543>`_)
+  Co-authored-by: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+* Added parameter to always publish odom twist in local coordinates (`#1531 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1531>`_)
+* [gazebo_ros_diff_drive] Fixed spelling mistake (`#1516 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1516>`_)
+* Fix typo OpenCV_LIBRARIES (`#1451 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1451>`_)
+* gazebo_ros_ft_sensor: Fix incorrect 'imu' with 'ft_sensor' (`#1436 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1436>`_)
+* Add ahcorde as maintainer (noetic-devel) (`#1437 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1437>`_)
+* Contributors: Addisu Z. Taddese, Jose Luis Rivero, Marc Perales, Martin Oehler, Michael Görner, Tobias Fischer, Wolfgang Merkt
+
 2.9.2 (2021-04-21)
 ------------------
 * gazebo_ros_utils: don't set tf_prefix if empty (`#1173 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1173>`_)

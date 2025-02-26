@@ -2,6 +2,16 @@
 Changelog for package gazebo_ros_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Noetic: Add `<deprecated>` tag to package.xml files (`#1566 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1566>`_)
+  These packages are now deprecated with Gazebo classic 11 reaching
+  end-of-life. This adds the `<deprecated>` tag (https://www.ros.org/reps/rep-0149.html#deprecated)
+  enabling tools to notify users about the deprecation.
+* Typo in error message (`#1564 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1564>`_)
+* Add ahcorde as maintainer (noetic-devel) (`#1437 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1437>`_)
+* Contributors: Addisu Z. Taddese, DaWiz, Jose Luis Rivero
+
 2.9.2 (2021-04-21)
 ------------------
 * colcon.pkg: build gazebo first in colcon workspace (`#1135 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1135>`_)

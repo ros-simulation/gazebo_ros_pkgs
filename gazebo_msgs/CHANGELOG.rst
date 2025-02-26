@@ -2,6 +2,15 @@
 Changelog for package gazebo_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Noetic: Add `<deprecated>` tag to package.xml files (`#1566 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1566>`_)
+  These packages are now deprecated with Gazebo classic 11 reaching
+  end-of-life. This adds the `<deprecated>` tag (https://www.ros.org/reps/rep-0149.html#deprecated)
+  enabling tools to notify users about the deprecation.
+* Add ahcorde as maintainer (noetic-devel) (`#1437 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1437>`_)
+* Contributors: Addisu Z. Taddese, Jose Luis Rivero
+
 2.9.2 (2021-04-21)
 ------------------
 * [Noetic] Bridge to republish PerformanceMetrics in ROS (`#1145 <https://github.com/ros-simulation/gazebo_ros_pkgs/issues/1145>`_)
