@@ -35,6 +35,7 @@ from rclpy.qos import DurabilityPolicy
 from rclpy.qos import QoSProfile
 from std_msgs.msg import String
 from std_srvs.srv import Empty
+from ament_index_python.packages import get_package_share_directory
 
 
 class SpawnEntityNode(Node):
@@ -202,7 +203,7 @@ class SpawnEntityNode(Node):
                     continue
                 url = urlsplit(filename_tag)
                 if url.scheme == 'package':
-                    url = SplitResult('model', *url[1:])
+                    url = SplitResult('file', get_package_share_directory(url[1]), *url[2:])
                     element.set('filename', url.geturl())
 
         # Encode xml object back into string for service call
