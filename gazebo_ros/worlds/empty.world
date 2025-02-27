@@ -9,5 +9,12 @@
     <include>
       <uri>model://ground_plane</uri>
     </include>
+
+    <plugin name="gazebo_ros_properties" filename="libgazebo_ros_properties.so">
+      <ros>
+        <namespace>/gazebo</namespace>
+      </ros>
+      <update_rate>1.0</update_rate>
+    </plugin>
   </world>
 </sdf>
