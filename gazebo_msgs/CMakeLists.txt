@@ -50,6 +50,7 @@ add_service_files(DIRECTORY srv FILES
   SetJointTrajectory.srv
   GetLightProperties.srv
   SetLightProperties.srv
+  StepControl.srv
   )
 
 generate_messages(DEPENDENCIES

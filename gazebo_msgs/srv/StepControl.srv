@@ -1,0 +1,19 @@
+#
+# Simulation Step Control:
+#
+#   Pauses and advances the Gazebo simulation a given number of steps. The simulated time duration of each step is the
+#   'max_step_size' value specified in Gazebo's Physics properties (Default is 0.001 seconds). So, for example, a
+#   'steps' value of 5, with a 'max_step_size' value of 0.003 will pause and advance the simulator by 0.015 seconds.
+#
+#   The primary motivation for this feature is to enable reinforcement-learning to be implemented over a ROS-based
+#   system, by allowing time-quantized state-action-reward associations to be drawn from the ROS-Gazebo duo. To fully
+#   enable this feature, please also ensure the ROS param /use_sim_time is set to True.
+#
+
+uint32  steps               # Number of steps to advance the simulator.
+                            # 0     : unpause the simulator (equivalent to /unpause_physics)
+                            # >= 1  : advance given # of steps and pause the simulator
+
+---
+bool success                # return true if spawn successful
+string status_message       # comments if available

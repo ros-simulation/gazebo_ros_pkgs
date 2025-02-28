@@ -23,6 +23,7 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/gazebo_config.h>
 #include <gazebo_ros/gazebo_ros_api_plugin.h>
+#include <boost/format.hpp>
 #include <chrono>
 #include <thread>
 
@@ -193,6 +194,8 @@ void GazeboRosApiPlugin::loadGazeboRosApiPlugin(std::string world_name)
   light_modify_pub_ = gazebonode_->Advertise<gazebo::msgs::Light>("~/light/modify");
   request_pub_ = gazebonode_->Advertise<gazebo::msgs::Request>("~/request");
   response_sub_ = gazebonode_->Subscribe("~/response",&GazeboRosApiPlugin::onResponse, this);
+  world_control_pub_ = gazebonode_->Advertise<gazebo::msgs::WorldControl>("~/world_control");
+
   // reset topic connection counts
   pub_link_states_connection_count_ = 0;
   pub_model_states_connection_count_ = 0;
@@ -505,6 +508,15 @@ void GazeboRosApiPlugin::advertiseServices()
                                                           boost::bind(&GazeboRosApiPlugin::unpausePhysics,this,_1,_2),
                                                           ros::VoidPtr(), &gazebo_queue_);
   unpause_physics_service_ = nh_->advertiseService(unpause_physics_aso);
+
+  // Advertise step control service (for one-step simulation)
+  std::string step_control_service_name("step_control");
+  ros::AdvertiseServiceOptions step_control_aso =
+    ros::AdvertiseServiceOptions::create<gazebo_msgs::StepControl>(
+                                                          step_control_service_name,
+                                                          boost::bind(&GazeboRosApiPlugin::stepControl,this,_1,_2),
+                                                          ros::VoidPtr(), &gazebo_queue_);
+  step_control_service_ = nh_->advertiseService(step_control_aso);
 
   // Advertise more services on the custom queue
   std::string apply_body_wrench_service_name("apply_body_wrench");
@@ -1731,6 +1743,30 @@ bool GazeboRosApiPlugin::pausePhysics(std_srvs::Empty::Request &req,std_srvs::Em
 bool GazeboRosApiPlugin::unpausePhysics(std_srvs::Empty::Request &req,std_srvs::Empty::Response &res)
 {
   world_->SetPaused(false);
+  return true;
+}
+
+bool GazeboRosApiPlugin::stepControl(gazebo_msgs::StepControl::Request &req, gazebo_msgs::StepControl::Response &res)
+{
+  gazebo::msgs::WorldControl step_msg;
+
+  // Unpause for 0 steps / Pause for >=1 steps
+  bool to_pause = (req.steps >= 1);
+  step_msg.set_pause(to_pause);
+
+  if (req.steps > 1)
+  { // Multi-step:
+    step_msg.set_multi_step(req.steps);
+  }
+  else
+  { // One-step:
+    step_msg.set_step(req.steps == 1);
+  }
+
+  world_control_pub_->Publish(step_msg);
+
+  res.success = true;
+  res.status_message = boost::str(boost::format("StepControl: %1% steps (%2%)") % req.steps % (to_pause ? "Paused" : "Unpaused"));
   return true;
 }
 
