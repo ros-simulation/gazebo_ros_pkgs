@@ -29,6 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
   camera_info_manager
   std_msgs
   visualization_msgs
+  moveit_msgs
 )
 
 # Through transitive dependencies in the packages above, gazebo_plugins depends
@@ -178,6 +179,7 @@ catkin_package(
   camera_info_manager
   std_msgs
   visualization_msgs
+  moveit_msgs
 )
 add_dependencies(${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
@@ -253,6 +255,10 @@ if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
   target_link_libraries(gazebo_ros_harness
     ${Boost_LIBRARIES} HarnessPlugin ${catkin_LIBRARIES})
 endif()
+
+add_library(gazebo_ros_moveit_planning_scene src/gazebo_ros_moveit_planning_scene.cpp)
+add_dependencies(gazebo_ros_moveit_planning_scene ${catkin_EXPORTED_TARGETS})
+target_link_libraries(gazebo_ros_moveit_planning_scene ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
 if (NOT GAZEBO_VERSION VERSION_LESS 9.5)
   add_library(gazebo_ros_wheel_slip src/gazebo_ros_wheel_slip.cpp)
@@ -358,6 +364,7 @@ install(TARGETS
   gazebo_ros_depth_camera
   gazebo_ros_openni_kinect
   gazebo_ros_laser
+  gazebo_ros_moveit_planning_scene
   gazebo_ros_block_laser
   gazebo_ros_p3d
   gazebo_ros_imu
@@ -400,6 +407,7 @@ if (NOT GAZEBO_VERSION VERSION_LESS 7.3)
     RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
     )
 endif()
+
 
 if (NOT GAZEBO_VERSION VERSION_LESS 9.5)
   install(TARGETS gazebo_ros_wheel_slip
