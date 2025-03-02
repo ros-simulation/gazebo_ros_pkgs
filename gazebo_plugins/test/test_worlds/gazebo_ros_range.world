@@ -104,7 +104,9 @@
             </range>
           </ray>
           <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range">
-            <gaussianNoise>0.005</gaussianNoise>
+            <!-- The unit test depends on the range value being within bounds,
+                 so any noise means the test might get unlucky and fail-->
+            <gaussianNoise>0.001</gaussianNoise>
             <alwaysOn>true</alwaysOn>
             <updateRate>5</updateRate>
             <topicName>sonar</topicName>

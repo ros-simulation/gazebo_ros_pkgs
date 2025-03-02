@@ -45,6 +45,11 @@ topics:
     num_publishers: 1
     num_subscribers: -1
 
+  - topic: /gazebo/performance_metrics
+    type: gazebo_msgs/PerformanceMetrics
+    num_publishers: 1
+    num_subscribers: -1
+
 ##########################################################
 # Published services
 services:
