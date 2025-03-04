@@ -22,6 +22,7 @@
   <arg name="enable_ros_network" default="true" />
   <arg name="server_required" default="false"/>
   <arg name="gui_required" default="false"/>
+  <arg name="random_seed" default=""/>
 
   <!-- set use_sim_time flag -->
   <param name="/use_sim_time" value="$(arg use_sim_time)"/>
@@ -33,6 +34,8 @@
   <arg     if="$(arg recording)" name="command_arg2" value="-r"/>
   <arg unless="$(arg verbose)" name="command_arg3" value=""/>
   <arg     if="$(arg verbose)" name="command_arg3" value="--verbose"/>
+  <arg unless="$(eval random_seed == '')" name="command_arg4" value="--seed $(arg random_seed)"/>
+  <arg     if="$(eval random_seed == '')" name="command_arg4" value=""/>
   <arg unless="$(arg debug)" name="script_type" value="gzserver"/>
   <arg     if="$(arg debug)" name="script_type" value="debug"/>
 
@@ -44,7 +47,7 @@
     <param name="gazebo/enable_ros_network" value="$(arg enable_ros_network)" />
   </group>
   <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="$(arg output)"
-	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)"
+	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name) $(arg command_arg4)"
   required="$(arg server_required)" />
 
   <!-- start gazebo client -->
