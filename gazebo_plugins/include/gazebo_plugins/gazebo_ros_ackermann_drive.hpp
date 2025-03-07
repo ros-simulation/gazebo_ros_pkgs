@@ -40,6 +40,22 @@ class GazeboRosAckermannDrivePrivate;
 
       <update_rate>100.0</update_rate>
 
+      <!-- Ackermann geometry and kinematic parameters-->
+
+      <!-- By default this plugin will attempt to infer the wheel radius,
+      wheelbase and track width from the geometry and poses of the links defined
+      as front and rear wheels. This only works when the collision meshes are
+      cylinder or sphere primitives. If the collision mesh for the model
+      needs to be more complex, you must set this param to false and specific
+      the values of the wheel params below. -->
+      <wheel_params_from_collision_mesh>true</wheel_params_from_collision_mesh>
+      <!-- The radius of the wheel in meters. Used when wheel_params_from_collision_mesh is false. -->
+      <wheel_radius>0.3</front_left_joint>
+      <!-- The distance between the front and rear sets of wheels in meters. Used when wheel_params_from_collision_mesh is false -->
+      <wheel_base>2.0</wheel_base>
+      <!-- The separate distance between the two steered wheels in meters. Used when wheel_params_from_collision_mesh is false -->
+      <track_width>1.2</track_width>
+
       <!-- wheels -->
       <front_left_joint>front_left_wheel_joint</front_left_joint>
       <front_right_joint>front_right_wheel_joint</front_right_joint>
