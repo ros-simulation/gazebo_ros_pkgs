@@ -146,9 +146,10 @@ void GazeboRosBlockLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     this->update_rate_ = 0;
   }
   else
+  {
     this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
-  // FIXME:  update the update_rate_
-
+    this->parent_ray_sensor_->SetUpdateRate(this->update_rate_);
+  }
 
   this->laser_connect_count_ = 0;
 
