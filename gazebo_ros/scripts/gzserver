@@ -38,4 +38,4 @@ fi
 
 final=$(relocate_remappings "${final}")
 
-GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" gzserver $final
+GAZEBO_MASTER_URI="$desired_master_uri" GAZEBO_MODEL_DATABASE_URI="$desired_model_database_uri" exec gzserver $final

@@ -18,4 +18,4 @@ then
 fi
 
 setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
-. $setup_path/setup.sh && /usr/bin/valgrind --tool=callgrind gzserver $final
+. $setup_path/setup.sh && exec /usr/bin/valgrind --tool=callgrind gzserver $final
