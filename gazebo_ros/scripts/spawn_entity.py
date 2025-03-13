@@ -147,7 +147,7 @@ class SpawnEntityNode(Node):
                 return 1
             # load file
             try:
-                f = open(self.args.file, 'r')
+                f = open(self.args.file, 'rb')
                 entity_xml = f.read()
             except IOError as e:
                 self.get_logger().error('Error reading file {}: {}'.format(self.args.file, e))
