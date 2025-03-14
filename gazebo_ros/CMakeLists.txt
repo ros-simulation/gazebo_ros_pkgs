@@ -40,7 +40,7 @@ link_directories(
   ${gazebo_dev_LIBRARY_DIRS}
 )
 
-ament_python_install_package(scripts)
+ament_python_install_package(gazebo_ros)
 
 # gazebo_ros_node
 add_library(gazebo_ros_node SHARED
@@ -195,7 +195,7 @@ install(DIRECTORY include/
 
 install(
   PROGRAMS
-    scripts/gazebo_ros_paths.py
+    gazebo_ros/gazebo_ros_paths.py
     DESTINATION lib/${PROJECT_NAME}/
 )
 
