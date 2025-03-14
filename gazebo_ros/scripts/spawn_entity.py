@@ -171,8 +171,8 @@ class SpawnEntityNode(Node):
             self.subscription = self.create_subscription(
                 String, self.args.topic, entity_xml_cb, latched_qos)
 
+            self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
             while rclpy.ok() and entity_xml == '':
-                self.get_logger().info('Waiting for entity xml on %s' % self.args.topic)
                 rclpy.spin_once(self)
                 pass
 
@@ -272,7 +272,6 @@ class SpawnEntityNode(Node):
         self.get_logger().info(
             'Waiting for service %s/spawn_entity, timeout = %.f' % (
                 self.args.gazebo_namespace, timeout))
-        self.get_logger().info('Waiting for service %s/spawn_entity' % self.args.gazebo_namespace)
         client = self.create_client(SpawnEntity, '%s/spawn_entity' % self.args.gazebo_namespace)
         if client.wait_for_service(timeout_sec=timeout):
             req = SpawnEntity.Request()
