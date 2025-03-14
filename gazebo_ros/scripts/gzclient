@@ -23,7 +23,7 @@ then
     final="$final -g `catkin_find --first-only libgazebo_ros_api_plugin.$EXT`"
 fi
 
-setup_path=$(pkg-config --variable=prefix gazebo)/share/gazebo/
+find_gazebo
 
 # source setup.sh, but keep local modifications to GAZEBO_MASTER_URI and GAZEBO_MODEL_DATABASE_URI
 desired_master_uri="$GAZEBO_MASTER_URI"
