@@ -131,9 +131,9 @@ bool DefaultRobotHWSim::initSim(
 
     // Add data from transmission
     joint_names_[j] = transmissions[j].joints_[0].name_;
-    joint_position_[j] = 1.0;
+    joint_position_[j] = 0.0;
     joint_velocity_[j] = 0.0;
-    joint_effort_[j] = 1.0;  // N/m for continuous joints
+    joint_effort_[j] = 0.0;  // N/m for continuous joints
     joint_effort_command_[j] = 0.0;
     joint_position_command_[j] = 0.0;
     joint_velocity_command_[j] = 0.0;
