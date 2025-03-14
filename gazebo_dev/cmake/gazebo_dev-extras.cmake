@@ -9,6 +9,7 @@ message(STATUS "Gazebo version: ${GAZEBO_VERSION}")
 # Real fix should go into Gazebo11 https://github.com/osrf/gazebo/issues/3008
 # On Ubuntu Jammy Gazebo11 is used directly from Ubuntu, before removing this
 # please be sure that the package is updated there.
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(TBB tbb)
 set(TBB_PKG_CONFIG "tbb")
 if(NOT TBB_FOUND)
