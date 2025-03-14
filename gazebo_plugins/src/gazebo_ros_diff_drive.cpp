@@ -580,7 +580,7 @@ void GazeboRosDiffDrivePrivate::UpdateOdometryEncoder(const gazebo::common::Time
   pose_encoder_.theta += dtheta;
 
   double w = dtheta / seconds_since_last_update;
-  double v = sqrt(dx * dx + dy * dy) / seconds_since_last_update;
+  double v = sqrt(dx * dx + dy * dy) / seconds_since_last_update * ((ssum > 0) ? +1.0 : -1.0);
 
   tf2::Quaternion qt;
   tf2::Vector3 vt;
