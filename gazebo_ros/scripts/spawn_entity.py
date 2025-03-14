@@ -70,7 +70,8 @@ class SpawnEntityNode(Node):
         parser.add_argument('-gazebo_namespace', type=str, default='',
                             help='ROS namespace of gazebo offered ROS interfaces. \
                             Default is without any namespace')
-        parser.add_argument('-robot_namespace', type=str, default='',
+        entity_namespace = self.get_namespace() if self.get_namespace() != '/' else ''
+        parser.add_argument('-robot_namespace', type=str, default=entity_namespace,
                             help='change ROS namespace of gazebo-plugins')
         parser.add_argument('-timeout', type=float, default=30.0,
                             help='Number of seconds to wait for the spawn and delete services to \
