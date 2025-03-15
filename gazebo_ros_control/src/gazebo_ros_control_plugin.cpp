@@ -211,12 +211,20 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
 void GazeboRosControlPlugin::Update()
 {
   // Get the simulation time and period
+  // TODO(lucasw) not sure about all the consequences of this- controllers probably update
+  // differently, but that's okay, more like real operation- may get out of steps time-wise
+  // with slower than 1.0 real time factor but that's going to be screwy anyhow with use_sim_time false
+  // One question is whether ros::Time::now() returns a more delayed timestamp than SimTime()
+  // in the case where use_sim_time is true- instrument this to find out
+#if 0
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::common::Time gz_time_now = parent_model_->GetWorld()->SimTime();
 #else
   gazebo::common::Time gz_time_now = parent_model_->GetWorld()->GetSimTime();
 #endif
-  ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
+  ros::Time sim_time_ros = ros::Time(gz_time_now.sec, gz_time_now.nsec);
+#endif
+  ros::Time sim_time_ros = ros::Time::now();
   ros::Duration sim_period = sim_time_ros - last_update_sim_time_ros_;
 
   robot_hw_sim_->eStopActive(e_stop_active_);
