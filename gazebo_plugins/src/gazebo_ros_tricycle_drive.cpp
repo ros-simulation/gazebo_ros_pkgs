@@ -566,7 +566,7 @@ void GazeboRosTricycleDrivePrivate::MotorController(
     if (fabs(diff_angle) < max_steering_angle_tol_) {
       // we're withing angle tolerance
       applied_steering_speed = 0;
-    } else if (diff_angle < target_speed) {
+    } else if (diff_angle < target_angle) {
       // steer toward target angle
       applied_steering_speed = max_steering_speed_;
     } else {
