@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gazebo_ros/gazebo_ros_state.hpp"
+
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/Entity.hh>
 #include <gazebo/physics/Light.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
+
+#include <memory>
+
 #include <gazebo_msgs/msg/link_states.hpp>
 #include <gazebo_msgs/msg/model_states.hpp>
 #include <gazebo_msgs/srv/get_entity_state.hpp>
 #include <gazebo_msgs/srv/set_entity_state.hpp>
 #include <gazebo_ros/node.hpp>
 
-#include <memory>
-
 #include "gazebo_ros/conversions/builtin_interfaces.hpp"
 #include "gazebo_ros/conversions/geometry_msgs.hpp"
-#include "gazebo_ros/gazebo_ros_state.hpp"
 
 namespace gazebo_ros
 {

@@ -13,11 +13,11 @@
 // limitations under the License.
 
 #include <gazebo/test/ServerFixture.hh>
+#include <memory>
 #include <gazebo_msgs/srv/get_model_list.hpp>
 #include <gazebo_msgs/srv/delete_entity.hpp>
 #include <gazebo_msgs/srv/spawn_entity.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <memory>
 
 class GazeboRosFactoryTest : public gazebo::ServerFixture
 {

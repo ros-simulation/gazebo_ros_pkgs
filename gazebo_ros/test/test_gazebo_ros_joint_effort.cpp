@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include <gazebo/test/ServerFixture.hh>
+#include <memory>
 #include <gazebo_msgs/srv/apply_joint_effort.hpp>
 #include <gazebo_msgs/srv/joint_request.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <memory>
 
 #define tol 10e-2
 

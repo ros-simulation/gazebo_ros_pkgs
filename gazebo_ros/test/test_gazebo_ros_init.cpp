@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include <gazebo/test/ServerFixture.hh>
+#include <memory>
 #include <rclcpp/rclcpp.hpp>
 #include <std_srvs/srv/empty.hpp>
-#include <memory>
 
 class GazeboRosInitTest : public gazebo::ServerFixture
 {
